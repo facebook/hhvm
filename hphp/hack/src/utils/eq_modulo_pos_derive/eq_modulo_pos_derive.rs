@@ -5,7 +5,8 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
-use synstructure::{decl_derive, Structure};
+use synstructure::decl_derive;
+use synstructure::Structure;
 
 decl_derive!([EqModuloPos] => derive_eq_modulo_pos);
 
@@ -17,17 +18,21 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
     // parameters implement our trait.
     s.add_bounds(synstructure::AddBounds::Generics);
 
-    let body = derive_body(&s);
+    let eq_modulo_pos = derive_eq_modulo_pos_body(&s);
+    let eq_modulo_pos_and_reason = derive_eq_modulo_pos_and_reason_body(&s);
     s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                match self { #body }
+                match self { #eq_modulo_pos }
+            }
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+                match self { #eq_modulo_pos_and_reason }
             }
         }
     })
 }
 
-fn derive_body(s: &Structure<'_>) -> TokenStream {
+fn derive_eq_modulo_pos_body(s: &Structure<'_>) -> TokenStream {
     s.each_variant(|v| {
         let mut s_rhs = s.clone();
         let v_rhs = s_rhs
@@ -43,6 +48,32 @@ fn derive_body(s: &Structure<'_>) -> TokenStream {
         let mut inner = quote! {true};
         for (bi, bi_rhs) in v.bindings().iter().zip(v_rhs.bindings().iter()) {
             inner = quote! { #inner && #bi.eq_modulo_pos(#bi_rhs) }
+        }
+        quote!(
+            match rhs {
+                #arm => { #inner }
+                _ => false,
+            }
+        )
+    })
+}
+
+fn derive_eq_modulo_pos_and_reason_body(s: &Structure<'_>) -> TokenStream {
+    s.each_variant(|v| {
+        let mut s_rhs = s.clone();
+        let v_rhs = s_rhs
+            .variants_mut()
+            .iter_mut()
+            .find(|v2| v2.ast().ident == v.ast().ident)
+            .unwrap();
+        for (i, binding) in v_rhs.bindings_mut().iter_mut().enumerate() {
+            let name = format!("rhs{}", i);
+            binding.binding = proc_macro2::Ident::new(&name, binding.binding.span());
+        }
+        let arm = v_rhs.pat();
+        let mut inner = quote! {true};
+        for (bi, bi_rhs) in v.bindings().iter().zip(v_rhs.bindings().iter()) {
+            inner = quote! { #inner && #bi.eq_modulo_pos_and_reason(#bi_rhs) }
         }
         quote!(
             match rhs {

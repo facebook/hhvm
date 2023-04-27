@@ -3,4 +3,4 @@ object(stdClass) (0) {
 NULL
 string(21) "Undefined variable: y"
 
-Catchable fatal error: Argument 1 passed to test() must be an instance of closure, stdClass given in %s/closure_027.php on line %d
+Catchable fatal error: Argument 1 passed to test() must be an instance of Closure, stdClass given in %s/closure_027.php on line %d

@@ -5,8 +5,8 @@ Errors:
     { c_span = [4:3-6:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([4:9-30], "\\A\\MyStringFileAttribute"); c_tparams = []; 
-      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))]; 
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+      c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))]; 
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
@@ -31,15 +31,16 @@ Errors:
            [([5:47-58],
              (Expr
                 ((string), [5:47-58],
-                 (Binop ((Eq None), ((string), [5:47-58], (Obj_get (((this), [5:47-58], This), ((string), [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, Is_prop))),
-                    ((string), [5:47-58], (Lvar ([5:47-58], $attr_value))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((string), [5:47-58], (Obj_get (((this), [5:47-58], This), ((string), [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, Is_prop)));
+                      rhs = ((string), [5:47-58], (Lvar ([5:47-58], $attr_value))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([5:21-32], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
@@ -56,20 +57,21 @@ Errors:
            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None });
   (Class
      { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([8:9-16], "\\A\\MyClass"); c_tparams = []; c_extends = []; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = [];
        c_consts =
        [{ cc_user_attributes = []; cc_type = (Some ([9:11-17], (Hprim Tstring))); 
           cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ((string), [9:35-57], (String "my class const value"))); 
-          cc_doc_comment = None }
+          cc_span = [9:5-57]; cc_doc_comment = None }
          ];
-       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
-       c_xhp_children = []; c_xhp_attrs = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
+       c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
@@ -86,15 +88,15 @@ Errors:
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:9-21], "\\B\\MyOtherClass"); c_tparams = []; c_extends = []; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "B"); 
@@ -111,4 +113,5 @@ Errors:
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false })
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None })

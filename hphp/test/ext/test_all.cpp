@@ -19,7 +19,6 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/test/ext/test_ext.h"
 #include "hphp/test/ext/test_server.h"
-#include "hphp/compiler/option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

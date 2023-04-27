@@ -1,6 +1,3 @@
-Warning: Type-hint of 'DerivedException::message' must be string (as in class Exception), not mixed in %s/test/slow/spec/tests/exception_handling/derived_exception_protected_props.php on line 9
-
-Warning: Type-hint of 'DerivedException::code' must be int (as in class Exception), not mixed in %s/test/slow/spec/tests/exception_handling/derived_exception_protected_props.php on line 9
 Derived message
 12345
 Foo

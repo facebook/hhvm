@@ -59,12 +59,12 @@ class virtual iter =
     method! on_Array_get env =
       super#on_Array_get { env with array_append_allowed = false }
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq None ->
-        self#on_expr { env with array_append_allowed = true } e1;
-        self#on_expr env e2
-      | _ -> super#on_Binop env op e1 e2
+        self#on_expr { env with array_append_allowed = true } lhs;
+        self#on_expr env rhs
+      | _ -> super#on_Binop env binop
 
     method! on_func_body env fb =
       match fb.fb_ast with
@@ -78,8 +78,8 @@ class virtual iter =
       match e with
       | (_, _, Call (e1, ta, el, unpacked_element)) ->
         self#on_Call env e1 ta el unpacked_element
-      | (_, _, Binop (Ast_defs.Eq None, e1, rhs)) ->
-        self#on_Binop env (Ast_defs.Eq None) e1 rhs
+      | (_, _, Binop ({ bop = Ast_defs.Eq None; _ } as binop)) ->
+        self#on_Binop env binop
       | _ -> super#on_expr env e
   end
 

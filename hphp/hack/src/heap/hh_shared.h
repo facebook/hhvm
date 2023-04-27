@@ -45,6 +45,8 @@ CAMLprim value hh_resume_workers(void);
 CAMLprim value hh_check_should_exit(void);
 CAMLprim value hh_set_can_worker_stop(value val);
 CAMLprim value hh_malloc_trim(void);
+CAMLprim value hh_set_allow_removes(value val);
+CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val);
 
 /*****************************************************************************/
 /* Global storage. */
@@ -97,5 +99,13 @@ value hh_mem(value key);
 void hh_move(value key1, value key2);
 /* Removes a key from the hash table. */
 CAMLprim value hh_remove(value key);
+
+/*****************************************************************************/
+/* Utility */
+/*****************************************************************************/
+/* Get the hash of a string, based on MD5. */
+CAMLprim value hh_get_hash_ocaml(value key);
+/* This assert will fail if the current process is not the master process. */
+CAMLprim value hh_assert_master(void);
 
 #endif

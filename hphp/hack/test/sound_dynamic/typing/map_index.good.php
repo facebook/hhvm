@@ -6,9 +6,9 @@ function test_dyn_index(
   Map<arraykey, int> $m2,
 ) : void {
   $a = $m1[$d];
-  hh_expect_equivalent<int>($a);
+  hh_expect_equivalent<~int>($a);
   $a = $m2[$d];
-  hh_expect_equivalent<int>($a);
+  hh_expect_equivalent<~int>($a);
 
   $m2[$d] = 1;
 }
@@ -22,11 +22,11 @@ class C<Tk as arraykey> {
 
   public function f(dynamic $d): void {
     $a = $this->m1[$d];
-    hh_expect_equivalent<int>($a);
+    hh_expect_equivalent<~int>($a);
     $a = $this->m2[$d];
-    hh_expect_equivalent<int>($a);
+    hh_expect_equivalent<~int>($a);
     $a = $this->m3[$d];
-    hh_expect_equivalent<int>($a);
+    hh_expect_equivalent<~int>($a);
 
     $this->m2[$d] = 1;
   }

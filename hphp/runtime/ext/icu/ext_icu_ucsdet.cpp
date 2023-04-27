@@ -72,7 +72,8 @@ static Object HHVM_METHOD(EncodingDetector, detect) {
     data->throwException("Could not detect encoding, error %d (%s)",
                          error, u_errorName(error));
   }
-  return EncodingMatch::newInstance(match, detector);
+  return EncodingMatch::newInstance(
+    match, detector, data->text(), data->declaredEncoding());
 }
 
 static Array HHVM_METHOD(EncodingDetector, detectAll) {
@@ -87,7 +88,8 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
   }
   VecInit ret{(uint32_t)count};
   for (int i = 0; i < count; ++i) {
-    ret.append(EncodingMatch::newInstance(matches[i], detector));
+    ret.append(EncodingMatch::newInstance(
+      matches[i], detector, data->text(), data->declaredEncoding()));
   }
   return ret.toArray();
 }

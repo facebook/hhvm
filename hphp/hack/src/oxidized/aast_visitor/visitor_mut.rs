@@ -1,9 +1,9 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<40991d03dd962a9529a1e843444ee9ff>>
+// @generated SignedSource<<08ac3bc8862c9b7001685a4dd054c92d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,13 +12,11 @@
 #![allow(unused_variables)]
 use super::node_mut::NodeMut;
 use super::type_params::Params;
-use crate::{
-    aast::{self, *},
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    doc_comment::{self, *},
-    *,
-};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::*;
 pub fn visit<'node, P: Params>(
     v: &mut impl VisitorMut<'node, Params = P>,
     c: &mut P::Context,
@@ -64,6 +62,20 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_binop(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut Binop<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_block(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut Block<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_bop(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -71,17 +83,10 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_ca_field(
+    fn visit_capture_lid(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
-        p: &'node mut CaField<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_ca_type(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut CaType,
+        p: &'node mut CaptureLid<<Self::Params as Params>::Ex>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -103,13 +108,6 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut ClassAbstractTypeconst,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_class_attr(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut ClassAttr<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -152,6 +150,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut ClassId_<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_class_req(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut ClassReq,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -211,6 +216,20 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_ctx_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut CtxRefinement,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_ctx_refinement_bounds(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut CtxRefinementBounds,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_def(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -225,10 +244,10 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_doc_comment(
+    fn visit_efun(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
-        p: &'node mut DocComment,
+        p: &'node mut Efun<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -285,6 +304,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut FileAttribute<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_finally_block(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut FinallyBlock<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -386,13 +412,6 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_insteadof_alias(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut InsteadofAlias,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_kvc_kind(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -404,6 +423,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut Lid,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_md_name_kind(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut MdNameKind,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -467,6 +493,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut ReadonlyKind,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut Refinement,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -540,6 +573,20 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_type_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut TypeRefinement,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_type_refinement_bounds(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut TypeRefinementBounds,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_typedef(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -561,24 +608,17 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_use_as_alias(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut UseAsAlias,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_use_as_visibility(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut UseAsVisibility,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_user_attribute(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut UserAttribute<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_user_attributes(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut UserAttributes<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

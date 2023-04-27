@@ -19,10 +19,10 @@
 # emit Hack code on clingo output.
 import functools
 from collections import deque
-from typing import Set, Dict, Any, Tuple, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import clingo
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
+from hphp.hack.src.hh_codesynthesis.codeGenerator import ClingoContext, CodeGenerator
 
 
 class _HackBaseGenerator(object):

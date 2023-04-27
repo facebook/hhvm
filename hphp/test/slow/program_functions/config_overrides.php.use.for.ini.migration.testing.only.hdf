@@ -1,4 +1,4 @@
-Log.Level=Verbose
+Log.Level=Info
 Server {
   ThreadCount=111
 }

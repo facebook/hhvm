@@ -36,7 +36,6 @@
 #include "hphp/util/timer.h"
 
 using std::set;
-using std::deque;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,7 +82,7 @@ PageletTransport::PageletTransport(
 
   disableCompression(); // so we don't have to decompress during sendImpl()
   m_rfc1867UploadedFiles = rfc1867UploadedFiles;
-  m_files = (std::string) f_serialize(files);
+  m_files = (std::string) HHVM_FN(serialize)(files);
 }
 
 const char *PageletTransport::getUrl() {

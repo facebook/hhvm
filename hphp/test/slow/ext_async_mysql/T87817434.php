@@ -20,10 +20,10 @@ function test_pool_connect_with_opts() {
 <<__EntryPoint>>
 function main(): void {
   $tests = vec[
-      fun('test_connect'),
-      fun('test_connect_and_query'),
-      fun('test_connect_with_opts'),
-      fun('test_pool_connect_with_opts')
+      test_connect<>,
+      test_connect_and_query<>,
+      test_connect_with_opts<>,
+      test_pool_connect_with_opts<>
   ];
   foreach ($tests as $t) {
     try {

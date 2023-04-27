@@ -25,7 +25,6 @@ namespace HPHP {
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(Nop,             NA,               NOV,             NOV,        NF) \
-  O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
@@ -70,9 +69,6 @@ namespace HPHP {
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sub,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(AddO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SubO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(MulO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Pow,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -114,8 +110,8 @@ namespace HPHP {
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    TF) \
   O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        TF) \
+  O(Enter,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
-  O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
   O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \
@@ -180,16 +176,15 @@ namespace HPHP {
   O(ResolveClass,    ONE(SA),          NOV,             ONE(CV),    NF) \
   O(LazyClass,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(FCallClsMethod,  THREE(FCA,SA,OA(IsLogAsDynamicCallOp)),            \
                                        FCALL(2, 0),     FCALL,      CF) \
-  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
-                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodM, FOUR(FCA,SA,OA(IsLogAsDynamicCallOp),SA),          \
+                                       FCALL(1, 0),     FCALL,      CF) \
+  O(FCallClsMethodD, THREE(FCA,SA,SA), FCALL(0, 0),     FCALL,      CF) \
   O(FCallClsMethodS, THREE(FCA,SA,OA(SpecialClsRef)),                   \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
@@ -220,8 +215,8 @@ namespace HPHP {
   O(ChainFaults,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
-  O(VerifyOutType,   ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
-  O(VerifyParamType, ONE(ILA),         NOV,             NOV,        NF) \
+  O(VerifyOutType,   ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
+  O(VerifyParamType, ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamTypeTS, ONE(ILA),       ONE(CV),         NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -230,9 +225,13 @@ namespace HPHP {
   O(ParentCls,       NA,               NOV,             ONE(CV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(CV),    NF) \
   O(RecordReifiedGeneric, NA,          ONE(CV),         ONE(CV),    NF) \
-  O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \
+  O(CheckClsReifiedGenericMismatch, NA, ONE(CV),        NOV,        NF) \
+  O(ClassHasReifiedGenerics, NA,       ONE(CV),         ONE(CV),    NF) \
+  O(GetClsRGProp,    NA,               ONE(CV),         ONE(CV),    NF) \
+  O(HasReifiedParent, NA,              ONE(CV),         ONE(CV),    NF) \
+  O(CheckClsRGSoft,  NA,               ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,IVA),     CUMANY,          ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CUMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
@@ -246,6 +245,10 @@ namespace HPHP {
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyImplicitContextState,                                         \
+                     NA,               NOV,             NOV,        NF) \
+  O(CreateSpecialImplicitContext,                                       \
+                     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \

@@ -81,13 +81,15 @@ void cgInitFrame(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
+void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
+  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const callerFP = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
-  v << phplogue{rvmsp()};
-  v << copy{rvmsp(), rvmfp()};
+  v << store{callerFP, calleeFP + AROFF(m_sfp)};
+  v << phplogue{calleeFP};
+  v << copy{calleeFP, rvmfp()};
   v << defvmfp{dst};
 }
 

@@ -62,15 +62,7 @@ inline bool magFits(uint64_t val, int s) {
  */
 struct Immed {
   /* implicit */ Immed(int i) : m_int(i) {}
-#ifdef _MSC_VER
-  // MSVC prefers not changing the sign of the value when
-  // resolving the overloads, which means that an unsigned
-  // argument, even of a size smaller than int, will error
-  // so we provide an unsigned overload to fix that.
-  /* implicit */ Immed(unsigned int i) : m_int((int)i) {}
-#else
   /* implicit */ Immed(unsigned i) = delete;
-#endif
   /* implicit */ Immed(long i) = delete;
   /* implicit */ Immed(unsigned long i) = delete;
   /* implicit */ Immed(long long i) = delete;

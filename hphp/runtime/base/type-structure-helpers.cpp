@@ -104,7 +104,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 
 } // namespace
 
-bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne) {
+bool tvInstanceOf(const TypedValue* tv, const NamedType* ne) {
   return tvInstanceOfImpl(tv, [ne]() { return Class::lookup(ne); });
 }
 
@@ -220,7 +220,7 @@ bool typeStructureIsType(
         input,
         [&](TypedValue k, TypedValue v1) {
           assertx(tvIsString(k));
-          if (k.m_data.pstr->isame(s_alias.get())) return false;
+          if (k.m_data.pstr->same(s_alias.get())) return false;
           auto const v2 = type->get(k.m_data.pstr);
           if (v2.is_init() && tvEqual(v1, v2)) return false;
           result = false;
@@ -273,7 +273,7 @@ bool typeStructureIsType(
         typeFields,
         [&](TypedValue k, TypedValue v) {
           assertx(tvIsDict(v));
-          auto typeField = getShapeFieldElement(v);
+          auto typeField = Array(getShapeFieldElement(v));
           auto const tv = inputFields->get(k);
           if (!tv.is_init()) {
             result = false;
@@ -285,13 +285,13 @@ bool typeStructureIsType(
             result = false;
             return true; // short circuit
           }
-          auto inputField = getShapeFieldElement(tv);
+          auto inputField = Array(getShapeFieldElement(tv));
           // If this field is associated with the value, kill it
           // This is safe since we already checked this above
-          auto cleanedInput = inputField->removeMove(s_optional_shape_field.get());
-          auto cleanedType = typeField->removeMove(s_optional_shape_field.get());
-          if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
-            if (warn || is_ts_soft(typeField)) {
+          inputField.remove(StrNR{s_optional_shape_field.get()});
+          typeField.remove(StrNR{s_optional_shape_field.get()});
+          if (!typeStructureIsType(inputField.get(), typeField.get(), warn, strict)) {
+            if (warn || is_ts_soft(typeField.get())) {
               willWarn = true;
               warn = false;
               return false;
@@ -455,9 +455,9 @@ bool isTSAllWildcards(const ArrayData* ts) {
   return allWildcard;
 }
 
-// This function will always be called after `VerifyParamType` instruction, so
-// we can make the assumption that if `param` is an object, outermost type in
-// `type_` is correct.
+// This function will always be called after the prologue parameter type
+// verification, so we can make the assumption that if `param` is an object,
+// outermost type in `type_` is correct.
 // This function will only be called when either `param` is an object or `type_`
 // is a primitive reified type parameter
 bool verifyReifiedLocalType(
@@ -473,12 +473,13 @@ bool verifyReifiedLocalType(
   auto const isObj = tvIsObject(param);
   // If it is not coming from a reified type variable and it is an object,
   // we do not need to run the check if the object in question does not have
-  // reified generics since `VerifyParamType` should have taken care of it
+  // reified generics since the parameter type verification should have taken
+  // care of it
   if (!isTypeVar && isObj) {
     auto const obj = val(param).pobj;
     auto const objcls = obj->getVMClass();
-    // Since we already checked that the class matches in VerifyParamType using
-    // the type annotation
+    // The parameter type verification in the prologue already checked that
+    // the class matches the type annocation.
     if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) {
       return true;
     }
@@ -1056,7 +1057,7 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
   IterateKV(
     ts,
     [&] (TypedValue k, TypedValue v) {
-      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->isame(s_kind.get()) &&
+      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->same(s_kind.get()) &&
           static_cast<TypeStructure::Kind>(v.m_data.num) ==
           TypeStructure::Kind::T_unresolved) {
         result = true;

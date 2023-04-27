@@ -36,7 +36,7 @@ module PositionedSyntaxValue = struct
         source_text: SourceText.t;
         offset: int;
       }
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   let source_text value =
     match value with
@@ -180,8 +180,6 @@ module PositionedValueBuilder = struct
 end
 
 include PositionedWithValue.WithValueBuilder (PositionedValueBuilder)
-module Validated =
-  Full_fidelity_validated_syntax.Make (Token) (PositionedSyntaxValue)
 
 let source_text node = PositionedSyntaxValue.source_text (value node)
 
@@ -348,11 +346,6 @@ let rust_parse_ref : unit rust_parse_type ref =
   ref (fun _ _ -> failwith "This should be lazily set in Rust_parser_ffi")
 
 let rust_parse text env = !rust_parse_ref text env
-
-let rust_parse_with_verify_sc_ref : t list rust_parse_type ref =
-  ref (fun _ _ -> failwith "This should be lazily set in Rust_parser_ffi")
-
-let rust_parse_with_verify_sc text env = !rust_parse_with_verify_sc_ref text env
 
 external rust_parser_errors :
   Full_fidelity_source_text.t ->

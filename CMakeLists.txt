@@ -10,7 +10,12 @@ cmake_policy(SET CMP0046 NEW)
 INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 
 # includes
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
+SET(
+  CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/CMake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/build/fbcode_builder/CMake"
+  ${CMAKE_MODULE_PATH}
+)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 PROJECT(hhvm C CXX ASM)
@@ -56,15 +61,6 @@ if(NOT SKIP_CCACHE)
    endif()
   endif(CCACHE_FOUND)
 endif(NOT SKIP_CCACHE)
-
-# 3rd party library
-IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
-  MESSAGE(FATAL_ERROR "third-party/CMakeLists.txt missing. "
-                      "Try updating your submodule with:
-rm -r third-party
-git submodule update --init --recursive
-")
-ENDIF()
 
 INCLUDE(HPHPFunctions)
 INCLUDE(CheckFunctionExists)

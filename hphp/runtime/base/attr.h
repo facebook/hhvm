@@ -25,6 +25,9 @@ namespace HPHP {
  * Attr unions are stored as integers in .hhbc repositories, so incompatible
  * changes here require a schema version bump.
  *
+ * NOTE: Make sure to keep this in sync with HHAS_ATTRS in as-base-hhas.h so it
+ * prints properly.
+ *
  * TODO(#4513748): We're almost out of space in Attr---in fact, we already have
  * too many Attrs to fit in Class, which packs them into only 28 bits.  There's
  * no reason to share Attrs among unrelated objects, so we should really have
@@ -86,6 +89,8 @@ enum Attr {
   // Indicates this property's initial value satisfies its type-constraint and
   // no runtime check needs to be done.
   AttrInitialSatisfiesTC   = (1u <<  9), //       |    X     |         //
+  // Indicates this class or any of its subclasses is not mocked.
+  AttrNoMock               = (1u <<  9), //    X  |          |         //
   // Indicates that the function or class is uniquely named among functions or
   // classes across the codebase.  Note that function and class names are in
   // separate namespaces, so it is possible to have a Func and Class which
@@ -111,9 +116,19 @@ enum Attr {
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //
-  // Only valid in WholeProgram mode.  Indicates on a class that the class is
-  // not extended, or on a method that no extending class defines the method.
+  // Indicates that the class is not extended, or on a method that no
+  // extending class defines the method. Implies
+  // AttrNoOverrideOverride for classes.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
+                                         //       |          |         //
+  // Set on classes to indicate it is not extended by a "regular"
+  // class (but might be extended by non-regular classes). A regular
+  // class is a class which isn't a trait, enum, or abstract
+  // class. Such classes cannot be instantiated (but can be
+  // manipulated in static contexts).  This is a weaker condition than
+  // AttrNoOverride but is useful if you have a known instance of the
+  // class (and therefore must be regular).
+  AttrNoOverrideRegular    = (1u << 14), //    X  |          |         //
                                          //       |          |         //
   // Indicates that this property was declared as readonly             //
   AttrIsReadonly           = (1u << 14), //       |    X     |         //
@@ -125,7 +140,11 @@ enum Attr {
   AttrReadonlyReturn       = (1u << 15), //       |          |    X    //
                                          //       |          |         //
   // Indicates that this symbol is internal to the module it is declared in
-  AttrInternal             = (1u << 17), //    X  |    X     |    X    //
+  AttrInternal             = (1u << 16), //    X  |    X     |    X    //
+                                         //       |          |         //
+  // Same as AttrInternal except when producing an error, instead of
+  // throwing, it always raises a warning
+  AttrInternalSoft         = (1u << 17), //    X  |    X     |    X    //
                                          //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
@@ -147,7 +166,6 @@ enum Attr {
                                          //       |          |         //
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
-                                         //                            //
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //

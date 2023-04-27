@@ -8,6 +8,10 @@
 open Hh_prelude
 module Error_code = Error_codes.NastCheck
 
+type verb =
+  | Vreq_implement
+  | Vimplement
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -40,13 +44,20 @@ type t =
     }
   | Interface_with_partial_typeconst of Pos.t
   | Partially_abstract_typeconst_definition of Pos.t
+  | Refinement_in_typestruct of {
+      pos: Pos.t;
+      kind: string;
+    }
   | Multiple_xhp_category of Pos.t
   | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t
   | Continue_in_switch of Pos.t
-  | Await_in_sync_function of Pos.t
+  | Await_in_sync_function of {
+      pos: Pos.t;
+      func_pos: Pos.t option;
+    }
   | Interface_uses_trait of Pos.t
   | Static_memoized_function of Pos.t
   | Magic of {
@@ -56,7 +67,7 @@ type t =
   | Non_interface of {
       pos: Pos.t;
       name: string;
-      verb: [ `req_implement | `implement ];
+      verb: verb;
     }
   | ToString_returns_string of Pos.t
   | ToString_visibility of Pos.t
@@ -97,7 +108,6 @@ type t =
     }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
-  | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
   | Illegal_context of {
       pos: Pos.t;
@@ -106,6 +116,7 @@ type t =
   | Case_fallthrough of {
       switch_pos: Pos.t;
       case_pos: Pos.t;
+      next_pos: Pos.t option;
     }
   | Default_fallthrough of Pos.t
   | Php_lambda_disallowed of Pos.t
@@ -114,11 +125,41 @@ type t =
       vis: Ast_defs.visibility;
     }
   | Private_and_final of Pos.t
-  | Internal_outside_module of Pos.t
   | Internal_member_inside_public_trait of {
       member_pos: Pos.t;
       trait_pos: Pos.t;
     }
+  | Attribute_conflicting_memoize of {
+      pos: Pos.t;
+      second_pos: Pos.t;
+    }
+  | Soft_internal_without_internal of Pos.t
+  | Wrong_expression_kind_builtin_attribute of {
+      pos: Pos.t;
+      attr_name: string;
+      expr_kind: string;
+    }
+  | Attribute_too_many_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_too_few_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_not_exact_number_of_args of {
+      pos: Pos.t;
+      name: string;
+      actual: int;
+      expected: int;
+    }
+  | Attribute_param_type of {
+      pos: Pos.t;
+      x: string;
+    }
+  | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -248,6 +289,14 @@ let partially_abstract_typeconst_definition pos =
     (pos, "`as` constraints are only legal on abstract type constants")
     []
 
+let refinement_in_typestruct kind pos =
+  User_error.make
+    Error_code.(to_enum RefinementInTypeStruct)
+    ( pos,
+      "Type refinements cannot appear on the right-hand side of " ^ kind ^ "."
+    )
+    []
+
 let multiple_xhp_category pos =
   User_error.make
     Error_code.(to_enum MultipleXhpCategory)
@@ -290,9 +339,25 @@ let continue_in_switch pos =
       ^ " Hack does not support this; use `break` if that is what you meant." )
     []
 
-let await_in_sync_function pos =
+let await_in_sync_function pos func_pos =
+  let quickfixes =
+    match func_pos with
+    | None -> Some []
+    | Some fix_pos ->
+      let (_, start_col) = Pos.line_column fix_pos in
+      let fix_pos = Pos.set_col_end (start_col - 9) fix_pos in
+      let fix_pos = Pos.set_col_start (start_col - 9) fix_pos in
+      Some
+        [
+          Quickfix.make
+            ~title:("Make function " ^ Markdown_lite.md_codify "async")
+            ~new_text:"async "
+            fix_pos;
+        ]
+  in
   User_error.make
     Error_code.(to_enum AwaitInSyncFunction)
+    ?quickfixes
     (pos, "`await` can only be used inside `async` functions")
     []
 
@@ -419,14 +484,6 @@ let list_rvalue pos =
     )
     []
 
-let inout_argument_bad_expr pos =
-  User_error.make
-    Error_code.(to_enum InoutArgumentBadExpr)
-    ( pos,
-      "`inout` arguments may only be local variables or array indexing expressions "
-    )
-    []
-
 let illegal_destructor pos =
   User_error.make
     Error_code.(to_enum IllegalDestructor)
@@ -445,7 +502,29 @@ let illegal_context pos name =
         Naming_special_names.Coeffects.contexts )
     []
 
-let case_fallthrough switch_pos case_pos =
+let case_fallthrough switch_pos case_pos next_pos =
+  let quickfixes =
+    match next_pos with
+    | None -> []
+    | Some next_pos ->
+      let (_, start_col) = Pos.line_column next_pos in
+      let offset = String.length "case " in
+      let new_pos =
+        Pos.set_col_end (start_col - offset)
+        @@ Pos.set_col_start (start_col - offset) next_pos
+      in
+      let new_text =
+        "  // FALLTHROUGH\n" ^ String.make (start_col - offset) ' '
+      in
+
+      [
+        Quickfix.make
+          ~title:"Mark this `case` as explicitly falling through"
+          ~new_text
+          new_pos;
+      ]
+  in
+
   let claim =
     ( switch_pos,
       "This `switch` has a `case` that implicitly falls through and is "
@@ -457,7 +536,7 @@ let case_fallthrough switch_pos case_pos =
       );
     ]
   in
-  User_error.make Error_code.(to_enum CaseFallthrough) claim reasons
+  User_error.make ~quickfixes Error_code.(to_enum CaseFallthrough) claim reasons
 
 let default_fallthrough pos =
   User_error.make
@@ -476,8 +555,8 @@ let php_lambda_disallowed pos =
 let non_interface pos name verb =
   let verb_str =
     match verb with
-    | `implement -> "implement"
-    | `req_implement -> "require implementation of"
+    | Vimplement -> "implement"
+    | Vreq_implement -> "require implementation of"
   in
   User_error.make
     Error_code.(to_enum NonInterface)
@@ -534,10 +613,12 @@ let private_and_final pos =
     (pos, "Class methods cannot be both `private` and `final`.")
     []
 
-let internal_outside_module pos =
+let soft_internal_without_internal pos =
   User_error.make
-    Error_code.(to_enum InternalOutsideModule)
-    (pos, "You cannot make this symbol `internal` outside a module")
+    Error_code.(to_enum Soft_internal_without_internal)
+    ( pos,
+      "<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol."
+    )
     []
 
 let internal_member_inside_public_trait member_pos trait_pos =
@@ -548,6 +629,83 @@ let internal_member_inside_public_trait member_pos trait_pos =
       ( Pos_or_decl.of_raw_pos trait_pos,
         "Only `internal` traits can have `internal` members" );
     ]
+
+let attribute_conflicting_memoize pos second_pos =
+  User_error.make
+    Error_code.(to_enum AttributeConflictingMemoize)
+    ( pos,
+      Printf.sprintf
+        "Methods cannot be both %s and %s."
+        (Markdown_lite.md_codify Naming_special_names.UserAttributes.uaMemoize)
+        (Markdown_lite.md_codify
+           Naming_special_names.UserAttributes.uaMemoizeLSB) )
+    [
+      ( Pos_or_decl.of_raw_pos second_pos,
+        "Conflicting memoize attribute is here" );
+    ]
+
+let wrong_expression_kind_builtin_attribute pos attr expr_kind =
+  User_error.make
+    Typing_error.Error_code.(to_enum WrongExpressionKindAttribute)
+    ( pos,
+      Printf.sprintf
+        "The %s attribute cannot be used on %s."
+        (Render.strip_ns attr |> Markdown_lite.md_codify)
+        expr_kind )
+    []
+
+let attribute_too_many_arguments pos name expected =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeTooManyArguments)
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects at most "
+      ^ Render.pluralize_arguments expected )
+    []
+
+let attribute_too_few_arguments pos name expected =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeTooFewArguments)
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects at least "
+      ^ Render.pluralize_arguments expected )
+    []
+
+let attribute_not_exact_number_of_args pos name expected actual =
+  let code =
+    if actual > expected then
+      Typing_error.Error_code.AttributeTooManyArguments
+    else
+      Typing_error.Error_code.AttributeTooFewArguments
+  and claim =
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects "
+      ^
+      match expected with
+      | 0 -> "no arguments"
+      | 1 -> "exactly 1 argument"
+      | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
+  in
+  User_error.make Typing_error.Error_code.(to_enum code) claim []
+
+let attribute_param_type pos x =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeParamType)
+    (pos, "This attribute parameter should be " ^ x)
+    []
+
+let enum_supertyping_reserved_syntax pos =
+  User_error.make
+    Typing_error.Error_code.(to_enum EnumSupertypingReservedSyntax)
+    ( pos,
+      "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
+      ^ "Enable it with the enable_enum_supertyping option in .hhconfig" )
+    []
 
 (* --------------------------------------------- *)
 let to_user_error = function
@@ -569,13 +727,15 @@ let to_user_error = function
   | Interface_with_partial_typeconst pos -> interface_with_partial_typeconst pos
   | Partially_abstract_typeconst_definition pos ->
     partially_abstract_typeconst_definition pos
+  | Refinement_in_typestruct { pos; kind } -> refinement_in_typestruct kind pos
   | Multiple_xhp_category pos -> multiple_xhp_category pos
   | Return_in_gen pos -> return_in_gen pos
   | Return_in_finally pos -> return_in_finally pos
   | Toplevel_break pos -> toplevel_break pos
   | Toplevel_continue pos -> toplevel_continue pos
   | Continue_in_switch pos -> continue_in_switch pos
-  | Await_in_sync_function pos -> await_in_sync_function pos
+  | Await_in_sync_function { pos; func_pos } ->
+    await_in_sync_function pos func_pos
   | Interface_uses_trait pos -> interface_uses_trait pos
   | Static_memoized_function pos -> static_memoized_function pos
   | Magic { pos; meth_name } -> magic pos meth_name
@@ -599,11 +759,10 @@ let to_user_error = function
     inout_in_transformed_pseudofunction pos fn_name
   | Reading_from_append pos -> reading_from_append pos
   | List_rvalue pos -> list_rvalue pos
-  | Inout_argument_bad_expr pos -> inout_argument_bad_expr pos
   | Illegal_destructor pos -> illegal_destructor pos
   | Illegal_context { pos; name } -> illegal_context pos name
-  | Case_fallthrough { switch_pos; case_pos } ->
-    case_fallthrough switch_pos case_pos
+  | Case_fallthrough { switch_pos; case_pos; next_pos } ->
+    case_fallthrough switch_pos case_pos next_pos
   | Default_fallthrough pos -> default_fallthrough pos
   | Php_lambda_disallowed pos -> php_lambda_disallowed pos
   | Non_interface { pos; name; verb } -> non_interface pos name verb
@@ -613,6 +772,19 @@ let to_user_error = function
   | Internal_method_with_invalid_visibility { pos; vis } ->
     internal_method_with_invalid_visibility pos vis
   | Private_and_final pos -> private_and_final pos
-  | Internal_outside_module pos -> internal_outside_module pos
   | Internal_member_inside_public_trait { member_pos; trait_pos } ->
     internal_member_inside_public_trait member_pos trait_pos
+  | Attribute_conflicting_memoize { pos; second_pos } ->
+    attribute_conflicting_memoize pos second_pos
+  | Soft_internal_without_internal pos -> soft_internal_without_internal pos
+  | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
+    wrong_expression_kind_builtin_attribute pos attr_name expr_kind
+  | Attribute_too_many_arguments { pos; name; expected } ->
+    attribute_too_many_arguments pos name expected
+  | Attribute_too_few_arguments { pos; name; expected } ->
+    attribute_too_few_arguments pos name expected
+  | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
+    attribute_not_exact_number_of_args pos name expected actual
+  | Attribute_param_type { pos; x } -> attribute_param_type pos x
+  | Enum_supertyping_reserved_syntax { pos } ->
+    enum_supertyping_reserved_syntax pos

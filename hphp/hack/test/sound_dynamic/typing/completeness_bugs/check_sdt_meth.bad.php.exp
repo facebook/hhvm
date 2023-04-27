@@ -1,8 +1,0 @@
-File "check_sdt_meth.bad.php", line 9, characters 19-19:
-Method  `g` in class `C` is not dynamically callable. (Typing[4402])
-  File "check_sdt_meth.bad.php", line 15, characters 27-28:
-  Invalid argument
-  File "check_sdt_meth.bad.php", line 5, characters 21-28:
-  Expected `vec<int>`
-  File "check_sdt_meth.bad.php", line 10, characters 15-20:
-  But got `(dynamic & not vec)` from this `is` expression test

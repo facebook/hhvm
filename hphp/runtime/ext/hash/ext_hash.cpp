@@ -52,22 +52,7 @@ namespace HPHP {
 
 static struct HashExtension final : Extension {
   HashExtension() : Extension("hash", "1.0") { }
-  void moduleInit() override {
-    HHVM_FE(hash);
-    HHVM_FE(hash_algos);
-    HHVM_FE(hash_file);
-    HHVM_FE(hash_final);
-    HHVM_FE(hash_init);
-    HHVM_FE(hash_update);
-    HHVM_FE(hash_copy);
-    HHVM_FE(hash_equals);
-    HHVM_FE(furchash_hphp_ext);
-    HHVM_FE(hphp_murmurhash);
-
-    HHVM_RC_INT(HASH_HMAC, k_HASH_HMAC);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_hash_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -447,6 +432,23 @@ int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,
                                        int64_t len, int64_t seed) {
   len = std::max<int64_t>(std::min<int64_t>(len, key.size()), 0);
   return murmur_hash_64A(key.data(), len, seed);
+}
+
+void HashExtension::moduleInit() {
+  HHVM_FE(hash);
+  HHVM_FE(hash_algos);
+  HHVM_FE(hash_file);
+  HHVM_FE(hash_final);
+  HHVM_FE(hash_init);
+  HHVM_FE(hash_update);
+  HHVM_FE(hash_copy);
+  HHVM_FE(hash_equals);
+  HHVM_FE(furchash_hphp_ext);
+  HHVM_FE(hphp_murmurhash);
+
+  HHVM_RC_INT(HASH_HMAC, k_HASH_HMAC);
+
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

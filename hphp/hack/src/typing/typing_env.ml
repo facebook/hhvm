@@ -25,8 +25,9 @@ module TPEnv = Type_parameter_env
 module KDefs = Typing_kinding_defs
 module TySet = Typing_set
 
-type class_or_typedef_result =
-  | ClassResult of Typing_classes_heap.Api.t
+type 'a class_or_typedef_result =
+      'a Decl_enforceability.class_or_typedef_result =
+  | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
 let show_env _ = "<env>"
@@ -114,6 +115,30 @@ let fresh_type_invariant env p =
   log_env_change_ "fresh_type_invariant" env
   @@
   let (inference_env, res) = Inf.fresh_type_invariant env.inference_env p in
+  ({ env with inference_env }, res)
+
+let fresh_type_error env p =
+  log_env_change_ "fresh_type_error" env
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_reason
+      ~variance:Ast_defs.Invariant
+      env.inference_env
+      p
+      (Reason.Rtype_variable_error p)
+  in
+  ({ env with inference_env }, res)
+
+let fresh_type_error_contravariant env p =
+  log_env_change_ "fresh_type_error_contravariant" env
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_reason
+      ~variance:Ast_defs.Contravariant
+      env.inference_env
+      p
+      (Reason.Rtype_variable_error p)
+  in
   ({ env with inference_env }, res)
 
 let new_global_tyvar env ?i r =
@@ -509,13 +534,13 @@ let get_tpenv_tparams env =
               parameters = _;
             }
           acc ->
-      let folder ty acc =
-        let (_env, ty) = expand_type env ty in
-        match get_node ty with
-        | Tgeneric _ -> acc
-        | _ -> get_tparams_in_ty_and_acc env acc ty
-      in
-      TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
+        let folder ty acc =
+          let (_env, ty) = expand_type env ty in
+          match get_node ty with
+          | Tgeneric _ -> acc
+          | _ -> get_tparams_in_ty_and_acc env acc ty
+        in
+        TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
     end
     (get_tpenv env)
     SSet.empty
@@ -550,17 +575,52 @@ let fun_is_constructor env = env.genv.fun_is_ctor
 let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
-let make_depend_on_class env class_name =
-  let dep = Dep.Type class_name in
+let add_fine_dep_if_enabled env dependency =
+  let open Option.Let_syntax in
+  let ctx = get_ctx env in
+  (* We resolve the dependency to its origin. See
+   * [Typing_extends.add_pessimisation_dependency] for details. *)
+  let dependency_on_origin () =
+    match dependency with
+    | Typing_deps.Dep.Method (class_name, method_name) ->
+      let origin_name =
+        let* cls = Decl_provider.get_class ctx class_name in
+        let* elt = Cls.get_method cls method_name in
+        Some elt.Typing_defs.ce_origin
+      in
+      let origin_name = Option.value origin_name ~default:class_name in
+      Typing_deps.Dep.Method (origin_name, method_name)
+    | Typing_deps.Dep.SMethod (class_name, method_name) ->
+      let origin_name =
+        let* cls = Decl_provider.get_class ctx class_name in
+        let* elt = Cls.get_smethod cls method_name in
+        Some elt.Typing_defs.ce_origin
+      in
+      let origin_name = Option.value origin_name ~default:class_name in
+      Typing_deps.Dep.SMethod (origin_name, method_name)
+    | _ -> dependency
+  in
+
+  let denv = env.decl_env in
+  if TypecheckerOptions.record_fine_grained_dependencies @@ get_tcopt env then
+    let dependency = dependency_on_origin () in
+    Typing_pessimisation_deps.try_add_fine_dep
+      (get_deps_mode env)
+      denv.droot
+      denv.droot_member
+      dependency
+
+let add_dependency_edge (env : Typing_env_types.env) dep : unit =
   Option.iter env.decl_env.droot ~f:(fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
-  ()
+  add_fine_dep_if_enabled env dep
+
+let make_depend_on_class env class_name =
+  add_dependency_edge env (Dep.Type class_name)
 
 let make_depend_on_constructor env class_name =
   make_depend_on_class env class_name;
-  let dep = Dep.Constructor class_name in
-  Option.iter env.decl_env.droot ~f:(fun root ->
-      Typing_deps.add_idep (get_deps_mode env) root dep);
+  add_dependency_edge env (Dep.Constructor class_name);
   ()
 
 let make_depend_on_class_def env x cd =
@@ -568,14 +628,79 @@ let make_depend_on_class_def env x cd =
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
-let make_depend_on_module env =
-  let f (_, mid) =
-    let dep = Dep.Module mid in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    ()
+let make_depend_on_module env module_name =
+  add_dependency_edge env (Dep.Module module_name)
+
+let make_depend_on_module_def env x md =
+  match md with
+  | Some md when Pos_or_decl.is_hhi md.mdt_pos -> ()
+  | _ -> make_depend_on_module env x
+
+let make_depend_on_current_module env =
+  Option.iter env.genv.current_module ~f:(fun (_, mid) ->
+      make_depend_on_module env mid)
+
+let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
+  List.iter (Cls.all_ancestor_names cls) ~f:(fun ancestor ->
+      add_dependency_edge env (Typing_deps.Dep.Type ancestor))
+
+let add_extends_dependency (env : Typing_env_types.env) x =
+  add_dependency_edge env (Dep.Extends x)
+
+let env_with_method_droot_member env m ~static =
+  let child =
+    if static then
+      Typing_pessimisation_deps.SMethod m
+    else
+      Typing_pessimisation_deps.Method m
   in
-  Option.iter ~f env.genv.this_module
+  let decl_env = { env.decl_env with droot_member = Some child } in
+  { env with decl_env }
+
+let env_with_constructor_droot_member env =
+  let member = Typing_pessimisation_deps.Constructor in
+  let decl_env = { env.decl_env with droot_member = Some member } in
+  { env with decl_env }
+
+let get_module (env : env) (name : Decl_provider.module_key) :
+    module_def_type option =
+  let res =
+    Decl_provider.get_module
+      ?tracing_info:(get_tracing_info env)
+      (get_ctx env)
+      name
+  in
+  make_depend_on_module_def env name res;
+  res
+
+let set_current_module env m =
+  { env with genv = { env.genv with current_module = m } }
+
+let get_current_module env = Option.map env.genv.current_module ~f:snd
+
+let set_internal env b = { env with genv = { env.genv with this_internal = b } }
+
+let get_internal env = env.genv.this_internal
+
+let get_package_for_module env md =
+  let info = env.genv.package_info in
+  Package.Info.get_package_for_module info md
+
+let get_package_by_name env pkg_name =
+  let info = env.genv.package_info in
+  Package.Info.get_package info pkg_name
+
+let is_package_loaded env package = SSet.mem package env.loaded_packages
+
+let load_packages env packages =
+  { env with loaded_packages = SSet.union env.loaded_packages packages }
+
+let with_packages env packages f =
+  let old_loaded_packages = env.loaded_packages in
+  let env = load_packages env packages in
+  let (env, result) = f env in
+  let env = { env with loaded_packages = old_loaded_packages } in
+  (env, result)
 
 let get_typedef env x =
   let res =
@@ -595,18 +720,24 @@ let is_typedef env x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
-let is_typedef_visible env ?(expand_visible_newtype = true) td =
-  let { Typing_defs.td_vis; td_pos; _ } = td in
+let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
+  let { Typing_defs.td_vis; td_module; _ } = td in
   match td_vis with
   | Aast.Opaque ->
     expand_visible_newtype
-    && Relative_path.equal
-         (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
-         (get_file env)
-  | Aast.Transparent
-  (* Internal types are not opaque, but they may be inaccessible altogether *)
-  | Aast.Tinternal ->
-    true
+    &&
+    let td_path = Naming_provider.get_typedef_path (get_ctx env) name in
+    (match td_path with
+    | Some s -> Relative_path.equal s (get_file env)
+    | None -> (* Not the right place to raise an error *) false)
+  | Aast.OpaqueModule ->
+    expand_visible_newtype
+    && Option.equal
+         String.equal
+         (get_current_module env)
+         (Option.map td_module ~f:snd)
+  | Aast.Transparent -> true
+  | Aast.CaseType -> false
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   let res =
@@ -628,14 +759,6 @@ let get_class_or_typedef env x =
     | None -> None
     | Some cd -> Some (ClassResult cd)
 
-let get_class_dep env x =
-  let res = get_class env x in
-  match res with
-  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> res
-  | _ ->
-    Decl_env.add_extends_dependency env.decl_env x;
-    res
-
 let get_fun env x =
   let res =
     Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x
@@ -643,9 +766,7 @@ let get_fun env x =
   match res with
   | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res
   | _ ->
-    let dep = Typing_deps.Dep.Fun x in
-    Option.iter env.decl_env.Decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_dependency_edge env (Typing_deps.Dep.Fun x);
     res
 
 let get_enum_constraint env x =
@@ -674,20 +795,16 @@ let is_enum_class env x =
 
 let get_typeconst env class_ mid =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
+    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
   end;
   Cls.get_typeconst class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
+    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
   end;
   Cls.get_const class_ mid
 
@@ -709,10 +826,27 @@ let get_gconst env cst_name =
   match res with
   | Some cst when Pos_or_decl.is_hhi cst.cd_pos -> res
   | _ ->
-    let dep = Dep.GConst cst_name in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_dependency_edge env (Dep.GConst cst_name);
     res
+
+let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
+    =
+  let add_dep cid =
+    let dep =
+      match (is_method, is_static) with
+      | (true, true) -> Dep.SMethod (cid, mid)
+      | (true, false) -> Dep.Method (cid, mid)
+      | (false, true) -> Dep.SProp (cid, mid)
+      | (false, false) -> Dep.Prop (cid, mid)
+    in
+    add_dependency_edge env dep
+  in
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
+    make_depend_on_class env (Cls.name class_);
+    add_dep (Cls.name class_);
+    Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.ce_origin)
+  );
+  ()
 
 let get_static_member is_method env class_ mid =
   (* The type of a member is stored separately in the heap. This means that
@@ -725,28 +859,17 @@ let get_static_member is_method env class_ mid =
     else
       Cls.get_sprop class_ mid
   in
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_class env (Cls.name class_);
-    let add_dep x =
-      let dep =
-        if is_method then
-          Dep.SMethod (x, mid)
-        else
-          Dep.SProp (x, mid)
-      in
-      Option.iter env.decl_env.droot ~f:(fun root ->
-          Typing_deps.add_idep (get_deps_mode env) root dep)
-    in
-    add_dep (Cls.name class_);
-    Option.iter ce_opt ~f:(fun ce -> add_dep ce.ce_origin)
-  end;
-
+  add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
   ce_opt
 
-(* Given a list of things whose name we can extract with `f`, return
-   the item whose name is closest to `name`. *)
+(* Given a list of [possibilities] whose name we can extract with [f], return
+   the item whose name is closest to [name]. *)
 let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string) :
     'a option =
+  (* Compare strings case-insensitively. *)
+  let name = String.lowercase name in
+  let f x = String.lowercase (f x) in
+
   let distance upper_bound = String_utils.levenshtein_distance ~upper_bound in
   let choose_closest ~best:(best, best_distance) candidate =
     let candidate_distance = distance (best_distance + 1) (f candidate) name in
@@ -788,16 +911,6 @@ let suggest_static_member is_method class_ mid =
   suggest_member members mid
 
 let get_member is_method env (class_ : Cls.t) mid =
-  let add_dep x =
-    let dep =
-      if is_method then
-        Dep.Method (x, mid)
-      else
-        Dep.Prop (x, mid)
-    in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
-  in
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
    * originated.
@@ -808,11 +921,7 @@ let get_member is_method env (class_ : Cls.t) mid =
     else
       Cls.get_prop class_ mid
   in
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then
-    make_depend_on_class env (Cls.name class_);
-  Option.iter ce_opt ~f:(fun ce ->
-      add_dep (Cls.name class_);
-      add_dep ce.ce_origin);
+  add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
   ce_opt
 
 let suggest_member is_method class_ mid =
@@ -883,16 +992,36 @@ let with_origin2 env origin f =
   let env = { env with tracing_info = ti1 } in
   (env, r1, r2)
 
-let with_in_expr_tree env in_expr_tree f =
+let inside_expr_tree env expr_tree_hint =
+  let outer_locals =
+    match next_cont_opt env with
+    | None -> Local_id.Map.empty
+    | Some cont -> cont.LEnvC.local_types
+  in
+  { env with in_expr_tree = Some { dsl = expr_tree_hint; outer_locals } }
+
+let outside_expr_tree env = { env with in_expr_tree = None }
+
+let with_inside_expr_tree env expr_tree_hint f =
   let old_in_expr_tree = env.in_expr_tree in
-  let env = { env with in_expr_tree } in
+  let env = inside_expr_tree env expr_tree_hint in
   let (env, r1, r2) = f env in
   let env = { env with in_expr_tree = old_in_expr_tree } in
   (env, r1, r2)
 
-let is_in_expr_tree env = env.in_expr_tree
+let with_outside_expr_tree env f =
+  let old_in_expr_tree = env.in_expr_tree in
+  let dsl =
+    match old_in_expr_tree with
+    | Some { dsl = (_, Happly (cls, _)); outer_locals = _ } -> Some cls
+    | _ -> None
+  in
+  let env = outside_expr_tree env in
+  let (env, r1, r2) = f env dsl in
+  let env = { env with in_expr_tree = old_in_expr_tree } in
+  (env, r1, r2)
 
-let set_in_expr_tree env b = { env with in_expr_tree = b }
+let is_in_expr_tree env = Option.is_some env.in_expr_tree
 
 let is_static env = env.genv.static
 
@@ -902,12 +1031,11 @@ let get_self_ty env = Option.map env.genv.self ~f:snd
 
 let get_self_class_type env =
   match get_self_ty env with
-  | Some self ->
-    begin
-      match get_node self with
-      | Tclass (id, exact, tys) -> Some (id, exact, tys)
-      | _ -> None
-    end
+  | Some self -> begin
+    match get_node self with
+    | Tclass (id, exact, tys) -> Some (id, exact, tys)
+    | _ -> None
+  end
   | None -> None
 
 let get_self_id env = Option.map env.genv.self ~f:fst
@@ -922,7 +1050,7 @@ let get_parent_id env = Option.map env.genv.parent ~f:fst
 
 let get_parent_class env =
   let open Option in
-  get_parent_id env >>= get_class_dep env
+  get_parent_id env >>= get_class env
 
 let get_fn_kind env = env.genv.fun_kind
 
@@ -931,16 +1059,13 @@ let set_fn_kind env fn_type =
   let genv = { genv with fun_kind = fn_type } in
   { env with genv }
 
-let set_module env m = { env with genv = { env.genv with this_module = m } }
-
-let get_module env = Option.map env.genv.this_module ~f:snd
-
-let set_internal env b = { env with genv = { env.genv with this_internal = b } }
-
-let get_internal env = env.genv.this_internal
-
 let set_support_dynamic_type env b =
   { env with genv = { env.genv with this_support_dynamic_type = b } }
+
+let set_everything_sdt env b =
+  map_tcopt
+    ~f:(fun tcopt -> { tcopt with GlobalOptions.tco_everything_sdt = b })
+    env
 
 let get_support_dynamic_type env = env.genv.this_support_dynamic_type
 
@@ -948,6 +1073,13 @@ let set_self env self_id self_ty =
   let genv = env.genv in
   let genv = { genv with self = Some (self_id, self_ty) } in
   { env with genv }
+
+let run_with_no_self env f =
+  let self = env.genv.self in
+  let genv = { env.genv with self = None } in
+  let (env, result) = f { env with genv } in
+  let genv = { env.genv with self } in
+  ({ env with genv }, result)
 
 let set_parent env parent_id parent_ty =
   let genv = env.genv in
@@ -1043,34 +1175,69 @@ let unset_local env local =
 
 let tany _env = Typing_defs.make_tany ()
 
-let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
-  let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
-  let error_if_pos_provided posopt ctx =
-    match posopt with
-    | Some p ->
-      let lid = LID.to_string x in
-      let suggest_most_similar lid =
-        (* Ignore fake locals *)
-        let all_locals =
-          LID.Map.fold
-            (fun k v acc ->
-              if LID.is_user_denotable k then
-                (k, v) :: acc
-              else
-                acc)
-            ctx.LEnvC.local_types
-            []
-        in
-        let var_name (k, _) = LID.to_string k in
-        match most_similar lid all_locals var_name with
-        | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)
-        | None -> None
-      in
-      Errors.add_naming_error
-      @@ Naming_error.Undefined
-           { pos = p; var_name = lid; did_you_mean = suggest_most_similar lid }
-    | None -> ()
+let local_undefined_error ~env p x ctx =
+  let open Option.Let_syntax in
+  (* When inside an expression tree, the user may forget to splice in a
+     variable. If that happens we want to suggest splicing in that
+     variable. *)
+  let all_outer_locals () =
+    Option.value ~default:[]
+    @@ let* { outer_locals; dsl } = env.in_expr_tree in
+       let locals =
+         LID.Map.fold
+           (fun k ((_, p, _) as v) acc ->
+             (* $this doesn't have a position. In general best to avoid
+                suggestions that lack positions. *)
+             if LID.is_user_denotable k && (not @@ Pos.equal p Pos.none) then
+               (k, v, Some dsl) :: acc
+             else
+               acc)
+           outer_locals
+           []
+       in
+       return locals
   in
+  match p with
+  | Some p ->
+    let lid = LID.to_string x in
+    let suggest_most_similar lid =
+      (* Ignore fake locals *)
+      let all_locals =
+        LID.Map.fold
+          (fun k v acc ->
+            if LID.is_user_denotable k then
+              (k, v, None) :: acc
+            else
+              acc)
+          ctx.LEnvC.local_types
+          (* Prefer suggesting variables within the current scope *)
+          (all_outer_locals ())
+      in
+      let var_name (k, _, _) = LID.to_string k in
+      match most_similar lid all_locals var_name with
+      | Some (k, (_, pos, _), dsl) -> (Some (LID.to_string k, pos), dsl)
+      | None -> (None, None)
+    in
+    let (most_similar, in_dsl) = suggest_most_similar lid in
+    let error =
+      match in_dsl with
+      | None ->
+        Naming_error.Undefined
+          { pos = p; var_name = lid; did_you_mean = most_similar }
+      | Some dsl ->
+        let dsl =
+          match dsl with
+          | (_, Happly ((_, cls), _)) -> Some cls
+          | _ -> None
+        in
+        Naming_error.Undefined_in_expr_tree
+          { pos = p; var_name = lid; dsl; did_you_mean = most_similar }
+    in
+    Errors.add_error (Naming_error.to_user_error error)
+  | None -> ()
+
+let get_local_in_ctx ~undefined_err_fun x ctx_opt =
+  let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
   match ctx_opt with
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
@@ -1084,19 +1251,20 @@ let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
         if not_found_is_ok x ctx then
           ()
         else
-          error_if_pos_provided p ctx
+          undefined_err_fun x ctx
       | Some _ -> ()
     end;
     lcl
 
-let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
-  match get_local_in_ctx ?error_if_undef_at_pos x ctx_opt with
+let get_local_ty_in_ctx env ~undefined_err_fun x ctx_opt =
+  match get_local_in_ctx ~undefined_err_fun x ctx_opt with
   | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
   | Some (x, pos, _) -> (true, x, pos)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
+  let undefined_err_fun = local_undefined_error ~env p in
   let next_cont = next_cont_opt env in
-  get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
+  get_local_ty_in_ctx env ~undefined_err_fun x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
   let (mut, ty, _) =
@@ -1110,10 +1278,19 @@ let get_local_pos env x =
   let (_, ty, pos) = get_local_in_next_continuation env x in
   (ty, pos)
 
-let get_locals env plids =
+let get_locals ?(quiet = false) env plids =
   let next_cont = next_cont_opt env in
-  List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
-      match get_local_in_ctx ~error_if_undef_at_pos:p lid next_cont with
+  List.fold plids ~init:LID.Map.empty ~f:(fun locals (_, (p, lid)) ->
+      let error_if_undef_at_pos =
+        if quiet then
+          None
+        else
+          Some p
+      in
+      let undefined_err_fun =
+        local_undefined_error ~env error_if_undef_at_pos
+      in
+      match get_local_in_ctx ~undefined_err_fun lid next_cont with
       | None -> locals
       | Some ty_eid -> LID.Map.add lid ty_eid locals)
 
@@ -1131,20 +1308,19 @@ let set_local_expr_id env x new_eid =
   let per_cont_env = env.lenv.per_cont_env in
   match LEnvC.get_cont_option C.Next per_cont_env with
   | None -> env
-  | Some next_cont ->
-    begin
-      match LID.Map.find_opt x next_cont.LEnvC.local_types with
-      | Some (type_, pos, eid)
-        when not (Typing_local_types.equal_expression_id eid new_eid) ->
-        if Ident.is_immutable eid then
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Immutable_local pos);
-        let local = (type_, pos, new_eid) in
-        let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
-        let env = { env with lenv = { env.lenv with per_cont_env } } in
-        env
-      | _ -> env
-    end
+  | Some next_cont -> begin
+    match LID.Map.find_opt x next_cont.LEnvC.local_types with
+    | Some (type_, pos, eid)
+      when not (Typing_local_types.equal_expression_id eid new_eid) ->
+      if Ident.is_immutable eid then
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Immutable_local pos);
+      let local = (type_, pos, new_eid) in
+      let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
+      let env = { env with lenv = { env.lenv with per_cont_env } } in
+      env
+    | _ -> env
+  end
 
 let get_local_expr_id env x =
   match next_cont_opt env with
@@ -1292,6 +1468,7 @@ let closure env f =
   let old_return = get_return env in
   let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
+  let outer_check_status = env.checked in
   (* Typing *)
   let (env, ret) = f env in
   (* Restore the environment fields that were clobbered *)
@@ -1299,6 +1476,7 @@ let closure env f =
   let env = set_params env old_params in
   let env = set_return env old_return in
   let env = set_fn_kind env outer_fun_kind in
+  let env = { env with checked = outer_check_status } in
   (env, ret)
 
 let in_try env f =
@@ -1315,6 +1493,7 @@ let save local_tpenv env =
     Tast.tpenv = TPEnv.union local_tpenv env.tpenv;
     Tast.condition_types = env.genv.condition_types;
     Tast.fun_tast_info = env.fun_tast_info;
+    Tast.checked = env.checked;
   }
 
 (* Compute the type variables appearing covariantly (positively)
@@ -1347,7 +1526,6 @@ and get_tyvars_i env (ty : internal_type) =
     | Tvar v -> (env, ISet.singleton v, ISet.empty)
     | Tany _
     | Tnonnull
-    | Terr
     | Tdynamic
     | Tprim _
     | Tneg _ ->
@@ -1357,7 +1535,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tunion tyl
     | Tintersection tyl ->
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
-    | Tshape (_, m) ->
+    | Tshape (_, _, m) ->
       TShapeMap.fold
         (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
         m
@@ -1448,6 +1626,23 @@ and get_tyvars_i env (ty : internal_type) =
         hm
       in
       get_tyvars env hm_type
+    | (_, Thas_type_member htm) ->
+      let { htm_id = _; htm_lower; htm_upper } = htm in
+      let (env, poslo, neglo) = get_tyvars env htm_lower in
+      let (env, posup, negup) = get_tyvars env htm_upper in
+      (env, ISet.union posup neglo, ISet.union poslo negup)
+    | (_, Tcan_index ci) ->
+      let (env, pos1, neg1) = get_tyvars env ci.ci_val in
+      let (env, pos2, neg2) = get_tyvars env ci.ci_key in
+      (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
+    | (_, Tcan_traverse ct) ->
+      let (env, pos1, neg1) = get_tyvars env ct.ct_val in
+      let (env, pos2, neg2) =
+        match ct.ct_key with
+        | None -> (env, ISet.empty, ISet.empty)
+        | Some ct_key -> get_tyvars env ct_key
+      in
+      (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       let (env, positive1, negative1) = get_tyvars env lty in

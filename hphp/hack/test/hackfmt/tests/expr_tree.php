@@ -3,4 +3,11 @@
 function foo(): void {
   $basic = Bar`baz()`;
   $splice = Bar`1 + ${baz()}`;
+  $block_empty = Bar`{ }`;
+  $block_basic = Bar`{call();}`;
+  $multi_line_block = Bar`
+  { $x = 10;
+    return $x + $x;
+  }
+  `;
 }

@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
 val init :
   root:Path.t ->
@@ -12,6 +13,7 @@ val init :
   popt:ParserOptions.t ->
   tcopt:TypecheckerOptions.t ->
   deps_mode:Typing_deps_mode.t ->
+  ?gc_control:Gc.control ->
   float ->
   Provider_context.t * MultiWorker.worker list * float
 

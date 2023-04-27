@@ -49,6 +49,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/runtime/ext/std/ext_std_closure.h"
+
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/trace.h"
@@ -596,9 +598,17 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 void cgReleaseShallow(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const base = srcLoc(env, inst, 0).reg(0);
+  auto const ty = inst->src(0)->type();
   auto args = argGroup(env, inst).reg(base);
-  auto const dtor = CallSpec::method(&ArrayData::releaseShallow);
-  cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+
+  if (ty <= TArrLike) {
+    auto const dtor = CallSpec::method(&ArrayData::releaseShallow);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+  } else {
+    assertx(ty.clsSpec().cls()->classof(c_Closure::classof()));
+    auto const dtor = CallSpec::direct(&c_Closure::releaseShallow);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+  }
 }
 
 template<class Then, class Else>

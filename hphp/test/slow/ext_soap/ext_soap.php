@@ -105,55 +105,55 @@ function entrypoint_ext_soap(): void {
    ExtSoapExtSoapPhp::$server->addFunction("hello");
 
     VSOAP("<ns1:hello xmlns:ns1=\"http://testuri.org\" />",
-  	"<ns1:helloResponse><return xsi:type=\"xsd:string\">Hello World".
-  	"</return></ns1:helloResponse>");
+    "<ns1:helloResponse><return xsi:type=\"xsd:string\">Hello World".
+    "</return></ns1:helloResponse>");
 
     ExtSoapExtSoapPhp::$server->addFunction(SOAP_FUNCTIONS_ALL);
 
     VSOAP("<ns1:strlen xmlns:ns1=\"http://testuri.org\">".
-  	"<x xsi:type=\"xsd:string\">Hello World</x>".
-  	"</ns1:strlen>",
-  	"<ns1:strlenResponse><return xsi:type=\"xsd:int\">11".
-  	"</return></ns1:strlenResponse>");
+    "<x xsi:type=\"xsd:string\">Hello World</x>".
+    "</ns1:strlen>",
+    "<ns1:strlenResponse><return xsi:type=\"xsd:int\">11".
+    "</return></ns1:strlenResponse>");
 
-    $funcs = varray["Sub", "Add"];
+    $funcs = varray["sub", "add"];
     ExtSoapExtSoapPhp::$server->addFunction($funcs);
 
-    VSOAP("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
-  	"<x xsi:type=\"xsd:int\">22</x>".
-  	"<y xsi:type=\"xsd:int\">33</y>".
-  	"</ns1:Add>",
-  	"<ns1:AddResponse><return xsi:type=\"xsd:int\">55".
-  	"</return></ns1:AddResponse>");
+    VSOAP("<ns1:add xmlns:ns1=\"http://testuri.org\">".
+    "<x xsi:type=\"xsd:int\">22</x>".
+    "<y xsi:type=\"xsd:int\">33</y>".
+    "</ns1:add>",
+    "<ns1:addResponse><return xsi:type=\"xsd:int\">55".
+    "</return></ns1:addResponse>");
 
-    ExtSoapExtSoapPhp::$server->addFunction("Sum");
+    ExtSoapExtSoapPhp::$server->addFunction("sum");
 
     VSOAP("<ns1:sum xmlns:ns1=\"http://testuri.org\">".
-  	"<param0 SOAP-ENC:arrayType=\"xsd:int[2]\"".
-  	" xmlns:SOAP-ENC=".
-  	"\"http://schemas.xmlsoap.org/soap/encoding/\"".
-  	" xsi:type=\"SOAP-ENC:Array\">".
-  	"  <val xsi:type=\"xsd:int\">3</val>".
-  	"  <val xsi:type=\"xsd:int\">5</val>".
-  	"</param0>".
-  	"</ns1:sum>",
-  	"<ns1:sumResponse><return xsi:type=\"xsd:int\">8".
-  	"</return></ns1:sumResponse>");
+    "<param0 SOAP-ENC:arrayType=\"xsd:int[2]\"".
+    " xmlns:SOAP-ENC=".
+    "\"http://schemas.xmlsoap.org/soap/encoding/\"".
+    " xsi:type=\"SOAP-ENC:Array\">".
+    "  <val xsi:type=\"xsd:int\">3</val>".
+    "  <val xsi:type=\"xsd:int\">5</val>".
+    "</param0>".
+    "</ns1:sum>",
+    "<ns1:sumResponse><return xsi:type=\"xsd:int\">8".
+    "</return></ns1:sumResponse>");
 
     ExtSoapExtSoapPhp::$server = new SoapServer(__DIR__."/1809.wsdl",
-  			  darray["uri" => "http://testuri.org"]);
+          darray["uri" => "http://testuri.org"]);
 
-    ExtSoapExtSoapPhp::$server->addFunction("Fault");
+    ExtSoapExtSoapPhp::$server->addFunction("fault");
 
     // TODO(#2512715): this doesn't work.
     if (false) {
       VSOAPEX("<ns1:fault xmlns:ns1=\"http://testuri.org\"/>",
-  	    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".
-  	    "<SOAP-ENV:Envelope xmlns:SOAP-ENV=".
-  	    "\"http://schemas.xmlsoap.org/soap/envelope/\"".
-  	    "><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>MyFault</faultcode>".
-  	    "<faultstring>My fault string</faultstring></SOAP-ENV:Fault>".
-  	    "</SOAP-ENV:Body></SOAP-ENV:Envelope>\n");
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".
+        "<SOAP-ENV:Envelope xmlns:SOAP-ENV=".
+        "\"http://schemas.xmlsoap.org/soap/envelope/\"".
+        "><SOAP-ENV:Body><SOAP-ENV:fault><faultcode>MyFault</faultcode>".
+        "<faultstring>My fault string</faultstring></SOAP-ENV:Fault>".
+        "</SOAP-ENV:Body></SOAP-ENV:Envelope>\n");
     }
   }
 }

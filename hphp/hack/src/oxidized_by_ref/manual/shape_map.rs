@@ -5,12 +5,14 @@
 
 use std::cmp::Ordering;
 
-use serde::{Deserialize, Serialize};
-
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::ast_defs::{Id, ShapeFieldName};
+use crate::ast_defs::Id;
+use crate::ast_defs::ShapeFieldName;
 
 #[derive(
     Copy,

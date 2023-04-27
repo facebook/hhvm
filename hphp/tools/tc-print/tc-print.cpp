@@ -128,6 +128,7 @@ void usage() {
     "translations by density (count / size) of the selected perf event\n"
     "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
     "(default: /tmp)\n"
+    "    -F <FUNC_NAME>  : prints the translations for the given function\n"
     "    -f <FUNC_ID>    : prints the translations for the given "
     "<FUNC_ID>, sorted by start offset\n"
     "    -g <FUNC_ID>    : prints the CFG among the translations for the "
@@ -156,7 +157,7 @@ void usage() {
     "Pass a comma-separated list of events to replace the default set.\n"
     "    -b              : prints bytecode stats\n"
     "    -B <OPCODE>     : used in conjunction with -e, prints the top "
-    "bytecode translationc event type. Pass '%s' to get a "
+    "bytecode translation event type. Pass '%s' to get a "
     "list of valid opcodes.\n"
     "    -i              : reports inclusive stats by including helpers "
     "(perf data must include call graph information)\n"
@@ -605,15 +606,23 @@ dynamic getTransRec(const TransRec* tRec,
     always_assert(false);
   }();
 
-  const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
+  auto const offset = sk.prologue() || sk.funcEntry()
+    ? 0  // Unable to lookup entry offset, assume main entry.
+    : sk.offset();
+
+  dynamic src = dynamic::object("sha1", tRec->sha1.toString())
                                      ("funcId", sk.funcID().toInt())
                                      ("funcName", tRec->funcName)
                                      ("resumeMode", resumeMode)
                                      ("hasThis", sk.hasThis())
                                      ("prologue", sk.prologue())
                                      ("funcEntry", sk.funcEntry())
-                                     ("bcStartOffset", sk.printableOffset())
+                                     ("bcStartOffset", offset)
                                      ("guards", guards);
+
+  if (sk.prologue() || sk.funcEntry()) {
+    src["numEntryArgs"] = sk.numEntryArgs();
+  }
 
   const dynamic result = dynamic::object("id", tRec->id)
                                         ("src", src)
@@ -677,8 +686,15 @@ dynamic getTrans(TransID transId) {
       );
     }
 
+    auto const offset = [&]() {
+      if (!sk.prologue() && !sk.funcEntry()) return sk.offset();
+      if (sk.valid()) return sk.entryOffset();
+      // Unable to lookup entry offset, assume main entry.
+      return 0;
+    }();
+
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
-                                    ("start", sk.printableOffset())
+                                    ("start", offset)
                                     ("end", block.bcPast)
                                     ("unit", sk.valid() ?
                                              byteInfo.str() :
@@ -769,8 +785,12 @@ void printTrans(TransID transId) {
       auto sk = block.sk;
       if (!sk.valid()) {
         byteInfo << folly::format(
-          "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
-          block.sha1, block.sk.printableOffset(), block.bcPast);
+          "<<< couldn't find func in {} to print bytecode range [{}{},{}) >>>\n",
+          block.sha1,
+          block.sk.prologue() || block.sk.funcEntry() ? "numEntryArgs " : "",
+          block.sk.prologue() || block.sk.funcEntry()
+            ? block.sk.numEntryArgs() : block.sk.offset(),
+          block.bcPast);
         continue;
       }
 
@@ -882,7 +902,9 @@ void printCFG() {
       continue;
     }
 
-    auto const bcStart = TREC(tid)->src.printableOffset();
+    auto const bcStart = sk.prologue() || sk.funcEntry()
+      ? folly::sformat("numEntryArgs {}", TREC(tid)->src.numEntryArgs())
+      : TREC(tid)->src.printableOffset();
     uint32_t bcStop = TREC(tid)->bcPast();
     auto const shape = [&] {
       switch (TREC(tid)->kind) {

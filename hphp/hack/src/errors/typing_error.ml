@@ -71,7 +71,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 
@@ -85,7 +85,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 
@@ -158,7 +158,7 @@ end
 
 type on_error =
   ?code:int ->
-  ?quickfixes:Quickfix.t list ->
+  ?quickfixes:Pos.t Quickfix.t list ->
   Pos_or_decl.t Message.t list ->
   unit
 
@@ -166,7 +166,7 @@ type error =
   Error_code.t
   * Pos.t Message.t Lazy.t
   * Pos_or_decl.t Message.t list Lazy.t
-  * Quickfix.t list
+  * Pos.t Quickfix.t list
 
 module Common = struct
   let map2 ~f x y = Lazy.(x >>= fun x -> map ~f:(fun y -> f x y) y)
@@ -198,17 +198,16 @@ module Common = struct
 
   let snot_found_suggestion orig similar kind =
     match similar with
-    | (`instance, pos, v) ->
-      begin
-        match kind with
-        | `static_method ->
-          Render.suggestion_message ~modifier:"instance method " orig v pos
-        | `class_constant ->
-          Render.suggestion_message ~modifier:"instance property " orig v pos
-        | `class_variable
-        | `class_typeconst ->
-          Render.suggestion_message orig v pos
-      end
+    | (`instance, pos, v) -> begin
+      match kind with
+      | `static_method ->
+        Render.suggestion_message ~modifier:"instance method " orig v pos
+      | `class_constant ->
+        Render.suggestion_message ~modifier:"instance property " orig v pos
+      | `class_variable
+      | `class_typeconst ->
+        Render.suggestion_message orig v pos
+    end
     | (`static, pos, v) -> Render.suggestion_message orig v pos
 
   let smember_not_found pos kind member_name class_name class_pos hint =
@@ -376,12 +375,13 @@ module Primary = struct
           reason:
             [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
+    [@@deriving show]
 
     let invalid_shape_field_type pos ty_pos ty_name trail : error =
       let reasons =
         lazy
           ((ty_pos, "Not " ^ Lazy.force ty_name)
-           :: Common.reasons_of_trail trail)
+          :: Common.reasons_of_trail trail)
       and claim =
         lazy (pos, "A shape field name must be an `int` or `string`")
       in
@@ -391,7 +391,7 @@ module Primary = struct
       let claim =
         lazy
           ( pos,
-            "Was expecting a constant string, class constant, or int (for shape access)"
+            "Shape access requires a string literal, integer literal, or a class constant"
           )
       in
       (Error_code.InvalidShapeFieldName, claim, lazy [], [])
@@ -590,7 +590,10 @@ module Primary = struct
       | Enum_class_label_unknown of {
           pos: Pos.t;
           label_name: string;
-          class_name: string;
+          enum_name: string;
+          decl_pos: Pos_or_decl.t;
+          most_similar: (string * Pos_or_decl.t) option;
+          ty_pos: Pos_or_decl.t option;
         }
       | Enum_class_label_as_expr of Pos.t
       | Enum_class_label_member_mismatch of {
@@ -614,7 +617,7 @@ module Primary = struct
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
-      | Enum_supertyping_reserved_syntax of Pos.t
+    [@@deriving show]
 
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
       let claim = lazy (pos, "Enum class label/member mismatch")
@@ -715,13 +718,53 @@ module Primary = struct
       in
       (Error_code.EnumSwitchWrongClass, claim, lazy [], [])
 
-    let enum_class_label_unknown pos label_name class_name =
+    let enum_class_label_unknown
+        pos label_name enum_name decl_pos most_similar ty_pos =
+      let enum_name = Markdown_lite.md_codify (Render.strip_ns enum_name) in
+
       let claim =
         lazy
-          (let class_name = Render.strip_ns class_name in
-           (pos, "Unknown constant " ^ label_name ^ " in " ^ class_name))
+          ( pos,
+            Printf.sprintf
+              "Enum class %s does not contain a label named %s."
+              enum_name
+              (Markdown_lite.md_codify label_name) )
       in
-      (Error_code.EnumClassLabelUnknown, claim, lazy [], [])
+
+      let decl_reason =
+        [(decl_pos, Printf.sprintf "%s is defined here" enum_name)]
+      in
+      let (similar_reason, quickfixes) =
+        match most_similar with
+        | Some (similar_name, similar_pos) ->
+          ( [
+              ( similar_pos,
+                Printf.sprintf
+                  "Did you mean %s?"
+                  (Markdown_lite.md_codify similar_name) );
+            ],
+            [
+              Quickfix.make
+                ~title:("Change to " ^ Markdown_lite.md_codify similar_name)
+                ~new_text:similar_name
+                pos;
+            ] )
+        | None -> ([], [])
+      in
+      let ty_reason =
+        match ty_pos with
+        | Some ty_pos ->
+          [
+            ( ty_pos,
+              Printf.sprintf
+                "This is why I expected an enum class label from %s."
+                enum_name );
+          ]
+        | None -> []
+      in
+
+      let reason = lazy (decl_reason @ similar_reason @ ty_reason) in
+      (Error_code.EnumClassLabelUnknown, claim, reason, quickfixes)
 
     let enum_class_label_as_expr pos =
       let claim =
@@ -778,16 +821,6 @@ module Primary = struct
         lazy [],
         [] )
 
-    let enum_supertyping_reserved_syntax pos =
-      ( Error_code.EnumSupertypingReservedSyntax,
-        lazy
-          ( pos,
-            "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
-            ^ "Enable it with the enable_enum_supertyping option in .hhconfig"
-          ),
-        lazy [],
-        [] )
-
     let to_error = function
       | Enum_type_bad { pos; is_enum_class; ty_name; trail } ->
         enum_type_bad pos is_enum_class ty_name trail
@@ -803,8 +836,15 @@ module Primary = struct
       | Enum_switch_not_const pos -> enum_switch_not_const pos
       | Enum_switch_wrong_class { pos; kind; expected; actual } ->
         enum_switch_wrong_class pos kind expected actual
-      | Enum_class_label_unknown { pos; label_name; class_name } ->
-        enum_class_label_unknown pos label_name class_name
+      | Enum_class_label_unknown
+          { pos; label_name; enum_name; decl_pos; most_similar; ty_pos } ->
+        enum_class_label_unknown
+          pos
+          label_name
+          enum_name
+          decl_pos
+          most_similar
+          ty_pos
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos
       | Enum_class_label_member_mismatch { pos; label; expected_ty_msg_opt } ->
         enum_class_label_member_mismatch pos label expected_ty_msg_opt
@@ -820,8 +860,6 @@ module Primary = struct
       | Enum_inclusion_not_enum { pos; classish_name; src_classish_name } ->
         enum_inclusion_not_enum pos classish_name src_classish_name
       | Enum_classes_reserved_syntax pos -> enum_classes_reserved_syntax pos
-      | Enum_supertyping_reserved_syntax pos ->
-        enum_supertyping_reserved_syntax pos
   end
 
   module Expr_tree = struct
@@ -838,6 +876,7 @@ module Primary = struct
           member_name: string;
           class_name: string;
         }
+    [@@deriving show]
 
     let expression_tree_non_public_member pos decl_pos =
       let claim =
@@ -931,6 +970,7 @@ module Primary = struct
           decl_pos: Pos_or_decl.t;
           suggestion: string;
         }
+    [@@deriving show]
 
     let readonly_modified pos reason_opt : error =
       let claim =
@@ -990,12 +1030,7 @@ module Primary = struct
       (Error_code.ReadonlyException, claim, lazy [], [])
 
     let explicit_readonly_cast pos decl_pos kind =
-      let (start_line, start_column) = Pos.line_column pos in
-      (* Create a zero-width position at the start of the offending
-         expression, so we can insert text without overwriting anything. *)
-      let qf_pos =
-        pos |> Pos.set_line_end start_line |> Pos.set_col_end start_column
-      in
+      let qf_pos = Pos.shrink_to_start pos in
       let quickfixes =
         [Quickfix.make ~title:"Insert `readonly`" ~new_text:"readonly " qf_pos]
       in
@@ -1074,6 +1109,7 @@ module Primary = struct
           pos: Pos.t;
           msg: string;
         }
+    [@@deriving show]
 
     let illegal_information_flow
         pos secondaries source_poss source sink_poss sink =
@@ -1194,6 +1230,7 @@ module Primary = struct
           required: string Lazy.t;
           suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
+    [@@deriving show]
 
     let call_coeffect
         pos available_pos available_incl_unsafe required_pos required : error =
@@ -1212,7 +1249,7 @@ module Primary = struct
       and claim =
         lazy
           ( pos,
-            "This call is not allowed because its coeffects are incompatible with the context"
+            "This call is not allowed because its capabilities are incompatible with the context"
           )
       in
       (Error_code.CallCoeffects, claim, reasons, [])
@@ -1293,10 +1330,11 @@ module Primary = struct
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           is_async: bool;
-          pos: Pos.t;
-          hint_pos: Pos.t option;
+          hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
+      | Invalid_class_refinement of { pos: Pos.t }
+    [@@deriving show]
 
     let missing_return pos hint_pos is_async =
       let return_type =
@@ -1340,16 +1378,16 @@ module Primary = struct
       and reason =
         lazy
           ((Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
-           ::
-           Option.value_map
-             without_value_pos_opt
-             ~default:
-               [
-                 ( Pos_or_decl.of_raw_pos pos,
-                   "This function does not always return a value" );
-               ]
-             ~f:(fun p ->
-               [(Pos_or_decl.of_raw_pos p, "Returning without a value here")]))
+          :: Option.value_map
+               without_value_pos_opt
+               ~default:
+                 [
+                   ( Pos_or_decl.of_raw_pos pos,
+                     "This function does not always return a value" );
+                 ]
+               ~f:(fun p ->
+                 [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
+          )
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
@@ -1359,7 +1397,7 @@ module Primary = struct
         lazy [],
         [] )
 
-    let non_void_annotation_on_return_void_function is_async pos hint_pos =
+    let non_void_annotation_on_return_void_function is_async hint_pos =
       let (async_indicator, return_type) =
         if is_async then
           ("Async f", "Awaitable<void>")
@@ -1368,22 +1406,19 @@ module Primary = struct
       in
       let claim =
         lazy
-          ( pos,
+          ( hint_pos,
             Printf.sprintf
               "%sunctions that do not return a value must have a type of %s"
               async_indicator
               return_type )
       in
       let quickfixes =
-        match hint_pos with
-        | None -> []
-        | Some hint_pos ->
-          [
-            Quickfix.make
-              ~title:("Change to " ^ Markdown_lite.md_codify return_type)
-              ~new_text:return_type
-              hint_pos;
-          ]
+        [
+          Quickfix.make
+            ~title:("Change to " ^ Markdown_lite.md_codify return_type)
+            ~new_text:return_type
+            hint_pos;
+        ]
       in
 
       (Error_code.NonVoidAnnotationOnReturnVoidFun, claim, lazy [], quickfixes)
@@ -1391,6 +1426,12 @@ module Primary = struct
     let tuple_syntax p =
       ( Error_code.TupleSyntax,
         lazy (p, "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`"),
+        lazy [],
+        [] )
+
+    let invalid_class_refinement pos =
+      ( Error_code.InvalidClassRefinement,
+        lazy (pos, "Invalid class refinement"),
         lazy [],
         [] )
 
@@ -1403,10 +1444,10 @@ module Primary = struct
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
       | Missing_assign pos -> missing_assign pos
-      | Non_void_annotation_on_return_void_function { is_async; pos; hint_pos }
-        ->
-        non_void_annotation_on_return_void_function is_async pos hint_pos
+      | Non_void_annotation_on_return_void_function { is_async; hint_pos } ->
+        non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
+      | Invalid_class_refinement { pos } -> invalid_class_refinement pos
   end
 
   module Modules = struct
@@ -1425,6 +1466,47 @@ module Primary = struct
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
+      | Module_missing_import of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module: string;
+          target_module_opt: string option;
+        }
+      | Module_missing_export of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          target_module: string;
+        }
+      | Module_cross_pkg_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
+      | Module_cross_pkg_call of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+        }
+      | Module_soft_included_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
+    [@@deriving show]
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1460,12 +1542,233 @@ module Primary = struct
           ],
         [] )
 
+    let module_missing_import
+        pos decl_pos module_pos current_module target_module_opt =
+      let target_module =
+        match target_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not import the public members of module '%s'"
+                current_module
+                target_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
+    let module_missing_export
+        pos decl_pos module_pos current_module_opt target_module =
+      let current_module =
+        match current_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not export its public members to module '%s'"
+                target_module
+                current_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
+    let get_module_str m_opt =
+      match m_opt with
+      | Some s -> Printf.sprintf "module `%s`" s
+      | None -> "outside of a module"
+
+    let get_package_str p_opt =
+      match p_opt with
+      | Some s -> Printf.sprintf "package `%s`" s
+      | None -> "the default package"
+
+    let module_cross_pkg_call
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (current_package_opt : string option)
+        (target_package_opt : string option) =
+      let current_package = get_package_str current_package_opt in
+      let target_package =
+        match target_package_opt with
+        | Some s -> s
+        | None ->
+          failwith "target package can't be default for cross_package call"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot call this CrossPackage method using package %s from %s"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This function is marked cross package, so requires the package %s to be loaded. You can check if package %s is loaded by placing this call inside a block like `if(package %s)`"
+                target_package
+                target_package
+                target_package );
+          ]
+      in
+      (Error_code.InvalidCrossPackage, claim, reason, [])
+
+    let module_cross_pkg_access
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (module_pos : Pos_or_decl.t)
+        (package_pos : Pos.t)
+        (current_module_opt : string option)
+        (current_package_opt : string option)
+        (target_module_opt : string option)
+        (target_package_opt : string option)
+        (soft : bool) =
+      let current_module = get_module_str current_module_opt in
+      let target_module = get_module_str target_module_opt in
+      let current_package = get_package_str current_package_opt in
+      let target_package = get_package_str target_package_opt in
+      let is_default = Pos.equal Pos.none package_pos in
+      let relationship =
+        if soft then
+          "only soft includes"
+        else
+          "does not include"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element in %s from %s"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This is from %s, which is in %s"
+                target_module
+                target_package );
+            ( module_pos,
+              Printf.sprintf
+                "But this is from %s, which belongs to %s"
+                current_module
+                current_package );
+            ( (if is_default then
+                module_pos
+              else
+                Pos_or_decl.of_raw_pos package_pos),
+              Printf.sprintf
+                "And %s %s %s"
+                current_package
+                relationship
+                target_package );
+          ]
+      in
+      let error_code =
+        if soft then
+          Error_code.InvalidCrossPackageSoft
+        else
+          Error_code.InvalidCrossPackage
+      in
+      (error_code, claim, reason, [])
+
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
         module_mismatch pos current_module_opt decl_pos target_module
       | Module_unsafe_trait_access { access_pos; trait_pos } ->
         module_unsafe_trait_access access_pos trait_pos
+      | Module_missing_import
+          { pos; decl_pos; module_pos; current_module; target_module_opt } ->
+        module_missing_import
+          pos
+          decl_pos
+          module_pos
+          current_module
+          target_module_opt
+      | Module_missing_export
+          { pos; decl_pos; module_pos; current_module_opt; target_module } ->
+        module_missing_export
+          pos
+          decl_pos
+          module_pos
+          current_module_opt
+          target_module
+      | Module_cross_pkg_call
+          { pos; decl_pos; current_package_opt; target_package_opt } ->
+        module_cross_pkg_call
+          pos
+          decl_pos
+          current_package_opt
+          target_package_opt
+      | Module_cross_pkg_access
+          {
+            pos;
+            decl_pos;
+            module_pos;
+            package_pos;
+            current_module_opt;
+            current_package_opt;
+            target_module_opt;
+            target_package_opt;
+          } ->
+        module_cross_pkg_access
+          pos
+          decl_pos
+          module_pos
+          package_pos
+          current_module_opt
+          current_package_opt
+          target_module_opt
+          target_package_opt
+          false (* Soft *)
+      | Module_soft_included_access
+          {
+            pos;
+            decl_pos;
+            module_pos;
+            package_pos;
+            current_module_opt;
+            current_package_opt;
+            target_module_opt;
+            target_package_opt;
+          } ->
+        module_cross_pkg_access
+          pos
+          decl_pos
+          module_pos
+          package_pos
+          current_module_opt
+          current_package_opt
+          target_module_opt
+          target_package_opt
+          true (* Soft *)
   end
 
   module Xhp = struct
@@ -1484,6 +1787,7 @@ module Primary = struct
           attr: string;
           ty_reason_msg: Pos_or_decl.t Message.t list Lazy.t;
         }
+    [@@deriving show]
 
     let xhp_required pos why_xhp ty_reason_msg =
       let claim = lazy (pos, "An XHP instance was expected") in
@@ -1597,6 +1901,24 @@ module Primary = struct
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Req_class_not_final of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+      }
+    | Incompatible_reqs of {
+        pos: Pos.t;
+        req_name: string;
+        req_class_pos: Pos_or_decl.t;
+        req_extends_pos: Pos_or_decl.t;
+      }
+    | Trait_not_used of {
+        pos: Pos.t;
+        trait_name: string;
+        req_class_pos: Pos_or_decl.t;
+        class_pos: Pos_or_decl.t;
+        class_name: string;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;
@@ -1627,6 +1949,11 @@ module Primary = struct
     | Typeconst_concrete_concrete_override of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
+      }
+    | Constant_multiple_concrete_conflict of {
+        pos: Pos.t;
+        name: string;
+        definitions: (Pos_or_decl.t * string option) list;
       }
     | Invalid_memoized_param of {
         pos: Pos.t;
@@ -1710,23 +2037,7 @@ module Primary = struct
         pos: Pos.t;
         member_name: string;
         decl_pos: Pos_or_decl.t;
-        quickfixes: Quickfix.t list;
-      }
-    | Attribute_too_many_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_too_few_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_not_exact_number_of_args of {
-        pos: Pos.t;
-        name: string;
-        actual: int;
-        expected: int;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Kind_mismatch of {
         pos: Pos.t;
@@ -1747,6 +2058,7 @@ module Primary = struct
         kind: [ `method_ | `property ];
         name: string;
         is_nullable: bool;
+        ty_reasons: (Pos_or_decl.t * string) list Lazy.t;
       }
     | Unresolved_tyvar_projection of {
         pos: Pos.t;
@@ -1854,6 +2166,11 @@ module Primary = struct
         trait_name: string;
         meth_pos: Pos_or_decl.t;
       }
+    | Should_not_be_override of {
+        pos: Pos.t;
+        class_id: string;
+        id: string;
+      }
     | Generic_at_runtime of {
         pos: Pos.t;
         prefix: string;
@@ -1887,10 +2204,6 @@ module Primary = struct
         left: Pos_or_decl.t Message.t list Lazy.t;
         right: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Attribute_param_type of {
-        pos: Pos.t;
-        x: string;
-      }
     | Deprecated_use of {
         pos: Pos.t;
         decl_pos_opt: Pos_or_decl.t option;
@@ -1911,7 +2224,10 @@ module Primary = struct
       }
     | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
-    | Illegal_type_structure of Pos.t
+    | Illegal_type_structure of {
+        pos: Pos.t;
+        msg: string;
+      }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {
         pos: Pos.t;
@@ -1920,11 +2236,6 @@ module Primary = struct
         attr_class_pos: Pos_or_decl.t;
         attr_class_name: string;
         intf_name: string;
-      }
-    | Wrong_expression_kind_builtin_attribute of {
-        pos: Pos.t;
-        attr_name: string;
-        expr_kind: string;
       }
     | Ambiguous_object_access of {
         pos: Pos.t;
@@ -1958,10 +2269,6 @@ module Primary = struct
         name: string;
         others: Pos_or_decl.t list;
       }
-    | Tparam_non_shadowing_reuse of {
-        pos: Pos.t;
-        tparam_name: string;
-      }
     | Reified_function_reference of Pos.t
     | Class_meth_abstract_call of {
         pos: Pos.t;
@@ -1989,12 +2296,6 @@ module Primary = struct
         class_name: string;
         meth_name: string;
         decl_pos: Pos_or_decl.t;
-      }
-    | Unnecessary_attribute of {
-        pos: Pos.t;
-        attr: string;
-        reason: Pos.t Message.t Lazy.t;
-        suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {
         pos: Pos.t;
@@ -2070,7 +2371,8 @@ module Primary = struct
         trace1: Pos_or_decl.t Message.t list Lazy.t;
         trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Generic_property_import_via_diamond of {
+    | Property_import_via_diamond of {
+        generic: bool;
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;
@@ -2298,9 +2600,10 @@ module Primary = struct
         pos: Pos.t;
         is_final: bool;
         decl_pos: Pos_or_decl.t;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Abstract_member_in_concrete_class of {
         pos: Pos.t;
@@ -2369,18 +2672,6 @@ module Primary = struct
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Static_redeclared_as_dynamic of {
-        pos: Pos.t;
-        static_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
-    | Dynamic_redeclared_as_static of {
-        pos: Pos.t;
-        dyn_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
     | Unknown_object_member of {
         pos: Pos.t;
         member_name: string;
@@ -2398,8 +2689,6 @@ module Primary = struct
         pos: Pos.t;
         null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Option_mixed of Pos.t
-    | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;
@@ -2425,7 +2714,8 @@ module Primary = struct
         tyconst_names: string list;
       }
     | Array_get_with_optional_field of {
-        pos: Pos.t;
+        recv_pos: Pos.t;
+        field_pos: Pos.t;
         field_name: string;
         decl_pos: Pos_or_decl.t;
       }
@@ -2451,7 +2741,7 @@ module Primary = struct
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos.t;
@@ -2479,6 +2769,14 @@ module Primary = struct
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
       }
+    | Static_instance_intersection of {
+        class_pos: Pos.t;
+        instance_pos: Pos_or_decl.t Lazy.t;
+        static_pos: Pos_or_decl.t Lazy.t;
+        member_name: string;
+        kind: [ `meth | `prop ];
+      }
+  [@@deriving show]
 
   (* User error helpers *)
 
@@ -2636,6 +2934,62 @@ module Primary = struct
     in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
 
+  let req_class_not_final pos trait_pos req_pos =
+    let reasons =
+      lazy
+        (let r =
+           (trait_pos, "The trait with a require class constraint is used here")
+         in
+         if Pos_or_decl.equal trait_pos req_pos then
+           [r]
+         else
+           [r; (req_pos, "The require class constraint is here")])
+    and claim =
+      lazy
+        ( pos,
+          "This class must be final because it uses a trait with a require class constraint."
+        )
+    in
+    (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let incompatible_reqs pos req_name req_class_pos req_extends_pos =
+    let reasons =
+      lazy
+        (let r1 =
+           ( req_class_pos,
+             "This requires exactly class " ^ Render.strip_ns req_name )
+         in
+         let r2 =
+           ( req_extends_pos,
+             "This requires a subtype of class " ^ Render.strip_ns req_name )
+         in
+         [r1; r2])
+    in
+    let claim = lazy (pos, "This trait defines incompatible requirements.") in
+    (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let trait_not_used pos trait_name req_class_pos class_pos class_name =
+    let class_name = Render.strip_ns class_name in
+    let reasons =
+      lazy
+        [
+          (class_pos, "Class " ^ class_name ^ " is defined here.");
+          (req_class_pos, "The require class requirement is here.");
+        ]
+    in
+    let claim =
+      lazy
+        ( pos,
+          "Trait "
+          ^ Render.strip_ns trait_name
+          ^ " requires class "
+          ^ Render.strip_ns class_name
+          ^ " but "
+          ^ Render.strip_ns class_name
+          ^ " does not use it. Either use the trait or delete it." )
+    in
+    (Error_code.TraitNotUsed, claim, reasons, [])
+
   let invalid_echo_argument pos =
     let claim =
       lazy
@@ -2743,6 +3097,39 @@ module Primary = struct
     and claim = lazy (pos, "Cannot re-declare this type constant") in
     (Error_code.TypeconstConcreteConcreteOverride, claim, reasons, [])
 
+  let constant_multiple_concrete_conflict pos name definitions =
+    let reasons =
+      lazy
+        (List.mapi
+           ~f:(fun i (p, via) ->
+             let first =
+               if i = 0 then
+                 "One"
+               else
+                 "Another"
+             in
+             let message =
+               Format.sprintf "%s conflicting definition is here" first
+             in
+             let full_message =
+               match via with
+               | Some parent_name ->
+                 Format.sprintf "%s, inherited through %s" message parent_name
+               | None -> message
+             in
+             (p, full_message))
+           definitions)
+    in
+
+    let claim =
+      lazy
+        ( pos,
+          Format.sprintf
+            "Constant %s is defined concretely in multiple ancestors"
+            name )
+    in
+    (Error_code.ConcreteConstInterfaceOverride, claim, reasons, [])
+
   let invalid_memoized_param pos reason : error =
     let claim =
       lazy
@@ -2768,7 +3155,7 @@ module Primary = struct
     and code =
       Error_code.(
         match ctxt with
-        | `read -> InvalidArrayKeyRead
+        | `read -> IndexTypeMismatch
         | `write -> InvalidArrayKeyWrite)
     in
     (code, claim, reasons, [])
@@ -2782,7 +3169,7 @@ module Primary = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Keyset values must be arraykeys") in
-    (Error_code.InvalidKeysetValue, claim, reasons, [])
+    (Error_code.IndexTypeMismatch, claim, reasons, [])
 
   let invalid_set_value
       pos container_pos container_ty_name value_pos value_ty_name =
@@ -2793,7 +3180,7 @@ module Primary = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Set values must be arraykeys") in
-    (Error_code.InvalidKeysetValue, claim, reasons, [])
+    (Error_code.IndexTypeMismatch, claim, reasons, [])
 
   let hkt_alias_with_implicit_constraints
       pos
@@ -2939,6 +3326,30 @@ module Primary = struct
     in
     (code, claim, reasons, [])
 
+  let static_instance_intersection
+      class_pos instance_pos static_pos member_name kind =
+    let claim =
+      lazy
+        ( class_pos,
+          "This class overrides some members with a different staticness" )
+    in
+    ( Error_code.StaticDynamic,
+      claim,
+      lazy
+        [
+          ( Lazy.force instance_pos,
+            "The "
+            ^ (match kind with
+              | `meth -> "method"
+              | `prop -> "property")
+            ^ " "
+            ^ Markdown_lite.md_codify member_name
+            ^ " is declared as non-static here" );
+          ( Lazy.force static_pos,
+            "But it conflicts with an inherited static declaration here" );
+        ],
+      [] )
+
   let nullsafe_property_write_context pos =
     let claim =
       lazy
@@ -3007,48 +3418,6 @@ module Primary = struct
     in
     (Error_code.MemberNotImplemented, claim, reasons, quickfixes)
 
-  let attribute_too_many_arguments pos name expected =
-    let claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects at most "
-          ^ Render.pluralize_arguments expected )
-    in
-    (Error_code.AttributeTooManyArguments, claim, lazy [], [])
-
-  let attribute_too_few_arguments pos name expected =
-    let claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects at least "
-          ^ Render.pluralize_arguments expected )
-    in
-    (Error_code.AttributeTooFewArguments, claim, lazy [], [])
-
-  let attribute_not_exact_number_of_args pos name actual expected =
-    let code =
-      if actual > expected then
-        Error_code.AttributeTooManyArguments
-      else
-        Error_code.AttributeTooFewArguments
-    and claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects "
-          ^
-          match expected with
-          | 0 -> "no arguments"
-          | 1 -> "exactly 1 argument"
-          | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
-    in
-    (code, claim, lazy [], [])
-
   let kind_mismatch pos decl_pos tparam_name expected_kind actual_kind =
     let claim =
       lazy
@@ -3080,7 +3449,7 @@ module Primary = struct
     and reason = lazy [(decl_pos, "Parent definition is here")] in
     (Error_code.TraitParentConstructInconsistent, claim, reason, [])
 
-  let top_member pos ctxt ty_name decl_pos kind name is_nullable =
+  let top_member pos ctxt ty_name decl_pos kind name is_nullable ty_reasons =
     let claim =
       Lazy.map ty_name ~f:(fun ty_name ->
           let kind_str =
@@ -3094,7 +3463,15 @@ module Primary = struct
               kind_str
               (Markdown_lite.md_codify name)
               ty_name ))
-    and reason = lazy [(decl_pos, "Definition is here")]
+    and reason =
+      lazy
+        begin
+          let reasons = Lazy.force ty_reasons in
+          if List.length reasons = 0 then
+            [(decl_pos, "Definition is here")]
+          else
+            reasons
+        end
     and code =
       Error_code.(
         match ctxt with
@@ -3136,8 +3513,7 @@ module Primary = struct
   let inout_annotation_missing pos1 pos2 =
     let claim = lazy (pos1, "This argument should be annotated with `inout`") in
     let reason = lazy [(pos2, "Because this is an `inout` parameter")] in
-    let (_, start_column) = Pos.line_column pos1 in
-    let pos = Pos.set_col_end start_column pos1 in
+    let pos = Pos.shrink_to_start pos1 in
 
     ( Error_code.InoutAnnotationMissing,
       claim,
@@ -3258,9 +3634,8 @@ module Primary = struct
             Printf.sprintf
               "%d distinct use types were determined: please add type hints to lambda parameters."
               (List.length uses) )
-          ::
-          List.map uses ~f:(fun (pos, ty) ->
-              (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
+          :: List.map uses ~f:(fun (pos, ty) ->
+                 (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
     in
     (Error_code.AmbiguousLambda, claim, reason, [])
 
@@ -3495,6 +3870,17 @@ module Primary = struct
         ],
       [] )
 
+  let should_not_be_override pos class_id id =
+    ( Error_code.ShouldNotBeOverride,
+      lazy
+        ( pos,
+          Printf.sprintf
+            "%s has no parent class with a method %s to override"
+            (Render.strip_ns class_id |> Markdown_lite.md_codify)
+            (Markdown_lite.md_codify id) ),
+      lazy [],
+      [] )
+
   let generic_at_runtime p prefix =
     ( Error_code.ErasedGenericAtRuntime,
       lazy
@@ -3573,12 +3959,6 @@ module Primary = struct
     and reason = lazy (left @ right) in
     (Error_code.StrictEqValueIncompatibleTypes, claim, reason, [])
 
-  let attribute_param_type pos x =
-    ( Error_code.AttributeParamType,
-      lazy (pos, "This attribute parameter should be " ^ x),
-      lazy [],
-      [] )
-
   let deprecated_use pos ?(pos_def = None) msg =
     let reason =
       lazy
@@ -3630,17 +4010,15 @@ module Primary = struct
       lazy [],
       [] )
 
-  let illegal_type_structure pos =
+  let illegal_type_structure pos msg =
     let claim =
       lazy
-        (let errmsg = "second argument is not a string" in
-         let msg =
+        (let msg =
            "The two arguments to `type_structure()` must be:"
            ^ "\n - first: `ValidClassname::class` or an object of that class"
            ^ "\n - second: a single-quoted string literal containing the name"
-           ^ " of a type constant of that class"
-           ^ "\n"
-           ^ errmsg
+           ^ " of a type constant of that class\n"
+           ^ msg
          in
          (pos, msg))
     in
@@ -3679,17 +4057,6 @@ module Primary = struct
         ]
     in
     (Error_code.WrongExpressionKindAttribute, claim, reason, [])
-
-  let wrong_expression_kind_builtin_attribute expr_kind pos attr =
-    let claim =
-      lazy
-        ( pos,
-          Printf.sprintf
-            "The %s attribute cannot be used on %s."
-            (Render.strip_ns attr |> Markdown_lite.md_codify)
-            expr_kind )
-    in
-    (Error_code.WrongExpressionKindAttribute, claim, lazy [], [])
 
   let ambiguous_object_access
       pos name self_pos vis subclass_pos class_self class_subclass =
@@ -3774,17 +4141,6 @@ module Primary = struct
       lazy (List.map others ~f:(fun pos -> (pos, "Here is another occurrence"))),
       [] )
 
-  let tparam_non_shadowing_reuse pos var_name =
-    ( Error_code.TypeParameterNameAlreadyUsedNonShadow,
-      lazy
-        ( pos,
-          "The name "
-          ^ Markdown_lite.md_codify var_name
-          ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
-        ),
-      lazy [],
-      [] )
-
   let reified_function_reference call_pos =
     ( Error_code.ReifiedFunctionReference,
       lazy
@@ -3858,27 +4214,6 @@ module Primary = struct
           ^ Markdown_lite.md_codify (Render.strip_ns cname ^ "::" ^ meth_name)
           ^ "; it is abstract" ),
       lazy [(decl_pos, "Declaration is here")],
-      [] )
-
-  let unnecessary_attribute pos ~attr ~reason ~suggestion =
-    let reason =
-      Lazy.map reason ~f:(fun (reason_pos, reason_msg) ->
-          let suggestion =
-            match suggestion with
-            | None -> "Try deleting this attribute"
-            | Some s -> s
-          in
-          [
-            ( Pos_or_decl.of_raw_pos reason_pos,
-              "It is unnecessary because " ^ reason_msg );
-            (Pos_or_decl.of_raw_pos pos, suggestion);
-          ])
-    in
-    ( Error_code.UnnecessaryAttribute,
-      lazy
-        ( pos,
-          sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr ),
-      reason,
       [] )
 
   let inherited_class_member_with_different_case
@@ -4148,12 +4483,13 @@ module Primary = struct
       Lazy.(
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
-        return ((method_pos, "Trait method is defined here") :: trace1 @ trace2))
+        return
+          (((method_pos, "Trait method is defined here") :: trace1) @ trace2))
     in
     (Error_code.DiamondTraitMethod, claim, reason, [])
 
-  let generic_property_import_via_diamond
-      pos class_name property_pos property_name trace1 trace2 =
+  let property_import_via_diamond
+      generic pos class_name property_pos property_name trace1 trace2 =
     let claim =
       lazy
         (let class_name =
@@ -4165,16 +4501,31 @@ module Primary = struct
          ( pos,
            "Class "
            ^ class_name
-           ^ " inherits generic trait property "
+           ^ " inherits "
+           ^ (if generic then
+               "generic "
+             else
+               "")
+           ^ "trait property "
            ^ property_name
-           ^ " via multiple traits.  Remove the multiple paths" ))
+           ^ " via multiple paths"
+           ^ (if generic then
+               " at different types."
+             else
+               ".")
+           ^
+           if not generic then
+             " Currently, traits with properties are not supported by "
+             ^ "the <<__EnableMethodTraitDiamond>> experimental feature."
+           else
+             "" ))
     in
     let reason =
       Lazy.(
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
         return
-          ((property_pos, "Trait property is defined here") :: trace1 @ trace2))
+          (((property_pos, "Trait property is defined here") :: trace1) @ trace2))
     in
     (Error_code.DiamondTraitProperty, claim, reason, [])
 
@@ -4374,12 +4725,10 @@ module Primary = struct
       [] )
 
   let unbound_name_typing pos name class_exists =
-    let (_, start_column) = Pos.line_column pos in
-
     let quickfixes =
       match class_exists with
       | true ->
-        let newpos = Pos.set_col_end start_column pos in
+        let newpos = Pos.shrink_to_start pos in
         [
           Quickfix.make
             ~title:("Add " ^ Markdown_lite.md_codify "new")
@@ -4649,8 +4998,9 @@ module Primary = struct
   let undefined_field use_pos name shape_type_pos =
     ( Error_code.UndefinedField,
       lazy
-        (use_pos, "The field " ^ Markdown_lite.md_codify name ^ " is undefined"),
-      lazy [(shape_type_pos, "Definition is here")],
+        ( use_pos,
+          "This shape doesn't have a field " ^ Markdown_lite.md_codify name ),
+      lazy [(shape_type_pos, "The shape is defined here")],
       [] )
 
   let array_access code pos1 pos2 ty =
@@ -4793,7 +5143,7 @@ module Primary = struct
            child_kind
            ^ " "
            ^ Markdown_lite.md_codify child_name
-           ^ " in sealed whitelist for "
+           ^ " in sealed allowlist for "
            ^ Markdown_lite.md_codify parent_name
            ^ ", but does not "
            ^ verb
@@ -4829,17 +5179,17 @@ module Primary = struct
       lazy [],
       [] )
 
-  let implement_abstract pos1 is_final pos2 x kind qfxs =
+  let implement_abstract pos1 is_final pos2 x kind qfxs trace =
+    let kind =
+      match kind with
+      | `meth -> "method"
+      | `prop -> "property"
+      | `const -> "constant"
+      | `ty_const -> "type constant"
+    in
     let claim =
       lazy
-        (let kind =
-           match kind with
-           | `meth -> "method"
-           | `prop -> "property"
-           | `const -> "constant"
-           | `ty_const -> "type constant"
-         in
-         let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
+        (let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
          let msg1 =
            if is_final then
              "This class was declared as `final`. It must provide an implementation for the "
@@ -4852,7 +5202,9 @@ module Primary = struct
     in
     ( Error_code.ImplementAbstract,
       claim,
-      lazy [(pos2, "Declaration is here")],
+      lazy
+        (Lazy.force trace
+        @ [(pos2, Printf.sprintf "The %s is defined here" kind)]),
       qfxs )
 
   let abstract_member_in_concrete_class
@@ -5066,54 +5418,6 @@ module Primary = struct
     | `meth -> "method"
     | `prop -> "property"
 
-  let static_redeclared_as_dynamic
-      dyn_position static_position member_name elt_type =
-    let claim =
-      lazy
-        (let dollar =
-           match elt_type with
-           | `prop -> "$"
-           | _ -> ""
-         in
-         let elt_type = elt_type_to_string elt_type in
-         let msg_dynamic =
-           "The "
-           ^ elt_type
-           ^ " "
-           ^ Markdown_lite.md_codify (dollar ^ member_name)
-           ^ " is declared here as non-static"
-         in
-         (dyn_position, msg_dynamic))
-    in
-    let msg_static =
-      "But it conflicts with an inherited static declaration here"
-    in
-    (Error_code.StaticDynamic, claim, lazy [(static_position, msg_static)], [])
-
-  let dynamic_redeclared_as_static
-      static_position dyn_position member_name elt_type =
-    let claim =
-      lazy
-        (let dollar =
-           match elt_type with
-           | `prop -> "$"
-           | _ -> ""
-         in
-         let elt_type = elt_type_to_string elt_type in
-         let msg_static =
-           "The "
-           ^ elt_type
-           ^ " "
-           ^ Markdown_lite.md_codify (dollar ^ member_name)
-           ^ " is declared here as static"
-         in
-         (static_position, msg_static))
-    in
-    let msg_dynamic =
-      "But it conflicts with an inherited non-static declaration here"
-    in
-    (Error_code.StaticDynamic, claim, lazy [(dyn_position, msg_dynamic)], [])
-
   let unknown_object_member pos s elt r =
     let claim =
       lazy
@@ -5150,18 +5454,6 @@ module Primary = struct
           "You are trying to access an element of this container"
           ^ " but the container could be `null`. " ),
       null_witness,
-      [] )
-
-  let option_mixed pos =
-    ( Error_code.OptionMixed,
-      lazy (pos, "`?mixed` is a redundant typehint - just use `mixed`"),
-      lazy [],
-      [] )
-
-  let option_null pos =
-    ( Error_code.OptionNull,
-      lazy (pos, "`?null` is a redundant typehint - just use `null`"),
-      lazy [],
       [] )
 
   let declared_covariant pos1 pos2 emsg =
@@ -5230,15 +5522,41 @@ module Primary = struct
     in
     (Error_code.CyclicTypeconst, claim, lazy [], [])
 
-  let array_get_with_optional_field pos1 name pos2 =
+  let array_get_with_optional_field
+      ~(field_pos : Pos.t) ~(recv_pos : Pos.t) ~decl_pos name =
+    let (_, recv_end_col) = Pos.end_line_column recv_pos in
+    let open_bracket_pos =
+      recv_pos
+      |> Pos.set_col_start recv_end_col
+      |> Pos.set_col_end (recv_end_col + 1)
+    in
+    let (_, field_end_col) = Pos.end_line_column field_pos in
+    let close_bracket_pos =
+      field_pos
+      |> Pos.set_col_start field_end_col
+      |> Pos.set_col_end (field_end_col + 1)
+    in
+
+    let quickfixes =
+      [
+        Quickfix.make_with_edits
+          ~title:"Change to `Shapes::idx()`"
+          ~edits:
+            [
+              (")", close_bracket_pos);
+              (", ", open_bracket_pos);
+              ("Shapes::idx(", Pos.shrink_to_start recv_pos);
+            ];
+      ]
+    in
     ( Error_code.ArrayGetWithOptionalField,
       lazy
-        ( pos1,
+        ( field_pos,
           Printf.sprintf
             "The field %s may not be present in this shape. Use `Shapes::idx()` instead."
             (Markdown_lite.md_codify name) ),
-      lazy [(pos2, "This is where the field was declared as optional.")],
-      [] )
+      lazy [(decl_pos, "This is where the field was declared as optional.")],
+      quickfixes )
 
   let mutating_const_property pos =
     ( Error_code.AssigningToConst,
@@ -5332,6 +5650,13 @@ module Primary = struct
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req_class pos trait_pos req_name req_pos
+    | Req_class_not_final { pos; trait_pos; req_pos } ->
+      req_class_not_final pos trait_pos req_pos
+    | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->
+      incompatible_reqs pos req_name req_class_pos req_extends_pos
+    | Trait_not_used { pos; trait_name; req_class_pos; class_pos; class_name }
+      ->
+      trait_not_used pos trait_name req_class_pos class_pos class_name
     | Invalid_echo_argument pos -> invalid_echo_argument pos
     | Index_type_mismatch { pos; is_covariant_container; msg_opt; reasons_opt }
       ->
@@ -5352,6 +5677,8 @@ module Primary = struct
     | Expected_tparam { pos; n; decl_pos } -> expected_tparam pos n decl_pos
     | Typeconst_concrete_concrete_override { pos; decl_pos } ->
       typeconst_concrete_concrete_override pos decl_pos
+    | Constant_multiple_concrete_conflict { pos; name; definitions } ->
+      constant_multiple_concrete_conflict pos name definitions
     | Invalid_memoized_param { pos; reason; _ } ->
       invalid_memoized_param pos reason
     | Invalid_arraykey
@@ -5415,6 +5742,14 @@ module Primary = struct
       typing_too_few_args pos decl_pos actual expected
     | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
       non_object_member pos ctxt ty_name member_name kind decl_pos
+    | Static_instance_intersection
+        { class_pos; instance_pos; static_pos; member_name; kind } ->
+      static_instance_intersection
+        class_pos
+        instance_pos
+        static_pos
+        member_name
+        kind
     | Nullsafe_property_write_context pos -> nullsafe_property_write_context pos
     | Uninstantiable_class { pos; class_name; reason_ty_opt; decl_pos } ->
       uninstantiable_class pos class_name reason_ty_opt decl_pos
@@ -5424,19 +5759,14 @@ module Primary = struct
       type_arity_mismatch pos decl_pos actual expected
     | Member_not_implemented { pos; member_name; decl_pos; quickfixes } ->
       member_not_implemented pos member_name decl_pos quickfixes
-    | Attribute_too_many_arguments { pos; name; expected } ->
-      attribute_too_many_arguments pos name expected
-    | Attribute_too_few_arguments { pos; name; expected } ->
-      attribute_too_few_arguments pos name expected
-    | Attribute_not_exact_number_of_args { pos; name; actual; expected } ->
-      attribute_not_exact_number_of_args pos name actual expected
     | Kind_mismatch { pos; decl_pos; tparam_name; expected_kind; actual_kind }
       ->
       kind_mismatch pos decl_pos tparam_name expected_kind actual_kind
     | Trait_parent_construct_inconsistent { pos; decl_pos } ->
       trait_parent_construct_inconsistent pos decl_pos
-    | Top_member { pos; ctxt; ty_name; decl_pos; kind; name; is_nullable } ->
-      top_member pos ctxt ty_name decl_pos kind name is_nullable
+    | Top_member
+        { pos; ctxt; ty_name; decl_pos; kind; name; is_nullable; ty_reasons } ->
+      top_member pos ctxt ty_name decl_pos kind name is_nullable ty_reasons
     | Unresolved_tyvar_projection { pos; proj_pos; tconst_name } ->
       unresolved_tyvar_projection pos proj_pos tconst_name
     | Cyclic_class_constant { pos; class_name; const_name } ->
@@ -5490,6 +5820,8 @@ module Primary = struct
       invalid_newable_type_param_constraints (pos, tp_name) constraints
     | Override_per_trait { pos; class_name; meth_name; trait_name; meth_pos } ->
       override_per_trait (pos, class_name) meth_name trait_name meth_pos
+    | Should_not_be_override { pos; class_id; id } ->
+      should_not_be_override pos class_id id
     | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
     | Generics_not_allowed pos -> generics_not_allowed pos
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
@@ -5505,7 +5837,6 @@ module Primary = struct
         pos
         (Lazy.force left)
         (Lazy.force right)
-    | Attribute_param_type { pos; x } -> attribute_param_type pos x
     | Deprecated_use { pos; decl_pos_opt; msg } ->
       deprecated_use pos ~pos_def:decl_pos_opt msg
     | Cannot_declare_constant { pos; class_pos; class_name } ->
@@ -5516,7 +5847,7 @@ module Primary = struct
       local_variable_modified_twice pos pos_modifieds
     | Assign_during_case pos -> assign_during_case pos
     | Invalid_classname pos -> invalid_classname pos
-    | Illegal_type_structure pos -> illegal_type_structure pos
+    | Illegal_type_structure { pos; msg } -> illegal_type_structure pos msg
     | Illegal_typeconst_direct_access pos -> illegal_typeconst_direct_access pos
     | Wrong_expression_kind_attribute
         {
@@ -5534,8 +5865,6 @@ module Primary = struct
         attr_class_pos
         attr_class_name
         intf_name
-    | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
-      wrong_expression_kind_builtin_attribute expr_kind pos attr_name
     | Ambiguous_object_access
         { pos; name; self_pos; vis; subclass_pos; class_self; class_subclass }
       ->
@@ -5556,8 +5885,6 @@ module Primary = struct
     | Meth_caller_trait { pos; trait_name } -> meth_caller_trait pos trait_name
     | Duplicate_interface { pos; name; others } ->
       duplicate_interface pos name others
-    | Tparam_non_shadowing_reuse { pos; tparam_name } ->
-      tparam_non_shadowing_reuse pos tparam_name
     | Reified_function_reference pos -> reified_function_reference pos
     | Class_meth_abstract_call { pos; class_name; meth_name; decl_pos } ->
       class_meth_abstract_call class_name meth_name pos decl_pos
@@ -5593,8 +5920,6 @@ module Primary = struct
         const_name
     | Abstract_function_pointer { pos; class_name; meth_name; decl_pos } ->
       abstract_function_pointer class_name meth_name pos decl_pos
-    | Unnecessary_attribute { pos; attr; reason; suggestion } ->
-      unnecessary_attribute pos ~attr ~reason ~suggestion
     | Inherited_class_member_with_different_case
         {
           pos;
@@ -5683,9 +6008,18 @@ module Primary = struct
         method_name
         trace1
         trace2
-    | Generic_property_import_via_diamond
-        { pos; class_name; property_pos; property_name; trace1; trace2 } ->
-      generic_property_import_via_diamond
+    | Property_import_via_diamond
+        {
+          generic;
+          pos;
+          class_name;
+          property_pos;
+          property_name;
+          trace1;
+          trace2;
+        } ->
+      property_import_via_diamond
+        generic
         pos
         class_name
         property_pos
@@ -5783,8 +6117,9 @@ module Primary = struct
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name
     | Read_before_write { pos; member_name } ->
       read_before_write (pos, member_name)
-    | Implement_abstract { pos; is_final; decl_pos; name; kind; quickfixes } ->
-      implement_abstract pos is_final decl_pos name kind quickfixes
+    | Implement_abstract
+        { pos; is_final; decl_pos; trace; name; kind; quickfixes } ->
+      implement_abstract pos is_final decl_pos name kind quickfixes trace
     | Abstract_member_in_concrete_class
         { pos; class_name_pos; is_final; member_kind; member_name } ->
       abstract_member_in_concrete_class
@@ -5816,17 +6151,11 @@ module Primary = struct
     | Reified_generics_not_allowed pos -> reified_generics_not_allowed pos
     | New_without_newable { pos; name } -> new_without_newable pos name
     | Discarded_awaitable { pos; decl_pos } -> discarded_awaitable pos decl_pos
-    | Static_redeclared_as_dynamic { pos; static_pos; member_name; elt } ->
-      static_redeclared_as_dynamic pos static_pos member_name elt
-    | Dynamic_redeclared_as_static { pos; dyn_pos; member_name; elt } ->
-      dynamic_redeclared_as_static pos dyn_pos member_name elt
     | Unknown_object_member { pos; member_name; elt; reason } ->
       unknown_object_member pos member_name elt reason
     | Non_class_member { pos; member_name; elt; ty_name; decl_pos } ->
       non_class_member pos member_name elt (Lazy.force ty_name) decl_pos
     | Null_container { pos; null_witness } -> null_container pos null_witness
-    | Option_mixed pos -> option_mixed pos
-    | Option_null pos -> option_null pos
     | Declared_covariant { pos; param_pos; msgs } ->
       declared_covariant param_pos pos msgs
     | Declared_contravariant { pos; param_pos; msgs } ->
@@ -5837,8 +6166,9 @@ module Primary = struct
       contravariant_this pos class_name typaram_name
     | Cyclic_typeconst { pos; tyconst_names } ->
       cyclic_typeconst pos tyconst_names
-    | Array_get_with_optional_field { pos; field_name; decl_pos } ->
-      array_get_with_optional_field pos field_name decl_pos
+    | Array_get_with_optional_field
+        { recv_pos; field_pos; field_name; decl_pos } ->
+      array_get_with_optional_field field_name ~decl_pos ~recv_pos ~field_pos
     | Mutating_const_property pos -> mutating_const_property pos
     | Self_const_parent_not pos -> self_const_parent_not pos
     | Unexpected_ty_in_tast { pos; expected_ty; actual_ty } ->
@@ -5872,7 +6202,7 @@ module Primary = struct
 end
 
 module rec Error : sig
-  type t
+  type t [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -5933,6 +6263,7 @@ end = struct
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5990,7 +6321,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 
@@ -6081,7 +6412,7 @@ and Secondary : sig
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -6161,6 +6492,7 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
+        shape_lit_pos: Pos.t option;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -6210,6 +6542,7 @@ and Secondary : sig
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -6230,6 +6563,10 @@ and Secondary : sig
         parent_is_const: bool;
       }
     | Override_final of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Override_async of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
@@ -6313,15 +6650,28 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
-      }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_refinement of Pos_or_decl.t
+    | Missing_class_constant of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
+      }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
+  [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6329,7 +6679,7 @@ and Secondary : sig
   val eval :
     t ->
     current_span:Pos.t ->
-    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
+    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Pos.t Quickfix.t list)
     Eval_result.t
 end = struct
   type t =
@@ -6348,7 +6698,7 @@ end = struct
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -6428,6 +6778,7 @@ end = struct
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
+        shape_lit_pos: Pos.t option;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -6477,6 +6828,7 @@ end = struct
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -6497,6 +6849,10 @@ end = struct
         parent_is_const: bool;
       }
     | Override_final of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Override_async of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
@@ -6580,15 +6936,28 @@ end = struct
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
-      }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_refinement of Pos_or_decl.t
+    | Missing_class_constant of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
+      }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     match t with
@@ -6747,7 +7116,22 @@ end = struct
     in
     (Error_code.ConcreteConstInterfaceOverride, reasons, [])
 
-  let missing_field pos name decl_pos =
+  let missing_field pos name decl_pos shape_lit_pos =
+    let quickfixes =
+      match shape_lit_pos with
+      | Some p ->
+        (* We want to add the new field just before the closing
+           parenthesis of the shape literal. *)
+        let fix_pos = Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p) in
+        [
+          Quickfix.make
+            ~title:("Add field " ^ Markdown_lite.md_codify name)
+            ~new_text:(Printf.sprintf ", '%s' => TODO" name)
+            fix_pos;
+        ]
+      | None -> []
+    in
+
     let reasons =
       lazy
         [
@@ -6755,7 +7139,7 @@ end = struct
           (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
         ]
     in
-    (Error_code.MissingField, reasons, [])
+    (Error_code.MissingField, reasons, quickfixes)
 
   let shape_fields_unknown pos decl_pos =
     let reasons =
@@ -6891,7 +7275,7 @@ end = struct
     in
     (Error_code.IFCExternalContravariant, reasons, [])
 
-  let required_field_is_optional pos name decl_pos =
+  let required_field_is_optional pos name decl_pos def_pos =
     let reasons =
       lazy
         [
@@ -6900,6 +7284,7 @@ end = struct
             "The field "
             ^ Markdown_lite.md_codify name
             ^ " is defined as **required**" );
+          (def_pos, Markdown_lite.md_codify name ^ " is defined here");
         ]
     in
     (Error_code.RequiredFieldIsOptional, reasons, [])
@@ -6942,6 +7327,16 @@ end = struct
         ]
     in
     (Error_code.OverrideFinal, reasons, [])
+
+  let override_async pos parent_pos =
+    let reasons =
+      lazy
+        [
+          (pos, "You cannot override this method with a non-async method");
+          (parent_pos, "It was declared as async");
+        ]
+    in
+    (Error_code.OverrideAsync, reasons, [])
 
   let override_lsb pos member_name parent_pos =
     let reasons =
@@ -7243,18 +7638,6 @@ end = struct
     in
     (Error_code.AbstractConcreteOverride, reasons, [])
 
-  let should_not_be_override pos class_id id =
-    ( Error_code.ShouldNotBeOverride,
-      lazy
-        [
-          ( pos,
-            Printf.sprintf
-              "%s has no parent class with a method %s to override"
-              (Render.strip_ns class_id |> Markdown_lite.md_codify)
-              (Markdown_lite.md_codify id) );
-        ],
-      [] )
-
   let override_no_default_typeconst pos parent_pos =
     ( Error_code.OverrideNoDefaultTypeconst,
       lazy
@@ -7266,8 +7649,61 @@ end = struct
         ],
       [] )
 
+  let unsupported_refinement pos =
+    ( Error_code.UnsupportedRefinement,
+      lazy [(pos, "Unsupported refinement, only class types can be refined")],
+      [] )
+
+  let missing_class_constant pos class_name const_name =
+    ( Error_code.SmemberNotFound,
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Class %s has no constant %s"
+              (Render.strip_ns class_name |> Markdown_lite.md_codify)
+              (Markdown_lite.md_codify const_name) );
+        ],
+      [] )
+
+  let invalid_refined_const_kind
+      pos class_name const_name correct_kind wrong_kind =
+    ( Error_code.InvalidRefinedConstKind,
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Constant %s in %s is not a %s, did you mean %s?"
+              (Markdown_lite.md_codify const_name)
+              (Render.strip_ns class_name |> Markdown_lite.md_codify)
+              wrong_kind
+              correct_kind );
+        ],
+      [] )
+
+  let inexact_tconst_access pos id =
+    ( Error_code.InexactTConstAccess,
+      lazy
+        [
+          (fst id, "Type member `" ^ snd id ^ "` cannot be accessed");
+          (pos, "  on a loose refinement");
+        ],
+      [] )
+
+  let violated_refinement_constraint (kind, pos) =
+    let kind =
+      match kind with
+      | `As -> "`as` or `=`"
+      | `Super -> "`super`"
+    in
+    ( Error_code.UnifyError,
+      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")],
+      [] )
+
   let eval t ~current_span :
-      (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
+      (Error_code.t
+      * Pos_or_decl.t Message.t list Lazy.t
+      * Pos.t Quickfix.t list)
       Eval_result.t =
     match t with
     | Of_error err ->
@@ -7315,8 +7751,8 @@ end = struct
            origin
            parent_origin
            is_abstract)
-    | Missing_field { pos; name; decl_pos } ->
-      Eval_result.single (missing_field pos name decl_pos)
+    | Missing_field { pos; name; decl_pos; shape_lit_pos } ->
+      Eval_result.single (missing_field pos name decl_pos shape_lit_pos)
     | Shape_fields_unknown { pos; decl_pos } ->
       Eval_result.single (shape_fields_unknown pos decl_pos)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
@@ -7341,8 +7777,8 @@ end = struct
       Eval_result.single (accept_disposable_invariant pos decl_pos)
     | Ifc_external_contravariant { pos_sub; pos_super } ->
       Eval_result.single (ifc_external_contravariant pos_sub pos_super)
-    | Required_field_is_optional { pos; name; decl_pos } ->
-      Eval_result.single (required_field_is_optional pos name decl_pos)
+    | Required_field_is_optional { pos; name; decl_pos; def_pos } ->
+      Eval_result.single (required_field_is_optional pos name decl_pos def_pos)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
       Eval_result.single
@@ -7354,6 +7790,8 @@ end = struct
       Eval_result.single (ifc_policy_mismatch pos policy pos_super policy_super)
     | Override_final { pos; parent_pos } ->
       Eval_result.single (override_final pos parent_pos)
+    | Override_async { pos; parent_pos } ->
+      Eval_result.single (override_async pos parent_pos)
     | Override_lsb { pos; member_name; parent_pos } ->
       Eval_result.single (override_lsb pos member_name parent_pos)
     | Multiple_concrete_defs
@@ -7435,21 +7873,36 @@ end = struct
       Eval_result.single (typeconst_concrete_concrete_override pos parent_pos)
     | Abstract_concrete_override { pos; parent_pos; kind } ->
       Eval_result.single (abstract_concrete_override pos parent_pos kind)
-    | Should_not_be_override { pos; class_id; id } ->
-      Eval_result.single (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
       Eval_result.single (override_no_default_typeconst pos parent_pos)
+    | Unsupported_refinement pos ->
+      Eval_result.single (unsupported_refinement pos)
+    | Missing_class_constant { pos; class_name; const_name } ->
+      Eval_result.single (missing_class_constant pos class_name const_name)
+    | Invalid_refined_const_kind
+        { pos; class_name; const_name; correct_kind; wrong_kind } ->
+      Eval_result.single
+        (invalid_refined_const_kind
+           pos
+           class_name
+           const_name
+           correct_kind
+           wrong_kind)
+    | Inexact_tconst_access (pos, id) ->
+      Eval_result.single (inexact_tconst_access pos id)
+    | Violated_refinement_constraint { cstr } ->
+      Eval_result.single (violated_refinement_constraint cstr)
 end
 
 and Callback : sig
-  type t
+  type t [@@deriving show]
 
   val iter : t -> on_prim:(Primary.t -> unit) -> unit
 
   val apply :
     ?code:Error_code.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     claim:Pos.t Message.t Lazy.t ->
     error option
@@ -7513,9 +7966,10 @@ end = struct
   type t =
     | Always of Primary.t
     | With_claim_as_reason of t * Primary.t
-    | With_code of Error_code.t * Quickfix.t list
+    | With_code of Error_code.t * Pos.t Quickfix.t list
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
+  [@@deriving show]
 
   let iter t ~on_prim =
     let rec aux = function
@@ -7535,7 +7989,7 @@ end = struct
     code_opt: Error_code.t option;
     claim_opt: Pos.t Message.t Lazy.t option;
     reasons: Pos_or_decl.t Message.t list Lazy.t;
-    quickfixes: Quickfix.t list;
+    quickfixes: Pos.t Quickfix.t list;
   }
 
   let with_code code { claim_opt; reasons; quickfixes; _ } =
@@ -7659,7 +8113,7 @@ end = struct
 end
 
 and Reasons_callback : sig
-  type t
+  type t [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -7696,13 +8150,15 @@ and Reasons_callback : sig
 
   val prepend_on_apply : t -> Secondary.t -> t
 
+  val drop_reasons_on_apply : t -> t
+
   val assert_in_current_decl : Error_code.t -> ctx:Pos_or_decl.ctx -> t
 
   val apply_help :
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     error Eval_result.t
@@ -7711,12 +8167,20 @@ and Reasons_callback : sig
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 
   val unify_error_at : Pos.t -> t
+
+  val expr_tree_splice_error :
+    Pos.t ->
+    expr_pos:Pos_or_decl.t ->
+    contextual_reasons:Pos_or_decl.t Message.t list Lazy.t option ->
+    dsl_opt:string option ->
+    docs_url:string option Lazy.t ->
+    t
 
   val bad_enum_decl : Pos.t -> t
 
@@ -7730,6 +8194,8 @@ and Reasons_callback : sig
 
   val bad_decl_override :
     name:string -> parent_pos:Pos.t -> parent_name:string -> t
+
+  val invalid_class_refinement : Pos.t -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
@@ -7763,11 +8229,13 @@ end = struct
   type op =
     | Append
     | Prepend
+  [@@deriving show]
 
   type component =
     | Code
     | Reasons
     | Quickfixes
+  [@@deriving show]
 
   type t =
     | Always of Error.t
@@ -7778,9 +8246,11 @@ end = struct
     | With_code of t * Error_code.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
-    | From_on_error of on_error
+    | From_on_error of (on_error[@show.opaque])
     | Prepend_on_apply of t * Secondary.t
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
+    | Drop_reasons_on_apply of t
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -7793,7 +8263,8 @@ end = struct
       | With_code (t, _)
       | With_reasons (t, _)
       | Add_reason (t, _, _)
-      | Prepend_on_apply (t, _) ->
+      | Prepend_on_apply (t, _)
+      | Drop_reasons_on_apply t ->
         aux t
       | From_on_error _
       | Assert_in_current_decl _ ->
@@ -7833,6 +8304,8 @@ end = struct
 
   let prepend_on_apply t snd_err = Prepend_on_apply (t, snd_err)
 
+  let drop_reasons_on_apply t = Drop_reasons_on_apply t
+
   let assert_in_current_decl code ~ctx = Assert_in_current_decl (code, ctx)
 
   (* -- Evaluation ------------------------------------------------------------ *)
@@ -7842,7 +8315,7 @@ end = struct
       code_opt: Error_code.t option;
       claim_opt: Pos.t Message.t Lazy.t option;
       reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
-      quickfixes_opt: Quickfix.t list option;
+      quickfixes_opt: Pos.t Quickfix.t list option;
     }
 
     let with_code t code_opt =
@@ -7936,6 +8409,9 @@ end = struct
         Eval_result.bind
           ~f:(aux t)
           (Error_state.prepend_secondary st snd_err ~current_span)
+      | Drop_reasons_on_apply t ->
+        let st = Error_state.{ st with reasons_opt = Some (lazy []) } in
+        aux t st
     and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
         =
       let reasons_opt =
@@ -8003,6 +8479,44 @@ end = struct
     @@ Error.primary
     @@ Primary.Unify_error { pos; msg_opt = None; reasons_opt = None }
 
+  let expr_tree_splice_error
+      pos ~expr_pos ~contextual_reasons ~dsl_opt ~docs_url =
+    let msg =
+      match dsl_opt with
+      | Some dsl_name ->
+        Printf.sprintf
+          "This value cannot be inserted (spliced) into a `%s` expression tree"
+        @@ Utils.strip_ns dsl_name
+      | None ->
+        "This value cannot be inserted (spliced) into an expression tree"
+    in
+    let reason =
+      lazy
+        begin
+          let (lazy docs_url) = docs_url in
+          let docs_url =
+            Option.value
+              docs_url
+              ~default:"https://docs.hhvm.com/hack/expression-trees/splicing"
+          in
+          let msg =
+            "Hack values need to be converted (lifted) to compatible types before splicing. "
+            ^ Printf.sprintf "For more information see: %s" docs_url
+          in
+
+          (expr_pos, msg)
+        end
+    in
+    let error =
+      append_reason ~reason
+      @@ of_error
+      @@ Error.primary
+      @@ Primary.Unify_error { pos; msg_opt = Some msg; reasons_opt = None }
+    in
+    match contextual_reasons with
+    | None -> error
+    | Some reasons -> with_reasons ~reasons error
+
   let bad_enum_decl pos =
     retain_code
     @@ retain_quickfixes
@@ -8023,6 +8537,14 @@ end = struct
     @@ retain_quickfixes
     @@ of_primary_error
     @@ Primary.Bad_decl_override { name; pos = parent_pos; parent_name }
+
+  let invalid_class_refinement pos =
+    append_incoming_reasons
+    @@ retain_code
+    @@ retain_quickfixes
+    @@ of_primary_error
+    @@ Primary.Wellformedness
+         (Primary.Wellformedness.Invalid_class_refinement { pos })
 
   let explain_where_constraint pos ~in_class ~decl_pos =
     append_incoming_reasons

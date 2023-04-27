@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,19 +8,30 @@
  *
  */
 
-const int UREGEX_CASE_INSENSITIVE = 0;
-const int UREGEX_COMMENTS = 0;
-const int UREGEX_DOTALL = 0;
-const int UREGEX_MULTILINE = 0;
-const int UREGEX_UWORD = 0;
-const int UREGEX_OFFSET_CAPTURE = 0;
+const int UREGEX_CASE_INSENSITIVE;
+const int UREGEX_COMMENTS;
+const int UREGEX_DOTALL;
+const int UREGEX_MULTILINE;
+const int UREGEX_UWORD;
+const int UREGEX_OFFSET_CAPTURE;
 
 <<__PHPStdLib>>
-function icu_match(string $pattern, string $subject, int $flags = 0);
+function icu_match(
+  string $pattern,
+  string $subject,
+  int $flags = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function icu_match_with_matches(string $pattern, string $subject, inout $matches,
-                                int $flags = 0);
+function icu_match_with_matches(
+  string $pattern,
+  string $subject,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matches,
+  int $flags = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function icu_transliterate(string $str, bool $remove_accents);
+function icu_transliterate(
+  string $str,
+  bool $remove_accents,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function icu_tokenize(string $text);
+function icu_tokenize(string $text): HH\FIXME\MISSING_RETURN_TYPE;

@@ -4,14 +4,17 @@
  (libraries
   collections
   decl_service_client
+  decl_store
+  rust_provider_backend_stubs
   heap_shared_mem
   lfu_cache
-  lru_cache
   naming_sqlite
   naming_types
   pos
   relative_path
   shallow_decl_defs
+  typechecker_options
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
@@ -23,6 +26,7 @@
   ast
   collections
   nast
+  package
   parser
   provider_backend
   server_command_types
@@ -33,51 +37,16 @@
   (pps ppx_deriving.std)))
 
 (library
- (name cache_sig)
- (modules cache_sig)
- (libraries core_kernel utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name lru_cache)
- (modules lru_cache)
- (libraries cache_sig core_kernel utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name lfu_cache)
  (modules lfu_cache)
- (libraries cache_sig core_kernel utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_service_client)
- (modules decl_service_client)
- (libraries
-  collections
-  core_kernel
-  decl_ipc_ffi_externs
-  decl_parser_options
-  direct_decl_parser
-  heap_shared_mem
-  marshal_tools
-  naming_types
-  relative_path
-  typing_defs
-  utils_core
-  shallow_decl_defs
-  typing_deps
-  sys_utils)
+ (libraries core_kernel utils_core)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name file_provider)
  (modules file_provider)
- (libraries ast provider_backend relative_path sys_utils)
+ (libraries ast provider_backend relative_path rust_provider_backend_stubs sys_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -106,12 +75,14 @@
   counters
   decl_counters
   decl_class
+  decl_enforceability
   decl_service_client
   direct_decl_utils
   provider_backend
+  rust_provider_backend_stubs
   shallow_classes_provider
   shallow_decl_defs
-  linearization_provider
+  typedef_provider
   typing_heap)
  (preprocess
   (pps ppx_deriving.std)))
@@ -131,9 +102,11 @@
   ast
   db_path_provider
   file_info
+  full_fidelity
   naming_heap
   pos
   relative_path
+  rust_provider_backend_stubs
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -151,6 +124,7 @@
   parser
   provider_context
   relative_path
+  rust_provider_backend_stubs
   server_command_types
   server_env
   counters
@@ -168,14 +142,9 @@
   direct_decl_utils
   provider_backend
   provider_context
+  remote_old_decl_client
+  rust_provider_backend_stubs
   shallow_classes_heap)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name linearization_provider)
- (modules linearization_provider)
- (libraries provider_backend provider_context)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -195,7 +164,11 @@
 (library
  (name db_path_provider)
  (modules db_path_provider)
- (libraries naming_sqlite provider_backend provider_context)
+ (libraries
+  naming_sqlite
+  provider_backend
+  provider_context
+  rust_provider_backend_stubs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -222,8 +195,19 @@
   provider_backend
   provider_context
   relative_path
+  rust_provider_backend_stubs
   shallow_classes_heap
   shallow_decl_defs
   typechecker_options)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+ (name typedef_provider)
+ (modules typedef_provider)
+ (libraries
+  decl_counters
+  decl_nast
+  direct_decl_utils
+  provider_context
+  naming_provider))

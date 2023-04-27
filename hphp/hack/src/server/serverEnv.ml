@@ -23,8 +23,9 @@ module RecheckLoopStats = struct
         (** Watchman subscription has gone down, so state of the world after the
           recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
-    rechecked_count: int;
-    total_rechecked_count: int;  (** includes dependencies *)
+    total_changed_files_count: int;
+        (** Count of files changed on disk and potentially also in the IDE. *)
+    total_rechecked_count: int;
     last_iteration_start_time: seconds_since_epoch;
     duration: seconds;
     time_first_result: seconds_since_epoch option;
@@ -36,7 +37,7 @@ module RecheckLoopStats = struct
     {
       updates_stale = false;
       per_batch_telemetry = [];
-      rechecked_count = 0;
+      total_changed_files_count = 0;
       total_rechecked_count = 0;
       last_iteration_start_time = 0.;
       duration = 0.;
@@ -50,7 +51,7 @@ module RecheckLoopStats = struct
     let {
       updates_stale;
       per_batch_telemetry;
-      rechecked_count;
+      total_changed_files_count;
       total_rechecked_count;
       last_iteration_start_time;
       duration;
@@ -64,7 +65,9 @@ module RecheckLoopStats = struct
     |> Telemetry.string_ ~key:"id" ~value:recheck_id
     |> Telemetry.float_ ~key:"time" ~value:duration
     |> Telemetry.int_ ~key:"count" ~value:total_rechecked_count
-    |> Telemetry.int_ ~key:"reparse_count" ~value:rechecked_count
+    |> Telemetry.int_
+         ~key:"total_changed_files_count"
+         ~value:total_changed_files_count
     |> Telemetry.object_list
          ~key:"per_batch"
          ~value:(List.rev per_batch_telemetry)
@@ -94,20 +97,9 @@ type genv = {
   config: ServerConfig.t;
   local_config: ServerLocalConfig.t;
   workers: MultiWorker.worker list option;
-      (** Early-initialized workers to be used in MultiWorker jobs
-          They are initialized early to keep their heaps as empty as possible. *)
+  notifier: ServerNotifier.t;
   indexer: (string -> bool) -> unit -> string list;
       (** Returns the list of files under .hhconfig, subject to a filter *)
-  notifier_async: unit -> ServerNotifierTypes.notifier_changes;
-      (** Each time this is called, it should return the files that have changed
-          since the last invocation *)
-  notifier_async_reader: unit -> Buffered_line_reader.t option;
-      (** If this FD is readable, next call to notifier_async () should read
-          something from it. *)
-  notifier: unit -> SSet.t;
-  wait_until_ready: unit -> unit;
-      (** If daemons are spawned as part of the init process, wait for them here
-          e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
   mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 
@@ -221,16 +213,15 @@ type env = {
   last_notifier_check_time: float;
       (** Timestamp of last query for disk changes *)
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
-  remote_execution_files: Relative_path.Set.t;
-      (** Files that need to be typechecked via remote execution *)
-  remote_execution: ReEnv.t option; [@opaque]
-      (** Whether type check should happen via remote execution *)
   editor_open_files: Relative_path.Set.t;
       (** The map from full path to synchronized file contents *)
   ide_needs_parsing: Relative_path.Set.t;
       (** Files which parse trees were invalidated (because they changed on disk
           or in editor) and need to be re-parsed *)
   disk_needs_parsing: Relative_path.Set.t;
+  clock: Watchman.clock option;
+      (** This is the clock as of when disk_needs_parsing was last updated.
+      None if not using Watchman. *)
   needs_phase2_redecl: Relative_path.Set.t;
       (** Declarations that became invalidated and moved to "old" part of the heap.
           We keep them there to be used in "determining changes" step of recheck.
@@ -242,6 +233,7 @@ type env = {
           executed . After full check this should be empty, unless that check was
           cancelled mid-flight, in which case full_check_status will be set to
           Full_check_started and entire thing will be retried on next iteration. *)
+  why_needs_server_type_check: string * string;
   init_env: init_env;
   full_recheck_on_file_changes: full_recheck_on_file_changes;
       (** Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck
@@ -282,6 +274,8 @@ type env = {
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option; [@opaque]
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
+  package_info: Package.Info.t; [@opaque]
+      (** Function for determining which package a module belongs to *)
 }
 [@@deriving show]
 
@@ -402,8 +396,8 @@ let list_files env =
       ~f:
         begin
           fun error (acc : SSet.t) ->
-          let pos = User_error.get_pos error in
-          SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
+            let pos = User_error.get_pos error in
+            SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
         end
       ~init:SSet.empty
       (Errors.get_error_list env.errorl)
@@ -415,3 +409,6 @@ let add_changed_files env changed_files =
     env with
     changed_files = Relative_path.Set.union env.changed_files changed_files;
   }
+
+let show_clock (clock : Watchman.clock option) : string =
+  Option.value clock ~default:"[noclock]"

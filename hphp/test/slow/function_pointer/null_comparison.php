@@ -44,7 +44,7 @@ function main(): void {
   $fp = bar<>;
   $lambda = () ==> 1;
   $fun = bar<>;
-  $clsmeth = class_meth('Foo', 'baz');
+  $clsmeth = Foo::baz<>;
   $rclsmeth = Foo::bar<int>;
 
   $outer = dict[

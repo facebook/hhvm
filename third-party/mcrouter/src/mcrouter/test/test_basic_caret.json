@@ -1,0 +1,10 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [ "localhost:12345" ],
+      "protocol": "caret"
+    }
+  },
+  "route": "PoolRoute|foo"
+}
+

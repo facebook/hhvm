@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-constexpr unsigned kLgSlabSize = 21;
+constexpr unsigned kLgSlabSize = 20;
 constexpr size_t kSlabSize = 1ull << kLgSlabSize;
 constexpr size_t kSlabAlign = kSlabSize;
 
@@ -63,7 +63,7 @@ struct TaggedSlabPtr {
 using AtomicTaggedSlabPtr = std::atomic<TaggedSlabPtr>;
 
 /*
- * Instrusive singly linked list of slabs using TaggedSlabPtr at the beginning
+ * Intrusive singly linked list of slabs using TaggedSlabPtr at the beginning
  * of each slab.
  */
 struct TaggedSlabList {

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/portability.h"
 #include "hphp/runtime/base/req-root.h"
@@ -60,6 +61,7 @@ void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
 
 [[noreturn]] void NEVER_INLINE throw_implicit_context_exception(std::string);
+void NEVER_INLINE raise_implicit_context_warning(std::string);
 
 [[noreturn]]
 void throw_exception(const Object& e);
@@ -315,7 +317,7 @@ char const kUnserializableString[] = "\x01";
  * two functions in runtime/base, as there are functions in
  * runtime/base that depend on these two functions.
  */
-String f_serialize(const Variant& value);
+String HHVM_FUNCTION(serialize, const Variant& value);
 String serialize_keep_dvarrays(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,

@@ -3,8 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{MultiSet, MultiSetMut, SortedSet};
 use bumpalo::Bump;
+
+use crate::MultiSet;
+use crate::MultiSetMut;
+use crate::SortedSet;
 
 // Doctests ////////////////////////////////////////////////////////////////////
 

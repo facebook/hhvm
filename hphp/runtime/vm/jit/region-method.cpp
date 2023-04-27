@@ -98,8 +98,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   // Add all the ARCs.
   for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
     auto const myId = blockMap[b];
-    auto const numSuccs = numSuccBlocks(b);
-    for (auto i = uint32_t{0}; i < numSuccs; ++i) {
+    for (auto i = uint32_t{0}; i < b->succ_count; ++i) {
       auto const succIt = blockMap.find(b->succs[i]);
       if (succIt != end(blockMap)) {
         ret->addArc(myId, succIt->second);
@@ -124,7 +123,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       sp += instrNumPushes(pc) - instrNumPops(pc);
     }
 
-    for (auto idx = uint32_t{0}; idx < numSuccBlocks(b); ++idx) {
+    for (auto idx = uint32_t{0}; idx < b->succ_count; ++idx) {
       if (!b->succs[idx]) continue;
       auto const succ = ret->block(blockMap[b->succs[idx]]);
       if (succ->initialSpOffset().isValid()) {

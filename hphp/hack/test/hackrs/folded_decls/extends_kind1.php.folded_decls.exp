@@ -1,0 +1,57 @@
+FoldedClass {
+    name: "\\I",
+    kind: Cinterface,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\I",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\A",
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\I": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\A",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\I": I,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\I",
+    },
+    decl_errors: [
+        WrongExtendKind {
+            pos: NPos,
+            kind: Cclass(
+                Concrete,
+            ),
+            name: "\\A",
+            parent_pos: NPos,
+            parent_kind: Cinterface,
+            parent_name: "\\I",
+        },
+    ],
+}

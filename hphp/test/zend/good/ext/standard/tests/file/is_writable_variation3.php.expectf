@@ -28,7 +28,7 @@ Warning: is_writeable() expects parameter 1 to be string, null given in %s/zend/
 bool(false)
 bool(false)
 
-Warning: is_writable() expects parameter 1 to be string, %r(varray|vec)%r given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line %d
+Warning: is_writable() expects parameter 1 to be string, vec given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line %d
 
-Warning: is_writeable() expects parameter 1 to be string, %r(varray|vec)%r given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line %d
+Warning: is_writeable() expects parameter 1 to be string, vec given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line %d
 Done

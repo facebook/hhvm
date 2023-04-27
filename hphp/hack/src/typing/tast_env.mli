@@ -20,7 +20,7 @@ type class_or_typedef_result =
 (** Return a string representation of the given type using Hack-like syntax. *)
 val print_ty : env -> Typing_defs.locl_ty -> string
 
-val print_decl_ty : env -> Typing_defs.decl_ty -> string
+val print_decl_ty : ?msg:bool -> env -> Typing_defs.decl_ty -> string
 
 val print_error_ty :
   ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
@@ -70,7 +70,9 @@ val get_class_or_typedef :
 
 val is_in_expr_tree : env -> bool
 
-val set_in_expr_tree : env -> bool -> env
+val inside_expr_tree : env -> Tast.hint -> env
+
+val outside_expr_tree : env -> env
 
 (** Return {true} when in the definition of a static property or method. *)
 val is_static : env -> bool
@@ -153,11 +155,6 @@ val is_visible :
 val assert_nontrivial :
   Pos.t -> Ast_defs.bop -> env -> Tast.ty -> Tast.ty -> unit
 
-(** Assert that the type of a value involved in a strict (non-)equality
-    comparsion to null is nullable (otherwise it is known to always
-    return true or false). *)
-val assert_nullable : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> unit
-
 (** Return the declaration-phase type the given hint represents. *)
 val hint_to_ty : env -> Aast.hint -> Typing_defs.decl_ty
 
@@ -196,6 +193,8 @@ val get_enforceable : env -> string -> bool
 
 (** Indicates whether the type parameter with the given name is <<__Newable>>. *)
 val get_newable : env -> string -> bool
+
+val fresh_type : env -> Pos.t -> env * Typing_defs.locl_ty
 
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being
@@ -279,14 +278,18 @@ val typing_env_as_tast_env : Typing_env_types.env -> env
 val tast_env_as_typing_env : env -> Typing_env_types.env
 
 (** Verify that an XHP body expression is legal. *)
-val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
+val is_xhp_child : env -> Pos.t -> Tast.ty -> bool * Typing_error.t option
 
 val get_enum : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 
 val is_typedef : env -> Decl_provider.type_key -> bool
 
 val is_typedef_visible :
-  env -> ?expand_visible_newtype:bool -> Typing_defs.typedef_type -> bool
+  env ->
+  ?expand_visible_newtype:bool ->
+  name:string ->
+  Typing_defs.typedef_type ->
+  bool
 
 val get_typedef :
   env -> Decl_provider.type_key -> Decl_provider.typedef_decl option
@@ -317,3 +320,10 @@ val consts :
     it with the current file. *)
 val fill_in_pos_filename_if_in_current_decl :
   env -> Pos_or_decl.t -> Pos.t option
+
+(** Check if the environment is for a definition in a while that is a builtin. *)
+val is_hhi : env -> bool
+
+(** See {!Tast.check_status} to understand what this function returns from the
+    environment. *)
+val get_check_status : env -> Tast.check_status

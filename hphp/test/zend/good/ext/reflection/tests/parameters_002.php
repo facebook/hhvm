@@ -6,7 +6,7 @@ function test($nix, AnyArray $ar, inout $ref, stdClass $std, NonExistingClass $n
 
 class test
 {
-    function test($nix, AnyArray $ar, $ref, stdClass $std, NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
+    function test($nix, AnyArray $ar, $ref, stdClass $std, NonExistingClass $na, ?stdClass $opt = NULL, $def = "FooBar")
     {
     }
 }

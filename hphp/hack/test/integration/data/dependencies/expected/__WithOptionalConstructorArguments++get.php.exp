@@ -12,8 +12,8 @@ class WithOptionalConstructorArguments implements \IWithNullaryConstructor {
   use \TDummy;
 
   public function __construct(
-    ?int $x = \extract_standalone_make_default(),
-    ?string $y = \extract_standalone_make_default(),
+    ?int $x = \EXTRACT_STANDALONE_DEFAULT,
+    ?string $y = \EXTRACT_STANDALONE_DEFAULT,
   ) {
     throw new \Exception();
   }
@@ -26,6 +26,4 @@ class WithOptionalConstructorArguments implements \IWithNullaryConstructor {
 //// __extract_standalone__.php
 <?hh
 
-function extract_standalone_make_default()[]: nothing {
-  throw new \Exception();
-}
+const nothing EXTRACT_STANDALONE_DEFAULT = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");

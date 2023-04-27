@@ -1,0 +1,7 @@
+Change to `float`
+
+<?hh
+
+function foo(): float {
+  return 1.0;
+}

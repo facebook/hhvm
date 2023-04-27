@@ -357,7 +357,7 @@ private:
       timelib_time_dtor(t);
     }
   };
-  typedef std::shared_ptr<timelib_time> TimePtr;
+  using TimePtr = std::shared_ptr<timelib_time>;
 
   TimePtr m_time;
   req::ptr<TimeZone> m_tz;

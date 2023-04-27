@@ -1,0 +1,42 @@
+uncat_memoize is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context
+vec(2) {
+  vec(1) {
+    string(16) "nonfunction/key1"
+  }
+  vec(0) {
+  }
+}
+uncat_memoize is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context
+vec(2) {
+  vec(1) {
+    string(16) "nonfunction/key2"
+  }
+  vec(0) {
+  }
+}
+soft_mici_function is a soft IC inaccessible memoized function, but it is called with a soft inaccessible state implicit context
+vec(2) {
+  vec(1) {
+    string(16) "nonfunction/key4"
+  }
+  vec(0) {
+  }
+}
+uncat_memoize is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context
+vec(2) {
+  vec(2) {
+    string(16) "nonfunction/key4"
+    string(18) "soft_mici_function"
+  }
+  vec(0) {
+  }
+}
+uncat_memoize is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context
+vec(2) {
+  vec(1) {
+    string(16) "nonfunction/key3"
+  }
+  vec(0) {
+  }
+}
+Cannot call HH\ImplicitContext\run_with_soft_inaccessible_state from non-null state.

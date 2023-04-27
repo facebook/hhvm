@@ -1,0 +1,17 @@
+type box_a = a
+
+type rc_a = a
+
+type arc_a = a
+
+type rc_oc_a = a
+
+type std_box_a = a
+
+type std_rc_a = a
+
+type std_arc_a = a
+
+type ocamlrep_rc_oc_a = a
+
+type boxed_tuple = a * b

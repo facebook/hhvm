@@ -3,7 +3,7 @@
 class A {
   private int $a = 0;
   protected int $b = 1;
-  static int $S = 100;
+  public static int $S = 100;
 
   const HELLOA = "hello0";
   const HELLOB = "hello0";

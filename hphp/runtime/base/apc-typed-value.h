@@ -141,7 +141,8 @@ struct APCTypedValue {
   static APCTypedValue* tvFalse();
 
   static void FreeHazardPointers();
-  static bool UseHazardPointers();
+  static void PushHazardPointer(const APCHandle* handle);
+  static bool UseStringHazardPointers();
 
   void deleteUncounted();
 
@@ -187,13 +188,22 @@ private:
 //////////////////////////////////////////////////////////////////////
 // Here because of circular dependencies
 
-inline Variant APCHandle::toLocal() const {
+inline TypedValue APCHandle::toLazyProp() const {
+  if (isTypedValue()) return APCTypedValue::fromHandle(this)->toTypedValue();
+
+  TypedValue result;
+  result.m_type = kInvalidDataType;
+  result.m_data.num = static_cast<int64_t>(uintptr_t(this));
+  return result;
+}
+
+inline Variant APCHandle::toLocal(bool pure) const {
   if (isTypedValue()) {
     Variant ret;
     *ret.asTypedValue() = APCTypedValue::fromHandle(this)->toTypedValue();
     return ret;
   }
-  return toLocalHelper();
+  return toLocalHelper(pure);
 }
 
 //////////////////////////////////////////////////////////////////////

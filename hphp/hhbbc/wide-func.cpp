@@ -33,7 +33,7 @@ namespace {
 
 TRACE_SET_MOD(hhbbc_mem);
 
-using Buffer = CompactVector<char>;
+using Buffer = CompressedBytecode;
 
 static_assert(std::is_same<LSString, LowStringPtr>::value);
 
@@ -373,6 +373,8 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
     switch (inst.op) { OPCODES }
 #undef O
   }
+
+  bcs.shrink_to_fit();
   return bcs;
 }
 
@@ -424,6 +426,7 @@ BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
     };
     block.emplace(std::move(tmp));
   }
+  blocks.shrink_to_fit();
   return blocks;
 }
 
@@ -436,6 +439,7 @@ void encodeBlockVec(Buffer& buffer, const BlockVec& blocks) {
     encode(buffer, block->throwExit - NoBlockId);
     encode(buffer, block->initializer);
   }
+  buffer.shrink_to_fit();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -473,42 +477,6 @@ bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-void testCompression(Program& program) {
-  trace_time tracer("test compression");
-  auto total_full_size = size_t{0};
-  auto total_compressed_size = size_t{0};
-  auto temp = BlockVec{};
-  auto buffer = Buffer{};
-
-  auto test_compression_function = [&](Func& func) {
-    auto mf = WideFunc::mut(&func);
-    auto& blocks = mf.blocks();
-    encodeBlockVec(buffer, blocks);
-    std::swap(temp, blocks);
-    auto pos = size_t{0};
-    blocks = decodeBlockVec(buffer, pos);
-    always_assert(pos == buffer.size());
-    always_assert(checkBlockVecs(func, temp, blocks));
-    total_full_size += estimateHeapSize(blocks);
-    total_compressed_size += buffer.size();
-    buffer.clear();
-  };
-
-  for (auto& unit : program.units) {
-    for (auto& c : unit->classes) {
-      for (auto& m : c->methods) {
-        test_compression_function(*m);
-      }
-    }
-    for (auto& f : unit->funcs) {
-      test_compression_function(*f);
-    }
-  }
-
-  TRACE(1, "Overall compression ratio: %.2f\n",
-        1.0 * total_full_size / std::max(total_compressed_size, size_t{1}));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -550,6 +518,20 @@ void WideFunc::release() {
   m_blocks.clear();
 }
 
+
+BlockVec WideFunc::uncompress(const CompressedBytecode& b) {
+  auto pos = size_t{0};
+  auto d = decodeBlockVec(b, pos);
+  assertx(pos == b.size());
+  return d;
+}
+
+CompressedBytecode WideFunc::compress(const BlockVec& v) {
+  Buffer buffer;
+  encodeBlockVec(buffer, v);
+  return buffer;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -559,6 +541,7 @@ void WideFunc::release() {
 CompressedBlockUpdate::CompressedBlockUpdate(BlockUpdateInfo&& in) {
   php::encode(raw, in);
   in = {};
+  raw.shrink_to_fit();
 }
 
 void CompressedBlockUpdate::expand(BlockUpdateInfo& out) {

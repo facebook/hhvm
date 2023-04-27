@@ -1,0 +1,19 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}_fbthrift_metadata.ThriftConstStruct({{#value:const_struct_type}}type={{#type:struct}}{{!
+}}_fbthrift_metadata.ThriftStructType(name="{{type:program_name}}.{{> structs/unadapted_name}}"){{/type:struct}}, {{/value:const_struct_type}}{{!
+}}fields= { {{#value:const_struct}}"{{constant:name}}": {{#constant:value}}{{ > metadata/const_value }}{{/constant:value}}, {{/value:const_struct}} })

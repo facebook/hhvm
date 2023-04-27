@@ -350,9 +350,9 @@ prescan_quantize (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
 {
   my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
 #endif
-  register JSAMPROW ptr;
-  register histptr histp;
-  register hist3d histogram = cquantize->histogram;
+  JSAMPROW ptr;
+  histptr histp;
+  hist3d histogram = cquantize->histogram;
   int row;
   JDIMENSION col;
 #ifdef ORIGINAL_LIB_JPEG
@@ -425,9 +425,9 @@ LOCAL (boxptr) find_biggest_color_pop (boxptr boxlist, int numboxes)
 /* Find the splittable box with the largest color population */
 /* Returns NULL if no splittable boxes remain */
 {
-  register boxptr boxp;
-  register int i;
-  register long maxc = 0;
+  boxptr boxp;
+  int i;
+  long maxc = 0;
   boxptr which = NULL;
 
   for (i = 0, boxp = boxlist; i < numboxes; i++, boxp++)
@@ -446,9 +446,9 @@ LOCAL (boxptr) find_biggest_volume (boxptr boxlist, int numboxes)
 /* Find the splittable box with the largest (scaled) volume */
 /* Returns NULL if no splittable boxes remain */
 {
-  register boxptr boxp;
-  register int i;
-  register INT32 maxv = 0;
+  boxptr boxp;
+  int i;
+  INT32 maxv = 0;
   boxptr which = NULL;
 
   for (i = 0, boxp = boxlist; i < numboxes; i++, boxp++)
@@ -608,7 +608,7 @@ median_cut (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize,
 {
   int n, lb;
   int c0, c1, c2, cmax;
-  register boxptr b1, b2;
+  boxptr b1, b2;
 
   while (numboxes < desired_colors)
     {
@@ -1113,12 +1113,12 @@ LOCAL (void) find_best_colors (
 {
   int ic0, ic1, ic2;
   int i, icolor;
-  register INT32 *bptr;   /* pointer into bestdist[] array */
+  INT32 *bptr;   /* pointer into bestdist[] array */
   JSAMPLE *cptr;    /* pointer into bestcolor[] array */
   INT32 dist0, dist1;   /* initial distance values */
-  register INT32 dist2;   /* current distance in inner loop */
+  INT32 dist2;   /* current distance in inner loop */
   INT32 xx0, xx1;   /* distance increments */
-  register INT32 xx2;
+  INT32 xx2;
   INT32 inc0, inc1, inc2; /* initial values for increments */
   /* This array holds the distance to the nearest-so-far color for each cell */
   INT32 bestdist[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS];
@@ -1217,8 +1217,8 @@ fill_inverse_cmap (
   hist3d histogram = cquantize->histogram;
   int minc0, minc1, minc2;  /* lower left corner of update box */
   int ic0, ic1, ic2;
-  register JSAMPLE *cptr; /* pointer into bestcolor[] array */
-  register histptr cachep;  /* pointer into main cache array */
+  JSAMPLE *cptr; /* pointer into bestcolor[] array */
+  histptr cachep;  /* pointer into main cache array */
   /* This array lists the candidate colormap indexes. */
   JSAMPLE colorlist[MAXNUMCOLORS];
   int numcolors;    /* number of candidate colors */
@@ -1285,8 +1285,8 @@ METHODDEF (void)
 #ifndef ORIGINAL_LIB_JPEG
 pass2_no_dither (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize)
 {
-  register int *inptr;
-  register unsigned char *outptr;
+  int *inptr;
+  unsigned char *outptr;
   int width = oim->sx;
   int num_rows = oim->sy;
 #else
@@ -1295,14 +1295,14 @@ pass2_no_dither (j_decompress_ptr cinfo,
 /* This version performs no dithering */
 {
   my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
-  register JSAMPROW inptr, outptr;
+  JSAMPROW inptr, outptr;
   JDIMENSION width = cinfo->output_width;
 #endif
   hist3d histogram = cquantize->histogram;
-  register int c0, c1, c2;
+  int c0, c1, c2;
   int row;
   JDIMENSION col;
-  register histptr cachep;
+  histptr cachep;
 
 
   for (row = 0; row < num_rows; row++)
@@ -1373,10 +1373,10 @@ pass2_fs_dither (j_decompress_ptr cinfo,
   JSAMPROW inptr;   /* => current input pixel */
 #endif
   hist3d histogram = cquantize->histogram;
-  register LOCFSERROR cur0, cur1, cur2; /* current error or pixel value */
+  LOCFSERROR cur0, cur1, cur2; /* current error or pixel value */
   LOCFSERROR belowerr0, belowerr1, belowerr2; /* error for pixel below cur */
   LOCFSERROR bpreverr0, bpreverr1, bpreverr2; /* error for below/prev col */
-  register FSERRPTR errorptr; /* => fserrors[] at column before current */
+  FSERRPTR errorptr; /* => fserrors[] at column before current */
   histptr cachep;
   int dir;      /* +1 or -1 depending on direction */
   int dir3;     /* 3*dir, for advancing inptr & errorptr */
@@ -1503,7 +1503,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
 #endif
     /* Now emit the colormap index for this cell */
     {
-      register int pixcode = *cachep - 1;
+      int pixcode = *cachep - 1;
       *outptr = (JSAMPLE) pixcode;
       /* Compute representation error for this pixel */
 #undef GETJSAMPLE
@@ -1518,7 +1518,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
      * next-line error sums left by 1 column.
      */
     {
-      register LOCFSERROR bnexterr, delta;
+      LOCFSERROR bnexterr, delta;
 
       bnexterr = cur0;  /* Process component 0 */
       delta = cur0 * 2;

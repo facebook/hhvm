@@ -9,11 +9,13 @@
 
 open Hh_prelude
 open Aast
-module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 
-let validate_classname (pos, hint) =
+(* This TAST check raises an error when an abstract final
+   class or a trait appears outside of classname<_>. *)
+
+let rec validate_classname (pos, hint) =
   match hint with
   | Aast.Happly _
   | Aast.Hthis
@@ -28,6 +30,7 @@ let validate_classname (pos, hint) =
   | Aast.Hlike _
   | Aast.Hnothing ->
     ()
+  | Aast.Hrefinement (h, _) -> validate_classname h
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
@@ -74,6 +77,25 @@ let rec check_hint env (pos, hint) =
       Option.iter (List.hd tal) ~f:validate_classname
     else
       List.iter tal ~f:(check_hint env)
+  | Aast.Hrefinement (h, members) ->
+    let check_bounds (lower, upper) =
+      List.iter lower ~f:(check_hint env);
+      List.iter upper ~f:(check_hint env)
+    in
+    let check_member = function
+      | Aast.Rtype (_, ref) ->
+        (match ref with
+        | Aast.TRexact h -> check_hint env h
+        | Aast.TRloose { Aast.tr_lower; tr_upper } ->
+          check_bounds (tr_lower, tr_upper))
+      | Aast.Rctx (_, ref) ->
+        (match ref with
+        | Aast.CRexact h -> check_hint env h
+        | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+          check_bounds (Option.to_list cr_lower, Option.to_list cr_upper))
+    in
+    List.iter members ~f:check_member;
+    check_hint env h
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids
   | Aast.Hvec_or_dict (hopt1, h2) ->
@@ -136,7 +158,8 @@ let handler =
 
     method! at_typedef env t =
       check_hint env t.t_kind;
-      Option.iter t.t_constraint ~f:(check_hint env)
+      Option.iter t.t_as_constraint ~f:(check_hint env);
+      Option.iter t.t_super_constraint ~f:(check_hint env)
 
     method! at_class_ env c =
       let check_class_vars cvar =
@@ -145,8 +168,9 @@ let handler =
       List.iter c.c_vars ~f:check_class_vars;
       check_tparams env c.c_tparams
 
+    method! at_fun_def env fd = check_tparams env fd.fd_tparams
+
     method! at_fun_ env f =
-      check_tparams env f.f_tparams;
       List.iter f.f_params ~f:(check_param env);
       Option.iter (hint_of_type_hint f.f_ret) ~f:(check_hint env)
 

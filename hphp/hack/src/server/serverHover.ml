@@ -27,18 +27,76 @@ let filter_class_and_constructor results =
   else
     results |> List.map ~f:snd
 
+let docs_url_markdown name url : string =
+  Printf.sprintf
+    "See the [documentation for %s](%s)."
+    (Markdown_lite.md_codify (Utils.strip_ns name))
+    url
+
+let typedef_docs_url ctx name : string option =
+  let qualified_name = "\\" ^ name in
+  Option.(
+    Decl_provider.get_typedef ctx qualified_name >>= fun decl ->
+    decl.Typing_defs.td_docs_url >>| fun url -> docs_url_markdown name url)
+
+(* If [classish_name] (or any of its parents) has a documentation URL,
+   return the docs of the closest type. *)
+let classish_docs_url ctx classish_name : string option =
+  let docs_url name =
+    match Decl_provider.get_class ctx name with
+    | Some decl -> Decl_provider.Class.get_docs_url decl
+    | None -> None
+  in
+
+  let qualified_name = "\\" ^ classish_name in
+  let ancestors =
+    match Decl_provider.get_class ctx qualified_name with
+    | Some decl -> Decl_provider.Class.all_ancestor_names decl
+    | None -> []
+  in
+  List.find_map (qualified_name :: ancestors) ~f:(fun ancestor ->
+      match docs_url ancestor with
+      | Some url -> Some (docs_url_markdown ancestor url)
+      | None -> None)
+
+let docs_url ctx def : string option =
+  let open SymbolDefinition in
+  match def.kind with
+  | Class
+  | Enum
+  | Interface
+  | Trait ->
+    classish_docs_url ctx def.name
+  | Typedef -> typedef_docs_url ctx def.name
+  | Function
+  | Method
+  | Property
+  | ClassConst
+  | GlobalConst
+  | LocalVar
+  | TypeVar
+  | Param
+  | Typeconst
+  | Module ->
+    None
+
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
   | Some def when not occurrence.SymbolOccurrence.is_declaration ->
     (* The docblock is useful at the call site, but it's redundant at
        the definition site. *)
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_comments_for_symbol_ctx
-      ~ctx
-      ~entry
-      ~def
-      ~base_class_name
-    |> Option.to_list
+    let doc_block_hover =
+      ServerDocblockAt.go_comments_for_symbol_ctx
+        ~ctx
+        ~entry
+        ~def
+        ~base_class_name
+      |> Option.to_list
+    in
+    (match docs_url ctx def with
+    | Some info -> info :: doc_block_hover
+    | None -> doc_block_hover)
   | None
   | Some _ ->
     []
@@ -77,8 +135,8 @@ let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
 let nth_fun_param tast fun_name n : string option =
   List.find_map tast ~f:(fun def ->
       match def with
-      | Aast.Fun { Aast.fd_fun; _ } ->
-        if String.equal fun_name (snd fd_fun.Aast.f_name) then
+      | Aast.Fun { Aast.fd_fun; fd_name; _ } ->
+        if String.equal fun_name (snd fd_name) then
           nth_param_name fd_fun.Aast.f_params n
         else
           None
@@ -128,86 +186,52 @@ let nth_param ctx recv i : string option =
   | None -> None
 
 let make_hover_const_definition entry def_opt =
-  match def_opt with
-  | Some def ->
-    [
+  Option.map def_opt ~f:(fun def ->
       Pos.get_text_from_pos
         ~content:(Provider_context.read_file_contents_exn entry)
-        def.SymbolDefinition.span;
-    ]
-  | _ -> []
-
-let make_hover_full_name env_and_ty occurrence def_opt =
-  SymbolOccurrence.(
-    let found_it () =
-      let name =
-        match def_opt with
-        | Some def -> def.SymbolDefinition.full_name
-        | None -> occurrence.name
-      in
-      [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
-    in
-    Typing_defs.(
-      match (occurrence, env_and_ty) with
-      | ({ type_ = Method _; _ }, Some (_, _ty)) -> found_it ()
-      | ( { type_ = Property _ | ClassConst _ | XhpLiteralAttr _; _ },
-          Some (_, ty) )
-        when is_fun ty ->
-        found_it ()
-      | _ -> []))
+        def.SymbolDefinition.span)
 
 (* Return a markdown description of built-in Hack attributes. *)
 let make_hover_attr_docs name =
-  let special_name_docs attr_name map =
-    Option.map ~f:snd (SMap.find_opt attr_name map)
-  in
   Option.first_some
-    (special_name_docs name SN.UserAttributes.as_map)
-    (special_name_docs name SN.UserAttributes.systemlib_map)
+    (SMap.find_opt name SN.UserAttributes.as_map)
+    (SMap.find_opt name SN.UserAttributes.systemlib_map)
+  |> Option.map ~f:(fun attr_info -> attr_info.SN.UserAttributes.doc)
   |> Option.to_list
 
 let pure_context_info =
   "This function has an empty context list, so it has no capabilities."
   ^ "\nIt may only read properties, access constants, or call other pure functions."
 
-let built_in_type_info (bt : SymbolOccurrence.built_in_type_hint) : string =
-  match bt with
-  | SymbolOccurrence.BIprimitive prim ->
-    (match prim with
-    | Aast_defs.Tnull -> "The value `null`. The opposite of `nonnull`."
-    | Aast_defs.Tvoid ->
-      "A `void` return type indicates a function that never returns a value. `void` functions usually have side effects."
-    | Aast_defs.Tint -> "A 64-bit integer."
-    | Aast_defs.Tbool -> "A boolean value, `true` or `false`."
-    | Aast_defs.Tfloat -> "A 64-bit floating-point number."
-    | Aast_defs.Tstring -> "A sequence of characters."
-    | Aast_defs.Tresource ->
-      "An external resource, such as a file handle or database connection."
-    | Aast_defs.Tnum -> "An `int` or a `float`."
-    | Aast_defs.Tarraykey ->
-      "An `int` or a `string`. `arraykey` is a common key type for `dict`s."
-    | Aast_defs.Tnoreturn ->
-      "A `noreturn` function always errors or loops forever.")
-  | SymbolOccurrence.BImixed ->
-    "Any value at all. It's usually better to use a more specific type, or a generic."
-  | SymbolOccurrence.BIdynamic ->
-    "Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.\n\n"
-    ^ "All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.\n\n"
-    ^ "To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the "
-    ^ "type checker will verify types after this point."
-  | SymbolOccurrence.BInothing ->
-    "The `nothing` type has no values, it's the empty type.\n\nA function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty."
-  | SymbolOccurrence.BInonnull -> "Any value except `null`."
-  | SymbolOccurrence.BIshape ->
-    "A shape is a key-value data structure where the keys are known."
-    ^ " Shapes are value types, just like `dict` and `vec`.\n\n"
-    ^ " A closed shape, such as `shape('x' => int)`, has a fixed number of keys. "
-    ^ " An open shape, such as `shape('x' => int, ...)`, may have additional keys."
-  | SymbolOccurrence.BIthis ->
-    "`this` represents the current class.\n\n"
-    ^ "`this` refers to the type of the current instance at runtime. In a child class, `this` refers to the child class, even if the method is defined in the parent."
-  | SymbolOccurrence.BIoption ->
-    "The type `?Foo` allows either `Foo` or `null`."
+let hh_fixme_info =
+  "`HH_FIXME[N]` disables type checker error N on the next line. It does
+not change runtime behavior.
+
+**`HH_FIXME` is almost always a bad idea**. You might get an
+exception, or you might get an unexpected value. Even scarier, you
+might cause an exception in a totally different part of the codebase.
+
+```
+/* HH_FIXME[4110] My reason here */
+takes_num(\"x\") + takes_num(\"y\");
+```
+
+In this example, the type checker will accept the code, but the code
+will still crash when you run it (`TypeHintViolationException` when
+calling `takes_num`).
+
+Note that `HH_FIXME` applies to all occurrences of the error on the
+next line.
+
+## You can fix it!
+
+It is always possible to write code without `HH_FIXME`. This usually
+requires changing type signatures and some refactoring. Your code will
+be more reliable, the type checker can help you, and future changes
+will be less scary.
+
+See also `HH\\FIXME\\UNSAFE_CAST()`, which is still bad, but much more
+precise."
 
 let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   let await_explanation =
@@ -217,6 +241,48 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   in
 
   match khi with
+  | SymbolOccurrence.Class ->
+    "A `class` contains methods, properties and constants that together solve a problem."
+  | SymbolOccurrence.Interface ->
+    "An `interface` defines signatures for methods that classes must implement."
+  | SymbolOccurrence.Trait ->
+    "A `trait` provides methods and properties that can be `use`d in classes."
+    ^ "\n\nTraits are often used to provide default implementations for methods declared in an `interface`."
+    ^ "\n\nWhen in doubt, use a class rather than a trait. You only need a trait when you want the same method in multiple classes that don't inherit from each other."
+  | SymbolOccurrence.Enum ->
+    "An `enum` is a fixed set of string or integer values."
+    ^ "\n\nYou can use `switch` with an `enum` and the type checker will ensure you handle every possible value."
+  | SymbolOccurrence.EnumClass ->
+    "An `enum class` is a fixed set of values that can be used as typed constants."
+    ^ "\n\nEnum classes enable you to write generic getter and setter methods."
+    ^ "\n\n```
+enum class PersonFields: BaseField {
+  Field<string> name = Field::string();
+  Field<string> email = Field::string();
+  Field<int> age = Field::int();
+}
+```"
+    ^ "\n\nYou can refer to items within an enum class by name (using the `#` syntax), and Hack knows the exact type."
+    ^ "\n\n```
+function person_get(
+  Person $p,
+  HH\\EnumClass\\Label<PersonFields, Field<T>> $field_name
+  ): T {
+  // ... implementation here ...
+}
+
+person_get($a_person, #email); // string
+```"
+    ^ "\n\nSee also `HH\\EnumClass\\Label` and `HH\\MemberOf`."
+  | SymbolOccurrence.Type ->
+    "A `type` is an alias for another type."
+    ^ "\n\n`type` aliases are transparent, so you can use the original type and its alias interchangeably."
+    ^ "\n\nSee also `newtype` for opaque type aliases."
+  | SymbolOccurrence.Newtype ->
+    "A `newtype` is a type alias that is opaque."
+    ^ "\n\nInside the current file, code can see the underlying type. In all other files, code cannot see the underlying type."
+    ^ " This enables you to hide implementation details."
+    ^ "\n\nSee also `type` for transparent type aliases."
   | SymbolOccurrence.FinalOnClass ->
     "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
   | SymbolOccurrence.FinalOnMethod ->
@@ -244,6 +310,41 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     "A `readonly` value is a reference that cannot modify the underlying value."
   | SymbolOccurrence.ReadonlyOnReturnType ->
     "This function/method may return a `readonly` value."
+  | SymbolOccurrence.XhpAttribute ->
+    "`attribute` declares which attributes are permitted on the current XHP class."
+    ^ "\n\nAttributes are optional unless marked with `@required`."
+  | SymbolOccurrence.XhpChildren ->
+    "`children` declares which XHP types may be used as children when creating instances of this class."
+    ^ "\n\nFor example, `children (:p)+` means that users may write `<my-class><p>hello</p><p>world</p></my_class>`."
+    ^ "\n\n**`children` is not enforced by the type checker**, but an XHP framework can choose to validate it at runtime."
+  | SymbolOccurrence.ConstGlobal -> "A `const` is a global constant."
+  | SymbolOccurrence.ConstOnClass ->
+    "A class constant."
+    ^ "\n\nClass constants have public visibility, so you can access `MyClass::MY_CONST` anywhere."
+  | SymbolOccurrence.ConstType ->
+    "A `const type` declares a type constant inside a class. You can refer to type constants in signatures with `this::TMyConstType`."
+    ^ "\n\nType constants are also a form of generics."
+    ^ "\n\n```"
+    ^ "\nabstract class Pet {"
+    ^ "\n  abstract const type TFood;"
+    ^ "\n}"
+    ^ "\n"
+    ^ "\nclass Cat extends Pet {"
+    ^ "\n  const type TFood = Fish;"
+    ^ "\n}"
+    ^ "\n```"
+    ^ "\n\nType constants are static, not per-instance. All instances of `Cat` have the same value for `TFood`, whereas `MyObject<T>` generics can differ between instances."
+    ^ "\n\nThis enables type constants to be used outside the class, e.g. `Cat::TFood`."
+  | SymbolOccurrence.StaticOnMethod ->
+    "A static method can be called without an instance, e.g. `MyClass::my_method()`."
+  | SymbolOccurrence.StaticOnProperty ->
+    "A static property is shared between all instances of a class. It can be accessed with `MyClass::$myProperty`."
+  | SymbolOccurrence.Use ->
+    "Include all the items (methods, properties etc) from a trait in this class/trait."
+    ^ "\n\nIf this class/trait already has an item of the same name, the trait item is not copied."
+  | SymbolOccurrence.FunctionOnMethod ->
+    "A `function` inside a class declares a method."
+  | SymbolOccurrence.FunctionGlobal -> "A standalone global function."
   | SymbolOccurrence.Async ->
     "An `async` function can use `await` to get results from other `async` functions. You may still return plain values, e.g. `return 1;` is permitted in an `Awaitable<int>` function."
     ^ await_explanation
@@ -285,10 +386,46 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ "For example, if you have a private property `name`, you can access both `$this->name` and `$other_instance->name`."
     ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `private` methods and properties."
     ^ "\n\nSee also `public` and `protected`."
+  | SymbolOccurrence.Internal ->
+    "An `internal` symbol can only be accessed from files that belong to the current `module`."
+  | SymbolOccurrence.ModuleInModuleDeclaration ->
+    "`new module Foo {}` defines a new module but does not associate any code with it."
+    ^ "\n\nYou must use `module Foo;` to mark all the definitions in a given file as associated with the `Foo` module and enable them to use `internal`."
+  | SymbolOccurrence.ModuleInModuleMembershipDeclaration ->
+    "`module Foo;` marks all the definitions in the current file as associated with the `Foo` module, and enables them to use `internal`."
+    ^ "\n\nYou must also define this module with `new module Foo {}` inside or outside this file."
+
+let split_class_name (full_name : string) : string =
+  match String.lsplit2 full_name ~on:':' with
+  | Some (class_name, _member) -> class_name
+  | None -> full_name
+
+let fun_defined_in def_opt : string =
+  match def_opt with
+  | Some { SymbolDefinition.full_name; _ } ->
+    let abs_name = "\\" ^ full_name in
+    if SN.PseudoFunctions.is_pseudo_function abs_name then
+      ""
+    else (
+      match String.rsplit2 (Utils.strip_hh_lib_ns abs_name) ~on:'\\' with
+      | Some (namespace, _) when not (String.equal namespace "") ->
+        Printf.sprintf "// Defined in namespace %s\n" namespace
+      | _ -> ""
+    )
+  | _ -> ""
 
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(
     Typing_defs.(
+      let defined_in =
+        match def_opt with
+        | Some def ->
+          Printf.sprintf
+            "// Defined in %s\n"
+            (split_class_name def.SymbolDefinition.full_name)
+        | None -> ""
+      in
+
       let snippet =
         match (occurrence, env_and_ty) with
         | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
@@ -301,15 +438,28 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               let ty = Lazy.force_val elt.ce_type in
               Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)
           in
-          begin
-            match snippet_opt with
-            | Some s -> s
-            | None ->
-              Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
-          end
+          defined_in
+          ^
+          (match snippet_opt with
+          | Some s -> s
+          | None ->
+            Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt)
         | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
           let param_name = nth_param ctx recv i in
           Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
+        | ({ type_ = Method _; _ }, Some (env, ty))
+        | ({ type_ = ClassConst _; _ }, Some (env, ty))
+        | ({ type_ = Property _; _ }, Some (env, ty)) ->
+          defined_in
+          ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
+        | ({ type_ = GConst; _ }, Some (env, ty)) ->
+          (match make_hover_const_definition entry def_opt with
+          | Some def_txt -> def_txt
+          | None ->
+            Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt)
+        | ({ type_ = Function; _ }, Some (env, ty)) ->
+          fun_defined_in def_opt
+          ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
         | (occurrence, Some (env, ty)) ->
           Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in
@@ -321,21 +471,12 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               make_hover_attr_docs name;
               make_hover_doc_block ctx entry occurrence def_opt;
             ]
-        | { type_ = GConst; _ } ->
-          List.concat
-            [
-              make_hover_doc_block ctx entry occurrence def_opt;
-              make_hover_const_definition entry def_opt;
-            ]
         | { type_ = Keyword info; _ } -> [keyword_info info]
+        | { type_ = HhFixme; _ } -> [hh_fixme_info]
         | { type_ = PureFunctionContext; _ } -> [pure_context_info]
-        | { type_ = BuiltInType bt; _ } -> [built_in_type_info bt]
-        | _ ->
-          List.concat
-            [
-              make_hover_doc_block ctx entry occurrence def_opt;
-              make_hover_full_name env_and_ty occurrence def_opt;
-            ]
+        | { type_ = BuiltInType bt; _ } ->
+          [SymbolOccurrence.built_in_type_hover bt]
+        | _ -> make_hover_doc_block ctx entry occurrence def_opt
       in
       HoverService.
         { snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }))
@@ -378,6 +519,13 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : HoverService.result =
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun tcopt ->
+        if TypecheckerOptions.enable_sound_dynamic tcopt then
+          GlobalOptions.{ tcopt with tco_tast_under_dynamic = true }
+        else
+          tcopt)
+  in
   let identities =
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
@@ -385,69 +533,109 @@ let go_quarantined
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   let env_and_ty =
-    ServerInferType.human_friendly_type_at_pos ctx tast line column
+    ServerInferType.human_friendly_type_at_pos
+      ~under_dynamic:false
+      ctx
+      tast
+      line
+      column
   in
-  match (identities, env_and_ty) with
-  | ([], Some (env, ty)) ->
-    (* There are no identities (named entities) at the cursor, but we
-       know the type of the expression. Just show the type.
-
-       This can occur if the user hovers over a literal such as `123`. *)
-    [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
-  | ( [
-        ( {
-            SymbolOccurrence.type_ =
-              SymbolOccurrence.BestEffortArgument (recv, i);
-            _;
-          },
-          _ );
-      ],
-      _ ) ->
-    (* There are no identities (named entities) at the cursor, but we
-       know the type of the expression and the name of the parameter
-       from the definition site.
-
-       This can occur if the user hovers over a literal in a call,
-       e.g. `foo(123)`. *)
-    let ty_result =
-      match env_and_ty with
-      | Some (env, ty) ->
-        [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+  let env_and_ty_dynamic =
+    ServerInferType.human_friendly_type_at_pos
+      ~under_dynamic:true
+      ctx
+      tast
+      line
+      column
+  in
+  let under_dynamic_result =
+    match env_and_ty_dynamic with
+    | Some (env, ty') ->
+      (match env_and_ty with
       | None -> []
-    in
-    let param_result =
-      match nth_param ctx recv i with
-      | Some param_name ->
-        [
-          {
-            snippet = Printf.sprintf "Parameter: %s" param_name;
-            addendum = [];
-            pos = None;
-          };
-        ]
-      | None -> []
-    in
-    ty_result @ param_result
-  | (identities, _) ->
-    (* We have a list of named things at the cursor. Show the
-       docblock and type of each thing. *)
-    identities
-    |> List.map ~f:(fun (occurrence, def_opt) ->
-           let env_and_ty =
-             match occurrence.SymbolOccurrence.type_ with
-             | SymbolOccurrence.TypeVar -> None
-             | _ -> env_and_ty
-           in
-           let path =
-             def_opt
-             |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
-             |> Option.map ~f:Pos.filename
-             |> Option.value ~default:entry.Provider_context.path
-           in
-           let (ctx, entry) =
-             Provider_context.add_entry_if_missing ~ctx ~path
-           in
-           (ctx, env_and_ty, entry, occurrence, def_opt))
-    |> make_hover_info_with_fallback
-    |> filter_class_and_constructor
-    |> List.remove_consecutive_duplicates ~equal:equal_hover_info
+      | Some (_, ty) ->
+        if Typing_defs.ty_equal ty ty' then
+          []
+        else
+          [
+            {
+              snippet =
+                Printf.sprintf
+                  "%s when called dynamically"
+                  (Tast_env.print_ty env ty');
+              addendum = [];
+              pos = None;
+            };
+          ])
+    | None -> []
+  in
+  let result =
+    match (identities, env_and_ty) with
+    | ([], Some (env, ty)) ->
+      (* There are no identities (named entities) at the cursor, but we
+         know the type of the expression. Just show the type.
+
+         This can occur if the user hovers over a literal such as `123`. *)
+      [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+    | ( [
+          ( {
+              SymbolOccurrence.type_ =
+                SymbolOccurrence.BestEffortArgument (recv, i);
+              _;
+            },
+            _ );
+        ],
+        _ ) ->
+      (* There are no identities (named entities) at the cursor, but we
+         know the type of the expression and the name of the parameter
+         from the definition site.
+
+         This can occur if the user hovers over a literal in a call,
+         e.g. `foo(123)`. *)
+      let ty_result =
+        match env_and_ty with
+        | Some (env, ty) ->
+          [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+        | None -> []
+      in
+      let param_result =
+        match nth_param ctx recv i with
+        | Some param_name ->
+          [
+            {
+              snippet = Printf.sprintf "Parameter: %s" param_name;
+              addendum = [];
+              pos = None;
+            };
+          ]
+        | None -> []
+      in
+      ty_result @ under_dynamic_result @ param_result
+    | (identities, _) ->
+      (* We have a list of named things at the cursor. Show the
+         docblock and type of each thing. *)
+      identities
+      |> List.map ~f:(fun (occurrence, def_opt) ->
+             (* If we're hovering over a type hint, we're not interested
+                in the type of the enclosing expression. *)
+             let env_and_ty =
+               match occurrence.SymbolOccurrence.type_ with
+               | SymbolOccurrence.TypeVar -> None
+               | SymbolOccurrence.BuiltInType _ -> None
+               | _ -> env_and_ty
+             in
+             let path =
+               def_opt
+               |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
+               |> Option.map ~f:Pos.filename
+               |> Option.value ~default:entry.Provider_context.path
+             in
+             let (ctx, entry) =
+               Provider_context.add_entry_if_missing ~ctx ~path
+             in
+             (ctx, env_and_ty, entry, occurrence, def_opt))
+      |> make_hover_info_with_fallback
+      |> filter_class_and_constructor
+      |> List.remove_consecutive_duplicates ~equal:equal_hover_info
+  in
+  result @ under_dynamic_result

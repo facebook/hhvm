@@ -5,26 +5,24 @@
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-14], "\\MyClass"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:17-34], "instanceProperty");
-          sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([5:10-16]), (Tprim Tstring)));
+          sp_xhp_attr = None; sp_type = (Rhint ([5:10-16]), (Tprim Tstring));
           sp_visibility = Public; sp_flags = needs_init };
          { Shallow_decl_defs.sp_name = ([6:17-35], "protectedProperty");
-           sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([6:13-16]), (Tprim Tint)));
+           sp_xhp_attr = None; sp_type = (Rhint ([6:13-16]), (Tprim Tint));
            sp_visibility = Protected; sp_flags = needs_init };
          { Shallow_decl_defs.sp_name = ([7:34-36], "p"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([7:25-33]), (Tprim Tarraykey)));
+           sp_type = (Rhint ([7:25-33]), (Tprim Tarraykey));
            sp_visibility = Public; sp_flags = lateinit | needs_init }
          ];
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([4:25-40], "$staticProperty");
-          sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([4:18-24]), (Tprim Tstring)));
+          sp_xhp_attr = None; sp_type = (Rhint ([4:18-24]), (Tprim Tstring));
           sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_constructor =
@@ -45,7 +43,8 @@
                        ~returns_readonly:false ~support_dynamic_type:false
                        ~readonly_this:false ~is_memoized:false
                        ~variadic:false);
-                     ft_ifc_decl = FDPolicied {PUBLIC} }));
+                     ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
+                     }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = [];
@@ -64,7 +63,7 @@
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC} }));
+                ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
@@ -81,7 +80,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
@@ -98,7 +97,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty); sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([14:25-40], "async_generator");
@@ -144,11 +143,11 @@
                  (make_ft_flags FAsyncGenerator ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\MyAbstractClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -157,11 +156,12 @@
         sc_module = None; sc_name = ([23:16-31], "\\MyAbstractClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\MyFinalClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -170,11 +170,12 @@
         sc_module = None; sc_name = ([24:13-25], "\\MyFinalClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\MyStaticClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -183,11 +184,12 @@
         sc_module = None; sc_name = ([25:22-35], "\\MyStaticClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\MyConstructorPropertiesClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -197,25 +199,25 @@
         sc_name = ([27:7-35], "\\MyConstructorPropertiesClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = [];
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([29:13-19]), (Tprim Tstring)));
+           sp_type = (Rhint ([29:13-19]), (Tprim Tstring));
            sp_visibility = Private; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([30:22-32], "protected");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([30:15-21]), (Tprim Tstring)));
+            sp_type = (Rhint ([30:15-21]), (Tprim Tstring));
             sp_visibility = Protected; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([31:19-26], "public");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([31:12-18]), (Tprim Tstring)));
+            sp_type = (Rhint ([31:12-18]), (Tprim Tstring));
             sp_visibility = Public; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([32:19-30], "hasDefault");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([32:12-18]), (Tprim Tstring)));
+            sp_type = (Rhint ([32:12-18]), (Tprim Tstring));
             sp_visibility = Public; sp_flags = needs_init }
           ];
         sc_sprops = [];
@@ -281,11 +283,11 @@
                         ~returns_readonly:false ~support_dynamic_type:false
                         ~readonly_this:false ~is_memoized:false
                         ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                      ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
+                                                       None
+                      }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

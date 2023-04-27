@@ -29,15 +29,10 @@
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
 
-// This is based on what is defined in
-// hphp/runtime/ext_zend_compat/php-src/main/php_config-*.h
-// And also what I know is present under MSVC.
-#ifndef __APPLE__
 # define HAVE_NGETTEXT 1
 # define HAVE_DNGETTEXT 1
 # define HAVE_DCNGETTEXT 1
 # define HAVE_BIND_TEXTDOMAIN_CODESET 1
-#endif
 
 namespace HPHP {
 

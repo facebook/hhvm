@@ -108,8 +108,8 @@ struct FuncAnalysisResult {
 
   /*
    * Bitset representing which parameters may affect the result of the
-   * function, assuming it produces one. Note that VerifyParamType
-   * does not count as a use in this context.
+   * function, assuming it produces one. Note that the parameter type
+   * verification does not count as a use in this context.
    */
   std::bitset<64> usedParams;
 

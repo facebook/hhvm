@@ -1,0 +1,96 @@
+'\" t
+.\"     Title: \fBmysqld\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLD\FR" "8" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqld \- the MySQL server
+.SH "SYNOPSIS"
+.HP \w'\fBmysqld\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBmysqld [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBmysqld\fR, also known as MySQL Server, is the main program that does most of the work in a MySQL installation\&. MySQL Server manages access to the MySQL data directory that contains databases and tables\&. The data directory is also the default location for other information such as log files and status files\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Some installation packages contain a debugging version of the server named
+\fBmysqld\-debug\fR\&. Invoke this version instead of
+\fBmysqld\fR
+for debugging support, memory allocation checking, and trace file support (see
+Section\ \&29.5.1.2, \(lqCreating Trace Files\(rq)\&.
+.sp .5v
+.RE
+.PP
+When MySQL server starts, it listens for network connections from client programs and manages access to databases on behalf of those clients\&.
+.PP
+The
+\fBmysqld\fR
+program has many options that can be specified at startup\&. For a complete list of options, run this command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqld \-\-verbose \-\-help\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+MySQL Server also has a set of system variables that affect its operation as it runs\&. System variables can be set at server startup, and many of them can be changed at runtime to effect dynamic server reconfiguration\&. MySQL Server also has a set of status variables that provide information about its operation\&. You can monitor these status variables to access runtime performance characteristics\&.
+.PP
+For a full description of MySQL Server command options, system variables, and status variables, see
+Section\ \&5.1, \(lqThe MySQL Server\(rq\&. For information about installing MySQL and setting up the initial configuration, see
+Chapter\ \&2, Installing and Upgrading MySQL\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

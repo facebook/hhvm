@@ -293,15 +293,19 @@ void OfflineCode::printRangeInfo(std::ostream& os,
   if (rangeInfo.disasm.empty()) return;
   if (rangeInfo.sk && rangeInfo.disasm[0].ip == rangeInfo.start) {
     auto const sk = *rangeInfo.sk;
-    if (rangeInfo.instrStr) {
+    if (sk.valid()) {
       os << std::setw(4) << sk.printableOffset() << ": "
-         << *rangeInfo.instrStr << std::endl;
+         << sk.showInst() << std::endl;
     } else {
       auto const currSha1 = rangeInfo.sha1
         ? rangeInfo.sha1->toString() : "\"missing SHA1\"";
       os << folly::format(
-            "<<< couldn't find unit {} to print bytecode at offset {} >>>\n",
-            currSha1, sk.printableOffset());
+        "<<< couldn't find unit {} to print bytecode at {} {} >>>\n",
+        currSha1,
+        sk.prologue() || sk.funcEntry() ? "numEntryArgs" : "offset",
+        sk.prologue() || sk.funcEntry()
+          ? sk.numEntryArgs() : sk.offset()
+      );
     }
   }
   for (auto const& disasmInfo : rangeInfo.disasm) {
@@ -437,7 +441,6 @@ TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
   if (sk.valid()) {
     rangeInfo.unit = sk.func()->unit();
     rangeInfo.func = sk.func();
-    rangeInfo.instrStr = sk.showInst();
     auto const lineNum = sk.lineNumber();
     if (lineNum != -1) rangeInfo.lineNum = lineNum;
   }

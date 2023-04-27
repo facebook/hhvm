@@ -3,8 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{BytesFormatter, DisplayBytes, FmtSpec};
-use std::io::{Result, Write};
+use std::io::Result;
+use std::io::Write;
+
+use crate::BytesFormatter;
+use crate::DisplayBytes;
+use crate::FmtSpec;
 
 pub fn write_bytes_fmt(w: &mut dyn Write, args: Arguments<'_>) -> Result<()> {
     let (a, b) = args.literals.split_at(args.args.len());

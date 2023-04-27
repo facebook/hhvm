@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/memo-cache.h"
@@ -101,6 +102,16 @@ void cgDefFuncPrologueNumArgs(IRLS& env, const IRInstruction* inst) {
 void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << copy{r_func_prologue_ctx(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmsp(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryPrevFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
 }
 
 void cgStVMFP(IRLS& env, const IRInstruction* inst) {
@@ -1022,6 +1033,27 @@ void cgDirFromFilepath(IRLS& env, const IRInstruction* inst) {
     callDest(env, inst),
     SyncOptions::None,
     argGroup(env, inst).ssa(0)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgCreateSpecialImplicitContext(IRLS& env, const IRInstruction* inst) {
+  auto args = argGroup(env, inst).ssa(0);
+  if (inst->src(1)->isA(TStr)) {
+    args.ssa(1);
+  } else {
+    args.immPtr(nullptr);
+  }
+  args.ssa(2);
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(create_special_implicit_context_explicit),
+    callDestTV(env, inst),
+    SyncOptions::None,
+    args
   );
 }
 

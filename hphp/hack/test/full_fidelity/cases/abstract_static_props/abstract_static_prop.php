@@ -2,8 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  abstract static int $p;
-  abstract int $l;
-  <<__Const>> abstract static int $m;
-  <<__Const>> abstract int $n;
+  abstract public static int $p;
+  abstract public int $l;
+  <<__Const>> abstract public static int $m;
+  <<__Const>> abstract public int $n;
 }

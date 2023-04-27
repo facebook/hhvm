@@ -2,7 +2,3 @@ File "constructor_ambiguous_consistent.php", line 17, characters 32-32:
 The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. The constraints A, B are valid newable classes (Typing[4308])
 File "constructor_ambiguous_consistent.php", line 21, characters 32-32:
 The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. The constraints A, B are valid newable classes (Typing[4308])
-File "constructor_ambiguous_consistent.php", line 22, characters 16-16:
-Too many arguments (expected 0 but got 1) (Typing[4105])
-File "constructor_ambiguous_consistent.php", line 6, characters 19-29:
-Definition is here

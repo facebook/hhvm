@@ -75,6 +75,16 @@ void HHVM_FUNCTION(
     int64_t seqid,
     bool oneway = false);
 
+void HHVM_FUNCTION(
+    thrift_protocol_write_compact2,
+    const Object& transportobj,
+    const String& method_name,
+    int64_t msgtype,
+    const Object& request_struct,
+    int64_t seqid,
+    bool oneway = false,
+    int64_t version = 2);
+
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
     const Object& transportobj,
@@ -190,22 +200,22 @@ struct TClientStreamError {
         },
         [&](apache::thrift::detail::EncodedStreamError& err) {
           auto& payload = err.encoded;
-          DCHECK(payload.metadata.payloadMetadata_ref().has_value());
+          DCHECK(payload.metadata.payloadMetadata().has_value());
           DCHECK_EQ(
-              payload.metadata.payloadMetadata_ref()->getType(),
-              apache::thrift::PayloadMetadata::exceptionMetadata);
+              payload.metadata.payloadMetadata()->getType(),
+              apache::thrift::PayloadMetadata::Type::exceptionMetadata);
           auto& exceptionMetadataBase =
-              payload.metadata.payloadMetadata_ref()->get_exceptionMetadata();
+              payload.metadata.payloadMetadata()->get_exceptionMetadata();
           if (auto exceptionMetadataRef =
-                  exceptionMetadataBase.metadata_ref()) {
+                  exceptionMetadataBase.metadata()) {
             if (exceptionMetadataRef->getType() ==
-                apache::thrift::PayloadExceptionMetadata::declaredException) {
+                apache::thrift::PayloadExceptionMetadata::Type::declaredException) {
               msgBuffer = std::move(payload.payload);
               if (!msgBuffer) {
                 msgStr = "Failed to parse declared exception";
               }
             } else {
-              msgStr = exceptionMetadataBase.what_utf8_ref().value_or("");
+              msgStr = exceptionMetadataBase.what_utf8().value_or("");
             }
           } else {
             msgStr = "Missing payload exception metadata";
@@ -216,7 +226,7 @@ struct TClientStreamError {
           apache::thrift::CompactProtocolReader reader;
           reader.setInput(err.encoded.get());
           streamRpcError.read(&reader);
-          msgStr = streamRpcError.what_utf8_ref().value_or("");
+          msgStr = streamRpcError.what_utf8().value_or("");
         },
         [](...) {});
 

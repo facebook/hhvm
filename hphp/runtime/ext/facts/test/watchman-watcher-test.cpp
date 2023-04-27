@@ -29,6 +29,7 @@
 using ::testing::ByMove;
 using ::testing::ElementsAre;
 using ::testing::Return;
+using ::testing::WithArg;
 
 namespace HPHP {
 namespace Facts {
@@ -36,7 +37,10 @@ namespace {
 
 struct MockWatchman final : public Watchman {
   MOCK_METHOD(
-      folly::SemiFuture<folly::dynamic>, query, (folly::dynamic), (override));
+      folly::SemiFuture<folly::dynamic>,
+      query,
+      (folly::dynamic),
+      (override));
 
   MOCK_METHOD(folly::SemiFuture<watchman::Clock>, getClock, (), (override));
 
@@ -136,8 +140,7 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
 
 struct WatchmanFailure : public std::runtime_error {
   explicit WatchmanFailure(std::string msg)
-      : std::runtime_error{std::move(msg)} {
-  }
+      : std::runtime_error{std::move(msg)} {}
 };
 
 TEST(WatchmanWatcherTest, RetryOnFailure) {
@@ -172,6 +175,41 @@ TEST(WatchmanWatcherTest, ThrowAfterRetrying) {
 
   Clock since;
   EXPECT_THROW(watcher->getChanges(Clock{}).get(), WatchmanFailure);
+}
+
+TEST(WatchmanWatcherTest, HgTransactionUpdate) {
+  auto mockWatchman = std::make_shared<MockWatchman>();
+  auto watcher = make_watchman_watcher(
+      folly::dynamic::object(), mockWatchman, {.m_retries = 0});
+
+  // Invoke the subscribe callback with a {"state-enter": "hg.transaction"}
+  // message
+  EXPECT_CALL(*mockWatchman, subscribe)
+      .WillOnce(WithArg<1>([&](watchman::SubscriptionCallback&& cb) {
+        // clang-format off
+        folly::dynamic msg = folly::dynamic::object
+	  ("clock", "2")
+	  ("version", "2022-05-06T03:03:19Z")
+	  ("metadata", folly::dynamic::object
+	     ("rev", "91f14be170109d514e9115b909d62114cabe5412")
+	     ("distance", 0)
+	     ("partial", false)
+	     ("status", "ok"))
+	  ("root", "/var/www")
+	  ("state-enter", "hg.transaction")
+	  ("unilateral", true)
+	  ("subscription", "sub1");
+        // clang-format on
+        cb(folly::Try{std::move(msg)});
+      }));
+
+  Clock oldClock{.m_clock = "1"};
+  watcher->subscribe(oldClock, [&](Watcher::Results&& results) {
+    EXPECT_FALSE(results.m_lastClock);
+    EXPECT_EQ(results.m_newClock, Clock{.m_clock = "2"});
+    EXPECT_FALSE(results.m_fresh);
+    EXPECT_TRUE(results.m_files.empty());
+  });
 }
 
 } // namespace

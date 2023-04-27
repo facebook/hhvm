@@ -371,7 +371,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
   char *buf = (char*)malloc(buf_size);
   buf[0] = '\0';
   while (id && i < buf_size) {
-    sprintf(intbuf, "%d", id->id);
+    snprintf(intbuf, 16, "%d", id->id);
     len = strlen(intbuf);
     if (len > (buf_size-i)) {
       raise_warning("too many nested sections in message");
@@ -389,7 +389,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
                           "developers.", buf_size).c_str());
       }
     }
-    sprintf(&buf[i], "%s%c", intbuf, id->next ? '.' : '\0');
+    snprintf(&buf[i], buf_size-i, "%s%c", intbuf, id->next ? '.' : '\0');
     i += len + (id->next ? 1 : 0);
     id = id->next;
   }
@@ -536,7 +536,7 @@ const StaticString
   s_mime_version("mime-version"),
   s_content_transfer_encoding("content-transfer-encoding");
 
-Variant MimePart::getPartData() {
+Array MimePart::getPartData() {
   Array ret = Array::CreateDict();
 
   ret.set(s_headers, m_headers);

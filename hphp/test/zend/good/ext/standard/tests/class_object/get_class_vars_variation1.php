@@ -16,7 +16,7 @@ class classWithToString
 class classWithoutToString
 {
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_vars_variation1(): void {
 echo "*** Testing get_class_vars() : usage variation ***\n";
 
 

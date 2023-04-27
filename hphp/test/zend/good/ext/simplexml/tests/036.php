@@ -1,5 +1,5 @@
 <?hh
-class SXE extends SimpleXmlElement {
+class SXE extends SimpleXMLElement {
     public function count() {
         echo "Called Count!\n";
         return parent::count();

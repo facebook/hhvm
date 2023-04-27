@@ -21,7 +21,7 @@ let modifiers_to_list ~is_final ~visibility ~is_abstract ~is_static =
     | Public -> [SymbolDefinition.Public]
     | Private -> [SymbolDefinition.Private]
     | Protected -> [SymbolDefinition.Protected]
-    | Internal -> []
+    | Internal -> [SymbolDefinition.Internal]
   in
   let modifiers =
     if is_final then
@@ -64,6 +64,7 @@ let summarize_property class_name var =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span = var.cv_span;
@@ -80,7 +81,7 @@ let maybe_summarize_property class_name ~skip var =
   else
     [summarize_property class_name var]
 
-let summarize_const class_name cc =
+let summarize_class_const class_name cc =
   let (pos, name) = cc.cc_id in
   let (span, modifiers) =
     match cc.cc_kind with
@@ -88,13 +89,14 @@ let summarize_const class_name cc =
     | CCAbstract (Some (_, p_default, _)) -> (Pos.btw pos p_default, [Abstract])
     | CCAbstract None -> (pos, [Abstract])
   in
-  let kind = Const in
+  let kind = ClassConst in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span;
@@ -128,6 +130,7 @@ let summarize_typeconst class_name t =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span = t.c_tconst_span;
@@ -164,6 +167,7 @@ let summarize_param param =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span = Pos.btw param_start param_end;
@@ -192,6 +196,7 @@ let summarize_method class_name m =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos = fst m.m_name;
     span = m.m_span;
@@ -266,7 +271,7 @@ let summarize_class class_ ~no_children =
         (* Summarized consts *)
         List.fold_left
           ~init:acc
-          ~f:(fun acc c -> summarize_const class_name c :: acc)
+          ~f:(fun acc c -> summarize_class_const class_name c :: acc)
           class_.c_consts
       in
       let acc =
@@ -305,6 +310,7 @@ let summarize_class class_ ~no_children =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos = class_name_pos;
     span = c_span;
@@ -326,6 +332,7 @@ let summarize_typedef tdef =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span;
@@ -340,15 +347,16 @@ let summarize_fun fd =
   let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
   let params = Some (List.map f.f_params ~f:summarize_param) in
   let kind = SymbolDefinition.Function in
-  let name = Utils.strip_ns (snd f.f_name) in
+  let name = Utils.strip_ns (snd fd.fd_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
   {
     kind;
     name;
     full_name;
+    class_name = None;
     id;
-    pos = fst f.f_name;
+    pos = fst fd.fd_name;
     span = f.f_span;
     modifiers;
     children = None;
@@ -360,7 +368,7 @@ let summarize_gconst cst =
   let pos = fst cst.cst_name in
   let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
   let (_, gconst_end, _) = cst.cst_value in
-  let kind = Const in
+  let kind = GlobalConst in
   let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
@@ -368,6 +376,7 @@ let summarize_gconst cst =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span = Pos.btw gconst_start gconst_end;
@@ -385,6 +394,7 @@ let summarize_local name span =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos = span;
     span;
@@ -392,6 +402,32 @@ let summarize_local name span =
     children = None;
     params = None;
     docblock = None;
+  }
+
+let summarize_module_def md =
+  let kind = SymbolDefinition.Module in
+  let name = snd md.md_name in
+  let full_name = get_full_name None name in
+  let id = get_symbol_id kind None name in
+  let span = md.md_span in
+  let doc_comment = md.md_doc_comment in
+  let docblock =
+    match doc_comment with
+    | None -> None
+    | Some dc -> Some (snd dc)
+  in
+  {
+    kind;
+    name;
+    full_name;
+    class_name = None;
+    id;
+    pos = span;
+    span;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock;
   }
 
 let outline_ast ast =
@@ -408,12 +444,14 @@ let should_add_docblock = function
   | Class
   | Method
   | Property
-  | Const
+  | ClassConst
+  | GlobalConst
   | Enum
   | Interface
   | Trait
   | Typeconst
-  | Typedef ->
+  | Typedef
+  | Module ->
     true
   | LocalVar
   | TypeVar
@@ -496,6 +534,7 @@ let rec print_def ~short_pos indent def =
     params;
     docblock;
     full_name = _;
+    class_name = _;
   } =
     def
   in

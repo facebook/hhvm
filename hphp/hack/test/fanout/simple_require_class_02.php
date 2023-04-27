@@ -12,7 +12,7 @@ trait A {
 }
 //// base-b.php
 <?hh
-class C {
+final class C {
   use A;
 
   public function bar(): int {
@@ -34,7 +34,7 @@ trait A {
 }
 //// changed-b.php
 <?hh
-class C {
+final class C {
   use A;
 
   public function bar(): string {

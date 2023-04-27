@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/field_wrapper.h"
+#include "hphp/runtime/ext/thrift/type_wrapper.h"
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/hash-map.h"
 
@@ -47,7 +48,9 @@ const StaticString
   s_etype("etype"),
   s_format("format"),
   s_SPEC("SPEC"),
-  s_isWrapped("is_wrapped");
+  s_isWrapped("is_wrapped"),
+  s_isTypeWrapped("is_type_wrapped"),
+  s_isTerse("is_terse");
 
 Array get_tspec(const Class* cls) {
   auto lookup = cls->clsCnsGet(s_SPEC.get());
@@ -146,6 +149,25 @@ const Func* lookupWithDefaultValuesFunc(const Class* cls) {
   return func;
 }
 
+const StaticString s_clearTerseFields("clearTerseFields");
+
+const Func* lookupClearTerseFieldsFunc(const Class* cls) {
+  auto const func = cls->lookupMethod(s_clearTerseFields.get());
+  if (func == nullptr) {
+    thrift_error(
+      folly::sformat("Method {}::clearTerseFields() not found", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  if (func->isStatic()) {
+    thrift_error(
+      folly::sformat("Method {}::clearTerseFields() is static", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  return func;
+}
+
 StructSpec compileSpec(const Array& spec, const Class* cls) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
@@ -159,7 +181,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
     }
     Array fieldSpec = specIt.second().toArray();
     auto field = FieldSpec::compile(fieldSpec, true);
-    field.fieldNum = specIt.first().toInt16();
+    field.fieldNum = (short)specIt.first().toInt64();
 
     // Determine if we can safely skip the type check when deserializing.
     field.noTypeCheck = [&] {
@@ -196,10 +218,13 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
 
   // We can precompute the cls::withDefaultValues() func pointer only if the
   // underlying class cannot change.
-  auto const func = cls != nullptr && cls->isPersistent()
+  auto const withDefaultValuesFunc = cls != nullptr && cls->isPersistent()
     ? lookupWithDefaultValuesFunc(cls) : nullptr;
 
-  return StructSpec{HPHP::FixedVector(std::move(temp)), func};
+  auto const clearTerseFieldsFunc = cls != nullptr && cls->isPersistent()
+    ? lookupClearTerseFieldsFunc(cls) : nullptr;
+
+  return StructSpec{HPHP::FixedVector(std::move(temp)), withDefaultValuesFunc, clearTerseFieldsFunc};
 }
 
 } // namespace
@@ -249,6 +274,10 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
   field.adapter = getAdapter(fieldSpec);
   field.isWrapped = tvCastToBoolean(
       fieldSpec.lookup(s_isWrapped, AccessFlags::Key));
+  field.isTypeWrapped = tvCastToBoolean(
+      fieldSpec.lookup(s_isTypeWrapped, AccessFlags::Key));
+  field.isTerse = tvCastToBoolean(
+      fieldSpec.lookup(s_isTerse, AccessFlags::Key));
   return field;
 }
 
@@ -300,7 +329,9 @@ Object StructSpec::newObject(Class* cls) const {
 
   auto obj = g_context->invokeFuncFew(
     func, cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
-  if (tvIsObject(obj)) return Object::attach(obj.m_data.pobj);
+  if (tvIsObject(obj)) {
+    return Object::attach(obj.m_data.pobj);
+  }
 
   SCOPE_EXIT { tvDecRefGen(obj); };
   thrift_error(
@@ -310,6 +341,13 @@ Object StructSpec::newObject(Class* cls) const {
     ),
     ERR_INVALID_DATA
   );
+}
+
+void StructSpec::clearTerseFields(Class* cls, const Object& obj) const {
+  auto const func = clearTerseFieldsFunc != nullptr
+    ? clearTerseFieldsFunc : lookupClearTerseFieldsFunc(cls);
+  g_context->invokeFuncFew(
+    func, obj.get(), 0, nullptr, RuntimeCoeffects::write_props());
 }
 
 }

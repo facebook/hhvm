@@ -17,8 +17,8 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
+      HH\Capabilities\WriteProperty < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
@@ -29,8 +29,8 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
@@ -41,8 +41,8 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\WriteProperty'1 < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
@@ -52,8 +52,8 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -69,8 +69,8 @@ Analyzing \simple:
                                           HH\Capabilities\AccessGlobals_lump'1> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
                                     HH\Capabilities\RxLocal_lump'1> &
-         \HH\Capabilities\System<HH\Capabilities\System'1,
-                                   HH\Capabilities\System_lump'1> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'1,
+                                        HH\Capabilities\SystemLocal_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
@@ -81,8 +81,8 @@ Analyzing \simple:
                                           HH\Capabilities\AccessGlobals_lump'3> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
                                     HH\Capabilities\RxLocal_lump'3> &
-         \HH\Capabilities\System<HH\Capabilities\System'3,
-                                   HH\Capabilities\System_lump'3> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'3,
+                                        HH\Capabilities\SystemLocal_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
@@ -109,8 +109,8 @@ Analyzing \union:
       HH\Capabilities\WriteProperty < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
+      HH\Capabilities\WriteProperty < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
@@ -121,8 +121,8 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
@@ -133,8 +133,8 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\WriteProperty'1 < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
@@ -144,8 +144,8 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -161,8 +161,8 @@ Analyzing \union:
                                           HH\Capabilities\AccessGlobals_lump'1> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
                                     HH\Capabilities\RxLocal_lump'1> &
-         \HH\Capabilities\System<HH\Capabilities\System'1,
-                                   HH\Capabilities\System_lump'1> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'1,
+                                        HH\Capabilities\SystemLocal_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
@@ -173,8 +173,8 @@ Analyzing \union:
                                           HH\Capabilities\AccessGlobals_lump'3> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
                                     HH\Capabilities\RxLocal_lump'3> &
-         \HH\Capabilities\System<HH\Capabilities\System'3,
-                                   HH\Capabilities\System_lump'3> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'3,
+                                        HH\Capabilities\SystemLocal_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
@@ -202,8 +202,8 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
+      HH\Capabilities\WriteProperty < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
@@ -214,8 +214,8 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
@@ -226,8 +226,8 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\WriteProperty'1 < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
@@ -237,8 +237,8 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -254,8 +254,8 @@ Analyzing \breaks:
                                           HH\Capabilities\AccessGlobals_lump'1> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
                                     HH\Capabilities\RxLocal_lump'1> &
-         \HH\Capabilities\System<HH\Capabilities\System'1,
-                                   HH\Capabilities\System_lump'1> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'1,
+                                        HH\Capabilities\SystemLocal_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
@@ -266,8 +266,8 @@ Analyzing \breaks:
                                           HH\Capabilities\AccessGlobals_lump'3> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
                                     HH\Capabilities\RxLocal_lump'3> &
-         \HH\Capabilities\System<HH\Capabilities\System'3,
-                                   HH\Capabilities\System_lump'3> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'3,
+                                        HH\Capabilities\SystemLocal_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
@@ -295,8 +295,8 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
+      HH\Capabilities\WriteProperty < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
@@ -307,8 +307,8 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
@@ -319,8 +319,8 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\AccessGlobals'1,
       HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\RxLocal'1,
-      HH\Capabilities\System_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
+      HH\Capabilities\SystemLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\WriteProperty'1 < HH\Capabilities\SystemLocal'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
@@ -330,8 +330,8 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
       HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
-      HH\Capabilities\System_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
+      HH\Capabilities\SystemLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\SystemLocal'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -348,8 +348,8 @@ Analyzing \continues:
                                           HH\Capabilities\AccessGlobals_lump'1> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
                                     HH\Capabilities\RxLocal_lump'1> &
-         \HH\Capabilities\System<HH\Capabilities\System'1,
-                                   HH\Capabilities\System_lump'1> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'1,
+                                        HH\Capabilities\SystemLocal_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
@@ -360,8 +360,8 @@ Analyzing \continues:
                                           HH\Capabilities\AccessGlobals_lump'3> &
          \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
                                     HH\Capabilities\RxLocal_lump'3> &
-         \HH\Capabilities\System<HH\Capabilities\System'3,
-                                   HH\Capabilities\System_lump'3> &
+         \HH\Capabilities\SystemLocal<HH\Capabilities\SystemLocal'3,
+                                        HH\Capabilities\SystemLocal_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);

@@ -3,18 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{cmp::Ordering, ops::Range, result::Result::*};
+use std::cmp::Ordering;
+use std::ops::Range;
+use std::result::Result::*;
 
 use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
-use serde::{Deserialize, Serialize};
-
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use oxidized::file_pos::FilePos;
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::relative_path::RelativePath;
 
@@ -440,6 +443,9 @@ impl EqModuloPos for Pos<'_> {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
         true
     }
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
+        true
+    }
 }
 
 /// This struct has an impl of Display which produces the same format as
@@ -471,9 +477,10 @@ pub mod map {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::relative_path::Prefix;
     use pretty_assertions::assert_eq;
+    use relative_path::Prefix;
+
+    use super::*;
 
     fn make_pos<'a>(
         b: &'a Bump,

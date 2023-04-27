@@ -1,5 +1,7 @@
 <?hh
 
+namespace SealedClass15;
+
 <<__Sealed(SomeOtherInterface::class)>>
 interface SomeSealedInterface {}
 

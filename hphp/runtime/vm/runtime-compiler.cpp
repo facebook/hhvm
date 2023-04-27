@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/runtime-compiler.h"
 
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -43,6 +45,7 @@ namespace {
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
                                    const char* filename,
                                    const Native::FuncTable& nativeFuncs,
+                                   AutoloadMap* map,
                                    Unit** releaseUnit,
                                    bool isSystemLib,
                                    bool forDebuggerEval) {
@@ -78,22 +81,19 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
   std::unique_ptr<UnitEmitter> ue;
-  // Check if this file contains raw hip hop bytecode instead of
-  // php.  This is dictated by a special file extension.
-  if (RuntimeOption::EvalAllowHhas) {
-    if (const char* dot = strrchr(filename, '.')) {
-      const char hhbc_ext[] = "hhas";
-      if (!strcmp(dot + 1, hhbc_ext)) {
-        auto const& contents = loader.contents();
-        ue = assemble_string(
-          contents.data(),
-          contents.size(),
-          filename,
-          loader.sha1(),
-          nativeFuncs
-        );
-      }
-    }
+  // Check if this file contains raw HHAS instead of Hack source code.
+  // This is dictated by a special file extension.
+  if (RuntimeOption::EvalAllowHhas &&
+      folly::StringPiece(filename).endsWith(".hhas")) {
+    auto const& contents = loader.contents();
+    ue = assemble_string(
+      contents.data(),
+      contents.size(),
+      filename,
+      loader.sha1(),
+      nativeFuncs,
+      RepoOptions::forFile(filename).packageInfo()
+    );
   }
 
   // If ue != nullptr then we assembled it above, so don't feed it into
@@ -103,6 +103,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       loader,
       filename,
       nativeFuncs,
+      map,
       isSystemLib,
       forDebuggerEval
     );
@@ -114,15 +115,16 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       }
     };
     try {
-      bool ignore;
-      ue = uc->compile(ignore);
+      bool cache_hit;
+      ue = uc->compile(cache_hit);
     } catch (const CompilerAbort& exn) {
       fprintf(stderr, "%s", exn.what());
-      _Exit(1);
+      _Exit(HPHP_EXIT_FAILURE);
     }
   }
 
   assertx(ue);
+  ue->logDeclInfo();
   return ue;
 }
 
@@ -133,12 +135,14 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
                    const Native::FuncTable& nativeFuncs,
+                   AutoloadMap* map,
                    Unit** releaseUnit) {
   assertx(!filename || filename[0] != '/' || filename[1] != ':');
   return parse(
     loader,
     filename,
     nativeFuncs,
+    map,
     releaseUnit,
     false,
     false
@@ -149,6 +153,7 @@ Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
                      const Native::FuncTable& nativeFuncs,
+                     AutoloadMap* map,
                      const RepoOptions& options,
                      bool isSystemLib,
                      bool forDebuggerEval) {
@@ -159,11 +164,12 @@ Unit* compile_string(const char* s,
   auto const sha1 = SHA1{mangleUnitSha1(
     string_sha1(folly::StringPiece{s, sz}), name, options.flags()
   )};
-  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags()};
+  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags(), options.dir()};
   return parse(
     loader,
     fname,
     nativeFuncs,
+    map,
     nullptr,
     isSystemLib,
     forDebuggerEval
@@ -184,11 +190,22 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
     fname,
     RepoOptions::defaults().flags()
   )};
-  LazyUnitContentsLoader loader{sha1, {s, sz}, RepoOptions::defaults().flags()};
+  auto const& defaults = RepoOptions::defaults();
+  LazyUnitContentsLoader loader{
+    sha1,
+    {s, sz},
+    defaults.flags(),
+    defaults.dir()
+  };
+  // We provide the empty autoload map here: there are no symbols that are going
+  // to be provided outside of systemlib itself. The created decl provider will
+  // hook into `s_builtin_symbols` to provide the relevant decls.
+  RepoAutoloadMap empty_map({}, {}, {}, {}, {});
   auto ue = parse(
     loader,
     fname,
     nativeFuncs,
+    RuntimeOption::EvalEnableDecl ? &empty_map : nullptr,
     nullptr,
     true,
     false
@@ -203,11 +220,20 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
 Unit* compile_debugger_string(
   const char* s, size_t sz, const RepoOptions& options
 ) {
+  auto const map = [] () -> AutoloadMap* {
+    if (!AutoloadHandler::s_instance) {
+      // It is not safe to autoinit AutoloadHandler outside a normal request.
+      return nullptr;
+    }
+    return AutoloadHandler::s_instance->getAutoloadMap();
+  }();
+
   return compile_string(
     s,
     sz,
     nullptr,
     Native::s_noNativeFuncs,
+    map,
     options,
     false,
     true

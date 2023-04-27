@@ -7,10 +7,20 @@
  *
  *)
 
+type rename_mode =
+  | Function
+  | Class
+  | Method
+  | Unspecified
+
 type client_mode =
-  | MODE_AI_QUERY of string
   | MODE_AUTO_COMPLETE
-  | MODE_BIGCODE of string
+  | MODE_CODEMOD_SDT of {
+      csdt_path_to_jsonl: string;
+      csdt_strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];
+      csdt_log_remotely: bool;
+      csdt_tag: string;
+    }
   | MODE_COLORING of string
   | MODE_COVERAGE of string
   | MODE_CREATE_CHECKPOINT of string
@@ -24,14 +34,18 @@ type client_mode =
   | MODE_FORMAT of int * int
   | MODE_FULL_FIDELITY_PARSE of string
   | MODE_FULL_FIDELITY_SCHEMA
-  | MODE_GEN_HOT_CLASSES of int * string
   | MODE_GEN_PREFETCH_DIR of string
+  | MODE_GEN_REMOTE_DECLS_FULL
+  | MODE_GEN_REMOTE_DECLS_INCREMENTAL
+  | MODE_GEN_SHALLOW_DECLS_DIR of string
   | MODE_GO_TO_IMPL_CLASS of string
   | MODE_GO_TO_IMPL_CLASS_REMOTE of string
   | MODE_GO_TO_IMPL_METHOD of string
   | MODE_IDE_FIND_REFS of string
+  | MODE_IDE_FIND_REFS_BY_SYMBOL of string
+  | MODE_IDE_GO_TO_IMPL of string
   | MODE_IDE_HIGHLIGHT_REFS of string
-  | MODE_IDE_REFACTOR of string
+  | MODE_IDE_RENAME of string
   | MODE_IDENTIFY_SYMBOL1 of string
   | MODE_IDENTIFY_SYMBOL2 of string
   | MODE_IDENTIFY_SYMBOL3 of string
@@ -47,8 +61,10 @@ type client_mode =
   | MODE_OUTLINE
   | MODE_OUTLINE2
   | MODE_PAUSE of bool
-  | MODE_REFACTOR of string * string * string
+  | MODE_RENAME of rename_mode * string * string
+  | MODE_RENAME_SOUND_DYNAMIC of rename_mode * string
   | MODE_REMOVE_DEAD_FIXMES of int list
+  | MODE_REMOVE_DEAD_UNSAFE_CASTS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
   | MODE_REWRITE_TYPE_PARAMS_TYPE of string list
   | MODE_RETRIEVE_CHECKPOINT of string
@@ -60,20 +76,21 @@ type client_mode =
   | MODE_STATS
   | MODE_STATUS
   | MODE_STATUS_SINGLE of string list (* filenames *)
-  | MODE_STATUS_SINGLE_REMOTE_EXECUTION of string (* filename *)
-  | MODE_STATUS_REMOTE_EXECUTION of string (* "warm" or "cold" *)
-  | MODE_STATUS_MULTI_REMOTE_EXECUTION
   | MODE_TYPE_AT_POS of string
   | MODE_TYPE_AT_POS_BATCH of string list
   | MODE_TYPE_ERROR_AT_POS of string
+  | MODE_IS_SUBTYPE
   | MODE_TAST_HOLES of string
+  | MODE_TAST_HOLES_BATCH of string
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
-  | MODE_FILE_DEPENDENTS
+  | MODE_FILE_LEVEL_DEPENDENCIES
   | MODE_GLOBAL_INFERENCE of ServerGlobalInferenceTypes.mode * string list
   | MODE_VERBOSE of bool
+  | MODE_DEPS_OUT_AT_POS_BATCH of string list
+  | MODE_DEPS_IN_AT_POS_BATCH of string list
+[@@deriving variants]
 
 type client_check_env = {
-  ai_mode: string option;
   autostart: bool;
   config: (string * string) list;
   custom_hhi_path: string option;
@@ -93,6 +110,7 @@ type client_check_env = {
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
   output_json: bool;
+  prefer_stdout: bool;
   prechecked: bool option;
   mini_state: string option;
   remote: bool;
@@ -106,67 +124,12 @@ type client_check_env = {
   desc: string;
 }
 
-let mode_to_string = function
-  | MODE_AI_QUERY _ -> "MODE_AI_QUERY"
-  | MODE_AUTO_COMPLETE -> "MODE_AUTO_COMPLETE"
-  | MODE_BIGCODE _ -> "MODE_BIGCODE"
-  | MODE_COLORING _ -> "MODE_COLORING"
-  | MODE_COVERAGE _ -> "MODE_COVERAGE"
-  | MODE_CREATE_CHECKPOINT _ -> "MODE_CREATE_CHECKPOINT"
-  | MODE_CST_SEARCH _ -> "MODE_CST_SEARCH"
-  | MODE_DELETE_CHECKPOINT _ -> "MODE_DELETE_CHECKPOINT"
-  | MODE_DUMP_SYMBOL_INFO _ -> "MODE_DUMP_SYMBOL_INFO"
-  | MODE_EXTRACT_STANDALONE _ -> "MODE_EXTRACT_STANDALONE"
-  | MODE_CONCATENATE_ALL -> "MODE_CONCATENATE_ALL"
-  | MODE_FIND_CLASS_REFS _ -> "MODE_FIND_CLASS_REFS"
-  | MODE_FIND_REFS _ -> "MODE_FIND_REFS"
-  | MODE_FORMAT _ -> "MODE_FORMAT"
-  | MODE_FULL_FIDELITY_PARSE _ -> "MODE_FULL_FIDELITY_PARSE"
-  | MODE_FULL_FIDELITY_SCHEMA -> "MODE_FULL_FIDELITY_SCHEMA"
-  | MODE_GEN_HOT_CLASSES _ -> "MODE_GEN_HOT_CLASSES"
-  | MODE_GEN_PREFETCH_DIR _ -> "MODE_GEN_PREFETCH_DIR"
-  | MODE_GO_TO_IMPL_CLASS _ -> "MODE_GO_TO_IMPL_CLASS"
-  | MODE_GO_TO_IMPL_CLASS_REMOTE _ -> "MODE_GO_TO_IMPL_CLASS_REMOTE"
-  | MODE_GO_TO_IMPL_METHOD _ -> "MODE_GO_TO_IMPL_METHOD"
-  | MODE_IDE_FIND_REFS _ -> "MODE_IDE_FIND_REFS"
-  | MODE_IDE_HIGHLIGHT_REFS _ -> "MODE_IDE_HIGHLIGHT_REFS"
-  | MODE_IDE_REFACTOR _ -> "MODE_IDE_REFACTOR"
-  | MODE_IDENTIFY_SYMBOL _ -> "MODE_IDENTIFY_SYMBOL"
-  | MODE_IDENTIFY_SYMBOL1 _ -> "MODE_IDENTIFY_SYMBOL1"
-  | MODE_IDENTIFY_SYMBOL2 _ -> "MODE_IDENTIFY_SYMBOL2"
-  | MODE_IDENTIFY_SYMBOL3 _ -> "MODE_IDENTIFY_SYMBOL3"
-  | MODE_IN_MEMORY_DEP_TABLE_SIZE -> "MODE_IN_MEMORY_DEP_TABLE_SIZE"
-  | MODE_LINT -> "MODE_LINT"
-  | MODE_LINT_ALL _ -> "MODE_LINT_ALL"
-  | MODE_LINT_STDIN _ -> "MODE_LINT_STDIN"
-  | MODE_LIST_FILES -> "MODE_LIST_FILES"
-  | MODE_METHOD_JUMP_ANCESTORS _ -> "MODE_METHOD_JUMP_ANCESTORS"
-  | MODE_METHOD_JUMP_ANCESTORS_BATCH _ -> "MODE_METHOD_JUMP_ANCESTORS_BATCH"
-  | MODE_METHOD_JUMP_CHILDREN _ -> "MODE_METHOD_JUMP_CHILDREN"
-  | MODE_OUTLINE -> "MODE_OUTLINE"
-  | MODE_OUTLINE2 -> "MODE_OUTLINE2"
-  | MODE_PAUSE _ -> "MODE_PAUSE"
-  | MODE_REFACTOR _ -> "MODE_REFACTOR"
-  | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
-  | MODE_REWRITE_LAMBDA_PARAMETERS _ -> "MODE_REWRITE_LAMBDA_PARAMETERS"
-  | MODE_REWRITE_TYPE_PARAMS_TYPE _ -> "MODE_REWRITE_TYPE_PARAMS_TYPE"
-  | MODE_RETRIEVE_CHECKPOINT _ -> "MODE_RETRIEVE_CHECKPOINT"
-  | MODE_SAVE_NAMING _ -> "MODE_SAVE_NAMING"
-  | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
-  | MODE_SEARCH _ -> "MODE_SEARCH"
-  | MODE_SERVER_RAGE -> "MODE_SERVER_RAGE"
-  | MODE_STATS -> "MODE_STATS"
-  | MODE_STATUS -> "MODE_STATUS"
-  | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"
-  | MODE_STATUS_SINGLE_REMOTE_EXECUTION _ ->
-    "MODE_STATUS_SINGLE_REMOTE_EXECUTION"
-  | MODE_STATUS_REMOTE_EXECUTION _ -> "MODE_STATUS_REMOTE_EXECUTION"
-  | MODE_STATUS_MULTI_REMOTE_EXECUTION -> "MODE_STATUS_MULTI_REMOTE_EXECUTION"
-  | MODE_TYPE_AT_POS _ -> "MODE_TYPE_AT_POS"
-  | MODE_TYPE_AT_POS_BATCH _ -> "MODE_TYPE_AT_POS_BATCH"
-  | MODE_TYPE_ERROR_AT_POS _ -> "MODE_TYPE_ERROR_AT_POS"
-  | MODE_TAST_HOLES _ -> "MODE_TAST_HOLES"
-  | MODE_FUN_DEPS_AT_POS_BATCH _ -> "MODE_FUN_DEPS_AT_POS_BATCH"
-  | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"
-  | MODE_GLOBAL_INFERENCE _ -> "MODE_GLOBAL_INFERENCE"
-  | MODE_VERBOSE _ -> "MODE_VERBOSE"
+let string_to_rename_mode = function
+  | "Function" -> Function
+  | "Class" -> Class
+  | "Method" -> Method
+  | _ ->
+    Printf.fprintf
+      stderr
+      "Error: please provide one of the following rename modes: Function, Class, or Method. \n%!";
+    exit 1

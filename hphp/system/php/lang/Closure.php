@@ -7,6 +7,7 @@ class Closure {
 
   /* @return array
    */
-  <<__Native>>
-  public final function __debugInfo(): darray;
+  public final function __debugInfo(): dict {
+    return dict[];
+  }
 }

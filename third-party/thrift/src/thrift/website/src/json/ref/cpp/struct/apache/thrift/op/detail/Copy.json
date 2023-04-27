@@ -1,0 +1,747 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::Copy",
+  "includes": {
+    "refid": "detail_2Copy_8h",
+    "local": "no",
+    "text_html": "Copy.h"
+  },
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a1dc71f25ab970f00f815dc85f0411e7d",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Src"
+        },
+        {
+          "type_html": "typename Dst"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(field_ref&lt; Src &gt; src_ref, field_ref&lt; Dst &amp;&gt; dst_ref) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; Src &gt;",
+          "declname_html": "src_ref"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; Dst &amp;&gt;",
+          "declname_html": "dst_ref"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "46",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "46",
+        "bodyend": "48"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(field_ref&lt;Src&gt; src_ref, field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(field_ref<Src> src_ref, field_ref<Dst&> dst_ref) const",
+        "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(field_ref&lt;Src&gt; src_ref, field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(field_ref<Src> src_ref, field_ref<Dst&> dst_ref) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(field_ref&lt; Src &gt; src_ref, field_ref&lt; Dst &amp;&gt; dst_ref) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a3ae187ce65ca7902c15f7b67c82568e3",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Src"
+        },
+        {
+          "type_html": "typename Dst"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(required_field_ref&lt; Src &gt; src_ref, required_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; Src &gt;",
+          "declname_html": "src_ref"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; Dst &amp;&gt;",
+          "declname_html": "dst_ref"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "50",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "50",
+        "bodyend": "53"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    required_field_ref&lt;Src&gt; src_ref, required_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    required_field_ref<Src> src_ref, required_field_ref<Dst&> dst_ref) const",
+        "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    required_field_ref&lt;Src&gt; src_ref, required_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    required_field_ref<Src> src_ref, required_field_ref<Dst&> dst_ref) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(required_field_ref&lt; Src &gt; src_ref, required_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a50df7538e094d946c980fc801fa7316a",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Src"
+        },
+        {
+          "type_html": "typename Dst"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(optional_field_ref&lt; Src &gt; src_ref, optional_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; Src &gt;",
+          "declname_html": "src_ref"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; Dst &amp;&gt;",
+          "declname_html": "dst_ref"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "55",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "55",
+        "bodyend": "58"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    optional_field_ref&lt;Src&gt; src_ref, optional_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    optional_field_ref<Src> src_ref, optional_field_ref<Dst&> dst_ref) const",
+        "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    optional_field_ref&lt;Src&gt; src_ref, optional_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    optional_field_ref<Src> src_ref, optional_field_ref<Dst&> dst_ref) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(optional_field_ref&lt; Src &gt; src_ref, optional_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a7e20a5835b17eee8aac50311721d12fe",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Src"
+        },
+        {
+          "type_html": "typename Dst"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(optional_boxed_field_ref&lt; Src &gt; src_ref, optional_boxed_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; Src &gt;",
+          "declname_html": "src_ref"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; Dst &amp;&gt;",
+          "declname_html": "dst_ref"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "60",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "60",
+        "bodyend": "64"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    optional_boxed_field_ref&lt;Src&gt; src_ref,\n    optional_boxed_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    optional_boxed_field_ref<Src> src_ref,\n    optional_boxed_field_ref<Dst&> dst_ref) const",
+        "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    optional_boxed_field_ref&lt;Src&gt; src_ref,\n    optional_boxed_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    optional_boxed_field_ref<Src> src_ref,\n    optional_boxed_field_ref<Dst&> dst_ref) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(optional_boxed_field_ref&lt; Src &gt; src_ref, optional_boxed_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1afa16beb0f388233433e61a2e22976b12",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Src"
+        },
+        {
+          "type_html": "typename Dst"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(terse_field_ref&lt; Src &gt; src_ref, terse_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; Src &gt;",
+          "declname_html": "src_ref"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; Dst &amp;&gt;",
+          "declname_html": "dst_ref"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "66",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "66",
+        "bodyend": "69"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    terse_field_ref&lt;Src&gt; src_ref, terse_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    terse_field_ref<Src> src_ref, terse_field_ref<Dst&> dst_ref) const",
+        "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    terse_field_ref&lt;Src&gt; src_ref, terse_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+        "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    terse_field_ref<Src> src_ref, terse_field_ref<Dst&> dst_ref) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(terse_field_ref&lt; Src &gt; src_ref, terse_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a6b04a7f90784bf3a251736e1920cde02",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(const std::unique_ptr&lt; T &gt; &amp;src_ptr, std::unique_ptr&lt; T &gt; &amp;dst_ptr) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const std::unique_ptr&lt; T &gt; &amp;",
+          "declname_html": "src_ptr"
+        },
+        {
+          "type_html": "std::unique_ptr&lt; T &gt; &amp;",
+          "declname_html": "dst_ptr"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "83",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "83",
+        "bodyend": "86"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid operator()(\n    const std::unique_ptr&lt;T&gt;&amp; src_ptr, std::unique_ptr&lt;T&gt;&amp; dst_ptr) const",
+        "simple_raw": "template <typename T>\nvoid operator()(\n    const std::unique_ptr<T>& src_ptr, std::unique_ptr<T>& dst_ptr) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline void operator()(\n    const std::unique_ptr&lt;T&gt;&amp; src_ptr, std::unique_ptr&lt;T&gt;&amp; dst_ptr) const",
+        "detailed_raw": "template <typename T>\ninline void operator()(\n    const std::unique_ptr<T>& src_ptr, std::unique_ptr<T>& dst_ptr) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(const std::unique_ptr&lt; T &gt; &amp;src_ptr, std::unique_ptr&lt; T &gt; &amp;dst_ptr) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1afe0954f8fc47d1bef7c0d7f0b655ee94",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+      "argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;src_ptr, std::shared_ptr&lt; T &gt; &amp;dst_ptr) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const std::shared_ptr&lt; T &gt; &amp;",
+          "declname_html": "src_ptr"
+        },
+        {
+          "type_html": "std::shared_ptr&lt; T &gt; &amp;",
+          "declname_html": "dst_ptr"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "line": "89",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+        "bodystart": "89",
+        "bodyend": "92"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid operator()(\n    const std::shared_ptr&lt;T&gt;&amp; src_ptr, std::shared_ptr&lt;T&gt;&amp; dst_ptr) const",
+        "simple_raw": "template <typename T>\nvoid operator()(\n    const std::shared_ptr<T>& src_ptr, std::shared_ptr<T>& dst_ptr) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline void operator()(\n    const std::shared_ptr&lt;T&gt;&amp; src_ptr, std::shared_ptr&lt;T&gt;&amp; dst_ptr) const",
+        "detailed_raw": "template <typename T>\ninline void operator()(\n    const std::shared_ptr<T>& src_ptr, std::shared_ptr<T>& dst_ptr) const",
+        "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+        "original_argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;src_ptr, std::shared_ptr&lt; T &gt; &amp;dst_ptr) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+    "line": "44",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+    "bodystart": "44",
+    "bodyend": "93"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "Copy"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "struct Copy;",
+  "declaration_html": "struct Copy;",
+  "filepath": "struct/apache/thrift/op/detail/Copy",
+  "href": "/ref/cpp/struct/apache/thrift/op/detail/Copy",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::Copy::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a1dc71f25ab970f00f815dc85f0411e7d",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Src"
+                },
+                {
+                  "type_html": "typename Dst"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(field_ref&lt; Src &gt; src_ref, field_ref&lt; Dst &amp;&gt; dst_ref) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; Src &gt;",
+                  "declname_html": "src_ref"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; Dst &amp;&gt;",
+                  "declname_html": "dst_ref"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "46",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "46",
+                "bodyend": "48"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(field_ref&lt;Src&gt; src_ref, field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(field_ref<Src> src_ref, field_ref<Dst&> dst_ref) const",
+                "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(field_ref&lt;Src&gt; src_ref, field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(field_ref<Src> src_ref, field_ref<Dst&> dst_ref) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(field_ref&lt; Src &gt; src_ref, field_ref&lt; Dst &amp;&gt; dst_ref) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a3ae187ce65ca7902c15f7b67c82568e3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Src"
+                },
+                {
+                  "type_html": "typename Dst"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(required_field_ref&lt; Src &gt; src_ref, required_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; Src &gt;",
+                  "declname_html": "src_ref"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; Dst &amp;&gt;",
+                  "declname_html": "dst_ref"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "50",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "50",
+                "bodyend": "53"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    required_field_ref&lt;Src&gt; src_ref, required_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    required_field_ref<Src> src_ref, required_field_ref<Dst&> dst_ref) const",
+                "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    required_field_ref&lt;Src&gt; src_ref, required_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    required_field_ref<Src> src_ref, required_field_ref<Dst&> dst_ref) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(required_field_ref&lt; Src &gt; src_ref, required_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a50df7538e094d946c980fc801fa7316a",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Src"
+                },
+                {
+                  "type_html": "typename Dst"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(optional_field_ref&lt; Src &gt; src_ref, optional_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; Src &gt;",
+                  "declname_html": "src_ref"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; Dst &amp;&gt;",
+                  "declname_html": "dst_ref"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "55",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "55",
+                "bodyend": "58"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    optional_field_ref&lt;Src&gt; src_ref, optional_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    optional_field_ref<Src> src_ref, optional_field_ref<Dst&> dst_ref) const",
+                "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    optional_field_ref&lt;Src&gt; src_ref, optional_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    optional_field_ref<Src> src_ref, optional_field_ref<Dst&> dst_ref) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(optional_field_ref&lt; Src &gt; src_ref, optional_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a7e20a5835b17eee8aac50311721d12fe",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Src"
+                },
+                {
+                  "type_html": "typename Dst"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(optional_boxed_field_ref&lt; Src &gt; src_ref, optional_boxed_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; Src &gt;",
+                  "declname_html": "src_ref"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; Dst &amp;&gt;",
+                  "declname_html": "dst_ref"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "60",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "60",
+                "bodyend": "64"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    optional_boxed_field_ref&lt;Src&gt; src_ref,\n    optional_boxed_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    optional_boxed_field_ref<Src> src_ref,\n    optional_boxed_field_ref<Dst&> dst_ref) const",
+                "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    optional_boxed_field_ref&lt;Src&gt; src_ref,\n    optional_boxed_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    optional_boxed_field_ref<Src> src_ref,\n    optional_boxed_field_ref<Dst&> dst_ref) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(optional_boxed_field_ref&lt; Src &gt; src_ref, optional_boxed_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1afa16beb0f388233433e61a2e22976b12",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Src"
+                },
+                {
+                  "type_html": "typename Dst"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(terse_field_ref&lt; Src &gt; src_ref, terse_field_ref&lt; Dst &amp;&gt; dst_ref) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; Src &gt;",
+                  "declname_html": "src_ref"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; Dst &amp;&gt;",
+                  "declname_html": "dst_ref"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "66",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "66",
+                "bodyend": "69"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Src, typename Dst&gt;\nvoid operator()(\n    terse_field_ref&lt;Src&gt; src_ref, terse_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "simple_raw": "template <typename Src, typename Dst>\nvoid operator()(\n    terse_field_ref<Src> src_ref, terse_field_ref<Dst&> dst_ref) const",
+                "detailed_html": "template &lt;typename Src, typename Dst&gt;\ninline void operator()(\n    terse_field_ref&lt;Src&gt; src_ref, terse_field_ref&lt;Dst&amp;&gt; dst_ref) const",
+                "detailed_raw": "template <typename Src, typename Dst>\ninline void operator()(\n    terse_field_ref<Src> src_ref, terse_field_ref<Dst&> dst_ref) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(terse_field_ref&lt; Src &gt; src_ref, terse_field_ref&lt; Dst &amp;&gt; dst_ref) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1a6b04a7f90784bf3a251736e1920cde02",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(const std::unique_ptr&lt; T &gt; &amp;src_ptr, std::unique_ptr&lt; T &gt; &amp;dst_ptr) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const std::unique_ptr&lt; T &gt; &amp;",
+                  "declname_html": "src_ptr"
+                },
+                {
+                  "type_html": "std::unique_ptr&lt; T &gt; &amp;",
+                  "declname_html": "dst_ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "83",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "83",
+                "bodyend": "86"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(\n    const std::unique_ptr&lt;T&gt;&amp; src_ptr, std::unique_ptr&lt;T&gt;&amp; dst_ptr) const",
+                "simple_raw": "template <typename T>\nvoid operator()(\n    const std::unique_ptr<T>& src_ptr, std::unique_ptr<T>& dst_ptr) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(\n    const std::unique_ptr&lt;T&gt;&amp; src_ptr, std::unique_ptr&lt;T&gt;&amp; dst_ptr) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(\n    const std::unique_ptr<T>& src_ptr, std::unique_ptr<T>& dst_ptr) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(const std::unique_ptr&lt; T &gt; &amp;src_ptr, std::unique_ptr&lt; T &gt; &amp;dst_ptr) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy_1afe0954f8fc47d1bef7c0d7f0b655ee94",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Copy::operator()",
+              "argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;src_ptr, std::shared_ptr&lt; T &gt; &amp;dst_ptr) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const std::shared_ptr&lt; T &gt; &amp;",
+                  "declname_html": "src_ptr"
+                },
+                {
+                  "type_html": "std::shared_ptr&lt; T &gt; &amp;",
+                  "declname_html": "dst_ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "line": "89",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Copy.h",
+                "bodystart": "89",
+                "bodyend": "92"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(\n    const std::shared_ptr&lt;T&gt;&amp; src_ptr, std::shared_ptr&lt;T&gt;&amp; dst_ptr) const",
+                "simple_raw": "template <typename T>\nvoid operator()(\n    const std::shared_ptr<T>& src_ptr, std::shared_ptr<T>& dst_ptr) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(\n    const std::shared_ptr&lt;T&gt;&amp; src_ptr, std::shared_ptr&lt;T&gt;&amp; dst_ptr) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(\n    const std::shared_ptr<T>& src_ptr, std::shared_ptr<T>& dst_ptr) const",
+                "original_definition_html": "void apache::thrift::op::detail::Copy::operator()",
+                "original_argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;src_ptr, std::shared_ptr&lt; T &gt; &amp;dst_ptr) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Copy/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
+              "compoundname_html": "apache::thrift::op::detail::Copy::operator()"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/op/detail/Copy/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Copy/operator.call",
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Copy/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

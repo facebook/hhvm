@@ -1,0 +1,7 @@
+Change to `Shapes::idx()`
+
+<?hh
+
+function foo(shape(?'bar' => int) $value): void {
+  Shapes::idx($value, 'bar');
+}

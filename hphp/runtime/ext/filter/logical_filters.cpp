@@ -379,7 +379,7 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED
@@ -410,8 +410,8 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  if (!url.scheme.isNull() && (url.scheme.get()->isame(s_http.get()) ||
-                               url.scheme.get()->isame(s_https.get()))) {
+  if (!url.scheme.isNull() && (url.scheme.get()->same_nocase(s_http.get()) ||
+                               url.scheme.get()->same_nocase(s_https.get()))) {
 
     if (url.host.isNull()) {
       goto bad_url;
@@ -482,7 +482,7 @@ Variant php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED

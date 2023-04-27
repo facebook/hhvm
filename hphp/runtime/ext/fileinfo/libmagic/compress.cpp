@@ -404,7 +404,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
     (void)fprintf(stderr, "exec `%s' failed (%s)\n",
         compr[method].argv[0], strerror(errno));
 #endif
-    exit(1);
+    exit(HPHP_EXIT_FAILURE);
     /*NOTREACHED*/
   case -1:
     file_error(ms, errno, "could not fork");
@@ -427,7 +427,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
               "Write failed (%s)\n",
               strerror(errno));
 #endif
-          exit(1);
+          exit(HPHP_EXIT_FAILURE);
         }
         exit(0);
         /*NOTREACHED*/
@@ -437,7 +437,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
         (void)fprintf(stderr, "Fork failed (%s)\n",
             strerror(errno));
 #endif
-        exit(1);
+        exit(HPHP_EXIT_FAILURE);
         /*NOTREACHED*/
 
       default:  /* parent */

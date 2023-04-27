@@ -31,7 +31,7 @@ static String to_full_path(const String& filename) {
   if (filename.charAt(0) == '/') {
     return filename;
   }
-  return f_getcwd().toString() + String::FromChar('/') + filename;
+  return HHVM_FN(getcwd)().toString() + String::FromChar('/') + filename;
 }
 
 // A wrapper for `zip_open` that prepares a full path
@@ -82,7 +82,7 @@ struct ZipStream : File {
 
   bool open(const String&, const String&) override { return false; }
 
-  bool close() override {
+  bool close(int* unused = nullptr) final {
     bool noError = true;
     if (!eof()) {
       if (zip_fclose(m_zipFile) != 0) {
@@ -913,7 +913,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
 
   struct zip_stat zipStat;
   if (zip_stat_index(zipDir->getZip(), index, 0, &zipStat) != 0) {
-    return false;
+    return Variant{Variant::NullInit{}};
   }
 
   if (zipStat.size < 1) {

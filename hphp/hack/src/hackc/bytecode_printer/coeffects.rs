@@ -3,18 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    context::{Context, FmtIndent},
-    write::{fmt_separated, fmt_separated_with},
-};
-use hhbc::hhas_coeffects::HhasCoeffects;
-use std::io::{Result, Write};
-use write_bytes::{write_bytes, DisplayBytes};
+use std::io::Result;
+use std::io::Write;
+
+use hhbc::Coeffects;
+use write_bytes::write_bytes;
+use write_bytes::DisplayBytes;
+
+use crate::context::Context;
+use crate::context::FmtIndent;
+use crate::write::fmt_separated;
+use crate::write::fmt_separated_with;
 
 pub(crate) fn coeffects_to_hhas(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    coeffects: &HhasCoeffects<'_>,
+    coeffects: &Coeffects<'_>,
 ) -> Result<()> {
     let indent = FmtIndent(ctx);
 
@@ -55,7 +59,9 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_param {};",
             indent,
-            fmt_separated_with(" ", cc_params, |w, c| write_bytes!(w, "{} {}", c.0, c.1))
+            fmt_separated_with(" ", cc_params, |w, c| write_bytes!(
+                w, "{} {}", c.index, c.ctx_name
+            ))
         )?;
     }
 
@@ -64,7 +70,7 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_this {};",
             indent,
-            fmt_separated(" ", v.iter())
+            fmt_separated(" ", v.types.iter())
         )?;
     }
 
@@ -73,9 +79,9 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_reified {}{} {};",
             indent,
-            if v.0 { "isClass " } else { "" },
-            v.1,
-            fmt_separated(" ", v.2.iter())
+            if v.is_class { "isClass " } else { "" },
+            v.index,
+            fmt_separated(" ", v.types.iter())
         )?;
     }
 

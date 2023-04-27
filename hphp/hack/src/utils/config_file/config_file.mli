@@ -36,6 +36,7 @@ val parse_hhconfig : string -> string * t
 
 val parse_local_config : string -> t
 
+(** Apply overrides using provided overrides. *)
 val apply_overrides : from:string option -> config:t -> overrides:t -> t
 
 val of_list : (string * string) list -> t

@@ -14,14 +14,8 @@ open Hh_prelude
 open Aast
 open Nast
 module DICheck = Decl_init_check
-module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
-
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
-let use_direct_decl_parser (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+module Native = Typing_native
 
 module SSetWTop = struct
   type t =
@@ -63,16 +57,17 @@ let lookup_props env class_name props =
   SSet.fold
     begin
       fun name map ->
-      let ty_opt =
-        if String.equal name parent_init_prop then
-          Some (Typing_make_type.nonnull Typing_reason.Rnone)
-        else
-          Typing_env.get_class env class_name
-          |> Option.bind ~f:(fun cls ->
-                 Typing_env.get_member false env cls name)
-          |> Option.bind ~f:(fun ce -> Some (Lazy.force ce.Typing_defs.ce_type))
-      in
-      SMap.add name ty_opt map
+        let ty_opt =
+          if String.equal name parent_init_prop then
+            Some (Typing_make_type.nonnull Typing_reason.Rnone)
+          else
+            Typing_env.get_class env class_name
+            |> Option.bind ~f:(fun cls ->
+                   Typing_env.get_member false env cls name)
+            |> Option.bind ~f:(fun ce ->
+                   Some (Lazy.force ce.Typing_defs.ce_type))
+        in
+        SMap.add name ty_opt map
     end
     props
     SMap.empty
@@ -119,16 +114,6 @@ let filter_props_by_type env cls props =
   |> SMap.keys
   |> SSet.of_list
 
-let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
-    SSet.t =
-  match DeferredMembers.parents env c with
-  | pc :: _ ->
-    (* All properties that don't have an explicit initialiser. *)
-    let (_, parent_props) = DeferredMembers.get_deferred_init_props env pc in
-    (* Filter properties whose type means they don't need initialising. *)
-    filter_props_by_type env (snd pc.Shallow_decl_defs.sc_name) parent_props
-  | [] -> SSet.empty
-
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the
@@ -141,7 +126,7 @@ let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
    interested in is, which class members do they initialize?
    But we don't want to recompute it every time it is called.
    So we memoize the result: hence the type method status.
- *)
+*)
 module Env = struct
   type method_status =
     (* We already computed this method *)
@@ -158,17 +143,8 @@ module Env = struct
   }
 
   let rec make tenv c =
-    let ctx = Typing_env.get_ctx tenv in
     let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    let sc =
-      lazy
-        (assert (shallow_decl_enabled ctx);
-         if use_direct_decl_parser ctx then
-           Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
-         else
-           Shallow_decl.class_DEPRECATED ctx c)
-    in
 
     (* In Zoncolan, we don't support eviction. We don't support lazy reparsing of
        shallow decls. If we try and the shallow decl is not available, we'll crash
@@ -203,10 +179,7 @@ module Env = struct
       | None -> false
     in
     let (private_props, _) =
-      if shallow_decl_enabled ctx then
-        DeferredMembers.class_ tenv (Lazy.force sc)
-      else
-        (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
+      (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
     in
     let private_props = lookup_props tenv (snd c.c_name) private_props in
     (if Ast_defs.is_c_abstract c.c_kind && not has_own_cstr then
@@ -226,21 +199,13 @@ module Env = struct
           add_parent_props,
           add_parent,
           parent_cstr_props ) =
-      if shallow_decl_enabled ctx then
-        let sc = Lazy.force sc in
-        ( DeferredMembers.init_not_required_props sc,
-          DeferredMembers.trait_props tenv sc,
-          DeferredMembers.parent_props tenv sc,
-          DeferredMembers.parent tenv sc,
-          parent_props_set_during_cstr tenv sc )
-      else
-        let decl_env = tenv.Typing_env_types.decl_env in
-        ( DICheck.init_not_required_props c,
-          DICheck.trait_props ~get_class_add_dep decl_env c,
-          DICheck.parent_props ~get_class_add_dep decl_env c,
-          DICheck.parent ~get_class_add_dep decl_env c,
-          DICheck.parent_initialized_members ~get_class_add_dep decl_env c
-          |> filter_props_by_type tenv (snd c.c_name) )
+      let decl_env = tenv.Typing_env_types.decl_env in
+      ( DICheck.init_not_required_props c,
+        DICheck.trait_props ~get_class_add_dep decl_env c,
+        DICheck.parent_props ~get_class_add_dep decl_env c,
+        DICheck.parent ~get_class_add_dep decl_env c,
+        DICheck.parent_initialized_members ~get_class_add_dep decl_env c
+        |> filter_props_by_type tenv (snd c.c_name) )
     in
     let init_not_required_props = add_init_not_required_props SSet.empty in
     let props =
@@ -292,29 +257,44 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
     | None -> Pos_or_decl.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in
-      if shallow_decl_enabled ctx then
-        match Shallow_classes_provider.get ctx member_origin with
-        | None -> Pos_or_decl.none
-        | Some sc ->
-          let prop =
-            List.find_exn sc.Shallow_decl_defs.sc_props ~f:(fun prop ->
-                String.equal (snd prop.Shallow_decl_defs.sp_name) prop_name)
-          in
-          fst prop.Shallow_decl_defs.sp_name
-      else
-        let get_class_by_name ctx x =
-          let open Option.Monad_infix in
-          Naming_provider.get_type_path ctx x >>= fun fn ->
-          Ast_provider.find_class_in_file ctx fn x
-        in
-        (match get_class_by_name ctx member_origin with
-        | None -> Pos_or_decl.none
-        | Some cls ->
-          let cv =
-            List.find_exn cls.Aast.c_vars ~f:(fun cv ->
-                String.equal (snd cv.Aast.cv_id) prop_name)
-          in
-          Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id))
+      let get_class_by_name ctx x =
+        let open Option.Monad_infix in
+        Naming_provider.get_type_path ctx x >>= fun fn ->
+        Ast_provider.find_class_in_file ctx fn x
+      in
+      (match get_class_by_name ctx member_origin with
+      | None -> Pos_or_decl.none
+      | Some cls ->
+        (match
+           List.find cls.Aast.c_vars ~f:(fun cv ->
+               String.equal (snd cv.Aast.cv_id) prop_name)
+         with
+        | None ->
+          (* We found the class prop's origin via Typing_defs.ce_origin, so we
+             *should* find the prop in the class. This is an invariant violation.
+          *)
+          HackEventLogger.invariant_violation_bug
+            "nastInitCheck can't find expected class prop"
+            ~data:
+              (Printf.sprintf
+                 "class_name=%s; member_origin=%s; prop_name=%s"
+                 class_name
+                 member_origin
+                 prop_name);
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Internal_error
+                   {
+                     pos = Pos.none;
+                     msg =
+                       "Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
+                       ^ prop_name
+                       ^ " in class "
+                       ^ member_origin;
+                   });
+          Pos_or_decl.none
+        | Some cv -> Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id)))
 
 (**
  * Returns the set of properties initialized by the constructor.
@@ -380,7 +360,7 @@ and stmt env acc st =
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
     let acc = argument_list env acc el in
-    assign env acc DeferredMembers.parent_init_prop
+    assign env acc DICheck.parent_init_prop
   | Expr e ->
     if Typing_func_terminality.expression_exits env.tenv e then
       S.Top
@@ -463,9 +443,9 @@ and check_all_init pos env acc =
   SMap.iter
     begin
       fun prop_name _ ->
-      if not (S.mem prop_name acc) then
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Call_before_init { pos; prop_name }
+        if not (S.mem prop_name acc) then
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Call_before_init { pos; prop_name }
     end
     env.props
 
@@ -487,9 +467,6 @@ and expr_ env acc p e =
   | This ->
     check_all_init p env acc;
     acc
-  | Fun_id _
-  | Method_id _
-  | Smethod_id _
   | Method_caller _
   | EnumClassLabel _
   | Id _ ->
@@ -591,13 +568,13 @@ and expr_ env acc p e =
   | Cast (_, e)
   | Unop (_, e) ->
     expr acc e
-  | Binop (Ast_defs.Eq None, e1, e2) ->
+  | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
     let acc = expr acc e2 in
     assign_expr env acc e1
-  | Binop (Ast_defs.Ampamp, e, _)
-  | Binop (Ast_defs.Barbar, e, _) ->
+  | Binop Aast.{ bop = Ast_defs.Ampamp; lhs = e; _ }
+  | Binop Aast.{ bop = Ast_defs.Barbar; lhs = e; _ } ->
     expr acc e
-  | Binop (_, e1, e2) ->
+  | Binop Aast.{ lhs = e1; rhs = e2; _ } ->
     let acc = expr acc e1 in
     expr acc e2
   | Pipe (_, e1, e2) ->
@@ -613,7 +590,7 @@ and expr_ env acc p e =
   | Is (e, _) -> expr acc e
   | As (e, _, _) -> expr acc e
   | Upcast (e, _) -> expr acc e
-  | Efun (f, _)
+  | Efun { ef_fun = f; _ }
   | Lfun (f, _) ->
     let acc = fun_paraml acc f.f_params in
     (* We don't need to analyze the body of closures *)
@@ -626,8 +603,7 @@ and expr_ env acc p e =
     List.fold_left
       ~f:
         begin
-          fun acc (_, v) ->
-          expr acc v
+          (fun acc (_, v) -> expr acc v)
         end
       ~init:acc
       fdm
@@ -639,6 +615,9 @@ and expr_ env acc p e =
   | ET_Splice e -> expr acc e
   | ReadonlyExpr e -> expr acc e
   | Hole (e, _, _, _) -> expr acc e
+  (* Don't analyze invalid expressions *)
+  | Invalid _ -> acc
+  | Package _ -> acc
 
 and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
 
@@ -668,7 +647,8 @@ and fun_param env acc param =
 and fun_paraml env acc l = List.fold_left ~f:(fun_param env) ~init:acc l
 
 let class_ tenv c =
-  if not (FileInfo.is_hhi c.c_mode) then
+  let is_hhi = FileInfo.is_hhi c.c_mode in
+  if not is_hhi then
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
@@ -697,6 +677,12 @@ let class_ tenv c =
   match c_constructor with
   | _ when Ast_defs.is_c_interface c.c_kind -> ()
   | Some _ when FileInfo.is_hhi c.c_mode -> ()
+  | Some m when Native.is_native_meth ~env:tenv m ->
+    (* If we're checking a `__Native` constructor then all bets are off: there's
+     * no way to verify that properties are initialized correctly, including if
+     * we've called parent::__construct.
+     *)
+    ()
   | _ ->
     let p =
       match c_constructor with
@@ -710,7 +696,7 @@ let class_ tenv c =
         SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
       in
       if not (SMap.is_empty uninit_props) then
-        if SMap.mem DeferredMembers.parent_init_prop uninit_props then
+        if SMap.mem DICheck.parent_init_prop uninit_props then
           Errors.add_nast_check_error @@ Nast_check_error.No_construct_parent p
         else
           let class_uninit_props =
@@ -718,7 +704,7 @@ let class_ tenv c =
               (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
               uninit_props
           in
-          if not (SMap.is_empty class_uninit_props) then
+          if (not (SMap.is_empty class_uninit_props)) && not is_hhi then
             Errors.add_nast_check_error
             @@ Nast_check_error.Not_initialized
                  {

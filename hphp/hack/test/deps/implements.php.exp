@@ -1,0 +1,3 @@
+Constructor I -> Type B
+Extends I -> Type A, Type B
+Type I -> Type A, Type B

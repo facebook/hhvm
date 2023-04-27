@@ -1,0 +1,18 @@
+{
+  "pools": {
+    "A.good": {
+      "servers": [ "localhost:12345" ]
+    },
+    "A.wildcard": {
+      "servers": [ "localhost:12347" ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "good": "PoolRoute|A.good",
+      "null": "DevNullRoute"
+    },
+    "wildcard": "PoolRoute|A.wildcard"
+  }
+}

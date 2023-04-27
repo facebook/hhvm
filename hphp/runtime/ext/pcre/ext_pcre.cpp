@@ -381,6 +381,7 @@ struct PcreExtension final : Extension {
     HHVM_RC_INT(PREG_BAD_UTF8_ERROR, PHP_PCRE_BAD_UTF8_ERROR);
     HHVM_RC_INT(PREG_BAD_UTF8_OFFSET_ERROR, PHP_PCRE_BAD_UTF8_OFFSET_ERROR);
     HHVM_RC_INT(PREG_BAD_REGEX_ERROR, PHP_PCRE_BAD_REGEX_ERROR);
+    HHVM_RC_INT(PREG_JIT_STACKLIMIT_ERROR, PHP_PCRE_JIT_STACKLIMIT_ERROR);
 
     HHVM_RC_INT_SAME(PREG_PATTERN_ORDER);
     HHVM_RC_INT_SAME(PREG_SET_ORDER);
@@ -449,8 +450,8 @@ struct PcreExtension final : Extension {
   void threadInit() override {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.backtrack_limit",
-                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                     &tl_pcre_globals->preg_backtrace_limit);
+                     std::to_string(RuntimeOption::PregBacktrackLimit).c_str(),
+                     &tl_pcre_globals->preg_backtrack_limit);
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.recursion_limit",
                      std::to_string(RuntimeOption::PregRecursionLimit).c_str(),

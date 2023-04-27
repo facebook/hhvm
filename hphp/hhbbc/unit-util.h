@@ -27,8 +27,8 @@ namespace php { struct Unit; }
  * the native units.
  */
 bool is_systemlib_part(const php::Unit&);
+bool is_systemlib_part(SString);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -28,6 +28,7 @@ let rec take_best_suggestions l =
       match first.SymbolOccurrence.type_ with
       | SymbolOccurrence.LocalVar -> true
       | SymbolOccurrence.Method _ -> true
+      | SymbolOccurrence.Class _ -> true
       | _ -> false
     in
     if stop then

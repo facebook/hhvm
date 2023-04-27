@@ -17,7 +17,7 @@ class C
     protected $prop3;
     private $prop4;
 
-    static $sprop1;
+    public static $sprop1;
     public static $sprop2;
     static protected $sprop3;   // visibility and static ordering unimportant
     private static $sprop4;

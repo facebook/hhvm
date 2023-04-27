@@ -13,12 +13,13 @@
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\I",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -110,7 +111,8 @@
                       ~returns_readonly:false ~support_dynamic_type:false
                       ~readonly_this:false ~is_memoized:false
                       ~variadic:false);
-                    ft_ifc_decl = FDPolicied {PUBLIC} })))
+                    ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
+                    })))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
@@ -118,7 +120,7 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([15:13-29]),
-               (Tshape (Typing_defs_core.Closed_shape,
+               (Tshape ((Rhint ([Pos.none]), (Tunion [])),
                   { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
                     { sft_optional = false;
                       sft_ty = (Rhint ([15:26-28]), (Tgeneric ("Ta", []))) } }
@@ -166,12 +168,11 @@
             tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

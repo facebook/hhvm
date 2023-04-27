@@ -44,13 +44,15 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrProtected,                F|P|T,   "protected");            \
   X(AttrPrivate,                  F|P|T,   "private");              \
   X(AttrInternal,                 F|P|C,   "internal");             \
+  X(AttrInternalSoft,             F|P|C,   "internal_soft");        \
   X(AttrStatic,                   F|P,     "static");               \
   X(AttrEnum,                     C,       "enum");                 \
   X(AttrDeepInit,                 P,       "deep_init");            \
   X(AttrInterface,                C,       "interface");            \
   X(AttrNoExpandTrait,            C,       "no_expand_trait");      \
   X(AttrAbstract,                 C|F|T,   "abstract");             \
-  X(AttrNoOverride,               C|F|T,   "no_override");          \
+  X(AttrNoOverride,               C|F,     "no_override");          \
+  X(AttrNoOverrideRegular,        C,       "no_override_regular");  \
   X(AttrFinal,                    C|F|T,   "final");                \
   X(AttrSealed,                   C,       "sealed");               \
   X(AttrTrait,                    C|F|P,   "trait");                \
@@ -73,9 +75,11 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrSystemInitialValue,       P,       "sys_initial_val");      \
   X(AttrNoImplicitNullable,       P,       "no_implicit_null");     \
   X(AttrInitialSatisfiesTC,       P,       "initial_satisfies_tc"); \
+  X(AttrNoMock,                   C,       "no_mock");              \
   X(AttrLateInit,                 P,       "late_init");            \
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
+  X(AttrIsClosureClass,           C,       "is_closure_class");     \
   X(AttrEnumClass,                C,       "enum_class");
   /* */
 

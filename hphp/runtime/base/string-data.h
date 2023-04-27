@@ -37,7 +37,9 @@ struct APCString;
 struct Array;
 struct String;
 struct APCHandle;
-struct NamedEntity;
+struct NamedType;
+struct UnitEmitter;
+struct Unit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -123,13 +125,6 @@ struct StringData final : MaybeCountable,
    * pre-initialized to 1.
    */
   static StringData* Make(size_t reserve);
-
-  /*
-   * Initialize a static string on a pre-allocated range of memory. This is
-   * useful when we need to create static strings at designated addresses when
-   * optimizing locality.
-   */
-  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
 
   /*
    * Allocate a string with malloc, using the low-memory allocator if
@@ -230,11 +225,8 @@ struct StringData final : MaybeCountable,
    * May not be called for strings created with MakeUncounted or
    * MakeStatic.
    *
-   * Returns: possibly a new StringData, if we decided to reallocate. The new
-   * string's reference count is be pre-initialized to 1.  shrinkImpl
-   * always returns a new StringData.
+   * Returns: a new StringData with reference count 1
    */
-  StringData* shrink(size_t len);
   StringData* shrinkImpl(size_t len);
 
   /*
@@ -271,7 +263,7 @@ struct StringData final : MaybeCountable,
   /*
    * StringData should not generally be allocated on the stack,
    * because references to it could escape.  This function is for
-   * debugging: it asserts that the addres of this doesn't point into
+   * debugging: it asserts that the address of this doesn't point into
    * the C++ stack.
    */
   void checkStack() const;
@@ -322,7 +314,7 @@ struct StringData final : MaybeCountable,
    * undocumented.
    *
    * If overflow is set its value is initialized to either zero to
-   * indicate that no overflow occurred or 1/-1 to inidicate the direction
+   * indicate that no overflow occurred or 1/-1 to indicate the direction
    * of overflow.
    *
    * Returns: KindOfNull, KindOfInt64 or KindOfDouble.  The int64_t or
@@ -339,13 +331,6 @@ struct StringData final : MaybeCountable,
    * In effect: isNumericWithVal(i, d, false) != KindOfNull
    */
   bool isNumeric() const;
-
-  /*
-   * Returns whether this string is numeric and an integer.
-   *
-   * In effect: isNumericWithVal(i, d, false) == KindOfInt64
-   */
-  bool isInteger() const;
 
   /*
    * Returns true if this string is "strictly" an integer in the sense
@@ -397,7 +382,6 @@ struct StringData final : MaybeCountable,
    * to avoid allocating these extra caches on any more static strings.
    */
   bool isSymbol() const;
-  static void markSymbolsLoaded();
 
   /*
    * A static string may be assigned a "color" which to be used as the hash key
@@ -409,15 +393,15 @@ struct StringData final : MaybeCountable,
   void setColor(uint16_t color);
 
   /*
-   * Get or set the cached class or named entity. Get will return nullptr
+   * Get or set the cached class or named type. Get will return nullptr
    * if the corresponding cached value hasn't been set yet.
    *
    * Pre: isSymbol()
    */
   Class* getCachedClass() const;
-  NamedEntity* getNamedEntity() const;
+  NamedType* getNamedType() const;
   void setCachedClass(Class* cls);
-  void setNamedEntity(NamedEntity* ne);
+  void setNamedType(NamedType* ne);
 
   /*
    * Helpers used to JIT access to the symbol cache.
@@ -431,15 +415,13 @@ struct StringData final : MaybeCountable,
    */
   constexpr static uint16_t kColorMask = 0x3fff;
   constexpr static uint16_t kInvalidColor = 0x0000;
+  constexpr static uint16_t kDupColor = 0x0001;
   static ptrdiff_t colorOffset();
 
   /*
    * Type conversion functions.
    */
   bool toBoolean() const;
-  char toByte(int base = 10) const { return toInt64(base); }
-  short toInt16(int base = 10) const { return toInt64(base); }
-  int toInt32(int base = 10) const { return toInt64(base); }
   int64_t toInt64(int base = 10) const;
   double toDouble() const;
   DataType toNumeric(int64_t& lval, double& dval) const;
@@ -470,8 +452,16 @@ struct StringData final : MaybeCountable,
   /*
    * Case-insensitive exact string comparison.  (Numeric strings are
    * not treated specially.)
+   * DEPRECATED: use same_nocase() for case-insensitive strings that
+   * are not language symbols.
    */
   bool isame(const StringData* s) const;
+
+  /*
+   * Case-insensitive exact string comparison.  (Numeric strings are
+   * not treated specially.)
+   */
+  bool same_nocase(const StringData* s) const;
 
   /*
    * Implements comparison in the sense of php's operator < on
@@ -506,6 +496,13 @@ private:
   template<bool trueStatic>
   static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
 
+  /*
+   * Initialize a static string on a pre-allocated range of memory. This is
+   * useful when we need to create static strings at designated addresses when
+   * optimizing locality.
+   */
+  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
+
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
   ~StringData() = delete;
@@ -532,7 +529,7 @@ private:
  * Some static StringData has a SymbolPrefix allocated right in front.
  */
 struct SymbolPrefix {
-  AtomicLowPtr<NamedEntity> ne;
+  AtomicLowPtr<NamedType> nty;
   AtomicLowPtr<Class> cls;
 };
 
@@ -599,7 +596,7 @@ struct string_data_lti;
 //////////////////////////////////////////////////////////////////////
 
 extern std::aligned_storage<
-  kStringOverhead,
+  kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
 >::type s_theEmptyString;
 
@@ -610,7 +607,9 @@ extern std::aligned_storage<
  */
 ALWAYS_INLINE StringData* staticEmptyString() {
   void* vp = &s_theEmptyString;
-  return static_cast<StringData*>(vp);
+  return reinterpret_cast<StringData*>(
+    reinterpret_cast<uintptr_t>(vp) + sizeof(SymbolPrefix)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -621,8 +620,50 @@ struct BlobEncoderHelper<const StringData*> {
   static void serde(BlobDecoder&, const StringData*&,
                     bool makeStatic = true);
 
+  static folly::StringPiece asStringPiece(BlobDecoder&);
+
   static void skip(BlobDecoder&);
   static size_t peekSize(BlobDecoder&);
+
+  // Encode each string once. If a string occurs more than once, use a
+  // small integer to refer to it. Faster and smaller if you have a
+  // lot of duplicate strings.
+  struct Indexer {
+    hphp_fast_map<const StringData*, uint32_t> m_indices;
+    std::vector<const StringData*> m_strs;
+  };
+
+  // If set, will utilize the UnitEmitter's string table.
+  static __thread UnitEmitter* tl_unitEmitter;
+  // Likewise, but only for lazy loading (so only deserializing
+  // supported).
+  static __thread Unit* tl_unit;
+  // If set, use that Indexer to encode strings.
+  static __thread Indexer* tl_indexer;
+};
+
+// Use an Indexer for string serialization (if one isn't already being
+// used) while this is in scope.
+struct ScopedStringDataIndexer {
+  ScopedStringDataIndexer() {
+    if (!BlobEncoderHelper<const StringData*>::tl_indexer) {
+      BlobEncoderHelper<const StringData*>::tl_indexer = &m_indexer;
+      m_used = true;
+    }
+  }
+  ~ScopedStringDataIndexer() {
+    if (m_used) {
+      assertx(BlobEncoderHelper<const StringData*>::tl_indexer == &m_indexer);
+      BlobEncoderHelper<const StringData*>::tl_indexer = nullptr;
+    }
+  }
+  ScopedStringDataIndexer(const ScopedStringDataIndexer&) = delete;
+  ScopedStringDataIndexer(ScopedStringDataIndexer&&) = delete;
+  ScopedStringDataIndexer& operator=(const ScopedStringDataIndexer&) = delete;
+  ScopedStringDataIndexer& operator=(ScopedStringDataIndexer&&) = delete;
+private:
+  BlobEncoderHelper<const StringData*>::Indexer m_indexer;
+  bool m_used{false};
 };
 
 //////////////////////////////////////////////////////////////////////

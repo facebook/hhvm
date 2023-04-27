@@ -19,7 +19,6 @@ val get :
   Provider_context.t ->
   string ->
   (Provider_context.t ->
-  Relative_path.t ->
   string ->
   Decl_defs.decl_class_type * Decl_store.class_members option) ->
   class_t option
@@ -44,17 +43,12 @@ module Api : sig
 
   val need_init : t -> bool
 
-  val linearization :
-    t -> Decl_defs.linearization_kind -> Decl_defs.mro_element list
-
   val abstract : t -> bool
 
   val final : t -> bool
 
   val const : t -> bool
 
-  (** To be used only when {!ServerLocalConfig.shallow_class_decl} is not enabled.
-      Raises [Failure] if used when shallow_class_decl is enabled. *)
   val deferred_init_members : t -> SSet.t
 
   val kind : t -> Ast_defs.classish_kind
@@ -62,6 +56,8 @@ module Api : sig
   val is_xhp : t -> bool
 
   val name : t -> string
+
+  val get_docs_url : t -> string option
 
   val get_module : t -> string option
 
@@ -92,6 +88,8 @@ module Api : sig
   val enum_type : t -> enum_type option
 
   val xhp_enum_values : t -> Ast_defs.xhp_enum_value list SMap.t
+
+  val xhp_marked_empty : t -> bool
 
   val sealed_whitelist : t -> SSet.t option
 
@@ -160,18 +158,6 @@ module Api : sig
 
   val smethods : t -> (string * class_elt) list
 
-  (** The following functions return _all_ class member declarations defined in or
-      inherited by this class with the given member name, including ones which
-      were overridden, for purposes such as override checking. The list is ordered
-      in reverse with respect to the linearization (so members defined in more
-      derived classes occur later in the list).
-
-      To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
-      Raises [Failure] if used when shallow_class_decl is not enabled. *)
-  val all_inherited_methods : t -> string -> class_elt list
-
-  val all_inherited_smethods : t -> string -> class_elt list
-
   (** Return the enforceability of the typeconst with the given name. A
       typeconst is enforceable if it was declared with the <<__Enforceable>>
       attribute, or if it overrides some ancestor typeconst with that attribute.
@@ -183,11 +169,19 @@ module Api : sig
   val get_typeconst_enforceability :
     t -> string -> (Pos_or_decl.t * bool) option
 
-  (** Return the shallow declaration for the given class.
-
-      To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
-      Raises [Failure] if used when shallow_class_decl is not enabled. *)
-  val shallow_decl : t -> Shallow_decl_defs.shallow_class
-
   val valid_newable_class : t -> bool
+
+  val overridden_method :
+    t ->
+    method_name:string ->
+    is_static:bool ->
+    get_class:(Provider_context.t -> string -> t option) ->
+    class_elt option
 end
+
+val get_class_with_cache :
+  Provider_context.t ->
+  string ->
+  Provider_backend.Decl_cache.t ->
+  (Provider_context.t -> string -> Decl_defs.decl_class_type * 'a) ->
+  class_t option

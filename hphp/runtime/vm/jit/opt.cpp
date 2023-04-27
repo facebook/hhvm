@@ -141,26 +141,40 @@ bool lowerBespokes(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_lowerbespokes, "lowerBespokes"};
   Timer t{Timer::optimize_lowerBespokes, unit.logEntry().get_pointer()};
 
-  jit::fast_set<IRInstruction*> insts;
+  jit::fast_set<IRInstruction*> structDictInsts;
+  jit::fast_set<IRInstruction*> typeStructInsts;
 
   auto blocks = rpoSortCfg(unit);
   for (auto& block : blocks) {
     for (auto& inst : *block) {
       if (!inst.is(BespokeGet, BespokeGetThrow)) continue;
       auto const arr = inst.src(0);
-      if (!arr->type().arrSpec().is_struct()) continue;
       if (!inst.src(1)->isA(TStr)) continue;
-      insts.emplace(&inst);
+      if (arr->type().arrSpec().is_struct()) {
+        structDictInsts.emplace(&inst);
+      } else if (arr->type().arrSpec().is_type_structure()) {
+        typeStructInsts.emplace(&inst);
+      }
     }
   }
 
-  if (insts.empty()) return false;
+  if (structDictInsts.empty() && typeStructInsts.empty()) return false;
 
-  for (auto inst : insts) {
+  for (auto inst : structDictInsts) {
     if (inst->is(BespokeGet)) {
       lowerStructBespokeGet(unit, inst);
     } else if (inst->is(BespokeGetThrow)) {
       lowerStructBespokeGetThrow(unit, inst);
+    } else {
+      always_assert(false);
+    }
+  }
+
+  for (auto inst : typeStructInsts) {
+    if (inst->is(BespokeGet)) {
+      lowerTypeStructureBespokeGet(unit, inst);
+    } else if (inst->is(BespokeGetThrow)) {
+      lowerTypeStructureBespokeGetThrow(unit, inst);
     } else {
       always_assert(false);
     }
@@ -245,7 +259,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   assertx(checkEverything(unit));
 
   auto const doCheckTypes = [&] {
-    if (kind != TransKind::Profile && RO::EvalHHIROptimizeCheckTypes) {
+    if (!isProfiling(kind) && RO::EvalHHIROptimizeCheckTypes) {
       rqtrace::EventGuard trace{"OPT_OPTIMIZE_CHECK_TYPES"};
       while (true) {
         if (!doPass(unit, optimizeCheckTypes, DCE::None)) {
@@ -281,7 +295,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   while (true) {
     auto again = false;
 
-    if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    if (!isProfiling(kind) && RuntimeOption::EvalHHIRMemoryOpts) {
       rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
       printUnit(6, unit, " after optimizeLoads ");
@@ -300,7 +314,7 @@ void optimize(IRUnit& unit, TransKind kind) {
       }
     }
 
-    if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    if (!isProfiling(kind) && RuntimeOption::EvalHHIRMemoryOpts) {
       rqtrace::EventGuard trace{"OPT_STORE"};
       doPass(unit, optimizeStores, DCE::Full);
       printUnit(6, unit, " after optimizeStores ");
@@ -316,7 +330,7 @@ void optimize(IRUnit& unit, TransKind kind) {
     printUnit(6, unit, " after optimizePhis ");
   }
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
+  if (!isProfiling(kind) && RuntimeOption::EvalHHIRRefcountOpts) {
     rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
@@ -330,11 +344,11 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, insertAsserts, DCE::None);
   }
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSinkDefs) {
+  if (!isProfiling(kind) && RuntimeOption::EvalHHIRSinkDefs) {
     doPass(unit, sinkDefs, DCE::Full);
   }
 
-  if (kind != TransKind::Profile && RO::EvalHHIRLowerBespokesPostIRGen) {
+  if (!isProfiling(kind) && RO::EvalHHIRLowerBespokesPostIRGen) {
     if (doPass(unit, lowerBespokes, DCE::None)) {
       doPass(unit, simplifyPass, DCE::Full);
     }
@@ -344,20 +358,19 @@ void optimize(IRUnit& unit, TransKind kind) {
   // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
 
-  if (kind != TransKind::Profile &&
-      RuntimeOption::EvalHHIRGlobalValueNumbering) {
+  if (!isProfiling(kind) && RuntimeOption::EvalHHIRGlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
 
-  if (kind != TransKind::Profile) {
+  if (!isProfiling(kind)) {
     doPass(unit, refineTmpsPass, DCE::None);
     doPass(unit, cleanCfg, DCE::None);
   }
 
   doCheckTypes();
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
+  if (!isProfiling(kind) && RuntimeOption::EvalHHIRSimplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
   } else {
@@ -369,7 +382,7 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   doPass(unit, fixBlockHints, DCE::None);
 
-  if (kind == TransKind::Optimize) {
+  if (isOptimized(kind)) {
     doPass(unit, selectiveWeakenDecRefs, DCE::None);
   }
   printUnit(6, unit, " after optimize ");

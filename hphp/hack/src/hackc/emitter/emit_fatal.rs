@@ -5,7 +5,8 @@
 
 use emit_pos::emit_pos;
 use hhbc::FatalOp;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
 
 pub fn emit_fatal<'arena>(
@@ -40,9 +41,6 @@ pub fn emit_fatal_runtimeomitframe<'arena>(
 pub fn emit_fatal_for_break_continue<'arena>(
     alloc: &'arena bumpalo::Bump,
     pos: &Pos,
-    level: usize,
 ) -> InstrSeq<'arena> {
-    let suffix = if level == 1 { "" } else { "s" };
-    let msg = format!("Cannot break/continue {} level{}", level, suffix);
-    emit_fatal_runtime(alloc, pos, msg)
+    emit_fatal_runtime(alloc, pos, "Cannot break/continue")
 }

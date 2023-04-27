@@ -103,7 +103,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
         resultLocal = kInvalidId;
         break;
       }
-      case Op::Jmp: case Op::JmpNS: {
+      case Op::Jmp: {
         sk = SrcKey(sk, sk.offset() + getImm(sk.pc(), 0).u_BA);
         continue;
       }
@@ -183,6 +183,14 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       auto const wh = gen(env, CreateAFWH, fp(env),
                           cns(env, func->numSlotsInFrame()),
                           resumeAddr(), suspendOff, child);
+      // Constructing a waithandle teleports locals and iterators to the heap,
+      // kill them here to improve alias analysis.
+      for (uint32_t i = 0; i < func->numLocals(); ++i) {
+        gen(env, KillLoc, LocalId{i}, fp(env));
+      }
+      for (uint32_t i = 0; i < func->numIterators(); ++i) {
+        gen(env, KillIter, IterId{i}, fp(env));
+      }
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
         gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);
@@ -214,8 +222,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       );
     }();
 
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
-
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
       return;
@@ -236,8 +242,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
-
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
@@ -468,7 +472,7 @@ void implAwaitSucceeded(IRGS& env, SSATmp* child) {
   auto const res = gen(env, LdWHResult, awaitedTy, child);
   popC(env);
   gen(env, IncRef, res);
-  decRef(env, child, DecRefProfileId::Default);
+  decRef(env, child);
   push(env, res);
 }
 
@@ -485,7 +489,7 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
   auto const exception = gen(env, LdWHResult, TObj, child);
   popC(env);
   gen(env, IncRef, exception);
-  decRef(env, child, DecRefProfileId::Default);
+  decRef(env, child);
   if (offset != kInvalidOffset) {
     push(env, exception);
     jmpImpl(env, offset);
@@ -657,8 +661,8 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
 
       auto const wh = gen(
         env,
-        CreateAAWH,
-        CreateAAWHData { locals.first, locals.count },
+        CreateCCWH,
+        CreateCCWHData { locals.first, locals.count },
         fp(env),
         cnt
       );
@@ -669,7 +673,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
         [&] (Block* taken) {
           gen(env, JmpNZero, taken, state);
         },
-        [&] { // Extremely unlikely: profiling hook finished the AAWH.
+        [&] { // Extremely unlikely: profiling hook finished the CCWH.
           hint(env, Block::Hint::Unused);
           push(env, cns(env, TInitNull));
         },

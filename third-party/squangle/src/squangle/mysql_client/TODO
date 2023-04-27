@@ -1,0 +1,8 @@
+consistency of column vs field terminology
+
+Support multiquery
+Connection pooling
+Logging/monitoring
+Retry?  Reconnect?
+
+Support use of an external TEventBase

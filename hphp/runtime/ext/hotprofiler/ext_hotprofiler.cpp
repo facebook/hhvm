@@ -1350,7 +1350,7 @@ IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
-void f_hotprofiler_enable(int64_t ikind) {
+void HHVM_FUNCTION(hotprofiler_enable, int64_t ikind) {
   auto kind = static_cast<ProfilerKind>(ikind);
   long flags = 0;
   if (kind == ProfilerKind::Hierarchical) {
@@ -1364,17 +1364,17 @@ void f_hotprofiler_enable(int64_t ikind) {
   }
 }
 
-Variant f_hotprofiler_disable() {
+Variant HHVM_FUNCTION(hotprofiler_disable) {
   return s_profiler_factory->stop();
 }
 
-void f_phprof_enable(int64_t flags /* = 0 */) {
+void HHVM_FUNCTION(phprof_enable, int64_t flags) {
   if (RuntimeOption::EnableHotProfiler) {
     s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }
 }
 
-Variant f_phprof_disable() {
+Variant HHVM_FUNCTION(phprof_disable) {
   return s_profiler_factory->stop();
 }
 
@@ -1410,6 +1410,13 @@ static struct HotProfilerExtension : Extension {
 #ifdef CLOCK_THREAD_CPUTIME_ID
     HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
 #endif
+
+    HHVM_FE(hotprofiler_enable);
+    HHVM_FE(hotprofiler_disable);
+    HHVM_FE(phprof_enable);
+    HHVM_FE(phprof_disable);
+
+    loadSystemlib();
   }
 } s_hot_profiler_extension;
 

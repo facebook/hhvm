@@ -35,18 +35,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#if defined(__APPLE__)
-/* OS X defines msgbuf, but it is defined with extra fields and some weird
- * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
- * with the same structure that other OSes use. This is weird, but this is also
- * what PHP does, so *shrug*. */
-typedef struct {
-    long mtype;
-    char mtext[1];
-} hhvm_msgbuf;
-#else
 typedef msgbuf hhvm_msgbuf;
-#endif
 
 using HPHP::ScopedMem;
 
@@ -54,51 +43,17 @@ namespace HPHP {
 
 static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
-    HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
-    HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
-    HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
-    HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
-
-    HHVM_FE(ftok);
-    HHVM_FE(msg_get_queue);
-    HHVM_FE(msg_queue_exists);
-    HHVM_FE(msg_send);
-    HHVM_FE(msg_receive);
-    HHVM_FE(msg_remove_queue);
-    HHVM_FE(msg_set_queue);
-    HHVM_FE(msg_stat_queue);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvmsg_extension;
 
 static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(sem_acquire);
-    HHVM_FE(sem_get);
-    HHVM_FE(sem_release);
-    HHVM_FE(sem_remove);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvsem_extension;
 
 static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(shm_attach);
-    HHVM_FE(shm_detach);
-    HHVM_FE(shm_remove);
-    HHVM_FE(shm_get_var);
-    HHVM_FE(shm_has_var);
-    HHVM_FE(shm_put_var);
-    HHVM_FE(shm_remove_var);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvshm_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,9 +247,7 @@ bool HHVM_FUNCTION(msg_receive,
 
   int64_t realflags = 0;
   if (flags != 0) {
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
     if (flags & k_MSG_EXCEPT) realflags |= MSG_EXCEPT;
-#endif
     if (flags & k_MSG_NOERROR) realflags |= MSG_NOERROR;
     if (flags & k_MSG_IPC_NOWAIT) realflags |= IPC_NOWAIT;
   }
@@ -433,7 +386,7 @@ struct Semaphore : SweepableResourceData {
      * them.  Semaphores are one such resource.  The fork manpage reads: "The
      * child does not inherit semaphore adjustments from its parent"
      */
-    if (pid != f_posix_getpid()) {
+    if (pid != HHVM_FN(posix_getpid)()) {
       return;
     }
 
@@ -557,7 +510,7 @@ Variant HHVM_FUNCTION(sem_get,
   auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
-  sem_ptr->pid = f_posix_getpid();
+  sem_ptr->pid = HHVM_FN(posix_getpid)();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
   return Resource(sem_ptr);
@@ -873,6 +826,46 @@ bool HHVM_FUNCTION(shm_remove_var,
   }
   remove_shm_data(shm_list_ptr->ptr, shm_varpos);
   return true;
+}
+
+void SysvmsgExtension::moduleInit() {
+  HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
+  HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
+  HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
+  HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
+  HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
+
+  HHVM_FE(ftok);
+  HHVM_FE(msg_get_queue);
+  HHVM_FE(msg_queue_exists);
+  HHVM_FE(msg_send);
+  HHVM_FE(msg_receive);
+  HHVM_FE(msg_remove_queue);
+  HHVM_FE(msg_set_queue);
+  HHVM_FE(msg_stat_queue);
+
+  loadSystemlib();
+}
+
+void SysvsemExtension::moduleInit() {
+  HHVM_FE(sem_acquire);
+  HHVM_FE(sem_get);
+  HHVM_FE(sem_release);
+  HHVM_FE(sem_remove);
+
+  loadSystemlib();
+}
+
+void SysvshmExtension::moduleInit() {
+  HHVM_FE(shm_attach);
+  HHVM_FE(shm_detach);
+  HHVM_FE(shm_remove);
+  HHVM_FE(shm_get_var);
+  HHVM_FE(shm_has_var);
+  HHVM_FE(shm_put_var);
+  HHVM_FE(shm_remove_var);
+
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

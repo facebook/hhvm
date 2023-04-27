@@ -73,8 +73,10 @@ namespace {
     if (UNLIKELY(checkSurpriseFlags())) {
       c_WaitableWaitHandle* wait_handle = context->getBlamedWaitHandle();
 
-      auto const flags = handle_request_surprise(wait_handle);
-      if (flags & XenonSignalFlag) {
+      // First, process the Xenon event. If we are going to time out, we want
+      // to attribute the time spent towards the time out to the I/O operation
+      // before the fatal exception is thrown.
+      if (getSurpriseFlag(XenonSignalFlag)) {
         if (Strobelight::active()) {
           Strobelight::getInstance().log(Xenon::IOWaitSample, wait_handle);
         } else {
@@ -85,6 +87,8 @@ namespace {
           );
         }
       }
+
+      auto const flags = handle_request_surprise(wait_handle);
       if (flags & IntervalTimerFlag) {
         IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);
       }

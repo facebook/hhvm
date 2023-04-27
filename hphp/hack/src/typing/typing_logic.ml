@@ -20,6 +20,7 @@ type subtype_prop =
   | IsSubtype of coercion_direction option * internal_type * internal_type
   | Conj of subtype_prop list
   | Disj of Typing_error.t option * subtype_prop list
+[@@deriving show]
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
@@ -68,7 +69,7 @@ let valid = Conj []
 let invalid ~fail = Disj (fail, [])
 
 (* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Disj (_, [])]
-* if not simplified
+   * if not simplified
 *)
 let rec is_valid p =
   match p with
@@ -77,7 +78,7 @@ let rec is_valid p =
   | IsSubtype _ -> false
 
 (* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Disj (_, [])]
-* if not simplified
+   * if not simplified
 *)
 and is_unsat p =
   match p with
@@ -104,6 +105,12 @@ let conj p1 p2 =
 
 let conj_list ps = List.fold ~init:(Conj []) ps ~f:conj
 
+let add_prop p ps =
+  if List.exists ps ~f:(equal_subtype_prop p) then
+    ps
+  else
+    p :: ps
+
 (* Smart constructor for binary disjunction *)
 let disj ~fail p1 p2 =
   if equal_subtype_prop p1 p2 then
@@ -114,7 +121,8 @@ let disj ~fail p1 p2 =
     | (_, _) when is_unsat p1 && is_unsat p2 -> Disj (fail, [])
     | (_, _) when is_unsat p1 -> Disj (fail, [p2])
     | (_, _) when is_unsat p2 -> Disj (fail, [p1])
-    | (Disj (_, ps1), Disj (_, ps2)) -> Disj (fail, ps1 @ ps2)
-    | (_, Disj (_, ps)) -> Disj (fail, p1 :: ps)
-    | (Disj (_, ps), _) -> Disj (fail, p2 :: ps)
+    | (Disj (_, ps1), Disj (_, ps2)) ->
+      Disj (fail, List.fold ps2 ~init:ps1 ~f:(fun ps p -> add_prop p ps))
+    | (_, Disj (_, ps)) -> Disj (fail, add_prop p1 ps)
+    | (Disj (_, ps), _) -> Disj (fail, add_prop p2 ps)
     | (_, _) -> Disj (fail, [p1; p2])

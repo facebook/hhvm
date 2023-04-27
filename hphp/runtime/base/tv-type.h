@@ -31,6 +31,14 @@ ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
   return tvIsNull(*tv);
 }
 
+ALWAYS_INLINE bool tvIsStringLike(TypedValue tv) {
+  assertx(tvIsPlausible(tv));
+  return isStringType(tv.m_type) || isLazyClassType(tv.m_type);
+}
+ALWAYS_INLINE bool tvIsStringLike(const TypedValue* tv) {
+  return tvIsStringLike(*tv);
+}
+
 #define CASE(ty)                                                        \
   template<typename T>                                                  \
   ALWAYS_INLINE enable_if_tv_val_t<T&&, bool> tvIs##ty(T&& tv) {        \
@@ -67,6 +75,13 @@ template<typename T>
 ALWAYS_INLINE double tvAssertDouble(T&& tv) {
   assertx(isDoubleType(type(tv)));
   return val(tv).dbl;
+}
+
+template<typename T>
+ALWAYS_INLINE const StringData* tvAssertStringLike(T&& tv) {
+  if (isStringType(type(tv)))    return val(tv).pstr;
+  if (isLazyClassType(type(tv))) return val(tv).plazyclass.name();
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

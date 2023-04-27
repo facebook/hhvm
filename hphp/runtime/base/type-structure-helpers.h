@@ -29,9 +29,9 @@ namespace HPHP {
 
 /*
  * Checks whether the given cell is an instance of the class referred by
- * given named entity.
+ * given named type.
  */
-bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne);
+bool tvInstanceOf(const TypedValue* tv, const NamedType* ne);
 
 /*
  * Checks whether the given cell is an instance of the given class.

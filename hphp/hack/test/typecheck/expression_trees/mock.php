@@ -13,7 +13,7 @@ class Mock {
     throw new Exception();
   }
 
-  public static function symbolType<T>(T $_): T {
+  public static function symbolType<T>(T $_): HasUnwrap<T> {
     throw new Exception();
   }
 
@@ -44,6 +44,10 @@ final class MockExprTree<TInfer>
   public function toReturn(TInfer $_): void {
     throw new Exception();
   }
+}
+
+interface HasUnwrap<T> {
+  public function __unwrap(): T;
 }
 
 function foo(): string {

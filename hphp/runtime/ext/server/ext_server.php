@@ -34,9 +34,9 @@ function pagelet_server_is_enabled(): bool;
  */
 <<__Native>>
 function pagelet_server_task_start(string $url,
-                                   darray $headers = darray[],
+                                   dict<arraykey, string> $headers = dict[],
                                    string $post_data = "",
-                                   darray $files = darray[],
+                                   dict<arraykey, string> $files = dict[],
                                    int $timeout_seconds = 0): resource;
 
 /**

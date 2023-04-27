@@ -1,0 +1,6 @@
+File "case_types_in_module.php", line 4, characters 8-15:
+Unbound name: `some.mod` (a module) (Naming[2049])
+File "case_types_in_module.php", line 10, characters 3-10:
+Unbound name: `SomeAttr` (an object type) (Naming[2049])
+File "case_types_in_module.php", line 10, characters 3-10:
+Unrecognized user attribute: `SomeAttr` does not have a class. Please declare a class for the attribute. (Naming[2049])

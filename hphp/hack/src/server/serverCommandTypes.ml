@@ -167,18 +167,91 @@ module Find_refs = struct
 
   type ide_result_or_retry = ide_result Done_or_retry.t
 
+  let dep_member_of member : Typing_deps.Dep.Member.t list =
+    let open Typing_deps.Dep.Member in
+    match member with
+    | Method n -> [method_ n; smethod n]
+    | Property n -> [prop n; sprop n]
+    | Class_const n -> [const n]
+    | Typeconst n -> [const n]
+
   let member_to_string member =
     match member with
     | Method s -> "Method " ^ s
     | Property s -> "Property " ^ s
     | Class_const s -> "Class_consts " ^ s
     | Typeconst s -> "Typeconst " ^ s
+
+  (**
+   * Output strings in the form of
+   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
+   * For example,
+   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
+   * Must be manually kept in sync with string_to_symbol_and_action_exn.
+  *)
+  let symbol_and_action_to_string_exn symbol_name action =
+    let action_serialized =
+      match action with
+      | Class str -> Printf.sprintf "Class,%s" str
+      | ExplicitClass str -> Printf.sprintf "ExplicitClass,%s" str
+      | Function str -> Printf.sprintf "Function,%s" str
+      | GConst str -> Printf.sprintf "GConst,%s" str
+      | Member (str, Method s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Method" s
+      | Member (str, Property s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Property" s
+      | Member (str, Class_const s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Class_const" s
+      | Member (str, Typeconst s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Typeconst" s
+      | LocalVar _ -> failwith "Invalid action"
+    in
+    Printf.sprintf "%s|%s" symbol_name action_serialized
+
+  (**
+   * Expects input strings in the form of
+   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
+   * For example,
+   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
+   * The implementation explicitly is tied to whatever is generated from symbol_and_action_to_string_exn
+   * and should be kept in sync manually by anybody editing.
+  *)
+  let string_to_symbol_and_action_exn arg =
+    let pair = Str.split (Str.regexp "|") arg in
+    let (symbol_name, action_arg) =
+      try
+        match pair with
+        | [symbol_name; action_arg] -> (symbol_name, action_arg)
+        | _ -> raise Exit
+      with
+      | _ ->
+        Printf.eprintf "Invalid input\n";
+        raise Exit_status.(Exit_with Input_error)
+    in
+    let action =
+      (* Explicitly ignoring localvar support *)
+      match Str.split (Str.regexp ",") action_arg with
+      | ["Class"; str] -> Class str
+      | ["ExplicitClass"; str] -> ExplicitClass str
+      | ["Function"; str] -> Function str
+      | ["GConst"; str] -> GConst str
+      | ["Member"; str; "Method"; member_name] ->
+        Member (str, Method member_name)
+      | ["Member"; str; "Property"; member_name] ->
+        Member (str, Property member_name)
+      | ["Member"; str; "Class_const"; member_name] ->
+        Member (str, Class_const member_name)
+      | ["Member"; str; "Typeconst"; member_name] ->
+        Member (str, Typeconst member_name)
+      | _ -> raise Exit_status.(Exit_with Input_error)
+    in
+    (symbol_name, action)
 end
 
-module Refactor = struct
-  type ide_result = (ServerRefactorTypes.patch list, string) result
+module Rename = struct
+  type ide_result = (ServerRenameTypes.patch list, string) result
 
-  type result = ServerRefactorTypes.patch list
+  type result = ServerRenameTypes.patch list
 
   type ide_result_or_retry = ide_result Done_or_retry.t
 
@@ -265,7 +338,7 @@ module Infer_return_type = struct
   type result = (string, string) Stdlib.result
 end
 
-module Ide_refactor_type = struct
+module Ide_rename_type = struct
   type t = {
     filename: string;
     line: int;
@@ -338,22 +411,14 @@ type _ t =
       max_errors: int option;
     }
       -> (Errors.finalized_error list * int) t
-  | STATUS_SINGLE_REMOTE_EXECUTION : {
-      file_name: string;
-    }
-      -> (string * string) t
-  | STATUS_REMOTE_EXECUTION : {
-      mode: string;
-      max_errors: int option;
-    }
-      -> (Errors.finalized_error list * int) t
-  | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
   | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list
       -> string list t
   | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
+  | IS_SUBTYPE : string -> (string, string) result t
   | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
+  | TAST_HOLES_BATCH : string list -> TastHolesService.result t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :
       (string * int * int * string option * SearchUtils.si_kind)
@@ -379,20 +444,32 @@ type _ t =
   | IDE_FIND_REFS :
       labelled_file * int * int * bool
       -> Find_refs.ide_result_or_retry t
+  | IDE_FIND_REFS_BY_SYMBOL :
+      Find_refs.action * string
+      -> Find_refs.ide_result_or_retry t
   | IDE_GO_TO_IMPL :
       labelled_file * int * int
       -> Find_refs.ide_result_or_retry t
   | IDE_HIGHLIGHT_REFS :
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
-  | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
-  | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
+  | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
+  | RENAME_CHECK_SD : ServerRenameTypes.action -> string Done_or_retry.t t
+  | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
+  | CODEMOD_SDT :
+      string
+      -> (ServerRenameTypes.patch list
+         * string list
+         * [ `ClassLike | `Function ])
+         t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
       int list
-      -> [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
-  | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
-  | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRefactorTypes.patch list t
+      -> [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
+  | REMOVE_DEAD_UNSAFE_CASTS
+      : [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
+  | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRenameTypes.patch list t
+  | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRenameTypes.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Stdlib.result t
   | SAVE_NAMING :
       string
@@ -410,7 +487,6 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
-  | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
@@ -418,7 +494,6 @@ type _ t =
   | IDE_AUTOCOMPLETE :
       string * position * bool
       -> AutocompleteTypes.ide_result t
-  | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t
@@ -426,8 +501,10 @@ type _ t =
   | RAGE : ServerRageTypes.result t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
-  | GEN_HOT_CLASSES : int -> string t
   | GEN_PREFETCH_DIR : string -> unit t
+  | GEN_REMOTE_DECLS_FULL : unit t
+  | GEN_REMOTE_DECLS_INCREMENTAL : unit t
+  | GEN_SHALLOW_DECLS_DIR : string -> unit t
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
@@ -435,12 +512,27 @@ type _ t =
   | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | CONCATENATE_ALL : string list -> string t
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
-  | BIGCODE : string -> string t
+  | PREPARE_CALL_HIERARCHY :
+      labelled_file * int * int
+      -> Lsp.PrepareCallHierarchy.result t
+  | CALL_HIERARCHY_INCOMING_CALLS :
+      Lsp.CallHierarchyItem.t
+      -> Lsp.CallHierarchyIncomingCalls.callHierarchyIncomingCall list
+         Done_or_retry.t
+         list
+         t
+  | CALL_HIERARCHY_OUTGOING_CALLS :
+      Lsp.CallHierarchyItem.t
+      -> Lsp.CallHierarchyOutgoingCalls.result t
   | PAUSE : bool -> unit t
   | GLOBAL_INFERENCE :
       ServerGlobalInferenceTypes.mode * string list
       -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
+  | DEPS_OUT_BATCH : (string * int * int) list -> string list t
+  | DEPS_IN_BATCH :
+      (string * int * int) list
+      -> Find_refs.result_or_retry list t
 
 type cmd_metadata = {
   from: string;
@@ -461,6 +553,10 @@ let is_critical_rpc : type a. a t -> bool = function
   | OPEN_FILE _ -> true
   | CLOSE_FILE _ -> true
   | EDIT_FILE _ -> true
+  | _ -> false
+
+let is_idle_rpc : type a. a t -> bool = function
+  | IDE_IDLE -> true
   | _ -> false
 
 type 'a command =
@@ -524,17 +620,7 @@ type 'a message_type =
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout
 
-(** Invariant: the progress file is created almost immediately upon server startup,
-certainly before any messages are exchanged; it is deleted upon clean exit.
-The server_finale_file is created by Exit.exit and left there. *)
+(** Invariant: The server_finale_file is created by Exit.exit and left there. *)
 type server_specific_files = {
   server_finale_file: string;  (** just before exit, server will write here *)
-  server_progress_file: string;  (** server will write progress to this file *)
-}
-
-(** These are human-readable messages, shown at command-line and within the editor. *)
-type server_progress = {
-  server_progress: string;  (** e.g. "typechecking 5/15 files" *)
-  server_warning: string option;  (** e.g. "typechecking will be slow" *)
-  server_timestamp: float;
 }

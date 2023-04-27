@@ -33,12 +33,24 @@ namespace {
 
 TRACE_SET_MOD(prof_prop);
 
-using ClassMethodPair = std::pair<const StringData*, const StringData*>;
+// (class, prop)
+using ClassPropPair = std::pair<const StringData*, const StringData*>;
+
+struct ClassPropPairHashCompare {
+  bool equal(const ClassPropPair& p1, const ClassPropPair& p2) const {
+    assertx(p1.first && p1.second && p2.first && p2.second);
+    return p1.first->isame(p2.first) && p1.second->same(p2.second);
+  }
+  size_t hash(const std::pair<const StringData*, const StringData*>& p) const {
+    assertx(p.first && p.second);
+    return folly::hash::hash_combine(p.first->hash(), p.second->hash());
+  }
+};
 
 using PropertyCounts = tbb::concurrent_hash_map<
-  ClassMethodPair,
+  ClassPropPair,
   uint32_t,
-  StringDataPairHashICompare
+  ClassPropPairHashCompare
 >;
 PropertyCounts s_counts;
 
@@ -48,14 +60,14 @@ PropertyCounts s_counts;
 // gets on the map. The lock shouldn't be an issue because we only
 // insert into it the first time a key is seen.
 std::mutex s_count_keys_lock;
-std::vector<ClassMethodPair> s_count_keys;
+std::vector<ClassPropPair> s_count_keys;
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void incCount(const StringData* cls, const StringData* prop) {
-  auto fullName = ClassMethodPair(cls, prop);
+  auto fullName = ClassPropPair(cls, prop);
 
   PropertyCounts::accessor acc;
   if (!s_counts.insert(acc, PropertyCounts::value_type(fullName, 1))) {
@@ -67,7 +79,7 @@ void incCount(const StringData* cls, const StringData* prop) {
 }
 
 uint32_t getCount(const StringData* cls, const StringData* prop) {
-  auto fullName = ClassMethodPair(cls, prop);
+  auto fullName = ClassPropPair(cls, prop);
 
   PropertyCounts::accessor acc;
   if (s_counts.find(acc, fullName)) return acc->second;
@@ -82,7 +94,7 @@ void serialize(jit::ProfDataSerializer& ser) {
   }();
 
   // Keys should be unique. Verify it.
-  hphp_fast_set<ClassMethodPair> seen;
+  hphp_fast_set<ClassPropPair> seen;
 
   write_raw(ser, keys.size());
   FTRACE(1, "PropertyProfile::serialize ({} entries):\n", keys.size());
@@ -108,7 +120,7 @@ void deserialize(jit::ProfDataDeserializer& ser) {
   while (elems--) {
     auto const clsName = read_string(ser);
     auto const propName = read_string(ser);
-    auto const fullName = ClassMethodPair(clsName, propName);
+    auto const fullName = ClassPropPair(clsName, propName);
     uint32_t count;
     read_raw(ser, count);
     FTRACE(1, "  {}::{} = {}\n", clsName->data(), propName->data(), count);

@@ -33,6 +33,7 @@ impl<'a> Reason<'a> {
         use T_::*;
         match self {
             Rnone => None,
+            Rinvalid => None,
             Rwitness(p)
             | RwitnessFromDecl(p)
             | Ridx((p, _))
@@ -92,11 +93,13 @@ impl<'a> Reason<'a> {
             | RincdecDynamic(p)
             | RtypeVariable(p)
             | RtypeVariableGenerics((p, _, _))
+            | RtypeVariableError(p)
             | RglobalTypeVariableGenerics((p, _, _))
             | RsolveFail(p)
             | RcstrOnGenerics((p, _))
             | RlambdaParam((p, _))
             | Rshape((p, _))
+            | RshapeLiteral(p)
             | Renforceable(p)
             | Rdestructure(p)
             | RkeyValueCollectionKey(p)
@@ -110,7 +113,8 @@ impl<'a> Reason<'a> {
             | RinterpOperand(p)
             | RsupportDynamicType(p)
             | RdynamicPartialEnforcement((p, _, _))
-            | RrigidTvarEscape((p, _, _, _)) => Some(p),
+            | RrigidTvarEscape((p, _, _, _))
+            | RmissingClass(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))
@@ -118,6 +122,7 @@ impl<'a> Reason<'a> {
             | RexprDepType((r, _, _))
             | RcontravariantGeneric((r, _))
             | RinvariantGeneric((r, _)) => r.pos(),
+            RopaqueTypeFromModule((p, _, _)) => Some(p),
             RdynamicCoercion(r) => r.pos(),
         }
     }

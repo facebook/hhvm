@@ -1,16 +1,16 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
-module there {}
+
+new module here {}
+new module there {}
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Internal>>
-class C {
+module here;
+
+internal class C {
   public function bar(mixed $m):void {
     // All not ok
     $m as D;
@@ -33,16 +33,14 @@ class C {
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
 
-<<__Internal>>
-class D {
+module there;
+
+internal class D {
 }
-<<__Internal>>
-class G<T> {
+internal class G<T> {
 }
-<<__Internal>>
-enum E : int {
+internal enum E : int {
   A = 1;
 }
 

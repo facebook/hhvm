@@ -51,7 +51,7 @@ function call_user_func_array(mixed $callback,
  */
 <<__Native>>
 function call_user_func(mixed $callback,
-                        ...$parameters): mixed;
+                        mixed... $parameters): mixed;
 
 /**
  * Return TRUE if the given function has been defined
@@ -75,7 +75,10 @@ function function_exists(string $function_name, bool $autoload = true)[]: bool;
  *   user defined ones using $arr["user"] (see example below).
  */
 <<__Native>>
-function get_defined_functions(): darray;
+function get_defined_functions(): shape(
+  'internal' => vec<string>,
+  'user' => vec<string>,
+);
 
 /**
  * Register a function for execution on shutdown

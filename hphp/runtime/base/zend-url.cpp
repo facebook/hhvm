@@ -110,7 +110,7 @@ bool url_parse(Url &output, const char *str, size_t length) {
 
       if (e + 2 < ue && *(e+2) == '/') {
         s = e + 3;
-        if (output.scheme.get()->isame(s_file.get())) {
+        if (output.scheme.get()->same_nocase(s_file.get())) {
           if (e + 3 < ue && *(e + 3) == '/') {
             /* support windows drive letters as in:
                file:///c:/somedir/file.txt
@@ -299,16 +299,14 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 String url_encode(const char *s, size_t len) {
   String retString(safe_address(len, 3, 1), ReserveString);
-  register unsigned char c;
-  unsigned char *to, *start;
-  unsigned char const *from, *end;
 
-  from = (unsigned char const *)s;
-  end = (unsigned char const *)s + len;
-  start = to = (unsigned char *)retString.mutableData();
+  auto from = (unsigned char const *)s;
+  auto end = (unsigned char const *)s + len;
+  auto start = (unsigned char *)retString.mutableData();
+  auto to = start;
 
   while (from < end) {
-    c = *from++;
+    auto c = *from++;
 
     if (c == ' ') {
       *to++ = '+';

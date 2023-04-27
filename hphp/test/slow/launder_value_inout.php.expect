@@ -1,0 +1,19 @@
+int(42)
+string(3) "foo"
+NULL
+bool(false)
+vec(1) {
+  string(3) "bar"
+}
+dict(1) {
+  [7]=>
+  int(13)
+}
+object(stdClass) (0) {
+}
+function(cases)
+classMeth{
+  class(HH\ExternalThreadEventWaitHandle)
+  function(setOnCreateCallback)
+}
+string(8) "stdClass"

@@ -286,6 +286,10 @@ inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }
 
+inline bool Class::isInternal() const {
+  return attrs() & AttrInternal;
+}
+
 inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
 }
@@ -359,13 +363,28 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
+  assertx(idx < numMethods());
   auto funcVec = (LowPtr<Func>*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
+  assertx(idx < numMethods());
   auto funcVec = (LowPtr<Func>*)this;
   funcVec[-((int32_t)idx + 1)] = func;
+}
+
+inline Func* Class::getMethodSafe(Slot idx) const {
+  if (idx >= numMethods()) return nullptr;
+  return getMethod(idx);
+}
+
+inline Func* Class::getIfaceMethodSafe(Slot vtableIdx, Slot methodIdx) const {
+  if (vtableIdx >= m_vtableVecLen) return nullptr;
+  auto const& vtable = m_vtableVec[vtableIdx];
+  if (vtable.iface == nullptr) return nullptr;
+  if (methodIdx >= vtable.iface->numMethods()) return nullptr;
+  return vtable.vtable[methodIdx];
 }
 
 inline Func* Class::lookupMethod(const StringData* methName) const {
@@ -410,11 +429,11 @@ inline Slot Class::lookupReifiedInitProp() const {
 }
 
 inline bool Class::hasReifiedGenerics() const {
-  return m_hasReifiedGenerics;
+  return m_allFlags.m_hasReifiedGenerics;
 }
 
 inline bool Class::hasReifiedParent() const {
-  return m_hasReifiedParent;
+  return m_allFlags.m_hasReifiedParent;
 }
 
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
@@ -434,7 +453,7 @@ inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
 }
 
 inline bool Class::hasDeepInitProps() const {
-  return m_hasDeepInitProps;
+  return m_allFlags.m_hasDeepInitProps;
 }
 
 inline bool Class::forbidsDynamicProps() const {
@@ -445,15 +464,15 @@ inline bool Class::forbidsDynamicProps() const {
 // Property initialization.
 
 inline bool Class::needInitialization() const {
-  return m_needInitialization;
+  return m_allFlags.m_needInitialization;
 }
 
 inline bool Class::maybeRedefinesPropTypes() const {
-  return m_maybeRedefsPropTy;
+  return m_allFlags.m_maybeRedefsPropTy;
 }
 
 inline bool Class::needsPropInitialValueCheck() const {
-  return m_needsPropInitialCheck;
+  return m_allFlags.m_needsPropInitialCheck;
 }
 
 inline const Class::PropInitVec& Class::declPropInit() const {
@@ -465,7 +484,7 @@ inline const VMFixedVector<const Func*>& Class::pinitVec() const {
 }
 
 inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
-  assertx(m_maybeRedefsPropTy);
+  assertx(m_allFlags.m_maybeRedefsPropTy);
   m_extra->m_checkedPropTypeRedefs.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropTypeRedefs", name()}
@@ -474,7 +493,7 @@ inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
 }
 
 inline rds::Handle Class::checkedPropInitialValuesHandle() const {
-  assertx(m_needsPropInitialCheck);
+  assertx(m_allFlags.m_needsPropInitialCheck);
   m_extra->m_checkedPropInitialValues.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropInitialValues", name()}
@@ -595,7 +614,7 @@ inline bool Class::checkInstanceBit(unsigned int bit) const {
 // Throwable initialization.
 
 inline bool Class::needsInitThrowable() const {
-  return m_needsInitThrowable;
+  return m_allFlags.m_needsInitThrowable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -674,9 +693,7 @@ inline EnumValues* Class::getEnumValues() const {
 // ExtraData.
 
 inline void Class::allocExtraData() const {
-  if (!m_extra) {
-    m_extra = new ExtraData();
-  }
+  m_extra.ensureAllocated();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -730,7 +747,7 @@ inline const StringData* classToStringHelper(const Class* cls) {
 ///////////////////////////////////////////////////////////////////////////////
 // Lookup.
 
-inline Class* Class::lookup(const NamedEntity* ne) {
+inline Class* Class::lookup(const NamedType* ne) {
   return ne->getCachedClass();
 }
 
@@ -738,14 +755,14 @@ inline Class* Class::lookup(const StringData* name) {
   if (name->isSymbol()) {
     if (auto const result = name->getCachedClass()) return result;
   }
-  auto const result = lookup(NamedEntity::get(name));
+  auto const result = lookup(NamedType::get(name));
   if (name->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(name)->setCachedClass(result);
   }
   return result;
 }
 
-inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,
+inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
                                                  const Class* ctx,
                                                  const Unit* unit) {
   Class* cls = ne->clsList();
@@ -759,7 +776,7 @@ inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,
 inline const Class* Class::lookupUniqueInContext(const StringData* name,
                                                  const Class* ctx,
                                                  const Unit* unit) {
-  return lookupUniqueInContext(NamedEntity::get(name), ctx, unit);
+  return lookupUniqueInContext(NamedType::get(name), ctx, unit);
 }
 
 inline Class* Class::load(const StringData* name) {
@@ -770,7 +787,7 @@ inline Class* Class::load(const StringData* name) {
 
   auto const result = [&]() -> Class* {
     String normStr;
-    auto ne = NamedEntity::get(name, true, &normStr);
+    auto ne = NamedType::get(name, true, &normStr);
 
     // Try to fetch from cache
     Class* class_ = ne->getCachedClass();
@@ -795,7 +812,7 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
   }
   auto const orig = name;
   String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
+  auto ne = NamedType::get(name, true, &normStr);
   if (normStr) {
     name = normStr.get();
   }

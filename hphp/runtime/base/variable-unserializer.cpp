@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
@@ -546,7 +547,10 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
                                            int nProp) {
 
   auto const cls = obj->getVMClass();
-  auto const lookup = cls->getDeclPropSlot(ctx, key.get());
+
+  // TODO(T126821336): unserializing variable may require module name
+  auto const propCtx = MemberLookupContext(ctx);
+  auto const lookup = cls->getDeclPropSlot(propCtx, key.get());
   auto const slot = lookup.slot;
   tv_lval t;
 
@@ -559,12 +563,11 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   } else {
     // We'll check if this doesn't violate the type-hint once we're done
     // unserializing all the props.
-    t = obj->getPropLval(ctx, key.get());
+    t = obj->getPropLval(propCtx, key.get());
   }
 
   unserializePropertyValue(t, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
-  if (!RepoFile::globalData().HardPrivatePropInference) return;
 
   /*
    * We assume for performance reasons in repo authoriative mode that
@@ -623,7 +626,10 @@ void VariableUnserializer::unserializeRemainingProps(
         }
       }
       String k(kdata + subLen, ksize - subLen, CopyString);
-      Class* ctx = (Class*)-1;
+      // We use (Class*)-8 as the sentinel value during deserialization to represent
+      // that we are allowed to look up protected properties. -8 allows 3 extra
+      // bits to be used for other purposes.
+      Class* ctx = (Class*)-8;
       if (kdata[1] != '*') {
         ctx = Class::lookup(
           String(kdata + 1, subLen - 2, CopyString).get());
@@ -653,11 +659,11 @@ static const StaticString
  * If no alternate name is found, returns nullptr.
  */
 const StringData* getAlternateCollectionName(const StringData* clsName) {
-  typedef hphp_hash_map<const StringData*, const StringData*,
-                        string_data_hash, string_data_isame> ClsNameMap;
+  using ClsNameMap = hphp_hash_map<const StringData*, const StringData*,
+                        string_data_hash, string_data_isame>;
 
   auto getAltMap = [] {
-    typedef std::pair<StaticString, StaticString> SStringPair;
+    using SStringPair = std::pair<StaticString, StaticString>;
 
     static ClsNameMap m;
 
@@ -752,10 +758,6 @@ void VariableUnserializer::unserializeVariant(
   if (isRefcountedType(self.type()) && mode == UnserializeMode::Value) {
     m_overwrittenList.append(*self);
   }
-
-  // NOTE: If you make changes to how serialization and unserialization work,
-  // make sure to update reserialize() here and test_apc_reserialize()
-  // in "test/ext/test_ext_apc.cpp".
 
   char type = readChar();
   char sep = readChar();
@@ -920,6 +922,14 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_tv<KindOfKeyset>(a.detach()), self);
     }
     return; // array has '}' terminating
+  case 'T': // BespokeTypeStructure
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeBespokeTypeStructure();
+      tvMove(make_array_like_tv(a.detach()), self);
+    }
+    return; // array has '}' terminating
   case 'L':
     {
       int64_t id = readInt();
@@ -1023,7 +1033,7 @@ void VariableUnserializer::unserializeVariant(
       } else {
         warnOrThrowUnknownClass(clsName);
         obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
-        obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+        obj->setProp(nullctx, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asTypedValue());
       }
       assertx(!obj.isNull());
@@ -1041,9 +1051,7 @@ void VariableUnserializer::unserializeVariant(
 
           Variant serializedNativeData = init_null();
           bool hasSerializedNativeData = false;
-          bool checkRepoAuthType =
-            RuntimeOption::RepoAuthoritative &&
-            RepoFile::globalData().HardPrivatePropInference;
+          bool checkRepoAuthType = RO::RepoAuthoritative;
           Class* objCls = obj->getVMClass();
           // Try fast case.
           if (remainingProps >= objCls->numDeclProperties() -
@@ -1057,7 +1065,7 @@ void VariableUnserializer::unserializeVariant(
               auto index = objCls->propSlotToIndex(slot);
               auto const& prop = declProps[slot];
               if (prop.name == s_86reified_prop.get()) continue;
-              if (!matchString(prop.mangledName->slice())) {
+              if (!matchString(prop.mangledName()->slice())) {
                 mismatch = true;
                 break;
               }
@@ -1189,9 +1197,9 @@ void VariableUnserializer::unserializeVariant(
         }
         warnOrThrowUnknownClass(clsName);
         Object ret = create_object_only(s_PHP_Incomplete_Class);
-        ret->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+        ret->setProp(nullctx, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asTypedValue());
-        ret->setProp(nullptr, s_serialized.get(), serialized.asTypedValue());
+        ret->setProp(nullctx, s_serialized.get(), serialized.asTypedValue());
         return ret;
       }();
 
@@ -1508,6 +1516,14 @@ Array VariableUnserializer::unserializeKeyset() {
   return init.toArray();
 }
 
+Array VariableUnserializer::unserializeBespokeTypeStructure() {
+  assertx(RO::EvalEmitBespokeTypeStructures);
+
+  auto arr = unserializeDict();
+  auto const ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
+  if (ts) arr = Array::attach(ts);
+  return arr;
+}
 
 folly::StringPiece
 VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
@@ -1713,171 +1729,6 @@ void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
   auto pair = static_cast<c_Pair*>(obj);
   unserializeVariant(pair->at(0));
   unserializeVariant(pair->at(1));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void VariableUnserializer::reserialize(StringBuffer& buf) {
-
-  char type = readChar();
-  char sep = readChar();
-
-  if (type == 'N') {
-    buf.append(type);
-    buf.append(sep);
-    return;
-  }
-
-  switch (type) {
-  case 'r':
-  case 'R':
-  case 'b':
-  case 'i':
-  case 'd':
-  case 'l':
-    {
-      buf.append(type);
-      buf.append(sep);
-      while (peek() != ';') {
-        char ch;
-        ch = readChar();
-        buf.append(ch);
-      }
-    }
-    break;
-  case 'S':
-  case 'A':
-    {
-      // shouldn't happen, but keep the code here anyway.
-      buf.append(type);
-      buf.append(sep);
-      auto str = readStr(8);
-      buf.append(str.data(), str.size());
-    }
-    break;
-  case 's':
-    {
-      String v = unserializeString();
-      assertx(!v.isNull());
-      if (v.get()->isStatic()) {
-        union {
-          char pointer[8];
-          StringData *sd;
-        } u;
-        u.sd = v.get();
-        buf.append("S:");
-        buf.append(u.pointer, 8);
-        buf.append(';');
-      } else {
-        buf.append("s:");
-        buf.append(v.size());
-        buf.append(":\"");
-        buf.append(v.data(), v.size());
-        buf.append("\";");
-      }
-      sep = readChar();
-      return;
-    }
-    break;
-  case 'a':
-  case 'D':
-  case 'Y':
-  case 'H':
-    {
-      buf.append(type == 'a' ? "a:" : (type == 'Y' ? "Y:" :
-            (type == 'D' ? "D:" : "H:")));
-      int64_t size = readInt();
-      char sep2 = readChar();
-      buf.append(size);
-      buf.append(sep2);
-      sep2 = readChar();
-      buf.append(sep2);
-      for (int64_t i = 0; i < size; i++) {
-        reserialize(buf); // key
-        reserialize(buf); // value
-      }
-      sep2 = readChar(); // '}'
-      buf.append(sep2);
-      return;
-    }
-    break;
-  case 'v':
-  case 'k':
-  case 'y':
-    {
-      buf.append(type == 'v' ? "v:" : (type == 'y' ? "y:" : "k:"));
-      int64_t size = readInt();
-      char sep2 = readChar();
-      buf.append(size);
-      buf.append(sep2);
-      sep2 = readChar();
-      buf.append(sep2);
-      for (int64_t i = 0; i < size; ++i) {
-        reserialize(buf);
-      }
-      sep2 = readChar(); // '}'
-      buf.append(sep2);
-      return;
-    }
-  case 'o':
-  case 'O':
-  case 'V':
-  case 'K':
-    {
-      buf.append(type);
-      buf.append(sep);
-
-      auto const clsName = unserializeStringPiece();
-      buf.append(static_cast<int>(clsName.size()));
-      buf.append(":\"");
-      buf.append(clsName.data(), clsName.size());
-      buf.append("\":");
-
-      readChar();
-      int64_t size = readInt();
-      char sep2 = readChar();
-
-      buf.append(size);
-      buf.append(sep2);
-      sep2 = readChar(); // '{'
-      buf.append(sep2);
-      // 'V' type is a series with values only, while all other
-      // types are series with keys and values
-      int64_t i = type == 'V' ? size : size * 2;
-      while (i--) {
-        reserialize(buf);
-      }
-      sep2 = readChar(); // '}'
-      buf.append(sep2);
-      return;
-    }
-    break;
-  case 'C':
-    {
-      buf.append(type);
-      buf.append(sep);
-
-      auto const clsName = unserializeStringPiece();
-      buf.append(static_cast<int>(clsName.size()));
-      buf.append(":\"");
-      buf.append(clsName.data(), clsName.size());
-      buf.append("\":");
-
-      sep = readChar(); // ':'
-      auto const serialized = unserializeStringPiece('{', '}');
-      buf.append(static_cast<int>(serialized.size()));
-      buf.append(":{");
-      buf.append(serialized.data(), serialized.size());
-      buf.append('}');
-      return;
-    }
-    break;
-  default:
-    throwUnknownType(type);
-  }
-
-  sep = readChar(); // the last ';'
-  buf.append(sep);
 }
 
 }

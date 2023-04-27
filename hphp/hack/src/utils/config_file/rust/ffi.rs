@@ -18,7 +18,7 @@ fn wrap(config: ConfigFile) -> Custom<Config> {
 
 ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_config_file_empty() -> Custom<Config> {
-        wrap(ConfigFile::empty())
+        wrap(ConfigFile::default())
     }
 
     fn hh_config_file_parse_contents(contents: Vec<u8>) -> Custom<Config> {

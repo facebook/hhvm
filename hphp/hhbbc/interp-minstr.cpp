@@ -814,6 +814,8 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
         unreachable();
         return;
       }
+      assertx(!toSet.is(BBottom));
+      assertx(!toPush.is(BBottom));
 
       // Write the element back into the array
       auto const set = array_do_set(env, key, toSet);
@@ -981,7 +983,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
           };
         }
         auto const raw =
-          env.index.lookup_public_prop(objcls(thisTy), sval(name));
+          env.index.lookup_public_prop(thisTy, sval(name));
         return { update ? raw : to_cell(raw), Effects::Throws };
       }();
 
@@ -1004,7 +1006,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
   if (env.collect.mInstrState.base.type.subtypeOf(BObj)) {
     auto const raw =
       env.index.lookup_public_prop(
-        objcls(env.collect.mInstrState.base.type),
+        env.collect.mInstrState.base.type,
         name ? sval(name) : TStr
       );
     auto const ty = update ? raw : to_cell(raw);
@@ -1381,6 +1383,9 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
           return Effects::Throws;
         }
+        if (!isDefinitelyThisPropAttr(env, name, AttrInitialSatisfiesTC)) {
+          return Effects::Throws;
+        }
         if (quiet) return Effects::None;
         auto const elem = thisPropType(env, name);
         assertx(elem.has_value());
@@ -1391,7 +1396,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
       if (!base.couldBe(BObj)) return TInitNull;
       auto t = to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1477,7 +1482,7 @@ Effects miFinalSetOpProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1535,7 +1540,7 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1746,6 +1751,9 @@ Effects miFinalSetOpElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& lhsTy) {
       auto const result = typeSetOp(subop, lhsTy, rhsTy);
+      if (result.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(result, result, Effects::Throws);
     }
   );
@@ -1758,6 +1766,9 @@ Effects miFinalIncDecElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& before) {
       auto const after = typeIncDec(subop, before);
+      if (after.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(
         after,
         isPre(subop) ? after : before,
@@ -2027,6 +2038,7 @@ void in(ISS& env, const bc::BaseSC& op) {
   // types.
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
+      lookup.internal == TriBool::No &&
       !lookup.classInitMightRaise &&
       !mightConstThrow &&
       !mightReadOnlyThrow &&
@@ -2262,7 +2274,7 @@ void in(ISS& env, const bc::QueryM& op) {
       op.subop2 == QueryMOp::CGet &&
       nDiscard == 1 &&
       op.mkey.mcode == MemberCode::MET &&
-      op.mkey.litstr->isame(s_classname.get())) {
+      op.mkey.litstr == s_classname.get()) {
     if (auto const last = last_op(env, 0)) {
       if (last->op == Op::BaseC) {
         if (auto const prev = last_op(env, 1)) {

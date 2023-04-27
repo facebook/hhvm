@@ -15,18 +15,22 @@
 */
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -64,7 +68,6 @@ struct ParamPrep {
     // The value with the appropriate ref-iness to pass to the C++ builtin
     SSATmp* argValue{nullptr};
     bool passByAddr{false};
-    bool needsConversion{false};
     bool isInOut{false};
   };
 
@@ -83,6 +86,85 @@ struct ParamPrep {
 // Will turn into either an int or a double in zend_convert_scalar_to_number.
 bool type_converts_to_number(Type ty) {
   return ty.subtypeOfAny(TDbl, TInt, TNull, TObj, TRes, TStr, TBool);
+}
+
+/*
+ * Warning: The logic for handling the tokens %%, %s in the format string
+ * in this function should mimic one in the string_printf implementation in
+ * zend-printf.cpp, which is invoked in the slow path. If you make any changes
+ * here, please ensure that the two implementations will be in sync.
+ */
+jit::vector<SSATmp*> tokenize(
+    IRGS& env, const StringData* format, SSATmp* args) {
+  assertx(args->isA(TVec));
+  auto const numArgs = [&]() -> Optional<uint32_t> {
+    auto const rat = args->type().arrSpec().type();
+    if (!rat || rat->tag() != RepoAuthType::Array::Tag::Tuple) {
+      return std::nullopt;
+    }
+    return rat->size();
+  }();
+
+  jit::vector<SSATmp*> result;
+  if (!numArgs.has_value()) {
+    return result;
+  }
+
+  if (format->empty()) {
+    return result;
+  }
+
+  int size = 256 - kStringOverhead;
+  StringBuffer buf(size);
+  jit::vector<const StringData*> tokens;
+  size_t numStrTokens = 0;
+  for (auto it = format->slice().begin(); it != format->slice().end(); ++it) {
+    char ch = *it;
+    if (ch != '%') {
+      buf.append(ch);
+      continue;
+    }
+
+    it++;
+    if (it != format->slice().end()) {
+      if (*it == '%') {
+        buf.append('%');
+        continue;
+      }
+
+      if (*it != 's') {
+        return jit::vector<SSATmp*>();
+      }
+
+      if (!buf.empty()) {
+        tokens.push_back(makeStaticString(buf.detach()));
+      }
+      // Use a nullptr placeholder that will be replaced with the corresponding
+      // token from args
+      ++numStrTokens;
+      tokens.push_back(nullptr);
+    }
+  }
+
+  if (!buf.empty()) {
+    tokens.push_back(makeStaticString(buf.detach()));
+  }
+
+  if (numArgs < numStrTokens) {
+    return result;
+  }
+
+  size_t argIdx = 0;
+  for (auto const token : tokens) {
+    if (!token) {
+      auto index = env.unit.cns(argIdx++);
+      auto elem = gen(env, LdVecElem, args, index);
+      result.push_back(gen(env, ConvTVToStr, ConvNoticeData{}, elem));
+    } else {
+      result.push_back(cns(env, token));
+    }
+  }
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -197,6 +279,21 @@ SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
     return gen(env, ChrInt, arg);
   }
 
+  return nullptr;
+}
+
+SSATmp* opt_is_numeric(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+
+  auto const arg = params[0].value;
+  if (!arg->type().maybe(TInt | TDbl | TStr)) return cns(env, false);
+  if (arg->isA(TInt | TDbl)) return cns(env, true);
+  if (arg->hasConstVal(TStr)) {
+    int64_t ival;
+    double dval;
+    auto const dt = arg->strVal()->toNumeric(ival, dval);
+    return cns(env, dt == KindOfInt64 || dt == KindOfDouble);
+  }
   return nullptr;
 }
 
@@ -444,6 +541,51 @@ SSATmp* opt_ceil(IRGS& env, const ParamPrep& params) {
   // May throw
   auto const dbl = gen(env, ConvTVToDbl, val);
   return gen(env, Ceil, dbl);
+}
+
+SSATmp* genConcat(IRGS& env, std::vector<SSATmp*>&& tokens) {
+  if (tokens.empty()) {
+    return nullptr;
+  }
+
+  auto lhs = tokens[0];
+  size_t frontier = 1;
+  while (frontier < tokens.size()) {
+    auto const remaining = tokens.size() - frontier;
+    if (remaining < 3) {
+      switch(remaining) {
+        case 0:
+          always_assert(false);
+        case 1:
+          lhs = gen(env, ConcatStrStr, lhs, tokens[frontier]);
+          break;
+        case 2:
+          lhs = gen(env, ConcatStr3, lhs, tokens[frontier], tokens[frontier+1]);
+          break;
+      }
+      frontier += remaining;
+    } else {
+      lhs = gen(env, ConcatStr4, lhs, tokens[frontier], tokens[frontier+1], tokens[frontier+2]);
+      frontier += 3;
+    }
+  }
+
+  return lhs;
+}
+
+SSATmp* opt_vsprintf_l(IRGS& env, const ParamPrep& params) {
+  auto const format = params[1].value;
+  auto const args = params[2].value;
+  if (!format->hasConstVal(TStr) || !args->isA(TVec)) {
+    return nullptr;
+  }
+
+  auto tokens = tokenize(env, format->strVal(), args);
+  if (tokens.empty()) {
+    return nullptr;
+  }
+
+  return genConcat(env, std::move(tokens));
 }
 
 SSATmp* opt_floor(IRGS& env, const ParamPrep& params) {
@@ -1077,6 +1219,25 @@ SSATmp* opt_meth_caller_get_method(IRGS& env, const ParamPrep& params) {
   return meth_caller_get_name<false>(env, params[0].value);
 }
 
+SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const ctx = gen(env, LdImplicitContext);
+      return gen(env, CheckType, TObj, taken, ctx);
+    },
+    [&] (SSATmp* ctx) {
+      auto const key = gen(env, LdImplicitContextMemoKey, ctx);
+      gen(env, IncRef, key);
+      return key;
+    },
+    [&] {
+      return cns(env, staticEmptyString());
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Whitelists of builtins that we have optimized HHIR emitters for.
@@ -1104,6 +1265,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"abs", opt_abs},
   {"ord", opt_ord},
   {"chr", opt_chr},
+  {"is_numeric", opt_is_numeric},
   {"hphp_debug_caller_info", opt_hphp_debug_caller_info},
   {"hh\\array_key_cast", opt_array_key_cast},
   {"hh\\type_structure", opt_type_structure},
@@ -1116,6 +1278,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\Lib\\_Private\\Native\\last", opt_container_last},
   {"HH\\Lib\\_Private\\Native\\first_key", opt_container_first_key},
   {"HH\\Lib\\_Private\\Native\\last_key", opt_container_last_key},
+  {"HH\\Lib\\_Private\\_Str\\vsprintf_l", opt_vsprintf_l},
   {"HH\\fun_get_function", opt_fun_get_function},
   {"HH\\class_meth_get_class", opt_class_meth_get_class},
   {"HH\\class_meth_get_method", opt_class_meth_get_method},
@@ -1127,6 +1290,8 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
+  {"HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
+     opt_get_implicit_context_memo_key},
 };
 
 // This second whitelist, a subset of the first, records which parameter
@@ -1251,23 +1416,28 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
  * If the builtin parameter has no type hints to cause coercion, this function
  * returns TBottom.
  */
-Type param_target_type(const Func* callee, uint32_t paramIdx) {
+Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
+  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+    // If we're dealing with an array-like interface, then there's no need to
+    // check the input type: it's going to be mixed on the C++ side anyhow.
+    return std::nullopt;
+  }
   if (tc.isNullable()) {
     // FIXME(T116301380): native builtins don't resolve properly
     auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-    if (!dt) return TBottom;
+    if (!dt) return std::nullopt;
     return TNull | Type(*dt);
   }
-  if (!pi.builtinType) {
-    return tc.isVecOrDict() ? TVec|TDict : TBottom;
+  if (!pi.builtinType()) {
+    return tc.isVecOrDict() ? make_optional(TVec|TDict) : std::nullopt;
   }
-  if (pi.builtinType == KindOfObject &&
+  if (pi.builtinType() == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
     return TNullableObj;
   }
-  return Type(*pi.builtinType);
+  return Type(*pi.builtinType());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1290,8 +1460,6 @@ prepare_params(IRGS& env, const Func* callee, SSATmp* ctx,
     auto& cur = ret[offset];
     auto& pi = callee->params()[offset];
 
-    // If ty > TBottom, it had some kind of type hint.
-    cur.needsConversion = ty > TBottom;
     cur.isInOut = callee->isInOut(offset);
     cur.value = ldLoc(env, offset, DataTypeSpecific);
     // We do actually mean exact type equality here.  We're only capable of
@@ -1337,12 +1505,12 @@ template<class V, class C, class R>
 SSATmp* realize_param(IRGS& env,
                       ParamPrep::Info& param,
                       const Func* callee,
-                      Type targetTy,
+                      Optional<Type> targetTy,
                       V checkType,
                       C convertParam,
                       R realize) {
-  if (param.needsConversion) {
-    auto const baseTy = targetTy - TNull;
+  if (targetTy) {
+    auto const baseTy = *targetTy - TNull;
     assertx(baseTy.isKnownDataType() || baseTy == (TVec|TDict));
 
     if (auto const value = cond(
@@ -1442,7 +1610,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
       if (tc.isVecOrDict()) return s_vec_or_dict.get();
-      auto const dt = param_target_type(callee, param) - TNull;
+      auto const dt = param_target_type(callee, param).value_or(TUninit) - TNull;
       return getDataTypeString(dt.toDataType()).get();
     }();
     auto const data = FuncArgTypeData { callee, param + 1, expected_type };
@@ -1684,58 +1852,6 @@ void emitNativeImpl(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-const StaticString s_add("add");
-const StaticString s_addall("addall");
-const StaticString s_append("append");
-const StaticString s_clear("clear");
-const StaticString s_remove("remove");
-const StaticString s_removeall("removeall");
-const StaticString s_removekey("removekey");
-const StaticString s_set("set");
-const StaticString s_setall("setall");
-
-// Whitelist of known collection methods that always return $this (ignoring
-// parameter coercion failure issues).
-bool collectionMethodReturnsThis(const Func* callee) {
-  auto const cls = callee->implCls();
-
-  if (cls == c_Vector::classof()) {
-    return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_append.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_removekey.get()) ||
-      callee->name()->isame(s_set.get()) ||
-      callee->name()->isame(s_setall.get());
-  }
-
-  if (cls == c_Map::classof()) {
-    return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_remove.get()) ||
-      callee->name()->isame(s_set.get()) ||
-      callee->name()->isame(s_setall.get());
-  }
-
-  if (cls == c_Set::classof()) {
-    return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_remove.get()) ||
-      callee->name()->isame(s_removeall.get());
-  }
-
-  return false;
-}
-
-}
-
 Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isCPPBuiltin());
   assertx(builtin->isInOut(i));
@@ -1800,13 +1916,7 @@ Type builtinReturnType(const Func* builtin) {
   // code-gen when lowering the builtin call to vasm and must be no more general
   // than the HNI declaration (if present).
   auto type = [&]{
-    // If this is a collection method which returns $this, use that fact to
-    // infer the exact returning type. Otherwise try to use HNI declaration.
-    if (collectionMethodReturnsThis(builtin)) {
-      assertx(builtin->hniReturnType() == KindOfObject);
-      return Type::ExactObj(builtin->implCls());
-    }
-    if (auto const hniType = builtin->hniReturnType()) {
+    if (auto const hniType = builtin->returnTypeConstraint().asSystemlibType()) {
       return Type{*hniType};
     }
     return TInitCell;
@@ -1831,11 +1941,12 @@ Type builtinReturnType(const Func* builtin) {
 namespace {
 
 void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const stack_base = popC(env);
+  auto const def = topC(env, BCSPRelOffset{0});
+  auto const key = topC(env, BCSPRelOffset{1});
+  auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
+    discard(env, 3);
     pushIncRef(env, elem);
     decRef(env, def, DecRefProfileId::IdxDef);
     decRef(env, key, DecRefProfileId::IdxKey);
@@ -1845,11 +1956,6 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -1882,7 +1988,7 @@ void implDictKeysetIdx(IRGS& env,
   auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
-    popC(env); popC(env); popC(env);
+    discard(env, 3);
     pushIncRef(env, elem);
     decRef(env, def, DecRefProfileId::IdxDef);
     decRef(env, key, DecRefProfileId::IdxKey);
@@ -1892,11 +1998,6 @@ void implDictKeysetIdx(IRGS& env,
   if (key->isA(TNull)) return finish(def);
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -2066,14 +2167,6 @@ void emitAKExists(IRGS& env) {
   }
 
   auto const throwBadKey = [&] {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    discard(env, 2);
-    push(env, cns(env, false));
-    decRef(env, arr, DecRefProfileId::AKExistsArr);
-    decRef(env, key, DecRefProfileId::AKExistsKey);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, arr, key);
   };
 
@@ -2496,34 +2589,102 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 }
 
 void emitSetImplicitContextByValue(IRGS& env) {
-  if (!RO::EvalEnableImplicitContext) {
-    popDecRef(env, DecRefProfileId::Default);
-    push(env, cns(env, make_tv<KindOfNull>()));
-    return;
-  }
   auto const tv = topC(env);
-  auto const prev_ctx = cond(
+  ifThenElse(
     env,
-    [&] (Block* taken) { return gen(env, CheckType, TInitNull, taken, tv); },
-    [&] (SSATmp* null) {
+    [&] (Block* taken) { gen(env, CheckType, TInitNull, taken, tv); },
+    [&] {
       auto const prev = gen(env, LdImplicitContext);
-      gen(env, StImplicitContext, null);
-      return prev;
-    },
-    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
-    [&] (SSATmp* obj) {
-      auto const prev = gen(env, LdImplicitContext);
-      gen(env, StImplicitContext, obj);
-      return prev;
+      gen(env, StImplicitContext, cns(env, TInitNull));
+      popC(env);
+      pushIncRef(env, prev);
     },
     [&] {
-      hint(env, Block::Hint::Unlikely);
-      interpOne(env);
-      return cns(env, TBottom);
+      ifThenElse(
+        env,
+        [&] (Block* taken) { gen(env, CheckType, TObj, taken, tv); },
+        [&] {
+          auto const obj = gen(env, AssertType, TObj, tv);
+          auto const prev = gen(env, LdImplicitContext);
+          gen(env, StImplicitContext, obj);
+          popC(env);
+          pushIncRef(env, prev);
+          // Decref after discarding so that if we are pushing the same object back,
+          // avoid refcount going to zero
+          decRef(env, obj);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, AssertType, tv->type() - TObj - TInitNull, tv);
+          interpOne(env);
+        }
+      );
     }
   );
-  popC(env);
-  push(env, prev_ctx);
+}
+
+void verifyImplicitContextState(IRGS& env, const Func* func) {
+  assertx(!func->hasCoeffectRules());
+  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+
+  switch (func->memoizeICType()) {
+    case Func::MemoizeICType::NoIC:
+      if (providedCoeffectsKnownStatically(func).canCall(
+          RuntimeCoeffects::leak_safe_shallow())) {
+        // We are in a memoized that can call [defaults] code or any escape
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            auto const ctx = gen(env, LdImplicitContext);
+            gen(env, CheckType, TInitNull, taken, ctx);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
+            return cns(env, TBottom);
+          }
+        );
+      }
+      return;
+    case Func::MemoizeICType::SoftMakeICInaccessible:
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          auto const ctx = gen(env, LdImplicitContext);
+          gen(env, CheckType, TInitNull, taken, ctx);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
+        }
+      );
+      return;
+    case Func::MemoizeICType::KeyedByIC:
+    case Func::MemoizeICType::MakeICInaccessible:
+      return;
+  }
+
+  not_reached();
+}
+
+void emitVerifyImplicitContextState(IRGS& env) {
+  verifyImplicitContextState(env, curFunc(env));
+}
+
+void emitCreateSpecialImplicitContext(IRGS& env) {
+  auto const memoKey = topC(env, BCSPRelOffset{0});
+  auto const type = topC(env, BCSPRelOffset{1});
+  if (!type->isA(TInt)) PUNT(CreateSpecialImplicitContext);
+  if (!memoKey->isA(TStr) && !memoKey->isA(TInitNull)) {
+    PUNT(CreateSpecialImplicitContext);
+  }
+  auto const func = curFunc(env);
+  auto const obj =
+    gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
+  decRef(env, memoKey);
+  decRef(env, type);
+  discard(env, 2);
+  push(env, obj);
 }
 
 //////////////////////////////////////////////////////////////////////

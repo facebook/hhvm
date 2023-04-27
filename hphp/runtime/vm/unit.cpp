@@ -20,6 +20,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iomanip>
 #include <map>
 #include <ostream>
@@ -132,7 +133,7 @@ Unit::~Unit() {
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
   for (auto const& pcls : m_preClasses) {
-    Class* cls = pcls->namedEntity()->clsList();
+    Class* cls = pcls->namedType()->clsList();
     while (cls) {
       Class* cur = cls;
       cls = cls->m_next;
@@ -242,22 +243,18 @@ StringData* Unit::lookupLitstrId(Id id) const {
   auto& elem = m_litstrs[id];
   auto wrapper = elem.copy();
   if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    assertx(wrapper.ptr()->isStatic());
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
     return const_cast<StringData*>(wrapper.ptr());
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    assertx(wrapper.ptr()->isStatic());
-    elem.unlock();
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
     return const_cast<StringData*>(wrapper.ptr());
   }
   auto const str = UnitEmitter::loadLitstrFromRepo(m_sn, wrapper.token(), true);
-  assertx(str);
-  assertx(str->isStatic());
-  elem.update_and_unlock(StringOrToken::FromPtr(str));
+  assertx(!str || str->isStatic());
+  lock.update(StringOrToken::FromPtr(str));
   return const_cast<StringData*>(str);
 }
 
@@ -274,20 +271,31 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
     assertx(wrapper.ptr()->isStatic());
     return wrapper.ptr();
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
     assertx(wrapper.ptr()->isStatic());
-    elem.unlock();
     return wrapper.ptr();
   }
-  auto const array = UnitEmitter::loadLitarrayFromRepo(
-    m_sn, wrapper.token(), m_origFilepath, true
-  );
+
+  auto const oldStrUnit = BlobEncoderHelper<const StringData*>::tl_unit;
+  auto const oldArrUnit = BlobEncoderHelper<const ArrayData*>::tl_unit;
+
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  BlobEncoderHelper<const ArrayData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = oldStrUnit;
+    BlobEncoderHelper<const ArrayData*>::tl_unit = oldArrUnit;
+  };
+
+  auto const array =
+    UnitEmitter::loadLitarrayFromRepo(m_sn, wrapper.token(), true);
   assertx(array);
   assertx(array->isStatic());
-  elem.update_and_unlock(ArrayOrToken::FromPtr(array));
+  lock.update(ArrayOrToken::FromPtr(array));
   return array;
 }
 
@@ -296,23 +304,29 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
 
 const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
   assertx(id >= 0 && id < m_rats.size());
-
   auto& elem = m_rats[id];
   auto wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
     return wrapper.ptr();
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
-    elem.unlock();
     return wrapper.ptr();
   }
+
+  assertx(!BlobEncoderHelper<const StringData*>::tl_unit);
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = nullptr;
+  };
+
   auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
   assertx(array);
-  elem.update_and_unlock(RATArrayOrToken::FromPtr(array));
+  lock.update(RATArrayOrToken::FromPtr(array));
   return array;
 }
 
@@ -346,7 +360,7 @@ void Unit::initialMerge() {
       ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
       if (RuntimeOption::ServerExecutionMode()) {
-        ent.setInt("uptime", f_server_uptime());
+        ent.setInt("uptime", HHVM_FN(server_uptime)());
       }
       StructuredLog::log("hhvm_first_units", ent);
     }
@@ -387,6 +401,24 @@ void Unit::merge() {
 
   mergeImpl(mergeTypes);
 
+  if (RO::EvalLogDeclDeps) {
+    logDeclInfo();
+
+    auto const thisPath = filepath();
+    auto const& options = RepoOptions::forFile(thisPath->data());
+    auto const dir = options.dir();
+    auto const relPath = std::filesystem::relative(
+      std::filesystem::path(thisPath->data()),
+      dir
+    );
+
+    for (auto& [path, sha] : m_deps) {
+      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto fpath = makeStaticString(dir / path);
+      g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
+    }
+  }
+
   if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
   }
@@ -397,16 +429,19 @@ void Unit::logTearing(int64_t nsecs) {
   assertx(RO::EvalSampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
-  auto repoRoot = folly::fs::path(repoOptions->path()).parent_path();
+  auto repoRoot = std::filesystem::path(repoOptions->path()).parent_path();
 
   assertx(!isSystemLib());
   StructuredLogEntry ent;
 
   auto const tpath = [&] () -> std::string {
-    auto const orig = folly::fs::path(origFilepath()->data());
-    if (repoRoot.size() > orig.size() || repoRoot.empty()) return orig.native();
+    auto const orig = std::filesystem::path{origFilepath()->data()};
+    auto const origNative = orig.native();
+    if (repoRoot.native().size() > origNative.size() || repoRoot.empty()) {
+      return origNative;
+    }
     if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
-      return orig.native();
+      return origNative;
     }
     return orig.lexically_relative(repoRoot).native();
   }();
@@ -439,6 +474,75 @@ void Unit::logTearing(int64_t nsecs) {
   FTRACE(2, "Tearing in {} ({} ns)\n", tpath.data(), nsecs);
 
   StructuredLog::log("hhvm_sandbox_file_tearing", ent);
+}
+
+void Unit::logDeclInfo() const {
+  if (!RO::EvalLogAllDeclTearing &&
+      !StructuredLog::coinflip(RO::EvalLogDeclDeps)) return;
+
+  auto const thisPath = filepath();
+  auto const& options = RepoOptions::forFile(thisPath->data());
+  auto const dir = options.dir();
+  auto const& map = g_context->m_evaledFiles;
+  std::vector<std::string> rev_tears;
+  std::vector<std::string> not_loaded;
+  std::vector<std::string> loaded;
+
+  std::vector<std::tuple<std::string, std::string, SHA1>> deps;
+  for (auto const& [path, sha] : m_deps) {
+    auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+    deps.emplace_back(path, dir / path, std::move(hash));
+  }
+
+  for (auto const& [path, fullpath, sha] : deps) {
+    auto const full = makeStaticString(fullpath);
+    if (auto const info = folly::get_ptr(map, full)) {
+      if (info->unit->sha1() != sha) rev_tears.emplace_back(path);
+      else loaded.emplace_back(path);
+    } else {
+      not_loaded.emplace_back(path);
+    }
+  }
+
+  StructuredLogEntry ent;
+
+  ent.setInt("num_loaded_deps", loaded.size() + rev_tears.size());
+  ent.setInt("num_torn_deps", rev_tears.size());
+  ent.setInt("num_not_loaded_deps", not_loaded.size());
+  ent.setInt("num_deps", deps.size());
+
+  auto const logVec = [&] (auto name, auto& vec) {
+    std::vector<folly::StringPiece> v;
+    v.reserve(vec.size());
+    for (auto& s : vec) v.emplace_back(s);
+    ent.setVec(name, v);
+  };
+
+  logVec("loaded_deps", loaded);
+  logVec("torn_deps", rev_tears);
+  logVec("not_loaded_deps", not_loaded);
+
+  std::vector<std::string> tears;
+  std::vector<std::string> non_tears;
+  for (auto const& [path, sha] : g_context->m_loadedRdepMap[thisPath]) {
+    if (sha != m_sha1) tears.emplace_back(path);
+    else non_tears.emplace_back(path);
+  }
+
+  ent.setInt("num_loaded_rdeps", tears.size() + non_tears.size());
+  ent.setInt("num_torn_rdeps", tears.size());
+
+  logVec("torn_rdeps", tears);
+  logVec("loaded_rdeps", non_tears);
+
+  if ((RO::EvalLogAllDeclTearing && (!rev_tears.empty() || !tears.empty()))) {
+    ent.setInt("sample_rate", 1);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  } else if(!RO::EvalLogAllDeclTearing ||
+            StructuredLog::coinflip(RO::EvalLogDeclDeps)) {
+    ent.setInt("sample_rate", RO::EvalLogDeclDeps);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  }
 }
 
 template <typename T, typename I>
@@ -536,7 +640,7 @@ namespace {
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   auto builtins = Array::CreateVec();
   auto non_builtins = Array::CreateVec();
-  NamedEntity::foreach_cached_class([&](Class* c) {
+  NamedType::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
         builtins.append(make_tv<KindOfPersistentString>(c->name()));
@@ -559,9 +663,9 @@ Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::CreateVec();
-  NamedEntity::foreach_cached_func([&](Func* func) {
+  NamedFunc::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
-    a.append(HHVM_FN(strtolower)(func->nameStr()));
+    a.append(Variant(func->nameStr()));
   });
   return a;
 }

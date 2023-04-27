@@ -2,14 +2,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use emit_property::PropAndInit;
 use env::emitter::Emitter;
-use error::{Error, Result};
-use hack_macro::{hack_expr, hack_stmts};
-use hhbc::{hhas_method::HhasMethod, HhasXhpAttribute};
+use error::Error;
+use error::Result;
+use hack_macros::hack_expr;
+use hack_macros::hack_stmts;
+use hhbc::Method;
 use hhbc_string_utils as string_utils;
-use oxidized::{ast::*, ast_defs, pos::Pos};
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
+
+use crate::emit_method;
+use crate::emit_property;
+use crate::xhp_attribute::XhpAttribute;
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -17,7 +24,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     class_is_const: bool,
     class_is_closure: bool,
 ) -> Result<PropAndInit<'arena>> {
-    let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
+    let initial_value = Some(Expr((), Pos::NONE, Expr_::mk_null()));
     emit_property::from_ast(
         emitter,
         class,
@@ -33,7 +40,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
             typehint: None,
             doc_comment: None,
             user_attributes: &[],
-            id: &ast_defs::Id(Pos::make_none(), "__xhpAttributeDeclarationCache".into()),
+            id: &ast_defs::Id(Pos::NONE, "__xhpAttributeDeclarationCache".into()),
         },
     )
 }
@@ -41,9 +48,9 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
 pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
-    xal: &[HhasXhpAttribute<'_>],
+    xal: &[XhpAttribute<'_>],
     xual: &[Hint],
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let mut args = vec![(
         ParamKind::Pnormal,
         hack_expr!("parent::__xhpAttributeDeclaration()"),
@@ -68,7 +75,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
         emit_xhp_attribute_array(emitter.alloc, xal)?,
     ));
 
-    let body = hack_stmts!(
+    let body = Block(hack_stmts!(
         r#"
             $r = self::$__xhpAttributeDeclarationCache;
             if ($r === null) {
@@ -77,7 +84,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             }
             return $r;
     "#
-    );
+    ));
     from_xhp_attribute_declaration_method(
         emitter,
         class,
@@ -95,9 +102,12 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
-    let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
+    let body = Block(vec![Stmt(
+        (*pos).clone(),
+        Stmt_::mk_return(Some(children_arr)),
+    )]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,
@@ -115,9 +125,9 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let category_arr = mk_expr(get_category_array(categories));
-    let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
+    let body = Block(vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,
@@ -238,12 +248,12 @@ fn emit_xhp_child_decl(unary: &str, child: &XhpChild) -> Result<Expr_> {
             }
         }
         XhpChild::ChildUnary(c, op) => {
-            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), &**c)
+            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), c)
         }
         XhpChild::ChildBinary(c1, c2) => get_array3(
             Expr_::Int("5".into()),
-            emit_xhp_child_decl(unary, &**c1)?,
-            emit_xhp_child_decl(unary, &**c2)?,
+            emit_xhp_child_decl(unary, c1)?,
+            emit_xhp_child_decl(unary, c2)?,
         ),
     }
 }
@@ -266,7 +276,7 @@ fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
 
 fn emit_xhp_attribute_array<'arena>(
     alloc: &'arena bumpalo::Bump,
-    xal: &[HhasXhpAttribute<'_>],
+    xal: &[XhpAttribute<'_>],
 ) -> Result<Expr> {
     fn hint_to_num(id: &str) -> usize {
         match id {
@@ -327,7 +337,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn inner_array<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
+        xa: &XhpAttribute<'_>,
     ) -> Result<Vec<Expr>> {
         let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
@@ -350,7 +360,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn emit_xhp_attribute<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
+        xa: &XhpAttribute<'_>,
     ) -> Result<(Expr, Expr)> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),
@@ -375,24 +385,24 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     static_: bool,
     visibility: Visibility,
     fb_ast: Block,
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let meth = Method_ {
-        span: pos.clone().unwrap_or_else(Pos::make_none),
+        span: pos.clone().unwrap_or(Pos::NONE),
         annotation: (),
         final_,
         abstract_,
         static_,
         readonly_this: false, // TODO readonly emitter
         visibility,
-        name: ast_defs::Id(Pos::make_none(), name.into()),
+        name: ast_defs::Id(Pos::NONE, name.into()),
         tparams: vec![],
         where_constraints: vec![],
         params: vec![],
-        ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
+        ctxs: Some(Contexts(pos.unwrap_or(Pos::NONE), vec![])),
         unsafe_ctxs: None,
         body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         readonly_ret: None, // TODO readonly emitter
         ret: TypeHint((), None),
         external: false,
@@ -402,9 +412,9 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {
-    Expr((), Pos::make_none(), expr_)
+    Expr((), Pos::NONE, expr_)
 }
 
 fn mk_stmt(stmt_: Stmt_) -> Stmt {
-    Stmt(Pos::make_none(), stmt_)
+    Stmt(Pos::NONE, stmt_)
 }

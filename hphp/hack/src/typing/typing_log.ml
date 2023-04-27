@@ -38,7 +38,7 @@ let lnewline () =
       ~out_channel:!out_channel
       ~color_mode:Color_Auto
       ((Normal White, String.make (2 * !indentLevel) ' ')
-       :: List.rev ((Normal White, "\n") :: !logBuffer));
+      :: List.rev ((Normal White, "\n") :: !logBuffer));
     Out_channel.flush !out_channel;
     accumulatedLength := 0;
     logBuffer := []
@@ -297,21 +297,11 @@ let possibly_enforced_type_as_value env et =
     ^ Typing_print.debug env et.et_type)
 
 let return_info_as_value env return_info =
-  let Typing_env_return_info.
-        {
-          return_type;
-          return_disposable;
-          return_explicit;
-          return_dynamically_callable;
-        } =
-    return_info
-  in
+  let Typing_env_return_info.{ return_type; return_disposable } = return_info in
   make_map
     [
       ("return_type", possibly_enforced_type_as_value env return_type);
       ("return_disposable", Bool return_disposable);
-      ("return_explicit", Bool return_explicit);
-      ("return_dynamically_callable", Bool return_dynamically_callable);
     ]
 
 let local_id_map_as_value f m =
@@ -494,11 +484,13 @@ let lenv_as_value env lenv =
       ("local_using_vars", local_id_set_as_value local_using_vars);
     ]
 
-let param_as_value env (ty, _pos, mode) =
+let param_as_value env (ty, _pos, ty_opt) =
   let ty_str = Typing_print.debug env ty in
-  match mode with
-  | FPnormal -> Atom ty_str
-  | FPinout -> Atom (Printf.sprintf "[inout]%s" ty_str)
+  match ty_opt with
+  | None -> Atom ty_str
+  | Some ty2 ->
+    let ty2_str = Typing_print.debug env ty2 in
+    Atom (Printf.sprintf "%s inout %s" ty_str ty2_str)
 
 let genv_as_value env genv =
   let {
@@ -515,9 +507,10 @@ let genv_as_value env genv =
     fun_kind;
     fun_is_ctor;
     file = _;
-    this_module;
+    current_module;
     this_internal;
     this_support_dynamic_type;
+    package_info = _;
   } =
     genv
   in
@@ -536,9 +529,9 @@ let genv_as_value env genv =
        ("this_internal", bool_as_value this_internal);
        ("this_support_dynamic_type", bool_as_value this_support_dynamic_type);
      ]
-    @ (match this_module with
-      | Some this_module ->
-        [("this_module", string_as_value @@ Ast_defs.show_id this_module)]
+    @ (match current_module with
+      | Some current_module ->
+        [("current_module", string_as_value @@ Ast_defs.show_id current_module)]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->
@@ -567,6 +560,17 @@ let fun_tast_info_as_map = function
         ("has_readonly", bool_as_value has_readonly);
       ]
 
+let checked_as_value check_status = Atom (Tast.show_check_status check_status)
+
+let in_expr_tree_as_value env = function
+  | None -> bool_as_value false
+  | Some { dsl = hint; outer_locals } ->
+    make_map
+      [
+        ("dsl", Atom (Aast_defs.show_hint hint));
+        ("outer_locals", local_id_map_as_value (local_as_value env) outer_locals);
+      ]
+
 let env_as_value env =
   let {
     fresh_typarams;
@@ -578,13 +582,14 @@ let env_as_value env =
     in_try;
     in_expr_tree;
     inside_constructor;
-    in_support_dynamic_type_method_check;
+    checked;
     tpenv;
     log_levels = _;
     allow_wildcards;
     inference_env;
     big_envs = _;
     fun_tast_info;
+    loaded_packages = _;
   } =
     env
   in
@@ -595,10 +600,9 @@ let env_as_value env =
       ("genv", genv_as_value env genv);
       ("in_loop", bool_as_value in_loop);
       ("in_try", bool_as_value in_try);
-      ("in_expr_tree", bool_as_value in_expr_tree);
+      ("in_expr_tree", in_expr_tree_as_value env in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
-      ( "in_support_dynamic_type_method_check",
-        bool_as_value in_support_dynamic_type_method_check );
+      ("checked", checked_as_value checked);
       ("tpenv", tpenv_as_value env tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",
@@ -771,26 +775,65 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
       ] );
   (env, result_ty)
 
-let log_pessimise_ env kind pos name =
-  log_with_level env "pessimise" ~level:1 @@ fun () ->
-  let p = Pos_or_decl.unsafe_to_raw_pos pos in
+let log_pessimise_ ?(level = 1) env kind pos name =
+  let log_level = Typing_env_types.get_log_level env "pessimise" in
+  if log_level >= level then
+    let p = Pos_or_decl.unsafe_to_raw_pos pos in
+    let (file, line) =
+      let p = Pos.to_absolute p in
+      (Pos.filename p, Pos.line p)
+    in
+    if log_level > 1 then
+      Hh_logger.log "pessimise:\t%s,%s,%d,%s" kind file line name
+    else (
+      lnewline ();
+      lprintf (Normal Yellow) "pessimise:\t%s,%s,%d,%s" kind file line name;
+      lnewline ()
+    )
+
+let log_pessimise_prop env pos prop_name =
+  log_pessimise_ env "prop" (Pos_or_decl.of_raw_pos pos) ("$" ^ prop_name)
+
+let log_pessimise_param env ~is_promoted_property pos mode param_name =
+  if
+    is_promoted_property
+    || (match mode with
+       | Ast_defs.Pinout _ -> true
+       | _ -> false)
+    || Typing_env_types.get_log_level env "pessimise.params" >= 1
+  then
+    log_pessimise_
+      env
+      (if is_promoted_property then
+        "prop"
+      else
+        "param")
+      (Pos_or_decl.of_raw_pos pos)
+      param_name
+
+let log_pessimise_return ?level env pos opt_bound =
+  log_pessimise_
+    ?level
+    env
+    "ret"
+    (Pos_or_decl.of_raw_pos pos)
+    (Option.value ~default:"" opt_bound)
+
+let log_pessimise_poisoned_return ?level env pos member =
+  log_pessimise_ ?level env "ret" (Pos_or_decl.of_raw_pos pos) ("^" ^ member)
+
+let log_sd_pass ?(level = 1) env pos =
+  log_with_level env "sd_pass" ~level @@ fun () ->
   let (file, line) =
-    let p = Pos.to_absolute p in
+    let p = Pos.to_absolute pos in
     (Pos.filename p, Pos.line p)
   in
   lnewline ();
-  lprintf (Normal Yellow) "pessimise:\t%s,%s,%d,%s" kind file line name;
+  lprintf (Normal Yellow) "sound dynamic pass:\t%s,%d" file line;
   lnewline ()
 
-let log_pessimise_prop env pos prop_name =
-  log_pessimise_ env "prop" pos ("$" ^ prop_name)
-
-let log_pessimise_param env pos param_name =
-  let param_name = Option.value ~default:"$$unknown_name" param_name in
-  log_pessimise_ env "param" pos param_name
-
 let increment_feature_count env s =
-  if GlobalOptions.tco_language_feature_logging env.genv.tcopt then
+  if TypecheckerOptions.language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0
 
 module GlobalInference = struct

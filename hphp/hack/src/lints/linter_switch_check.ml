@@ -59,16 +59,15 @@ let check_exhaustiveness_lint env pos ty hasdfl =
     | Typing.Tunion tyl -> List.exists tyl ~f:has_infinite_values
     | Typing.Tintersection tyl -> List.for_all tyl ~f:has_infinite_values
     | Typing.Tprim (Tstring | Tint | Tfloat | Tarraykey | Tnum) -> true
-    | Typing.Tclass ((_, name), _, _) ->
-      begin
-        match Decl_provider.get_class (Env.get_ctx env) name with
-        | Some class_decl
-          when not
-                 (Cls.final class_decl
-                 || Option.is_some (Cls.sealed_whitelist class_decl)) ->
-          true
-        | _ -> false
-      end
+    | Typing.Tclass ((_, name), _, _) -> begin
+      match Decl_provider.get_class (Env.get_ctx env) name with
+      | Some class_decl
+        when not
+               (Cls.final class_decl
+               || Option.is_some (Cls.sealed_whitelist class_decl)) ->
+        true
+      | _ -> false
+    end
     | _ -> false
   in
   if has_infinite_values ty && not hasdfl then

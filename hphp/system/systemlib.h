@@ -36,7 +36,7 @@ namespace HPHP::SystemLib {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define SYSTEMLIB_CLASSES(x)                    \
-  x(stdclass)                                   \
+  x(stdClass)                                   \
   x(Exception)                                  \
   x(BadMethodCallException)                     \
   x(InvalidArgumentException)                   \
@@ -76,14 +76,12 @@ namespace HPHP::SystemLib {
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
   x(Iterator)                   \
-  x(SwitchableClass)            \
 /* */
 
 extern bool s_inited;
 extern bool s_anyNonPersistentBuiltins;
 extern std::string s_source;
 extern Unit* s_unit;
-extern Unit* s_hhas_unit;
 extern Func* s_nullFunc;
 extern Func* s_nullCtor;
 

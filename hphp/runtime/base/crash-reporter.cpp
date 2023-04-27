@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
@@ -37,8 +38,9 @@
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 
+#include <fcntl.h>
 #include <signal.h>
-#if defined(__x86_64__) && defined(__linux__)
+#ifdef __x86_64__
 #include <ucontext.h>
 #endif
 
@@ -66,6 +68,7 @@ enum class CrashReportStage {
   ReportPhpStack,
   ReportApproximatePhpStack,
   DumpTransDB,
+  DumpProfileData,
   SendEmail,
   Log,
   Done,
@@ -73,10 +76,20 @@ enum class CrashReportStage {
 
 static CrashReportStage s_crash_report_stage;
 
+// These ranges contain debug information in the core that can be extracted
+// using the helper tool `hphp/tools/extract_from_core.sh`.  They start at
+// kDebugAddr and each start is page size aligned.  These static variables
+// should be kept in sync with that utility.
+static uintptr_t s_jitprof_start;
+static uintptr_t s_jitprof_end;
+static uintptr_t s_stacktrace_start;
+static uintptr_t s_stacktrace_end;
+
 static const char* s_newBlacklist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafe",
   "_ZN4HPHPL10bt_handlerEi",
+  "_ZN5folly6fibers12_GLOBAL__N_120sigsegvSignalHandlerEiP9siginfo_tPv",
   "killpg"
 };
 
@@ -85,7 +98,7 @@ static void bt_timeout_handler(int sig) {
   abort();
 }
 
-static void bt_handler(int sigin, siginfo_t* info, void* args) {
+void bt_handler(int sigin, siginfo_t* info, void* args) {
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
@@ -117,7 +130,10 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
   static int sig = sigin;
   static Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
-#if defined(__x86_64__) && defined(__linux__)
+
+  static FILE* stacktraceFile = nullptr;
+
+#ifdef __x86_64__
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
 #endif
 
@@ -155,7 +171,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       // Turn on stack traces for coredumps
       StackTrace::Enabled = true;
       StackTrace::FunctionBlacklist = s_newBlacklist;
-      StackTrace::FunctionBlacklistCount = 3;
+      StackTrace::FunctionBlacklistCount = 5;
       st.emplace();
       // fall through
     case CrashReportStage::ReportHeader:
@@ -246,7 +262,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
           auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
-#if defined(__x86_64__) && defined(__linux__)
+#if defined(__x86_64__)
             return (jit::CTCA) sig_rip;
 #else
             return (jit::CTCA) 0;
@@ -262,24 +278,57 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       // fall through
     case CrashReportStage::DumpTransDB:
-      s_crash_report_stage = CrashReportStage::SendEmail;
+      s_crash_report_stage = CrashReportStage::DumpProfileData;
 
       if (jit::transdb::enabled() && RuntimeOption::EvalJit) {
         jit::tc::dump(true);
       }
+      // fall through
+    case CrashReportStage::DumpProfileData: {
+      s_crash_report_stage = CrashReportStage::SendEmail;
+      auto frontier = kDebugAddr;
+      auto const mapFileIn = [&frontier](const std::string& filename,
+                                         uintptr_t& start,
+                                         uintptr_t& end) {
+
+        auto file = fopen(filename.c_str(), "r");
+        size_t size = 0;
+        start = end = frontier;
+        if (file) {
+          fseek(file, 0, SEEK_END);
+          size = ftell(file);
+          end = start + size;
+          fseek(file, 0, SEEK_SET);
+          if (size > 0) {
+            mmap(reinterpret_cast<void*>(start),
+                 size, PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            fread(reinterpret_cast<void*>(start), 1, size, file);
+          }
+          fclose(file);
+        }
+        frontier = (end + s_pageSize - 1) & -s_pageSize;
+      };
+      if (auto const serdesFile = jit::getFilenameDeserialized()) {
+        // Copy JitSerdesFile to fixed address (the debug range), so that they
+        // get included in the coredump.
+        mapFileIn(*serdesFile, s_jitprof_start, s_jitprof_end);
+      }
+      auto const& stacktraceFile = RuntimeOption::StackTraceFilename;
+      mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
+    }
       // fall through
     case CrashReportStage::SendEmail:
       s_crash_report_stage = CrashReportStage::Log;
 
       if (!RuntimeOption::CoreDumpEmail.empty()) {
         char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
-        char* cmdline = (char*)alloca(
-            sizeof(char) *
-            (strlen(format)
+        size_t cmdline_size = sizeof(char) *(strlen(format)
              +RuntimeOption::StackTraceFilename.length()
              +strlen(Process::GetAppName().c_str())
-             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1));
-        sprintf(cmdline, format, RuntimeOption::StackTraceFilename.c_str(),
+             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1);
+        char* cmdline = (char*)alloca(cmdline_size);
+        snprintf(cmdline, cmdline_size, format, RuntimeOption::StackTraceFilename.c_str(),
                 Process::GetAppName().c_str(),
                 RuntimeOption::CoreDumpEmail.c_str());
         FileUtil::ssystem(cmdline);
@@ -294,6 +343,19 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       Logger::FError("Core dumped: {}", strsignal(sig));
       Logger::FError("Stack trace in {}", RuntimeOption::StackTraceFilename);
+
+      if (RO::EvalDumpStacktraceToErrorLogOnCrash) {
+        stacktraceFile = fopen(RuntimeOption::StackTraceFilename.c_str(), "r");
+        if (stacktraceFile) {
+          char line[256];
+          while (fgets(line, sizeof(line), stacktraceFile)) {
+            // Strip the newline, or just truncate the line if it's larger than
+            // 256 characters.
+            line[MIN(strcspn(line, "\n"), 255)] = 0;
+            Logger::FError("{}", line);
+          }
+        }
+      }
 
       // Flush whatever access logs are still pending
       Logger::FlushAll();
@@ -324,12 +386,6 @@ void install_crash_reporter() {
   // bt_handler.  Don't install our handler when running with tsan.
   if (use_tsan) return;
 
-#ifdef _MSC_VER
-  signal(SIGILL,  bt_handler);
-  signal(SIGFPE,  bt_handler);
-  signal(SIGSEGV, bt_handler);
-  signal(SIGABRT, bt_handler);
-#else
   struct sigaction sa{};
   struct sigaction osa;
   sigemptyset(&sa.sa_mask);
@@ -345,9 +401,11 @@ void install_crash_reporter() {
   CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));
   CHECK_ERR(sigaction(SIGILL,  &sa, &osa));
   CHECK_ERR(sigaction(SIGFPE,  &sa, &osa));
-  CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  if (!RO::EvalSanitizeReqHeap) {
+    // SIGSEGV is handled by the request heap sanitizer when it is enabled.
+    CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  }
   CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////

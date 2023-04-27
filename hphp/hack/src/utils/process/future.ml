@@ -205,6 +205,11 @@ let error_to_string_verbose err : verbose_error =
     let module I = (val err : Error_instance) in
     I.Error.to_string_verbose I.this
 
+let () =
+  Stdlib.Printexc.register_printer (function
+      | Future_failure e -> Some (error_to_string e)
+      | _ -> None)
+
 (* Must explicitly make recursive functions polymorphic. *)
 let rec get : 'value. ?timeout:int -> 'value t -> ('value, error) result =
  fun ?(timeout = default_timeout) (promise, _) ->

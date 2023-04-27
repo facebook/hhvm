@@ -1,4 +1,4 @@
-Add stub method `Bar\IFoo::bar`
+Add stubs for missing interface methods
 
 <?hh
 
@@ -10,5 +10,4 @@ interface IFoo {
 
 class Foo implements IFoo {
   public function bar(): void {}
-
 }

@@ -1,8 +1,8 @@
-File "soft_reified_within_function.php", line 13, characters 8-12:
-Invalid `as` expression hint (Typing[4195])
-File "soft_reified_within_function.php", line 13, characters 8-12:
-The `as` operator cannot be used with a soft reified generic type parameter
 File "soft_reified_within_function.php", line 16, characters 7-11:
 Soft reified generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
 File "soft_reified_within_function.php", line 19, characters 3-7:
 Soft reified generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
+File "soft_reified_within_function.php", line 13, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "soft_reified_within_function.php", line 13, characters 8-12:
+  The `as` operator cannot be used with a soft reified generic type parameter

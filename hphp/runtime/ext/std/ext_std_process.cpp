@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/std/ext_std_process.h"
-
 #include <cstdlib>
 #include <vector>
 #include <string>
@@ -112,27 +110,6 @@ static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
   return envp;
 }
 #endif
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StandardExtension::initProcess() {
-  HHVM_FE(shell_exec);
-  HHVM_FE(exec);
-  HHVM_FE(passthru);
-  HHVM_FE(system);
-  HHVM_FE(proc_open);
-  HHVM_FE(proc_terminate);
-  HHVM_FE(proc_close);
-  HHVM_FE(proc_get_status);
-#ifndef _WIN32
-  HHVM_FE(proc_nice);
-#endif
-  HHVM_FE(escapeshellarg);
-  HHVM_FE(escapeshellcmd);
-
-  loadSystemlib("std_process");
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // popen
@@ -563,7 +540,7 @@ static bool pre_proc_open(const Array& descriptorspec,
       raise_warning("descriptor spec must be an integer indexed array");
       break;
     }
-    item.index = index.toInt32();
+    item.index = (int)index.toInt64();
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {
@@ -913,7 +890,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
   }
   execle("/bin/sh", "sh", "-c", cmd.data(), nullptr, envp);
   free(envp);
-  _exit(127);
+  _exit(HPHP_EXIT_FAILURE);
 #endif
 }
 
@@ -1025,6 +1002,26 @@ String HHVM_FUNCTION(escapeshellcmd,
     return string_escape_shell_cmd(command.c_str());
   }
   return command;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initProcess() {
+  HHVM_FE(shell_exec);
+  HHVM_FE(exec);
+  HHVM_FE(passthru);
+  HHVM_FE(system);
+  HHVM_FE(proc_open);
+  HHVM_FE(proc_terminate);
+  HHVM_FE(proc_close);
+  HHVM_FE(proc_get_status);
+#ifndef _WIN32
+  HHVM_FE(proc_nice);
+#endif
+  HHVM_FE(escapeshellarg);
+  HHVM_FE(escapeshellcmd);
+
+  loadSystemlib("std_process");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

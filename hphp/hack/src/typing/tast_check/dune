@@ -3,12 +3,17 @@
  (wrapped false)
  (libraries
   ast
-  bad_type_logger
+  tany_logger
   core_kernel
   ifc_lib
   nast
   shape_analysis
+  shape_analysis_scuba
+  sdt_analysis
+  remove_dead_unsafe_casts
   tast_env
+  typing_deps
+  typing_pessimisation_deps
   utils_core)
  (preprocess
   (pps ppx_deriving.std)))

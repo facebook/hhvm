@@ -40,11 +40,6 @@ Type arithOpResult(Type t1, Type t2) {
   return TInt;
 }
 
-Type arithOpOverResult(Type t1, Type t2) {
-  if (t1 <= TInt && t2 <= TInt) return TInt | TDbl;
-  return arithOpResult(t1, t2);
-}
-
 Type bitOpResult(Type t1, Type t2) {
   if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
     return TCell;
@@ -60,9 +55,6 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual:    return arithOpResult(locType, valType);
-  case SetOpOp::PlusEqualO:
-  case SetOpOp::MinusEqualO:
-  case SetOpOp::MulEqualO:   return arithOpOverResult(locType, valType);
   case SetOpOp::ConcatEqual: return TStr;
   case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
@@ -135,9 +127,7 @@ Optional<Type> interpOutputType(IRGS& env,
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),
                            topType(env, BCSPRelOffset{1}));
-    case OutArithO:
-      return arithOpOverResult(topType(env, BCSPRelOffset{0}),
-                               topType(env, BCSPRelOffset{1}));
+
     case OutUnknown:     return TCell;
 
     case OutBitOp:
@@ -251,12 +241,6 @@ interpOutputLocals(IRGS& env,
       break;
     }
 
-    case OpVerifyParamTypeTS:
-    case OpVerifyParamType: {
-      setImmLocType(0, TCell);
-      break;
-    }
-
     case OpSilence:
       if (static_cast<SilenceOp>(getImm(sk.pc(), 1).u_OA) == SilenceOp::Start) {
         setImmLocType(0, TInt);
@@ -300,7 +284,7 @@ void interpOne(IRGS& env) {
     }.to<SBInvOffset>(env.irb->fs().bcSPOff());
 
     auto const loc = Location::Stack { checkIdx };
-    checkType(env, loc, *checkTypeType, nextSrcKey(env));
+    checkType(env, loc, *checkTypeType, makeExit(env, nextSrcKey(env)));
   }
 }
 
@@ -344,7 +328,8 @@ void interpOne(IRGS& env,
     auto const rbjData = ReqBindJmpData {
       nextSrcKey(env),
       spOffBCFromStackBase(env),
-      spOffBCFromIRSP(env)
+      spOffBCFromIRSP(env),
+      false /* popFrame */
     };
     gen(env, ReqBindJmp, rbjData, sp(env), fp(env));
   }
@@ -370,8 +355,6 @@ void emitReqOnce(IRGS& env)                   { interpOne(env); }
 void emitEval(IRGS& env)                      { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
-void emitResolveClass(IRGS& env, const StringData*)
-                                              { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -99,7 +99,7 @@ function password_hash(?string $password,
           $required_salt_len),
         E_WARNING);
       return null;
-    } elseif (0 == preg_match('#^[a-zA-Z0-9./]+$#D', $salt)) {
+    } else if (0 == preg_match('#^[a-zA-Z0-9./]+$#D', $salt)) {
       $salt = str_replace('+', '.', base64_encode($salt));
     }
   } else {

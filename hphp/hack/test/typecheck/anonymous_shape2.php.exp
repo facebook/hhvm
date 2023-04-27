@@ -1,6 +1,6 @@
 File "anonymous_shape2.php", line 16, characters 10-12:
 Invalid return type (Typing[4057])
-File "anonymous_shape2.php", line 7, characters 15-31:
-The field `y` is missing
-File "anonymous_shape2.php", line 12, characters 4-31:
-The field `y` is defined
+  File "anonymous_shape2.php", line 7, characters 15-31:
+  The field `y` is missing
+  File "anonymous_shape2.php", line 13, characters 3-5:
+  The field `y` is defined

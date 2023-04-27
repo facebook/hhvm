@@ -91,6 +91,8 @@ val print_documentRename : Lsp.Rename.result -> Hh_json.json
 
 val print_diagnostics : Lsp.PublishDiagnostics.params -> Hh_json.json
 
+val print_codeActionResult : Lsp.CodeAction.result -> Hh_json.json
+
 val print_logMessage : Lsp.MessageType.t -> string -> Hh_json.json
 
 val print_showMessage : Lsp.MessageType.t -> string -> Hh_json.json
@@ -117,6 +119,22 @@ val print_completionItem : Lsp.Completion.completionItem -> Hh_json.json
 val parse_completion : Hh_json.json option -> Lsp.Completion.params
 
 val print_completion : Lsp.Completion.result -> Hh_json.json
+
+val parse_callItem : Hh_json.json option -> Lsp.CallHierarchyItem.t
+
+val print_callItem : Lsp.CallHierarchyItem.t -> Hh_json.json
+
+val parse_callHierarchyCalls :
+  Hh_json.json option -> Lsp.CallHierarchyCallsRequestParam.t
+
+val print_PrepareCallHierarchyResult :
+  Lsp.PrepareCallHierarchy.result -> Hh_json.json
+
+val print_CallHierarchyIncomingCallsResult :
+  Lsp.CallHierarchyIncomingCalls.result -> Hh_json.json
+
+val print_CallHierarchyOutgoingCallsResult :
+  Lsp.CallHierarchyOutgoingCalls.result -> Hh_json.json
 
 val parse_willSaveWaitUntil :
   Hh_json.json option -> Lsp.WillSaveWaitUntil.params

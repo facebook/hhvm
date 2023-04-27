@@ -105,25 +105,12 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
     in
     ((env, combine_ty_errs errs), res)
 
-  let filter_map (f : 'a -> 'b option) m =
-    m
-    |> map f
-    |> merge
-         (fun _k _v v ->
-           match v with
-           | Some (Some v) -> Some v
-           | Some None
-           | None ->
-             None)
-         empty
-
-  let filter_opt m = filter_map (fun x -> x) m
+  let filter_opt m = filter_map (fun _key x -> x) m
 
   let of_list elts =
     List.fold_left
       begin
-        fun acc (key, value) ->
-        add key value acc
+        (fun acc (key, value) -> add key value acc)
       end
       empty
       elts
@@ -131,8 +118,7 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
   let of_function domain f =
     List.fold_left
       begin
-        fun acc key ->
-        add key (f key) acc
+        (fun acc key -> add key (f key) acc)
       end
       empty
       domain
@@ -140,12 +126,11 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
   let add ?combine key new_value map =
     match combine with
     | None -> add key new_value map
-    | Some combine ->
-      begin
-        match find_opt key map with
-        | None -> add key new_value map
-        | Some old_value -> add key (combine old_value new_value) map
-      end
+    | Some combine -> begin
+      match find_opt key map with
+      | None -> add key new_value map
+      | Some old_value -> add key (combine old_value new_value) map
+    end
 
   let ident_map f map =
     let (map_, changed) =

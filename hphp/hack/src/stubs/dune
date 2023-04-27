@@ -15,14 +15,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name artifact_store_stubs)
- (wrapped false)
- (modules artifactStore)
- (libraries errors)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name build)
  (wrapped false)
  (modules buildMain)
@@ -33,6 +25,16 @@
  (name rust_ffi_stubs)
  (wrapped false)
  (modules)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name rust_provider_backend_stubs)
+ (wrapped false)
+ (modules rust_provider_backend)
+ (libraries
+  file_info
+  relative_path)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -92,13 +94,13 @@
  (wrapped false)
  (modules remoteWorker)
  (libraries
-  artifact_store_stubs
   ci_util_stubs
   errors
   file_info
   future
   naming
   relative_path
+  state_loader_stubs
   sys_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
@@ -115,14 +117,16 @@
  (name state_loader_stubs)
  (wrapped false)
  (modules saved_state_loader state_loader_futures state_loader_lwt)
- (libraries artifact_store_stubs hg server_monitor)
+ (libraries
+  hg
+  typechecker_options)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name decl_ipc_ffi_externs)
+ (name decl_service_client)
  (wrapped false)
- (modules decl_ipc_ffi_externs)
+ (modules decl_service_client)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -135,6 +139,14 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name hh_distc_ffi)
+  (wrapped false)
+  (modules
+    hh_distc_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name hulk_rpc_ffi)
   (wrapped false)
   (modules
@@ -143,25 +155,9 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name re_stubs)
- (wrapped false)
- (modules re reEnv)
- (libraries errors relative_path typing_deps)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name experiments_config_file_stubs)
  (wrapped false)
  (modules experiments_config_file)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name recli_stubs)
- (wrapped false)
- (modules cas)
- (libraries errors relative_path typing_deps future)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -254,8 +250,18 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name bad_type_logger_scuba_stubs)
+ (name shape_analysis_scuba_stubs)
  (wrapped false)
- (modules bad_type_logger_scuba)
+ (modules shape_analysis_scuba))
+
+(library
+ (name file_scuba_logger_ffi_externs)
+ (wrapped false)
+ (modules file_scuba_logger_ffi_externs)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name sdt_analysis_remote_logging_stubs)
+ (wrapped false)
+ (modules sdt_analysis_remote_logging))

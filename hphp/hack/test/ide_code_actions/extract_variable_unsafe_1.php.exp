@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"$placeholder0 = $a->toggle_mut_and_ret_false();\n  ",
+            "range":{"end":{"character":2,"line":13},"start":{"character":2,"line":13}}
+          },
+          {
+            "newText":"$placeholder0",
+            "range":{"end":{"character":61,"line":13},"start":{"character":31,"line":13}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into variable"
+  }
+]

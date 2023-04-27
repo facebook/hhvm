@@ -64,13 +64,10 @@ const bespoke::LayoutFunctions* BespokeArray::vtable() const {
 void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
   m_layout_index = index;
 }
-
-NO_PROFILING
 void BespokeArray::scan(type_scan::Scanner& scan) const {
   return g_layout_funcs.fnScan[getVtableIndex(this)](this, scan);
 }
 
-NO_PROFILING
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
   return g_layout_funcs.fnEscalateToVanilla[getVtableIndex(ad)](ad, reason);
 }
@@ -121,94 +118,75 @@ void BespokeArray::ReleaseUncounted(ArrayData* ad) {
 //////////////////////////////////////////////////////////////////////////////
 
 // ArrayData interface
-NO_PROFILING
 void BespokeArray::Release(ArrayData* ad) {
   g_layout_funcs.fnRelease[getVtableIndex(ad)](ad);
 }
-NO_PROFILING
 bool BespokeArray::IsVectorData(const ArrayData* ad) {
   return g_layout_funcs.fnIsVectorData[getVtableIndex(ad)](ad);
 }
 
-NO_PROFILING
 ArrayData* BespokeArray::Copy(const ArrayData* ad) {
   return g_layout_funcs.fnCopy[getVtableIndex(ad)](ad);
 }
 
 // RO access
-NO_PROFILING
 TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
   return g_layout_funcs.fnNvGetInt[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
   return g_layout_funcs.fnNvGetStr[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 TypedValue BespokeArray::NvGetIntThrow(const ArrayData* ad, int64_t key) {
   return g_layout_funcs.fnNvGetIntThrow[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 TypedValue BespokeArray::NvGetStrThrow(const ArrayData* ad, const StringData* key) {
   return g_layout_funcs.fnNvGetStrThrow[getVtableIndex(ad)](ad, key);
 }
 TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnGetPosKey[getVtableIndex(ad)](ad, pos);
 }
-NO_PROFILING
 TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnGetPosVal[getVtableIndex(ad)](ad, pos);
 }
 bool BespokeArray::PosIsValid(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnPosIsValid[getVtableIndex(ad)](ad, pos);
 }
-NO_PROFILING
 bool BespokeArray::ExistsInt(const ArrayData* ad, int64_t key) {
   return NvGetInt(ad, key).is_init();
 }
-NO_PROFILING
 bool BespokeArray::ExistsStr(const ArrayData* ad, const StringData* key) {
   return NvGetStr(ad, key).is_init();
 }
 
 // iteration
-NO_PROFILING
 ssize_t BespokeArray::IterBegin(const ArrayData* ad) {
   return g_layout_funcs.fnIterBegin[getVtableIndex(ad)](ad);
 }
-NO_PROFILING
 ssize_t BespokeArray::IterLast(const ArrayData* ad) {
   return g_layout_funcs.fnIterLast[getVtableIndex(ad)](ad);
 }
-NO_PROFILING
 ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
   return g_layout_funcs.fnIterEnd[getVtableIndex(ad)](ad);
 }
-NO_PROFILING
 ssize_t BespokeArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnIterAdvance[getVtableIndex(ad)](ad, pos);
 }
-NO_PROFILING
 ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnIterRewind[getVtableIndex(ad)](ad, pos);
 }
 
 // RW access
-NO_PROFILING
 arr_lval BespokeArray::LvalInt(ArrayData* ad, int64_t key) {
   return g_layout_funcs.fnLvalInt[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 arr_lval BespokeArray::LvalStr(ArrayData* ad, StringData* key) {
   return g_layout_funcs.fnLvalStr[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 tv_lval BespokeArray::ElemInt(
     tv_lval lval, int64_t key, bool throwOnMissing) {
   auto const ad = lval.val().parr;
   return g_layout_funcs.fnElemInt[getVtableIndex(ad)](lval, key, throwOnMissing);
 }
-NO_PROFILING
 tv_lval BespokeArray::ElemStr(
     tv_lval lval, StringData* key, bool throwOnMissing) {
   auto const ad = lval.val().parr;
@@ -216,33 +194,27 @@ tv_lval BespokeArray::ElemStr(
 }
 
 // insertion
-NO_PROFILING
 ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
   return g_layout_funcs.fnSetIntMove[getVtableIndex(ad)](ad, key, v);
 }
-NO_PROFILING
 ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue v) {
   return g_layout_funcs.fnSetStrMove[getVtableIndex(ad)](ad, key, v);
 }
 
 // deletion
-NO_PROFILING
 ArrayData* BespokeArray::RemoveIntMove(ArrayData* ad, int64_t key) {
   return g_layout_funcs.fnRemoveIntMove[getVtableIndex(ad)](ad, key);
 }
-NO_PROFILING
 ArrayData* BespokeArray::RemoveStrMove(ArrayData* ad, const StringData* key) {
   return g_layout_funcs.fnRemoveStrMove[getVtableIndex(ad)](ad, key);
 }
 
 // sorting
-NO_PROFILING
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (!isSortFamily(sf) && ad->isVecType()) return ad->toDict(true);
   assertx(!ad->empty());
   return g_layout_funcs.fnPreSort[getVtableIndex(ad)](ad, sf);
 }
-NO_PROFILING
 ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
   assertx(vad->isVanilla());
   if (ad->toDataType() != vad->toDataType()) return vad;
@@ -251,11 +223,9 @@ ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
 }
 
 // high-level ops
-NO_PROFILING
 ArrayData* BespokeArray::AppendMove(ArrayData* ad, TypedValue v) {
   return g_layout_funcs.fnAppendMove[getVtableIndex(ad)](ad, v);
 }
-NO_PROFILING
 ArrayData* BespokeArray::PopMove(ArrayData* ad, Variant& out) {
   return g_layout_funcs.fnPopMove[getVtableIndex(ad)](ad, out);
 }
@@ -267,7 +237,6 @@ void BespokeArray::OnSetEvalScalar(ArrayData*) {
 ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }
-NO_PROFILING
 ArrayData* BespokeArray::SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
   return g_layout_funcs.fnSetLegacyArray[getVtableIndex(ad)](ad, copy, legacy);
 }

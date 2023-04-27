@@ -242,7 +242,7 @@ let make
     ~entry
     nbr_procs
     ~gc_control
-    ~heap_handle =
+    ~heap_handle : worker list =
   let setup_controller_fd () =
     if use_prespawned then
       let (parent_fd, child_fd) = Unix.pipe () in
@@ -256,7 +256,7 @@ let make
       (None, None)
   in
   let spawn worker_id name child_fd () =
-    Unix.clear_close_on_exec heap_handle.SharedMem.h_fd;
+    SharedMem.clear_close_on_exec heap_handle;
 
     (* Daemon.spawn runs exec after forking. We explicitly *do* want to "leak"
      * child_fd to this one spawned process because it will be using that FD to
@@ -271,7 +271,7 @@ let make
         entry
         { longlived_workers; entry_state = state; controller_fd = child_fd }
     in
-    Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
+    SharedMem.set_close_on_exec heap_handle;
 
     (* This process no longer needs child_fd after its spawned the child.
      * Messages are read using controller_fd. *)
@@ -418,13 +418,12 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
       Marshal_tools.to_fd_with_preamble ~flags:[Marshal.Closures] outfd request
       |> ignore
     with
-    | e ->
-      begin
-        match Unix.waitpid [Unix.WNOHANG] worker_pid with
-        | (0, _) -> raise (Worker_failed_to_send_job (Other_send_job_failure e))
-        | (_, status) ->
-          raise (Worker_failed_to_send_job (Worker_already_exited status))
-      end
+    | e -> begin
+      match Unix.waitpid [Unix.WNOHANG] worker_pid with
+      | (0, _) -> raise (Worker_failed_to_send_job (Other_send_job_failure e))
+      | (_, status) ->
+        raise (Worker_failed_to_send_job (Worker_already_exited status))
+    end
   in
   (* And returned the 'handle'. *)
   let handle : (a, b) handle = ref ((x, call_id), Processing job) in

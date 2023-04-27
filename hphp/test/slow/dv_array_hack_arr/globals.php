@@ -13,9 +13,9 @@ function main() {
     tuple("server", $_SERVER),
   ];
   $dfuncs = vec[
-    fun('HH\\is_php_array'),
-    fun('HH\\is_darray'),
-    fun('HH\\is_dict'),
+    HH\is_php_array<>,
+    HH\is_darray<>,
+    HH\is_dict<>,
   ];
   foreach ($dicts as list($name, $d)) {
     echo "$name:\n";

@@ -37,7 +37,7 @@ final class SpawnTest extends HackTest {
       $status = null;
       \pcntl_waitpid($pid, inout $status);
     }
-    expect(\pcntl_wexitstatus($status))->toEqual(0);
+    expect(\pcntl_wexitstatus($status as nonnull))->toEqual(0);
     expect($output)->toContainSubstring(\basename(__FILE__));
   }
 
@@ -60,7 +60,7 @@ final class SpawnTest extends HackTest {
     );
     $status = null;
     \pcntl_waitpid($pid, inout $status);
-    expect(\pcntl_wexitstatus($status))->toEqual(0);
+    expect(\pcntl_wexitstatus($status as nonnull))->toEqual(0);
     $handle = File\open_read_only($tmp_file_path);
     using $handle->closeWhenDisposed();
     $output = await $handle->readAllAsync();
@@ -122,8 +122,8 @@ final class SpawnTest extends HackTest {
       $find_status = null;
       \pcntl_waitpid($find_process, inout $find_status);
     }
-    expect(\pcntl_wexitstatus($find_status))->toEqual(0);
-    expect(\pcntl_wexitstatus($cat_status))->toEqual(0);
+    expect(\pcntl_wexitstatus($find_status as nonnull))->toEqual(0);
+    expect(\pcntl_wexitstatus($cat_status as nonnull))->toEqual(0);
     expect($output)->toContainSubstring(__FUNCTION__);
   }
 
@@ -143,7 +143,7 @@ final class SpawnTest extends HackTest {
     );
     $status = null;
     \pcntl_waitpid($pid, inout $status);
-    expect(\pcntl_wexitstatus($status))->toEqual(0);
+    expect(\pcntl_wexitstatus($status as nonnull))->toEqual(0);
   }
 
 }

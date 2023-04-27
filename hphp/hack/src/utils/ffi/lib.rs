@@ -12,14 +12,16 @@
 //! The types in this crate are C friendly substitutions for a
 //! handful of these types.
 
+#![cfg_attr(UNSTABLE_DEBUG_SLICE, feature(min_specialization))]
+
 pub mod ffi;
 
 pub use crate::ffi::BumpSliceMut;
 pub use crate::ffi::Bytes;
+pub use crate::ffi::Maybe;
+pub use crate::ffi::Maybe::*;
 pub use crate::ffi::Pair;
 pub use crate::ffi::Quadruple;
 pub use crate::ffi::Slice;
 pub use crate::ffi::Str;
 pub use crate::ffi::Triple;
-
-pub use crate::ffi::{Maybe, Maybe::*};

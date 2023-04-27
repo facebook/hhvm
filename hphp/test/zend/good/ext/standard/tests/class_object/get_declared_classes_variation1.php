@@ -5,17 +5,8 @@
  * Alias to functions:
  */
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_classes_variation1(): void {
 echo "*** Testing get_declared_classes() : testing autoloaded classes ***\n";
-
-HH\autoload_set_paths(
-  dict[
-    'class' => dict[
-      'autoloaded' => 'AutoLoaded.inc',
-    ],
-  ],
-  __DIR__.'/',
-);
 
 echo "\n-- before instance is declared --\n";
 var_dump(in_array('AutoLoaded', get_declared_classes()));

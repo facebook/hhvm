@@ -1,0 +1,80 @@
+#include <tunables/global>
+
+/usr/sbin/mysqld {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/mysql>
+  #include <abstractions/winbind>
+
+# Allow system resource access
+  /sys/devices/system/cpu/ r,
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/** r,
+  /proc/*/status r,
+  capability sys_resource,
+  capability dac_override,
+  capability setuid,
+  capability setgid,
+  capability sys_nice,
+
+# Allow network access
+  network tcp,
+
+  /etc/hosts.allow r,
+  /etc/hosts.deny r,
+
+# Allow config access
+  /etc/mysql/** r,
+
+# Allow pid, socket, socket lock file access
+  /var/run/mysqld/mysqld.pid rw,
+  /var/run/mysqld/mysqld.sock rw,
+  /var/run/mysqld/mysqld.sock.lock rw,
+  /var/run/mysqld/mysqlx.sock rw,
+  /var/run/mysqld/mysqlx.sock.lock rw,
+  /run/mysqld/mysqld.pid rw,
+  /run/mysqld/mysqld.sock rw,
+  /run/mysqld/mysqld.sock.lock rw,
+  /run/mysqld/mysqlx.sock rw,
+  /run/mysqld/mysqlx.sock.lock rw,
+
+# Allow systemd notify messages
+  /{,var/}run/systemd/notify w,
+
+# Allow execution of server binary
+  /usr/sbin/mysqld mr,
+  /usr/sbin/mysqld-debug mr,
+
+# Allow plugin access
+  /usr/lib/mysql/plugin/ r,
+  /usr/lib/mysql/plugin/*.so* mr,
+
+# Allow error msg and charset access
+  /usr/share/mysql/ r,
+  /usr/share/mysql/** r,
+  /usr/share/mysql-@MYSQL_BASE_VERSION@/ r,
+  /usr/share/mysql-@MYSQL_BASE_VERSION@/** r,
+
+# Allow data dir access
+  /var/lib/mysql/ r,
+  /var/lib/mysql/** rwk,
+
+# Allow data files dir access
+  /var/lib/mysql-files/ r,
+  /var/lib/mysql-files/** rwk,
+
+# Allow keyring dir access
+  /var/lib/mysql-keyring/ r,
+  /var/lib/mysql-keyring/** rwk,
+
+# Allow log file access
+  /var/log/mysql/ r,
+  /var/log/mysql/** rw,
+
+# Allow access to openssl config
+  /etc/ssl/openssl.cnf r,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.sbin.mysqld>
+}

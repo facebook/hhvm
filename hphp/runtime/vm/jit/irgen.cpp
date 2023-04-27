@@ -198,7 +198,9 @@ void checkCoverage(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
       auto const irSP = spOffBCFromIRSP(env);
       auto const invSP = spOffBCFromStackBase(env);
-      auto const rbjData = ReqBindJmpData { curSrcKey(env), invSP, irSP };
+      auto const rbjData = ReqBindJmpData {
+        curSrcKey(env), invSP, irSP, curSrcKey(env).funcEntry() /* popFrame */
+      };
       gen(env, ReqInterpBBNoTranslate, rbjData, sp(env), fp(env));
     }
   );
@@ -218,6 +220,12 @@ void ringbufferMsg(IRGS& env,
 }
 
 void prepareEntry(IRGS& env) {
+  /*
+   * Trivial DV Func Entries don't have the frame setup yet, so we
+   * can't validate the frame or load the context from it.
+   */
+  if (curSrcKey(env).trivialDVFuncEntry()) return;
+
   /*
    * If assertions are on, before we do anything, each region makes a call to a
    * C++ function that checks the state of everything.
@@ -247,18 +255,20 @@ void endRegion(IRGS& env) {
 
 void endRegion(IRGS& env, SrcKey nextSk) {
   FTRACE(1, "------------------- endRegion ---------------------------\n");
-  if (!fp(env)) {
-    // The function already returned.  There's no reason to generate code to
+  if (env.irb->inUnreachableState()) {
+    // This location is unreachable.  There's no reason to generate code to
     // try to go to the next part of it.
     return;
   }
 
   spillInlinedFrames(env);
 
+  assertx(!nextSk.funcEntry());
   auto const data = ReqBindJmpData {
     nextSk,
     spOffBCFromStackBase(env),
-    spOffBCFromIRSP(env)
+    spOffBCFromIRSP(env),
+    false /* popFrame */
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
 }

@@ -1,0 +1,444 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "scope",
+  "structs" : {
+    "Transitive" : {
+      "lineno" : 67,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 67,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 67,
+          "column" : 21
+        }
+      }
+    },
+    "Schema" : {
+      "lineno" : 74,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 74,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 74,
+          "column" : 17
+        }
+      }
+    },
+    "Program" : {
+      "lineno" : 82,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 82,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 82,
+          "column" : 18
+        }
+      }
+    },
+    "Struct" : {
+      "lineno" : 85,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 85,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 85,
+          "column" : 17
+        }
+      }
+    },
+    "Union" : {
+      "lineno" : 88,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 88,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 88,
+          "column" : 16
+        }
+      }
+    },
+    "Exception" : {
+      "lineno" : 91,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 91,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 91,
+          "column" : 20
+        }
+      }
+    },
+    "Field" : {
+      "lineno" : 94,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 94,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 94,
+          "column" : 16
+        }
+      }
+    },
+    "Typedef" : {
+      "lineno" : 97,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 97,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 97,
+          "column" : 18
+        }
+      }
+    },
+    "Service" : {
+      "lineno" : 100,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 100,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 100,
+          "column" : 18
+        }
+      }
+    },
+    "Interaction" : {
+      "lineno" : 103,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 103,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 103,
+          "column" : 22
+        }
+      }
+    },
+    "Function" : {
+      "lineno" : 106,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TFunction",
+          "source_range" : {
+            "begin" : {
+              "line" : 106,
+              "column" : 21
+            },
+            "end" : {
+              "line" : 106,
+              "column" : 44
+            }
+          }
+        }
+,
+        "js.name" : {
+          "value" : "TFunction",
+          "source_range" : {
+            "begin" : {
+              "line" : 106,
+              "column" : 46
+            },
+            "end" : {
+              "line" : 106,
+              "column" : 67
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 106,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 106,
+          "column" : 68
+        }
+      }
+    },
+    "EnumValue" : {
+      "lineno" : 109,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 109,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 109,
+          "column" : 20
+        }
+      }
+    },
+    "Const" : {
+      "lineno" : 112,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TConst",
+          "source_range" : {
+            "begin" : {
+              "line" : 112,
+              "column" : 18
+            },
+            "end" : {
+              "line" : 112,
+              "column" : 38
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 112,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 112,
+          "column" : 39
+        }
+      }
+    },
+    "Enum" : {
+      "lineno" : 116,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "py3.hidden" : {
+          "value" : "1",
+          "source_range" : {
+            "begin" : {
+              "line" : 116,
+              "column" : 69
+            },
+            "end" : {
+              "line" : 116,
+              "column" : 79
+            }
+          }
+        }
+,
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Enum",
+          "source_range" : {
+            "begin" : {
+              "line" : 116,
+              "column" : 17
+            },
+            "end" : {
+              "line" : 116,
+              "column" : 67
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 116,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 116,
+          "column" : 80
+        }
+      }
+    },
+    "Structured" : {
+      "lineno" : 119,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Struct" : {  },
+        "Union" : {  },
+        "Exception" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 119,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 123,
+          "column" : 21
+        }
+      }
+    },
+    "Interface" : {
+      "lineno" : 126,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TInterface",
+          "source_range" : {
+            "begin" : {
+              "line" : 129,
+              "column" : 22
+            },
+            "end" : {
+              "line" : 129,
+              "column" : 46
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "Service" : {  },
+        "Interaction" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 126,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 129,
+          "column" : 47
+        }
+      }
+    },
+    "RootDefinition" : {
+      "lineno" : 132,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Structured" : {  },
+        "Interface" : {  },
+        "Typedef" : {  },
+        "Enum" : {  },
+        "Const" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 132,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 138,
+          "column" : 25
+        }
+      }
+    },
+    "Definition" : {
+      "lineno" : 141,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "RootDefinition" : {  },
+        "Field" : {  },
+        "Function" : {  },
+        "EnumValue" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 141,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 146,
+          "column" : 21
+        }
+      }
+    }
+  }
+}

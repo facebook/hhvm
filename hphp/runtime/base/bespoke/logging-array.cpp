@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"
@@ -232,7 +231,8 @@ void profileArrLikeProps(ObjectData* obj) {
     if (cls->declProperties()[slot].attrs & AttrIsConst) continue;
     auto lval = obj->propLvalAtOffset(slot);
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, false));
+    auto profile = getLoggingProfile(cls, slot, LocationType::InstanceProperty);
+    profileArrLikeLval(lval, profile);
   }
 }
 
@@ -247,7 +247,31 @@ void profileArrLikeStaticProps(const Class* cls) {
     if (!owned) continue;
     auto lval = &link->val;
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, true));
+    auto profile = getLoggingProfile(cls, slot, LocationType::StaticProperty);
+    profileArrLikeLval(lval, profile);
+  }
+}
+
+void profileArrLikeClsCns(const Class* cls, TypedValue* tv, Slot slot) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+  if (!tvIsArrayLike(tv)) return;
+  auto profile = getLoggingProfile(cls, slot, LocationType::TypeConstant);
+  profileArrLikeLval(tv, profile);
+}
+
+void profileArrLikeTypeAlias(const TypeAlias* ta, Array* ts) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+
+  auto const ad = ts->get();
+  auto const profile = getLoggingProfile(ta);
+  if (profile) {
+    auto const layout = profile->getLayout();
+    if (layout.bespoke()) {
+      ts->reset(layout.apply(ad));
+    } else {
+      auto loggingAd = maybeMakeLoggingArray(ad, profile);
+      ts->reset(loggingAd);
+    }
   }
 }
 
@@ -443,7 +467,12 @@ TypedValue LoggingArray::GetPosKey(const LoggingArray* lad, ssize_t pos) {
   return lad->wrapped->nvGetKey(pos);
 }
 TypedValue LoggingArray::GetPosVal(const LoggingArray* lad, ssize_t pos) {
-  return lad->wrapped->nvGetVal(pos);
+  auto const k = lad->wrapped->nvGetKey(pos);
+  tvIsString(k) ?
+    logEvent(lad, ArrayOp::GetStrPos, val(k).pstr) :
+    logEvent(lad, ArrayOp::GetIntPos, val(k).num) ;
+  auto const v = lad->wrapped->nvGetVal(pos);
+  return v;
 }
 
 bool LoggingArray::PosIsValid(const LoggingArray* lad, ssize_t pos) {

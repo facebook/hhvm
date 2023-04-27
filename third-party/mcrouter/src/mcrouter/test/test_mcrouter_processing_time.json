@@ -1,0 +1,55 @@
+{
+    "pools": {
+        "normal": {
+            "servers": [
+                "localhost:10001"
+            ],
+            "server_timeout": 1000
+        },
+        "shadow1": {
+            "servers": [
+                "localhost:10002"
+            ],
+            "server_timeout": 2000
+        },
+        "shadow2": {
+            "servers": [
+                "localhost:10003"
+            ],
+            "server_timeout": 3000
+        }
+    },
+    "route": {
+        "type": "LatencyInjectionRoute",
+        "before_latency_ms": 200,
+        "after_latency_ms": 500,
+        "child": {
+            "type": "PoolRoute",
+            "pool": "normal",
+            "shadows": [
+                {
+                    "target": "PoolRoute|shadow1",
+                    "index_range": [
+                        0,
+                        1
+                    ],
+                    "key_fraction_range": [
+                        0.0,
+                        1.0
+                    ]
+                },
+                {
+                    "target": "PoolRoute|shadow2",
+                    "index_range": [
+                        0,
+                        1
+                    ],
+                    "key_fraction_range": [
+                        0.0,
+                        1.0
+                    ]
+                }
+            ]
+        }
+    }
+}

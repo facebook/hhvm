@@ -25,21 +25,28 @@
 
 #include <folly/Lazy.h>
 
-#include "hphp/runtime/base/array-init.h"
-
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/index.h"
+
+#include "hphp/runtime/base/array-init.h"
+
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+
 #include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/util/extern-worker.h"
+
 namespace HPHP::HHBBC {
+
+using namespace extern_worker;
 
 void PrintTo(const Type& t, ::std::ostream* os) { *os << show(t); }
 void PrintTo(Emptiness e, ::std::ostream* os) {
@@ -51,8 +58,8 @@ void PrintTo(Emptiness e, ::std::ostream* os) {
   }
 }
 
-Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
-Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
+Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
+Type make_cls_for_testing(trep, res::Class, bool, bool, bool, bool);
 Type make_arrval_for_testing(trep, SArray);
 Type make_arrpacked_for_testing(trep, std::vector<Type>);
 Type make_arrpackedn_for_testing(trep, Type);
@@ -64,25 +71,181 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_test("test");
-const StaticString s_TestClass("TestClass");
-const StaticString s_Base("Base");
-const StaticString s_A("A");
-const StaticString s_AA("AA");
-const StaticString s_AB("AB");
-const StaticString s_B("B");
-const StaticString s_BA("BA");
-const StaticString s_BB("BB");
-const StaticString s_BAA("BAA");
 const StaticString s_C("C");
-const StaticString s_IBase("IBase");
-const StaticString s_IA("IA");
-const StaticString s_IAA("IAA");
-const StaticString s_IB("IB");
-const StaticString s_Awaitable("HH\\Awaitable");
+
+const StaticString s_ChildClosure1("Closure$ChildClosure1");
+const StaticString s_ChildClosure2("Closure$ChildClosure2");
+const StaticString s_ChildClosure3("Closure$ChildClosure3");
+
+#define TEST_CLASSES                            \
+  Y(Closure)                                    \
+                                                \
+  X(TestClass)                                  \
+  X(TestClassDeriver)                           \
+  X(Base)                                       \
+  X(A)                                          \
+  X(AA)                                         \
+  X(AB)                                         \
+  X(B)                                          \
+  X(BA)                                         \
+  X(BB)                                         \
+  X(BAA)                                        \
+  X(BAADeriver)                                 \
+  X(IBase)                                      \
+  X(IA)                                         \
+  X(IAA)                                        \
+  X(IB)                                         \
+                                                \
+  X(I_A)                                        \
+  X(I_B)                                        \
+  X(I_C)                                        \
+  X(I_D)                                        \
+  X(I_E)                                        \
+  X(I_F)                                        \
+  X(I_G)                                        \
+  X(I_H)                                        \
+  X(I_I)                                        \
+  X(I_J)                                        \
+  X(I_K)                                        \
+                                                \
+  X(X1)                                         \
+  X(X2)                                         \
+  X(X3)                                         \
+  X(X4)                                         \
+  X(X5)                                         \
+  X(X6)                                         \
+  X(X7)                                         \
+  X(X8)                                         \
+  X(X9)                                         \
+  X(X10)                                        \
+  X(X11)                                        \
+  X(X12)                                        \
+  X(X13)                                        \
+  X(X14)                                        \
+  X(X15)                                        \
+  X(X16)                                        \
+  X(X17)                                        \
+  X(X18)                                        \
+  X(X19)                                        \
+  X(X20)                                        \
+  X(X21)                                        \
+  X(X22)                                        \
+  X(X23)                                        \
+  X(X24)                                        \
+  X(X25)                                        \
+  X(X26)                                        \
+  X(X27)                                        \
+  X(X28)                                        \
+  X(X29)                                        \
+                                                \
+  X(Y1)                                         \
+  X(Y2)                                         \
+  X(Y3)                                         \
+  X(Y4)                                         \
+  X(Y5)                                         \
+  X(Y6)                                         \
+  X(Y7)                                         \
+  X(Y8)                                         \
+  X(Y9)                                         \
+                                                \
+  X(Z1)                                         \
+  X(Z2)                                         \
+  X(Z3)                                         \
+  X(Z4)                                         \
+  X(Z5)                                         \
+  X(Z6)                                         \
+  X(Z7)                                         \
+  X(Z8)                                         \
+  X(Z9)                                         \
+  X(Z10)                                        \
+                                                \
+  X(I_Y1)                                       \
+  X(I_Y2)                                       \
+  X(I_Y3)                                       \
+                                                \
+  X(I_Z1)                                       \
+  X(I_Z2)                                       \
+  X(I_Z3)                                       \
+  X(I_Z4)                                       \
+  X(I_Z5)                                       \
+  X(I_Z6)                                       \
+                                                \
+  X(ICanon1)                                    \
+  X(ICanon2)                                    \
+  X(ICanon3)                                    \
+  X(ICanon4)                                    \
+  X(ICanon5)                                    \
+  X(ICanon6)                                    \
+  X(ICanon7)                                    \
+  X(ICanon8)                                    \
+  X(ICanon9)                                    \
+  X(ICanon10)                                   \
+  X(ICanon11)                                   \
+  X(ICanon12)                                   \
+  X(ICanon13)                                   \
+  X(ICanon14)                                   \
+                                                \
+  X(Canon1)                                     \
+  X(Canon2)                                     \
+  X(Canon3)                                     \
+  X(Canon4)                                     \
+  X(Canon5)                                     \
+  X(Canon6)                                     \
+  X(Canon7)                                     \
+  X(Canon8)                                     \
+  X(Canon9)                                     \
+  X(Canon10)                                    \
+  X(Canon11)                                    \
+  X(Canon12)                                    \
+  X(Canon13)                                    \
+  X(Canon14)                                    \
+  X(Canon15)                                    \
+  X(Canon16)                                    \
+  X(Canon17)                                    \
+  X(Canon18)                                    \
+                                                \
+  X(T1)                                         \
+  X(T2)                                         \
+  X(T3)                                         \
+  X(T4)                                         \
+                                                \
+  X(Abs1)                                       \
+  X(Abs2)                                       \
+  X(Abs3)                                       \
+  X(Abs4)                                       \
+  X(Abs5)                                       \
+  X(Abs6)                                       \
+                                                \
+  X(T1_C1)                                      \
+  X(T4_C1)                                      \
+                                                \
+  X(Abs3_C1)                                    \
+  X(Abs3_C2)                                    \
+  X(Abs3_C3)                                    \
+                                                \
+  X(Abs4_C1)                                    \
+  X(Abs4_C2)                                    \
+                                                \
+  X(Abs6_C1)                                    \
+                                                \
+  X(Abs5_P)                                     \
+  X(Abs6_P)                                     \
+                                                \
+  Y(Foo1)                                       \
+  Y(Foo2)                                       \
+  Y(Foo3)                                       \
+
+#define X(name)                                 \
+  const StaticString s_##name(#name);
+#define Y(name)                                 \
+  const StaticString s_##name(#name);
+  TEST_CLASSES
+#undef Y
+#undef X
 
 // A test program so we can actually test things involving object or
 // class types.
-void add_test_unit(php::Program& program) {
+Index make_index() {
   assertx(SystemLib::s_inited);
   std::string const hhas = R"(
     # Technically this should be provided by systemlib, but it's the
@@ -93,6 +256,31 @@ void add_test_unit(php::Program& program) {
     }
 
     .class [unique builtin] HH\AwaitableChild extends HH\Awaitable {
+    }
+
+    .class [unique builtin] HH\AwaitableChild2 extends HH\Awaitable {
+    }
+
+    .class [unique builtin] Closure {
+    }
+
+    .class [unique] Closure$ChildClosure1 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
+    }
+    .class [unique] Closure$ChildClosure2 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
+    }
+    .class [unique] Closure$ChildClosure3 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
     }
 
     .class [interface unique] IBase {
@@ -153,24 +341,418 @@ void add_test_unit(php::Program& program) {
       .default_ctor;
     }
 
+    .class [interface unique] I_A {
+    }
+    .class [interface unique] I_B {
+    }
+    .class [interface unique] I_C {
+    }
+    .class [interface unique] I_D {
+    }
+    .class [interface unique] I_E {
+    }
+    .class [interface unique] I_F {
+    }
+    .class [interface unique] I_G {
+    }
+    .class [interface unique] I_H {
+    }
+    .class [interface unique] I_I {
+    }
+    .class [interface unique] I_J {
+    }
+    .class [interface unique] I_K {
+    }
+
+    .class [unique] X1 {
+    }
+    .class [unique] X2 extends X1 implements (I_A) {
+    }
+    .class [unique] X3 extends X1 implements (I_B) {
+    }
+    .class [unique] X4 extends X1 implements (I_C) {
+    }
+    .class [unique] X5 extends X1 implements (I_D) {
+    }
+    .class [unique] X6 extends X2 implements (I_E) {
+    }
+    .class [unique] X7 extends X6 implements (I_I) {
+    }
+    .class [unique] X8 extends X6 implements (I_J) {
+    }
+    .class [unique] X9 extends X5 implements (I_I) {
+    }
+    .class [unique] X10 extends X2 implements (I_D) {
+    }
+    .class [unique] X11 extends X10 implements (I_I) {
+    }
+    .class [unique] X12 extends X2 implements (I_F) {
+    }
+    .class [unique] X13 extends X12 implements (I_J) {
+    }
+    .class [unique] X14 extends X2 implements (I_J) {
+    }
+    .class [unique] X15 extends X2 implements (I_G) {
+    }
+    .class [unique] X16 extends X1 implements (I_G) {
+    }
+    .class [unique] X17 extends X3 implements (I_G) {
+    }
+    .class [unique] X18 extends X3 implements (I_H) {
+    }
+    .class [unique] X19 extends X3 implements (I_K) {
+    }
+    .class [unique] X20 extends X1 implements (I_K) {
+    }
+    .class [unique] X21 {
+    }
+    .class [unique] X22 extends X21 implements (I_A) {
+    }
+    .class [unique] X23 extends X21 implements (I_B) {
+    }
+    .class [unique] X24 extends X21 implements (I_C) {
+    }
+    .class [unique] X25 extends X21 implements (I_E) {
+    }
+    .class [unique] X26 extends X21 implements (I_F) {
+    }
+    .class [unique] X27 extends X21 implements (I_H) {
+    }
+    .class [unique] X28 extends X21 {
+    }
+    .class [unique] X29 extends X1 {
+    }
+
+    .class [interface unique] I_Y1 {
+    }
+    .class [interface unique] I_Y2 {
+    }
+    .class [interface unique] I_Y3 {
+    }
+
+    .class [unique] Y1 implements (I_Y2 I_Y3) {
+    }
+    .class [unique] Y2 extends Y1 {
+    }
+    .class [unique] Y3 extends Y1 {
+    }
+    .class [unique] Y4 extends Y2 implements (I_Y1) {
+    }
+    .class [unique] Y5 extends Y3 implements (I_Y1) {
+    }
+    .class [unique] Y6 implements (I_Y2 I_Y3) {
+    }
+    .class [unique] Y7 implements (I_Y1 I_Y2 I_Y3) {
+    }
+    .class [unique] Y8 implements (I_Y2) {
+    }
+    .class [unique] Y9 implements (I_Y3) {
+    }
+
+    .class [interface unique] I_Z1 {
+    }
+    .class [interface unique] I_Z2 {
+    }
+    .class [interface unique] I_Z3 {
+    }
+    .class [interface unique] I_Z4 {
+    }
+    .class [interface unique] I_Z5 {
+    }
+    .class [interface unique] I_Z6 {
+    }
+
+    .class [abstract unique] Z1 implements (I_Z2) {
+    }
+    .class [unique] Z2 extends Z1 implements (I_Z1) {
+    }
+    .class [unique] Z3 extends Z1 implements (I_Z1) {
+    }
+    .class [unique] Z4 {
+    }
+    .class [abstract unique] Z5 extends Z4 implements (I_Z4) {
+    }
+    .class [unique] Z6 extends Z4 implements (I_Z3 I_Z4) {
+    }
+    .class [unique] Z7 implements (I_Z5 I_Z6) {
+    }
+    .class [unique] Z8 implements (I_Z5 I_Z6) {
+    }
+    .class [unique] Z9 implements (I_Z5) {
+    }
+    .class [abstract unique] Z10 implements (I_Z6) {
+    }
+
+    .class [interface unique] ICanon1 {
+    }
+
+    .class [interface unique] ICanon2 implements (ICanon1) {
+    }
+
+    .class [interface unique] ICanon3 {
+    }
+
+    .class [interface unique] ICanon4 {
+    }
+
+    .class [interface unique] ICanon5 {
+    }
+
+    .class [interface unique] ICanon6 implements (ICanon5) {
+    }
+
+    .class [interface unique] ICanon7 {
+    }
+
+    .class [interface unique] ICanon8 {
+    }
+
+    .class [interface unique] ICanon9 {
+    }
+
+    .class [interface unique] ICanon10 {
+    }
+
+    .class [interface unique] ICanon11 {
+    }
+
+    .class [interface unique] ICanon12 {
+    }
+
+    .class [interface unique] ICanon13 {
+    }
+
+    .class [interface unique] ICanon14 {
+    }
+
+    .class [unique] Canon1 implements (ICanon3 ICanon4) {
+    }
+
+    .class [unique] Canon2 implements (ICanon3 ICanon4) {
+    }
+
+    .class [unique] Canon3 implements (ICanon6) {
+    }
+
+    .class [unique] Canon4 implements (ICanon9 ICanon10) {
+    }
+
+    .class [abstract unique] Canon5 implements (ICanon11 ICanon12) {
+    }
+
+    .class [abstract unique] Canon6 implements (ICanon11 ICanon12) {
+    }
+
+    .class [unique] Canon7 implements (ICanon11) {
+    }
+
+    .class [unique] Canon8 implements (ICanon12) {
+    }
+
+    .class [unique] Canon9 implements (ICanon11) {
+    }
+
+    .class [unique] Canon10 implements (ICanon12 ICanon13) {
+    }
+
+    .class [abstract unique] Canon11 implements (ICanon12 ICanon13) {
+    }
+
+    .class [unique] Canon12 implements (ICanon11 ICanon13) {
+    }
+
+    .class [unique] Canon13 implements (ICanon11 ICanon13) {
+    }
+
+    .class [abstract unique] Canon14 {
+    }
+
+    .class [abstract unique] Canon15 extends Canon14 {
+    }
+
+    .class [unique] Canon16 extends Canon14 implements (ICanon14) {
+    }
+
+    .class [unique] Canon17 extends Canon14 implements (ICanon14) {
+    }
+
+    .class [unique] Canon18 implements (ICanon14) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T1 {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T2 implements (ICanon7) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T3 implements (ICanon7) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T4 implements (ICanon8) {
+    }
+
+    .class [abstract unique] Abs1 implements (ICanon7) {
+    }
+
+    .class [abstract unique] Abs2 {
+      .use T4;
+    }
+
+    .class [abstract unique] Abs3 {
+    }
+
+    .class [abstract unique] Abs4 {
+    }
+
+    .class [unique] T1_C1 {
+      .use T1;
+    }
+
+    .class [unique] T4_C1 {
+      .use T4;
+    }
+
+    .class [unique] Abs3_C1 extends Abs3 {
+    }
+    .class [unique] Abs3_C2 extends Abs3_C1 {
+    }
+    .class [abstract unique] Abs3_C3 extends Abs3 {
+    }
+
+    .class [unique] Abs4_C1 extends Abs4 {
+    }
+    .class [unique] Abs4_C2 extends Abs4 {
+    }
+
+    .class [unique] Abs5_P {
+    }
+    .class [abstract unique] Abs5 extends Abs5_P {
+    }
+
+    .class [unique] Abs6_P {
+    }
+    .class [abstract unique] Abs6 extends Abs6_P {
+    }
+    .class [unique] Abs6_C1 extends Abs6 {
+    }
+
     .function test() {
       Int 1
       RetC
     }
   )";
-  std::unique_ptr<UnitEmitter> ue(assemble_string(
+
+  Logger::LogLevel = Logger::LogNone;
+
+  HHBBC::parallel::num_threads = 1;
+  HHBBC::parallel::final_threads = 1;
+
+  std::unique_ptr<UnitEmitter> ue{assemble_string(
     hhas.c_str(), hhas.size(),
     "ignore.php",
     SHA1("1234543212345432123454321234543212345432"),
-    Native::s_noNativeFuncs
-  ));
-  parse_unit(program, ue.get());
-}
+    Native::s_noNativeFuncs,
+    RepoOptions::defaults().packageInfo()
+  )};
 
-php::ProgramPtr make_test_program() {
-  auto program = make_program();
-  add_test_unit(*program);
-  return program;
+  auto parse = parse_unit(*ue);
+
+  Index::Input indexInput;
+
+  auto executor = std::make_unique<coro::TicketExecutor>(
+    "HHBBCWorker",
+    0,
+    1,
+    [] {
+      hphp_thread_init();
+      hphp_session_init(Treadmill::SessionKind::HHBBC);
+    },
+    [] {
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+    },
+    std::chrono::minutes{15}
+  );
+
+  extern_worker::Options options;
+  options.setUseSubprocess(extern_worker::Options::UseSubprocess::Always);
+
+  auto client = std::make_unique<Client>(
+    executor->sticky(),
+    options
+  );
+
+  if (parse.unit) {
+    auto const name = parse.unit->filename;
+    auto stored = coro::wait(client->store(std::move(parse.unit)));
+    indexInput.units.emplace_back(
+      Index::Input::UnitMeta{
+        std::move(stored),
+        name
+      }
+    );
+  }
+  for (auto& c : parse.classes) {
+    auto const name = c->name;
+    auto deps = Index::Input::makeDeps(*c);
+    auto const isClosure = is_closure(*c);
+
+    auto bytecode = std::make_unique<php::ClassBytecode>();
+    for (auto& meth : c->methods) {
+      bytecode->methodBCs.emplace_back(std::move(meth->rawBlocks));
+    }
+
+    auto stored = coro::wait(client->store(std::move(c)));
+    auto storedBC = coro::wait(client->store(std::move(bytecode)));
+
+    indexInput.classes.emplace_back(
+      Index::Input::ClassMeta{
+        std::move(stored),
+        name,
+        std::move(deps),
+        nullptr,
+        isClosure
+      }
+    );
+    indexInput.classBC.emplace_back(
+      Index::Input::ClassBytecodeMeta{
+        std::move(storedBC),
+        name
+      }
+    );
+  }
+  for (auto& f : parse.funcs) {
+    auto const name = f->name;
+    auto bytecode =
+      std::make_unique<php::FuncBytecode>(std::move(f->rawBlocks));
+    auto stored = coro::wait(client->store(std::move(f)));
+    auto storedBC = coro::wait(client->store(std::move(bytecode)));
+    indexInput.funcs.emplace_back(
+      Index::Input::FuncMeta{
+        std::move(stored),
+        name,
+        nullptr
+      }
+    );
+    indexInput.funcBC.emplace_back(
+      Index::Input::FuncBytecodeMeta{
+        std::move(storedBC),
+        name,
+        nullptr
+      }
+    );
+  }
+
+  return Index{
+    std::move(indexInput),
+    HHBBC::Config::get(RepoGlobalData{}),
+    std::move(executor),
+    std::move(client),
+    [] (std::unique_ptr<coro::TicketExecutor>,
+        std::unique_ptr<Client>) {},
+    nullptr
+  };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -196,23 +778,29 @@ Type make_specialized_wait_handle(trep bits, Type inner, const Index& index) {
 }
 
 Type make_specialized_exact_object(trep bits, res::Class cls,
-                                   bool isCtx = false) {
-  return make_obj_for_testing(bits, cls, DObj::Exact, isCtx);
+                                   bool isCtx = false,
+                                   bool canonicalize = true) {
+  return make_obj_for_testing(bits, cls, false, isCtx, canonicalize);
 }
 
 Type make_specialized_sub_object(trep bits, res::Class cls,
-                                 bool isCtx = false) {
-  return make_obj_for_testing(bits, cls, DObj::Sub, isCtx);
+                                 bool isCtx = false,
+                                 bool canonicalize = true) {
+  return make_obj_for_testing(bits, cls, true, isCtx, canonicalize);
 }
 
 Type make_specialized_exact_class(trep bits, res::Class cls,
-                                  bool isCtx = false) {
-  return make_cls_for_testing(bits, cls, DCls::Exact, isCtx);
+                                  bool isCtx = false,
+                                  bool canonicalize = true,
+                                  bool nonReg = true) {
+  return make_cls_for_testing(bits, cls, false, isCtx, canonicalize, nonReg);
 }
 
 Type make_specialized_sub_class(trep bits, res::Class cls,
-                                bool isCtx = false) {
-  return make_cls_for_testing(bits, cls, DCls::Sub, isCtx);
+                                bool isCtx = false,
+                                bool canonicalize = true,
+                                bool nonReg = true) {
+  return make_cls_for_testing(bits, cls, true, isCtx, canonicalize, nonReg);
 }
 
 Type make_specialized_arrval(trep bits, SArray ar) {
@@ -345,21 +933,64 @@ auto const primitives = folly::lazy([]{
 std::vector<Type> withData(const Index& index) {
   std::vector<Type> types;
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
-  auto const clsAA = index.resolve_class(Context{}, s_AA.get());
+  auto const clsAA = index.resolve_class(s_AA.get());
   if (!clsAA || !clsAA->resolved()) ADD_FAILURE();
-  auto const clsAB = index.resolve_class(Context{}, s_AB.get());
+  auto const clsAB = index.resolve_class(s_AB.get());
   if (!clsAB || !clsAB->resolved()) ADD_FAILURE();
 
-  auto const clsIBase = index.resolve_class(Context{}, s_IBase.get());
+  auto const clsIBase = index.resolve_class(s_IBase.get());
   if (!clsIBase || !clsIBase->resolved()) ADD_FAILURE();
-  auto const clsIA = index.resolve_class(Context{}, s_IA.get());
+  auto const clsIA = index.resolve_class(s_IA.get());
   if (!clsIA || !clsIA->resolved()) ADD_FAILURE();
-  auto const clsIAA = index.resolve_class(Context{}, s_IAA.get());
+  auto const clsIAA = index.resolve_class(s_IAA.get());
   if (!clsIAA || !clsIAA->resolved()) ADD_FAILURE();
-  auto const clsIB = index.resolve_class(Context{}, s_IB.get());
+  auto const clsIB = index.resolve_class(s_IB.get());
   if (!clsIB || !clsIB->resolved()) ADD_FAILURE();
+
+  auto const clsI_A = index.resolve_class(s_I_A.get());
+  if (!clsI_A || !clsI_A->resolved()) ADD_FAILURE();
+  auto const clsI_B = index.resolve_class(s_I_B.get());
+  if (!clsI_B || !clsI_B->resolved()) ADD_FAILURE();
+  auto const clsI_C = index.resolve_class(s_I_C.get());
+  if (!clsI_C || !clsI_C->resolved()) ADD_FAILURE();
+  auto const clsI_D = index.resolve_class(s_I_D.get());
+  if (!clsI_D || !clsI_D->resolved()) ADD_FAILURE();
+  auto const clsI_E = index.resolve_class(s_I_E.get());
+  if (!clsI_E || !clsI_E->resolved()) ADD_FAILURE();
+  auto const clsI_F = index.resolve_class(s_I_F.get());
+  if (!clsI_F || !clsI_F->resolved()) ADD_FAILURE();
+  auto const clsI_G = index.resolve_class(s_I_G.get());
+  if (!clsI_G || !clsI_G->resolved()) ADD_FAILURE();
+  auto const clsI_H = index.resolve_class(s_I_H.get());
+  if (!clsI_H || !clsI_H->resolved()) ADD_FAILURE();
+  auto const clsI_I = index.resolve_class(s_I_I.get());
+  if (!clsI_I || !clsI_I->resolved()) ADD_FAILURE();
+  auto const clsI_J = index.resolve_class(s_I_J.get());
+  if (!clsI_J || !clsI_J->resolved()) ADD_FAILURE();
+  auto const clsI_K = index.resolve_class(s_I_K.get());
+  if (!clsI_K || !clsI_K->resolved()) ADD_FAILURE();
+
+  auto const clsX1 = index.resolve_class(s_X1.get());
+  if (!clsX1 || !clsX1->resolved()) ADD_FAILURE();
+  auto const clsX2 = index.resolve_class(s_X2.get());
+  if (!clsX2 || !clsX2->resolved()) ADD_FAILURE();
+  auto const clsX3 = index.resolve_class(s_X3.get());
+  if (!clsX3 || !clsX3->resolved()) ADD_FAILURE();
+  auto const clsX4 = index.resolve_class(s_X4.get());
+  if (!clsX4 || !clsX4->resolved()) ADD_FAILURE();
+  auto const clsX7 = index.resolve_class(s_X7.get());
+  if (!clsX7 || !clsX7->resolved()) ADD_FAILURE();
+  auto const clsX11 = index.resolve_class(s_X11.get());
+  if (!clsX11 || !clsX11->resolved()) ADD_FAILURE();
+  auto const clsX21 = index.resolve_class(s_X21.get());
+  if (!clsX21 || !clsX21->resolved()) ADD_FAILURE();
+
+  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
+  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
@@ -397,6 +1028,7 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(make_specialized_wait_handle(b, TInt, index));
       types.emplace_back(make_specialized_wait_handle(b, TStr, index));
       types.emplace_back(make_specialized_wait_handle(b, TArrKey, index));
+      types.emplace_back(make_specialized_wait_handle(b, TBottom, index));
 
       types.emplace_back(make_specialized_exact_object(b, *clsA));
       types.emplace_back(make_specialized_exact_object(b, *clsAA));
@@ -437,9 +1069,36 @@ std::vector<Type> withData(const Index& index) {
 
       auto const dobj =
         dobj_of(make_specialized_wait_handle(b, TArrKey, index));
-      if (!dobj.cls.resolved()) ADD_FAILURE();
-      types.emplace_back(make_specialized_sub_object(b, dobj.cls));
-      types.emplace_back(make_specialized_exact_object(b, dobj.cls));
+      if (!dobj.cls().resolved()) ADD_FAILURE();
+      types.emplace_back(make_specialized_sub_object(b, dobj.cls()));
+      types.emplace_back(make_specialized_exact_object(b, dobj.cls()));
+
+      types.emplace_back(make_specialized_sub_object(b, *clsI_A));
+      types.emplace_back(make_specialized_exact_object(b, *clsI_A));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_B));
+      types.emplace_back(make_specialized_exact_object(b, *clsI_B));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_C));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_E));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_F));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_G));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_H));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_J));
+      types.emplace_back(make_specialized_sub_object(b, *clsI_K));
+
+      types.emplace_back(make_specialized_sub_object(b, *clsX1));
+      types.emplace_back(make_specialized_sub_object(b, *clsX2));
+      types.emplace_back(make_specialized_exact_object(b, *clsX2));
+      types.emplace_back(make_specialized_sub_object(b, *clsX3));
+      types.emplace_back(make_specialized_exact_object(b, *clsX3));
+      types.emplace_back(make_specialized_sub_object(b, *clsX4));
+      types.emplace_back(make_specialized_sub_object(b, *clsX7));
+      types.emplace_back(make_specialized_sub_object(b, *clsX11));
+      types.emplace_back(make_specialized_sub_object(b, *clsX21));
+
+      types.emplace_back(make_specialized_exact_object(b, clsFoo1));
+      types.emplace_back(make_specialized_sub_object(b, clsFoo1));
+      types.emplace_back(make_specialized_exact_object(b, clsFoo2));
+      types.emplace_back(make_specialized_sub_object(b, clsFoo2));
     }
     if (couldBe(b, BCls) && subtypeOf(b, BCls | nonSupport)) {
       types.emplace_back(make_specialized_exact_class(b, *clsA));
@@ -853,10 +1512,89 @@ auto const specialized_arrays = folly::lazy([]{
   return types;
 });
 
+std::vector<Type> specializedClasses(const Index& index) {
+  hphp_fast_set<Type, TypeHasher> types;
+  auto const addExactSub = [&] (res::Class c) {
+    types.emplace(objExact(c));
+    types.emplace(subObj(c));
+    types.emplace(clsExact(c));
+    types.emplace(subCls(c));
+    types.emplace(clsExact(c, false));
+    types.emplace(subCls(c, false));
+  };
+
+#define X(name)                                                         \
+  {                                                                     \
+    auto const cls = index.resolve_class(s_##name.get());               \
+    if (!cls || !cls->resolved()) ADD_FAILURE();                        \
+    addExactSub(*cls);                                                  \
+  }
+#define Y(name)                                                         \
+  {                                                                     \
+    auto const cls = index.resolve_class_name_only(s_##name.get());     \
+    if (cls.resolved()) ADD_FAILURE();                                  \
+    addExactSub(cls);                                                   \
+  }
+  TEST_CLASSES
+#undef Y
+#undef X
+
+  auto const childClo1 = index.resolve_class(s_ChildClosure1.get());
+  if (!childClo1 || !childClo1->resolved()) ADD_FAILURE();
+  auto const childClo2 = index.resolve_class(s_ChildClosure2.get());
+  if (!childClo2 || !childClo2->resolved()) ADD_FAILURE();
+  auto const childClo3 = index.resolve_class(s_ChildClosure3.get());
+  if (!childClo3 || !childClo3->resolved()) ADD_FAILURE();
+
+  addExactSub(*childClo1);
+  addExactSub(*childClo2);
+  addExactSub(*childClo3);
+
+  auto const awaitable = index.wait_handle_class();
+  addExactSub(awaitable);
+
+  auto const clsX2 = index.resolve_class(s_X2.get());
+  auto const clsX6 = index.resolve_class(s_X6.get());
+  auto const clsX18 = index.resolve_class(s_X18.get());
+  auto const clsY3 = index.resolve_class(s_Y3.get());
+
+  types.emplace(make_specialized_wait_handle(BObj, TInt, index));
+  types.emplace(make_specialized_wait_handle(BObj, TStr, index));
+  types.emplace(make_specialized_wait_handle(BObj, TArrKey, index));
+  types.emplace(make_specialized_wait_handle(BObj, TBottom, index));
+
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX2), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX6), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX18), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsY3), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX2), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX6), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX18), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsY3), index));
+
+  types.emplace(TObj);
+  types.emplace(TCls);
+
+  while (true) {
+    auto combinations = types;
+    for (auto const& a : types) {
+      for (auto const& b : types) {
+        combinations.emplace(union_of(a, b));
+        combinations.emplace(intersection_of(a, b));
+      }
+    }
+    if (types.size() == combinations.size()) break;
+    types = std::move(combinations);
+  }
+  return std::vector<Type>{begin(types), end(types)};
+}
+
 std::vector<Type> allCases(const Index& index) {
   auto types = withData(index);
   auto const specialized = specialized_arrays();
   types.insert(types.end(), specialized.begin(), specialized.end());
+  auto const specializedCls = specializedClasses(index);
+  types.insert(types.end(), specializedCls.begin(), specializedCls.end());
   return types;
 }
 
@@ -898,8 +1636,7 @@ auto const allBits = folly::lazy([]{
 }
 
 TEST(Type, Bits) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   for (auto const& t : predefined()) {
     EXPECT_EQ(Type{t.first}, t.second);
@@ -926,8 +1663,7 @@ TEST(Type, Bits) {
 }
 
 TEST(Type, Top) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   // Everything is a subtype of Top, couldBe Top, and the union of Top
   // with anything is Top.
@@ -949,8 +1685,7 @@ TEST(Type, Top) {
 }
 
 TEST(Type, Bottom) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   // Bottom is a subtype of everything, nothing couldBe Bottom, and
   // the union_of anything with Bottom is itself.
@@ -970,30 +1705,36 @@ TEST(Type, Bottom) {
 }
 
 TEST(Type, Prims) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   // All pairs of non-equivalent primitives are not related by either
-  // subtypeOf or couldBe, including if you wrap them in wait handles.
+  // subtypeOf or couldBe, except for wait-handles, which always could
+  // be each other.
   for (auto const& t1 : primitives()) {
     for (auto const& t2 : primitives()) {
       if (t1 == t2) continue;
 
-      auto const test = [] (const Type& a, const Type& b) {
+      auto const test = [] (const Type& a, const Type& b, bool isWaitHandle) {
         EXPECT_TRUE(!a.subtypeOf(b));
         EXPECT_TRUE(!a.strictSubtypeOf(b));
         EXPECT_TRUE(!b.subtypeOf(a));
         EXPECT_TRUE(!b.strictSubtypeOf(a));
-        EXPECT_TRUE(!a.couldBe(b));
-        EXPECT_TRUE(!b.couldBe(a));
-        EXPECT_EQ(intersection_of(a, b), TBottom);
+        if (!isWaitHandle) {
+          EXPECT_TRUE(!a.couldBe(b));
+          EXPECT_TRUE(!b.couldBe(a));
+          EXPECT_EQ(intersection_of(a, b), TBottom);
+        } else {
+          EXPECT_TRUE(a.couldBe(b));
+          EXPECT_TRUE(b.couldBe(a));
+          EXPECT_NE(intersection_of(a, b), TBottom);
+        }
       };
 
-      test(t1, t2);
+      test(t1, t2, false);
 
       if (t1.is(BUninit) || t2.is(BUninit)) continue;
 
-      test(wait_handle(index, t1), wait_handle(index, t2));
+      test(wait_handle(index, t1), wait_handle(index, t2), true);
 
       const std::vector<Type> arrays1{
         dict_packed({t1, t1}),
@@ -1008,7 +1749,7 @@ TEST(Type, Prims) {
         dict_n(TInt, t2)
       };
       for (auto const& a1 : arrays1) {
-        for (auto const& a2 : arrays2) test(a1, a2);
+        for (auto const& a2 : arrays2) test(a1, a2, false);
       }
     }
   }
@@ -1048,10 +1789,10 @@ void test_basic_operators(const std::vector<Type>& types) {
       if (is_specialized_wait_handle(t1) || is_specialized_wait_handle(t2)) {
         return false;
       }
-      return dobj_of(t1).isCtx != dobj_of(t2).isCtx;
+      return dobj_of(t1).isCtx() != dobj_of(t2).isCtx();
     }
     if (!is_specialized_cls(t1) || !is_specialized_cls(t2)) return false;
-    return dcls_of(t1).isCtx != dcls_of(t2).isCtx;
+    return dcls_of(t1).isCtx() != dcls_of(t2).isCtx();
   };
 
   auto const matchingData = [] (const Type& t1, const Type& t2, auto const& self) {
@@ -1075,24 +1816,10 @@ void test_basic_operators(const std::vector<Type>& types) {
       return self(wait_handle_inner(t1), wait_handle_inner(t2), self);
     }
     if (is_specialized_obj(t1)) {
-      if (dobj_of(t1).cls.couldBeInterface()) return false;
       if (!t2.hasData()) return true;
-      if (!is_specialized_obj(t2)) return false;
-      return !dobj_of(t2).cls.couldBeInterface();
+      return is_specialized_obj(t2);
     }
     return true;
-  };
-
-  auto const isNotInterface = [] (Type t1, Type t2) {
-    if (is_specialized_wait_handle(t1) && is_specialized_wait_handle(t2)) {
-      t1 = wait_handle_inner(t1);
-      t2 = wait_handle_inner(t2);
-    }
-    return
-      !is_specialized_obj(t1) ||
-      !is_specialized_obj(t2) ||
-      !dobj_of(t1).cls.couldBeInterface() ||
-      !dobj_of(t2).cls.couldBeInterface();
   };
 
   for (size_t i1 = 0; i1 < types.size(); ++i1) {
@@ -1151,9 +1878,7 @@ void test_basic_operators(const std::vector<Type>& types) {
         EXPECT_TRUE(isect.moreRefined(t1));
         EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1));
       } else {
-        if (isNotInterface(t1, t2)) {
-          EXPECT_TRUE(isect.moreRefined(t1) || isect.moreRefined(t2));
-        }
+        EXPECT_TRUE(isect.moreRefined(t1) || isect.moreRefined(t2));
         EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1) ||
                     intersection_of(uni, t2).equivalentlyRefined(t2));
       }
@@ -1203,12 +1928,88 @@ void test_basic_operators(const std::vector<Type>& types) {
 }
 
 TEST(Type, BasicOperators) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
   test_basic_operators(withData(index));
 
   EXPECT_EQ(union_of(ival(0),TStr), TArrKey);
   EXPECT_EQ(union_of(TInt,sval(s_A)), TUncArrKey);
+}
+
+TEST(Type, SpecializedClasses) {
+  auto index = make_index();
+  auto const types = specializedClasses(index);
+
+  test_basic_operators(types);
+
+  for (auto const& t1 : types) {
+    for (auto const& t2 : types) {
+      if (!t2.subtypeOf(t1)) continue;
+      for (auto const& t3 : types) {
+        auto const superU = union_of(t1, t3);
+        auto const superI = intersection_of(t1, t3);
+        for (auto const& t4 : types) {
+          if (!t4.subtypeOf(t3)) continue;
+          EXPECT_TRUE(union_of(t2, t4).subtypeOf(superU));
+          EXPECT_TRUE(intersection_of(t2, t4).subtypeOf(superI));
+        }
+      }
+    }
+  }
+}
+
+TEST(Type, Closure) {
+  auto index = make_index();
+
+  auto const closureCls = index.resolve_class(s_Closure.get());
+  if (!closureCls || closureCls->resolved()) ADD_FAILURE();
+
+  auto const childCls1 = index.resolve_class(s_ChildClosure1.get());
+  if (!childCls1 || !childCls1->resolved()) ADD_FAILURE();
+  auto const childCls2 = index.resolve_class(s_ChildClosure2.get());
+  if (!childCls2 || !childCls2->resolved()) ADD_FAILURE();
+  auto const childCls3 = index.resolve_class(s_ChildClosure3.get());
+  if (!childCls3 || !childCls3->resolved()) ADD_FAILURE();
+
+  auto const closure = subObj(*closureCls);
+  auto const child1 = objExact(*childCls1);
+  auto const child2 = objExact(*childCls2);
+  auto const child3 = objExact(*childCls3);
+
+  EXPECT_TRUE(child1.subtypeOf(closure));
+  EXPECT_TRUE(child2.subtypeOf(closure));
+  EXPECT_TRUE(child3.subtypeOf(closure));
+
+  EXPECT_FALSE(closure.subtypeOf(child1));
+  EXPECT_FALSE(closure.subtypeOf(child2));
+  EXPECT_FALSE(closure.subtypeOf(child3));
+
+  EXPECT_FALSE(child1.subtypeOf(child2));
+  EXPECT_FALSE(child1.subtypeOf(child3));
+  EXPECT_FALSE(child2.subtypeOf(child3));
+
+  EXPECT_TRUE(child1.couldBe(closure));
+  EXPECT_TRUE(child2.couldBe(closure));
+  EXPECT_TRUE(child3.couldBe(closure));
+
+  EXPECT_TRUE(closure.couldBe(child1));
+  EXPECT_TRUE(closure.couldBe(child2));
+  EXPECT_TRUE(closure.couldBe(child3));
+
+  EXPECT_FALSE(child1.couldBe(child2));
+  EXPECT_FALSE(child1.couldBe(child3));
+  EXPECT_FALSE(child2.couldBe(child3));
+
+  EXPECT_EQ(union_of(child1, closure), closure);
+  EXPECT_EQ(union_of(child2, closure), closure);
+  EXPECT_EQ(union_of(child3, closure), closure);
+
+  EXPECT_EQ(union_of(child1, child2), closure);
+  EXPECT_EQ(union_of(child1, child3), closure);
+  EXPECT_EQ(union_of(child2, child3), closure);
+
+  EXPECT_EQ(intersection_of(child1, closure), child1);
+  EXPECT_EQ(intersection_of(child2, closure), child2);
+  EXPECT_EQ(intersection_of(child3, closure), child3);
 }
 
 TEST(Type, SpecializedArrays) {
@@ -1483,11 +2284,21 @@ TEST(Type, SpecializedArrays) {
     ),
     make_specialized_arrpacked(BKeysetN, {ival(0)})
   );
+
+  {
+    auto const vec1 = make_specialized_arrval(BSVecN, static_vec(s_A.get()));
+    auto const dict1 = make_specialized_arrval(BSDictN, static_dict(s_B.get(), 1));
+    EXPECT_EQ(union_of(vec1, TSKeysetN),
+              make_unmarked(make_specialized_arrmapn(BSKeysetN|BSVecN, TUncArrKey, TUncArrKey)));
+    EXPECT_EQ(union_of(vec1, TKeysetN),
+              make_unmarked(make_specialized_arrmapn(BKeysetN|BSVecN, TArrKey, TArrKey)));
+    EXPECT_EQ(union_of(union_of(vec1, dict1), TKeysetN),
+              union_of(union_of(vec1, TKeysetN), dict1));
+  }
 }
 
 TEST(Type, Split) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   auto const test = [] (auto f, trep bits, const Type& split,
                         const Type& rest, const Type& orig) {
@@ -1566,7 +2377,7 @@ TEST(Type, Split) {
   EXPECT_EQ(split.first, make_specialized_arrmapn(BDictN, TStr, TObj));
   EXPECT_EQ(split.second, TFalse);
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   split = split_obj(Type{BObj|BInt});
@@ -1667,8 +2478,7 @@ TEST(Type, Split) {
 }
 
 TEST(Type, Remove) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   auto const test = [] (auto f, trep bits, const Type& removed,
                         const Type& orig) {
@@ -1746,7 +2556,7 @@ TEST(Type, Remove) {
   EXPECT_EQ(remove_lazycls(lazyclsval(s_A)), TBottom);
   EXPECT_EQ(remove_lazycls(union_of(TInt,lazyclsval(s_A))), TInt);
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   EXPECT_EQ(remove_cls(TInt), TInt);
@@ -1933,35 +2743,84 @@ TEST(Type, DblNan) {
   EXPECT_EQ(intersection_of(dval(qnan), dval(qnan)), dval(qnan));
 }
 
-TEST(Type, ToObj) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+TEST(Type, ObjToCls) {
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
     if (t.is(BBottom) || !t.subtypeOf(BCls)) continue;
-    EXPECT_TRUE(toobj(t).subtypeOf(BObj));
+    auto const obj = toobj(t);
+    EXPECT_TRUE(obj.subtypeOf(BObj));
     if (!is_specialized_cls(t)) {
-      EXPECT_EQ(toobj(t), TObj);
+      EXPECT_EQ(obj, TObj);
     } else {
-      EXPECT_TRUE(is_specialized_obj(toobj(t)));
+      EXPECT_TRUE(obj.is(BBottom) || is_specialized_obj(obj));
     }
   }
 
   for (auto const& t : all) {
     if (t.is(BBottom) || !t.subtypeOf(BObj)) continue;
-    EXPECT_TRUE(objcls(t).subtypeOf(BCls));
+    auto const cls = objcls(t);
+    EXPECT_TRUE(cls.subtypeOf(BCls));
     if (!is_specialized_obj(t)) {
-      EXPECT_EQ(objcls(t), TCls);
+      EXPECT_EQ(cls, TCls);
     } else {
-      EXPECT_TRUE(is_specialized_cls(objcls(t)));
+      EXPECT_TRUE(is_specialized_cls(cls));
+      if (is_specialized_cls(cls)) {
+        auto const& dcls = dcls_of(cls);
+        EXPECT_FALSE(dcls.containsNonRegular());
+      }
     }
   }
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
-  if (!clsA || !clsA->resolved()) ADD_FAILURE();
+  for (auto const& t : all) {
+    if (t.is(BBottom) || !t.subtypeOf(BCls)) continue;
+    auto const obj = toobj(t);
+    if (obj.is(BBottom)) continue;
+    auto const cls = objcls(obj);
+    EXPECT_TRUE(cls.subtypeOf(t));
+    if (!is_specialized_cls(cls)) continue;
+    auto const& dcls = dcls_of(cls);
+    EXPECT_FALSE(dcls.containsNonRegular());
+    auto const obj2 = toobj(cls);
+    EXPECT_EQ(obj, obj2);
+  }
 
-  auto const awaitable = index.builtin_class(s_Awaitable.get());
+  auto const clsA = index.resolve_class(s_A.get());
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
+  auto const clsICanon1 = index.resolve_class(s_ICanon1.get());
+  if (!clsICanon1 || !clsICanon1->resolved()) ADD_FAILURE();
+  auto const clsICanon5 = index.resolve_class(s_ICanon5.get());
+  if (!clsICanon5 || !clsICanon5->resolved()) ADD_FAILURE();
+  auto const clsCanon3 = index.resolve_class(s_Canon3.get());
+  if (!clsCanon3 || !clsCanon3->resolved()) ADD_FAILURE();
+  auto const clsT1 = index.resolve_class(s_T1.get());
+  if (!clsT1 || !clsT1->resolved()) ADD_FAILURE();
+  auto const clsT4_C1 = index.resolve_class(s_T4_C1.get());
+  if (!clsT4_C1 || !clsT4_C1->resolved()) ADD_FAILURE();
+  auto const clsICanon8 = index.resolve_class(s_ICanon8.get());
+  if (!clsICanon8 || !clsICanon8->resolved()) ADD_FAILURE();
+  auto const clsAbs4 = index.resolve_class(s_Abs4.get());
+  if (!clsAbs4 || !clsAbs4->resolved()) ADD_FAILURE();
+  auto const clsAbs5_P = index.resolve_class(s_Abs5_P.get());
+  if (!clsAbs5_P || !clsAbs5_P->resolved()) ADD_FAILURE();
+  auto const clsAbs6_P = index.resolve_class(s_Abs6_P.get());
+  if (!clsAbs6_P || !clsAbs6_P->resolved()) ADD_FAILURE();
+  auto const clsICanon11 = index.resolve_class(s_ICanon11.get());
+  if (!clsICanon11 || !clsICanon11->resolved()) ADD_FAILURE();
+  auto const clsICanon12 = index.resolve_class(s_ICanon12.get());
+  if (!clsICanon12 || !clsICanon12->resolved()) ADD_FAILURE();
+  auto const clsICanon13 = index.resolve_class(s_ICanon13.get());
+  if (!clsICanon13 || !clsICanon13->resolved()) ADD_FAILURE();
+  auto const clsCanon10 = index.resolve_class(s_Canon10.get());
+  if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
+
+  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
+  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  if (clsFoo2.resolved()) ADD_FAILURE();
+
+  auto const awaitable = index.wait_handle_class();
 
   EXPECT_EQ(toobj(TCls), TObj);
   EXPECT_EQ(toobj(make_specialized_sub_class(BCls, *clsA)),
@@ -1969,19 +2828,125 @@ TEST(Type, ToObj) {
   EXPECT_EQ(toobj(make_specialized_exact_class(BCls, *clsA)),
             make_specialized_exact_object(BObj, *clsA));
 
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon5, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon5, false, false)),
+    make_specialized_exact_object(BObj, *clsCanon3, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsT1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon8, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon8, false, false)),
+    make_specialized_exact_object(BObj, *clsT4_C1, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs4, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs4, false, false)),
+    make_specialized_sub_object(BObj, *clsAbs4, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs5_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs5_P, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs5_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs6_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs6_P, false, false)),
+    make_specialized_sub_object(BObj, *clsAbs6_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, clsFoo1, false, false)),
+    make_specialized_sub_object(BObj, clsFoo1, false, false)
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, clsFoo1, false, false),
+        make_specialized_sub_class(BCls, clsFoo2, false, false)
+      )
+    ),
+    intersection_of(
+      make_specialized_sub_object(BObj, clsFoo1, false, false),
+      make_specialized_sub_object(BObj, clsFoo2, false, false)
+    )
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, *clsICanon11, false, false),
+        make_specialized_sub_class(BCls, *clsICanon12, false, false)
+      )
+    ),
+    TBottom
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, *clsICanon12, false, false),
+        make_specialized_sub_class(BCls, *clsICanon13, false, false)
+      )
+    ),
+    make_specialized_exact_object(BObj, *clsCanon10, false, false)
+  );
+
   EXPECT_EQ(objcls(TObj), TCls);
   EXPECT_EQ(objcls(make_specialized_sub_object(BObj, *clsA)),
             make_specialized_sub_class(BCls, *clsA));
   EXPECT_EQ(objcls(make_specialized_exact_object(BObj, *clsA)),
             make_specialized_exact_class(BCls, *clsA));
   EXPECT_EQ(objcls(make_specialized_wait_handle(BObj, TInt, index)),
-            make_specialized_sub_class(BCls, awaitable));
+            make_specialized_sub_class(BCls, awaitable, false, true, false));
+
+  EXPECT_EQ(
+    objcls(make_specialized_sub_object(BObj, *clsICanon11)),
+    make_specialized_sub_class(BCls, *clsICanon11, false, false, false)
+  );
+
+  EXPECT_EQ(
+    objcls(
+      intersection_of(
+        make_specialized_sub_object(BObj, *clsICanon11),
+        make_specialized_sub_object(BObj, *clsICanon13)
+      )
+    ),
+    intersection_of(
+      make_specialized_sub_class(BCls, *clsICanon11, false, false, false),
+      make_specialized_sub_class(BCls, *clsICanon13, false, false, false)
+    )
+  );
 }
 
 TEST(Type, Option) {
-  auto const program = make_test_program();
-  Index index { program.get() };
-
+  auto index = make_index();
   EXPECT_TRUE(TTrue.subtypeOf(BOptTrue));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptTrue));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptTrue));
@@ -2093,9 +3058,8 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptClsMeth, union_of(TInitNull, TClsMeth));
   EXPECT_EQ(TOptRClsMeth, union_of(TInitNull, TRClsMeth));
 
-  auto const program = make_test_program();
-  Index index { program.get() };
-  auto const rcls = index.builtin_class(s_Awaitable.get());
+  auto index = make_index();
+  auto const rcls = index.wait_handle_class();
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
 
@@ -2120,8 +3084,7 @@ TEST(Type, OptUnionOf) {
 }
 
 TEST(Type, TV) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -2407,8 +3370,7 @@ TEST(Type, OptCouldBe) {
 }
 
 TEST(Type, ArrayLikeElem) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   const std::vector<Type> keys{
     TInt,
@@ -2787,8 +3749,7 @@ TEST(Type, ArrayLikeElem) {
 }
 
 TEST(Type, ArrayLikeNewElem) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   const std::vector<Type> values{
     TInt,
@@ -3112,8 +4073,7 @@ TEST(Type, ArrayLikeNewElem) {
 }
 
 TEST(Type, ArrayLikeSetElem) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   const std::vector<Type> keys{
     TInt,
@@ -3508,22 +4468,11 @@ TEST(Type, SpecificExamples) {
 }
 
 TEST(Type, IndexBased) {
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
+  auto idx = make_index();
 
-  auto const ctx = Context { unit, func };
-  Index idx{program.get()};
-
-  auto const cls = idx.resolve_class(ctx, s_TestClass.get());
+  auto const cls = idx.resolve_class(s_TestClass.get());
   if (!cls) ADD_FAILURE();
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
 
   auto const objExactTy = objExact(*cls);
@@ -3623,37 +4572,26 @@ TEST(Type, IndexBased) {
 }
 
 TEST(Type, Hierarchies) {
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
-  Index idx{program.get()};
+  auto idx = make_index();
 
   // load classes in hierarchy
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
-  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  auto const clsA = idx.resolve_class(s_A.get());
   if (!clsA) ADD_FAILURE();
-  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  auto const clsB = idx.resolve_class(s_B.get());
   if (!clsB) ADD_FAILURE();
-  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  auto const clsAA = idx.resolve_class(s_AA.get());
   if (!clsAA) ADD_FAILURE();
-  auto const clsAB = idx.resolve_class(ctx, s_AB.get());
+  auto const clsAB = idx.resolve_class(s_AB.get());
   if (!clsAB) ADD_FAILURE();
-  auto const clsBA = idx.resolve_class(ctx, s_BA.get());
+  auto const clsBA = idx.resolve_class(s_BA.get());
   if (!clsBA) ADD_FAILURE();
-  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  auto const clsBB = idx.resolve_class(s_BB.get());
   if (!clsBB) ADD_FAILURE();
-  auto const clsBAA = idx.resolve_class(ctx, s_BAA.get());
+  auto const clsBAA = idx.resolve_class(s_BAA.get());
   if (!clsBAA) ADD_FAILURE();
-  auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
+  auto const clsTestClass = idx.resolve_class(s_TestClass.get());
   if (!clsTestClass) ADD_FAILURE();
 
   // make *exact type* and *sub type* types and objects for all loaded classes
@@ -3878,22 +4816,6 @@ TEST(Type, Hierarchies) {
   EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjBAATy)));
   EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBAATy)));
 
-  // check union_of and commonAncestor API
-  EXPECT_TRUE((*(*clsA).commonAncestor(*clsB)).same(*clsBase));
-  EXPECT_TRUE((*(*clsB).commonAncestor(*clsA)).same(*clsBase));
-  EXPECT_TRUE((*(*clsAA).commonAncestor(*clsAB)).same(*clsA));
-  EXPECT_TRUE((*(*clsAB).commonAncestor(*clsAA)).same(*clsA));
-  EXPECT_TRUE((*(*clsA).commonAncestor(*clsBAA)).same(*clsBase));
-  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsA)).same(*clsBase));
-  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsB)).same(*clsB));
-  EXPECT_TRUE((*(*clsB).commonAncestor(*clsBAA)).same(*clsB));
-  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsBB)).same(*clsB));
-  EXPECT_TRUE((*(*clsBB).commonAncestor(*clsBAA)).same(*clsB));
-  EXPECT_TRUE((*(*clsAA).commonAncestor(*clsBase)).same(*clsBase));
-  EXPECT_TRUE((*(*clsBase).commonAncestor(*clsAA)).same(*clsBase));
-  EXPECT_FALSE((*clsAA).commonAncestor(*clsTestClass));
-  EXPECT_FALSE((*clsTestClass).commonAncestor(*clsAA));
-
   // check union_of
   // union of subCls
   EXPECT_EQ(union_of(subClsATy, subClsBTy), subClsBaseTy);
@@ -3962,29 +4884,18 @@ TEST(Type, Hierarchies) {
 }
 
 TEST(Type, Interface) {
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
-  Index idx{program.get()};
+  auto idx = make_index();
 
   // load classes in hierarchy
-  auto const clsIA = idx.resolve_class(ctx, s_IA.get());
+  auto const clsIA = idx.resolve_class(s_IA.get());
   if (!clsIA) ADD_FAILURE();
-  auto const clsIB = idx.resolve_class(ctx, s_IB.get());
+  auto const clsIB = idx.resolve_class(s_IB.get());
   if (!clsIB) ADD_FAILURE();
-  auto const clsIAA = idx.resolve_class(ctx, s_IAA.get());
+  auto const clsIAA = idx.resolve_class(s_IAA.get());
   if (!clsIAA) ADD_FAILURE();
-  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  auto const clsA = idx.resolve_class(s_A.get());
   if (!clsA) ADD_FAILURE();
-  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  auto const clsAA = idx.resolve_class(s_AA.get());
   if (!clsAA) ADD_FAILURE();
 
   // make sometypes and objects
@@ -4003,10 +4914,10 @@ TEST(Type, Interface) {
 
   EXPECT_TRUE(subClsATy.subtypeOf(objcls(subObjIATy)));
   EXPECT_TRUE(subClsATy.couldBe(objcls(subObjIATy)));
-  EXPECT_TRUE(objcls(subObjATy).strictSubtypeOf(subClsIATy));
+  EXPECT_EQ(objcls(subObjATy), subClsATy);
   EXPECT_TRUE(subClsAATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_TRUE(subClsAATy.couldBe(objcls(subObjIAATy)));
-  EXPECT_TRUE(objcls(subObjAATy).strictSubtypeOf(objcls(subObjIAATy)));
+  EXPECT_EQ(objcls(subObjAATy), objcls(subObjIAATy));
 
   EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(objcls(subObjIAATy)));
@@ -4014,8 +4925,8 @@ TEST(Type, Interface) {
   EXPECT_EQ(intersection_of(subObjIAATy, subObjAATy), subObjAATy);
   EXPECT_EQ(intersection_of(subObjIAATy, exactObjAATy), exactObjAATy);
   EXPECT_EQ(intersection_of(subObjIAATy, exactObjATy), TBottom);
-  EXPECT_EQ(intersection_of(subObjIAATy, subObjATy), subObjATy);
-  EXPECT_EQ(intersection_of(subObjIAATy, subObjIBTy), TObj);
+  EXPECT_EQ(intersection_of(subObjIAATy, subObjATy), exactObjAATy);
+  EXPECT_EQ(intersection_of(subObjIAATy, subObjIBTy), TBottom);
 
   EXPECT_FALSE(clsExactATy.couldBe(objcls(subObjIAATy)));
 
@@ -4026,51 +4937,208 @@ TEST(Type, Interface) {
   EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
 }
 
-TEST(Type, LoosenInterfaces) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+TEST(Type, Canonicalization) {
+  auto idx = make_index();
 
-  auto const test = [&] (const Type& t, auto const& self) -> Type {
-    auto [obj, rest] = split_obj(t);
-    EXPECT_EQ(loosen_interfaces(rest), rest);
+  auto const clsICanon1 = idx.resolve_class(s_ICanon1.get());
+  if (!clsICanon1) ADD_FAILURE();
+  auto const clsICanon2 = idx.resolve_class(s_ICanon2.get());
+  if (!clsICanon2) ADD_FAILURE();
+  auto const clsICanon3 = idx.resolve_class(s_ICanon3.get());
+  if (!clsICanon3) ADD_FAILURE();
+  auto const clsICanon4 = idx.resolve_class(s_ICanon4.get());
+  if (!clsICanon4) ADD_FAILURE();
+  auto const clsICanon5 = idx.resolve_class(s_ICanon5.get());
+  if (!clsICanon5) ADD_FAILURE();
+  auto const clsICanon6 = idx.resolve_class(s_ICanon6.get());
+  if (!clsICanon6) ADD_FAILURE();
+  auto const clsCanon3 = idx.resolve_class(s_Canon3.get());
+  if (!clsCanon3) ADD_FAILURE();
+  auto const clsT1 = idx.resolve_class(s_T1.get());
+  if (!clsT1) ADD_FAILURE();
+  auto const clsICanon7 = idx.resolve_class(s_ICanon7.get());
+  if (!clsICanon7) ADD_FAILURE();
+  auto const clsAbs1 = idx.resolve_class(s_Abs1.get());
+  if (!clsAbs1) ADD_FAILURE();
+  auto const clsICanon8 = idx.resolve_class(s_ICanon8.get());
+  if (!clsICanon8) ADD_FAILURE();
+  auto const clsT4_C1 = idx.resolve_class(s_T4_C1.get());
+  if (!clsT4_C1) ADD_FAILURE();
+  auto const clsAbs3 = idx.resolve_class(s_Abs3.get());
+  if (!clsAbs3) ADD_FAILURE();
+  auto const clsAbs3_C1 = idx.resolve_class(s_Abs3_C1.get());
+  if (!clsAbs3_C1) ADD_FAILURE();
+  auto const clsAbs4 = idx.resolve_class(s_Abs4.get());
+  if (!clsAbs4) ADD_FAILURE();
+  auto const clsAbs5_P = idx.resolve_class(s_Abs5_P.get());
+  if (!clsAbs5_P) ADD_FAILURE();
+  auto const clsAbs6_P = idx.resolve_class(s_Abs6_P.get());
+  if (!clsAbs6_P) ADD_FAILURE();
+  auto const clsICanon9 = idx.resolve_class(s_ICanon9.get());
+  if (!clsICanon9) ADD_FAILURE();
+  auto const clsICanon10 = idx.resolve_class(s_ICanon10.get());
+  if (!clsICanon10) ADD_FAILURE();
+  auto const clsCanon4 = idx.resolve_class(s_Canon4.get());
+  if (!clsCanon4) ADD_FAILURE();
+  auto const clsZ1 = idx.resolve_class(s_Z1.get());
+  if (!clsZ1) ADD_FAILURE();
+  auto const clsIZ1 = idx.resolve_class(s_I_Z1.get());
+  if (!clsIZ1) ADD_FAILURE();
+  auto const clsCanon14 = idx.resolve_class(s_Canon14.get());
+  if (!clsCanon14) ADD_FAILURE();
 
-    if (is_specialized_wait_handle(obj)) {
-      EXPECT_EQ(loosen_interfaces(obj),
-                wait_handle(index, self(wait_handle_inner(obj), self)));
-    } else if (is_specialized_obj(obj) && dobj_of(obj).cls.couldBeInterface()) {
-      EXPECT_EQ(loosen_interfaces(obj), TObj);
-    } else {
-      EXPECT_EQ(loosen_interfaces(obj), obj);
-    }
+  auto const clsFoo1 = idx.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
 
-    EXPECT_EQ(loosen_interfaces(t), union_of(loosen_interfaces(obj), rest));
-    return loosen_interfaces(t);
-  };
+  EXPECT_EQ(subObj(*clsICanon1), TBottom);
+  EXPECT_EQ(objExact(*clsICanon1), TBottom);
+  EXPECT_EQ(subCls(*clsICanon1), make_specialized_sub_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(clsExact(*clsICanon1), make_specialized_exact_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(subCls(*clsICanon1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon1, false), TBottom);
 
-  auto const& all = allCases(index);
-  for (auto const& t : all) {
-    if (t.is(BTop)) continue;
+  EXPECT_EQ(subObj(*clsICanon2), TBottom);
+  EXPECT_EQ(objExact(*clsICanon2), TBottom);
+  EXPECT_EQ(subCls(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(clsExact(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(subCls(*clsICanon2, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon2, false), TBottom);
 
-    EXPECT_EQ(loosen_interfaces(opt(t)), opt(loosen_interfaces(t)));
-    if (t.subtypeOf(BInitCell) && !t.is(BBottom)) {
-      EXPECT_EQ(loosen_interfaces(wait_handle(index, t)),
-                wait_handle(index, loosen_interfaces(t)));
-    }
+  EXPECT_EQ(subObj(*clsICanon3), make_specialized_sub_object(BObj, *clsICanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon3), TBottom);
+  EXPECT_EQ(subCls(*clsICanon3), make_specialized_sub_class(BCls, *clsICanon3, false, false));
+  EXPECT_EQ(clsExact(*clsICanon3), make_specialized_exact_class(BCls, *clsICanon3, false, false));
+  EXPECT_EQ(subCls(*clsICanon3, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon3, false), TBottom);
 
-    test(t, test);
-  }
+  EXPECT_EQ(subObj(*clsICanon4), make_specialized_sub_object(BObj, *clsICanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon4), TBottom);
+  EXPECT_EQ(subCls(*clsICanon4), make_specialized_sub_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(clsExact(*clsICanon4), make_specialized_exact_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(subCls(*clsICanon4, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon4, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon5), make_specialized_exact_object(BObj, *clsCanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon5), TBottom);
+  EXPECT_EQ(subCls(*clsICanon5), make_specialized_sub_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(clsExact(*clsICanon5), make_specialized_exact_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(subCls(*clsICanon5, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon5, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon6), make_specialized_exact_object(BObj, *clsCanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon6), TBottom);
+  EXPECT_EQ(subCls(*clsICanon6), make_specialized_sub_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(clsExact(*clsICanon6), make_specialized_exact_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(subCls(*clsICanon6, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon6, false), TBottom);
+
+  EXPECT_EQ(subObj(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
+  EXPECT_EQ(objExact(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
+  EXPECT_EQ(subCls(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(clsExact(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(subCls(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
+  EXPECT_EQ(clsExact(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
+
+  EXPECT_EQ(subObj(*clsT1), TBottom);
+  EXPECT_EQ(objExact(*clsT1), TBottom);
+  EXPECT_EQ(subCls(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(clsExact(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(subCls(*clsT1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsT1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon7), TBottom);
+  EXPECT_EQ(objExact(*clsICanon7), TBottom);
+  EXPECT_EQ(subCls(*clsICanon7), make_specialized_sub_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(clsExact(*clsICanon7), make_specialized_exact_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(subCls(*clsICanon7, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon7, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs1), TBottom);
+  EXPECT_EQ(objExact(*clsAbs1), TBottom);
+  EXPECT_EQ(subCls(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(clsExact(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(subCls(*clsAbs1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsAbs1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon8), make_specialized_exact_object(BObj, *clsT4_C1, false, false));
+  EXPECT_EQ(objExact(*clsICanon8), TBottom);
+  EXPECT_EQ(subCls(*clsICanon8), make_specialized_sub_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(clsExact(*clsICanon8), make_specialized_exact_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(subCls(*clsICanon8, false), make_specialized_exact_class(BCls, *clsT4_C1, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon8, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs3), make_specialized_sub_object(BObj, *clsAbs3_C1, false, false));
+  EXPECT_EQ(objExact(*clsAbs3), TBottom);
+  EXPECT_EQ(subCls(*clsAbs3), make_specialized_sub_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(clsExact(*clsAbs3), make_specialized_exact_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(subCls(*clsAbs3, false), make_specialized_sub_class(BCls, *clsAbs3_C1, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs3, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs4), make_specialized_sub_object(BObj, *clsAbs4, false, false));
+  EXPECT_EQ(objExact(*clsAbs4), TBottom);
+  EXPECT_EQ(subCls(*clsAbs4), make_specialized_sub_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(clsExact(*clsAbs4), make_specialized_exact_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(subCls(*clsAbs4, false), make_specialized_sub_class(BCls, *clsAbs4, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs4, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
+  EXPECT_EQ(objExact(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
+  EXPECT_EQ(subCls(*clsAbs5_P), make_specialized_sub_class(BCls, *clsAbs5_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs5_P), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+
+  EXPECT_EQ(subObj(*clsAbs6_P), make_specialized_sub_object(BObj, *clsAbs6_P, false, false));
+  EXPECT_EQ(objExact(*clsAbs6_P), make_specialized_exact_object(BObj, *clsAbs6_P, false, false));
+  EXPECT_EQ(subCls(*clsAbs6_P), make_specialized_sub_class(BCls, *clsAbs6_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs6_P), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs6_P, false), make_specialized_sub_class(BCls, *clsAbs6_P, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs6_P, false), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
+
+  EXPECT_EQ(subObj(*clsICanon9), make_specialized_exact_object(BObj, *clsCanon4, false, false));
+  EXPECT_EQ(objExact(*clsICanon9), TBottom);
+  EXPECT_EQ(subCls(*clsICanon9), make_specialized_sub_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(clsExact(*clsICanon9), make_specialized_exact_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(subCls(*clsICanon9, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon9, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon10), make_specialized_exact_object(BObj, *clsCanon4, false, false));
+  EXPECT_EQ(objExact(*clsICanon10), TBottom);
+  EXPECT_EQ(subCls(*clsICanon10), make_specialized_sub_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(clsExact(*clsICanon10), make_specialized_exact_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(subCls(*clsICanon10, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon10, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
+  EXPECT_EQ(objExact(*clsZ1), TBottom);
+  EXPECT_EQ(subCls(*clsZ1), make_specialized_sub_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(clsExact(*clsZ1), make_specialized_exact_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(subCls(*clsZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
+  EXPECT_EQ(clsExact(*clsZ1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsIZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
+  EXPECT_EQ(objExact(*clsIZ1), TBottom);
+  EXPECT_EQ(subCls(*clsIZ1), make_specialized_sub_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(clsExact(*clsIZ1), make_specialized_exact_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(subCls(*clsIZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
+  EXPECT_EQ(clsExact(*clsIZ1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsCanon14), make_specialized_sub_object(BObj, *clsCanon14, false, false));
+  EXPECT_EQ(objExact(*clsCanon14), TBottom);
+  EXPECT_EQ(subCls(*clsCanon14), make_specialized_sub_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(clsExact(*clsCanon14), make_specialized_exact_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(subCls(*clsCanon14, false), make_specialized_sub_class(BCls, *clsCanon14, false, false, false));
+  EXPECT_EQ(clsExact(*clsCanon14, false), TBottom);
 }
 
 TEST(Type, WaitH) {
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
-  auto const rcls   = index.builtin_class(s_Awaitable.get());
+  auto const rcls   = index.wait_handle_class();
   auto const twhobj = subObj(rcls);
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
-    if (t.is(BBottom)) continue;
     if (!t.subtypeOf(BInitCell)) continue;
     auto const wh = wait_handle(index, t);
     if (t.strictSubtypeOf(BInitCell)) {
@@ -4090,7 +5158,6 @@ TEST(Type, WaitH) {
     for (auto const& p2 : predefined()) {
       auto const& t1 = p1.second;
       auto const& t2 = p2.second;
-      if (t1.is(BBottom) || t2.is(BBottom)) continue;
       if (!t1.subtypeOf(BInitCell) || !t2.subtypeOf(BInitCell)) continue;
       auto const u1 = union_of(t1, t2);
       auto const u2 = union_of(wait_handle(index, t1), wait_handle(index, t2));
@@ -4110,11 +5177,13 @@ TEST(Type, WaitH) {
         EXPECT_FALSE(wait_handle(index, t1).subtypeOf(wait_handle(index, t2)));
       }
 
-      if (t1.couldBe(t2)) {
-        EXPECT_TRUE(wait_handle(index, t1).couldBe(wait_handle(index, t2)));
-      } else {
-        EXPECT_FALSE(wait_handle(index, t1).couldBe(wait_handle(index, t2)));
-      }
+      // Two wait handles can always be each other
+      EXPECT_TRUE(wait_handle(index, t1).couldBe(wait_handle(index, t2)));
+      auto const isect =
+        intersection_of(wait_handle(index, t1), wait_handle(index, t2));
+      EXPECT_FALSE(isect.is(BBottom));
+      EXPECT_TRUE(isect.subtypeOf(wait_handle(index, t1)));
+      EXPECT_TRUE(isect.subtypeOf(wait_handle(index, t2)));
     }
   }
 
@@ -4144,13 +5213,13 @@ TEST(Type, WaitH) {
 
   // union_of(WaitH<T>, Obj<=Awaitable) == Obj<=Awaitable
   for (auto const& t : all) {
-    if (t.is(BBottom) || !t.subtypeOf(BInitCell)) continue;
+    if (!t.subtypeOf(BInitCell)) continue;
     auto const u = union_of(wait_handle(index, t), twhobj);
     EXPECT_EQ(u, twhobj);
   }
 
   for (auto const& t : all) {
-    if (t.is(BBottom) || !t.subtypeOf(BInitCell)) continue;
+    if (!t.subtypeOf(BInitCell)) continue;
     auto const u1 = union_of(wait_handle(index, t), TInitNull);
     auto const u2 = union_of(TInitNull, wait_handle(index, t));
     EXPECT_EQ(u1, u2);
@@ -4166,10 +5235,17 @@ TEST(Type, WaitH) {
   }
 
   for (auto const& t : all) {
-    if (t.is(BBottom) || !t.subtypeOf(BInitCell)) continue;
+    if (!t.subtypeOf(BInitCell)) continue;
     auto const wh = wait_handle(index, t);
     EXPECT_EQ(intersection_of(wh, twhobj), wh);
   }
+
+  EXPECT_EQ(
+    intersection_of(wait_handle(index, TInt), wait_handle(index, TStr)),
+    wait_handle(index, TBottom)
+  );
+  EXPECT_TRUE(wait_handle(index, TInt).couldBe(wait_handle(index, TStr)));
+
 }
 
 TEST(Type, FromHNIConstraint) {
@@ -4658,8 +5734,7 @@ TEST(Type, DictOfDict) {
 TEST(Type, WideningAlreadyStable) {
   // A widening union on types that are already stable should not move
   // the type anywhere.
-  auto const program = make_test_program();
-  Index index { program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -4747,8 +5822,7 @@ TEST(Type, ArrKey) {
 }
 
 TEST(Type, LoosenStaticness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
 
@@ -4872,8 +5946,7 @@ TEST(Type, LoosenStaticness) {
 }
 
 TEST(Type, LoosenStringStaticness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -4923,8 +5996,7 @@ TEST(Type, LoosenStringStaticness) {
 }
 
 TEST(Type, LoosenArrayStaticness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
 
@@ -5025,8 +6097,7 @@ TEST(Type, LoosenArrayStaticness) {
 }
 
 TEST(Type, Emptiness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   std::vector<std::pair<Type, Emptiness>> tests{
     { TInitNull, Emptiness::Empty },
@@ -5065,8 +6136,7 @@ TEST(Type, Emptiness) {
 }
 
 TEST(Type, AssertNonEmptiness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5135,8 +6205,7 @@ TEST(Type, AssertNonEmptiness) {
 }
 
 TEST(Type, AssertEmptiness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5206,8 +6275,9 @@ TEST(Type, AssertEmptiness) {
 }
 
 TEST(Type, LoosenEmptiness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
+
+  auto const clsA = index.resolve_class(s_A.get());
 
   auto const& all = allCases(index);
 
@@ -5218,8 +6288,6 @@ TEST(Type, LoosenEmptiness) {
       EXPECT_FALSE(loosen_emptiness(t).subtypeAmong(BArrLikeE, BArrLike));
       EXPECT_FALSE(loosen_emptiness(t).subtypeAmong(BArrLikeN, BArrLike));
     }
-
-    EXPECT_EQ(t.hasData(), loosen_emptiness(t).hasData());
 
     if (!t.subtypeOf(BCell)) continue;
     auto const [arr, rest] = split_array_like(t);
@@ -5259,6 +6327,8 @@ TEST(Type, LoosenEmptiness) {
     { TSArrLikeN, TSArrLike },
     { TArrLikeE, TArrLike },
     { TArrLikeN, TArrLike },
+    { union_of(make_specialized_exact_object(BObj, *clsA), TSDictE),
+      union_of(TObj, TSDict) },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_emptiness(p.first)),
@@ -5269,18 +6339,7 @@ TEST(Type, LoosenEmptiness) {
 }
 
 TEST(Type, LoosenValues) {
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-    auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
 
@@ -5332,7 +6391,7 @@ TEST(Type, LoosenValues) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_values(opt(p.first))), opt(p.second));
   }
 
-  auto const cls = index.resolve_class(ctx, s_TestClass.get());
+  auto const cls = index.resolve_class(s_TestClass.get());
   EXPECT_TRUE(!!cls);
 
   EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
@@ -5345,8 +6404,7 @@ TEST(Type, LoosenValues) {
 }
 
 TEST(Type, LoosenArrayValues) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5361,8 +6419,7 @@ TEST(Type, LoosenArrayValues) {
 }
 
 TEST(Type, LoosenStringValues) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5377,8 +6434,7 @@ TEST(Type, LoosenStringValues) {
 }
 
 TEST(Type, AddNonEmptiness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5446,8 +6502,7 @@ TEST(Type, AddNonEmptiness) {
 }
 
 TEST(Type, LoosenVecOrDict) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5516,8 +6571,7 @@ TEST(Type, LoosenVecOrDict) {
 }
 
 TEST(Type, Scalarize) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -5881,28 +6935,17 @@ TEST(Type, DictMapOptValues) {
 TEST(Type, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
-  Index idx{program.get()};
+  auto idx = make_index();
 
   // load classes in hierarchy  Base -> B -> BB
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
-  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  auto const clsB = idx.resolve_class(s_B.get());
   if (!clsB) ADD_FAILURE();
-  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  auto const clsBB = idx.resolve_class(s_BB.get());
   if (!clsBB) ADD_FAILURE();
   // Unrelated class.
-  auto const clsUn = idx.resolve_class(ctx, s_TestClass.get());
+  auto const clsUn = idx.resolve_class(s_TestClass.get());
   if (!clsUn) ADD_FAILURE();
 
   auto const objExactBaseTy     = objExact(*clsBase);
@@ -6307,8 +7350,7 @@ TEST(Type, ArrLike) {
 }
 
 TEST(Type, LoosenLikeness) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
@@ -6336,8 +7378,7 @@ TEST(Type, LoosenLikeness) {
 }
 
 TEST(Type, LoosenLikenessRecursively) {
-  auto const program = make_test_program();
-  Index index{ program.get() };
+  auto index = make_index();
 
   auto const test = [&] (const Type& t) {
     if (!t.subtypeOf(BInitCell)) return;
@@ -6410,6 +7451,41 @@ TEST(Type, LoosenLikenessRecursively) {
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_likeness_recursively(p.first)),
               loosen_mark_for_testing(p.second));
+  }
+}
+
+TEST(Type, PromoteClassish) {
+  auto const index = make_index();
+
+  auto const clsA = index.resolve_class(s_A.get());
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
+
+  std::vector<std::pair<Type, Type>> tests{
+    { TCls, TSStr },
+    { TLazyCls, TSStr },
+    { TOptCls, TOptSStr },
+    { TOptLazyCls, TOptSStr },
+    { TStr, TStr },
+    { TInt, TInt },
+    { TObj, TObj },
+    { TOptStr, TOptStr },
+    { TBottom, TBottom },
+    { union_of(TCls, TLazyCls), TSStr },
+    { union_of(TLazyCls, TStr), TStr },
+    { union_of(TCls, TSStr), TSStr },
+    { union_of(TInt, TLazyCls), union_of(TInt, TSStr) },
+    { make_specialized_int(BInt, 100), make_specialized_int(BInt, 100) },
+    { make_specialized_string(BStr, s_C.get()), make_specialized_string(BStr, s_C.get()) },
+    { make_specialized_lazycls(BLazyCls, s_C.get()), make_specialized_string(BSStr, s_C.get()) },
+    { make_specialized_lazycls(BLazyCls|BBool, s_C.get()), make_specialized_string(BSStr|BBool, s_C.get()) },
+    { make_specialized_exact_class(BCls, *clsA), make_specialized_string(BSStr, s_A.get()) },
+    { make_specialized_exact_class(BCls|BBool, *clsA), make_specialized_string(BSStr|BBool, s_A.get()) },
+    { make_specialized_sub_class(BCls, *clsA), TSStr },
+    { make_specialized_sub_class(BCls|BBool, *clsA), union_of(TSStr, TBool) }
+  };
+
+  for (auto const& p : tests) {
+    EXPECT_EQ(promote_classish(p.first), p.second);
   }
 }
 
@@ -6516,6 +7592,120 @@ TEST(Type, IterTypes) {
     EXPECT_EQ(iter.mayThrowOnInit, p.second.mayThrowOnInit);
     EXPECT_EQ(iter.mayThrowOnNext, p.second.mayThrowOnNext);
   }
+}
+
+
+TEST(Type, ResolveClasses) {
+  auto const index = make_index();
+
+  struct Hasher {
+    size_t operator()(const std::pair<Type, Type>& p) const {
+      return folly::hash::hash_combine(
+        TypeHasher{}(p.first),
+        TypeHasher{}(p.second)
+      );
+    }
+  };
+  hphp_fast_set<std::pair<Type, Type>, Hasher> types;
+
+#define MAKE(name) {                                                    \
+    auto const u = index.resolve_class_name_only(s_##name.get());       \
+    if (u.resolved()) ADD_FAILURE();                                    \
+    auto const r = index.resolve_class(s_##name.get());                 \
+    auto const t1 = r ? subObj(*r) : TBottom;                           \
+    auto const t2 = r ? subCls(*r) : TBottom;                           \
+    types.emplace(subObj(u), t1);                                       \
+    types.emplace(objExact(u), t1);                                     \
+    types.emplace(subCls(u), t2);                                       \
+    types.emplace(clsExact(u), t2);                                     \
+  }
+#define X(name) MAKE(name)
+#define Y(name) MAKE(name)
+  TEST_CLASSES
+#undef Y
+#undef X
+#undef MAKE
+
+  for (auto const& [t1, t2] : types) {
+    for (auto const& [t3, t4] : types) {
+      EXPECT_EQ(
+        resolve_classes(
+          index,
+          intersection_of(t1, t3)
+        ),
+        intersection_of(t2, t4)
+      );
+    }
+  }
+
+  EXPECT_EQ(resolve_classes(index, TBottom), TBottom);
+  EXPECT_EQ(resolve_classes(index, TInitCell), TInitCell);
+  EXPECT_EQ(resolve_classes(index, TInt), TInt);
+  EXPECT_EQ(resolve_classes(index, TCls), TCls);
+  EXPECT_EQ(resolve_classes(index, TObj), TObj);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_int(BInt, 1)),
+            make_specialized_int(BInt, 1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_string(BStr, s_A.get())),
+            make_specialized_string(BStr, s_A.get()));
+  EXPECT_EQ(resolve_classes(index, make_specialized_lazycls(BLazyCls, s_A.get())),
+            make_specialized_lazycls(BLazyCls, s_A.get()));
+  EXPECT_EQ(resolve_classes(index, make_specialized_double(BDbl, 1.23)),
+            make_specialized_double(BDbl, 1.23));
+
+  auto const svec = static_vec(1, 2, 3, 4);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrval(BSVecN, svec)),
+            make_specialized_arrval(BSVecN, svec));
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, TInt, index)),
+            make_specialized_wait_handle(BObj, TInt, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, TSStr)),
+            make_specialized_arrpackedn(BVecN, TSStr));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, TStr})),
+            make_specialized_arrpacked(BVecN, {TInt, TStr}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, TInt)),
+            make_specialized_arrmapn(BDictN, TStr, TInt));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)})),
+            make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)}));
+
+  auto const u1 = index.resolve_class_name_only(s_Base.get());
+  if (u1.resolved()) ADD_FAILURE();
+  auto const r1 = index.resolve_class(s_Base.get());
+  if (!r1 || !r1->resolved()) ADD_FAILURE();
+
+  auto const uobj1 = subObj(u1);
+  auto const robj1 = subObj(*r1);
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj1, index)),
+            make_specialized_wait_handle(BObj, robj1, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj1)),
+            make_specialized_arrpackedn(BVecN, robj1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {uobj1, uobj1})),
+            make_specialized_arrpacked(BVecN, {robj1, robj1}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj1)),
+            make_specialized_arrmapn(BDictN, TStr, robj1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj1)})),
+            make_specialized_arrmap(BDictN, {map_elem(s_A, robj1)}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u1)),
+            make_specialized_sub_object(BObj|BBool, *r1));
+
+  auto const u2 = index.resolve_class_name_only(s_Foo1.get());
+  if (u2.resolved()) ADD_FAILURE();
+  auto const uobj2 = subObj(u2);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj2, index)),
+            make_specialized_wait_handle(BObj, TBottom, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj2)), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, uobj2})), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj2)), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj2)})), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u2)), TBool);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj|BBool, uobj2, index)),
+            make_specialized_wait_handle(BObj|BBool, TBottom, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN|BBool, uobj2)), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN|BBool, {TInt, uobj2})), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN|BBool, TStr, uobj2)), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN|BBool, {map_elem(s_A, uobj2)})), TBool);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@ function P(bool $b) { return $b ? "True\n" : "False\n"; }
 function LV($x)     { return __hhvm_intrinsics\launder_value($x); }
 
 function is_as_static() {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
 
   echo '$m is arraylike: '      .P($m is AnyArray);
   echo '$m is shape(str,str): ' .P($m is shape(K::A => string, K::B => string));
@@ -37,16 +37,16 @@ function is_as_static() {
 }
 
 function is_as_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
-  echo '$m is arraylike: '      .p($m is AnyArray);
-  echo '$m is shape(str,str): ' .p($m is shape(K::A => string, K::B => string));
-  echo '$m is shape(...): '     .p($m is shape(...));
-  echo '$m is Traversable: '    .p($m is Traversable);
-  echo '$m is Container: '      .p($m is Container);
-  echo '$m is (string,string): '.p($m is (string, string));
-  echo '$m[0] is string: '      .p($m[0] is string);
-  echo '$m[1] is string: '      .p($m[1] is string);
+  echo '$m is arraylike: '      .P($m is AnyArray);
+  echo '$m is shape(str,str): ' .P($m is shape(K::A => string, K::B => string));
+  echo '$m is shape(...): '     .P($m is shape(...));
+  echo '$m is Traversable: '    .P($m is Traversable);
+  echo '$m is Container: '      .P($m is Container);
+  echo '$m is (string,string): '.P($m is (string, string));
+  echo '$m[0] is string: '      .P($m[0] is string);
+  echo '$m[1] is string: '      .P($m[1] is string);
 
   try { $m    as AnyArray;       } catch (Exception $e) { echo "Passed!\n"; }
   try { $m    as shape(K::A => string, K::B => string);
@@ -62,7 +62,7 @@ function is_as_dynamic() {
 }
 
 function is_as_shuffle_static() {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
 
   if (is_array($m)) {
     $x = varray($m);
@@ -80,7 +80,7 @@ function is_as_shuffle_static() {
 }
 
 function is_as_shuffle_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   if (is_array($m)) {
     $x = varray($m);

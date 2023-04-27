@@ -28,12 +28,6 @@ namespace HPHP::jit::x64::detail {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * We support x64 linux (linked off FS), and x64 MacOS using some reverse
- * engineering of their generated code.
- */
-
-#ifndef __APPLE__
-/*
  * x86 terminology review: "Virtual addresses" are subject to both segmented
  * translation and paged translation.  "Linear addresses" are post-segmentation
  * address, subject only to paging.  C and C++ generally only have access to
@@ -71,74 +65,6 @@ Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
   return addr;
 }
 
-#else // __APPLE__
-/*
- * In MacOS an __thread variable has a "key" allocated in global memory, under
- * the name of the object.  The key consists of three longs.  The first holds
- * the address of a function, which if called with $rdi pointing at the key
- * (i.e., $rdi = &key; call 0x0($rdi)) will return the address of the thread
- * local (possibly allocating it, if this is the first time its been accessed
- * in the current thread).
- *
- * The function is very short (in the case that the thread local has already
- * been allocated), and preserves all the registers except for $rax (which gets
- * the address of the thread local)---so we could just use it to access the
- * thread locals.  But we can do better.
- *
- * The second long contains a gs-relative index to a pointer to the block of
- * memory containing the thread-local, and the third long contains the offset
- * to it within that block.  So if $rdi points at the key,
- *
- *  movq 8($rdi), $rax
- *  movq gs:(,$rax,8), $rax
- *  addq 16($rdi), $rax
- *
- * will get us the address of the thread local.
- *
- * But we can still do better.  key[1] and key[2] are constants for the
- * duration of the program; so we can burn their values into the tc:
- *
- *  movq gs:{key[1]*8}, $rax
- *  addq {key[2]}, $rax
- *
- * But note that the add will often fold into a following load or store.
- *
- * So the only remaining problem is to get the address of the key:
- *
- *   __asm__("lea %1, %0" : "=r"(ret) : "m"(tlvar));
- *
- * Unfortunately, clang is too smart here, and converts the lea into:
- *
- *  lea _tlvar, $rdi
- *  call ($rdi)
- *  move $rax, ret
- *
- * Fortunately, the helper preserves all regs (except $rax), and so $rdi now
- * has the address of the key.  We use that trick in the OSX version of
- * tls_datum().
- *
- * Finally note that all of this is only valid if the thread local has already
- * been accessed in the current thread---but we can easily ensure that (it's
- * already true for any ThreadLocalNoCheck variable).
- */
-template<typename T>
-Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
-  auto const scratch = v.makeReg();
-
-  v << load{Vptr{baseless(datum.raw[1] * 8), Segment::GS}, scratch};
-  return scratch[datum.raw[2]];
-}
-
-template<typename T>
-Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
-  auto const b = v.makeReg();
-  v << lea{detail::emitTLSAddr(v, datum) + offset, b};
-  return b;
-}
-
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

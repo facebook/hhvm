@@ -1,4 +1,0 @@
-File "non_value_return_any_annot.php.pess", line 15, characters 10-14:
-Functions that do not return a value must have a type of void (Typing[4422])
-File "non_value_return_any_annot.php.pess", line 21, characters 16-20:
-Async functions that do not return a value must have a type of Awaitable<void> (Typing[4422])

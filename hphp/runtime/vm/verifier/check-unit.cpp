@@ -35,7 +35,6 @@ struct UnitChecker {
  private:
   template<class T> bool checkLiteral(size_t, const T*, const char*);
   bool checkStrings();
-  bool checkArrays();
   bool checkSourceLocs();
   bool checkPreClasses();
   bool checkFuncs();
@@ -61,6 +60,8 @@ struct UnitChecker {
  private:
   const UnitEmitter* m_unit;
   ErrorMode m_errmode;
+
+  StringToStringIMap m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -145,8 +146,7 @@ const StaticString s_Closure("Closure");
 bool UnitChecker::checkPreClasses() {
   bool ok = true;
 
-  for (Id pceId = 0; pceId < m_unit->numPreClasses(); ++pceId) {
-    auto preclass = m_unit->pce(pceId);
+  for (auto const preclass : m_unit->preclasses()) {
     auto classAttrs = preclass->attrs();
 
     // Closures don't need constructors
@@ -182,8 +182,7 @@ bool UnitChecker::checkPreClasses() {
       IterateV(
         sealed_attr.m_data.parr, [this, preclass, &ok](TypedValue tv) -> bool {
           if (!isStringType(tv.m_type) &&
-              (!isLazyClassType(tv.m_type) ||
-               RuntimeOption::EvalEmitClassPointers != 2)) {
+              !isLazyClassType(tv.m_type)) {
             ok = false;
             error("For Class %s, values in sealed whitelist must be strings\n",
                   preclass->name()->data());
@@ -268,13 +267,13 @@ bool UnitChecker::checkFuncs() {
 
   auto doCheck = [&] (const FuncEmitter* func) {
     if (func->isNative) ok &= checkNativeFunc(func, m_errmode);
-    ok &= checkFunc(func, m_errmode);
+    ok &= checkFunc(func, m_createCls, m_errmode);
   };
 
   for (auto& func : m_unit->fevec()) doCheck(func.get());
 
-  for (Id i = 0; i < m_unit->numPreClasses(); i++) {
-    for (auto f : m_unit->pce(i)->methods()) doCheck(f);
+  for (auto const pce : m_unit->preclasses()) {
+    for (auto f : pce->methods()) doCheck(f);
   }
 
   return ok;

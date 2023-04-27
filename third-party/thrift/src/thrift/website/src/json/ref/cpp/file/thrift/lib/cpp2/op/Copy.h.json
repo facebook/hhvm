@@ -1,0 +1,61 @@
+{
+  "refid": "Copy_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Copy.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "folly/Traits.h"
+    },
+    {
+      "refid": "detail_2Copy_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/detail/Copy.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Copy.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/Copy.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/Copy.h",
+  "free_vars": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a38c91ad3f6d6319334abe0e8df98188d",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Copy\">detail::Copy</a>",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Copy apache::thrift::op::copy",
+      "argsstring_html": "",
+      "name_html": "copy",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Copy.h",
+        "line": "37",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Copy.h",
+        "bodystart": "37",
+        "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>Copies from the src field to the dst field. For example:<ul>\n<li><p>copy(src.field_ref(), dst.field_ref()) // calls dst.field_ref().copy_from(src.field_ref())</p></li><li><p>copy(src.unique_ptr_ref(), dst.unique_ptr_ref()) // If src is nullptr, it sets dst to nullptr, otherwise constructs a new // unique ptr with the same value.</p></li><li><p>copy(src.shared_ptr_ref(), dst.shared_ptr_ref()) // If src is nullptr, it sets dst to nullptr, otherwise shares the pointer. </p></li></ul>\n</p>"
+      }
+    }
+  ],
+  "free_overloadgroups": []
+}

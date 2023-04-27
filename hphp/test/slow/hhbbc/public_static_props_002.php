@@ -1,7 +1,7 @@
 <?hh
 
 class B {
-  static $x = 2;
+  public static $x = 2;
 }
 final class D extends B {
   function x(D $d) {

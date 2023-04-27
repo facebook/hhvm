@@ -8,6 +8,8 @@
  *
  */
 
+use namespace HH\Lib\Vec;
+
 namespace HH\Lib\Async;
 
 /**
@@ -91,10 +93,12 @@ abstract class BasePoll<Tk, Tv> {
     // Make sure the next pending condition is notified upon completion.
     $awaitable = $this->waitForThenNotify($key, $awaitable);
 
-    // Keep track of all pending events.
-    $this->notifiers = AwaitAllWaitHandle::fromVec(
-      vec[$awaitable, $this->notifiers],
-    );
+    $this->notifiers = async {
+      concurrent {
+        await $awaitable;
+        await $this->notifiers;
+      }
+    };
   }
 
   final protected function addMultiImpl(
@@ -120,7 +124,9 @@ abstract class BasePoll<Tk, Tv> {
 
     // Keep track of all pending events.
     $this->lastAdded = $last_added;
-    $this->notifiers = AwaitAllWaitHandle::fromVec($notifiers);
+    $this->notifiers = async {
+      await Vec\from_async($notifiers);
+    };
   }
 
   private async function waitForThenNotify(

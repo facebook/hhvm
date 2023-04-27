@@ -19,7 +19,7 @@
     "Featherweight Java: A Minimal Core Calculus for Java and GJ", 2002,
     Igarashi, Pierce, Wadler. *)
 
-val fun_ : Typing_env_types.env -> Nast.fun_ -> Typing_error.t list
+val fun_def : Typing_env_types.env -> Nast.fun_def -> Typing_error.t list
 
 val class_ : Typing_env_types.env -> Nast.class_ -> Typing_error.t list
 

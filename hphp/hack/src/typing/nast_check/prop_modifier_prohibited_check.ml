@@ -28,23 +28,21 @@ let error_if_nonstatic_prop_with_lsb cv =
       Naming_attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
     in
     Option.iter lsb_pos ~f:(fun pos ->
-        Errors.add_naming_error @@ Naming_error.Nonstatic_property_with_lsb pos)
+        Errors.add_error
+          Naming_error.(to_user_error @@ Nonstatic_property_with_lsb pos))
 
 let unnecessary_lsb c cv =
   let attr = SN.UserAttributes.uaLSB in
   match Naming_attributes.mem_pos attr cv.cv_user_attributes with
   | None -> ()
   | Some pos ->
-    let (pos_class, name_class) = c.c_name in
-    let name_class = Utils.strip_ns name_class in
-    let reason =
-      lazy (pos_class, sprintf "the class `%s` is final" name_class)
-    in
+    let (class_pos, class_name) = c.c_name in
     let suggestion = None in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Unnecessary_attribute { pos; attr; reason; suggestion })
+    Errors.add_error
+      Naming_error.(
+        to_user_error
+        @@ Unnecessary_attribute
+             { pos; attr; class_pos; class_name; suggestion })
 
 let handler =
   object

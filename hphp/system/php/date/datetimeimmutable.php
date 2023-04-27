@@ -3,7 +3,7 @@
 class DateTimeImmutable implements DateTimeInterface {
   public function __construct(
     string $time = "now",
-    DateTimeZone $timezone = null
+    ?DateTimeZone $timezone = null
   ) {
     $this->data = new DateTime($time, $timezone);
   }
@@ -89,7 +89,7 @@ class DateTimeImmutable implements DateTimeInterface {
   public static function createFromFormat(
     string $format,
     string $time,
-    DateTimeZone $timezone = null
+    ?DateTimeZone $timezone = null
   ): mixed {
     $out = new DateTimeImmutable();
     $data = DateTime::createFromFormat($format, $time, $timezone);

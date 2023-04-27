@@ -1,0 +1,48 @@
+File "stringish_intish_refinement.bad.php", line 12, characters 13-14:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
+  Expected `E`
+  File "stringish_intish_refinement.bad.php", line 11, characters 13-13:
+  But got `(~E & int)` from this `is` expression test
+File "stringish_intish_refinement.bad.php", line 17, characters 13-14:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
+  Expected `E`
+  File "stringish_intish_refinement.bad.php", line 16, characters 13-13:
+  But got `(~E & string)` from this `is` expression test
+File "stringish_intish_refinement.bad.php", line 23, characters 11-12:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
+  Expected `E`
+  File "stringish_intish_refinement.bad.php", line 22, characters 8-9:
+  But got `(~E & int)` from this "as" assertion
+File "stringish_intish_refinement.bad.php", line 26, characters 11-12:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
+  Expected `E`
+  File "stringish_intish_refinement.bad.php", line 25, characters 8-11:
+  But got `(~E & string)` from this "as" assertion
+File "stringish_intish_refinement.bad.php", line 38, characters 13-14:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
+  Expected `F`
+  File "stringish_intish_refinement.bad.php", line 37, characters 13-13:
+  But got `(~F & int)` from this `is` expression test
+File "stringish_intish_refinement.bad.php", line 43, characters 13-14:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
+  Expected `F`
+  File "stringish_intish_refinement.bad.php", line 42, characters 13-13:
+  But got `(string & dynamic)` from this `is` expression test
+File "stringish_intish_refinement.bad.php", line 49, characters 11-12:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
+  Expected `F`
+  File "stringish_intish_refinement.bad.php", line 48, characters 8-9:
+  But got `(~F & int)` from this "as" assertion
+File "stringish_intish_refinement.bad.php", line 52, characters 11-12:
+Invalid argument (Typing[4110])
+  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
+  Expected `F`
+  File "stringish_intish_refinement.bad.php", line 51, characters 8-11:
+  But got `(string & dynamic)` from this "as" assertion

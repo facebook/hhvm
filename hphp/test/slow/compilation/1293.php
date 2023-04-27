@@ -1,6 +1,6 @@
 <?hh
 class X {
-  static $foo;
+  public static $foo;
 }
 function test() {
   $x = new X;

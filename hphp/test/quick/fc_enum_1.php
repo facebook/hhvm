@@ -13,7 +13,7 @@ enum Bar : Nus {
   BAZ = 3;
 }
 
-enum Baz : mixed {
+enum Baz : arraykey {
   FOO = 1;
   BAR = "welp";
 }

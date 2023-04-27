@@ -1,0 +1,13 @@
+// Defined in namespace C
+function any<T>(
+  Traversable<int> $traversable,
+  ?(function(int): bool) $predicate = _
+)[ctx $predicate]: bool
+Returns true if the given predicate returns true for any element of the
+given Traversable. If no predicate is provided, it defaults to casting the
+element to bool. If the Traversable is empty, it returns false.
+
+If you're looking for `C\none`, use `!C\any`.
+
+Time complexity: O(n)
+Space complexity: O(1)

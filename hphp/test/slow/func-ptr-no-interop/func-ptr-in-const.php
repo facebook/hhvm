@@ -9,14 +9,14 @@ class Cls {
 class A {
   public static $arr = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 }
 
 class B {
   const f = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 }
 

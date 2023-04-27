@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fba4ff8e20c18583d1028ecdcfe87868>>
+// @generated SignedSource<<f30b715704dff8652d050fa2c7df25c4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,9 +11,9 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -37,11 +37,14 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Parsing {
     FixmeFormat = 1001,
     ParsingError = 1002,
     XhpParsingError = 1007,
+    HhIgnoreComment = 1008,
+    PackageConfigError = 1009,
 }
 impl TrivialDrop for Parsing {}
 arena_deserializer::impl_deserialize_in_arena!(Parsing);
@@ -63,6 +66,7 @@ arena_deserializer::impl_deserialize_in_arena!(Parsing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Naming {
     AddATypehint = 2001,
@@ -93,6 +97,7 @@ pub enum Naming {
     NamingTooManyArguments = 2038,
     PrimitiveToplevel = 2039,
     ShadowedTypeParam = 2041,
+    #[rust_to_ocaml(name = "StartWith_T")]
     StartWithT = 2042,
     ThisMustBeReturn = 2043,
     ThisNoArgument = 2044,
@@ -129,7 +134,6 @@ pub enum Naming {
     NonstaticPropertyWithLSB = 2094,
     UnsupportedTraitUseAs = 2102,
     UnsupportedInsteadOf = 2103,
-    InvalidTraitUseAsVisibility = 2104,
     InvalidFunPointer = 2105,
     IllegalUseOfDynamicallyCallable = 2106,
     ClassMethNonFinalSelf = 2111,
@@ -140,6 +144,11 @@ pub enum Naming {
     InvalidWildcardContext = 2117,
     ExplicitConsistentConstructor = 2118,
     InvalidReqClass = 2119,
+    ModuleDeclarationOutsideAllowedFiles = 2120,
+    DynamicMethodAccess = 2121,
+    TypeConstantInEnumClassOutsideAllowedLocations = 2122,
+    InvalidBuiltinType = 2123,
+    InvalidMemoizeLabel = 2124,
 }
 impl TrivialDrop for Naming {}
 arena_deserializer::impl_deserialize_in_arena!(Naming);
@@ -161,6 +170,7 @@ arena_deserializer::impl_deserialize_in_arena!(Naming);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum NastCheck {
     AbstractBody = 3001,
@@ -196,7 +206,6 @@ pub enum NastCheck {
     InoutParamsSpecial = 3043,
     InoutParamsMemoize = 3045,
     ReadingFromAppend = 3047,
-    InoutArgumentBadExpr = 3050,
     IllegalDestructor = 3056,
     RequiresFinalClass = 3072,
     InterfaceUsesTrait = 3073,
@@ -217,8 +226,11 @@ pub enum NastCheck {
     InternalProtectedOrPrivate = 3095,
     InoutInTransformedPsuedofunction = 3096,
     PrivateAndFinal = 3097,
-    InternalOutsideModule = 3098,
     InternalMemberInsidePublicTrait = 3099,
+    AttributeConflictingMemoize = 3100,
+    RefinementInTypeStruct = 3101,
+    #[rust_to_ocaml(name = "Soft_internal_without_internal")]
+    SoftInternalWithoutInternal = 3102,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);
@@ -240,6 +252,7 @@ arena_deserializer::impl_deserialize_in_arena!(NastCheck);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Typing {
     InternalError = 0,
@@ -296,7 +309,6 @@ pub enum Typing {
     NullMemberRead = 4064,
     OptionReturnOnlyTypehint = 4066,
     ObjectString = 4067,
-    OptionMixed = 4068,
     OverrideFinal = 4070,
     OverridePerTrait = 4071,
     AbstractCall = 4073,
@@ -422,7 +434,6 @@ pub enum Typing {
     InvalidMoveTarget = 4288,
     UnexpectedTy = 4291,
     UnserializableType = 4292,
-    OptionNull = 4295,
     UnknownObjectMember = 4296,
     UnknownType = 4297,
     InvalidArrayKeyRead = 4298,
@@ -567,6 +578,14 @@ pub enum Typing {
     ConstructNotInstanceMethod = 4463,
     InvalidMethCallerReadonlyReturn = 4464,
     AbstractMemberInConcreteClass = 4465,
+    TraitNotUsed = 4466,
+    OverrideAsync = 4467,
+    InexactTConstAccess = 4468,
+    UnsupportedRefinement = 4469,
+    InvalidClassRefinement = 4470,
+    InvalidRefinedConstKind = 4471,
+    InvalidCrossPackage = 4472,
+    InvalidCrossPackageSoft = 4473,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);
@@ -588,35 +607,13 @@ arena_deserializer::impl_deserialize_in_arena!(Typing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
-pub enum Init {
-    ForwardCompatibilityNotCurrent = 8001,
-    ForwardCompatibilityBelowMinimum = 8002,
+pub enum GlobalAccessCheck {
+    DefiniteGlobalWrite = 11001,
+    PossibleGlobalWriteViaReference = 11002,
+    PossibleGlobalWriteViaFunctionCall = 11003,
+    DefiniteGlobalRead = 11004,
 }
-impl TrivialDrop for Init {}
-arena_deserializer::impl_deserialize_in_arena!(Init);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum GlobalWriteCheck {
-    GlobalVariableWrite = 11001,
-    GlobalVariableInFunctionCall = 11002,
-}
-impl TrivialDrop for GlobalWriteCheck {}
-arena_deserializer::impl_deserialize_in_arena!(GlobalWriteCheck);
+impl TrivialDrop for GlobalAccessCheck {}
+arena_deserializer::impl_deserialize_in_arena!(GlobalAccessCheck);

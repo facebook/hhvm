@@ -1,0 +1,30 @@
+{
+  "pools": {
+    "A.gut": {
+      "servers": [ "localhost:12345" ]
+    },
+    "B.gut": {
+      "servers": [ "localhost:23456" ]
+    },
+    "C.gut": {
+      "servers": [ "localhost:34567" ]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": [
+      {
+        "type": "ErrorRoute",
+        "enable_logging": false,
+        "result": "mc_res_busy"
+      },
+      "PoolRoute|A.gut",
+      "PoolRoute|B.gut",
+      "PoolRoute|C.gut"
+    ],
+    "failover_limit": {
+      "rate": 0.2,
+      "burst": 9.8
+    }
+  }
+}

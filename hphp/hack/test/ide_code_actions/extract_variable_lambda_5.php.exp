@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"$placeholder0 = $item + 1;\n    ",
+            "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
+          },
+          {
+            "newText":"$placeholder0",
+            "range":{"end":{"character":33,"line":8},"start":{"character":24,"line":8}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into variable"
+  }
+]

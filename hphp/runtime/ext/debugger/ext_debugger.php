@@ -8,7 +8,10 @@ namespace __SystemLib {
    * and port will be null if the connection is local.
    */
   <<__Native>>
-  function debugger_get_info() : darray;
+  function debugger_get_info() : shape(
+    ?'clientIP' => string,
+    ?'clientPort' => ?int,
+  );
 
 }
 

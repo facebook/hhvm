@@ -26,6 +26,10 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
+#if defined(__x86_64__)
+#define CTI_SUPPORTED 1
+#endif
+
 namespace HPHP {
 struct Func;
 struct ExecutionContext;

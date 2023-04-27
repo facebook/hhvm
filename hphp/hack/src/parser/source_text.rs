@@ -4,11 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::rc::Rc;
+
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
-use oxidized::relative_path::RelativePath;
-use std::rc::Rc;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use relative_path::RelativePath;
 
 pub const INVALID: char = '\x00';
 
@@ -97,10 +99,7 @@ impl<'a> SourceText<'a> {
 }
 
 impl<'content> ToOcamlRep for SourceText<'content> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // A SourceText with no associated ocaml_source_text cannot be converted
         // to OCaml yet (we'd need to construct the OffsetMap). We still
         // construct some in test cases, so just panic upon attempts to convert.

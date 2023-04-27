@@ -100,6 +100,18 @@ bool cfgHasLoop(const IRUnit&);
  */
 EdgeSet findRetreatingEdges(const IRUnit&);
 
+struct LoopInfo {
+  jit::hash_set<RegionDesc::BlockId> blocks;
+  jit::hash_map<RegionDesc::BlockId, BlockList> loopPreheaders;
+};
+
+/*
+ * Return loop information containing the set of blocks in a loop and the
+ * set of loop preheaders for each loop
+ */
+LoopInfo findBlocksInLoops(const IRUnit&, const EdgeSet&);
+
+
 /*
  * Visit the instructions in this blocklist, in block order.
  */
@@ -111,4 +123,3 @@ void forEachInst(const BlockList& blocks, Body body);
 }
 
 #include "hphp/runtime/vm/jit/cfg-inl.h"
-

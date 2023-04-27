@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\%rdarray|dict%r, int given in %s/idx_arr_type_error.php on line 5
+Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, int given in %s/idx_arr_type_error.php on line 5

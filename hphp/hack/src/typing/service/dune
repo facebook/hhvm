@@ -18,7 +18,6 @@
  (wrapped false)
  (modules typing_service_delegate_sig)
  (libraries
-  artifact_store
   biglist
   core_kernel
   errors

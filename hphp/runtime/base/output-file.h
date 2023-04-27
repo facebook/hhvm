@@ -38,7 +38,7 @@ struct OutputFile : File {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
@@ -48,9 +48,6 @@ struct OutputFile : File {
   bool rewind() override;
   bool flush() override;
   bool truncate(int64_t size) override;
-
-protected:
-  bool closeImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

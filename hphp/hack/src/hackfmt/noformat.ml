@@ -137,9 +137,7 @@ let get_suppressed_formatting_ranges env line_boundaries tree =
       let whole_file = [(0, String.length text)] in
       if is_generated_file text then
         whole_file
-      else if
-        is_partially_generated_file text && not (List.is_empty manual_sections)
-      then
+      else if is_partially_generated_file text then
         Interval.diff_sorted_lists whole_file manual_sections
         |> List.map ~f:expand_to_line_boundaries
       else

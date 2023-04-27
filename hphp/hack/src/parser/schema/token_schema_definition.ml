@@ -94,27 +94,23 @@ let given_text_tokens =
     make_token_node "Class" "class" ();
     make_token_node "Classname" "classname" ~allowed_as_identifier:true ();
     make_token_node "Clone" "clone" ();
+    make_token_node "Concurrent" "concurrent" ();
     make_token_node "Const" "const" ();
     make_token_node "Construct" "__construct" ();
     make_token_node "Continue" "continue" ();
     make_token_node "Ctx" "ctx" ();
     make_token_node "Darray" "darray" ~allowed_as_identifier:true ();
     make_token_node "Default" "default" ();
-    make_token_node "Define" "define" ~allowed_as_identifier:true ();
     make_token_node "Dict" "dict" ~allowed_as_identifier:true ();
     make_token_node "Do" "do" ();
     make_token_node "Double" "double" ~allowed_as_identifier:true ();
     make_token_node "Echo" "echo" ();
     make_token_node "Else" "else" ();
-    make_token_node "Elseif" "elseif" ();
     make_token_node "Empty" "empty" ();
-    make_token_node "Endfor" "endfor" ();
-    make_token_node "Endforeach" "endforeach" ();
     make_token_node "Endif" "endif" ();
-    make_token_node "Endswitch" "endswitch" ();
-    make_token_node "Endwhile" "endwhile" ();
     make_token_node "Enum" "enum" ~allowed_as_identifier:true ();
     make_token_node "Eval" "eval" ();
+    make_token_node "Exports" "exports" ~allowed_as_identifier:true ();
     make_token_node "Extends" "extends" ();
     make_token_node "Fallthrough" "fallthrough" ~allowed_as_identifier:true ();
     make_token_node "Float" "float" ~allowed_as_identifier:true ();
@@ -123,12 +119,11 @@ let given_text_tokens =
     make_token_node "Finally" "finally" ();
     make_token_node "For" "for" ();
     make_token_node "Foreach" "foreach" ();
-    make_token_node "From" "from" ~allowed_as_identifier:true ();
     make_token_node "Function" "function" ();
     make_token_node "Global" "global" ();
-    make_token_node "Concurrent" "concurrent" ();
     make_token_node "If" "if" ();
     make_token_node "Implements" "implements" ();
+    make_token_node "Imports" "imports" ~allowed_as_identifier:true ();
     make_token_node "Include" "include" ();
     make_token_node "Include_once" "include_once" ();
     make_token_node "Inout" "inout" ();
@@ -140,6 +135,7 @@ let given_text_tokens =
     make_token_node "Is" "is" ~allowed_as_identifier:true ();
     make_token_node "Isset" "isset" ();
     make_token_node "Keyset" "keyset" ~allowed_as_identifier:true ();
+    make_token_node "Lateinit" "lateinit" ();
     make_token_node "List" "list" ();
     make_token_node "Mixed" "mixed" ~allowed_as_identifier:true ();
     make_token_node "Module" "module" ();
@@ -149,7 +145,6 @@ let given_text_tokens =
     make_token_node "Newtype" "newtype" ~allowed_as_identifier:true ();
     make_token_node "Noreturn" "noreturn" ~allowed_as_identifier:true ();
     make_token_node "Num" "num" ~allowed_as_identifier:true ();
-    make_token_node "Object" "object" ~allowed_as_identifier:true ();
     make_token_node "Parent" "parent" ~allowed_as_identifier:true ();
     make_token_node "Print" "print" ();
     make_token_node "Private" "private" ();
@@ -160,7 +155,6 @@ let given_text_tokens =
     make_token_node "Require" "require" ();
     make_token_node "Require_once" "require_once" ();
     make_token_node "Required" "required" ();
-    make_token_node "Lateinit" "lateinit" ();
     make_token_node "Resource" "resource" ~allowed_as_identifier:true ();
     make_token_node "Return" "return" ();
     make_token_node "Self" "self" ~allowed_as_identifier:true ();
@@ -183,6 +177,7 @@ let given_text_tokens =
     make_token_node "Varray" "varray" ~allowed_as_identifier:true ();
     make_token_node "Vec" "vec" ~allowed_as_identifier:true ();
     make_token_node "Void" "void" ~allowed_as_identifier:true ();
+    make_token_node "With" "with" ~allowed_as_identifier:true ();
     make_token_node "Where" "where" ~allowed_as_identifier:true ();
     make_token_node "While" "while" ();
     make_token_node "Yield" "yield" ();
@@ -259,6 +254,7 @@ let given_text_tokens =
     make_token_node "Hash" "#" ();
     make_token_node "Readonly" "readonly" ();
     make_token_node "Internal" "internal" ~allowed_as_identifier:true ();
+    make_token_node "Package" "package" ();
   ]
 
 let tokens = variable_text_tokens @ no_text_tokens @ given_text_tokens

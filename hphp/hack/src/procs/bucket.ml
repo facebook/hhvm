@@ -32,13 +32,10 @@ let is_done = function
 
 type 'a next = unit -> 'a bucket
 
-let max_size_ref = ref 500
+let default_max_size = 500
 
-let max_size () = !max_size_ref
-
-let set_max_bucket_size x = max_size_ref := x
-
-let calculate_bucket_size ~num_jobs ~num_workers ~max_size =
+let calculate_bucket_size ~num_jobs ~num_workers ?max_size () =
+  let max_size = Option.value max_size ~default:default_max_size in
   if num_jobs < num_workers * max_size then
     max 1 (1 + (num_jobs / num_workers))
   else
@@ -57,10 +54,13 @@ let make_list ~num_workers ?progress_fn ?max_size jobs =
   let progress_fn =
     Option.value ~default:(fun ~total:_ ~start:_ ~length:_ -> ()) progress_fn
   in
-  let max_size = Option.value max_size ~default:!max_size_ref in
   let jobs = Array.of_list jobs in
   let bucket_size =
-    calculate_bucket_size ~num_jobs:(Array.length jobs) ~num_workers ~max_size
+    calculate_bucket_size
+      ~num_jobs:(Array.length jobs)
+      ~num_workers
+      ?max_size
+      ()
   in
   make_ (progress_fn ~total:(Array.length jobs)) bucket_size jobs
 
@@ -69,8 +69,7 @@ let of_list = function
   | wl -> Job wl
 
 let make ~num_workers ?progress_fn ?max_size jobs =
-  let max_size = Option.value max_size ~default:!max_size_ref in
-  let maker = make_list ~num_workers ?progress_fn ~max_size jobs in
+  let maker = make_list ~num_workers ?progress_fn ?max_size jobs in
   (fun () -> of_list (maker ()))
 
 type 'a of_n = {

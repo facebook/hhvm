@@ -11,11 +11,11 @@ $tok3 = strtok("\\");
 $tok4 = strtok(".");
 if ($tok1 != "testing") {
 	echo("failed 1\n");
-} elseif ($tok2 != "1") {
+} else if ($tok2 != "1") {
 	echo("failed 2\n");
-} elseif ($tok3 != "2") {
+} else if ($tok3 != "2") {
 	echo("failed 3\n");
-} elseif ($tok4 != "3") {
+} else if ($tok4 != "3") {
 	echo("failed 4\n");
 } else {
 	echo("passed\n");
@@ -27,7 +27,7 @@ $found1 = strstr($test, 32);
 $found2 = strstr($test, "a ");
 if ($found1 != " is a test") {
 	echo("failed 1\n");
-} elseif ($found2 != "a test") {
+} else if ($found2 != "a test") {
 	echo("failed 2\n");
 } else {
 	echo("passed\n");
@@ -39,7 +39,7 @@ $found1 = strrchr($test, "b");
 $found2 = strrchr($test, 102);
 if ($found1 != "blakken") {
 	echo("failed 1\n");
-} elseif ($found2 != "fola blakken") {
+} else if ($found2 != "fola blakken") {
 	echo("failed 2\n");
 }
 else {

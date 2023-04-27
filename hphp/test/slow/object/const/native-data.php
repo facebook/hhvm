@@ -1,6 +1,6 @@
 <?hh
 
-class C extends StringBuffer {
+class C extends __hhvm_intrinsics\ExtensibleNewableClassWithNativeData {
   <<__Const>>
   public int $ci = 0;
   <<__Const>>
@@ -8,7 +8,7 @@ class C extends StringBuffer {
   public int $i = 2;
   public vec $v = vec[3];
 
-  public function __construct(string $timezone) {
+  public function __construct() {
     echo "-- at constructor entry --\n";
     var_dump($this);
     $this->ci = 4;
@@ -20,7 +20,7 @@ class C extends StringBuffer {
 
 <<__EntryPoint>>
 function test() {
-  $c = new C('America/New_York');
+  $c = new C();
   echo "-- after constructor completes --\n";
   var_dump($c);
 
@@ -43,9 +43,8 @@ function test() {
   $c->lol = 'whut';
 
   echo "-- test behavior of inherited-from native class --\n";
-  $c->append('hi ');
-  $c->append('there');
-  var_dump($c->detach());
+  $c->setDummyValue(42);
+  var_dump($c->getDumyValue());
 
   echo "-- at the end --\n";
   var_dump($c);

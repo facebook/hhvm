@@ -1,0 +1,10 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [
+        "[::1]:10001"
+      ]
+    }
+  },
+  "route": "PoolRoute|foo"
+}

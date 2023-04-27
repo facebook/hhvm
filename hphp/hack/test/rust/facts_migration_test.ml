@@ -1,10 +1,10 @@
 open Facts
 open Hh_json
 
-let validate_json_deser_ser json0 md5 sha1 =
+let validate_json_deser_ser json0 sha1 =
   match facts_from_json json0 with
   | Some facts ->
-    let json = facts_to_json ~md5 ~sha1 facts in
+    let json = facts_to_json ~sha1 facts in
     if json0 = json then
       true
     else (
@@ -15,12 +15,9 @@ let validate_json_deser_ser json0 md5 sha1 =
 
 let test_json_deser_ser_idempotent () =
   let sha1 = "14c54bb46fa1562e2dd76ed1c2a98b59e32b5a44" in
-  let md5 = "C0DEC0DEC0DEC0DEDEADBEEFDEADBEEF" in
   let json0 =
     JSON_Object
       [
-        ("md5sum0", JSON_Number "-4548986510646525730");
-        ("md5sum1", JSON_Number "-2401053088876216593");
         ("sha1sum", JSON_String sha1);
         ( "types",
           JSON_Array
@@ -35,25 +32,23 @@ let test_json_deser_ser_idempotent () =
                   ( "attributes",
                     JSON_Object
                       [("A", JSON_Array [JSON_String "B"; JSON_String "C"])] );
+                  ("requireClass", JSON_Array []);
                   ("requireImplements", JSON_Array []);
                   ("requireExtends", JSON_Array []);
                 ];
             ] );
         ("functions", JSON_Array [JSON_String "foo"; JSON_String "bar"]);
         ("constants", JSON_Array [JSON_String "c1"; JSON_String "c2"]);
-        ("typeAliases", JSON_Array []);
+        ("modules", JSON_Array []);
       ]
   in
-  validate_json_deser_ser json0 md5 sha1
+  validate_json_deser_ser json0 sha1
 
 let test_json_deser_ser_type_alias () =
   let sha1 = "82c78e3747fb89be849daf863a3fedf87788abb1" in
-  let md5 = "C0DEC0DEC0DEC0DEDEADBEEFDEADBEEF" in
   let json0 =
     JSON_Object
       [
-        ("md5sum0", JSON_Number "-4548986510646525730");
-        ("md5sum1", JSON_Number "-2401053088876216593");
         ("sha1sum", JSON_String sha1);
         ( "types",
           JSON_Array
@@ -69,10 +64,10 @@ let test_json_deser_ser_type_alias () =
             ] );
         ("functions", JSON_Array []);
         ("constants", JSON_Array []);
-        ("typeAliases", JSON_Array [JSON_String "T0"]);
+        ("modules", JSON_Array []);
       ]
   in
-  validate_json_deser_ser json0 md5 sha1
+  validate_json_deser_ser json0 sha1
 
 let () =
   Unit_test.run_all

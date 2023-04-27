@@ -16,7 +16,8 @@
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 
-template <typename T> Array makeVec(const std::vector<T>& types) {
+template <typename T>
+Array makeVec(const std::vector<T>& types) {
   VecInit ret{types.size()};
   for (auto const& type : types) {
     ret.append(type);
@@ -33,11 +34,13 @@ X(attributes)
 X(kind)
 X(flags)
 X(baseTypes)
+X(requireClass)
 X(requireExtends)
 X(requireImplements)
 X(methods)
 
 // FileFacts
+X(modules)
 X(types)
 X(functions)
 X(constants)
@@ -57,13 +60,15 @@ Array makeDict(const TypeDetails& type) {
       X(flags),
       X(baseTypes),
       X(attributes),
+      X(requireClass),
       X(requireExtends),
       X(requireImplements),
       X(methods));
 #undef X
 }
 
-template <> Array makeVec(const std::vector<TypeDetails>& types) {
+template <>
+Array makeVec(const std::vector<TypeDetails>& types) {
   VecInit ret{types.size()};
   for (auto const& type : types) {
     ret.append(makeDict(type));

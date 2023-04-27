@@ -132,7 +132,8 @@ pub mod collections {
 }
 
 pub mod members {
-    use hash::{HashMap, HashSet};
+    use hash::HashMap;
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const M_GET_INSTANCE_KEY: &str = "getInstanceKey";
@@ -228,8 +229,8 @@ pub mod members {
 }
 
 pub mod user_attributes {
+    use hash::HashSet;
     use lazy_static::lazy_static;
-    use std::collections::HashSet;
 
     pub const OVERRIDE: &str = "__Override";
 
@@ -239,15 +240,13 @@ pub mod user_attributes {
 
     pub const DEPRECATED: &str = "__Deprecated";
 
+    pub const DOCS: &str = "__Docs";
+
     pub const ENTRY_POINT: &str = "__EntryPoint";
 
     pub const MEMOIZE: &str = "__Memoize";
 
     pub const MEMOIZE_LSB: &str = "__MemoizeLSB";
-
-    pub const POLICY_SHARDED_MEMOIZE: &str = "__PolicyShardedMemoize";
-
-    pub const POLICY_SHARDED_MEMOIZE_LSB: &str = "__PolicyShardedMemoizeLSB";
 
     pub const PHP_STD_LIB: &str = "__PHPStdLib";
 
@@ -270,6 +269,8 @@ pub mod user_attributes {
     pub const NON_DISJOINT: &str = "__NonDisjoint";
 
     pub const SOFT: &str = "__Soft";
+
+    pub const SOFT_INTERNAL: &str = "__SoftInternal";
 
     pub const WARN: &str = "__Warn";
 
@@ -311,11 +312,9 @@ pub mod user_attributes {
 
     pub const SUPPORT_DYNAMIC_TYPE: &str = "__SupportDynamicType";
 
+    pub const NO_AUTO_DYNAMIC: &str = "__NoAutoDynamic";
+
     pub const REQUIRE_DYNAMIC: &str = "__RequireDynamic";
-
-    pub const MODULE: &str = "__Module";
-
-    pub const INTERNAL: &str = "__Internal";
 
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
 
@@ -323,17 +322,20 @@ pub mod user_attributes {
 
     pub const IGNORE_COEFFECT_LOCAL_ERRORS: &str = "__IgnoreCoeffectLocalErrors";
 
+    pub const CROSS_PACKAGE: &str = "__CrossPackage";
+
+    pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
             CONSISTENT_CONSTRUCT,
             CONST,
             DEPRECATED,
+            DOCS,
             ENTRY_POINT,
             MEMOIZE,
             MEMOIZE_LSB,
-            POLICY_SHARDED_MEMOIZE,
-            POLICY_SHARDED_MEMOIZE_LSB,
             PHP_STD_LIB,
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
@@ -360,25 +362,18 @@ pub mod user_attributes {
             EXTERNAL,
             CAN_CALL,
             SUPPORT_DYNAMIC_TYPE,
+            NO_AUTO_DYNAMIC,
             REQUIRE_DYNAMIC,
-            MODULE,
-            INTERNAL,
             ENABLE_METHOD_TRAIT_DIAMOND,
+            CROSS_PACKAGE,
+            MODULE_LEVEL_TRAIT,
         ]
         .into_iter()
         .collect();
     }
 
-    pub fn is_memoized_regular(name: &str) -> bool {
-        name == MEMOIZE || name == MEMOIZE_LSB
-    }
-
-    pub fn is_memoized_policy_sharded(name: &str) -> bool {
-        name == POLICY_SHARDED_MEMOIZE || name == POLICY_SHARDED_MEMOIZE_LSB
-    }
-
     pub fn is_memoized(name: &str) -> bool {
-        is_memoized_regular(name) || is_memoized_policy_sharded(name)
+        name == MEMOIZE || name == MEMOIZE_LSB
     }
 
     // TODO(hrust) these should probably be added to the above map/fields, too
@@ -410,6 +405,42 @@ pub mod user_attributes {
 
     pub fn is_soft(name: &str) -> bool {
         name == SOFT
+    }
+
+    pub fn is_ifc(name: &str) -> bool {
+        name == POLICIED || name == INFERFLOWS || name == EXTERNAL
+    }
+
+    pub fn is_cross_package(name: &str) -> bool {
+        name == CROSS_PACKAGE
+    }
+}
+
+pub mod memoize_option {
+    use hash::HashSet;
+    use lazy_static::lazy_static;
+
+    pub const KEYED_BY_IC: &str = "KeyedByIC";
+
+    pub const MAKE_IC_INACCESSSIBLE: &str = "MakeICInaccessible";
+
+    pub const SOFT_MAKE_IC_INACCESSSIBLE: &str = "SoftMakeICInaccessible";
+
+    pub const UNCATEGORIZED: &str = "Uncategorized";
+
+    pub static _ALL: &[&str] = &[
+        KEYED_BY_IC,
+        MAKE_IC_INACCESSSIBLE,
+        SOFT_MAKE_IC_INACCESSSIBLE,
+        UNCATEGORIZED,
+    ];
+
+    lazy_static! {
+        static ref VALID_SET: HashSet<&'static str> = _ALL.iter().copied().collect();
+    }
+
+    pub fn is_valid(x: &str) -> bool {
+        VALID_SET.contains(x)
     }
 }
 
@@ -474,12 +505,9 @@ pub mod special_functions {
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
-    pub const HHAS_ADATA: &str = "__hhas_adata";
-
     pub fn is_special_function(x: &str) -> bool {
         lazy_static! {
-            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
-                vec![ECHO, HHAS_ADATA,].into_iter().collect();
+            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> = vec![ECHO].into_iter().collect();
         }
         ALL_SPECIAL_FUNCTIONS.contains(&x)
     }
@@ -489,12 +517,6 @@ pub mod autoimported_functions {
     pub const INVARIANT: &str = "\\HH\\invariant";
 
     pub const INVARIANT_VIOLATION: &str = "\\HH\\invariant_violation";
-
-    pub const FUN_: &str = "\\HH\\fun";
-
-    pub const INST_METH: &str = "\\HH\\inst_meth";
-
-    pub const CLASS_METH: &str = "\\HH\\class_meth";
 
     pub const METH_CALLER: &str = "\\HH\\meth_caller";
 }
@@ -519,8 +541,8 @@ pub mod special_idents {
 }
 
 pub mod pseudo_functions {
+    use hash::HashSet;
     use lazy_static::lazy_static;
-    use std::collections::HashSet;
 
     pub const ISSET: &str = "\\isset";
 
@@ -552,7 +574,11 @@ pub mod pseudo_functions {
 
     pub const UNSAFE_CAST: &str = "\\HH\\FIXME\\UNSAFE_CAST";
 
+    pub const UNSAFE_NONNULL_CAST: &str = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST";
+
     pub const ENFORCED_CAST: &str = "\\HH\\FIXME\\ENFORCED_CAST";
+
+    pub const PACKAGE_EXISTS: &str = "\\HH\\package_exists";
 
     pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
         ISSET,
@@ -569,6 +595,8 @@ pub mod pseudo_functions {
         EXIT,
         DIE,
         UNSAFE_CAST,
+        UNSAFE_NONNULL_CAST,
+        PACKAGE_EXISTS,
     ];
 
     lazy_static! {
@@ -608,48 +636,63 @@ pub mod std_lib_functions {
 }
 
 pub mod typehints {
+    use hash::HashSet;
     use lazy_static::lazy_static;
-    use std::collections::HashSet;
 
     pub const NULL: &str = "null";
+    pub const HH_NULL: &str = "\\HH\\null";
 
     pub const VOID: &str = "void";
+    pub const HH_VOID: &str = "\\HH\\void";
 
     pub const RESOURCE: &str = "resource";
+    pub const HH_RESOURCE: &str = "\\HH\\resource";
 
     pub const NUM: &str = "num";
+    pub const HH_NUM: &str = "\\HH\\num";
 
     pub const ARRAYKEY: &str = "arraykey";
+    pub const HH_ARRAYKEY: &str = "\\HH\\arraykey";
 
     pub const NORETURN: &str = "noreturn";
+    pub const HH_NORETURN: &str = "\\HH\\noreturn";
 
     pub const MIXED: &str = "mixed";
 
     pub const NONNULL: &str = "nonnull";
+    pub const HH_NONNULL: &str = "\\HH\\nonnull";
 
     pub const THIS: &str = "this";
+    pub const HH_THIS: &str = "\\HH\\this";
 
     pub const DYNAMIC: &str = "dynamic";
 
-    pub const SUPPORTDYNAMIC: &str = "supportdynamic";
-
     pub const NOTHING: &str = "nothing";
+    pub const HH_NOTHING: &str = "\\HH\\nothing";
 
     pub const INT: &str = "int";
+    pub const HH_INT: &str = "\\HH\\int";
 
     pub const BOOL: &str = "bool";
+    pub const HH_BOOL: &str = "\\HH\\bool";
 
     pub const FLOAT: &str = "float";
+    pub const HH_FLOAT: &str = "\\HH\\float";
 
     pub const STRING: &str = "string";
+    pub const HH_STRING: &str = "\\HH\\string";
 
     pub const DARRAY: &str = "darray";
+    pub const HH_DARRAY: &str = "\\HH\\darray";
 
     pub const VARRAY: &str = "varray";
+    pub const HH_VARRAY: &str = "\\HH\\varray";
 
     pub const VARRAY_OR_DARRAY: &str = "varray_or_darray";
+    pub const HH_VARRAY_OR_DARRAY: &str = "\\HH\\varray_or_darray";
 
     pub const VEC_OR_DICT: &str = "vec_or_dict";
+    pub const HH_VEC_OR_DICT: &str = "\\HH\\vec_or_dict";
 
     pub const CALLABLE: &str = "callable";
 
@@ -659,18 +702,19 @@ pub mod typehints {
 
     pub const HH_SUPPORTDYN: &str = "\\HH\\supportdyn";
 
+    pub const TANY_MARKER: &str = "\\HH\\FIXME\\TANY_MARKER";
+    pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";
+    pub const SUPPORTDYN_MARKER: &str = "\\HH\\FIXME\\SUPPORTDYN_MARKER";
+
     pub const WILDCARD: &str = "_";
 
-    // matches definition in Tprim
-    pub fn is_primitive_type_hint(x: &str) -> bool {
-        lazy_static! {
-            static ref PRIMITIVE_TYPEHINTS: HashSet<&'static str> = vec![
-                NULL, VOID, INT, BOOL, FLOAT, STRING, RESOURCE, NUM, ARRAYKEY, NORETURN
-            ]
-            .into_iter()
-            .collect();
-        }
-        PRIMITIVE_TYPEHINTS.contains(x)
+    lazy_static! {
+        // matches definition in Tprim
+        pub static ref PRIMITIVE_TYPEHINTS: HashSet<&'static str> = vec![
+            NULL, VOID, INT, BOOL, FLOAT, STRING, RESOURCE, NUM, ARRAYKEY, NORETURN
+        ]
+        .into_iter()
+        .collect();
     }
 
     pub fn is_reserved_type_hint(x: &str) -> bool {
@@ -694,6 +738,7 @@ pub mod typehints {
                 DARRAY,
                 VARRAY,
                 VARRAY_OR_DARRAY,
+                VEC_OR_DICT,
                 CALLABLE,
                 WILDCARD,
             ]
@@ -765,8 +810,8 @@ pub mod literal {
 }
 
 pub mod pseudo_consts {
+    use hash::HashSet;
     use lazy_static::lazy_static;
-    use std::collections::HashSet;
 
     pub const G__LINE__: &str = "\\__LINE__";
 
@@ -833,6 +878,9 @@ pub mod fb {
 }
 
 pub mod hh {
+
+    pub const MEMOIZE_OPTION: &str = "\\HH\\MemoizeOption";
+
     pub const CONTAINS: &str = "\\HH\\Lib\\C\\contains";
 
     pub const CONTAINS_KEY: &str = "\\HH\\Lib\\C\\contains_key";
@@ -845,9 +893,11 @@ pub mod readonly {
 }
 
 pub mod coeffects {
-    use lazy_static::lazy_static;
-    use std::collections::HashSet;
     use std::fmt;
+
+    use hash::HashSet;
+    use lazy_static::lazy_static;
+    use serde::Serialize;
 
     pub const DEFAULTS: &str = "defaults";
 
@@ -860,6 +910,10 @@ pub mod coeffects {
     pub const WRITE_THIS_PROPS: &str = "write_this_props";
 
     pub const WRITE_PROPS: &str = "write_props";
+
+    pub const LEAK_SAFE_LOCAL: &str = "leak_safe_local";
+
+    pub const LEAK_SAFE_SHALLOW: &str = "leak_safe_shallow";
 
     pub const LEAK_SAFE: &str = "leak_safe";
 
@@ -883,6 +937,8 @@ pub mod coeffects {
 
     pub const CONTEXTS: &str = "HH\\Contexts";
 
+    pub const UNSAFE_CONTEXTS: &str = "HH\\Contexts\\Unsafe";
+
     pub const CAPABILITIES: &str = "HH\\Capabilities";
 
     pub fn is_any_zoned(x: &str) -> bool {
@@ -893,7 +949,28 @@ pub mod coeffects {
         ZONED_SET.contains(x)
     }
 
-    #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
+    pub fn is_any_zoned_or_defaults(x: &str) -> bool {
+        lazy_static! {
+            static ref ZONED_SET: HashSet<&'static str> =
+                vec![ZONED, ZONED_WITH, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
+                    .into_iter()
+                    .collect();
+        }
+        ZONED_SET.contains(x)
+    }
+
+    // context does not provide the capability to fetch the IC even indirectly
+    pub fn is_any_without_implicit_policy_or_unsafe(x: &str) -> bool {
+        lazy_static! {
+            static ref LEAK_SAFE_GLOBALS_SET: HashSet<&'static str> =
+                vec![LEAK_SAFE, GLOBALS, READ_GLOBALS, WRITE_PROPS]
+                    .into_iter()
+                    .collect();
+        }
+        LEAK_SAFE_GLOBALS_SET.contains(x)
+    }
+
+    #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone, Serialize)]
     #[repr(C)]
     pub enum Ctx {
         Defaults,
@@ -913,6 +990,8 @@ pub mod coeffects {
         ZonedShallow,
         Zoned,
 
+        LeakSafeLocal,
+        LeakSafeShallow,
         LeakSafe,
 
         ReadGlobals,
@@ -937,6 +1016,8 @@ pub mod coeffects {
                 ZonedLocal => write!(f, "{}", ZONED_LOCAL),
                 ZonedShallow => write!(f, "{}", ZONED_SHALLOW),
                 Zoned => write!(f, "{}", ZONED),
+                LeakSafeLocal => write!(f, "{}", LEAK_SAFE_LOCAL),
+                LeakSafeShallow => write!(f, "{}", LEAK_SAFE_SHALLOW),
                 LeakSafe => write!(f, "{}", LEAK_SAFE),
                 ReadGlobals => write!(f, "{}", READ_GLOBALS),
                 Globals => write!(f, "{}", GLOBALS),
@@ -949,6 +1030,7 @@ pub mod coeffects {
     pub fn ctx_str_to_enum(s: &str) -> Option<Ctx> {
         match s {
             DEFAULTS => Some(Ctx::Defaults),
+            PURE => Some(Ctx::Pure),
             RX_LOCAL => Some(Ctx::RxLocal),
             RX_SHALLOW => Some(Ctx::RxShallow),
             RX => Some(Ctx::Rx),
@@ -958,6 +1040,8 @@ pub mod coeffects {
             ZONED_LOCAL => Some(Ctx::ZonedLocal),
             ZONED_SHALLOW => Some(Ctx::ZonedShallow),
             ZONED => Some(Ctx::Zoned),
+            LEAK_SAFE_LOCAL => Some(Ctx::LeakSafeLocal),
+            LEAK_SAFE_SHALLOW => Some(Ctx::LeakSafeShallow),
             LEAK_SAFE => Some(Ctx::LeakSafe),
             GLOBALS => Some(Ctx::Globals),
             READ_GLOBALS => Some(Ctx::ReadGlobals),
@@ -981,7 +1065,9 @@ pub mod coeffects {
         match ctx {
             Ctx::Defaults => self::capability_in_defaults_ctx(c),
             Ctx::Rx | Ctx::RxLocal | Ctx::RxShallow => self::capability_in_rx_ctx(c),
-            Ctx::LeakSafe => self::capability_in_controlled_ctx(c),
+            Ctx::LeakSafe | Ctx::LeakSafeLocal | Ctx::LeakSafeShallow => {
+                self::capability_in_controlled_ctx(c)
+            }
             Ctx::Zoned | Ctx::ZonedLocal | Ctx::ZonedShallow | Ctx::ZonedWith => {
                 self::capability_in_policied_ctx(c)
             }
@@ -1057,8 +1143,9 @@ pub mod shapes {
 }
 
 pub mod superglobals {
+    use hash::HashSet;
     use lazy_static::lazy_static;
-    use std::collections::HashSet;
+
     pub const GLOBALS: &str = "$GLOBALS";
 
     pub static SUPERGLOBALS: &[&str] = &[
@@ -1100,6 +1187,8 @@ pub mod unstable_features {
     pub const READONLY: &str = "readonly";
     pub const EXPRESSION_TREES: &str = "expression_trees";
     pub const MODULES: &str = "modules";
+    pub const MODULE_REFERENCES: &str = "module_references";
+    pub const PACKAGE: &str = "package";
 }
 
 pub mod regex {
@@ -1128,6 +1217,7 @@ pub mod expression_trees {
     pub const NULL_TYPE: &str = "nullType";
     pub const VOID_TYPE: &str = "voidType";
     pub const SYMBOL_TYPE: &str = "symbolType";
+    pub const LAMBDA_TYPE: &str = "lambdaType";
 
     pub const VISIT_INT: &str = "visitInt";
     pub const VISIT_FLOAT: &str = "visitFloat";
@@ -1151,7 +1241,6 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_XHP: &str = "visitXhp";
-    pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
 
     pub const SPLICE: &str = "splice";
 

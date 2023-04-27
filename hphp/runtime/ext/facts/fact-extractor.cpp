@@ -20,7 +20,6 @@
 
 #include <folly/dynamic.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
 
@@ -110,9 +109,22 @@ std::vector<TypeDetails> move_type_vec(folly::dynamic* types) {
         .m_flags = static_cast<int>(std::move(type.at("flags")).getInt()),
         .m_baseTypes = move_str_vec(type.get_ptr("baseTypes")),
         .m_attributes = move_attr_vec(type.get_ptr("attributes")),
+        .m_requireClass = move_str_vec(type.get_ptr("requireClass")),
         .m_requireExtends = move_str_vec(type.get_ptr("requireExtends")),
         .m_requireImplements = move_str_vec(type.get_ptr("requireImplements")),
         .m_methods = move_method_vec(type.get_ptr("methods"))});
+  }
+  return ret;
+}
+
+std::vector<ModuleDetails> move_module_vec(folly::dynamic* modules) {
+  if (modules == nullptr) {
+    return {};
+  }
+  std::vector<ModuleDetails> ret;
+  for (auto& module : *modules) {
+    ret.push_back(
+        ModuleDetails{.m_name = std::move(module.at("name")).getString()});
   }
   return ret;
 }
@@ -123,6 +135,7 @@ FileFacts make_file_facts(folly::dynamic facts) {
         .m_types = move_type_vec(facts.get_ptr("types")),
         .m_functions = move_str_vec(facts.get_ptr("functions")),
         .m_constants = move_str_vec(facts.get_ptr("constants")),
+        .m_modules = move_module_vec(facts.get_ptr("modules")),
         .m_attributes = move_attr_vec(facts.get_ptr("fileAttributes")),
         .m_sha1hex = std::move(facts.at("sha1sum")).getString()};
   } catch (const folly::TypeError& e) {
@@ -164,24 +177,25 @@ folly::dynamic parse_json(const std::string& json) {
 ExtractorFactory s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : public Extractor {
-  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {
-  }
+  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {}
 
   ~SimpleExtractor() override = default;
 
   folly::SemiFuture<std::string> get(const PathAndOptionalHash& key) override {
-    return folly::via(
-        &m_exec, [path = key.m_path]() { return facts_json_from_path(path); });
+    return folly::via(&m_exec, [key]() { return facts_json_from_path(key); });
   }
 };
 
 } // namespace
 
-std::string facts_json_from_path(const folly::fs::path& path) {
-  assertx(path.is_absolute());
+std::string facts_json_from_path(const PathAndOptionalHash& path) {
+  assertx(path.m_path.is_absolute());
 
   auto const result = extract_facts(
-      path.native(), "", RepoOptions::forFile(path.c_str()).flags());
+      path.m_path.native(),
+      "", // ask extract_facts() to load the file.
+      RepoOptions::forFile(path.m_path.c_str()).flags(),
+      path.m_hash ? *path.m_hash : "");
   return match<std::string>(
       result,
       [&](const FactsJSONString& r) { return r.value; },
@@ -195,23 +209,23 @@ void setExtractorFactory(ExtractorFactory factory) {
 }
 
 std::vector<folly::Try<FileFacts>> facts_from_paths(
-    const folly::fs::path& root,
+    const std::filesystem::path& root,
     const std::vector<PathAndOptionalHash>& pathsAndHashes) {
-
   folly::CPUThreadPoolExecutor exec{
       std::min(
           RuntimeOption::EvalFactsWorkers,
           static_cast<uint64_t>(pathsAndHashes.size())),
       make_thread_factory("FactExtractor")};
 
-  // If we defined a fancy memcache Extractor in closed-source code, use that.
+  // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   auto extractor = [&]() -> std::unique_ptr<Extractor> {
-    if (s_extractorFactory) {
-      XLOG(INFO) << "Creating a custom HPHP::Facts::Extractor.";
+    if (s_extractorFactory &&
+        RuntimeOption::AutoloadEnableExternFactExtractor) {
+      XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
       return s_extractorFactory(exec);
     } else {
-      XLOG(INFO) << "Creating a HPHP::Facts::SimpleExtractor.";
+      XLOG(INFO) << "Creating an internal HPHP::Facts::SimpleExtractor.";
       return std::make_unique<SimpleExtractor>(exec);
     }
   }();
@@ -262,11 +276,14 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                 return *std::move(facts);
               } else {
                 XLOGF(
-                    CRITICAL,
+                    WARN,
                     "Error extracting {}: {}",
                     absPathAndHash.m_path.native().c_str(),
                     facts.exception().what().c_str());
-                return parse_json(facts_json_from_path(absPathAndHash.m_path));
+                // There might have been a SHA1 mismatch due to a filesystem
+                // race. Try again without an expected hash.
+                PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
+                return parse_json(facts_json_from_path(withoutHash));
               }
             })
             .thenValue([](folly::dynamic&& facts) {

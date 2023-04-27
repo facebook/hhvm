@@ -44,11 +44,6 @@ void optimize_func(const Index&, FuncAnalysis&&, php::WideFunc&);
 void update_bytecode(php::WideFunc&, BlockUpdates&&, FuncAnalysis* = nullptr);
 
 /*
- * Optimize property type hints for a particular class.
- */
-void optimize_class_prop_type_hints(const Index& index, Context ctx);
-
-/*
  * Return a bytecode to generate the value in cell
  */
 Bytecode gen_constant(const TypedValue& cell);
@@ -56,4 +51,3 @@ Bytecode gen_constant(const TypedValue& cell);
 //////////////////////////////////////////////////////////////////////
 
 }
-

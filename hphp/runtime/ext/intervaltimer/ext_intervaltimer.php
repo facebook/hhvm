@@ -13,17 +13,17 @@ class IntervalTimer {
   <<__Native>>
   public function __construct(float $interval,
                               float $initial,
-                              mixed $callback);
+                              mixed $callback)[leak_safe];
 
   /**
    * Start the timer.
    */
   <<__Native>>
-  public function start(): void;
+  public function start()[globals, leak_safe]: void;
 
   /**
    * Stop the timer.
    */
   <<__Native>>
-  public function stop(): void;
+  public function stop()[globals, leak_safe]: void;
 }

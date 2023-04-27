@@ -41,15 +41,14 @@ struct Index;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * If Trace::hhbbc_time >= 1, print some stats about the program to a
+ * If Trace::hhbbc_stats >= 1, print some stats about the program to a
  * temporary file.  If it's greater than or equal to 2, also dump it
  * to stdout.
  */
 StatsHolder allocate_stats();
-void collect_stats(const StatsHolder&, const Index&, const php::Unit*);
+void collect_stats(const StatsHolder&, const Index&, const php::Unit&);
 void print_stats(const StatsHolder&);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

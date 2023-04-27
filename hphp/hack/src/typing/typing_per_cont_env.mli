@@ -54,6 +54,9 @@ val get_cont_option : C.t -> t -> per_cont_entry option
 (** Get all continuations present in an environment *)
 val all_continuations : t -> C.t list
 
+(** Continuations used to typecheck the `finally` block. *)
+val continuations_for_finally : C.t list
+
 (* Add the key, value pair to the continuation named 'name'
  * If the continuation doesn't exist, create it *)
 val add_to_cont : C.t -> Local_id.t -> Typing_local_types.local -> t -> t

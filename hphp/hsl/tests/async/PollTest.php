@@ -140,4 +140,77 @@ final class PollTest extends HackTest {
     expect($foo->get())->toEqual('bar');
     expect($herp->get())->toEqual('derp');
   }
+
+  /*
+  * Test the case of a long chain of awaitables by creating a situation where
+  * the bottom-most wait handle has all of its dependencies already satisfied.
+  * Upon completion all of the dependencies will be unblocked. This should not
+  * fail due to stack overflow.
+  */
+  public async function testLongChain(): Awaitable<void> {
+    $iterations = 70_000;
+    $poll = Async\Poll::create();
+
+    $count = new Ref(0);
+
+    $gen_awaitable = async (int $prio) ==> {
+      await RescheduleWaitHandle::create(
+        RescheduleWaitHandle::QUEUE_DEFAULT,
+        $prio,
+      );
+      $count->value += 1;
+    };
+
+    // Add WH that will sit in the queue
+    $poll->add($gen_awaitable(1));
+
+    // Add WH that will finish first
+    $poll->add($gen_awaitable(0));
+
+    $i = 0;
+    foreach ($poll await as $item) {
+      // Add `$iterations` more WHs that finish before the first (prio=1) WH
+      if ($i < $iterations) {
+        $poll->add($gen_awaitable(0));
+        $i += 1;
+      }
+    }
+
+    expect($count->get())->toBePHPEqual($iterations + 2);
+  }
+
+  /*
+  * Same as testLongChain, but using `addMulti` instead.
+  */
+  public async function testLongChainMulti(): Awaitable<void> {
+    $iterations = 70_000;
+    $poll = Async\Poll::create();
+
+    $count = new Ref(0);
+
+    $gen_awaitable = async (int $prio) ==> {
+      await RescheduleWaitHandle::create(
+        RescheduleWaitHandle::QUEUE_DEFAULT,
+        $prio,
+      );
+      $count->value += 1;
+    };
+
+    // Add WH that will sit in the queue
+    $poll->add($gen_awaitable(1));
+
+    // Add WH that will finish first
+    $poll->add($gen_awaitable(0));
+
+    $i = 0;
+    foreach ($poll await as $item) {
+      // Add `$iterations` more WHs that finish before the first (prio=1) WH
+      if ($i < $iterations) {
+        $poll->addMulti(vec[$gen_awaitable(0)]);
+        $i += 1;
+      }
+    }
+
+    expect($count->get())->toBePHPEqual($iterations + 2);
+  }
 }

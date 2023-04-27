@@ -23,23 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array HHVM_FUNCTION(hphp_get_extension_info, const String& name);
-Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params);
-Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
-                                          const String& name, const Variant& params);
-Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params);
-Object HHVM_FUNCTION(hphp_create_object_without_constructor,
-                      const String& name);
-Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
-                                         const String& prop);
-void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
-                                      const String& prop, const Variant& value);
-Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
-                                                const String& prop, bool force);
-void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop, const Variant& value,
-                                             bool force);
-
 struct Reflection {
   static Class* s_ReflectionExceptionClass;
   static Class* s_ReflectionExtensionClass;
@@ -299,8 +282,6 @@ Class* get_cls(const Variant& class_or_object);
 const Func* get_method_func(const Class* cls, const String& meth_name);
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func,
                                   unsigned argIdx);
-bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
-                                     Variant &cns);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

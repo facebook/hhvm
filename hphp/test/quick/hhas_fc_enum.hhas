@@ -2,7 +2,6 @@
 
 
 .function test(<"Foo" "Foo"> $x) {
-  VerifyParamType $x
   Null
   RetC
 }

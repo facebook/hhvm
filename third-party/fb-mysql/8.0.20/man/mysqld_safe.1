@@ -1,0 +1,1018 @@
+'\" t
+.\"     Title: \fBmysqld_safe\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLD_SAFE\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqld_safe \- MySQL server startup script
+.SH "SYNOPSIS"
+.HP \w'\fBmysqld_safe\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBmysqld_safe \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBmysqld_safe\fR
+is the recommended way to start a
+\fBmysqld\fR
+server on Unix\&.
+\fBmysqld_safe\fR
+adds some safety features such as restarting the server when an error occurs and logging runtime information to an error log\&. A description of error logging is given later in this section\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+For some Linux platforms, MySQL installation from RPM or Debian packages includes systemd support for managing MySQL server startup and shutdown\&. On these platforms,
+\fBmysqld_safe\fR
+is not installed because it is unnecessary\&. For more information, see
+Section\ \&2.5.9, \(lqManaging MySQL Server with systemd\(rq\&.
+.sp .5v
+.RE
+.PP
+\fBmysqld_safe\fR
+tries to start an executable named
+\fBmysqld\fR\&. To override the default behavior and specify explicitly the name of the server you want to run, specify a
+\fB\-\-mysqld\fR
+or
+\fB\-\-mysqld\-version\fR
+option to
+\fBmysqld_safe\fR\&. You can also use
+\fB\-\-ledir\fR
+to indicate the directory where
+\fBmysqld_safe\fR
+should look for the server\&.
+.PP
+Many of the options to
+\fBmysqld_safe\fR
+are the same as the options to
+\fBmysqld\fR\&. See
+Section\ \&5.1.7, \(lqServer Command Options\(rq\&.
+.PP
+Options unknown to
+\fBmysqld_safe\fR
+are passed to
+\fBmysqld\fR
+if they are specified on the command line, but ignored if they are specified in the
+[mysqld_safe]
+group of an option file\&. See
+Section\ \&4.2.2.2, \(lqUsing Option Files\(rq\&.
+.PP
+\fBmysqld_safe\fR
+reads all options from the
+[mysqld],
+[server], and
+[mysqld_safe]
+sections in option files\&. For example, if you specify a
+[mysqld]
+section like this,
+\fBmysqld_safe\fR
+will find and use the
+\fB\-\-log\-error\fR
+option:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[mysqld]
+log\-error=error\&.log
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For backward compatibility,
+\fBmysqld_safe\fR
+also reads
+[safe_mysqld]
+sections, but to be current you should rename such sections to
+[mysqld_safe]\&.
+.PP
+\fBmysqld_safe\fR
+accepts options on the command line and in option files, as described in the following table\&. For information about option files used by MySQL programs, see
+Section\ \&4.2.2.2, \(lqUsing Option Files\(rq\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-basedir=\fR\fB\fIdir_name\fR\fR
+.sp
+The path to the MySQL installation directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-core\-file\-size=\fR\fB\fIsize\fR\fR
+.sp
+The size of the core file that
+\fBmysqld\fR
+should be able to create\&. The option value is passed to
+\fBulimit \-c\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+The
+innodb_buffer_pool_in_core_file
+variable can be used to reduce the size of core files on operating systems that support it\&. For more information, see
+Section\ \&15.8.3.7, \(lqExcluding Buffer Pool Pages from Core Files\(rq\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-datadir=\fR\fB\fIdir_name\fR\fR
+.sp
+The path to the data directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file in addition to the usual option files\&. If the file does not exist or is otherwise inaccessible, the server will exit with an error\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&. This must be the first option on the command line if it is used\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, the server will exit with an error\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&. This must be the first option on the command line if it is used\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ledir=\fR\fB\fIdir_name\fR\fR
+.sp
+If
+\fBmysqld_safe\fR
+cannot find the server, use this option to indicate the path name to the directory where the server is located\&.
+.sp
+This option is accepted only on the command line, not in option files\&. On platforms that use systemd, the value can be specified in the value of
+MYSQLD_OPTS\&. See
+Section\ \&2.5.9, \(lqManaging MySQL Server with systemd\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-log\-error=\fR\fB\fIfile_name\fR\fR
+.sp
+Write the error log to the given file\&. See
+Section\ \&5.4.2, \(lqThe Error Log\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-mysqld\-safe\-log\-timestamps\fR
+.sp
+This option controls the format for timestamps in log output produced by
+\fBmysqld_safe\fR\&. The following list describes the permitted values\&. For any other value,
+\fBmysqld_safe\fR
+logs a warning and uses
+UTC
+format\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+UTC,
+utc
+.sp
+ISO 8601 UTC format (same as
+\fB\-\-log_timestamps=UTC\fR
+for the server)\&. This is the default\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+SYSTEM,
+system
+.sp
+ISO 8601 local time format (same as
+\fB\-\-log_timestamps=SYSTEM\fR
+for the server)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+HYPHEN,
+hyphen
+.sp
+\fIYY\-MM\-DD h:mm:ss\fR
+format, as in
+\fBmysqld_safe\fR
+for MySQL 5\&.6\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+LEGACY,
+legacy
+.sp
+\fIYYMMDD hh:mm:ss\fR
+format, as in
+\fBmysqld_safe\fR
+prior to MySQL 5\&.6\&.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-malloc\-lib=[\fR\fB\fIlib_name\fR\fR\fB]\fR
+The name of the library to use for memory allocation instead of the system
+malloc()
+library\&. The option value must be one of the directories
+/usr/lib,
+/usr/lib64,
+/usr/lib/i386\-linux\-gnu, or
+/usr/lib/x86_64\-linux\-gnu\&.
+.sp
+The
+\fB\-\-malloc\-lib\fR
+option works by modifying the
+LD_PRELOAD
+environment value to affect dynamic linking to enable the loader to find the memory\-allocation library when
+\fBmysqld\fR
+runs:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the option is not given, or is given without a value (\fB\-\-malloc\-lib=\fR),
+LD_PRELOAD
+is not modified and no attempt is made to use
+tcmalloc\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the option is given as
+\fB\-\-malloc\-lib=tcmalloc\fR,
+\fBmysqld_safe\fR
+looks for a
+tcmalloc
+library in
+/usr/lib\&. If
+tmalloc
+is found, its path name is added to the beginning of the
+LD_PRELOAD
+value for
+\fBmysqld\fR\&. If
+tcmalloc
+is not found,
+\fBmysqld_safe\fR
+aborts with an error\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the option is given as
+\fB\-\-malloc\-lib=\fR\fB\fI/path/to/some/library\fR\fR, that full path is added to the beginning of the
+LD_PRELOAD
+value\&. If the full path points to a nonexistent or unreadable file,
+\fBmysqld_safe\fR
+aborts with an error\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+For cases where
+\fBmysqld_safe\fR
+adds a path name to
+LD_PRELOAD, it adds the path to the beginning of any existing value the variable already has\&.
+.RE
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+On systems that manage the server using systemd,
+\fBmysqld_safe\fR
+is not available\&. Instead, specify the allocation library by setting
+LD_PRELOAD
+in
+/etc/sysconfig/mysql\&.
+.sp .5v
+.RE
+Linux users can use the
+libtcmalloc_minimal\&.so
+library on any platform for which a
+tcmalloc
+package is installed in
+/usr/lib
+by adding these lines to the
+my\&.cnf
+file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[mysqld_safe]
+malloc\-lib=tcmalloc
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To use a specific
+tcmalloc
+library, specify its full path name\&. Example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[mysqld_safe]
+malloc\-lib=/opt/lib/libtcmalloc_minimal\&.so
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-mysqld=\fR\fB\fIprog_name\fR\fR
+.sp
+The name of the server program (in the
+ledir
+directory) that you want to start\&. This option is needed if you use the MySQL binary distribution but have the data directory outside of the binary distribution\&. If
+\fBmysqld_safe\fR
+cannot find the server, use the
+\fB\-\-ledir\fR
+option to indicate the path name to the directory where the server is located\&.
+.sp
+This option is accepted only on the command line, not in option files\&. On platforms that use systemd, the value can be specified in the value of
+MYSQLD_OPTS\&. See
+Section\ \&2.5.9, \(lqManaging MySQL Server with systemd\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-mysqld\-version=\fR\fB\fIsuffix\fR\fR
+.sp
+This option is similar to the
+\fB\-\-mysqld\fR
+option, but you specify only the suffix for the server program name\&. The base name is assumed to be
+\fBmysqld\fR\&. For example, if you use
+\fB\-\-mysqld\-version=debug\fR,
+\fBmysqld_safe\fR
+starts the
+\fBmysqld\-debug\fR
+program in the
+ledir
+directory\&. If the argument to
+\fB\-\-mysqld\-version\fR
+is empty,
+\fBmysqld_safe\fR
+uses
+\fBmysqld\fR
+in the
+ledir
+directory\&.
+.sp
+This option is accepted only on the command line, not in option files\&. On platforms that use systemd, the value can be specified in the value of
+MYSQLD_OPTS\&. See
+Section\ \&2.5.9, \(lqManaging MySQL Server with systemd\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nice=\fR\fB\fIpriority\fR\fR
+.sp
+Use the
+nice
+program to set the server\*(Aqs scheduling priority to the given value\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&. This must be the first option on the command line if it is used\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-open\-files\-limit=\fR\fB\fIcount\fR\fR
+.sp
+The number of files that
+\fBmysqld\fR
+should be able to open\&. The option value is passed to
+\fBulimit \-n\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+You must start
+\fBmysqld_safe\fR
+as
+root
+for this to function properly\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pid\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+The path name that
+\fBmysqld\fR
+should use for its process ID file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-plugin\-dir=\fR\fB\fIdir_name\fR\fR
+.sp
+The path name of the plugin directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port=\fR\fB\fIport_num\fR\fR
+.sp
+The port number that the server should use when listening for TCP/IP connections\&. The port number must be 1024 or higher unless the server is started by the
+root
+operating system user\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-kill\-mysqld\fR
+.sp
+Do not try to kill stray
+\fBmysqld\fR
+processes at startup\&. This option works only on Linux\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket=\fR\fB\fIpath\fR\fR
+.sp
+The Unix socket file that the server should use when listening for local connections\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-syslog\fR,
+\fB\-\-skip\-syslog\fR
+.sp
+\fB\-\-syslog\fR
+causes error messages to be sent to
+syslog
+on systems that support the
+\fBlogger\fR
+program\&.
+\-\-skip\-syslog
+suppresses the use of
+syslog; messages are written to an error log file\&.
+.sp
+When
+syslog
+is used for error logging, the
+daemon\&.err
+facility/severity is used for all log messages\&.
+.sp
+Using these options to control
+\fBmysqld\fR
+logging is deprecated\&. To write error log output to the system log, use the instructions at
+Section\ \&5.4.2.7, \(lqError Logging to the System Log\(rq\&. To control the facility, use the server
+log_syslog_facility
+system variable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-syslog\-tag=\fR\fB\fItag\fR\fR
+.sp
+For logging to
+syslog, messages from
+\fBmysqld_safe\fR
+and
+\fBmysqld\fR
+are written with identifiers of
+mysqld_safe
+and
+mysqld, respectively\&. To specify a suffix for the identifiers, use
+\fB\-\-syslog\-tag=\fR\fB\fItag\fR\fR, which modifies the identifiers to be
+mysqld_safe\-\fItag\fR
+and
+mysqld\-\fItag\fR\&.
+.sp
+Using this option to control
+\fBmysqld\fR
+logging is deprecated\&. Use the server
+log_syslog_tag
+system variable instead\&. See
+Section\ \&5.4.2.7, \(lqError Logging to the System Log\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-timezone=\fR\fB\fItimezone\fR\fR
+.sp
+Set the
+TZ
+time zone environment variable to the given option value\&. Consult your operating system documentation for legal time zone specification formats\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user={\fR\fB\fIuser_name\fR\fR\fB|\fR\fB\fIuser_id\fR\fR\fB}\fR
+.sp
+Run the
+\fBmysqld\fR
+server as the user having the name
+\fIuser_name\fR
+or the numeric user ID
+\fIuser_id\fR\&. (\(lqUser\(rq
+in this context refers to a system login account, not a MySQL user listed in the grant tables\&.)
+.RE
+.PP
+If you execute
+\fBmysqld_safe\fR
+with the
+\fB\-\-defaults\-file\fR
+or
+\fB\-\-defaults\-extra\-file\fR
+option to name an option file, the option must be the first one given on the command line or the option file will not be used\&. For example, this command will not use the named option file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBmysqld_safe \-\-port=\fR\fB\fIport_num\fR\fR\fB \-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Instead, use the following command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBmysqld_safe \-\-defaults\-file=\fR\fB\fIfile_name\fR\fR\fB \-\-port=\fR\fB\fIport_num\fR\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBmysqld_safe\fR
+script is written so that it normally can start a server that was installed from either a source or a binary distribution of MySQL, even though these types of distributions typically install the server in slightly different locations\&. (See
+Section\ \&2.1.4, \(lqInstallation Layouts\(rq\&.)
+\fBmysqld_safe\fR
+expects one of the following conditions to be true:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The server and databases can be found relative to the working directory (the directory from which
+\fBmysqld_safe\fR
+is invoked)\&. For binary distributions,
+\fBmysqld_safe\fR
+looks under its working directory for
+bin
+and
+data
+directories\&. For source distributions, it looks for
+libexec
+and
+var
+directories\&. This condition should be met if you execute
+\fBmysqld_safe\fR
+from your MySQL installation directory (for example,
+/usr/local/mysql
+for a binary distribution)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the server and databases cannot be found relative to the working directory,
+\fBmysqld_safe\fR
+attempts to locate them by absolute path names\&. Typical locations are
+/usr/local/libexec
+and
+/usr/local/var\&. The actual locations are determined from the values configured into the distribution at the time it was built\&. They should be correct if MySQL is installed in the location specified at configuration time\&.
+.RE
+.PP
+Because
+\fBmysqld_safe\fR
+tries to find the server and databases relative to its own working directory, you can install a binary distribution of MySQL anywhere, as long as you run
+\fBmysqld_safe\fR
+from the MySQL installation directory:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBcd \fR\fB\fImysql_installation_directory\fR\fR
+shell> \fBbin/mysqld_safe &\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If
+\fBmysqld_safe\fR
+fails, even when invoked from the MySQL installation directory, specify the
+\fB\-\-ledir\fR
+and
+\fB\-\-datadir\fR
+options to indicate the directories in which the server and databases are located on your system\&.
+.PP
+\fBmysqld_safe\fR
+tries to use the
+\fBsleep\fR
+and
+\fBdate\fR
+system utilities to determine how many times per second it has attempted to start\&. If these utilities are present and the attempted starts per second is greater than 5,
+\fBmysqld_safe\fR
+waits 1 full second before starting again\&. This is intended to prevent excessive CPU usage in the event of repeated failures\&. (Bug #11761530, Bug #54035)
+.PP
+When you use
+\fBmysqld_safe\fR
+to start
+\fBmysqld\fR,
+\fBmysqld_safe\fR
+arranges for error (and notice) messages from itself and from
+\fBmysqld\fR
+to go to the same destination\&.
+.PP
+There are several
+\fBmysqld_safe\fR
+options for controlling the destination of these messages:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-log\-error=\fR\fB\fIfile_name\fR\fR: Write error messages to the named error file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-syslog\fR: Write error messages to
+syslog
+on systems that support the
+\fBlogger\fR
+program\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-syslog\fR: Do not write error messages to
+syslog\&. Messages are written to the default error log file (\fIhost_name\fR\&.err
+in the data directory), or to a named file if the
+\fB\-\-log\-error\fR
+option is given\&.
+.RE
+.PP
+If none of these options is given, the default is
+\fB\-\-skip\-syslog\fR\&.
+.PP
+When
+\fBmysqld_safe\fR
+writes a message, notices go to the logging destination (syslog
+or the error log file) and
+stdout\&. Errors go to the logging destination and
+stderr\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Controlling
+\fBmysqld\fR
+logging from
+\fBmysqld_safe\fR
+is deprecated\&. Use the server\*(Aqs native
+syslog
+support instead\&. For more information, see
+Section\ \&5.4.2.7, \(lqError Logging to the System Log\(rq\&.
+.sp .5v
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

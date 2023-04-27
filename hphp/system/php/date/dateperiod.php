@@ -66,7 +66,7 @@ class DatePeriod implements Iterator {
     DateTimeInterface $start,
     DateInterval $interval,
     mixed $end = null,
-    int $options = null): void {
+    ?int $options = null): void {
 
     $this->start = clone $start;
     $this->interval = clone $interval;
@@ -116,7 +116,7 @@ class DatePeriod implements Iterator {
     }
   }
 
-  public function valid() {
+  public function valid(): bool {
     return ($this->current >= $this->start && $this->current < $this->end);
   }
 

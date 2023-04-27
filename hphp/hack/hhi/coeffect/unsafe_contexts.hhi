@@ -9,7 +9,7 @@
  */
 
 // see contexts.hhi for more details
-<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 /**
  * As an unsafe extension and for the purpose of top-level migration,
@@ -32,9 +32,12 @@ namespace HH\Contexts\Unsafe {
   type globals = mixed;
 
   type leak_safe = mixed;
+  type leak_safe_shallow = \HH\Capabilities\SystemLocal;
+  type leak_safe_local = \HH\Contexts\defaults;
 
   type zoned = mixed;
-  type zoned_shallow = \HH\Capabilities\ImplicitPolicyLocal;
+  type zoned_shallow =
+    (\HH\Capabilities\ImplicitPolicyLocal & \HH\Capabilities\SystemLocal &);
   type zoned_local = \HH\Contexts\defaults;
   type zoned_with<T> = mixed;
 

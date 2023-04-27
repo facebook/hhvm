@@ -831,7 +831,7 @@ DOMXPath* getDOMXPath(const Object& obj) {
 
 }
 
-static bool HHVM_METHOD(DomDocument, _load, const String& source,
+static bool HHVM_METHOD(DOMDocument, _load, const String& source,
                         int64_t options, bool isFile) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -855,7 +855,7 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
   return true;
 }
 
-static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
+static bool HHVM_METHOD(DOMDocument, _loadHTML, const String& source,
                         int64_t options, bool isFile) {
   VMRegGuard _;
 
@@ -1151,40 +1151,24 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-// These need to be lowercase...
-const StaticString
-  s_domdocument("domdocument"),
-  s_domdocumenttype("domdocumenttype"),
-  s_domelement("domelement"),
-  s_domattr("domattr"),
-  s_domtext("domtext"),
-  s_domcomment("domcomment"),
-  s_domprocessinginstruction("domprocessinginstruction"),
-  s_domentityreference("domentityreference"),
-  s_domentity("domentity"),
-  s_domcdatasection("domcdatasection"),
-  s_domdocumentfragment("domdocumentfragment"),
-  s_domnotation("domnotation"),
-  s_domnamespacenode("domnamespacenode");
-
 static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {
   case XML_DOCUMENT_NODE:
-  case XML_HTML_DOCUMENT_NODE: return s_domdocument;
+  case XML_HTML_DOCUMENT_NODE: return s_DOMDocument;
   case XML_DTD_NODE:
-  case XML_DOCUMENT_TYPE_NODE: return s_domdocumenttype;
-  case XML_ELEMENT_NODE:       return s_domelement;
-  case XML_ATTRIBUTE_NODE:     return s_domattr;
-  case XML_TEXT_NODE:          return s_domtext;
-  case XML_COMMENT_NODE:       return s_domcomment;
-  case XML_PI_NODE:            return s_domprocessinginstruction;
-  case XML_ENTITY_REF_NODE:    return s_domentityreference;
+  case XML_DOCUMENT_TYPE_NODE: return s_DOMDocumentType;
+  case XML_ELEMENT_NODE:       return s_DOMElement;
+  case XML_ATTRIBUTE_NODE:     return s_DOMAttr;
+  case XML_TEXT_NODE:          return s_DOMText;
+  case XML_COMMENT_NODE:       return s_DOMComment;
+  case XML_PI_NODE:            return s_DOMProcessingInstruction;
+  case XML_ENTITY_REF_NODE:    return s_DOMEntityReference;
   case XML_ENTITY_DECL:
-  case XML_ELEMENT_DECL:       return s_domentity;
-  case XML_CDATA_SECTION_NODE: return s_domcdatasection;
-  case XML_DOCUMENT_FRAG_NODE: return s_domdocumentfragment;
-  case XML_NOTATION_NODE:      return s_domnotation;
-  case XML_NAMESPACE_DECL:     return s_domnamespacenode;
+  case XML_ELEMENT_DECL:       return s_DOMEntity;
+  case XML_CDATA_SECTION_NODE: return s_DOMCdataSection;
+  case XML_DOCUMENT_FRAG_NODE: return s_DOMDocumentFragment;
+  case XML_NOTATION_NODE:      return s_DOMNotation;
+  case XML_NAMESPACE_DECL:     return s_DOMNameSpaceNode;
   default:
     return String((StringData*)nullptr);
   }
@@ -1198,10 +1182,13 @@ Variant php_dom_create_object(xmlNodePtr obj,
     return init_null();
   }
   if (doc) {
-    if (doc->m_classmap.exists(clsname)) {
+    // Need to lowercase because that is what registerNodeClass does
+    // when it adds things to this map.
+    auto lower_clsname = HHVM_FN(strtolower)(clsname);
+    if (doc->m_classmap.exists(lower_clsname)) {
       // or const char * is not safe
-      assertx(doc->m_classmap[clsname].isString());
-      clsname = doc->m_classmap[clsname].toString();
+      assertx(doc->m_classmap[lower_clsname].isString());
+      clsname = doc->m_classmap[lower_clsname].toString();
     }
   }
 
@@ -5136,7 +5123,7 @@ Array HHVM_METHOD(DOMNamedNodeMap, __debugInfo) {
   return domnamednodemap_properties_map.debugInfo(Object{this_});
 }
 
-Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
+Object HHVM_METHOD(DOMNamedNodeMap, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
@@ -5253,7 +5240,7 @@ Variant HHVM_METHOD(DOMNodeList, item,
   return Object();
 }
 
-Variant HHVM_METHOD(DOMNodeList, getIterator) {
+Object HHVM_METHOD(DOMNodeList, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
@@ -5774,11 +5761,11 @@ Variant HHVM_METHOD(DOMNodeIterator, key) {
   return data->m_index;
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, next) {
+void HHVM_METHOD(DOMNodeIterator, next) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   if (data->m_iter) {
     data->m_iter.next();
-    return init_null();
+    return;
   }
 
   XMLNode curnode = nullptr;
@@ -5790,7 +5777,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
         data->m_objmap->m_nodetype == XML_ELEMENT_NODE) {
       if (!curnode->nodep()) {
         php_dom_throw_error(INVALID_STATE_ERR, 0);
-        return false;
+        return;
       }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
@@ -5799,7 +5786,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
         data->m_objmap->getBaseNodeData()->nodep();
       if (!basenode) {
         php_dom_throw_error(INVALID_STATE_ERR, 0);
-        return false;
+        return;
       }
       if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
                        basenode->type == XML_HTML_DOCUMENT_NODE)) {
@@ -5835,18 +5822,17 @@ err:
   } else {
     data->m_curobj.reset();
   }
-  return init_null();
+  return;
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, rewind) {
+void HHVM_METHOD(DOMNodeIterator, rewind) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   data->m_iter.reset();
   data->m_index = -1;
   data->reset_iterator();
-  return init_null();
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, valid) {
+bool HHVM_METHOD(DOMNodeIterator, valid) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   if (data->m_iter) {
     return !data->m_iter.end();
@@ -5936,8 +5922,8 @@ struct DOMDocumentExtension final : Extension {
     HHVM_ME(DOMDocument, getElementsByTagName);
     HHVM_ME(DOMDocument, getElementsByTagNameNS);
     HHVM_ME(DOMDocument, importNode);
-    HHVM_ME(DomDocument, _load);
-    HHVM_ME(DomDocument, _loadHTML);
+    HHVM_ME(DOMDocument, _load);
+    HHVM_ME(DOMDocument, _loadHTML);
     HHVM_ME(DOMDocument, normalizeDocument);
     HHVM_ME(DOMDocument, registerNodeClass);
     HHVM_ME(DOMDocument, relaxNGValidate);

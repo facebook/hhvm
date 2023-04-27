@@ -6,10 +6,10 @@
 
 use bitflags::bitflags;
 
-use crate::{
-    lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivium,
-    trivia_factory::SimpleTriviaFactory, trivia_kind::TriviaKind,
-};
+use crate::lexable_trivia::LexableTrivia;
+use crate::minimal_trivia::MinimalTrivium;
+use crate::trivia_factory::SimpleTriviaFactory;
+use crate::trivia_kind::TriviaKind;
 
 bitflags! {
     pub struct TriviaKinds : u8 {

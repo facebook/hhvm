@@ -63,8 +63,10 @@ TRACE_SET_MOD(hhbbc_stats);
   X(wh, "wait handle", is_specialized_wait_handle)                   \
   X(obj_sub, "sub obj", is_sub_obj)                                  \
   X(obj_exact, "exact obj", is_exact_obj)                            \
+  X(obj_isect, "isect obj", is_isect_obj)                            \
   X(cls_sub, "sub class", is_sub_cls)                                \
   X(cls_exact, "exact class", is_exact_cls)                          \
+  X(cls_isect, "isect class", is_isect_cls)                          \
   X(arr_val, "array value", is_specialized_array_like_arrval)        \
   X(arr_packedn, "array packedn", is_specialized_array_like_packedn) \
   X(arr_packed, "array packed", is_specialized_array_like_packed)    \
@@ -85,16 +87,6 @@ struct TypeStat {
 #define X(y, ...) std::atomic<uint64_t> spec_##y;
   SPEC_TYPES(X)
 #undef X
-};
-
-struct ISameCmp {
-  bool equal(SString s1, SString s2) const {
-    return s1->isame(s2);
-  }
-
-  size_t hash(SString s) const {
-    return s->hash();
-  }
 };
 
 #define TAG(x,...) 1 +
@@ -239,20 +231,29 @@ bool is_sub_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Sub;
+    dobj_of(t).isSub();
 }
 bool is_exact_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Exact;
+    dobj_of(t).isExact();
+}
+bool is_isect_obj(const Type& t) {
+  return
+    is_specialized_obj(t) &&
+    !is_specialized_wait_handle(t) &&
+    dobj_of(t).isIsect();
 }
 
 bool is_sub_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Sub;
+  return is_specialized_cls(t) && dcls_of(t).isSub();
 }
 bool is_exact_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Exact;
+  return is_specialized_cls(t) && dcls_of(t).isExact();
+}
+bool is_isect_cls(const Type& t) {
+  return is_specialized_cls(t) && dcls_of(t).isIsect();
 }
 
 void add_type(TypeStat& stat, const Type& t) {
@@ -353,7 +354,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
-  if (index.is_effect_free(&func)) {
+  if (index.is_effect_free_raw(&func)) {
     ++stats.effectFreeFuncs;
   } else {
     ++stats.effectfulFuncs;
@@ -373,7 +374,8 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
 
   if (!options.extendedStats) return;
 
-  auto const ctx = AnalysisContext { func.unit, cf, func.cls };
+  auto const ctx =
+    AnalysisContext { index.lookup_func_unit(func), cf, func.cls };
   auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
@@ -423,25 +425,6 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   }
 }
 
-void collect_stats(Stats& stats,
-                   const Index& index,
-                   const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& unit) {
-      for (auto const& c : unit->classes) {
-        collect_class(stats, index, *c);
-        for (auto const& m : c->methods) {
-          collect_func(stats, index, *m);
-        }
-      }
-      for (auto const& x : unit->funcs) {
-        collect_func(stats, index, *x);
-      }
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -449,7 +432,7 @@ void collect_stats(Stats& stats,
 //////////////////////////////////////////////////////////////////////
 
 StatsHolder::StatsHolder() {
-  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_stats, 1)) return;
   stats = new Stats{};
 }
 
@@ -463,26 +446,31 @@ StatsHolder allocate_stats() {
 
 void collect_stats(const StatsHolder& stats,
                    const Index& index,
-                   const php::Unit* unit) {
+                   const php::Unit& unit) {
   if (!stats) return;
-  for (auto& c : unit->classes) {
-    collect_class(*stats.stats, index, *c);
-    for (auto& m : c->methods) {
-      collect_func(*stats.stats, index, *m);
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) {
+      collect_class(*stats.stats, index, c);
+      for (auto const& m : c.methods) {
+        if (!m) continue;
+        collect_func(*stats.stats, index, *m);
+      }
     }
-  }
-  for (auto& x : unit->funcs) {
-    collect_func(*stats.stats, index, *x);
-  }
+  );
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { collect_func(*stats.stats, index, f); }
+  );
 }
 
 void print_stats(const StatsHolder& stats) {
   if (!stats) return;
 
   auto const str = show(*stats.stats);
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 2)) {
-    std::cout << str;
-  }
+  Trace::ftraceRelease("{}", str);
+
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_stats, 2)) return;
 
   auto stats_file = options.stats_file;
 

@@ -117,74 +117,12 @@ ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
 }
 
 template <bool Unlocked>
-NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
-  assertx(cls);
-  if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
-                AttrEnumClass))) {
-    raiseAbstractClassError(cls);
-  }
-  if (cls->hasReifiedGenerics()) {
-    if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
-      raise_warning_for_soft_reified(0, false, cls->name());
-    } else {
-      raise_error("Cannot create a new instance of a reified class without "
-                  "the reified generics");
-    }
-  }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(
-    cls,
-    [&](void* mem, uint8_t sizeFlag) {
-      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
-      return new (NotNull{}, mem) ObjectData(cls, flags);
-    }
-  );
-  if (UNLIKELY(cls->needsInitThrowable())) {
-    // may incref obj
-    throwable_init(obj);
-    assertx(obj->checkCount());
-  }
-  if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
-  }
-  return obj;
-}
-
-template <bool Unlocked>
 inline ObjectData* ObjectData::newInstance(Class* cls) {
   assertx(cls);
-  if (UNLIKELY(cls->hasReifiedGenerics() ||
-               cls->needsInitThrowable() ||
-               cls->hasReifiedParent())) {
-    return newInstanceSlow<Unlocked>(cls);
-  }
   if (UNLIKELY(cls->attrs() &
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
                 AttrEnumClass))) {
     raiseAbstractClassError(cls);
-  }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(
-    cls,
-    [&](void* mem, uint8_t sizeFlag) {
-      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
-      return new (NotNull{}, mem) ObjectData(cls, flags);
-    }
-  );
-  return obj;
-}
-
-template <bool Unlocked>
-inline ObjectData* ObjectData::newInstanceReified(Class* cls,
-                                                  ArrayData* reifiedTypes) {
-  assertx(cls);
-  if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
-                AttrEnumClass))) {
-    raiseAbstractClassError(cls);
-  }
-  if (cls->hasReifiedGenerics()) {
-    assertx(reifiedTypes);
-    checkClassReifiedGenericMismatch(cls, reifiedTypes);
   }
   auto obj = ObjectData::newInstanceImpl<Unlocked>(
     cls,
@@ -197,13 +135,6 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     // may incref obj
     throwable_init(obj);
     assertx(obj->checkCount());
-  }
-  if (cls->hasReifiedGenerics()) {
-    obj->setReifiedGenerics(cls, reifiedTypes);
-    return obj;
-  }
-  if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
   }
   return obj;
 }
@@ -224,21 +155,17 @@ inline void ObjectData::instanceInit(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
     if (cls->pinitVec().size() > 0) {
-      const Class::PropInitVec* propInitVec = m_cls->getPropData();
+      const Class::PropInitVec* propInitVec = cls->getPropData();
       assertx(propInitVec != nullptr);
       assertx(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(props(),
-                        propInitVec->data(),
-                        ObjectProps::sizeFor(nProps));
+        memcpy(props(), propInitVec->data(), ObjectProps::sizeFor(nProps));
       } else {
         deepInitHelper(props(), propInitVec, nProps);
       }
     } else {
       assertx(nProps == cls->declPropInit().size());
-      memcpy16_inline(props(),
-                      cls->declPropInit().data(),
-                      ObjectProps::sizeFor(nProps));
+      memcpy(props(), cls->declPropInit().data(), ObjectProps::sizeFor(nProps));
     }
   }
 }
@@ -265,7 +192,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
   tc.verifyProperty(val, m_cls, prop.cls, prop.name);
 
   if (debug && RuntimeOption::RepoAuthoritative) {
-    // The fact that uninitialized LateInit props are uninint isn't
+    // The fact that uninitialized LateInit props are uninit isn't
     // reflected in the repo-auth-type.
     if (type(val) != KindOfUninit || !(prop.attrs & AttrLateInit)) {
       always_assert(tvMatchesRepoAuthType(val.tv(), prop.repoAuthType));
@@ -299,8 +226,8 @@ inline void ObjectData::verifyPropTypeHint(Slot slot) {
 inline bool ObjectData::assertPropTypeHints() const {
   auto const end = m_cls->declProperties().size();
   for (size_t slot = 0; slot < end; ++slot) {
-    auto index = m_cls->propSlotToIndex(slot);
-    if (!assertTypeHint(props()->at(index), slot)) return false;
+    auto const prop = props()->at(m_cls->propSlotToIndex(slot));
+    if (!isLazyProp(prop) && !assertTypeHint(prop, slot)) return false;
   }
   return true;
 }
@@ -326,18 +253,6 @@ inline void ObjectData::unlockObject() {
    m_aux16 |= IsBeingConstructed;
 }
 
-inline bool ObjectData::hasUninitProps() const {
-  return getAttribute(HasUninitProps);
-}
-
-inline void ObjectData::setHasUninitProps() {
-  setAttribute(HasUninitProps);
-}
-
-inline void ObjectData::clearHasUninitProps() {
-  m_aux16 &= ~HasUninitProps;
-}
-
 inline bool ObjectData::isCollection() const {
   return m_kind >= HeaderKind::Vector && m_kind <= HeaderKind::ImmSet;
 }
@@ -347,7 +262,7 @@ inline bool ObjectData::isCppBuiltin() const {
 }
 
 inline bool ObjectData::isWaitHandle() const {
-  return isWaithandleKind(m_kind);
+  return isWaitHandleKind(m_kind);
 }
 
 inline bool ObjectData::isMutableCollection() const {

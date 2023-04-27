@@ -52,7 +52,7 @@ public:
   bool parse(const char *buf, int bufsize);
   Variant extract(const Variant& filename, const Variant& callbackfunc, int decode,
                   bool isfile);
-  Variant getPartData();
+  Array getPartData();
   Array getStructure();
   Resource findByName(const char *name);
 
@@ -153,4 +153,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -107,10 +107,23 @@ val log_localize :
 
 val increment_feature_count : Typing_env_types.env -> string -> unit
 
-val log_pessimise_prop : Typing_env_types.env -> Pos_or_decl.t -> string -> unit
+val log_pessimise_prop : Typing_env_types.env -> Pos.t -> string -> unit
+
+val log_pessimise_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string option -> unit
+
+val log_pessimise_poisoned_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string -> unit
 
 val log_pessimise_param :
-  Typing_env_types.env -> Pos_or_decl.t -> string option -> unit
+  Typing_env_types.env ->
+  is_promoted_property:bool ->
+  Pos.t ->
+  Ast_defs.param_kind ->
+  string ->
+  unit
+
+val log_sd_pass : ?level:int -> Typing_env_types.env -> Pos.t -> unit
 
 module GlobalInference : sig
   val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit

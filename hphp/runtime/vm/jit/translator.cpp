@@ -139,10 +139,6 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith        }},
   { OpSub,         {StackTop2,        Stack1,       OutArith        }},
   { OpMul,         {StackTop2,        Stack1,       OutArith        }},
-  /* Arithmetic ops that overflow ints to floats */
-  { OpAddO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpSubO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpMulO,        {StackTop2,        Stack1,       OutArithO       }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown      }},
   { OpMod,         {StackTop2,        Stack1,       OutUnknown      }},
@@ -190,8 +186,8 @@ static const struct {
 
   /*** 4. Control flow instructions ***/
 
+  { OpEnter,       {None,             None,         OutNone         }},
   { OpJmp,         {None,             None,         OutNone         }},
-  { OpJmpNS,       {None,             None,         OutNone         }},
   { OpJmpZ,        {Stack1,           None,         OutNone         }},
   { OpJmpNZ,       {Stack1,           None,         OutNone         }},
   { OpSwitch,      {Stack1,           None,         OutNone         }},
@@ -254,9 +250,7 @@ static const struct {
   /*** 8. Call instructions ***/
 
   { OpNewObj,      {Stack1,           Stack1,       OutObject       }},
-  { OpNewObjR,     {StackTop2,        Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpLockObj,     {Stack1,           Stack1,       OutSameAsInput1 }},
 
@@ -266,6 +260,8 @@ static const struct {
    */
   { OpFCallClsMethod,
                    {StackTop2,        StackN,       OutUnknown      }},
+  { OpFCallClsMethodM,
+                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
                    {None,             StackN,       OutUnknown      }},
   { OpFCallClsMethodS,
@@ -305,9 +301,9 @@ static const struct {
   { OpCheckThis,   {This,             None,         OutNone         }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
-                   {Local,            Local,        OutUnknown      }},
+                   {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyParamTypeTS,
-                   {Local|Stack1,     Local,        OutUnknown      }},
+                   {Local|Stack1,     None,         OutNone         }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyRetTypeTS,
@@ -323,7 +319,15 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClass        }},
   { OpRecordReifiedGeneric,
                    {Stack1,           Stack1,       OutVec          }},
-  { OpCheckReifiedGenericMismatch,
+  { OpCheckClsReifiedGenericMismatch,
+                   {Stack1,           None,         OutNone         }},
+  { OpClassHasReifiedGenerics,
+                   {Stack1,           Stack1,       OutBoolean      }},
+  { OpGetClsRGProp,
+                   {Stack1,           Stack1,       OutVec          }},
+  { OpHasReifiedParent,
+                   {Stack1,           Stack1,       OutBoolean      }},
+  { OpCheckClsRGSoft,
                    {Stack1,           None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
@@ -359,11 +363,13 @@ static const struct {
                    {Stack1,           Stack1,       OutClsMethLike  }},
   { OpResolveRClsMethodS,
                    {Stack1,           Stack1,       OutClsMethLike  }},
-
-  // TODO (T61651936): ResolveClass may return a classptr or a string
-  { OpResolveClass,{None,             Stack1,       OutUnknown      }},
+  { OpResolveClass,{None,             Stack1,       OutClass      }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
+  { OpVerifyImplicitContextState,
+                   {None,             None,         OutNone         }},
+  { OpCreateSpecialImplicitContext,
+                   {StackTop2,        Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/
 
@@ -396,7 +402,7 @@ static const struct {
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpSetM,        {Stack1|BStackN|MBase|MKey,
+  { OpSetM,        {Stack1|DontGuardStack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpSetRangeM,   {StackTop3|BStackN|MBase,
                                       None,         OutNone         }},
@@ -464,6 +470,7 @@ int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -513,6 +520,7 @@ int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -539,7 +547,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::Nop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
-  case Op::EntryNop:
     return true;
   default:
     return false;
@@ -745,6 +752,8 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
     }
   }
   if (isFCall(ni.op())) {
@@ -863,10 +872,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LIterNext:
   case Op::IterInit:
   case Op::LIterInit:
+  case Op::Enter:
+  case Op::Jmp:
   case Op::JmpZ:
   case Op::JmpNZ:
-  case Op::Jmp:
-  case Op::JmpNS:
   case Op::ClsCnsD:
   case Op::NewStructDict:
   case Op::Switch:
@@ -902,10 +911,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BitXor:
   case Op::Sub:
   case Op::Mul:
-  case Op::SubO:
-  case Op::MulO:
   case Op::Add:
-  case Op::AddO:
   case Op::ClassGetC:
   case Op::ClassGetTS:
   case Op::AKExists:
@@ -939,7 +945,11 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ColFromArray:
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
-  case Op::CheckReifiedGenericMismatch:
+  case Op::CheckClsReifiedGenericMismatch:
+  case Op::ClassHasReifiedGenerics:
+  case Op::GetClsRGProp:
+  case Op::HasReifiedParent:
+  case Op::CheckClsRGSoft:
   case Op::ConcatN:
   case Op::Concat:
   case Op::ContCheck:
@@ -953,6 +963,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Double:
   case Op::Dup:
   case Op::FCallClsMethod:
+  case Op::FCallClsMethodM:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
@@ -1000,9 +1011,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::NewObj:
-  case Op::NewObjR:
   case Op::NewObjD:
-  case Op::NewObjRD:
   case Op::NewObjS:
   case Op::Not:
   case Op::Null:
@@ -1060,11 +1069,12 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LockObj:
   case Op::ClsCnsL:
   case Op::SetImplicitContextByValue:
+  case Op::VerifyImplicitContextState:
+  case Op::CreateSpecialImplicitContext:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
   case Op::Nop:
-  case Op::EntryNop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::ClsCns:
@@ -1098,8 +1108,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
       op == OpAwaitAll || // similar to Await
       op == OpClsCnsD || // side exits if misses in the RDS
       op == OpThrowNonExhaustiveSwitch || // control flow breaks bb
-      op == OpVerifyParamTypeTS || // avoids combinatorial explosion
-      op == OpVerifyParamType) {   // with nullable types
+      op == OpVerifyParamTypeTS) { // avoids combinatorial explosion
+                                   // with nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,

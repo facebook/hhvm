@@ -8,6 +8,8 @@
 
 let foo_contents =
   {|<?hh //strict
+  <<file:__EnableUnstableFeatures("modules")>>
+  new module foo {}
   class Foo {
     public function foo (Bar $b) : int {
       A::class;
@@ -23,6 +25,8 @@ let foo_contents =
 
 let bar_contents =
   {|<?hh //strict
+  <<file:__EnableUnstableFeatures("modules")>>
+  module foo;
   class A {}
   class B<T> {}
   class D {}
@@ -81,6 +85,13 @@ let setup
         | `MangledSymbols -> false);
     }
   in
+  (* Since the common test has a module in it, always allow all files for module declarations *)
+  let tcopt =
+    {
+      tcopt with
+      GlobalOptions.tco_allow_all_files_for_module_declarations = true;
+    }
+  in
   let deps_mode = Typing_deps_mode.InMemoryMode None in
   let ctx =
     Provider_context.empty_for_tool
@@ -88,29 +99,19 @@ let setup
       ~tcopt
       ~backend:(Provider_backend.get ())
       ~deps_mode
+      ~package_info:Package.Info.empty
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
-    if
-      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-    then
-      ( Direct_decl_service.go
-          ctx
-          None
-          ~ide_files:Relative_path.Set.empty
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      Parsing_service.go_DEPRECATED
+    ( Direct_decl_service.go
         ctx
         None
-        Relative_path.Set.empty
+        ~ide_files:Relative_path.Set.empty
         ~get_next
-        popt
         ~trace:true
+        ~cache_decls:false,
+      Errors.empty,
+      Relative_path.Set.empty )
   in
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
@@ -132,6 +133,7 @@ let setup
           ~tcopt:(Provider_context.get_tcopt ctx)
           ~backend:(Provider_backend.get ())
           ~deps_mode:(Provider_context.get_deps_mode ctx)
+          ~package_info:(Provider_context.get_package_info ctx)
       in
       (sqlite_ctx, Naming_table.load_from_sqlite sqlite_ctx db_name)
     ) else

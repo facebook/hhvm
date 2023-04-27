@@ -37,18 +37,21 @@ type type_facts = {
   flags: int;
   require_extends: InvSSet.t;
   require_implements: InvSSet.t;
+  require_class: InvSSet.t;
   attributes: string list InvSMap.t;
 }
+
+type module_facts = unit
 
 type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
-  type_aliases: string list;
+  modules: module_facts InvSMap.t;
 }
 
 val empty : facts
 
-val facts_to_json : md5:string -> sha1:string -> facts -> Hh_json.json
+val facts_to_json : sha1:string -> facts -> Hh_json.json
 
 val facts_from_json : Hh_json.json -> facts option

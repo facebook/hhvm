@@ -4,7 +4,7 @@ class A {
  private $a;
  protected $b;
  public $c;
- static $d;
+ public static $d;
  }
 function f($a) {
  asort(inout $a);

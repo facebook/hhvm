@@ -51,11 +51,11 @@ function test4(vec<supportdyn<mixed>> $v):void {
 
 function voidfun():void { }
 
-function callvoid():?supportdynamic {
+function callvoid():supportdyn<mixed> {
   return voidfun();
 }
 
-function returnunion(bool $b):supportdynamic {
+function returnunion(bool $b):supportdyn<nonnull> {
   return $b ? new A() : new D();
 }
 

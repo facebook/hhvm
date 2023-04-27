@@ -66,12 +66,12 @@ type entry = {
       (** Derived from [contents]; contains additional preprocessing. *)
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
-    under ~full:true ~keep_errors:true *)
+      under ~full:true ~keep_errors:true *)
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
       (** NOT monotonic: depends on the decls of other files. *)
-  mutable naming_and_typing_errors: Errors.t option;
+  mutable all_errors: Errors.t option;
       (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
@@ -105,6 +105,7 @@ val empty_for_tool :
   tcopt:TypecheckerOptions.t ->
   backend:Provider_backend.t ->
   deps_mode:Typing_deps_mode.t ->
+  package_info:Package.Info.t ->
   t
 
 (** The empty context, for use with Multiworker workers. This assumes that the
@@ -215,3 +216,18 @@ val get_telemetry : t -> Telemetry.t
 
 (** This function resets the 'counters' associated with telemetry. *)
 val reset_telemetry : t -> unit
+
+(** Given a context that uses [Provider_backend.Pessimised_shared_memory] as
+its backend, return a context with the backend updated to use the given
+[pessimisation_info] instead. Due to the stateful nature of setting backends in
+general (see the Provider_backend.set_* functions), we make no attempt to
+support situations where the original backend isn't
+[Provider_backend.Pessimised_shared_memory] already and fail instead. *)
+val ctx_with_pessimisation_info_exn :
+  t -> Provider_backend.pessimisation_info -> t
+
+val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
+
+val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
+
+val get_package_info : t -> Package.Info.t

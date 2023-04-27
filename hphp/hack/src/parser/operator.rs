@@ -6,8 +6,10 @@
 
 mod operator_generated;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use parser_core_types::{parser_env::ParserEnv, token_kind::TokenKind};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 
@@ -88,6 +90,7 @@ impl Operator {
             IndexingOperator => 29,
             ScopeResolutionOperator => 30,
             DollarOperator => 31,
+            PackageOperator => 32,
         }
     }
 
@@ -132,7 +135,7 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | AwaitOperator | ReadonlyOperator => Assoc::RightAssociative,
+            | PrintOperator | AwaitOperator | ReadonlyOperator | PackageOperator => Assoc::RightAssociative,
         }
     }
 
@@ -155,6 +158,7 @@ impl Operator {
             TokenKind::Require_once => RequireOnceOperator,
             TokenKind::Print => PrintOperator,
             TokenKind::Readonly => ReadonlyOperator,
+            TokenKind::Package => PackageOperator,
             _ => panic!("not a unary operator"),
         }
     }

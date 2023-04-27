@@ -31,7 +31,6 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_network-internal.h
     ext_std_options.h
     ext_std_output.h
-    ext_std_process.h
     ext_std_string.h
     ext_std_variable.h
   SYSTEMLIB

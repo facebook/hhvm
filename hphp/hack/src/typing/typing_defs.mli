@@ -64,6 +64,7 @@ type fun_elt = {
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
   fe_support_dynamic_type: bool;
+  fe_no_auto_dynamic: bool;
 }
 [@@deriving show]
 
@@ -82,7 +83,18 @@ type class_const = {
 }
 [@@deriving show]
 
-type module_def_type = { mdt_pos: Pos_or_decl.t } [@@deriving show]
+type module_reference =
+  | MRGlobal
+  | MRPrefix of string
+  | MRExact of string
+[@@deriving show]
+
+type module_def_type = {
+  mdt_pos: Pos_or_decl.t;
+  mdt_exports: module_reference list option;
+  mdt_imports: module_reference list option;
+}
+[@@deriving show]
 
 type requirement = Pos_or_decl.t * decl_ty
 
@@ -126,10 +138,13 @@ type typedef_type = {
   td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
-  td_constraint: decl_ty option;
+  td_as_constraint: decl_ty option;
+  td_super_constraint: decl_ty option;
   td_type: decl_ty;
   td_is_ctx: bool;
   td_attributes: user_attribute list;
+  td_internal: bool;
+  td_docs_url: string option;
 }
 [@@deriving show]
 
@@ -141,6 +156,7 @@ type deserialization_error =
   | Wrong_phase of string
   | Not_supported of string
   | Deserialization_error of string
+[@@deriving show]
 
 module Type_expansions : sig
   (** A list of the type defs and type access we have expanded thus far. Used
@@ -184,6 +200,9 @@ val empty_expand_env_with_on_error :
 val add_type_expansion_check_cycles :
   expand_env -> Pos_or_decl.t * string -> expand_env * Pos.t option option
 
+(** Returns whether there was an attempt at expanding a cyclic type. *)
+val cyclic_expansion : expand_env -> bool
+
 val get_var : 'a ty -> Ident.t option
 
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option
@@ -192,6 +211,8 @@ val get_var_i : internal_type -> Ident.t option
 
 val is_tyvar : 'a ty -> bool
 
+val is_tyvar_i : internal_type -> bool
+
 val is_var_v : 'a ty -> Ident.t -> bool
 
 val is_generic : 'a ty -> bool
@@ -199,6 +220,8 @@ val is_generic : 'a ty -> bool
 val is_dynamic : 'a ty -> bool
 
 val is_nonnull : 'a ty -> bool
+
+val is_nothing : 'a ty -> bool
 
 val is_fun : 'a ty -> bool
 
@@ -255,6 +278,11 @@ module DependentKind : sig
 
   val is_generic_dep_ty : string -> bool
 end
+
+(** Returns [true] if both origins are available and identical.
+    If this function returns [true], the two types that have
+    the origins provided must be identical. *)
+val same_type_origin : type_origin -> type_origin -> bool
 
 module ShapeFieldMap : sig
   include module type of struct
@@ -335,6 +363,9 @@ val class_id_equal : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> bool
 val has_member_compare :
   normalize_lists:bool -> has_member -> has_member -> Ppx_deriving_runtime.int
 
+val can_index_compare :
+  normalize_lists:bool -> can_index -> can_index -> Ppx_deriving_runtime.int
+
 val destructure_compare :
   normalize_lists:bool -> destructure -> destructure -> Ppx_deriving_runtime.int
 
@@ -350,6 +381,10 @@ val constraint_ty_equal :
   ?normalize_lists:bool -> constraint_type -> constraint_type -> bool
 
 val ty_equal : ?normalize_lists:bool -> 'a ty -> 'a ty -> bool
+
+val compare_exact : exact -> exact -> int
+
+val equal_exact : exact -> exact -> bool
 
 val equal_internal_type : internal_type -> internal_type -> bool
 
@@ -429,6 +464,8 @@ val get_ce_support_dynamic_type : class_elt -> bool
 
 val get_ce_xhp_attr : class_elt -> xhp_attr option
 
+val get_ce_safe_global_variable : class_elt -> bool
+
 val make_ce_flags :
   xhp_attr:xhp_attr option ->
   abstract:bool ->
@@ -442,6 +479,7 @@ val make_ce_flags :
   readonly_prop:bool ->
   support_dynamic_type:bool ->
   needs_init:bool ->
+  safe_global_variable:bool ->
   Typing_defs_flags.ClassElt.t
 
 val class_elt_is_private_not_lsb : class_elt -> bool
@@ -449,6 +487,8 @@ val class_elt_is_private_not_lsb : class_elt -> bool
 val class_elt_is_private_or_protected_not_lsb : class_elt -> bool
 
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a
+
+val is_typeconst_type_abstract : typeconst_type -> bool
 
 module Attributes : sig
   val mem : string -> user_attribute Hh_prelude.List.t -> bool

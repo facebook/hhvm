@@ -15,11 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_SESSION_H_
-#define incl_HPHP_EXT_ASIO_SESSION_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/util/rds-local.h"
@@ -30,6 +31,7 @@ namespace HPHP {
 struct ActRec;
 struct c_Awaitable;
 struct c_AwaitAllWaitHandle;
+struct c_ConcurrentWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_ResumableWaitHandle;
 
@@ -127,7 +129,12 @@ struct AsioSession final {
   // AwaitAllWaitHandle callbacks:
   void setOnAwaitAllCreate(const Variant& callback);
   bool hasOnAwaitAllCreate() { return !!m_onAwaitAllCreate; }
-  void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, const Variant& dependencies);
+  void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, Array&& dependencies);
+
+  // ConcurrentWaitHandle callbacks:
+  void setOnConcurrentCreate(const Variant& callback);
+  bool hasOnConcurrentCreate() { return !!m_onConcurrentCreate; }
+  void onConcurrentCreate(c_ConcurrentWaitHandle* wh, Array&& dependencies);
 
   // ConditionWaitHandle callbacks:
   void setOnConditionCreate(const Variant& callback);
@@ -174,6 +181,7 @@ private:
   Object m_onResumableSuccess;
   Object m_onResumableFail;
   Object m_onAwaitAllCreate;
+  Object m_onConcurrentCreate;
   Object m_onConditionCreate;
   Object m_onExtThreadEventCreate;
   Object m_onExtThreadEventSuccess;
@@ -184,5 +192,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // incl_HPHP_EXT_ASIO_SESSION_H_

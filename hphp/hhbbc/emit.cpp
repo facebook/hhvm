@@ -36,6 +36,7 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
@@ -58,11 +59,6 @@ const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-struct PceInfo {
-  PreClassEmitter* pce;
-  Id origId;
-};
-
 struct EmitUnitState {
   explicit EmitUnitState(const Index& index, const php::Unit* unit) :
       index(index), unit(unit) {}
@@ -81,8 +77,15 @@ struct EmitUnitState {
    * While emitting bytecode, we keep track of the classes and funcs
    * we emit.
    */
-  std::vector<Offset>  classOffsets;
-  std::vector<PceInfo> pceInfo;
+  std::vector<std::pair<php::Class*, PreClassEmitter*>> pces;
+
+  /*
+   * Whether a closure in a CreateCl opcode has been seen before
+   * (CreateCls within the same func are allowed to refer to the same
+   * closure, so we must avoid creating duplicate PreClassEmitters for
+   * them).
+   */
+  hphp_fast_set<const php::Class*> seenClosures;
 };
 
 /*
@@ -110,20 +113,21 @@ template<Op op, typename F, typename Bc>
 std::enable_if_t<std::remove_reference_t<Bc>::op != op>
 caller(F&&, Bc&&) {}
 
-Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto cls = euState.unit->classes[id].get();
-  euState.pceInfo.push_back(
-    { ue.newPreClassEmitter(cls->name->toCppString()), id }
+void recordClass(EmitUnitState& euState,
+                 UnitEmitter& ue,
+                 php::Class& cls) {
+  euState.pces.emplace_back(
+    &cls,
+    ue.newPreClassEmitter(cls.name->toCppString())
   );
-  return euState.pceInfo.back().pce->id();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
+php::SrcLoc srcLoc(const php::Unit& unit, const php::Func& func, int32_t ix) {
   if (ix < 0) return php::SrcLoc{};
-  auto const unit = func.originalUnit ? func.originalUnit : func.unit;
-  return unit->srcLocs[ix];
+  assertx(ix < unit.srcLocs.size());
+  return unit.srcLocs[ix];
 }
 
 /*
@@ -266,7 +270,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
   // Offset of the last emitted bytecode.
   Offset lastOff { 0 };
 
-  bool traceBc = false;
+  auto const unit = euState.index.lookup_func_original_unit(*func);
 
   SCOPE_ASSERT_DETAIL("emit") {
     std::string ret;
@@ -331,10 +335,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     auto const startOffset = fe.bcPos();
     lastOff = startOffset;
 
-    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(func, inst),
-           show(srcLoc(*func, inst.srcLoc)));
-
-    if (options.TraceBytecodes.count(inst.op)) traceBc = true;
+    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(*func, inst),
+           show(srcLoc(*unit, *func, inst.srcLoc)));
 
     auto const emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
@@ -375,7 +377,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     };
 
     auto const emit_srcloc = [&] {
-      auto const sl = srcLoc(*func, inst.srcLoc);
+      auto const sl = srcLoc(*unit, *func, inst.srcLoc);
       auto const loc = sl.isValid() ?
         Location::Range(sl.start.line, sl.start.col, sl.past.line, sl.past.col)
         : Location::Range(-1,-1,-1,-1);
@@ -394,19 +396,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 
     auto const ret_assert = [&] { assertx(currentStackDepth == inst.numPop()); };
 
-    auto const createcl  = [&] (auto& data) {
-      auto& id = data.arg2;
-      if (euState.classOffsets[id] != kInvalidOffset) {
-        for (auto const& elm : euState.pceInfo) {
-          if (elm.origId == id) {
-            id = elm.pce->id();
-            return;
-          }
-        }
-        always_assert(false);
-      }
-      euState.classOffsets[id] = startOffset;
-      id = recordClass(euState, ue, id);
+    auto const createcl = [&] (auto const& data) {
+      auto [_, cls] = euState.index.resolve_closure_class(
+        Context { euState.unit, nullptr, nullptr },
+        data.str2
+      );
+      assertx(cls->unit == euState.unit->filename);
+      // Skip closures we've already recorded
+      if (!euState.seenClosures.emplace(cls).second) return;
+      recordClass(euState, ue, const_cast<php::Class&>(*cls));
     };
 
     auto const emit_lar  = [&](const LocalRange& range) {
@@ -624,15 +622,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     auto end = b->hhbcs.end();
     auto flip = false;
 
-    if (is_single_nop(*b)) {
-      if (blockIt == begin(ret.blockOrder)) {
-        // If the first block is just a Nop, this means that there is
-        // a jump to the second block from somewhere in the
-        // function. We don't want this, so we change this nop to an
-        // EntryNop so it doesn't get optimized away
-        emit_inst(bc_with_loc(b->hhbcs.front().srcLoc, bc::EntryNop {}));
-      }
-    } else {
+    if (!is_single_nop(*b)) {
       // If the block ends with JmpZ or JmpNZ to the next block, flip
       // the condition to make the fallthrough the next block
       if (b->hhbcs.back().op == Op::JmpZ ||
@@ -663,11 +653,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1] != fallthrough) {
-        if (b->fallthroughNS) {
-          emit_inst(bc::JmpNS { fallthrough });
-        } else {
-          emit_inst(bc::Jmp { fallthrough });
-        }
+        emit_inst(bc::Jmp { fallthrough });
 
         auto const nextExnId = func.blocks()[fallthrough]->exnNodeId;
         auto const parent = commonParent(*func, nextExnId, b->exnNodeId);
@@ -692,12 +678,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     FTRACE(2, "      block {} end: {}\n", bid, info.past);
   }
 
-  if (traceBc) {
-    FTRACE(0, "TraceBytecode (emit): {}::{} in {}\n",
-           func->cls ? func->cls->name->data() : "",
-           func->name, func->unit->filename);
-  }
-
   return ret;
 }
 
@@ -717,7 +697,6 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       pinfo.upperBounds = param.upperBounds;
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
-      pinfo.builtinType = param.builtinType;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
       if (param.readonly) pinfo.setFlag(Func::ParamInfo::Flags::Readonly);
       if (param.isVariadic) pinfo.setFlag(Func::ParamInfo::Flags::Variadic);
@@ -983,7 +962,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::WideFunc& func,
 void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
                       php::WideFunc& wf, const EmitBcInfo& info) {
   auto const& func = *wf;
-  if (info.containsCalls) fe.containsCalls = true;;
+  if (info.containsCalls) fe.containsCalls = true;
 
   emit_locals_and_params(fe, func, info);
   emit_ehent_tree(fe, wf, info);
@@ -994,12 +973,14 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.retUpperBounds = func.returnUBs;
   fe.originalFilename =
     func.originalFilename ? func.originalFilename :
-    func.originalUnit ? func.originalUnit->filename : nullptr;
+    func.originalUnit ? func.originalUnit : nullptr;
+  fe.originalModuleName = func.originalModuleName;
+  fe.requiresFromOriginalModule = func.requiresFromOriginalModule;
   fe.isClosureBody = func.isClosureBody;
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.nativeInfo != nullptr;
+  fe.isNative = func.isNative;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
@@ -1020,9 +1001,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
     }
   }
 
-  if (func.nativeInfo) {
-    fe.hniReturnType = func.nativeInfo->returnType;
-  }
   fe.retTypeConstraint = func.retTypeConstraint;
 
   fe.maxStackCells = info.maxStackDepth +
@@ -1085,7 +1063,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
 }
 
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
-                Offset offset, php::Class& cls) {
+                php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
   assertx(cls.attrs & AttrUnique);
   assertx(cls.attrs & AttrPersistent);
@@ -1103,8 +1081,6 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   for (auto& x : cls.includedEnumNames)  pce->addEnumInclude(x);
   for (auto& x : cls.usedTraitNames)     pce->addUsedTrait(x);
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
-  for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
-  for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
 
   pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
 
@@ -1118,7 +1094,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       continue;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
-      assertx(cconst.cls == &cls);
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
@@ -1128,7 +1104,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.isFromTrait
       );
     } else if (!cconst.val.has_value()) {
-      assertx(cconst.cls == &cls);
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addAbstractConstant(
@@ -1140,7 +1116,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       needs86cinit |= cconst.val->m_type == KindOfUninit;
       pce->addConstant(
         cconst.name,
-        (cconst.cls == &cls) ? nullptr : cconst.cls->name,
+        cconst.cls->isame(cls.name) ? nullptr : cconst.cls,
         &cconst.val.value(),
         ArrNR{cconst.resolvedTypeStructure},
         cconst.kind,
@@ -1152,8 +1128,9 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   }
 
   for (auto& m : cls.methods) {
+    if (!m) continue; // Removed
     if (!needs86cinit && m->name == s_86cinit.get()) continue;
-    FTRACE(2, "    method: {}\n", m->name->data());
+    FTRACE(2, "    method: {}\n", m->name);
     auto const fe = ue.newMethodEmitter(m->name, pce);
     emit_func(state, ue, *fe, *m);
     pce->addMethod(fe);
@@ -1209,7 +1186,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       }();
     }
 
-    if (!everModified && (attrs & AttrStatic)) {
+    if (!everModified && (attrs & AttrStatic) && !propTy.is(BBottom)) {
       attrs |= AttrPersistent;
     }
 
@@ -1261,10 +1238,13 @@ void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
 void emit_module(UnitEmitter& ue, const php::Module& module) {
   Module m {
     module.name,
+    module.srcInfo.docComment,
     (int)std::get<0>(module.srcInfo.loc),
     (int)std::get<1>(module.srcInfo.loc),
     module.attrs,
-    module.userAttributes
+    module.userAttributes,
+    module.exports,
+    module.imports
   };
   ue.addModule(m);
 }
@@ -1273,81 +1253,74 @@ void emit_module(UnitEmitter& ue, const php::Module& module) {
 
 }
 
-std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
+std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   Trace::Bump bumper{
     Trace::hhbbc_emit, kSystemLibBump, is_systemlib_part(unit)
   };
 
-  assertx(check(unit));
+  assertx(check(unit, index));
 
-  auto ue = std::make_unique<UnitEmitter>(unit.sha1,
+  static std::atomic<uint64_t> nextUnitId{0};
+  auto unitSn = nextUnitId++;
+
+  auto ue = std::make_unique<UnitEmitter>(SHA1 { unitSn },
                                           SHA1{},
-                                          Native::s_noNativeFuncs);
+                                          Native::s_noNativeFuncs,
+                                          unit.packageInfo);
   FTRACE(1, "  unit {}\n", unit.filename->data());
-  ue->m_sn = unit.sn;
+  ue->m_sn = unitSn;
   ue->m_filepath = unit.filename;
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
   ue->m_moduleName = unit.moduleName;
 
   if (unit.fatalInfo) {
+    // We should have dealt with verifier failures long ago.
+    assertx(unit.fatalInfo->fatalLoc.has_value());
     ue->m_fatalUnit = true;
     ue->m_fatalOp = unit.fatalInfo->fatalOp;
-    ue->m_fatalLoc = unit.fatalInfo->fatalLoc;
+    ue->m_fatalLoc = *unit.fatalInfo->fatalLoc;
     ue->m_fatalMsg = unit.fatalInfo->fatalMsg;
   }
 
   EmitUnitState state { index, &unit };
-  state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 
-  // Go thought all constant and see if they still need their matching 86cinit
-  // func. In repo mode we are able to optimize away most of them away. And if
-  // the const don't need them anymore we should not emit them.
-  std::unordered_set<
-    const StringData*,
-    string_data_hash,
-    string_data_same
-  > const_86cinit_funcs;
+  // Go thought all constants and see if they still need their
+  // matching 86cinit func. In repo mode we are able to optimize away
+  // most of them away. And if the const don't need them anymore we
+  // should not emit them.
+  hphp_fast_set<const StringData*> const_86cinit_funcs;
   for (size_t id = 0; id < unit.constants.size(); ++id) {
-    auto& c = unit.constants[id];
+    auto const& c = unit.constants[id];
     if (type(c->val) != KindOfUninit) {
-      const_86cinit_funcs.insert(Constant::funcNameFromName(c->name));
+      const_86cinit_funcs.emplace(Constant::funcNameFromName(c->name));
     }
   }
 
-  /*
-   * Top level funcs are always defined when the unit is loaded, and
-   * don't have a DefFunc bytecode. Process them up front.
-   */
-  for (size_t id = 0; id < unit.funcs.size(); ++id) {
-    auto const f = unit.funcs[id].get();
-    if (const_86cinit_funcs.find(f->name) != const_86cinit_funcs.end()) {
-      continue;
+  index.for_each_unit_class_mutable(
+    unit,
+    [&] (php::Class& c) {
+      // No reason to include closures unless there's a reachable
+      // CreateCl.
+      if (is_closure(c)) return;
+      recordClass(state, *ue, c);
     }
-    auto fe = ue->newFuncEmitter(f->name);
-    emit_func(state, *ue, *fe, *f);
-  }
+  );
 
-  /*
-   * Find any top-level classes that need to be included due to
-   * hoistability.
-   */
-  for (size_t id = 0; id < unit.classes.size(); ++id) {
-    if (state.classOffsets[id] != kInvalidOffset) continue;
-    auto const c = unit.classes[id].get();
-    // Closures are AlwaysHoistable; but there's no need to include
-    // them unless there's a reachable CreateCl.
-    if (is_closure(*c)) continue;
-    recordClass(state, *ue, id);
-  }
+  index.for_each_unit_func_mutable(
+    unit,
+    [&] (php::Func& f) {
+      if (const_86cinit_funcs.count(f.name)) return;
+      auto fe = ue->newFuncEmitter(f.name);
+      emit_func(state, *ue, *fe, f);
+    }
+  );
 
-  size_t pceId = 0;
-  // Note that state.pceInfo can grow inside the loop
-  while (pceId < state.pceInfo.size()) {
-    auto const& pceInfo = state.pceInfo[pceId++];
-    auto const id = pceInfo.origId;
-    emit_class(state, *ue, pceInfo.pce,
-               state.classOffsets[id], *unit.classes[id]);
+  // Note that state.pces can grow inside the loop due to discovering
+  // more closures.
+  for (size_t idx = 0; idx < state.pces.size(); ++idx) {
+    auto const [cls, pce] = state.pces[idx];
+    emit_class(state, *ue, pce, *cls);
   }
 
   for (size_t id = 0; id < unit.typeAliases.size(); ++id) {

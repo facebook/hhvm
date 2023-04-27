@@ -24,7 +24,7 @@ abstract final class ZendGoodExtSoapTestsServer025 {
 <<__EntryPoint>>
 function entrypoint_server025(): void {
 
-  ZendGoodExtSoapTestsServer025::$server = new soapserver(dirname(__FILE__)."/server025.wsdl");
+  ZendGoodExtSoapTestsServer025::$server = new SoapServer(dirname(__FILE__)."/server025.wsdl");
   ZendGoodExtSoapTestsServer025::$server->addFunction("test");
 
   $HTTP_RAW_POST_DATA = <<<EOF

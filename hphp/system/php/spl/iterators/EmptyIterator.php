@@ -68,9 +68,9 @@ class EmptyIterator implements \HH\Iterator {
    * The EmptyIterator valid() method. Warning: This function is currently
    * not documented; only its argument list is available.
    *
-   * @return     mixed   FALSE
+   * @return     bool    FALSE
    */
-  public function valid() {
+  public function valid(): bool {
     return false;
   }
 

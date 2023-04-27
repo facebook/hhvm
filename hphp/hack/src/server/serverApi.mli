@@ -13,7 +13,6 @@ val make_local_server_api :
   Naming_table.t ->
   root:string ->
   init_id:string ->
-  enable_disk_heap:bool ->
   deps_mode:Typing_deps_mode.t ->
   (module LocalServerApi)
 

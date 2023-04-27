@@ -1,5 +1,9 @@
 File root|module_methods.php--modules.php
-[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:8-9] }))]
+[("A",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [4:12-13]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
 
 File root|module_methods.php--A.php
 [("\\A",
@@ -7,32 +11,33 @@ File root|module_methods.php--A.php
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-       sc_module = (Some ([4:54-57], "A")); sc_name = ([6:7-8], "\\A");
+       sc_module = (Some ([5:8-9], "A")); sc_name = ([7:7-8], "\\A");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = [];
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([8:19-20], "f");
+       [{ Shallow_decl_defs.sm_name = ([8:21-22], "f");
           sm_type =
-          (Rwitness_from_decl ([8:19-20]),
+          (Rwitness_from_decl ([8:21-22]),
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-                ft_implicit_params = { capability = (CapDefaults [8:19-20]) };
+                ft_implicit_params = { capability = (CapDefaults [8:21-22]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([8:24-28]), (Tprim Tvoid)) };
+                  et_type = (Rhint ([8:26-30]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC} }));
+                ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
           sm_visibility = Internal; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }))
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 File root|module_methods.php--main.php
@@ -52,9 +57,7 @@ File root|module_methods.php--main.php
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
        fe_pos = [4:10-14]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }))
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]
-
-They matched!

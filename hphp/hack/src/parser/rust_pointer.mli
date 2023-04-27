@@ -6,7 +6,7 @@
  *
  *)
 
-type t [@@deriving show]
+type t [@@deriving show, sexp_of]
 
 (* Assumptions:
  *  - the only pointers we leak are pointers to positioned syntax trees

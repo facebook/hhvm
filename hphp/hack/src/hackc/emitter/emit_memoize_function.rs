@@ -2,66 +2,71 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use ast_scope::{self, Scope, ScopeItem};
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use emit_pos::emit_pos_then;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
-use ffi::{Slice, Str};
-use hhbc::{
-    hhas_attribute::{self, HhasAttribute},
-    hhas_body::HhasBody,
-    hhas_coeffects::HhasCoeffects,
-    hhas_function::{HhasFunction, HhasFunctionFlags},
-    hhas_param::HhasParam,
-    hhas_pos::HhasSpan,
-    hhas_type::HhasTypeInfo,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, TypedValue,
-};
+use ffi::Slice;
+use ffi::Str;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Coeffects;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::Function;
+use hhbc::FunctionFlags;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::Param;
+use hhbc::Span;
+use hhbc::TypeInfo;
+use hhbc::TypedValue;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options, RepoFlags};
-use oxidized::{ast as T, pos::Pos};
+use options::Options;
+use oxidized::ast;
+use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_param;
 
 pub fn is_interceptable(opts: &Options) -> bool {
-    opts.hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
-        && !opts.repo_flags.contains(RepoFlags::AUTHORITATIVE)
+    opts.hhbc.jit_enable_rename_function && !opts.hhbc.repo_authoritative
 }
 
 pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    fd: &'a T::FunDef,
-    user_attrs: &'a [HhasAttribute<'arena>],
+    fd: &'a ast::FunDef,
+    user_attrs: &'a [Attribute<'arena>],
     is_memoize_impl: bool,
 ) -> Attr {
     let f = &fd.fun;
     let is_systemlib = emitter.systemlib();
     let is_dyn_call =
-        is_systemlib || (hhas_attribute::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_prov_skip_frame = hhas_attribute::has_provenance_skip_frame(user_attrs);
-    let is_meth_caller = hhas_attribute::has_meth_caller(user_attrs);
+        is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
+    let is_meth_caller = hhbc::has_meth_caller(user_attrs);
 
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
     attrs.set(Attr::AttrInterceptable, is_interceptable(emitter.options()));
-    attrs.set(
-        Attr::AttrIsFoldable,
-        hhas_attribute::has_foldable(user_attrs),
-    );
+    attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
-    attrs.set(
-        Attr::AttrNoInjection,
-        hhas_attribute::is_no_injection(user_attrs),
-    );
+    attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));
     attrs.set(Attr::AttrPersistent, is_systemlib);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
     attrs.set(Attr::AttrUnique, is_systemlib);
+    attrs.set(Attr::AttrInternal, fd.internal);
     attrs
 }
 
@@ -70,14 +75,12 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     original_id: hhbc::FunctionName<'arena>,
     renamed_id: &hhbc::FunctionName<'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    fd: &'a T::FunDef,
-) -> Result<HhasFunction<'arena>> {
+    fd: &'a ast::FunDef,
+) -> Result<Function<'arena>> {
     let alloc = emitter.alloc;
     let f = &fd.fun;
-    emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
-    let scope = Scope {
-        items: vec![ScopeItem::Function(ast_scope::Fun::new_ref(fd))],
-    };
+    emit_memoize_helpers::check_memoize_possible(&(fd.name).0, &f.params, false)?;
+    let scope = Scope::with_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     let mut tparams = scope
         .get_tparams()
         .iter()
@@ -85,27 +88,27 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
+    attributes.extend(emit_attribute::add_reified_attribute(alloc, &fd.tparams));
     let return_type_info = emit_body::emit_return_type_info(
         alloc,
         &tparams,
         f.fun_kind.is_fasync(), /* skip_awaitable */
         f.ret.1.as_ref(),
     )?;
-    let is_reified = f
+    let is_reified = fd
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
+    let should_emit_implicit_context = hhbc::is_keyed_by_ic_memoize(attributes.iter());
+    let is_make_ic_inaccessible_memoize = hhbc::is_make_ic_inaccessible_memoize(attributes.iter());
+    let is_soft_make_ic_inaccessible_memoize =
+        hhbc::is_soft_make_ic_inaccessible_memoize(attributes.iter());
+    let should_make_ic_inaccessible =
+        if is_make_ic_inaccessible_memoize || is_soft_make_ic_inaccessible_memoize {
+            Some(is_soft_make_ic_inaccessible_memoize)
+        } else {
+            None
+        };
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -118,8 +121,9 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         f.fun_kind.is_fasync(),
         is_reified,
         should_emit_implicit_context,
+        should_make_ic_inaccessible,
     )?;
-    let coeffects = HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
+    let coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     let body = make_wrapper_body(
         emitter,
         env,
@@ -129,15 +133,15 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         body_instrs,
     )?;
 
-    let mut flags = HhasFunctionFlags::empty();
-    flags.set(HhasFunctionFlags::ASYNC, f.fun_kind.is_fasync());
+    let mut flags = FunctionFlags::empty();
+    flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let attrs = get_attrs_for_fun(emitter, fd, &attributes, false);
 
-    Ok(HhasFunction {
+    Ok(Function {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name: original_id,
         body,
-        span: HhasSpan::from_pos(&f.span),
+        span: Span::from_pos(&f.span),
         coeffects,
         flags,
         attrs,
@@ -149,16 +153,24 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    ast_params: &[T::FunParam],
+    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let (fun, decl_vars) = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context
     {
-        make_memoize_function_no_params_code(e, env, deprecation_info, renamed_id, is_async)
+        make_memoize_function_no_params_code(
+            e,
+            env,
+            deprecation_info,
+            renamed_id,
+            is_async,
+            should_make_ic_inaccessible,
+        )
     } else {
         make_memoize_function_with_params_code(
             e,
@@ -171,6 +183,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
             is_async,
             is_reified,
             should_emit_implicit_context,
+            should_make_ic_inaccessible,
         )
     }?;
     Ok((emit_pos_then(pos, fun), decl_vars))
@@ -181,12 +194,13 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    ast_params: &[T::FunParam],
+    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = e.alloc;
     let param_count = hhas_params.len();
@@ -231,7 +245,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         (instr::empty(), instr::empty())
     } else {
         (
-            instr::cgetl(generics_local),
+            instr::c_get_l(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
                 Local::new(param_count + first_unnamed_idx),
                 generics_local,
@@ -251,39 +265,48 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         start: first_unnamed_local,
         len: key_count.try_into().unwrap(),
     };
+    let ic_stash_local = Local::new(first_unnamed_idx + (key_count) as usize);
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
         if is_async {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, local_range),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, local_range),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
-            InstrSeq::gather(vec![instr::memoget(notfound, local_range), instr::retc()])
+            InstrSeq::gather(vec![instr::memo_get(notfound, local_range), instr::ret_c()])
         },
         instr::label(notfound),
-        instr::nulluninit(),
-        instr::nulluninit(),
+        instr::null_uninit(),
+        instr::null_uninit(),
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
-        instr::fcallfuncd(fcall_args, renamed_id),
-        instr::memoset(local_range),
+        emit_memoize_helpers::with_possible_ic(
+            alloc,
+            e.label_gen_mut(),
+            ic_stash_local,
+            instr::f_call_func_d(fcall_args, renamed_id),
+            should_make_ic_inaccessible,
+        ),
+        instr::memo_set(local_range),
         if is_async {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(local_range),
-                instr::retc(),
+                instr::memo_set_eager(local_range),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
         default_value_setters,
     ]);
@@ -296,6 +319,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue<'arena>]>,
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = e.alloc;
     let notfound = e.label_gen_mut().next_regular();
@@ -312,35 +336,44 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         if is_async { Some(eager_set) } else { None },
         None,
     );
+    let ic_stash_local = Local::new(0);
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
+        instr::verify_implicit_context_state(),
         if is_async {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
-                instr::memoget(notfound, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get(notfound, LocalRange::EMPTY),
+                instr::ret_c(),
             ])
         },
         instr::label(notfound),
-        instr::nulluninit(),
-        instr::nulluninit(),
-        instr::fcallfuncd(fcall_args, renamed_id),
-        instr::memoset(LocalRange::default()),
+        instr::null_uninit(),
+        instr::null_uninit(),
+        emit_memoize_helpers::with_possible_ic(
+            alloc,
+            e.label_gen_mut(),
+            ic_stash_local,
+            instr::f_call_func_d(fcall_args, renamed_id),
+            should_make_ic_inaccessible,
+        ),
+        instr::memo_set(LocalRange::EMPTY),
         if is_async {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(LocalRange::default()),
-                instr::retc(),
+                instr::memo_set_eager(LocalRange::EMPTY),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
     ]);
     Ok((instrs, Vec::new()))
@@ -349,11 +382,11 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
-    return_type_info: HhasTypeInfo<'arena>,
-    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
+    return_type_info: TypeInfo<'arena>,
+    params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
     body_instrs: InstrSeq<'arena>,
-) -> Result<HhasBody<'arena>> {
+) -> Result<Body<'arena>> {
     emit_body::make_body(
         emitter.alloc,
         emitter,

@@ -1,0 +1,2 @@
+interface
+An `interface` defines signatures for methods that classes must implement.

@@ -40,7 +40,6 @@ class A {
   public function double() {}
   public function echo() {}
   public function else() {}
-  public function elseif() {}
   public function empty() {}
   public function enddeclare() {}
   public function endfor() {}
@@ -150,7 +149,6 @@ class A {
     $this->double();
     $this->echo();
     $this->else();
-    $this->elseif();
     $this->empty();
     $this->enddeclare();
     $this->endfor();
@@ -261,7 +259,6 @@ $a->do();
 $a->double();
 $a->echo();
 $a->else();
-$a->elseif();
 $a->empty();
 $a->enddeclare();
 $a->endfor();

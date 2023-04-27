@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-22], "\\TestTraversable"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+      c_vars = [];
       c_methods =
       [{ m_span = [4:3-50]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -20,23 +20,23 @@
          m_ret = ((void), (Some ([4:43-47], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\i");
        fd_fun =
        { f_span = [7:1-41]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:34-38], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\i"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:34-38], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (Traversable<int>); param_type_hint = ((Traversable<int>), (Some ([7:12-28], (Happly (([7:12-23], "\\HH\\Traversable"), [([7:24-27], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:29-31]; param_name = "$i"; 
@@ -46,18 +46,16 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-26], "\\call_traversable");
        fd_fun =
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_name = ([9:10-26], "\\call_traversable"); f_tparams = []; 
-         f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (Traversable<float>); param_type_hint = ((Traversable<float>), (Some ([10:3-21], (Happly (([10:3-14], "\\HH\\Traversable"), [([10:15-20], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:22-24]; param_name = "$i"; 
@@ -71,43 +69,35 @@
              (Expr
                 ((void), [13:3-8],
                  (Call ((((function(Traversable<int> $i): void)), [13:3-4], (Id ([13:3-4], "\\i"))), 
-                    [],
-                    [(Pnormal,
-                      ((<expr#1> as Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing))))],
-                    None)))));
+                    [], [(Pnormal, ((Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None)))));
              ([15:3-32],
               (Expr
                  ((TestTraversable), [15:3-31],
-                  (Binop ((Eq None), ((TestTraversable), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestTraversable), [15:10-31], (New (((TestTraversable), [15:14-29], (CI ([15:14-29], "\\TestTraversable"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestTraversable), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestTraversable), [15:10-31], (New (((TestTraversable), [15:14-29], (CI ([15:14-29], "\\TestTraversable"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call (
                      (((function(Traversable<int> $i): void)), [18:3-10],
                       (Obj_get (((TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((<expr#1> as Traversable<float>), [18:11-13],
-                        (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing))))
-                       ],
-                     None)))))
+                     [], [(Pnormal, ((Traversable<float>), [18:11-13], (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None
+                     )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-31], "\\call_traversable_cast");
        fd_fun =
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
-         f_name = ([21:10-31], "\\call_traversable_cast"); f_tparams = []; 
-         f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (Traversable<float>); param_type_hint = ((Traversable<float>), (Some ([22:3-21], (Happly (([22:3-14], "\\HH\\Traversable"), [([22:15-20], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:22-24]; param_name = "$i"; 
@@ -134,8 +124,9 @@
              ([27:3-32],
               (Expr
                  ((TestTraversable), [27:3-31],
-                  (Binop ((Eq None), ((TestTraversable), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestTraversable), [27:10-31], (New (((TestTraversable), [27:14-29], (CI ([27:14-29], "\\TestTraversable"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestTraversable), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestTraversable), [27:10-31], (New (((TestTraversable), [27:14-29], (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ((function(): void))))) }))));
              ([30:3-75],
               (Expr
                  ((void), [30:3-74],
@@ -156,4 +147,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

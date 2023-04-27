@@ -57,7 +57,8 @@ struct HackCFactsExtractor {
     result_type& res
   ) {
     auto result = extract_facts(path, code.toString(),
-                                RepoOptions::forFile(path.data()).flags());
+                                RepoOptions::forFile(path.data()).flags(),
+                                "" /* no expected hash */);
     match<void>(
       result,
       [&](FactsJSONString& r) {
@@ -138,6 +139,7 @@ void parse_file(
     if (S_ISDIR(st.st_mode)) {
       return;
     }
+    // parse_file_impl() will load the file via extract_facts().
     HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax,
                                          folly::StringPiece{""}, res);
   }

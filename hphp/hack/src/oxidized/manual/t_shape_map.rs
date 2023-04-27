@@ -4,13 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
-
-use serde::{Deserialize, Serialize};
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::typing_defs_core::TshapeFieldName;
 

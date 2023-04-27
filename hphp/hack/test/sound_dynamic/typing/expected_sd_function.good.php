@@ -9,7 +9,7 @@ class E {
   public function foo():D { return new D(); }
 }
 
-function expectSD(?supportdynamic $n):void { }
+function expectSD(supportdyn<mixed> $n):void { }
 
 function testit():void {
   expectSDTfun(($v) ==> {

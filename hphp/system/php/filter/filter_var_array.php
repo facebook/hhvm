@@ -3,18 +3,16 @@
 abstract final class _FilterVarArrayFilterValidator {
   private static $ids = null;
 
-  <<__Pure, __Memoize>>
+  <<__Memoize>>
   private static function getIDs() {
     return array_fill_keys(array_map('filter_id', filter_list()), null);
   }
 
-  <<__Pure>>
   public static function isValid($filter) {
     return array_key_exists($filter, self::getIDs());
   }
 }
 
-  <<__Pure>>
 function _filter_var_array_single($value, $filter, $options = darray[]) {
   if (!_FilterVarArrayFilterValidator::isValid($filter)) {
     $filter = FILTER_DEFAULT;

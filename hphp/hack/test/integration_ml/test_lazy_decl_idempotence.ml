@@ -59,6 +59,7 @@ let test () =
     {
       Typing_service_types.init_id = "";
       check_reason = "test";
+      log_errors = false;
       recheck_id = Some "";
       use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
@@ -73,11 +74,11 @@ let test () =
       delegate_state
       (Telemetry.create ())
       [bar_path]
+      ~root:None
       ~memory_cap
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -88,11 +89,11 @@ let test () =
       delegate_state
       telemetry
       [bar_path]
+      ~root:None
       ~memory_cap
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -104,11 +105,11 @@ let test () =
       delegate_state
       telemetry
       [foo_path]
+      ~root:None
       ~memory_cap
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -119,11 +120,11 @@ let test () =
       delegate_state
       telemetry
       [foo_path]
+      ~root:None
       ~memory_cap
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;

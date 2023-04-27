@@ -1,0 +1,688 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "patch",
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    },
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    },
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    },
+    "standard" : {
+      "path" : "thrift/lib/thrift/standard.thrift"
+    }
+  },
+  "enumerations" : {
+    "PatchOp" : {
+      "lineno" : 262,
+      "constants" : {
+        "Assign" : 1,
+        "Clear" : 2,
+        "PatchPrior" : 3,
+        "EnsureUnion" : 4,
+        "EnsureStruct" : 5,
+        "PatchAfter" : 6,
+        "Remove" : 7,
+        "Add" : 8,
+        "Put" : 9,
+        "Unspecified" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 262,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 333,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "ListPatchIndex" : {
+      "lineno" : 336,
+      "type_enum" : "I32",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 336,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 339,
+          "column" : 27
+        }
+      }
+    }
+  },
+  "structs" : {
+    "GeneratePatch" : {
+      "lineno" : 43,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 43,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 24
+        }
+      }
+    },
+    "AssignOnlyPatch" : {
+      "lineno" : 47,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 47,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 49,
+          "column" : 26
+        }
+      }
+    },
+    "BoolPatch" : {
+      "lineno" : 52,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 64,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 64,
+              "column" : 27
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 67,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 67,
+              "column" : 17
+            }
+          }
+        },
+        "invert" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 70,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 70,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 52,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 71,
+          "column" : 2
+        }
+      }
+    },
+    "BytePatch" : {
+      "lineno" : 74,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "BYTE",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 86,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 86,
+              "column" : 27
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 89,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 89,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "BYTE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 92,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 92,
+              "column" : 15
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 74,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 93,
+          "column" : 2
+        }
+      }
+    },
+    "I16Patch" : {
+      "lineno" : 96,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "I16",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 108,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 108,
+              "column" : 26
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 111,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 111,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "I16",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 114,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 114,
+              "column" : 14
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 96,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 115,
+          "column" : 2
+        }
+      }
+    },
+    "I32Patch" : {
+      "lineno" : 118,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 130,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 130,
+              "column" : 26
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 133,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 133,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 136,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 136,
+              "column" : 14
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 118,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 137,
+          "column" : 2
+        }
+      }
+    },
+    "I64Patch" : {
+      "lineno" : 140,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 152,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 152,
+              "column" : 26
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 155,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 155,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 158,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 158,
+              "column" : 14
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 140,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 159,
+          "column" : 2
+        }
+      }
+    },
+    "FloatPatch" : {
+      "lineno" : 162,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "FLOAT",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 174,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 174,
+              "column" : 28
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 177,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 177,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "FLOAT",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 180,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 180,
+              "column" : 16
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 162,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 181,
+          "column" : 2
+        }
+      }
+    },
+    "DoublePatch" : {
+      "lineno" : 184,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 196,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 196,
+              "column" : 29
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 199,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 199,
+              "column" : 17
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 202,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 202,
+              "column" : 17
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 184,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 203,
+          "column" : 2
+        }
+      }
+    },
+    "StringPatch" : {
+      "lineno" : 206,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 218,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 218,
+              "column" : 29
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 221,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 221,
+              "column" : 17
+            }
+          }
+        },
+        "prepend" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 224,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 224,
+              "column" : 21
+            }
+          }
+        },
+        "append" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 227,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 227,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 206,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 228,
+          "column" : 2
+        }
+      }
+    },
+    "BinaryPatch" : {
+      "lineno" : 231,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "standard.ByteBuffer",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 243,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 243,
+              "column" : 42
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 246,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 246,
+              "column" : 17
+            }
+          }
+        },
+        "prepend" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "standard.ByteBuffer",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 249,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 249,
+              "column" : 34
+            }
+          }
+        },
+        "append" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "standard.ByteBuffer",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 252,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 252,
+              "column" : 33
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 231,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 253,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

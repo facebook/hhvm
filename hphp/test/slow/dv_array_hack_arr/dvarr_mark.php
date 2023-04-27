@@ -27,10 +27,6 @@ function foo($x) {
   $e = HH\array_mark_legacy(darray[1 => $x]);
   var_dump(HH\is_array_marked_legacy($e));
   var_dump($e);
-  $obj = new Baz();
-  $g = HH\array_mark_legacy(varray(inst_meth($obj, "m")));
-  var_dump(HH\is_array_marked_legacy($g));
-  var_dump($g);
 
   // real vecs/dicts are not marked
   $a = dict['a' => $x];

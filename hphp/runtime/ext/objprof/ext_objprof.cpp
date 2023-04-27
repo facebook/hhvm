@@ -29,10 +29,11 @@
  * Call objprof_get_data to trigger the scan.
  */
 
+#include <algorithm>
+#include <sstream>
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
-#include <algorithm>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
@@ -90,19 +91,6 @@ using PathsToObject = std::unordered_map<
 using PathsToClass = std::unordered_map<
   Class*, std::unordered_map<std::string, ObjprofClassReferral>>;
 
-struct ObjprofStringAgg {
-  uint64_t dups{0};
-  uint64_t refs{0};
-  uint64_t srefs{0};
-  String path;
-};
-
-using ObjprofStrings = std::unordered_map<
-  String,
-  ObjprofStringAgg,
-  hphp_string_hash,
-  hphp_string_same
->;
 using ObjprofStack = std::vector<std::string>;
 using ClassProp = std::pair<Class*, std::string>;
 
@@ -116,41 +104,41 @@ enum ObjprofFlags {
   PER_PROPERTY = 4
 };
 
-std::pair<int, double> tvGetSize(
-  TypedValue tv,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  ObjprofFlags flags
-);
-void tvGetStrings(
-  TypedValue tv,
-  ObjprofStrings* metrics,
-  ObjprofStack* path,
-  std::unordered_set<void*>* pointers,
-  ObjprofValuePtrStack* val_stack);
+struct ObjprofState {
+  const ObjectData* source;
+  Optional<ObjprofStack> stack;
+  Optional<PathsToObject> paths;
+  ObjprofValuePtrStack val_stack;
+  const std::unordered_set<std::string>& exclude_classes;
+  ObjprofFlags flags;
+  // While iterating the heap objprof is retaining pointers to heap objects,
+  // any logic that may reenter (or trigger frees) must be deferred.
+  std::vector<std::string>& deferred_warnings;
+};
+
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env);
 
 std::pair<int, double> getObjSize(
-  const ObjectData* obj,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ObjectData* obj, ObjprofState& env,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 );
 
-String pathString(ObjprofStack* stack, const char* sep) {
-  assertx(stack->size() < 100000000);
-  StringBuffer sb;
-  for (size_t i = 0; i < stack->size(); ++i) {
-    if (i != 0) sb.append(sep);
-    sb.append((*stack)[i]);
+std::string pathString(const ObjprofStack& stack, const char* sep) {
+  assertx(stack.size() < 100000000);
+
+  std::ostringstream os;
+  for (size_t i = 0; i < stack.size(); ++i) {
+    if (i != 0) os << sep;
+    os << stack[i];
   }
-  return sb.detach();
+  return os.str();
+}
+
+void issueWarnings(std::vector<std::string>& deferred_warnings) {
+  for (auto const& warning : deferred_warnings) {
+    raise_warning(warning);
+  }
+  deferred_warnings.clear();
 }
 
 /**
@@ -186,47 +174,34 @@ bool isObjprofRoot(
  * into ObjectData* references.
  */
 std::pair<int, double> sizeOfArray(
-  const ArrayData* ad,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  Class* cls,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ArrayData* ad, ObjprofState& env, Class* cls,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 ) {
-  auto ptr_begin = val_stack->begin();
-  auto ptr_end = val_stack->end();
+  auto ptr_begin = env.val_stack.begin();
+  auto ptr_end = env.val_stack.end();
   if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
     FTRACE(3, "Cycle found for ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
   }
 
-  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
-    raise_warning("objprof: data structure is too deep, pruning traversal");
+  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
+    env.deferred_warnings.push_back(
+      "objprof: data structure is too deep, pruning traversal"
+    );
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting ArrayData*({})\n", ad);
-  val_stack->push_back(ad);
+  env.val_stack.push_back(ad);
 
   int size = 0;
   double sized = 0;
   if (ad->isVecType()) {
     FTRACE(2, "Iterating vec\n");
-    if (stack) stack->push_back("ArrayIndex");
+    if (env.stack) env.stack->push_back("ArrayIndex");
 
     IterateV(ad, [&] (TypedValue v) {
-      auto val_size_pair = tvGetSize(
-        v,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto val_size_pair = tvGetSize(v, env);
       if (histogram) {
         auto histogram_key = std::make_pair(cls, "<index>");
         auto& metrics = (*histogram)[histogram_key];
@@ -240,47 +215,33 @@ std::pair<int, double> sizeOfArray(
       return false;
     });
 
-    if (stack) stack->pop_back();
+    if (env.stack) env.stack->pop_back();
   } else {
     FTRACE(2, "Iterating mixed array\n");
     IterateKV(ad, [&] (TypedValue k, TypedValue v) {
 
+      std::string k_str;
       std::pair<int, double> key_size_pair;
       switch (k.m_type) {
         case KindOfPersistentString:
         case KindOfString: {
           auto const str = k.m_data.pstr;
-          if (stack) {
-            stack->push_back(
-              std::string("ArrayKeyString:" + str->toCppString()));
+          k_str = str->toCppString();
+          if (env.stack) {
+            env.stack->push_back(std::string("ArrayKeyString:" + k_str));
           }
-          key_size_pair = tvGetSize(
-            k,
-            source,
-            stack,
-            paths,
-            val_stack,
-            exclude_classes,
-            flags
-          );
+          key_size_pair = tvGetSize(k, env);
           FTRACE(2, "  Iterating str-key {} with size {}:{}\n",
             str->data(), key_size_pair.first, key_size_pair.second);
           break;
         }
         case KindOfInt64: {
           int64_t num = k.m_data.num;
-          if (stack) {
-            stack->push_back(std::string("ArrayKeyInt:" + std::to_string(num)));
+          k_str = std::to_string(num);
+          if (env.stack) {
+            env.stack->push_back(std::string("ArrayKeyInt:" + k_str));
           }
-          key_size_pair = tvGetSize(
-            k,
-            source,
-            stack,
-            paths,
-            val_stack,
-            exclude_classes,
-            flags
-          );
+          key_size_pair = tvGetSize(k, env);
           FTRACE(2, "  Iterating num-key {} with size {}:{}\n",
             num, key_size_pair.first, key_size_pair.second);
           break;
@@ -306,20 +267,11 @@ std::pair<int, double> sizeOfArray(
           always_assert(false);
       }
 
-      auto val_size_pair = tvGetSize(
-        v,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto val_size_pair = tvGetSize(v, env);
       FTRACE(2, "  Value size for that key was {}:{}\n",
         val_size_pair.first, val_size_pair.second);
       if (histogram) {
-        auto const k_str = tvCastToString(k);
-        auto const histogram_key = std::make_pair(cls, k_str.toCppString());
+        auto const histogram_key = std::make_pair(cls, k_str);
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += val_size_pair.first + key_size_pair.first;
@@ -328,367 +280,219 @@ std::pair<int, double> sizeOfArray(
       size += val_size_pair.first + key_size_pair.first;
       sized += val_size_pair.second + key_size_pair.second;
 
-      if (stack) stack->pop_back();
+      if (env.stack) env.stack->pop_back();
       return false;
     });
   }
 
   FTRACE(3, "Popping {} frm stack in sizeOfArray. Stack size before pop {}\n",
-    val_stack->back(), val_stack->size()
+    env.val_stack.back(), env.val_stack.size()
   );
-  val_stack->pop_back();
+  env.val_stack.pop_back();
 
   return std::make_pair(size, sized);
-}
-
-void stringsOfArray(
-  const ArrayData* ad,
-  ObjprofStrings* metrics,
-  ObjprofStack* path,
-  std::unordered_set<void*>* pointers,
-  ObjprofValuePtrStack* val_stack
-) {
-  auto ptr_begin = val_stack->begin();
-  auto ptr_end = val_stack->end();
-  if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
-    return;
-  }
-
-  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
-    raise_warning("objprof: data structure is too deep, pruning traversal");
-    return;
-  }
-
-  val_stack->push_back(ad);
-
-  path->push_back(std::string("array()"));
-
-  if (ad->isVanillaVec()) {
-    path->push_back(std::string("[]"));
-    IterateV(ad, [&] (TypedValue v) {
-      tvGetStrings(v, metrics, path, pointers, val_stack);
-      return false;
-    });
-    path->pop_back();
-  } else {
-    IterateKV(ad, [&] (TypedValue k, TypedValue v) {
-      switch (k.m_type) {
-        case KindOfPersistentString:
-        case KindOfString: {
-          auto const str = k.m_data.pstr;
-          tvGetStrings(k, metrics, path, pointers, val_stack);
-          path->push_back(std::string("[\"" + str->toCppString() + "\"]"));
-          break;
-        }
-        case KindOfInt64: {
-          auto const num = k.m_data.num;
-          auto key_str = std::to_string(num);
-          path->push_back(std::string(key_str));
-          tvGetStrings(k, metrics, path, pointers, val_stack);
-          path->pop_back();
-          path->push_back(std::string("[" + key_str + "]"));
-          break;
-        }
-        case KindOfUninit:
-        case KindOfNull:
-        case KindOfPersistentVec:
-        case KindOfBoolean:
-        case KindOfPersistentDict:
-        case KindOfDouble:
-        case KindOfPersistentKeyset:
-        case KindOfObject:
-        case KindOfResource:
-        case KindOfVec:
-        case KindOfDict:
-        case KindOfKeyset:
-        case KindOfRFunc:
-        case KindOfFunc:
-        case KindOfClass:
-        case KindOfLazyClass:
-        case KindOfClsMeth:
-        case KindOfRClsMeth:
-          // this should be an always_assert(false), but that appears to trigger
-          // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
-          // can't always_assert(false) here until we stop supporting gcc-4.9
-          // for open source users, since they may be using an older version
-          assertx(false);
-      }
-
-      tvGetStrings(v, metrics, path, pointers, val_stack);
-      path->pop_back();
-      return false;
-    });
-  }
-
-  path->pop_back();
-  val_stack->pop_back();
 }
 
 /**
  * Measures the size of the typed value and referenced objects without going
  * into ObjectData* references.
  */
-std::pair<int, double> tvGetSize(
-  TypedValue tv,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  ObjprofFlags flags
-) {
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
   int size = sizeof(tv);
   double sized = size;
 
+  if (!isRealType(tv.m_type)) {
+    FTRACE(3, " Skipping tv with invalid type {}\n", tv.m_type);
+    return std::make_pair(size, sized);
+  }
+
+  if (!isRefcountedType(tv.m_type)) {
+    FTRACE(3, " Skipping tv with non refcounted type {}\n", tv.m_type);
+    return std::make_pair(size, sized);
+  }
+
+  auto const cnt = tv.m_data.pcnt;
+  auto const start = tl_heap->find(cnt);
+  if (!start) {
+    FTRACE(3, " Skipping tv pointing outside heap {}\n", cnt);
+    return std::make_pair(size, sized);
+  }
+  const HeapObject* obj = innerObj(start);
+  if (!obj) obj = start;
+  if (cnt != obj) {
+    FTRACE(3, " Skipping tv pointing to middle of HeapObj {}\n", cnt);
+    return std::make_pair(size, sized);
+  }
+  if (!cnt->checkCount()) {
+    FTRACE(3, " Skipping HeapObj with invalid count {}\n", cnt);
+    return std::make_pair(size, sized);
+  }
+
   auto add_array_size = [&](ArrayData* arr) {
     auto size_of_array_pair = sizeOfArray(
-      arr,
-      source,
-      stack,
-      paths,
-      val_stack,
-      exclude_classes,
+      arr, env,
       nullptr, /* cls */
-      nullptr, /* histogram */
-      flags
+      nullptr /* histogram */
     );
-    if (arr->isRefCounted()) {
-      auto arr_ref_count = int{tvGetCount(tv)};
-      FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
-        (void*)arr,
-        arr_ref_count
-      );
-      size += sizeof(*arr);
-      size += size_of_array_pair.first;
-      assertx(arr_ref_count > 0);
-      sized += sizeof(*arr) / (double)arr_ref_count;
-      sized += size_of_array_pair.second / (double)(arr_ref_count);
-    } else {
-      // static or uncounted array
-      FTRACE(3, " ArrayData tv: at {} not refcounted\n", (void*)arr);
-      size += sizeof(*arr);
-      size += size_of_array_pair.first;
-    }
+    auto arr_ref_count = int{cnt->count()};
+    FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
+      (void*)arr,
+      arr_ref_count
+    );
+    size += sizeof(*arr);
+    size += size_of_array_pair.first;
+    assertx(arr_ref_count > 0);
+    sized += sizeof(*arr) / (double)arr_ref_count;
+    sized += size_of_array_pair.second / (double)(arr_ref_count);
   };
 
-  switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfLazyClass: {
-      // Counted as part sizeof(TypedValue)
+  UNUSED auto const headerName = header_names[int(cnt->kind())];
+  switch (cnt->kind()) {
+    case HeaderKind::String: {
+      assertx(cnt->isRefCounted());
+      auto const str = (StringData*)cnt;
+      size += str->size();
+      auto str_ref_count = int{cnt->count()};
+      FTRACE(3, " String tv: {} string at {} ref count: {}\n",
+        str->data(),
+        (void*)str,
+        str_ref_count
+      );
+      assertx(str_ref_count > 0);
+      sized += (str->size() / (double)(str_ref_count));
       break;
     }
-    case KindOfObject: {
-      ObjectData* obj = tv.m_data.pobj;
+    case HeaderKind::Vec:
+    case HeaderKind::Dict:
+    case HeaderKind::Keyset:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeKeyset: {
+      assertx(cnt->isRefCounted());
+      ArrayData* arr = (ArrayData*)cnt;
+      add_array_size(arr);
+      break;
+    }
+    case HeaderKind::AsyncFuncWH:
+    case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
+    case HeaderKind::WaitHandle:
+    case HeaderKind::NativeObject:
+    case HeaderKind::Vector:
+    case HeaderKind::Map:
+    case HeaderKind::Set:
+    case HeaderKind::Pair:
+    case HeaderKind::ImmVector:
+    case HeaderKind::ImmMap:
+    case HeaderKind::ImmSet:
+    case HeaderKind::Closure:
+    case HeaderKind::Object: {
+      assertx(cnt->isRefCounted());
+      ObjectData* obj = (ObjectData*)cnt;
       // If its not a root node, recurse into the object to determine its size
-      if (!isObjprofRoot(obj, flags, exclude_classes)) {
-        auto obj_size_pair = getObjSize(
-          obj,
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          nullptr, /* histogram */
-          flags
-        );
+      if (!isObjprofRoot(obj, env.flags, env.exclude_classes)) {
+        auto obj_size_pair = getObjSize(obj, env, nullptr /* histogram */);
         size += obj_size_pair.first;
-        if (obj->isRefCounted()) {
-          auto obj_ref_count = int{tvGetCount(tv)};
-          FTRACE(3, " ObjectData tv: at {} with ref count {}\n",
-            (void*)obj,
-            obj_ref_count
-          );
-          assertx(obj_ref_count > 0);
-          sized += obj_size_pair.second / (double)(obj_ref_count);
-        }
-      } else if (stack && paths) {
+        auto obj_ref_count = int{cnt->count()};
+        FTRACE(3, " ObjectData tv: at {} with ref count {}\n",
+          (void*)obj,
+          obj_ref_count
+        );
+        assertx(obj_ref_count > 0);
+        sized += obj_size_pair.second / (double)(obj_ref_count);
+      } else if (env.stack && env.paths) {
         // notice we might have multiple OBJ->path->OBJ for same path
         // (e.g. packed array where we omit the index number)
         auto cls = obj->getVMClass();
-        stack->push_back(std::string("Object:" + cls->name()->toCppString()));
-        auto pathStr = pathString(stack, "->");
-        stack->pop_back();
+        env.stack->push_back(std::string("Object:" + cls->name()->toCppString()));
+        auto pathStr = pathString(*env.stack, "->");
+        env.stack->pop_back();
 
-        auto& pathsToTv = (*paths)[obj];
-        auto& referral = pathsToTv[pathStr.toCppString()];
-        if (source) {
-          referral.sources.insert(source);
+        auto& pathsToTv = (*env.paths)[obj];
+        auto& referral = pathsToTv[pathStr];
+        if (env.source) {
+          referral.sources.insert(env.source);
         }
         referral.refs += 1;
 
         FTRACE(3, " ObjectData tv: at {} of type {} at path {}, refs {}\n",
           (void*)obj,
           obj->getClassName().data(),
-          pathStr.data(),
+          pathStr,
           referral.refs
         );
       }
       break;
     }
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset: {
-      ArrayData* arr = tv.m_data.parr;
-      add_array_size(arr);
+    case HeaderKind::RFunc: {
+      assertx(cnt->isRefCounted());
+      size += sizeof(RFuncData);
+      add_array_size(((RFuncData*)cnt)->m_arr);
       break;
     }
-    case KindOfRFunc: {
-      size += sizeof(RFuncData);
-      add_array_size(tv.m_data.prfunc->m_arr);
-    }
-    case KindOfResource: {
-      auto resource = tv.m_data.pres;
+    case HeaderKind::Resource: {
+      assertx(cnt->isRefCounted());
+      auto const resource = (ResourceHdr*)cnt;
       auto resource_size = resource->heapSize();
       size += resource_size;
-      assertx(tvGetCount(tv) > 0);
-      sized += resource_size / (double)(tvGetCount(tv));
+      auto const count = cnt->count();
+      assertx(count > 0);
+      sized += resource_size / (double)(count);
       break;
     }
-    case KindOfPersistentString:
-    case KindOfString: {
-      StringData* str = tv.m_data.pstr;
-      size += str->size();
-      if (str->isRefCounted()) {
-        auto str_ref_count = int{tvGetCount(tv)};
-        FTRACE(3, " String tv: {} string at {} ref count: {}\n",
-          str->data(),
-          (void*)str,
-          str_ref_count
-        );
-        assertx(str_ref_count > 0);
-        sized += (str->size() / (double)(str_ref_count));
-      } else {
-        // static or uncounted string
-        FTRACE(3, " String tv: {} string at {} uncounted\n",
-          str->data(), (void*)str
-        );
-      }
-      break;
-    }
-    case KindOfClsMeth: {
-      FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
-            (void*)tv.m_data.pclsmeth.get());
-      break;
-    }
-
-    case KindOfRClsMeth: {
-      auto const rclsmeth = tv.m_data.prclsmeth;
+    case HeaderKind::RClsMeth: {
+      assertx(cnt->isRefCounted());
+      auto const rclsmeth = (RClsMethData*)cnt;
       auto const sz = sizeof(RClsMethData);
-      auto ref_count = int{tvGetCount(tv)};
+      auto ref_count = int{cnt->count()};
       size += sz;
       FTRACE(3, " RClsMeth tv: rclsmeth at {} with ref count {}\n",
              (void*)rclsmeth, ref_count);
       assertx(ref_count > 0);
       sized += sz / (double)ref_count;
       add_array_size(rclsmeth->m_arr);
+      break;
     }
+    case HeaderKind::AsyncFuncFrame:
+    case HeaderKind::NativeData:
+    case HeaderKind::ClsMeth:
+    case HeaderKind::MemoData:
+    case HeaderKind::ClosureHdr:
+    case HeaderKind::Cpp:
+    case HeaderKind::SmallMalloc:
+    case HeaderKind::BigMalloc:
+    case HeaderKind::Free:
+    case HeaderKind::Hole:
+    case HeaderKind::Slab:
+      FTRACE(3, " Skipping errant pointer {} to {}\n", cnt, headerName);
+      break;
   }
 
   return std::make_pair(size, sized);
 }
 
-void tvGetStrings(
-  TypedValue tv,
-  ObjprofStrings* metrics,
-  ObjprofStack* path,
-  std::unordered_set<void*>* pointers,
-  ObjprofValuePtrStack* val_stack
-) {
-  switch (tv.m_type) {
-    case HPHP::KindOfUninit:
-    case HPHP::KindOfResource:
-    case HPHP::KindOfNull:
-    case HPHP::KindOfBoolean:
-    case HPHP::KindOfInt64:
-    case HPHP::KindOfDouble:
-    case HPHP::KindOfRFunc:
-    case HPHP::KindOfFunc:
-    case HPHP::KindOfClass:
-    case HPHP::KindOfClsMeth:
-    case HPHP::KindOfRClsMeth:
-    case HPHP::KindOfLazyClass: {
-      // Not strings
-      break;
-    }
-    case HPHP::KindOfObject: {
-      // This is a shallow size function, not a recursive one
-      break;
-    }
-    case HPHP::KindOfPersistentVec:
-    case HPHP::KindOfVec:
-    case HPHP::KindOfPersistentDict:
-    case HPHP::KindOfDict:
-    case HPHP::KindOfPersistentKeyset:
-    case HPHP::KindOfKeyset: {
-      auto* arr = tv.m_data.parr;
-      stringsOfArray(arr, metrics, path, pointers, val_stack);
-      break;
-    }
-    case HPHP::KindOfPersistentString:
-    case HPHP::KindOfString: {
-      StringData* str = tv.m_data.pstr;
-
-      // Obtain aggregation object
-      auto &str_agg = (*metrics)[StrNR(str)];
-      if (!str_agg.path.get()) {
-        str_agg.path = pathString(path, ":");
-      }
-
-      // Increment aggregation metrics
-      str_agg.refs++;
-      if (pointers->find(str) == pointers->end()) {
-        pointers->insert(str);
-        str_agg.dups++;
-      }
-      if (!str->isRefCounted()) {
-        str_agg.srefs++;
-      }
-
-      FTRACE(3, " String: {} = {} \n",
-        pathString(path, ":").get()->data(),
-        str->data()
-      );
-      break;
-    }
-  }
-}
-
 std::pair<int, double> getObjSize(
-  const ObjectData* obj,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ObjectData* obj, ObjprofState& env,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 ) {
   Class* cls = obj->getVMClass();
 
-  auto ptr_begin = val_stack->begin();
-  auto ptr_end = val_stack->end();
+  auto ptr_begin = env.val_stack.begin();
+  auto ptr_end = env.val_stack.end();
   if (std::find(ptr_begin, ptr_end, obj) != ptr_end) {
     FTRACE(3, "Cycle found for {}*({})\n", obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }
 
-  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
-    raise_warning("objprof: data structure is too deep, pruning traversal");
+  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
+    env.deferred_warnings.push_back(
+      "objprof: data structure is too deep, pruning traversal"
+    );
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting {}*({})\n", obj->getClassName().data(), obj);
-  val_stack->push_back(obj);
+  env.val_stack.push_back(obj);
 
   FTRACE(1, "Getting object size for type {} at {}\n",
     obj->getClassName().data(),
@@ -702,58 +506,32 @@ std::pair<int, double> getObjSize(
   }
   double sized = size;
 
-  if (stack) stack->push_back(
+  if (env.stack) env.stack->push_back(
     std::string("Object:" + cls->name()->toCppString())
   );
 
   if (obj->isCollection()) {
     auto const arr = collections::asArray(obj);
     if (arr) {
-      auto array_size_pair = sizeOfArray(
-        arr,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        cls,
-        histogram,
-        flags
-      );
+      auto array_size_pair = sizeOfArray(arr, env, cls, histogram);
       size += array_size_pair.first;
       sized += array_size_pair.second;
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<const c_Pair*>(obj);
-      auto elm_size_pair = tvGetSize(
-        *pair->get(0),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto elm_size_pair = tvGetSize(*pair->get(0), env);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
-      elm_size_pair = tvGetSize(
-        *pair->get(1),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      elm_size_pair = tvGetSize(*pair->get(1), env);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
     }
 
-    if (stack) stack->pop_back();
+    if (env.stack) env.stack->pop_back();
     FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-      val_stack->back(), val_stack->size()
+      env.val_stack.back(), env.val_stack.size()
     );
-    val_stack->pop_back();
+    env.val_stack.pop_back();
     return std::make_pair(size, sized);
   }
 
@@ -763,19 +541,14 @@ std::pair<int, double> getObjSize(
       FTRACE(2, "Skipping declared property key {}\n", prop.name->data());
 
       FTRACE(2, "Counting value for key {}\n", prop.name->data());
-      if (stack) {
-        stack->push_back(std::string("Property:" + prop.name->toCppString()));
+      if (env.stack) {
+        env.stack->push_back(
+          std::string("Property:" + prop.name->toCppString())
+        );
       }
-      auto val_size_pair = tvGetSize(
-        val.tv(),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
-      if (stack) stack->pop_back();
+
+      auto val_size_pair = tvGetSize(val.tv(), env);
+      if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key=0:0, val={}:{}\n",
         prop.name->data(),
@@ -795,39 +568,26 @@ std::pair<int, double> getObjSize(
       sized += val_size_pair.second;
     },
     [&](TypedValue key_tv, TypedValue val) {
-      auto key = tvCastToString(key_tv);
+      assertx(tvIsString(key_tv) || tvIsInt(key_tv));
       std::pair<int, double> key_size_pair = {0, 0.0};
-      if (isStringType(key_tv.m_type)) {
-        FTRACE(2, "Counting dynamic string key {}\n", key.c_str());
-        key_size_pair = tvGetSize(
-          key_tv,
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          flags
-        );
+      std::string k_str;
+      if (tvIsString(key_tv)) {
+        k_str = key_tv.m_data.pstr->toCppString();
+        FTRACE(2, "Counting dynamic string key {}\n", k_str);
+        key_size_pair = tvGetSize(key_tv, env);
       } else {
         assertx(isIntType(key_tv.m_type));
-        FTRACE(2, "Skipping dynamic int key {}\n", key.c_str());
+        k_str = std::to_string(key_tv.m_data.num);
+        FTRACE(2, "Skipping dynamic int key {}\n", k_str);
       }
 
-      FTRACE(2, "Counting value for key {}\n", key.c_str());
-      if (stack) stack->push_back(std::string("Key:" + key));
-      auto val_size_pair = tvGetSize(
-        val,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
-      if (stack) stack->pop_back();
+      FTRACE(2, "Counting value for key {}\n", k_str);
+      if (env.stack) env.stack->push_back(std::string("Key:" + k_str));
+      auto val_size_pair = tvGetSize(val, env);
+      if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key={}:{}, val={}:{}\n",
-        key.c_str(),
+        k_str,
         key_size_pair.first,
         key_size_pair.second,
         val_size_pair.first,
@@ -835,7 +595,7 @@ std::pair<int, double> getObjSize(
       );
 
       if (histogram) {
-        auto histogram_key = std::make_pair(cls, key.toCppString());
+        auto histogram_key = std::make_pair(cls, k_str);
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += key_size_pair.first + val_size_pair.first;
@@ -847,106 +607,13 @@ std::pair<int, double> getObjSize(
     }
   );
 
-  if (stack) stack->pop_back();
+  if (env.stack) env.stack->pop_back();
   FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-    val_stack->back(), val_stack->size()
+    env.val_stack.back(), env.val_stack.size()
   );
-  val_stack->pop_back();
+  env.val_stack.pop_back();
 
   return std::make_pair(size, sized);
-}
-
-void getObjStrings(
-  const ObjectData* obj,
-  ObjprofStrings* metrics,
-  ObjprofStack* path,
-  std::unordered_set<void*>* pointers
-) {
-  FTRACE(1, "Getting strings for type {} at {}\n",
-    obj->getClassName().data(),
-    obj
-  );
-
-  // used for recursion protection
-  ObjprofValuePtrStack val_stack;
-
-  if (obj->isCollection()) {
-    auto const arr = collections::asArray(obj);
-    path->push_back(obj->getClassName().data());
-    if (arr) {
-      stringsOfArray(arr, metrics, path, pointers, &val_stack);
-    } else {
-      assertx(collections::isType(obj->getVMClass(), CollectionType::Pair));
-      auto pair = static_cast<const c_Pair*>(obj);
-      tvGetStrings(*pair->get(0), metrics, path, pointers, &val_stack);
-      tvGetStrings(*pair->get(1), metrics, path, pointers, &val_stack);
-    }
-    path->pop_back();
-    return;
-  }
-
-  path->push_back(obj->getClassName().data());
-  IteratePropMemOrder(
-    obj,
-    [&](Slot slot, const Class::Prop& prop, tv_rval val) {
-      FTRACE(2, "Skipping declared property key {}\n", prop.name->data());
-      path->push_back(prop.name->toCppString());
-      FTRACE(2, "Inspecting value for key {}\n", prop.name->data());
-      tvGetStrings(val.tv(), metrics, path, pointers, &val_stack);
-      path->pop_back();
-      FTRACE(2, "   Finished for key/val {}\n", prop.name->data());
-    },
-    [&](TypedValue key_tv, TypedValue val) {
-      auto key = tvCastToString(key_tv);
-      if (isStringType(key_tv.m_type)) {
-        FTRACE(2, "Inspecting dynamic string key {}\n", key.c_str());
-        tvGetStrings(key_tv, metrics, path, pointers, &val_stack);
-        path->push_back(std::string("[\"" + key + "\"]"));
-      } else {
-        assertx(isIntType(key_tv.m_type));
-        FTRACE(2, "Skipping dynamic int key {}\n", key.c_str());
-        path->push_back(key.toCppString());
-      }
-      FTRACE(2, "Inspecting value for key {}\n", key.c_str());
-      tvGetStrings(val, metrics, path, pointers, &val_stack);
-      path->pop_back();
-      FTRACE(2, "   Finished for key/val {}\n", key.c_str());
-    }
-  );
-  path->pop_back();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Function that traverses objects and counts metrics per strings
-
-Array HHVM_FUNCTION(objprof_get_strings, int64_t min_dup) {
-  ObjprofStrings metrics;
-
-  std::unordered_set<void*> pointers;
-  tl_heap->forEachObject([&](const ObjectData* obj) {
-    if (obj->hasZeroRefs()) return;
-    ObjprofStack path;
-    getObjStrings(obj, &metrics, &path, &pointers);
-  });
-
-  // Create response
-  DictInit objs(metrics.size());
-  for (auto& it : metrics) {
-    if (it.second.dups < min_dup) continue;
-
-    auto metrics_val = make_dict_array(
-      s_dups, Variant(it.second.dups),
-      s_refs, Variant(it.second.refs),
-      s_srefs, Variant(it.second.srefs),
-      s_path, Variant(it.second.path)
-    );
-
-    const Variant str = Variant(it.first);
-    objs.setValidKey(str, Variant(metrics_val));
-  }
-
-  return objs.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -957,7 +624,7 @@ Array HHVM_FUNCTION(objprof_get_data,
   const Array& exclude_list = Array()
 ) {
   std::unordered_map<ClassProp, ObjprofMetrics> histogram;
-  auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
+  UNUSED auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
 
   // Create a set of std::strings from the exclude_list provided. This de-dups
   // the exclude_list, and also provides for fast lookup when determining
@@ -967,19 +634,22 @@ Array HHVM_FUNCTION(objprof_get_data,
     exclude_classes.insert(iter.second().toString().data());
   }
 
+  std::vector<std::string> deferred_warnings;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
-    std::vector<const void*> val_stack;
+    ObjprofState env{
+      .source = nullptr,
+      .stack = std::nullopt,
+      .paths = std::nullopt,
+      .val_stack = ObjprofValuePtrStack{},
+      .exclude_classes = exclude_classes,
+      .flags = (ObjprofFlags)flags,
+      .deferred_warnings = deferred_warnings
+    };
     auto objsizePair = getObjSize(
-      obj,
-      nullptr, /* source */
-      nullptr, /* stack */
-      nullptr, /* paths */
-      &val_stack,
-      exclude_classes,
-      objprof_props_mode ? &histogram : nullptr,
-      (ObjprofFlags)flags
+      obj, env,
+      objprof_props_mode ? &histogram : nullptr
     );
 
     if (!objprof_props_mode) {
@@ -998,6 +668,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       );
     }
   });
+  issueWarnings(deferred_warnings);
 
   // Create response
   DictInit objs(histogram.size());
@@ -1038,28 +709,30 @@ Array HHVM_FUNCTION(objprof_get_paths,
     exclude_classes.insert(iter.second().toString().data());
   }
 
+  std::vector<std::string> deferred_warnings;
   tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       if (obj->hasZeroRefs()) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];
-      ObjprofStack stack;
-      PathsToObject pathsToObject;
-      std::vector<const void*> val_stack;
+      ObjprofState env{
+        .source = obj,
+        .stack = ObjprofStack{},
+        .paths = PathsToObject{},
+        .val_stack = ObjprofValuePtrStack{},
+        .exclude_classes = exclude_classes,
+        .flags = (ObjprofFlags)flags,
+        .deferred_warnings = deferred_warnings
+      };
       auto objsizePair = getObjSize(
         obj, /* obj */
-        obj, /* source */
-        &stack,
-        &pathsToObject,
-        &val_stack,
-        exclude_classes,
-        nullptr, /* histogram */
-        (ObjprofFlags)flags
+        env,
+        nullptr /* histogram */
       );
       metrics.instances += 1;
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
-      for (auto const& pathsIt : pathsToObject) {
+      for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
         auto& aggPaths = pathsToClass[cls];
@@ -1078,14 +751,14 @@ Array HHVM_FUNCTION(objprof_get_paths,
        objsizePair.first,
        objsizePair.second
       );
-      assertx(stack.size() == 0);
+      assertx(env.stack->size() == 0);
   });
+  issueWarnings(deferred_warnings);
 
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
       return;
     }
-    std::vector<const void*> val_stack;
     auto const staticProps = cls->staticProperties();
     auto const nSProps = cls->numStaticProperties();
     for (Slot i = 0; i < nSProps; ++i) {
@@ -1100,8 +773,15 @@ Array HHVM_FUNCTION(objprof_get_paths,
         StrNR(prop.name).data()
       );
 
-      ObjprofStack stack;
-      PathsToObject pathsToObject;
+      ObjprofState env{
+        .source = nullptr,
+        .stack = ObjprofStack{},
+        .paths = PathsToObject{},
+        .val_stack = ObjprofValuePtrStack{},
+        .exclude_classes = exclude_classes,
+        .flags = (ObjprofFlags)flags,
+        .deferred_warnings = deferred_warnings
+      };
 
       auto refname = std::string(
         "ClassProperty:" +
@@ -1113,19 +793,11 @@ Array HHVM_FUNCTION(objprof_get_paths,
         continue;
       }
 
-      stack.push_back(refname);
-      tvGetSize(
-        *tv,
-        nullptr, /* source */
-        &stack,
-        &pathsToObject,
-        &val_stack,
-        exclude_classes,
-        (ObjprofFlags)flags
-      );
-      stack.pop_back();
+      env.stack->push_back(refname);
+      tvGetSize(*tv, env);
+      env.stack->pop_back();
 
-      for (auto const& pathsIt : pathsToObject) {
+      for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
         auto& aggPaths = pathsToClass[cls];
@@ -1137,9 +809,10 @@ Array HHVM_FUNCTION(objprof_get_paths,
           aggReferral.sources.insert(cls);
         }
       }
-      assertx(stack.size() == 0);
+      assertx(env.stack->size() == 0);
     }
   });
+  issueWarnings(deferred_warnings);
 
   // Create response
   DictInit objs(histogram.size());
@@ -1247,7 +920,6 @@ struct objprofExtension final : Extension {
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
-    HHVM_FALIAS(HH\\objprof_get_strings, objprof_get_strings);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
     HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
     HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);

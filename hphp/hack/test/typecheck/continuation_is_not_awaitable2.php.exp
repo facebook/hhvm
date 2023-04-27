@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
   Expected `Awaitable<int>`
   File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
-  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+  But got `Generator<_, _, _>` (result of function containing a `yield`)

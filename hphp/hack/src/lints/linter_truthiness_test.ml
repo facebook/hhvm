@@ -53,8 +53,7 @@ let handler =
       | Unop (Unot, e)
       | Eif (e, _, _) ->
         truthiness_test env e
-      | Binop (Ampamp, e1, e2)
-      | Binop (Barbar, e1, e2) ->
+      | Binop { bop = Ampamp | Barbar; lhs = e1; rhs = e2 } ->
         truthiness_test env e1;
         truthiness_test env e2
       | _ -> ()

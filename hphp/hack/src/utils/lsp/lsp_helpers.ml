@@ -32,9 +32,13 @@ let lsp_uri_to_path (uri : documentUri) : string =
     uri
 
 let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.documentUri =
-  if path = "" then
+  if path = "" then begin
+    HackEventLogger.invariant_violation_bug "missing path";
+    Hh_logger.log
+      "missing path %s"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     File_url.create default_path |> uri_of_string
-  else
+  end else
     File_url.create path |> uri_of_string
 
 let lsp_textDocumentIdentifier_to_filename
@@ -53,6 +57,22 @@ let lsp_range_to_fc (range : Lsp.range) : File_content.range =
     File_content.st = lsp_position_to_fc range.Lsp.start;
     ed = lsp_position_to_fc range.Lsp.end_;
   }
+
+let lsp_range_to_pos ~line_to_offset path (range : Lsp.range) : Pos.t =
+  let pos_fname = Relative_path.suffix path in
+  let lexing_of endpoint =
+    let pos_bol = line_to_offset endpoint.Lsp.line in
+    Lexing.
+      {
+        pos_fname;
+        pos_lnum = endpoint.Lsp.line;
+        pos_bol;
+        pos_cnum = pos_bol + endpoint.Lsp.character;
+      }
+  in
+  let start = lexing_of range.Lsp.start in
+  let end_ = lexing_of range.Lsp.end_ in
+  Pos.make_from_lexing_pos path start end_
 
 let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
     File_content.text_edit =
@@ -79,6 +99,84 @@ let apply_changes_unsafe
   match apply_changes text contentChanges with
   | Ok r -> r
   | Error (e, _stack) -> failwith e
+
+let sym_occ_kind_to_lsp_sym_info_kind (sym_occ_kind : SymbolOccurrence.kind) :
+    Lsp.SymbolInformation.symbolKind =
+  let open Lsp.SymbolInformation in
+  let open SymbolOccurrence in
+  match sym_occ_kind with
+  | Class _ -> Class
+  | BuiltInType _ -> Class
+  | Function -> Function
+  | Method _ -> Method
+  | LocalVar -> Variable
+  | TypeVar -> TypeParameter
+  | Property _ -> Property
+  | XhpLiteralAttr _ -> Property
+  | ClassConst _ -> TypeParameter
+  | Typeconst _ -> TypeParameter
+  | GConst -> Constant
+  | Attribute _ -> Class
+  | EnumClassLabel _ -> EnumMember
+  | Keyword _ -> Null
+  | PureFunctionContext -> Null
+  | BestEffortArgument _ -> Null
+  | HhFixme -> Null
+  | Module -> Module
+
+let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
+    Lsp.range =
+  (* .hhconfig errors are Positions with a filename, but dummy start/end
+   * positions. Handle that case - and Pos.none - specially, as the LSP
+   * specification requires line and character >= 0, and VSCode silently
+   * drops diagnostics that violate the spec in this way *)
+  if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
+    { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
+  else
+    let (line1, col1, line2, col2) = Pos.destruct_range pos in
+    {
+      start = { line = line1 - 1; character = col1 - 1 };
+      end_ = { line = line2 - 1; character = col2 - 1 };
+    }
+
+let hack_pos_to_lsp_range_adjusted (p : 'a Pos.pos) : range =
+  let (line_start, line_end, character_start, character_end) =
+    Pos.info_pos_extended p
+  in
+  let (start_position : position) =
+    { line = line_start; character = character_start }
+  in
+  let (end_position : position) =
+    { line = line_end; character = character_end }
+  in
+  { start = start_position; end_ = end_position }
+
+let symbol_to_lsp_call_item
+    (sym_occ : Relative_path.t SymbolOccurrence.t)
+    (sym_def_opt : Relative_path.t SymbolDefinition.t option) :
+    CallHierarchyItem.t =
+  let open CallHierarchyItem in
+  let open SymbolOccurrence in
+  let (selectionRange_, range_, file_pos) =
+    match sym_def_opt with
+    | None ->
+      let sym_range = hack_pos_to_lsp_range_adjusted sym_occ.pos in
+      (sym_range, sym_range, sym_occ.pos)
+    | Some sym_def ->
+      ( hack_pos_to_lsp_range_adjusted sym_def.SymbolDefinition.pos,
+        hack_pos_to_lsp_range_adjusted sym_def.SymbolDefinition.span,
+        sym_def.SymbolDefinition.pos )
+  in
+  let filename_ = Pos.to_absolute file_pos |> Pos.filename in
+  let uri_ = path_to_lsp_uri filename_ ~default_path:"www" in
+  {
+    name = sym_occ.name;
+    kind = sym_occ_kind_to_lsp_sym_info_kind sym_occ.type_;
+    detail = None;
+    uri = uri_;
+    range = range_;
+    selectionRange = selectionRange_;
+  }
 
 (************************************************************************)
 (* Range calculations                                                   *)

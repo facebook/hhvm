@@ -1,6 +1,6 @@
 File "namespace_collections1.php", line 15, characters 8-14:
 Cannot use collection initialization for non-collection class. (Parsing[1002])
-File "namespace_collections1.php", line 14, characters 15-18:
-Unbound name: `Map` (Naming[2049])
 File "namespace_collections1.php", line 15, characters 8-11:
 Unexpected collection type `Map` (Naming[2013])
+File "namespace_collections1.php", line 14, characters 15-18:
+Unbound name: `Map` (Naming[2049])

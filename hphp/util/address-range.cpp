@@ -62,6 +62,7 @@ size_t getLowMapped() {
   // arenas.
   low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
   low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
+  low_mapped += alloc::getRange(alloc::AddrRangeClass::LowEmergency).used();
 #elif USE_JEMALLOC
   mallctlRead<size_t, true>(
     folly::sformat("stats.arenas.{}.mapped", low_arena).c_str(),

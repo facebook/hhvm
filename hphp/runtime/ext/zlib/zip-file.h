@@ -36,7 +36,7 @@ struct ZipFile : File {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
   bool seekable() override { return true;}
@@ -63,8 +63,6 @@ private:
   gzFile m_gzFile;
   req::ptr<File> m_innerFile;
   req::ptr<File> m_tempFile;
-
-  bool closeImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

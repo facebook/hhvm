@@ -151,7 +151,7 @@ constexpr size_t kNumDataTypes = 17;
 constexpr std::array<DataType, kNumDataTypes> computeDataTypes() {
   std::array<DataType, kNumDataTypes> result = {};
   size_t index = 0;
-#define DT(name, value) {                                      \
+#define DT(name, value, ...) {                                 \
     auto constexpr dt = KindOf##name;                          \
     if (dt == dt_modulo_persistence(dt)) result[index++] = dt; \
   }
@@ -172,23 +172,19 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  *
  * The lambda parameters are as follows:
  *
- * - GetVal:    Return the SSATmp of the value to test
- * - FuncToStr: Emit code to deal with any func to string conversions.
- * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
- * - Fail:      Emit code to deal with the type check failing.
- * - Callable:  Emit code to verify that the given value is callable.
- * - VerifyCls: Emit code to verify that the given value is an instance of the
- *              given Class.
- * - Fallback:  Called when the type check cannot be resolved statically. Either
- *              PUNT or call a runtime helper to do the check.
- *
- * `propCls' should only be non-null for property type-hints, and represents the
- * runtime class of the object the property belongs to.
+ * - GetVal:     Return the SSATmp of the value to test
+ * - GetThisCls: Return the SSATmp of the the class of `this'
+ * - SetVal:     Emit code to update the value with the coerced value.
+ * - Fail:       Emit code to deal with the type check failing.
+ * - Callable:   Emit code to verify that the given value is callable.
+ * - VerifyCls:  Emit code to verify that the given value is an instance of the
+ *               given Class.
+ * - Fallback:   Called when the type check cannot be resolved statically.
+ *               Call a runtime helper to do the check.
  */
 template <typename TGetVal,
-          typename TGetCtx,
-          typename TClassToStr,
-          typename TLazyClassToStr,
+          typename TGetThisCls,
+          typename TSetVal,
           typename TFail,
           typename TCallable,
           typename TVerifyCls,
@@ -196,11 +192,9 @@ template <typename TGetVal,
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
                     bool onlyCheckNullability,
-                    SSATmp* propCls,
                     TGetVal getVal,
-                    TGetCtx getCtx,
-                    TClassToStr classToStr,
-                    TLazyClassToStr lazyClassToStr,
+                    TGetThisCls getThisCls,
+                    TSetVal setVal,
                     TFail fail,
                     TCallable callable,
                     TVerifyCls verifyCls,
@@ -209,34 +203,50 @@ void verifyTypeImpl(IRGS& env,
   if (!tc.isCheckable()) return;
   assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
-  auto const genFail = [&](SSATmp* val, SSATmp* ctx = nullptr) {
-    if (ctx == nullptr) {
-      ctx = tc.isThis() ? propCls ? propCls : getCtx()
-                        : cns(env, nullptr);
-    }
+  auto const genThisCls = [&]() {
+    return tc.isThis() ? getThisCls() : cns(env, nullptr);
+  };
+
+  auto const genFail = [&](SSATmp* val, SSATmp* thisCls = nullptr) {
+    if (thisCls == nullptr) thisCls = genThisCls();
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && (!tc.isThis() || !tc.couldSeeMockObject())
+      && !tc.isThis()
       && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
-    return fail(val, ctx, failHard);
+    return fail(val, thisCls, failHard);
   };
 
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) {
     assertx(val->type().isKnownDataType());
 
     switch (result) {
-      case AnnotAction::Pass:           return;
-      case AnnotAction::Fail:           return genFail(val);
-      case AnnotAction::Fallback:       return fallback(val, false);
-      case AnnotAction::FallbackCoerce: return fallback(val, true);
-      case AnnotAction::CallableCheck:  return callable(val);
-      case AnnotAction::ObjectCheck:    break;
+      case AnnotAction::Pass:
+        return;
+
+      case AnnotAction::Fail:
+        genFail(val);
+        return;
+
+      case AnnotAction::Fallback:
+        fallback(val, genThisCls(), false);
+        return;
+
+      case AnnotAction::FallbackCoerce:
+        setVal(fallback(val, genThisCls(), true));
+        return;
+
+      case AnnotAction::CallableCheck:
+        callable(val);
+        return;
+
+      case AnnotAction::ObjectCheck:
+        break;
 
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
         assertx(val->type() <= TCls);
-        if (!classToStr(val)) return genFail(val);
+        setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
         }
@@ -245,7 +255,7 @@ void verifyTypeImpl(IRGS& env,
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
         assertx(val->type() <= TLazyCls);
-        if (!lazyClassToStr(val)) return genFail(val);
+        setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
         }
@@ -258,21 +268,21 @@ void verifyTypeImpl(IRGS& env,
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(val->type() <= TObj);
-    if (onlyCheckNullability) return;
+    assertx(!onlyCheckNullability);
 
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
       // For this type checks, the class needs to be an exact match.
-      auto const ctxCls = propCls ? propCls : getCtx();
+      auto const thisCls = getThisCls();
       auto const objClass = gen(env, LdObjClass, val);
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, EqCls, ctxCls, objClass));
+          gen(env, JmpZero, taken, gen(env, EqCls, thisCls, objClass));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          genFail(val, ctxCls);
+          genFail(val, thisCls);
         }
       );
       return;
@@ -307,7 +317,31 @@ void verifyTypeImpl(IRGS& env,
   auto const computeAction = [&](DataType dt) {
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
     auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
-    return annotCompat(dt, tc.type(), name);
+    auto const action = annotCompat(dt, tc.type(), name);
+    if (action != AnnotAction::ObjectCheck) return action;
+
+    if (onlyCheckNullability) return AnnotAction::Pass;
+    if (tc.isThis()) return action;
+    assertx(tc.isObject() || tc.isUnresolved());
+
+    if (!genericValType.clsSpec()) return action;
+    auto const cls = genericValType.clsSpec().cls();
+
+    if (env.irb->constrainValue(genericVal, GuardConstraint(cls).setWeak())) {
+      // We would have to constrain a guard to get the `cls` value.
+      return action;
+    }
+
+    // Exact name match -- the type check will always pass.
+    auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+    if (cls->name()->same(clsName)) return AnnotAction::Pass;
+
+    if (auto const knownCls = lookupUniqueClass(env, clsName)) {
+      // Subclass of a unique class.
+      if (cls->classof(knownCls)) return AnnotAction::Pass;
+    }
+
+    return action;
   };
 
   if (genericValType.isKnownDataType()) {
@@ -341,6 +375,13 @@ void verifyTypeImpl(IRGS& env,
     return result;
   }();
 
+  if (fallbackAction == None &&
+      std::all_of(options.begin(), options.end(), [] (auto const& pair) {
+        return pair.second == AnnotAction::Pass;
+      })) {
+    return;
+  }
+
   // TODO(kshaunak): If we were a bit more sophisticated here, we could
   // merge the cases for certain types, like TVec|TDict, or TArrLike.
   MultiCond mc{env};
@@ -356,13 +397,14 @@ void verifyTypeImpl(IRGS& env,
         gen(env, Unreachable, ASSERT_REASON);
         break;
       case Fail:
+        hint(env, Block::Hint::Unlikely);
         genFail(genericVal);
         break;
       case Fallback:
-        fallback(genericVal, false);
+        fallback(genericVal, genThisCls(), false);
         break;
       case FallbackCoerce:
-        fallback(genericVal, true);
+        setVal(fallback(genericVal, genThisCls(), true));
         break;
     }
     return cns(env, TBottom);
@@ -543,7 +585,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
 void emitInstanceOfD(IRGS& env, const StringData* className) {
   auto const src = popC(env);
   push(env, implInstanceOfD(env, src, className));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 void emitInstanceOf(IRGS& env) {
@@ -616,7 +658,7 @@ void emitIsLateBoundCls(IRGS& env) {
   } else {
     PUNT(IsLateBoundCls-MaybeObject);
   }
-  decRef(env, obj, DecRefProfileId::Default);
+  decRef(env, obj);
 }
 
 namespace {
@@ -1055,7 +1097,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
       if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);
         return {inputTS, create_catch_block(
-            env, [&]{ decRef(env, inputTS, DecRefProfileId::Default); })};
+            env, [&]{ decRef(env, inputTS); })};
       }
     }
     auto const ts = resolveTypeStructImpl(env, true, false, 1, true);
@@ -1105,43 +1147,27 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       env,
       tc,
       onlyCheckNullability,
-      nullptr,
       [&] { // Get value to test
-        return topC(env, BCSPRelOffset { ind });
+        return topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
       },
-      [&] { // Get the context class
+      [&] { // Get the class representing `this' type
         return ldCtxCls(env);
       },
-      [&] (SSATmp* val) { // class to string conversions
-        auto const str = gen(env, LdClsName, val);
+      [&] (SSATmp* updated) { // Set the potentially coerced value
         auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
         env.irb->exceptionStackBoundary();
-        return true;
       },
-      [&] (SSATmp* val) { // lazy class to string conversions
-        auto const str = gen(env, LdLazyClsName, val);
-        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
-        env.irb->exceptionStackBoundary();
-        return true;
-      },
-      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
-        auto const updated = gen(
+        gen(
           env,
           hard ? VerifyRetFailHard : VerifyRetFail,
           FuncParamWithTCData { func, id, &tc },
           val,
-          ctx
+          thisCls
         );
-
-        if (!hard) {
-          auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-          gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
-          env.irb->exceptionStackBoundary();
-        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
@@ -1162,8 +1188,14 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
           checkCls
         );
       },
-      [] (SSATmp*, bool) { // Fallback
-        PUNT(VerifyReturnType);
+      [&] (SSATmp* val, SSATmp* thisCls, bool mayCoerce) { // Fallback
+        return gen(
+          env,
+          mayCoerce ? VerifyRetCoerce : VerifyRet,
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          thisCls
+        );
       }
     );
   };
@@ -1190,42 +1222,54 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   }
 }
 
-void verifyParamTypeImpl(IRGS& env, int32_t id) {
-  auto const func = curFunc(env);
+}
+
+void verifyParamType(IRGS& env, const Func* func, int32_t id,
+                     BCSPRelOffset offset, SSATmp* prologueCtx) {
   auto const verifyFunc = [&](const TypeConstraint& tc) {
     verifyTypeImpl(
       env,
       tc,
       false,
-      nullptr,
       [&] { // Get value to test
-        return ldLoc(env, id, DataTypeSpecific);
+        return topC(env, offset, DataTypeGeneric);
       },
-      [&] { // Get the context class
-        return ldCtxCls(env);
+      [&] { // Get the class representing `this' type
+        if (prologueCtx == nullptr) return ldCtxCls(env);
+
+        if (!func->cls()) return cns(env, nullptr);
+        if (func->isClosureBody()) {
+          auto const closureTy = Type::ExactObj(func->implCls());
+          auto const closure = gen(env, AssertType, closureTy, prologueCtx);
+          if (func->isStatic()) {
+            return gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
+          }
+          auto const closureThis =
+            gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
+          return gen(env, LdObjClass, closureThis);
+        }
+
+        if (func->isStatic()) {
+          return gen(env, AssertType, Type::SubCls(func->cls()), prologueCtx);
+        }
+        auto const thiz =
+          gen(env, AssertType, Type::SubObj(func->cls()), prologueCtx);
+        return gen(env, LdObjClass, thiz);
       },
-      [&] (SSATmp* val) { // class to string conversions
-        auto const str = gen(env, LdClsName, val);
-        stLocRaw(env, id, fp(env), str);
-        return true;
+      [&] (SSATmp* updated) { // Set the potentially coerced value
+        auto const irspRelOffset = offsetFromIRSP(env, offset);
+        gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updated);
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
       },
-      [&] (SSATmp* val) { // lazy class to string conversions
-        auto const str = gen(env, LdLazyClsName, val);
-        stLocRaw(env, id, fp(env), str);
-        return true;
-      },
-      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
-        auto const updated = gen(
+      [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
+        gen(
           env,
           hard ? VerifyParamFailHard : VerifyParamFail,
           FuncParamWithTCData { func, id, &tc },
           val,
-          ctx
+          thisCls
         );
-
-        if (!hard) {
-          stLocRaw(env, id, fp(env), updated);
-        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
@@ -1246,8 +1290,14 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
           checkCls
         );
       },
-      [] (SSATmp*, bool) { // Fallback
-        PUNT(VerifyParamType);
+      [&] (SSATmp* val, SSATmp* thisCls, bool mayCoerce) { // Fallback
+        return gen(
+          env,
+          mayCoerce ? VerifyParamCoerce : VerifyParam,
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          thisCls
+        );
       }
     );
   };
@@ -1263,8 +1313,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       }
     }
   }
-}
-
 }
 
 void verifyPropType(IRGS& env,
@@ -1286,50 +1334,43 @@ void verifyPropType(IRGS& env,
     if (!tc || !tc->isCheckable()) return;
     assertx(tc->validForProp());
 
-    auto const fallback = [&](SSATmp* val, bool mayCoerce) {
-      // Unlike the other type-hint checks, we don't punt here. We instead do
-      // the check using a runtime helper. This gives us the freedom to call
-      // verifyPropType without us worrying about it punting the whole set op.
-
-      auto const data = TypeConstraintData{tc};
-      auto const sprop = cns(env, isSProp);
-      if (coerce && mayCoerce) {
-        *coerce = gen(env, VerifyPropCoerce, data, cls, cns(env, slot), val, sprop);
-      } else {
-        gen(env, VerifyProp, data, cls, cns(env, slot), val, sprop);
-      }
+    auto const fallback = [&](SSATmp* val, SSATmp*, bool mayCoerce) {
+      return gen(
+        env,
+        mayCoerce ? VerifyPropCoerce : VerifyProp,
+        TypeConstraintData { tc },
+        cls,
+        cns(env, slot),
+        val,
+        cns(env, isSProp)
+      );
     };
 
     // For non-DataTypeSpecific values, verifyTypeImpl handles the different
-    // cases separately. However, our callers want a single coerced value,
-    // which we don't track, so we punt if we're going to split it up.
-    if (!val->type().isKnownDataType()) {
-      return fallback(val, tc->mayCoerce());
+    // cases separately. However, our callers want a single coerced value, which
+    // we don't track, so we use the fallback if we're going to split it up.
+    if (tc->mayCoerce() && !val->type().isKnownDataType()) {
+      auto const updated = fallback(val, nullptr, true /* mayCoerce */);
+      if (coerce) *coerce = updated;
+      return;
     }
 
     verifyTypeImpl(
       env,
       *tc,
       false,
-      cls,
       [&] { // Get value to check
-        env.irb->constrainValue(val, DataTypeSpecific);
+        // Guard the type only if we may coerce, so that the most common
+        // non-coercion case is handled without using the fallback.
+        if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
         return val;
       },
-      [&] { // Get the context class
-        return ldCtxCls(env);
+      [&] { // Get the class representing `this' type
+        return cls;
       },
-      [&] (SSATmp* val) {  // class to string automatic conversions
-        if (!coerce) return false;
-        if (RO::EvalCheckPropTypeHints < 3) return false;
-        *coerce = gen(env, LdClsName, val);
-        return true;
-      },
-      [&] (SSATmp* val) {  // lazy class to string automatic conversions
-        if (!coerce) return false;
-        if (RO::EvalCheckPropTypeHints < 3) return false;
-        *coerce = gen(env, LdLazyClsName, val);
-        return true;
+      [&] (SSATmp* updated) { // Set the potentially coerced value
+        assertx(tc->mayCoerce());
+        if (coerce) *coerce = updated;
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
@@ -1345,8 +1386,8 @@ void verifyPropType(IRGS& env,
           cns(env, isSProp)
         );
       },
-      // We don't allow callable as a property type-hint, so we should never need
-      // to check callability.
+      // We don't allow callable as a property type-hint, so we should never
+      // need to check callability.
       [&] (SSATmp*) { always_assert(false); },
       [&] (SSATmp* val, SSATmp* checkCls) { // Class/type-alias check
         gen(
@@ -1385,18 +1426,15 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     env,
     c.tc,
     false,
-    c.propDecl ? cns(env, c.propDecl) : nullptr,
     [&] { // Get value to test
       return val;
     },
-    [&] { // Get the context class
-      return c.ctx ? cns(env, c.ctx) : cns(env, nullptr);
+    [&] { // Get the class representing `this' type
+      if (c.propDecl) return cns(env, c.propDecl);
+      if (c.ctx) return cns(env, c.ctx);
+      return cns(env, nullptr);
     },
-    [&] (SSATmp*) { // class to string conversions
-      return false;
-    },
-    [&] (SSATmp*) { // lazy class to string conversions
-      return false;
+    [&] (SSATmp*) { // Set the potentially coerced value
     },
     [&] (SSATmp*, SSATmp*, bool) { // Check failure
       genFail();
@@ -1407,8 +1445,9 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     [&] (SSATmp*, SSATmp*) {
       genFail();
     },
-    [&] (SSATmp*, bool) { // Fallback
+    [&] (SSATmp*, SSATmp*, bool) { // Fallback
       genFail();
+      return nullptr;
     }
   );
 }
@@ -1438,16 +1477,15 @@ void emitVerifyRetNonNullC(IRGS& env) {
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 
-void emitVerifyOutType(IRGS& env, uint32_t paramId) {
+void emitVerifyOutType(IRGS& env, int32_t paramId) {
   verifyRetTypeImpl(env, paramId, 0, false);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {
-  verifyParamTypeImpl(env, paramId);
+  verifyParamType(env, curFunc(env), paramId, BCSPRelOffset{0}, nullptr);
 }
 
 void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
-  verifyParamTypeImpl(env, paramId);
   auto const ts = popC(env);
   auto const cell = ldLoc(env, paramId, DataTypeSpecific);
   auto const reified = tcCouldBeReified(curFunc(env), paramId);
@@ -1497,7 +1535,7 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   );
   discard(env, 2);
   push(env, val);
-  decRef(env, tCls, DecRefProfileId::Default);
+  decRef(env, tCls);
 }
 
 void emitIssetL(IRGS& env, int32_t id) {
@@ -1531,7 +1569,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   auto const val = popC(env, DataTypeSpecific);
   push(env, isTypeHelper(env, subop, val));
-  decRef(env, val, DecRefProfileId::Default);
+  decRef(env, val);
 }
 
 void emitIsTypeL(IRGS& env, NamedLocal loc, IsTypeOp subop) {

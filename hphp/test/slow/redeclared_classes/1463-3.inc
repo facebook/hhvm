@@ -3,7 +3,7 @@
   class child3 extends child2 {
     public $child3Val = 'child3';
     public $childProp = 'IamChild3';
-    static $child3Static = 'child3Stat';
+    public static $child3Static = 'child3Stat';
     function childMeth() {
       return 'I am child3';
     }

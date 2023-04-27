@@ -317,23 +317,23 @@ void Scope::fixName(ObjectTypeName newName) {
 TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     : m_dwarf{filename}
 {
-  // Processing each compiliation unit is very expensive, as it involves walking
-  // a large part of the debug information. To speed things up (a lot), we buid
-  // up the state concurrently. Create a job corresponding to each compiliation
+  // Processing each compilation unit is very expensive, as it involves walking
+  // a large part of the debug information. To speed things up (a lot), we build
+  // up the state concurrently. Create a job corresponding to each compilation
   // unit in the file and enqueue the jobs with a thread pool. We'll find the
-  // offsets of the compiliation unit in the main thread, enqueuing them as we
+  // offsets of the compilation unit in the main thread, enqueuing them as we
   // find them. This lets us not only exploit concurrency between processing
-  // compiliation units, but between finding them and processing them.
+  // compilation units, but between finding them and processing them.
   //
   // Each worker maintains its own private state which it populates for all the
-  // compiliation units its assigned (each worker can process multiple
-  // compiliation units). Once done, all the different states are kept separate
+  // compilation units its assigned (each worker can process multiple
+  // compilation units). Once done, all the different states are kept separate
   // (merging them would be too expensive), but a mapping is constructed to map
   // offsets to the appropriate state block.
   //
   // This whole scheme is only viable because (right now), debug information in
   // a given compilation unit doesn't reference anything outside of that unit,
-  // so the state for any given compiliation unit can be processed
+  // so the state for any given compilation unit can be processed
   // independently.
 
   // The context serves as the link between a worker and the TypeParserImpl
@@ -359,7 +359,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     std::vector<GlobalOff> offsets;
 
     void doJob(GlobalOff offset) override {
-      // Process a compiliation unit at the given offset.
+      // Process a compilation unit at the given offset.
       try {
         // We're going to use it so let's mark this worker active.
         if (!env.dwarf) {
@@ -475,28 +475,53 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   dispatcher.start();
 
   size_t num_tu = 0;
-  FTRACE(1, "Adding type-units to dispatcher...\n");
-  // Iterate over every type-unit, enqueuing jobs which will
-  // concurrently scan that unit.
-  m_dwarf.forEachTopLevelUnit(
-    [&] (Dwarf_Die tu) {
-      dispatcher.enqueue(m_dwarf.getDIEOffset(tu));
-      ++num_tu;
-      return true;
-    },
-    false
-  );
-  FTRACE(1, "... {} type-units added.\n", num_tu);
-
   size_t num_cu = 0;
-  FTRACE(1, "Adding compilation-units to dispatcher...\n");
-  // Iterate over every compilation-unit, enqueuing jobs which will
-  // concurrently scan that unit.
-  m_dwarf.forEachCompilationUnit(
-    [&](Dwarf_Die cu) { dispatcher.enqueue(m_dwarf.getDIEOffset(cu)); ++num_cu;}
-  );
 
-  FTRACE(1, "... {} compilation-units added.\n", num_cu);
+  if (m_dwarf.useDWP) {
+    // With dwp it is sufficient to scan the dwarf in the dwp file alone. Both
+    // compile units and type units are mixed in the dwp file.
+    FTRACE(1, "Adding dwp-units to dispatcher...\n");
+
+    // Iterate over compile units in the dwp
+    m_dwarf.forEachCompilationUnit(
+      [&](Dwarf_Die cu) {
+        dispatcher.enqueue(m_dwarf.getDIEOffset(cu));
+        ++num_cu;
+      },
+      true
+    );
+
+    FTRACE(1, "... {} dwp-units added.\n", num_cu);
+  } else {
+    FTRACE(1, "Adding type-units to dispatcher...\n");
+    // Iterate over every type-unit, enqueuing jobs which will
+    // concurrently scan that unit.
+    m_dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die tu) {
+        dispatcher.enqueue(m_dwarf.getDIEOffset(tu));
+        ++num_tu;
+        return true;
+      },
+      false,
+      false
+    );
+
+    FTRACE(1, "... {} type-units added.\n", num_tu);
+
+    FTRACE(1, "Adding compilation-units to dispatcher...\n");
+    // Iterate over every compilation-unit, enqueuing jobs which will
+    // concurrently scan that unit.
+
+    m_dwarf.forEachCompilationUnit(
+      [&](Dwarf_Die cu) {
+        dispatcher.enqueue(m_dwarf.getDIEOffset(cu));
+        ++num_cu;
+      },
+      false
+    );
+
+    FTRACE(1, "... {} compilation-units added.\n", num_cu);
+  }
 
   // Wait for all the workers to finish.
   dispatcher.stop();
@@ -1879,6 +1904,42 @@ void TypeParserImpl::fillFuncArgs(Dwarf_Die die, FuncType& func) {
 }
 
 /*
+* Print out the DWARF header information, which is largely stored in the Context
+* struct. Aim to match output style of `llvm-dwarfdump` for comparison and
+* debugging purposes.
+*/
+void printContext(const DwarfState &dwarf, std::ostream &os,
+                  const debug_parser::DwarfState::Context *context) {
+  auto const compileUnit = context->unitType == DW_UT_compile ||
+                           context->unitType == DW_UT_split_compile;
+
+  os << fmt::format("{:#010x}:", context->offset)
+     << (compileUnit ? " Compile Unit:" : " Type Unit:")
+     << fmt::format(" length = {:#010x}",
+                    context->size - (context->is64Bit ? 12 : 4))
+     << fmt::format(", version = {:#06x}", context->version)
+     << fmt::format(", unit_type = {}", dwarf.utToString(context->unitType))
+     << fmt::format(", abbr_offset = {:#06x}", context->abbrevOffset)
+     << fmt::format(", addr_size = {:#04x}", context->addrSize);
+
+  if (compileUnit) {
+    os << fmt::format(", DWO_id = {:#018x}", context->dwoId);
+  } else {
+    os << fmt::format(", type_signature = {:#018x}", context->typeSignature)
+       << fmt::format(", type_offset = {:#06x}", context->typeOffset);
+  }
+
+  if (context->isDWP) {
+    os << fmt::format(", str_offsets_base = {:#010x}", context->strOffsetsBase)
+       << fmt::format(", rnglists_base = {:#010x}", context->rnglistsBase);
+  }
+
+  os << fmt::format(" (next unit at {:#010x})", context->offset + context->size)
+     << std::endl
+     << std::endl;
+}
+
+/*
  * Print out the given DIE (including children) in textual format to the given
  * ostream. Only actually print out DIEs which begin in the range between the
  * begin and end parameters.
@@ -1895,6 +1956,10 @@ void printDIE(std::ostream& os,
   auto tag_name = dwarf.tagToString(tag);
   auto name = dwarf.getDIEName(die);
   auto offset = dwarf.getDIEOffset(die).offset();
+
+  auto const indentPadding = [](size_t count) {
+    return std::string(count * 2, ' ');
+  };
 
   const auto recurse = [&]{
     // Find the last child DIE which does not start with the begin/end
@@ -1941,10 +2006,8 @@ void printDIE(std::ostream& os,
     return folly::sformat("ref_sig8:{:016x}", sig);
   };
 
-  for (int i = 0; i < indent; ++i) {
-    os << "  ";
-  }
-  os << "#" << offset << ": " << tag_name << " (" << tag << ") \""
+  os << indentPadding(indent);
+  os << fmt::format("{:#010x}: ", offset) << tag_name << " (" << tag << ") \""
      << name << "\"";
   if (sig && sig->first) {
     os << folly::sformat(" {{{} -> #{}}}", printSig(sig->first), sig->second);
@@ -1961,14 +2024,19 @@ void printDIE(std::ostream& os,
 
       auto attr_value = [&]() -> std::string {
         if (type == DW_AT_ranges) {
-          auto const ranges = dwarf.getRanges(attr);
-          std::string res;
+          // Dwarf v5 uses debug_rnglists, whereas previous versions use
+          // debug_ranges and both can coexist in the same file
+          auto const ranges = die->context->version >= 5 ?
+            dwarf.getRngLists(attr) :
+            dwarf.getRanges(attr);
+          auto const padding = indentPadding(indent + 2);
+          std::string res = fmt::format("{}", padding);
           for (auto range : ranges) {
             if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
-              folly::format(&res, "0x{:x} ", range.dwr_addr2);
+              folly::format(&res, "\n{}{:#010x} ", padding, range.dwr_addr2);
             } else {
-              folly::format(&res, "0x{:x}-0x{:x} ",
-                            range.dwr_addr1, range.dwr_addr2);
+              folly::format(&res, "\n{}[{:#018x}, {:#018x})",
+                            padding, range.dwr_addr1, range.dwr_addr2);
             }
           }
           return res;
@@ -2033,6 +2101,15 @@ void printDIE(std::ostream& os,
             return folly::sformat("Location: [{}]", output);
           }
 
+          case DW_FORM_strx1:
+          case DW_FORM_strx2:
+          case DW_FORM_strx3:
+          case DW_FORM_strx4:
+            return folly::sformat(
+              "\"{}\"",
+              dwarf.getAttributeValueString(attr)
+            );
+
           case DW_FORM_block1:
           case DW_FORM_block2:
           case DW_FORM_block4:
@@ -2061,11 +2138,17 @@ struct PrinterImpl : Printer {
   explicit PrinterImpl(const std::string& filename): m_filename{filename} {}
   void operator()(std::ostream& os,
                   std::size_t begin,
-                  std::size_t end) const override {
+                  std::size_t end,
+                  bool dwp) const override {
     DwarfState dwarf{m_filename};
 
-    print_section(os, dwarf, false, begin, end);
-    print_section(os, dwarf, true, begin, end);
+    if (dwp) {
+      // DWP doesn't have a types section, to just print info
+      print_section(os, dwarf, true, true, begin, end);
+    } else {
+      print_section(os, dwarf, true, false, begin, end);
+      print_section(os, dwarf, false, false, begin, end);
+    }
 
     os << std::flush;
   }
@@ -2073,6 +2156,7 @@ private:
   void print_section(std::ostream& os,
                      const DwarfState& dwarf,
                      bool isInfo,
+                     bool isDWP,
                      std::size_t begin,
                      std::size_t end) const {
     // If a non-default begin parameter was specified, first iterate over all
@@ -2086,7 +2170,8 @@ private:
           const auto offset = dwarf.getDIEOffset(cu).offset();
           if (offset <= begin) last = offset;
         },
-        isInfo
+        isInfo,
+        isDWP
       );
     }
 
@@ -2095,11 +2180,12 @@ private:
     dwarf.forEachTopLevelUnit(
       [&] (Dwarf_Die cu) {
         auto context = cu->context;
-        auto type_offset = GlobalOff { context->typeOffset, context->isInfo };
+        auto type_offset = GlobalOff { context->typeOffset, context->isInfo, context->isDWP };
         auto pair = std::make_pair(context->typeSignature, type_offset);
         const auto offset = dwarf.getDIEOffset(cu).offset();
         if (offset >= end) return false;
         if ((!last || offset >= *last)) {
+          printContext(dwarf, os, context);
           printDIE(
             os,
             dwarf,
@@ -2114,7 +2200,8 @@ private:
         }
         return true;
       },
-      isInfo
+      isInfo,
+      isDWP
     );
   }
   std::string m_filename;
@@ -2215,11 +2302,13 @@ private:
 
   std::vector<uint64_t> get_cu(const DwarfState& dwarf) const {
     std::vector<uint64_t> result = {};
-    dwarf.forEachCompilationUnit(
+    dwarf.forEachTopLevelUnit(
       [&](Dwarf_Die cu) {
         result.push_back(cu->context->offset);
         result.push_back(cu->context->size);
-      }
+      },
+      true,
+      false
     );
     return result;
   }
@@ -2231,7 +2320,9 @@ private:
         result.push_back(cu->context->offset);
         result.push_back(cu->context->typeOffset - cu->context->offset);
         result.push_back(cu->context->typeSignature);
-      }, false
+      },
+      false,
+      false
     );
     return result;
   }
@@ -2270,7 +2361,11 @@ private:
       [&](Dwarf_Attribute attr) {
         switch (dwarf.getAttributeType(attr)) {
           case DW_AT_ranges:
-            ranges = dwarf.getRanges(attr);
+            // Dwarf v5 uses debug_rnglists, whereas previous versions use
+            // debug_ranges
+            ranges = die->context->version >= 5 ?
+              dwarf.getRngLists(attr) :
+              dwarf.getRanges(attr);
             break;
           case DW_AT_low_pc:
             // Some times GCC/Clang emits very low numbers for addresses in
@@ -2657,6 +2752,7 @@ private:
         break;
       case DW_TAG_compile_unit:
       case DW_TAG_type_unit:
+      case DW_TAG_skeleton_unit:
         visitChildren(parent_name);
         break;
       default:
@@ -2676,14 +2772,18 @@ private:
       [&](Dwarf_Die die) {
         unit_indices_cu.insert({die->context->offset, count});
         count++;
-      }, true /* Compilation Unit */
+      },
+      true,
+      false
     );
     size_t numCUs = count;
     dwarf.forEachTopLevelUnit(
       [&](Dwarf_Die die) {
         unit_indices_tu[die->context->offset] = count;
         count++;
-      }, false /* Type Unit */
+      },
+      false,
+      false
     );
 
 
@@ -2718,7 +2818,10 @@ private:
         SpecMap spec_names;
         visit_die_for_symbols(dwarf, die, symbols, spec_names, "",
                               0, index);
-      }, true /* Compilation Unit */, m_numThreads
+      },
+      true,
+      m_numThreads,
+      false
     );
 
     std::vector<AddressTableEntry> entries;
@@ -2736,7 +2839,10 @@ private:
         SpecMap spec_names;
         visit_die_for_symbols(dwarf, die, symbols, spec_names, "",
                               0, index);
-      }, false /* Type Unit */, m_numThreads
+      },
+      false,
+      m_numThreads,
+      false
     );
 
     log_time(time, "collect_addresses_and_symbols: Visit TUs");

@@ -178,7 +178,7 @@ static double KernelBessel_J1(const double x)
 {
   double p, q;
 
-  register long i;
+  long i;
 
   static const double
   Pone[] =
@@ -220,7 +220,7 @@ static double KernelBessel_P1(const double x)
 {
   double p, q;
 
-  register long i;
+  long i;
 
   static const double
   Pone[] =
@@ -256,7 +256,7 @@ static double KernelBessel_Q1(const double x)
 {
   double p, q;
 
-  register long i;
+  long i;
 
   static const double
   Pone[] =
@@ -521,7 +521,7 @@ static inline int _color_blend (const int dst, const int src)
     if( dst_alpha == gdAlphaTransparent ) {
       return src;
     } else {
-      register int alpha, red, green, blue;
+      int alpha, red, green, blue;
       const int src_weight = gdAlphaTransparent - src_alpha;
       const int dst_weight = (gdAlphaTransparent - dst_alpha) * src_alpha / gdAlphaMax;
       const int tot_weight = src_weight + dst_weight;
@@ -549,7 +549,7 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
     }
     return c;
   } else {
-    register int border = 0;
+    int border = 0;
 
     if (y < im->cy1) {
       border = im->tpixels[0][im->cx1];
@@ -600,7 +600,7 @@ static inline int getPixelOverflowPalette(gdImagePtr im, const int x, const int 
     }
     return colorIndex2RGBA(c);
   } else {
-    register int border = 0;
+    int border = 0;
     if (y < im->cy1) {
       border = gdImageGetPixel(im, im->cx1, 0);
       goto processborder;
@@ -855,7 +855,7 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
     for (u = 0; u < line_size; u++) {
         const double dCenter = (double)u / scale_d;
         /* get the significant edge points affecting the pixel */
-        register int iLeft = MAX(0, (int)floor (dCenter - width_d));
+        int iLeft = MAX(0, (int)floor (dCenter - width_d));
         int iRight = MIN((int)ceil(dCenter + width_d), (int)src_size - 1);
         double dTotalWeight = 0.0;
     int iSrc;
@@ -898,7 +898,7 @@ static inline void _gdScaleRow(gdImagePtr pSrc, unsigned int /*src_width*/,
   unsigned int x;
 
     for (x = 0; x < dst_width - 1; x++) {
-    register unsigned char r = 0, g = 0, b = 0, a = 0;
+    unsigned char r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
     int i;
@@ -945,7 +945,7 @@ _gdScaleCol(gdImagePtr pSrc, unsigned int /*src_width*/, gdImagePtr pRes,
             unsigned int uCol, LineContribType* contrib) {
   unsigned int y;
   for (y = 0; y < dst_height - 1; y++) {
-    register unsigned char r = 0, g = 0, b = 0, a = 0;
+    unsigned char r = 0, g = 0, b = 0, a = 0;
     const int iLeft = contrib->ContribRow[y].Left;
     const int iRight = contrib->ContribRow[y].Right;
     int i;
@@ -1140,7 +1140,7 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
     long j;
     const gdFixed f_i = gd_itofx(i);
     const gdFixed f_a = gd_mulfx(f_i, f_dy);
-    register long m = gd_fxtoi(f_a);
+    long m = gd_fxtoi(f_a);
 
     dst_offset_h = 0;
 
@@ -1161,7 +1161,7 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
       unsigned int pixel2;
       unsigned int pixel3;
       unsigned int pixel4;
-      register gdFixed f_r1, f_r2, f_r3, f_r4,
+      gdFixed f_r1, f_r2, f_r3, f_r4,
           f_g1, f_g2, f_g3, f_g4,
           f_b1, f_b2, f_b3, f_b4,
           f_a1, f_a2, f_a3, f_a4;
@@ -1252,7 +1252,7 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
       unsigned int pixel2;
       unsigned int pixel3;
       unsigned int pixel4;
-      register gdFixed f_r1, f_r2, f_r3, f_r4,
+      gdFixed f_r1, f_r2, f_r3, f_r4,
           f_g1, f_g2, f_g3, f_g4,
           f_b1, f_b2, f_b3, f_b4,
           f_a1, f_a2, f_a3, f_a4;
@@ -1360,7 +1360,7 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
       }
       unsigned int src_offset_x[16], src_offset_y[16];
       long k;
-      register gdFixed f_red = 0, f_green = 0, f_blue = 0, f_alpha = 0;
+      gdFixed f_red = 0, f_green = 0, f_blue = 0, f_alpha = 0;
       unsigned char red, green, blue, alpha = 0;
       int *dst_row = dst->tpixels[dst_offset_y];
 
@@ -1487,9 +1487,9 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
       }
 
       for (k = -1; k < 3; k++) {
-        register gdFixed f_RY;
+        gdFixed f_RY;
         {
-          register gdFixed f_a = 0, f_b = 0, f_d = 0, f_c = 0;
+          gdFixed f_a = 0, f_b = 0, f_d = 0, f_c = 0;
           const gdFixed f = gd_itofx(k)-f_f;
           const gdFixed f_fm1 = f - f_1;
           const gdFixed f_fp1 = f + f_1;
@@ -1507,9 +1507,9 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
           const gdFixed f_fm1 = f - f_1;
           const gdFixed f_fp1 = f + f_1;
           const gdFixed f_fp2 = f + f_2;
-          register gdFixed f_a = 0, f_b = 0, f_c = 0, f_d = 0;
-          register gdFixed f_RX, f_R, f_rs, f_gs, f_bs, f_ba;
-          register int c;
+          gdFixed f_a = 0, f_b = 0, f_c = 0, f_d = 0;
+          gdFixed f_RX, f_R, f_rs, f_gs, f_bs, f_ba;
+          int c;
           const int _k = ((k+1)*4) + (l+1);
 
           if (f_fp2 > 0) f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
@@ -1685,7 +1685,7 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
       if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
         dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
       } else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-        register int c = getPixelInterpolated(src, n, m, bgColor);
+        int c = getPixelInterpolated(src, n, m, bgColor);
         c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
 
         dst->tpixels[dst_offset_y][dst_offset_x++] = _color_blend(bgColor, c);
@@ -1759,7 +1759,7 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
         }
         {
           const int pixel1 = src->tpixels[src_offset_y][src_offset_x];
-          register int pixel2, pixel3, pixel4;
+          int pixel2, pixel3, pixel4;
 
           if (src_offset_y + 1 >= src_h) {
             pixel2 = bgColor;
@@ -2019,8 +2019,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
             gdFixed f_a = 0, f_b = 0, f_c = 0, f_d = 0;
             gdFixed f_RX, f_R;
             const int _k = ((k + 1) * 4) + (l + 1);
-            register gdFixed f_rs, f_gs, f_bs, f_as;
-            register int c;
+            gdFixed f_rs, f_gs, f_bs, f_as;
+            int c;
 
             if (f_fp2 > 0) {
               f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
@@ -2250,7 +2250,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
   int c1x,c1y,c2x,c2y;
   int backclip = 0;
   int backup_clipx1, backup_clipy1, backup_clipx2, backup_clipy2;
-  register int x, y, src_offset_x, src_offset_y;
+  int x, y, src_offset_x, src_offset_y;
   double inv[6];
   int *dst_p;
   gdPointF pt, src_pt;

@@ -2,13 +2,15 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
-module there {}
-module another {}
+new module here {}
+new module there {}
+new module another {}
+
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module("here")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module here;
 
 function foo(): void { }
 
@@ -19,7 +21,8 @@ newtype Tnew = string;
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module("there")>>
+
+module there;
 
 class C {
   public function bar(): void { }
@@ -28,7 +31,8 @@ class C {
 //// another.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module("another")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module another;
 
 enum E : int {
   A = 3;

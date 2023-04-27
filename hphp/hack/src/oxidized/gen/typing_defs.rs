@@ -3,25 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26ab1db7ab3e97793327f5a15810e581>>
+// @generated SignedSource<<43be16b7aa65037dded0df6fbace8f42>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs_core::*;
+pub use typing_defs_flags::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs_flags::*;
-
-pub use typing_defs_core::*;
 
 /// Origin of Class Constant References:
 /// In order to be able to detect cycle definitions like
@@ -52,8 +50,10 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom {
+    #[rust_to_ocaml(name = "Self")]
     Self_,
     From(String),
 }
@@ -85,6 +85,7 @@ pub enum ClassConstFrom {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ClassConstRef(pub ClassConstFrom, pub String);
 
@@ -103,6 +104,8 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl {
     pub pos: pos_or_decl::PosOrDecl,
@@ -124,6 +127,8 @@ pub struct ConstDecl {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
 pub struct ClassElt {
     pub visibility: CeVisibility,
@@ -151,6 +156,8 @@ pub struct ClassElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt {
     pub deprecated: Option<String>,
@@ -161,6 +168,7 @@ pub struct FunElt {
     pub pos: pos_or_decl::PosOrDecl,
     pub php_std_lib: bool,
     pub support_dynamic_type: bool,
+    pub no_auto_dynamic: bool,
 }
 
 #[derive(
@@ -180,6 +188,7 @@ pub struct FunElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstKind {
     CCAbstract(bool),
@@ -201,6 +210,8 @@ pub enum ClassConstKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst {
     pub synthesized: bool,
@@ -228,9 +239,36 @@ pub struct ClassConst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C, u8)]
+pub enum ModuleReference {
+    MRGlobal,
+    MRPrefix(String),
+    MRExact(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "mdt_")]
 #[repr(C)]
 pub struct ModuleDefType {
-    pub mdt_pos: pos_or_decl::PosOrDecl,
+    pub pos: pos_or_decl::PosOrDecl,
+    pub exports: Option<Vec<ModuleReference>>,
+    pub imports: Option<Vec<ModuleReference>>,
 }
 
 /// The position is that of the hint in the `use` / `implements` AST node
@@ -279,6 +317,8 @@ pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst {
     pub as_constraint: Option<Ty>,
@@ -301,6 +341,7 @@ pub struct AbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ConcreteTypeconst {
     pub tc_type: Ty,
@@ -321,6 +362,8 @@ pub struct ConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst {
     pub constraint: Ty,
@@ -342,6 +385,7 @@ pub struct PartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Typeconst {
     TCAbstract(AbstractTypeconst),
@@ -363,6 +407,8 @@ pub enum Typeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType {
     pub synthesized: bool,
@@ -408,6 +454,9 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType {
     pub base: Ty,
@@ -430,16 +479,21 @@ pub struct EnumType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType {
     pub module: Option<ast_defs::Id>,
     pub pos: pos_or_decl::PosOrDecl,
-    pub vis: aast::TypedefVisibility,
+    pub vis: ast_defs::TypedefVisibility,
     pub tparams: Vec<Tparam>,
-    pub constraint: Option<Ty>,
+    pub as_constraint: Option<Ty>,
+    pub super_constraint: Option<Ty>,
     pub type_: Ty,
     pub is_ctx: bool,
     pub attributes: Vec<UserAttribute>,
+    pub internal: bool,
+    pub docs_url: Option<String>,
 }
 
 #[derive(
@@ -457,15 +511,19 @@ pub struct TypedefType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.
+    #[rust_to_ocaml(name = "Wrong_phase")]
     WrongPhase(String),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
     /// able to deserialize it again.
+    #[rust_to_ocaml(name = "Not_supported")]
     NotSupported(String),
     /// The input JSON was invalid for some reason.
+    #[rust_to_ocaml(name = "Deserialization_error")]
     DeserializationError(String),
 }

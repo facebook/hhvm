@@ -1,8 +1,0 @@
-File "mixed_return_forms_return_any_annot.php.pess", line 15, characters 10-13:
-This function can exit with and without returning a value (Typing[4421])
-  File "mixed_return_forms_return_any_annot.php.pess", line 17, characters 5-13:
-  Returning a value here.
-  File "mixed_return_forms_return_any_annot.php.pess", line 15, characters 10-13:
-  This function does not always return a value
-File "mixed_return_forms_return_any_annot.php.pess", line 23, characters 16-20:
-Async functions that do not return a value must have a type of Awaitable<void> (Typing[4422])

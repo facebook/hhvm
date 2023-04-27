@@ -34,6 +34,8 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 <<__EntryPoint>>
@@ -44,5 +46,5 @@ function test() {
   $v1->anI32 = 1 << 31;
   $v1->anI16 = 1 << 15;
   $v1->map = darray[(1 << 15) => 0];
-  thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20, true);
+  thrift_protocol_write_compact2($p, 'foomethod', 1, $v1, 20, true);
 }

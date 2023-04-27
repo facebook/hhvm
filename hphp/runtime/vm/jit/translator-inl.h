@@ -25,8 +25,8 @@ namespace HPHP::jit {
 
 inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
   switch (op) {
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::JmpZ:
     case Op::JmpNZ:
     case Op::Switch:
@@ -53,6 +53,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::AwaitAll:
       return inlining ? ControlFlowInfo::ChangesPC : ControlFlowInfo::BreaksBB;
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:

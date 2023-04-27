@@ -92,7 +92,7 @@
                   (([8:3-7], Inv<?vec<arraykey>>), (Lvar ([8:3-7], $obj))),
                   (([8:10-21], Inv<?vec<arraykey>>),
                    (New (
-                      (([8:14-17], Inv<[unresolved]>),
+                      (([8:14-17], Inv<_>),
                        (CI ([8:14-17], "\\Inv"))),
                       [],
                       [(([8:18-20], ?vec<string>), (Lvar ([8:18-20], $v)))],

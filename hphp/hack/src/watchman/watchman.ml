@@ -293,10 +293,11 @@ end = struct
           ~on_timeout:
             begin
               fun (_ : Timeout.timings) ->
-              let () =
-                Hh_logger.log "Regular_watchman_process.blocking_read timed out"
-              in
-              raise Read_payload_too_long
+                let () =
+                  Hh_logger.log
+                    "Regular_watchman_process.blocking_read timed out"
+                in
+                raise Read_payload_too_long
             end
       in
       Some (sanitize_watchman_response ~debug_logging output)
@@ -622,7 +623,8 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
        * is a file now, might it become a directory later? I'm not aware of aterm which will watch for either a file or a directory, so let's add two terms *)
       Some
         (J.strlist ["dirname"; relative_path]
-         :: J.strlist ["name"; relative_path] :: terms)
+        :: J.strlist ["name"; relative_path]
+        :: terms)
 
   let re_init
       ?prior_clockspec
@@ -690,7 +692,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           String_utils.(
             match
               SSet.find_first_opt
-                (fun root -> string_starts_with path root)
+                (fun root -> String.is_prefix path ~prefix:root)
                 watch_roots
             with
             | None -> failwith (spf "Cannot deduce watch root for path %s" path)
@@ -864,7 +866,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             (* This happens when watchman is tearing itself down after we
              * retrieved a sock address and connected to the sock address. That's
              * because Unix.open_connection (via Timeout.open_connection) doesn't
-             * error even when the sock adddress is no longer valid and actually -
+             * error even when the sock address is no longer valid and actually -
              * it returns a channel that will error at some later time when you
              * actually try to do anything with it (write to it, or even get the
              * file descriptor of it). I'm pretty sure we don't need to close the
@@ -1042,6 +1044,11 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
            with
           | J.Not_found ->
             (env, Files_changed (set_of_list @@ extract_file_names env data)))))
+
+  let get_clock instance =
+    match instance with
+    | Watchman_alive { clockspec; _ } -> clockspec
+    | Watchman_dead { prior_clockspec; _ } -> prior_clockspec
 
   let get_changes ?deadline instance =
     call_on_instance instance "get_changes" @@ fun env ->
@@ -1283,6 +1290,8 @@ module Watchman_mock = struct
     let result = !Mocking.changes_synchronously in
     Mocking.changes_synchronously := [];
     (instance, result)
+
+  let get_clock _instance = ""
 
   let get_reader _ = None
 

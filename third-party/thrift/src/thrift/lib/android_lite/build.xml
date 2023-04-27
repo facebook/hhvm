@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements. See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership. The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License. You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<project name="libthrift" default="dist" basedir="."
+  xmlns:ivy="antlib:org.apache.ivy.ant">
+
+
+  <description>Thrift Build File</description>
+
+  <property environment="env" />
+
+  <property name="gen" location="gen-android_lite" />
+
+  <property name="src" location="src" />
+  <property name="build" location="build" />
+  <property name="javadoc" location="${build}/javadoc" />
+  <property name="install.path" value="/usr/local/lib" />
+  <property name="src.test" location="test" />
+  <property name="build.test" location="${build}/test" />
+  <property name="test.thrift.home" location="../../test"/>
+  <property name="thrift.root" location="../../"/>
+
+  <property file="${user.home}/.thrift-build.properties" />
+
+  <path id="compile.classpath">
+  </path>
+
+  <path id="test.classpath">
+    <path refid="compile.classpath" />
+    <pathelement path="${env.CLASSPATH}" />
+    <pathelement location="build/test" />
+    <pathelement location="libthrift.jar" />
+  </path>
+
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build.test}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" source="1.5" target="1.5" debug="true" classpathref="compile.classpath" />
+  </target>
+
+  <target name="javadoc" depends="init">
+    <javadoc sourcepath="${src}"
+      destdir="${javadoc}"
+      version="true"
+      windowtitle="Thrift Java API"
+      doctitle="Thrift Java API">
+    </javadoc>
+  </target>
+
+  <target name="dist" depends="compile">
+    <mkdir dir="${build}/META-INF"/>
+    <copy file="${thrift.root}/LICENSE" tofile="${build}/META-INF/LICENSE.txt"/>
+    <!-- <copy file="${thrift.root}/NOTICE" tofile="${build}/META-INF/NOTICE.txt"/> -->
+    <jar jarfile="libthrift.jar">
+      <fileset dir="${build}">
+        <include name="**/*.class" />
+        <include name="META-INF/*.txt" />
+      </fileset>
+      <fileset dir="src">
+        <include name="**/*.java" />
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="install" depends="dist,javadoc">
+    <copy todir="${install.path}">
+        <fileset dir="."><include name="*.jar" /></fileset>
+    </copy>
+    <copy todir="${install.javadoc.path}">
+      <fileset dir="${javadoc}">
+        <include name="**/*" />
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${javadoc}"/>
+    <delete file="libthrift.jar" />
+  </target>
+
+  <target name="compile-test" description="Build the test suite classes" depends="dist">
+    <javac debug="true" srcdir="${src.test}" destdir="${build.test}" classpathref="test.classpath" />
+  </target>
+
+  <target name="test" description="Run the full test suite" depends="compile-test">
+    <java classname="com.facebook.thrift.lite.TBinaryProtocolTest"
+      classpathref="test.classpath" failonerror="true" />
+  </target>
+
+</project>
+

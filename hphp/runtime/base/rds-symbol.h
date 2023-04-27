@@ -37,6 +37,7 @@ struct ArrayAccessProfile;
 struct ArrayIterProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
+struct CoeffectFunParamProfile;
 struct COWProfile;
 struct DecRefProfile;
 struct IncRefProfile;
@@ -72,11 +73,18 @@ struct ClsConstant { LowStringPtr clsName;
  * StaticMethod{F,}Cache allocations.
  *
  * These are used to cache static method dispatch targets in a given class
- * context.  The `name' field here is a string that encodes the target class,
- * property, and source context.
+ * context.
  */
-struct StaticMethod  { LowStringPtr name; };
-struct StaticMethodF { LowStringPtr name; };
+struct StaticMethod  {
+  LowStringPtr clsName;
+  LowStringPtr methName;
+  LowStringPtr ctxName;
+};
+struct StaticMethodF {
+  LowStringPtr clsName;
+  LowStringPtr methName;
+  LowStringPtr ctxName;
+};
 
 /*
  * Profiling translations may store various kinds of junk under symbols that
@@ -93,6 +101,7 @@ struct StaticMethodF { LowStringPtr name; };
   PR(COWProfile)          \
   PR(DecRefProfile)       \
   PR(IsTypeStructProfile) \
+  PR(CoeffectFunParamProfile) \
   PR(IncRefProfile)       \
   PR(MethProfile)         \
   PR(SwitchProfile)       \

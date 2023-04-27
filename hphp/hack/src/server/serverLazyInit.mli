@@ -21,13 +21,15 @@ val parse_only_init :
   CgroupProfiler.step_group ->
   ServerEnv.env * float
 
-val write_symbol_info_init :
+val write_symbol_info_full_init :
   ServerEnv.genv ->
   ServerEnv.env ->
   CgroupProfiler.step_group ->
   ServerEnv.env * float
 
+(** if [index] is true, call Glean indexer after init, otherwise typechecks *)
 val saved_state_init :
+  do_indexing:bool ->
   load_state_approach:load_state_approach ->
   ServerEnv.genv ->
   ServerEnv.env ->

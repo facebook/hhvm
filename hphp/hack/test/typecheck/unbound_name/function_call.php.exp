@@ -2,7 +2,7 @@ File "function_call.php", line 9, characters 3-11:
 Unbound name: `not_found` (a global function) (Naming[2049])
 File "function_call.php", line 12, characters 7-9:
 Unbound name: `foo` (a global constant) (Naming[2049])
-File "function_call.php", line 9, characters 3-11:
-Unbound name (typing): `not_found` (Typing[4107])
 File "function_call.php", line 12, characters 7-9:
 Unbound global constant (Typing) (Typing[4106])
+File "function_call.php", line 9, characters 3-11:
+Unbound name (typing): `not_found` (Typing[4107])

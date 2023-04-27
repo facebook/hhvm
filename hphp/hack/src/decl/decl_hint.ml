@@ -66,12 +66,11 @@ and aast_contexts_to_decl_capability env ctxs default_pos :
     let reason = Reason.Rhint (Decl_env.make_decl_pos env pos) in
     let dty =
       match dtys with
-      | [dty] ->
-        begin
-          match get_node dty with
-          | Tgeneric _ -> dty
-          | _ -> mk (reason, Tintersection dtys)
-        end
+      | [dty] -> begin
+        match get_node dty with
+        | Tgeneric _ -> dty
+        | _ -> mk (reason, Tintersection dtys)
+      end
       | _ -> mk (reason, Tintersection dtys)
     in
     (pos, CapTy dty)
@@ -94,7 +93,7 @@ and aast_tparam_to_decl_tparam env t =
 
 and hint_ p env = function
   | Hany -> Typing_defs.make_tany ()
-  | Herr -> Terr
+  | Herr -> Typing_defs.make_tany ()
   | Hmixed -> Tmixed
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
@@ -149,8 +148,7 @@ and hint_ p env = function
           make_fp_flags
             ~mode:kind
             ~accept_disposable:false
-            ~has_default:
-              false
+            ~has_default:false
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
             ~ifc_can_call:false
@@ -191,6 +189,8 @@ and hint_ p env = function
             ~variadic;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;
+        (* TODO *)
+        ft_cross_package = None;
       }
   | Happly (id, argl) ->
     let id = Decl_env.make_decl_posed env id in
@@ -209,6 +209,41 @@ and hint_ p env = function
           ids
     in
     translate root_ty ids
+  | Hrefinement (root_ty, members) ->
+    let root_ty = hint env root_ty in
+    let class_ref =
+      (* We do not err on duplicate refinements as the parser will
+       * already have *)
+      List.fold
+        members
+        ~init:{ cr_consts = SMap.empty }
+        ~f:(fun { cr_consts } r ->
+          let (id, rc) =
+            match r with
+            | Rctx ((_, id), CRexact h) ->
+              (id, { rc_bound = TRexact (context_hint env h); rc_is_ctx = true })
+            | Rctx (((_, id) as _pos), CRloose { cr_lower; cr_upper }) ->
+              let decl_bounds h =
+                Option.map ~f:(context_hint env) h |> Option.to_list
+              in
+              let tr_lower = decl_bounds cr_lower in
+              let tr_upper = decl_bounds cr_upper in
+              ( id,
+                { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx = true }
+              )
+            | Rtype ((_, id), TRexact h) ->
+              (id, { rc_bound = TRexact (hint env h); rc_is_ctx = false })
+            | Rtype ((_, id), TRloose { tr_lower; tr_upper }) ->
+              let decl_bounds = List.map ~f:(hint env) in
+              let tr_lower = decl_bounds tr_lower in
+              let tr_upper = decl_bounds tr_upper in
+              ( id,
+                { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx = false }
+              )
+          in
+          { cr_consts = SMap.add id rc cr_consts })
+    in
+    Trefinement (root_ty, class_ref)
   | Htuple hl ->
     let tyl = List.map hl ~f:(hint env) in
     Ttuple tyl
@@ -220,10 +255,13 @@ and hint_ p env = function
     Tintersection tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_kind =
-      if nsi_allows_unknown_fields then
-        Open_shape
-      else
-        Closed_shape
+      hint
+        env
+        ( p,
+          if nsi_allows_unknown_fields then
+            Hmixed
+          else
+            Hnothing )
     in
     let fdm =
       List.fold_left
@@ -235,12 +273,12 @@ and hint_ p env = function
         ~init:TShapeMap.empty
         nsi_field_map
     in
-    Tshape (shape_kind, fdm)
+    Tshape (Missing_origin, shape_kind, fdm)
   | Hsoft (p, h_) -> hint_ p env h_
   | Hfun_context _
   | Hvar _ ->
     Errors.internal_error p "Unexpected context hint";
-    Terr
+    Tunion []
 
 and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.

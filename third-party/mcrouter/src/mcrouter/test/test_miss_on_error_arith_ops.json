@@ -1,0 +1,13 @@
+{
+  "pools": {
+    "A-foo": {
+      "servers": [ "127.0.0.1:11610" ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "foo": "PoolRoute|A-foo"
+    }
+  }
+}

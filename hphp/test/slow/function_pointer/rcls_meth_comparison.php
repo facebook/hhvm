@@ -33,7 +33,7 @@ function main(): void {
 
   comp($f, varray['Test','foo']);
 
-  comp($f, class_meth(Test::class, 'foo'));
+  comp($f, Test::foo<>);
 
   comp($f, "Test::foo");
 }

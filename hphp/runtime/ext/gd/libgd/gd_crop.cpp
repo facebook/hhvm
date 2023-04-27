@@ -332,7 +332,7 @@ static int gdGuessBackgroundColorFromCorners(gdImagePtr im, int *color) {
     *color = bl;
     return 2;
   } else {
-    register int r,b,g,a;
+    int r,b,g,a;
 
     r = (int)(0.5f + (gdImageRed(im, tl) + gdImageRed(im, tr) +
               gdImageRed(im, bl) + gdImageRed(im, br)) / 4);

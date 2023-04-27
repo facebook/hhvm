@@ -1,2 +1,1 @@
-
-Fatal error: You cannot decorate this argument as `inout` in %stest/slow/nullsafe/nullsafe-prop-13.php on line 7
+Fatal error: `?->` operator is not allowed in write context in %s/nullsafe-prop-13.php on line 7

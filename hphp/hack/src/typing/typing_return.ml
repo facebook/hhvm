@@ -9,22 +9,13 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_env_types
 open Typing_env_return_info
 module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 module SN = Naming_special_names
-
-(* The regular strip_awaitable function depends on expand_type and only works on locl types *)
-let strip_awaitable_decl fun_kind env (ty : decl_ty) =
-  if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
-    ty
-  else
-    match (Env.get_fn_kind env, get_node ty) with
-    | (Ast_defs.FAsync, Tapply ((_, class_name), [inner_ty]))
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-      inner_ty
-    | _ -> ty
+module Cls = Decl_provider.Class
 
 let strip_awaitable fun_kind env et =
   if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
@@ -58,104 +49,256 @@ let has_attribute attr l =
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
 
-let make_info ret_pos fun_kind attributes env ~is_explicit locl_ty decl_ty =
+let make_info ret_pos fun_kind attributes env return_type =
   let return_disposable = has_return_disposable_attribute attributes in
-  let et_enforced =
-    match decl_ty with
-    | None -> Unenforced
-    | Some decl_ty ->
-      let stripped_decl_ty = strip_awaitable_decl fun_kind env decl_ty in
-      Typing_enforceability.get_enforcement env stripped_decl_ty
-  in
-  let return_type = { et_type = locl_ty; et_enforced } in
   if not return_disposable then
     enforce_return_not_disposable ret_pos fun_kind env return_type;
-  {
-    return_type;
-    return_disposable;
-    return_explicit = is_explicit;
-    return_dynamically_callable = false;
-  }
+  { return_type; return_disposable }
 
-let make_return_type localize env (ty : decl_ty) =
-  let wrap_awaitable p =
-    MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+(* Make a fresh Awaitable<_> etc making sure that any constraints (e.g. supportdyn)
+ * are added to the type variable
+ *)
+let make_wrapped_fresh_type env p r id =
+  let class_ = Env.get_class env id in
+  match class_ with
+  | None -> Env.fresh_type_error env p (* Shouldn't happen *)
+  | Some class_ ->
+    let ((env, _), ty, _tal) =
+      Typing_phase.localize_targs_and_check_constraints
+        ~exact:nonexact
+        ~check_well_kinded:false
+        ~def_pos:(Cls.pos class_)
+        ~use_pos:p
+        ~check_explicit_targs:false
+        env
+        (p, id)
+        r
+        (Cls.tparams class_)
+        []
+    in
+    (env, ty)
+
+(* Create a return type with fresh type variables  *)
+let make_fresh_return_type env p =
+  let fun_kind = Env.get_fn_kind env in
+  let r = Reason.Rret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
+  match fun_kind with
+  | Ast_defs.FSync -> Env.fresh_type env p
+  | Ast_defs.FAsync -> make_wrapped_fresh_type env p r SN.Classes.cAwaitable
+  | Ast_defs.FGenerator -> make_wrapped_fresh_type env p r SN.Classes.cGenerator
+  | Ast_defs.FAsyncGenerator ->
+    make_wrapped_fresh_type env p r SN.Classes.cAsyncGenerator
+
+(** Force the return type of a function to adhere to the fun_kind specified in
+    the env *)
+let force_return_kind ~is_toplevel env p ety =
+  let fun_kind = Env.get_fn_kind env in
+  let (env, ty) = Env.expand_type env ety.et_type in
+  let (env, ty) =
+    match (fun_kind, get_node ty) with
+    (* Sync functions can return anything *)
+    | (Ast_defs.FSync, _) -> (env, ty)
+    (* Each other fun kind needs a specific return type *)
+    | (Ast_defs.FAsync, _) when is_toplevel ->
+      (* For toplevel functions, this is already checked in the parser *)
+      (env, ty)
+    | (Ast_defs.FAsync, Tclass ((_, class_name), _, _))
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      (* For toplevel functions, this is already checked in the parser *)
+      (env, ty)
+    | (Ast_defs.FGenerator, Tclass ((_, class_name), _, _))
+      when String.equal class_name Naming_special_names.Classes.cGenerator ->
+      (env, ty)
+    | (Ast_defs.FAsyncGenerator, Tclass ((_, class_name), _, _))
+      when String.equal class_name Naming_special_names.Classes.cAsyncGenerator
+      ->
+      (env, ty)
+    | _ ->
+      let (env, wrapped_ty) = make_fresh_return_type env p in
+      let (env, ty_err_opt) =
+        Typing_ops.sub_type
+          p
+          Reason.URreturn
+          env
+          wrapped_ty
+          ty
+          Typing_error.Callback.unify_error
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      (env, wrapped_ty)
   in
-  match (Env.get_fn_kind env, deref ty) with
-  | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-    let (env, ty) = localize env inner_ty in
-    (env, wrap_awaitable (get_pos ty) ty)
-  | (Ast_defs.FAsync, (r_like, Tlike ty_like)) ->
-    begin
+  (env, { ety with et_type = ty })
+
+let make_return_type
+    ~ety_env
+    ~this_class
+    ~supportdyn
+    env
+    ~hint_pos
+    ~(explicit : decl_ty option)
+    ~(default : locl_ty option) =
+  match explicit with
+  | None ->
+    let (env, ty) =
+      match default with
+      | None -> make_fresh_return_type env hint_pos
+      | Some ty -> (env, ty)
+    in
+    let (env, ty) =
+      if supportdyn then
+        TUtils.make_supportdyn
+          (Reason.Rsupport_dynamic_type (Pos_or_decl.of_raw_pos hint_pos))
+          env
+          ty
+      else
+        (env, ty)
+    in
+    (env, MakeType.unenforced ty)
+  | Some ty ->
+    let wrap_awaitable p ty =
+      MakeType.awaitable
+        (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+        ty
+    in
+    let localize ~wrap (env : env) (dty : decl_ty) =
+      if TypecheckerOptions.everything_sdt env.genv.tcopt then (
+        (* Under implicit pessimisation, all unenforceable return types get pessimised to a like type,
+           and all enforceable ones for the purpose of checking the function body also get a like type
+           when the function is __SupportDynamicType, which all functions are during implicit pessimisation.
+           Hence we don't need to check enforcement here. Don't pessimise void. *)
+        let dty =
+          match get_node dty with
+          | Tfun _ ->
+            Typing_utils.make_supportdyn_decl_type
+              (get_pos dty)
+              (get_reason dty)
+              dty
+          | _ -> dty
+        in
+        let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
+        let (env, ty) =
+          if supportdyn then
+            TUtils.make_supportdyn
+              (Reason.Rsupport_dynamic_type (get_pos ty))
+              env
+              ty
+          else
+            (env, ty)
+        in
+        let et_type =
+          match get_node ty with
+          | Tprim Aast.Tvoid when not wrap -> ty
+          | _ -> Typing_utils.make_like env ty
+        in
+        let et_type =
+          if wrap then
+            wrap_awaitable (get_pos et_type) et_type
+          else
+            et_type
+        in
+        (env, { et_type; et_enforced = Unenforced })
+      ) else
+        let et_enforced =
+          Typing_enforceability.get_enforcement ~this_class env dty
+        in
+        let et_enforced =
+          match et_enforced with
+          | Unenforced ->
+            Typing_log.log_pessimise_return env hint_pos None;
+            (* Return type is not fully enforced according to the naive check
+             * in Typing_enforceability. Let's now ask for what type it is actually
+             * enforced at. If this is a subtype of the Hack type, then we can
+             * treat the return type as fully enforced.
+             * Example: return type is declared to be (~E & arraykey)
+             * for enum E : int as int
+             * get_enforced_type (~E & arraykey) is int
+             * Now since int <:D (~E & arraykey) it suffices to treat
+             * the return type as fully enforced.
+             *)
+            if not (TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) then
+              Unenforced
+            else
+              let enforced_type =
+                Typing_partial_enforcement.get_enforced_type
+                  env
+                  (Env.get_self_class env)
+                  dty
+              in
+              let is_sub_type =
+                Typing_phase.is_sub_type_decl
+                  ~coerce:(Some Typing_logic.CoerceToDynamic)
+                  env
+                  enforced_type
+                  dty
+              in
+              if is_sub_type then
+                Enforced
+              else
+                Unenforced
+          | Enforced -> Enforced
+        in
+        let ((env, ty_err_opt), et_type) =
+          Typing_phase.localize ~ety_env env dty
+        in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
+        let (env, et_type) =
+          if supportdyn then
+            TUtils.make_supportdyn
+              (Reason.Rsupport_dynamic_type (get_pos et_type))
+              env
+              et_type
+          else
+            (env, et_type)
+        in
+        (* If return type t is enforced we permit values of type ~t to be returned *)
+        let ety =
+          Typing_utils.make_like_if_enforced env { et_enforced; et_type }
+        in
+        let et_type =
+          if wrap then
+            wrap_awaitable (get_pos et_type) ety.et_type
+          else
+            ety.et_type
+        in
+        (env, { ety with et_type })
+    in
+    (match (Env.get_fn_kind env, deref ty) with
+    | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      localize ~wrap:true env inner_ty
+    | (Ast_defs.FAsync, (r_like, Tlike ty_like)) -> begin
       match get_node ty_like with
       | Tapply ((_, class_name), [inner_ty])
         when String.equal class_name Naming_special_names.Classes.cAwaitable ->
         let ty = mk (r_like, Tlike inner_ty) in
-        let (env, ty) = localize env ty in
-        (env, wrap_awaitable (get_pos ty_like) ty)
-      | _ -> localize env ty
+        localize ~wrap:true env ty
+      | _ -> localize ~wrap:false env ty
     end
-  | _ -> localize env ty
+    | _ -> localize ~wrap:false env ty)
 
-(* Create a return type with fresh type variables  *)
-let make_fresh_return_type env p =
-  let (env, rty) = Env.fresh_type env p in
-  let fun_kind = Env.get_fn_kind env in
-  let r = Reason.Rret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
-  match fun_kind with
-  | Ast_defs.FSync -> (env, rty)
-  | Ast_defs.FAsync -> (env, MakeType.awaitable r rty)
-  | Ast_defs.FGenerator ->
-    let (env, key) = Env.fresh_type env p in
-    let (env, send) = Env.fresh_type env p in
-    (env, MakeType.generator r key rty send)
-  | Ast_defs.FAsyncGenerator ->
-    let (env, key) = Env.fresh_type env p in
-    let (env, send) = Env.fresh_type env p in
-    (env, MakeType.async_generator r key rty send)
-
-let force_return_kind ?(is_toplevel = true) env p ty =
-  let fun_kind = Env.get_fn_kind env in
-  let (env, ty) = Env.expand_type env ty in
-  match (fun_kind, get_node ty) with
-  (* Sync functions can return anything *)
-  | (Ast_defs.FSync, _) -> (env, ty)
-  (* Each other fun kind needs a specific return type *)
-  | (Ast_defs.FAsync, _) when is_toplevel ->
-    (* For toplevel functions, this is already checked in the parser *)
-    (env, ty)
-  | (Ast_defs.FAsync, Tclass ((_, class_name), _, _))
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-    (* For toplevel functions, this is already checked in the parser *)
-    (env, ty)
-  | (Ast_defs.FGenerator, Tclass ((_, class_name), _, _))
-    when String.equal class_name Naming_special_names.Classes.cGenerator ->
-    (env, ty)
-  | (Ast_defs.FAsyncGenerator, Tclass ((_, class_name), _, _))
-    when String.equal class_name Naming_special_names.Classes.cAsyncGenerator ->
-    (env, ty)
-  | _ ->
-    let (env, wrapped_ty) = make_fresh_return_type env p in
-    let (env, ty_err_opt) =
-      Typing_ops.sub_type
-        p
-        Reason.URreturn
-        env
-        wrapped_ty
-        ty
-        Typing_error.Callback.unify_error
-    in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
-    (env, wrapped_ty)
-
-let make_default_return ~is_method env name =
-  let pos = fst name in
-  let r = Reason.Rwitness pos in
-  if is_method && String.equal (snd name) SN.Members.__construct then
-    MakeType.void r
-  else
-    mk (r, Typing_utils.tany env)
+let make_return_type
+    ~ety_env
+    ~this_class
+    ?(is_toplevel = true)
+    ~supportdyn
+    env
+    ~hint_pos
+    ~explicit
+    ~default =
+  let (env, ty) =
+    make_return_type
+      ~ety_env
+      ~this_class
+      env
+      ~supportdyn
+      ~hint_pos
+      ~explicit
+      ~default
+  in
+  force_return_kind ~is_toplevel env hint_pos ty
 
 let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =
   let reason = Reason.URreturn in
@@ -163,20 +306,10 @@ let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =
     Typing_error.Primary.(
       Wellformedness (Wellformedness.Missing_return { pos; hint_pos; is_async }))
   in
-  let open Typing_env_types in
   let (env, ty_err_opt) =
-    if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-      Typing_utils.sub_type
-        env
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        actual
-        expected
-      @@ Some (Typing_error.Reasons_callback.of_primary_error error)
-    else
-      Typing_ops.sub_type pos reason env actual expected
-      @@ Typing_error.Callback.of_primary_error error
+    Typing_ops.sub_type pos reason env actual expected
+    @@ Typing_error.Callback.of_primary_error error
   in
-
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   env
 
@@ -186,9 +319,9 @@ let check_inout_return ret_pos env =
     List.fold
       params
       ~init:(env, [])
-      ~f:(fun (env, ty_errs) (id, (ty, param_pos, mode)) ->
-        match mode with
-        | FPinout ->
+      ~f:(fun (env, ty_errs) (id, (_ty, param_pos, out_ty_opt)) ->
+        match out_ty_opt with
+        | Some out_ty ->
           (* Whenever the function exits normally, we require that each local
            * corresponding to an inout parameter be compatible with the original
            * type for the parameter (under subtyping rules). *)
@@ -202,14 +335,16 @@ let check_inout_return ret_pos env =
             else
               param_pos
           in
-          let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
+          let param_ty =
+            mk (Reason.Rinout_param (get_pos out_ty), get_node out_ty)
+          in
           let (env, ty_err_opt) =
-            Typing_ops.sub_type
+            Typing_coercion.coerce_type
               pos
               Reason.URassign_inout
               env
               ety
-              param_ty
+              (MakeType.unenforced param_ty)
               Typing_error.Callback.inout_return_type_mismatch
           in
           let ty_errs =
@@ -219,7 +354,7 @@ let check_inout_return ret_pos env =
               ty_err_opt
           in
           (env, ty_errs)
-        | _ -> (env, ty_errs))
+        | None -> (env, ty_errs))
   in
   Option.iter ~f:Errors.add_typing_error @@ Typing_error.multiple_opt ty_errs;
   env
@@ -238,7 +373,6 @@ let rec remove_like_for_return env ty =
 
 let fun_implicit_return env pos ret =
   let ret =
-    let open Typing_env_types in
     if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
       (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
        * However, for ergonomic reasons, it should not be the case that a function

@@ -1,0 +1,1 @@
+This VFS test fails remotely in repo authoritative mode.  The file size of the bar directory is 60 instead of 0.

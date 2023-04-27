@@ -1,1 +1,1 @@
--i "hphp/test/slow/native-autoload-xhp/nomangle-print.inc"
+-i "__DIR__/nomangle-print.inc"

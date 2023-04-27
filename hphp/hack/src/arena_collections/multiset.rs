@@ -23,13 +23,15 @@
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
+use arena_trait::TrivialDrop;
 use bumpalo::Bump;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Serialize;
 
-use arena_trait::TrivialDrop;
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
-
-use crate::{AssocList, AssocListMut, SortedAssocList};
+use crate::AssocList;
+use crate::AssocListMut;
+use crate::SortedAssocList;
 
 /// A readonly array-based multiset.
 ///
@@ -570,12 +572,9 @@ impl<'a, T: Ord> From<MultiSetMut<'a, T>> for SortedSet<'a, T> {
 }
 
 impl<T: ToOcamlRep + Ord> ToOcamlRep for SortedSet<'_, T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.len();
-        let mut iter = self.iter();
+        let mut iter = self.iter().map(|x| x.to_ocamlrep(alloc));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         value
     }

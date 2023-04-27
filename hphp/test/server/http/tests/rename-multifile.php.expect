@@ -1,0 +1,48 @@
+Sandbox: 0 (sandbox0) Version: 0
+--------------------------------------------------------
+Foo in foo.php
+Bar in bar.php
+test(Foo) = ok
+test(Bar) = ex
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo in foo.php
+Bar in bar.php
+test(Foo) = ok
+test(Bar) = ex
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 1
+--------------------------------------------------------
+Foo in bar.php
+Bar in foo.php
+test(Foo) = ex
+test(Bar) = ok
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 1
+--------------------------------------------------------
+Foo in bar.php
+Bar in foo.php
+test(Foo) = ex
+test(Bar) = ok
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo in foo.php
+Bar in bar.php
+test(Foo) = ok
+test(Bar) = ex
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 1
+--------------------------------------------------------
+Foo in bar.php
+Bar in foo.php
+test(Foo) = ex
+test(Bar) = ok
+--------------------------------------------------------
+

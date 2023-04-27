@@ -47,8 +47,6 @@ module type S = sig
     combine_ty_errs:('c list -> 'e) ->
     ('a * 'e) * 'd t
 
-  val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-
   val filter_opt : 'a option t -> 'a t
 
   val of_list : (key * 'a) list -> 'a t

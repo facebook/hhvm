@@ -35,19 +35,21 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
   RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
-  RO::EvalEmitClassPointers                        = EmitClassPointers;
   RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
   RO::EvalRaiseClassConversionWarning              = RaiseClassConversionWarning;
   RO::EvalClassPassesClassname                     = ClassPassesClassname;
   RO::EvalClassnameNotices                         = ClassnameNotices;
+  RO::EvalClassStringHintNotices                   = ClassStringHintNotices;
   RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
   RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
   RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
-  RO::EvalEnableImplicitContext                    = EnableImplicitContext;
+  RO::EvalEmitBespokeTypeStructures                = EmitBespokeTypeStructures;
+  RO::EvalActiveDeployment                         = ActiveDeployment;
+  RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -74,11 +76,11 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 std::string show(const RepoGlobalData& gd) {
   std::string out;
 #define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
-  SHOW(InitialNamedEntityTableSize);
+  SHOW(InitialTypeTableSize);
+  SHOW(InitialFuncTableSize);
   SHOW(InitialStaticStringTableSize);
   SHOW(CheckPropTypeHints);
   SHOW(HardGenericsUB);
-  SHOW(HardPrivatePropInference);
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);
@@ -94,19 +96,24 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(AbortBuildOnVerifyError);
   SHOW(EnableArgsInBacktraces);
   SHOW(Signature);
-  SHOW(EmitClassPointers);
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
   SHOW(RaiseClassConversionWarning);
   SHOW(ClassPassesClassname);
   SHOW(ClassnameNotices);
+  SHOW(ClassStringHintNotices);
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);
   SHOW(TraitConstantInterfaceBehavior);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
   SHOW(DiamondTraitMethods);
-  SHOW(EnableImplicitContext);
+  SHOW(EmitBespokeTypeStructures);
+  SHOW(ModuleLevelTraits);
 #undef SHOW
+  folly::format(
+    &out, "  SourceRootForFileBC: {}\n",
+    gd.SourceRootForFileBC.value_or("*")
+  );
   return out;
 }
 

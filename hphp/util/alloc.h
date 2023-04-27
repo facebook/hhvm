@@ -69,7 +69,7 @@ struct OutOfMemoryException : Exception {
 // - low arena, lower arena, and low cold arena try to give addresses that fit
 //   in 32 bits. Use lower arena when 31-bit address is preferred, and when we
 //   want to make full use of the huge pages there (if present). low and low
-//   cold areans prefer addresses between 2G and 4G, to conserve space in the
+//   cold arenas prefer addresses between 2G and 4G, to conserve space in the
 //   lower range. These are just preferences, all these arenas are able to use
 //   spare space in the 1G to 4G region, when the preferred range is used up. In
 //   LOWPTR builds, running out of space in any of the low arenas will cause a
@@ -108,7 +108,7 @@ extern int low_arena_flags;
 extern int lower_arena_flags;
 extern int low_cold_arena_flags;
 extern int high_cold_arena_flags;
-extern __thread int high_arena_flags;
+extern int high_arena_flags;
 extern __thread int local_arena_flags;
 
 struct PageSpec {
@@ -315,18 +315,24 @@ void* mallocx_on_node(size_t size, int node, size_t align);
   }
 #endif
 
-DEF_ALLOC_FUNCS(vm, high_arena_flags, )
+#if USE_JEMALLOC_EXTENT_HOOKS
+#define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
+#else
+#define HIGH_ARENA_FLAGS 0
+#endif
+
+DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, )
 DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, )
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
 // USE_JEMALLOC_EXTENT_HOOKS. This provides a new way to check for countedness
 // for arrays and strings.
-DEF_ALLOC_FUNCS(uncounted, high_arena_flags, )
+DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, )
 
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
 // e.g., APCObject, or the hash table. Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
-DEF_ALLOC_FUNCS(apc, high_arena_flags, )
+DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, )
 
 // Thread-local allocations that are not accessed outside the thread.
 DEF_ALLOC_FUNCS(local, local_arena_flags, )
@@ -338,11 +344,7 @@ inline void* low_malloc(size_t size) {
   return malloc(size);
 #else
   assert(size);
-  auto ptr = mallocx(size, low_arena_flags);
-#ifndef USE_LOWPTR
-  if (ptr == nullptr) ptr = uncounted_malloc(size);
-#endif
-  return ptr;
+  return mallocx(size, low_arena_flags);
 #endif
 }
 
@@ -454,6 +456,10 @@ inline void static_try_free(void* ptr, size_t size) {
   if (tl_static_arena) return tl_static_arena->deallocate(ptr, size);
   return lower_sized_free(ptr, size);
 }
+
+using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
+void setup_swappable_readonly_arena(uint32_t chunk_size);
+SwappableReadonlyArena* get_swappable_readonly_arena();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

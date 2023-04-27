@@ -5,6 +5,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+type verb =
+  | Vreq_implement
+  | Vimplement
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -37,13 +42,20 @@ type t =
     }
   | Interface_with_partial_typeconst of Pos.t
   | Partially_abstract_typeconst_definition of Pos.t
+  | Refinement_in_typestruct of {
+      pos: Pos.t;
+      kind: string;
+    }
   | Multiple_xhp_category of Pos.t
   | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t
   | Continue_in_switch of Pos.t
-  | Await_in_sync_function of Pos.t
+  | Await_in_sync_function of {
+      pos: Pos.t;
+      func_pos: Pos.t option;
+    }
   | Interface_uses_trait of Pos.t
   | Static_memoized_function of Pos.t
   | Magic of {
@@ -53,7 +65,7 @@ type t =
   | Non_interface of {
       pos: Pos.t;
       name: string;
-      verb: [ `req_implement | `implement ];
+      verb: verb;
     }
   | ToString_returns_string of Pos.t
   | ToString_visibility of Pos.t
@@ -94,7 +106,6 @@ type t =
     }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
-  | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
   | Illegal_context of {
       pos: Pos.t;
@@ -103,6 +114,7 @@ type t =
   | Case_fallthrough of {
       switch_pos: Pos.t;
       case_pos: Pos.t;
+      next_pos: Pos.t option;
     }
   | Default_fallthrough of Pos.t
   | Php_lambda_disallowed of Pos.t
@@ -111,11 +123,41 @@ type t =
       vis: Ast_defs.visibility;
     }
   | Private_and_final of Pos.t
-  | Internal_outside_module of Pos.t
   | Internal_member_inside_public_trait of {
       member_pos: Pos.t;
       trait_pos: Pos.t;
     }
+  | Attribute_conflicting_memoize of {
+      pos: Pos.t;
+      second_pos: Pos.t;
+    }
+  | Soft_internal_without_internal of Pos.t
+  | Wrong_expression_kind_builtin_attribute of {
+      pos: Pos.t;
+      attr_name: string;
+      expr_kind: string;
+    }
+  | Attribute_too_many_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_too_few_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_not_exact_number_of_args of {
+      pos: Pos.t;
+      name: string;
+      actual: int;
+      expected: int;
+    }
+  | Attribute_param_type of {
+      pos: Pos.t;
+      x: string;
+    }
+  | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

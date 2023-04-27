@@ -6,68 +6,134 @@
  *
  *)
 
+open Hh_prelude
+module A = Ast_defs
+module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
+module HT = Hips_types
 
-exception Shape_analysis_exn of string
+module Error = struct
+  type t = string [@@deriving show]
+
+  let mk str = str
+end
+
+exception Shape_analysis_exn of Error.t
+
+module CommonSet (S : Caml.Set.S) = struct
+  let unions_map ~f set =
+    S.fold (fun elt acc -> S.union (f elt) acc) set S.empty
+end
 
 type potential_targets = {
   expressions_to_modify: Pos.t list;
   hints_to_modify: Pos.t list;
 }
 
-type mode =
-  | FlagTargets
+type command =
   | DumpConstraints
+  | DumpMarshalledConstraints of { constraints_dir: string }
+  | DumpDerivedConstraints
   | SimplifyConstraints
-  | SolveConstraints [@deriving eq]
+  | Codemod
+  | SolveConstraints
+  | CloseConstraints [@deriving eq]
 
-type options = { mode: mode }
+(* TODO(T138659530): remove when using global everywhere is unblocked*)
+type mode =
+  | Local
+  | Global
+
+type options = {
+  command: command;
+  mode: mode;
+  verbosity: int;
+}
 
 type entity_ =
   | Literal of Pos.t
   | Variable of int
+  | Inter of HT.entity
 [@@deriving eq, ord]
 
 type entity = entity_ option
 
-type shape_key = SK_string of string [@@deriving eq, ord]
+type shape_keys = T.locl_phase T.shape_field_type T.TShapeMap.t
 
-module ShapeKeyMap = Map.Make (struct
-  type t = shape_key
-
-  let compare = compare_shape_key
-end)
-
-module ResultID = ISet
-
-type shape_keys = ResultID.t * Typing_defs.locl_ty ShapeKeyMap.t
-
-type exists_kind =
+type marker_kind =
   | Allocation
   | Parameter
-  | Argument
+  | Return
+  | Debug
+  | Constant
+[@@deriving ord, show { with_path = false }]
+
+module Codemod = struct
+  type kind =
+    | Allocation
+    | Hint
+  [@@deriving show { with_path = false }]
+end
+
+type certainty =
+  | Definite
+  | Maybe
+[@@deriving ord, show { with_path = false }]
+
+type variety =
+  | Has
+  | Needs
+[@@deriving ord, show { with_path = false }]
 
 type constraint_ =
-  | Exists of exists_kind * Pos.t
-  | Has_static_keys of entity_ * shape_keys
+  | Marks of marker_kind * Pos.t
+  | Static_key of variety * certainty * entity_ * T.TShapeField.t * T.locl_ty
   | Has_dynamic_key of entity_
-  | Subset of entity_ * entity_
+  | Subsets of entity_ * entity_
+[@@deriving ord]
+
+type inter_constraint_ = entity_ HT.inter_constraint_ [@@deriving ord]
 
 type shape_result =
-  | Shape_like_dict of
-      Pos.t * ResultID.t * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of Pos.t * marker_kind * shape_keys
   | Dynamically_accessed_dict of entity_
 
 type lenv = entity LMap.t KMap.t
 
+type 'constraint_ decorated = {
+  hack_pos: Pos.t;
+  origin: int;
+  constraint_: 'constraint_;
+}
+[@@deriving ord]
+
+module DecoratedConstraintSet = Caml.Set.Make (struct
+  type t = constraint_ decorated
+
+  let compare = compare_decorated compare_constraint_
+end)
+
+module DecoratedInterConstraintSet = Caml.Set.Make (struct
+  type t = inter_constraint_ decorated
+
+  let compare = compare_decorated (HT.compare_inter_constraint_ compare_entity_)
+end)
+
+type decorated_constraints =
+  DecoratedConstraintSet.t * DecoratedInterConstraintSet.t
+
 type env = {
-  constraints: constraint_ list;
+  constraints: DecoratedConstraintSet.t;
+  inter_constraints: DecoratedInterConstraintSet.t;
   lenv: lenv;
+  return: entity;
   tast_env: Tast_env.t;
+  errors: Error.t list;
+  mode: mode;
 }
 
-module PointsToSet = Set.Make (struct
+module PointsToSet = Caml.Set.Make (struct
   type t = entity_ * entity_
 
   let compare (a, b) (c, d) =
@@ -76,14 +142,50 @@ module PointsToSet = Set.Make (struct
     | x -> x
 end)
 
-module EntityMap = Map.Make (struct
+module EntityMap = Caml.Map.Make (struct
   type t = entity_
 
   let compare = compare_entity_
 end)
 
-module EntitySet = Set.Make (struct
-  type t = entity_
+module EntitySet = struct
+  module S = Caml.Set.Make (struct
+    type t = entity_
 
-  let compare = compare_entity_
+    let compare = compare_entity_
+  end)
+
+  include S
+  include CommonSet (S)
+end
+
+module ConstraintSet = Caml.Set.Make (struct
+  type t = constraint_
+
+  let compare = compare_constraint_
 end)
+
+type analysis_result = {
+  results: shape_result list;
+  error_count: int;
+}
+
+type log = {
+  location: string;
+  result: (analysis_result, Error.t) Either.t;
+}
+
+type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_
+[@@deriving ord]
+
+module ConstraintEntry = struct
+  type t = {
+    source_file: Relative_path.t;
+    id: string;
+    constraints: any_constraint list;
+    error_count: int;
+  }
+end
+
+type solve_entries =
+  Typing_env_types.env -> ConstraintEntry.t list -> shape_result list SMap.t

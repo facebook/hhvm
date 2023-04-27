@@ -17,7 +17,8 @@
 
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
-#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -25,9 +26,6 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -47,32 +45,9 @@ namespace {
   StaticString s_awaitAll("<await-all>");
 
   [[noreturn]] NEVER_INLINE
-  void failMap() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Map");
-  }
-
-  [[noreturn]] NEVER_INLINE
-  void failVector() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Vector");
-  }
-
-  [[noreturn]] NEVER_INLINE
   void failWaitHandle() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a collection of WaitHandle instances");
-  }
-
-  [[noreturn]] NEVER_INLINE
-  void failNotContainer() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be a container");
-  }
-
-  void failInvalidContainer() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Dependencies cannot be a set-like container or Pair");
   }
 
   c_StaticWaitHandle* returnEmpty() {
@@ -129,42 +104,6 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   return Object{std::move(result)};
 }
 
-ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
-  const ActRec* fp, uint32_t first, uint32_t last, uint32_t cnt
-) {
-  assertx(cnt);
-  assertx(first < last);
-
-  auto result = Alloc(cnt);
-  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
-  auto next = &result->m_children[cnt];
-  uint32_t idx = cnt;
-
-  for (int64_t i = first; i < last; i++) {
-    auto const local = frame_local(fp, i);
-    if (tvIsNull(local)) continue;
-    auto const waitHandle = c_Awaitable::fromTVAssert(*local);
-    if (waitHandle->isFinished()) continue;
-
-    auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
-    ctx_idx = std::min(ctx_idx, child->getContextIdx());
-
-    child->incRefCount();
-    (--next)->m_child = child;
-    next->m_index = --idx;
-    next->m_child->getParentChain().addParent(
-      next->m_blockable,
-      AsioBlockable::Kind::AwaitAllWaitHandleNode
-    );
-
-    if (!idx) break;
-  }
-
-  assertx(next == &result->m_children[0]);
-  result->initialize(ctx_idx);
-  return result.detach();
-}
-
 Object c_AwaitAllWaitHandle::fromArrLike(const ArrayData* ad) {
   return c_AwaitAllWaitHandle::Create([=](auto fn) { IterateV(ad, fn); });
 }
@@ -193,83 +132,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   });
 }
 
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies) {
-  if (LIKELY(dependencies.isObject())) {
-    auto obj = dependencies.getObjectData();
-    if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
-      assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
-                                                     CollectionType::ImmMap));
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        VanillaDict::IterateV(static_cast<BaseMap*>(obj)->arrayData(), fn);
-      });
-    }
-  }
-  failMap();
-}
-
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies) {
-  if (LIKELY(dependencies.isObject())) {
-    auto obj = dependencies.getObjectData();
-    if (LIKELY(obj->isCollection() &&
-               isVectorCollection(obj->collectionType()))) {
-      assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
-                                                  CollectionType::ImmVector));
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        VanillaVec::IterateV(static_cast<BaseVector*>(obj)->arrayData(), fn);
-      });
-    }
-  }
-  failVector();
-}
-
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
-                          const Variant& dependencies) {
-  switch (dependencies.getType()) {
-    case KindOfPersistentVec:
-    case KindOfVec:
-      return c_AwaitAllWaitHandle_ns_fromVec(self_, dependencies.asCArrRef());
-    case KindOfPersistentDict:
-    case KindOfDict:
-      return c_AwaitAllWaitHandle_ns_fromDict(self_, dependencies.asCArrRef());
-    case KindOfObject: {
-      auto obj = dependencies.getObjectData();
-      if (LIKELY(obj->isCollection())) {
-        if (isVectorCollection(obj->collectionType())) {
-          return c_AwaitAllWaitHandle_ns_fromVector(self_, dependencies);
-        } else if (isMapCollection(obj->collectionType())) {
-          return c_AwaitAllWaitHandle_ns_fromMap(self_, dependencies);
-        }
-        failInvalidContainer();
-      }
-      failNotContainer();
-      break;
-    }
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      failInvalidContainer();
-      break;
-    case KindOfPersistentString:
-    case KindOfString:
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfResource:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfRFunc:
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfLazyClass:
-    case KindOfClsMeth:
-    case KindOfRClsMeth:
-      failNotContainer();
-      break;
-  }
-  not_reached();
-}
-
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   setState(STATE_BLOCKED);
   setContextIdx(ctx_idx);
@@ -278,12 +140,12 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   incRefCount();
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
-    auto vector = req::make<c_Vector>();
+    VecInit dependencies(m_cap);
     for (int32_t idx = m_cap - 1; idx >= 0; --idx) {
       auto const child = make_tv<KindOfObject>(m_children[idx].m_child);
-      vector->add(child);
+      dependencies.append(child);
     }
-    AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
+    AsioSession::Get()->onAwaitAllCreate(this, dependencies.toArray());
   }
 }
 
@@ -353,10 +215,7 @@ void AsioExtension::initAwaitAllWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
   AAWH_SME(fromVec);
   AAWH_SME(fromDict);
-  AAWH_SME(fromMap);
-  AAWH_SME(fromVector);
   AAWH_SME(setOnCreateCallback);
-  AAWH_SME(fromContainer);
 #undef AAWH_SME
 }
 

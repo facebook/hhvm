@@ -1,0 +1,180 @@
+{
+  "refid": "Compare_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Compare.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "folly/Traits.h"
+    },
+    {
+      "refid": "detail_2Compare_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/detail/Compare.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1EqualTo",
+      "prot": "public",
+      "text_html": "apache::thrift::op::EqualTo"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1IdenticalTo",
+      "prot": "public",
+      "text_html": "apache::thrift::op::IdenticalTo"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1Less",
+      "prot": "public",
+      "text_html": "apache::thrift::op::Less"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Compare.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/Compare.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/Compare.h",
+  "free_vars": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a2242cd4d38551f7a511eb67d7f1d0092",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename LTagOrT",
+          "defval_html": "void"
+        },
+        {
+          "type_html": "typename RTagOrT",
+          "defval_html": "LTagOrT"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/EqualTo\">EqualTo</a>&lt; type::infer_tag&lt; LTagOrT &gt;, type::infer_tag&lt; RTagOrT &gt; &gt;",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr EqualTo&lt; type::infer_tag&lt;LTagOrT&gt;, type::infer_tag&lt;RTagOrT&gt; &gt; apache::thrift::op::equal",
+      "argsstring_html": "",
+      "name_html": "equal",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "line": "42",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "bodystart": "42",
+        "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>A binary operator that returns true iff the given Thrift values are equal to each other.</p><p>For example:<ul>\n<li><p>equal&lt;int32_t&gt;(1, 2) -&gt; false</p></li><li><p>equal&lt;double_t&gt;(0.0, -0.0) -&gt; true</p></li><li><p>equal&lt;float_t&gt;(NaN, NaN) -&gt; false</p></li><li><p>equal&lt;list&lt;double_t&gt;&gt;([NaN, 0.0], [NaN, -0.0]) -&gt; false </p></li></ul>\n</p>"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a48046e7fc91767d401468e9835f4d0ce",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename TagOrT",
+          "defval_html": "void"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/IdenticalTo\">IdenticalTo</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr IdenticalTo&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::identical",
+      "argsstring_html": "",
+      "name_html": "identical",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "line": "57",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "bodystart": "57",
+        "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>A binary operator that returns true iff the given Thrift values are identical to each other (i.e. they are same representations).</p><p>For example:<ul>\n<li><p>identical&lt;int32_t&gt;(1, 2) -&gt; false</p></li><li><p>identical&lt;double_t&gt;(0.0, -0.0) -&gt; false</p></li><li><p>identical&lt;float_t&gt;(NaN, NaN) -&gt; true</p></li><li><p>identical&lt;list&lt;double_t&gt;&gt;([NaN, 0.0], [NaN, -0.0]) -&gt; false </p></li></ul>\n</p>"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a5cb1898ef5d865be5902cf4ead0f3ea9",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename LTagOrT",
+          "defval_html": "void"
+        },
+        {
+          "type_html": "typename RTagOrT",
+          "defval_html": "LTagOrT"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/Less\">Less</a>&lt; type::infer_tag&lt; LTagOrT &gt;, type::infer_tag&lt; RTagOrT &gt; &gt;",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr Less&lt; type::infer_tag&lt;LTagOrT&gt;, type::infer_tag&lt;RTagOrT&gt; &gt; apache::thrift::op::less",
+      "argsstring_html": "",
+      "name_html": "less",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "line": "73",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "bodystart": "73",
+        "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>A binary operator that returns true iff one Thrift values is less than the another.</p><p>For example:<ul>\n<li><p>less&lt;int32_t&gt;(1, 2) -&gt; true</p></li><li><p>less&lt;double_t&gt;(0.0, -0.0) -&gt; false</p></li><li><p>less&lt;float_t&gt;(NaN, NaN) -&gt; false </p></li></ul>\n</p>"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ace21470e61619a5065e68ed1ee5ff635",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename LTagOrT",
+          "defval_html": "void"
+        },
+        {
+          "type_html": "typename RTagOrT",
+          "defval_html": "LTagOrT"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/CompareWith\">detail::CompareWith</a>&lt; type::infer_tag&lt; LTagOrT &gt;, type::infer_tag&lt; RTagOrT &gt; &gt;",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail:: CompareWith&lt;type::infer_tag&lt;LTagOrT&gt;, type::infer_tag&lt;RTagOrT&gt; &gt; apache::thrift::op::compare",
+      "argsstring_html": "",
+      "name_html": "compare",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "line": "84",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+        "bodystart": "84",
+        "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>Compares two Thrift values, returning the associated folly::ordering value.</p><p>For example:<ul>\n<li><p>compare&lt;int32_t&gt;(1, 2) -&gt; folly::ordering::lt</p></li><li><p>less&lt;double_t&gt;(0.0, -0.0) -&gt; folly::ordering::eq</p></li><li><p>compare&lt;string_t&gt;(\"aa\", \"a\") -&gt; folly::ordering::gt </p></li></ul>\n</p>"
+      }
+    }
+  ],
+  "free_overloadgroups": []
+}

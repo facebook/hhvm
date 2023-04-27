@@ -7,7 +7,7 @@ function test1() {
 
 <<__EntryPoint>>
 function main(): void {
-  $tests = vec[fun('test1')];
+  $tests = vec[test1<>];
   foreach ($tests as $t) {
     try {
       $t();

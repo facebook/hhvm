@@ -1,7 +1,6 @@
 === Shape analysis results for dynamic_access.php
 Constraints for \f:
-Allocated at [5:3-9]
-DK ?1 : dyn
-SK #{0} [5:3-9] : shape()
-[5:3-9] ⊆ ?1
+   5: Allocation at [5:3-9]
+   5: DK [5:3-9] : dyn
+   3: ParamLike (([3:15-19], "\\f"), Return)
 

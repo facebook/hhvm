@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -118,7 +119,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   }
 
   if (debug && RuntimeOption::RepoAuthoritative) {
-    // The fact that uninitialized LateInit props are uninint isn't
+    // The fact that uninitialized LateInit props are uninit isn't
     // reflected in the repo-auth-type.
     if (prop.type() != KindOfUninit || !(propDecl.attrs & AttrLateInit)) {
       always_assert(tvMatchesRepoAuthType(*prop, propDecl.repoAuthType));
@@ -415,12 +416,13 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Can't use propImpl here because if the property is not accessible and
   // there is no native get, propImpl will raise_error("Cannot access ...",
   // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
 
-  auto const lookup = getPropImpl<false, true, true>(ctx, propName.get());
+  auto const lookup = getPropImpl<false, true, true>(propCtx, propName.get());
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
       return Variant::wrap(lookup.val.tv());
@@ -454,12 +456,13 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Can't use setProp here because if the property is not accessible and
   // there is no native set, setProp will raise_error("Cannot access ...",
   // but o_set will skip writing and return normally.
 
-  auto const lookup = getPropImpl<true, false, true>(ctx, propName.get());
+  auto const lookup = getPropImpl<true, false, true>(propCtx, propName.get());
   auto prop = lookup.val;
   if (prop && lookup.accessible) {
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
@@ -498,8 +501,11 @@ void ObjectData::o_setArray(const Array& properties) {
       }
       k = k.substr(subLen);
     }
-
-    setProp(ctx, k.get(), tvAssertPlausible(iter.secondVal()));
+    // TODO(T126821336): property can be internal
+    // This function is only used in ext_mysql.cpp,
+    // but has its own encoding mechanism
+    auto const propCtx = MemberLookupContext(ctx);
+    setProp(propCtx, k.get(), tvAssertPlausible(iter.secondVal()));
   }
 }
 
@@ -541,7 +547,7 @@ void ObjectData::o_getArray(Array& props,
         // Skip all the reified properties since we already prepended the
         // current class' reified property to the list
         if (prop.name != s_86reified_prop.get()) {
-          props.set(StrNR(prop.mangledName).asString(), val.tv());
+          props.set(StrNR(prop.mangledName()).asString(), val.tv());
         }
       }
     },
@@ -601,7 +607,7 @@ Array ObjectData::toArray<IntishCast::Cast>(bool, bool) const;
 namespace {
 
 size_t getPropertyIfAccessible(ObjectData* obj,
-                               const Class* ctx,
+                               const MemberLookupContext& ctx,
                                const StringData* key,
                                Array& properties,
                                size_t propLeft) {
@@ -642,6 +648,7 @@ Array ObjectData::o_toIterArray(const String& context) {
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
@@ -653,7 +660,7 @@ Array ObjectData::o_toIterArray(const String& context) {
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, retArray, accessibleProps);
+          this, propCtx, key, retArray, accessibleProps);
     }
     klass = klass->parent();
   }
@@ -663,7 +670,7 @@ Array ObjectData::o_toIterArray(const String& context) {
       auto const key = prop.name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, retArray, accessibleProps);
+          this, propCtx, key, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }
@@ -806,8 +813,15 @@ ObjectData* ObjectData::clone() {
   cloneProps->init(m_cls->numDeclProperties());
   for (auto slot = Slot{0}; slot < nProps; slot++) {
     auto index = m_cls->propSlotToIndex(slot);
-    tvDup(*props()->at(index), cloneProps->at(index));
-    assertx(assertTypeHint(cloneProps->at(index), slot));
+    auto const prop = props()->at(index);
+    if (!isLazyProp(prop)) {
+      tvDup(*prop, cloneProps->at(index));
+      assertx(assertTypeHint(cloneProps->at(index), slot));
+    } else {
+      auto const cloneProp = cloneProps->at(index);
+      type(cloneProp) = type(prop);
+      val(cloneProp).num = val(prop).num;
+    }
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -829,10 +843,6 @@ ObjectData* ObjectData::clone() {
 
 bool ObjectData::equal(const ObjectData& other) const {
   if (this == &other) return true;
-  if (getVMClass() == SystemLib::s_HH_SwitchableClassClass ||
-      other.getVMClass() == SystemLib::s_HH_SwitchableClassClass) {
-    return false; // Never compare for structural equality.
-  }
   if (isCollection()) {
     return collections::equals(this, &other);
   }
@@ -1096,7 +1106,7 @@ ObjectData::~ObjectData() {
 
 Object ObjectData::FromArray(ArrayData* properties) {
   auto const props = properties->toDict(true);
-  Object retval{SystemLib::s_stdclassClass};
+  Object retval{SystemLib::s_stdClassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), props);
   if (props != properties) decRefArr(props);
@@ -1161,20 +1171,39 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
   }
 }
 
+void ObjectData::deserializeAllLazyProps() {
+  if (!m_cls->currentlyUsingLazyAPCDeserialization()) return;
+  props()->foreach(m_cls->numDeclProperties(), [&](tv_lval lval) {
+    if (isLazyProp(lval)) deserializeLazyProp(lval);
+  });
+}
+
+void ObjectData::deserializeLazyProp(tv_lval prop) {
+  assertx(isLazyProp(prop));
+  auto const handle = reinterpret_cast<APCHandle*>(prop.val().num);
+  assertx(handle->checkInvariants());
+  tvCopy(handle->toLocalHelper(false).detach(), prop);
+}
+
+bool ObjectData::isLazyProp(tv_rval prop) {
+  return prop.type() == kInvalidDataType;
+}
+
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
-  const Class* ctx,
+  const MemberLookupContext& propCtx,
   const StringData* key
 ) {
-  auto const lookup = m_cls->getDeclPropSlot(ctx, key);
+  auto const lookup = m_cls->getDeclPropSlot(propCtx, key);
   auto const propSlot = lookup.slot;
 
   if (LIKELY(propSlot != kInvalidSlot)) {
-    // We found a visible property, but it might not be accessible.  No need to
-    // check if there is a dynamic property with this name.
+    // We found a visible property in one of the object's slots. Immediately
+    // deserialize it if it's a lazy prop. Then, check if it's accessible.
     auto const propIndex = m_cls->propSlotToIndex(propSlot);
     auto prop = props()->at(propIndex);
+    if (isLazyProp(prop)) deserializeLazyProp(prop);
     assertx(assertTypeHint(prop, propSlot));
 
     auto const& declProp = m_cls->declProperties()[propSlot];
@@ -1183,6 +1212,12 @@ ObjectData::PropLookup ObjectData::getPropImpl(
           (declProp.attrs & AttrLateInit)) {
         throw_late_init_prop(declProp.cls, key, false);
       }
+    }
+
+    // If the prop is internal, check that modules are compatible
+    if (lookup.internal &&
+        will_symbol_raise_module_boundary_violation(&declProp, &propCtx)) {
+      raiseModulePropertyViolation(m_cls, key, propCtx.moduleName(), false);
     }
 
     return {
@@ -1219,7 +1254,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   return { nullptr, nullptr, kInvalidSlot, false, !forWrite, false };
 }
 
-tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
+tv_lval ObjectData::getPropLval(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<true, false, true>(ctx, key);
   if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
     throwMutateConstProp(lookup.slot);
@@ -1227,13 +1262,13 @@ tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
+tv_rval ObjectData::getProp(const MemberLookupContext& ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false, true, false>(ctx, key);
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
+tv_rval ObjectData::getPropIgnoreLateInit(const MemberLookupContext& ctx,
                                           const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false, true, true>(ctx, key);
@@ -1241,7 +1276,7 @@ tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
 }
 
 tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl<false, true, true>(nullptr, key);
+  auto const lookup = getPropImpl<false, true, true>(MemberLookupContext(nullptr, (const StringData*) nullptr), key);
   auto prop = lookup.val;
   if (!prop) return nullptr;
   if (lookup.prop && type(prop) == KindOfUninit &&
@@ -1255,7 +1290,7 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
-tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
+tv_lval ObjectData::propImpl(TypedValue* tvRef, const MemberLookupContext& ctx,
                              const StringData* key, const ReadonlyOp op) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
@@ -1316,7 +1351,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
 tv_lval ObjectData::prop(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1325,7 +1360,7 @@ tv_lval ObjectData::prop(
 
 tv_lval ObjectData::propW(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1334,7 +1369,7 @@ tv_lval ObjectData::propW(
 
 tv_lval ObjectData::propU(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1343,14 +1378,14 @@ tv_lval ObjectData::propU(
 
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
   return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
 }
 
-bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
+bool ObjectData::propIsset(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(ctx, key);
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
@@ -1369,7 +1404,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   return false;
 }
 
-void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op) {
+void ObjectData::setProp(const MemberLookupContext& ctx, const StringData* key, TypedValue val, ReadonlyOp op) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
@@ -1404,7 +1439,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
 }
 
 tv_lval ObjectData::setOpProp(TypedValue& tvRef,
-                              Class* ctx,
+                              const MemberLookupContext& ctx,
                               SetOpOp op,
                               const StringData* key,
                               TypedValue* val) {
@@ -1472,7 +1507,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
-TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
+TypedValue ObjectData::incDecProp(const MemberLookupContext& ctx, IncDecOp op, const StringData* key) {
   auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
@@ -1544,7 +1579,7 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
   return IncDecBody(op, prop);
 }
 
-void ObjectData::unsetProp(Class* ctx, const StringData* key) {
+void ObjectData::unsetProp(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<true, false, true>(ctx, key);
   auto const prop = lookup.val;
 
@@ -1608,7 +1643,7 @@ void ObjectData::throwUndefPropException(const StringData* key) const {
 }
 
 void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdclassClass ||
+  if (m_cls == SystemLib::s_stdClassClass ||
       m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
     // these classes (but not classes derived from them) don't get notices
     return;
@@ -1623,7 +1658,7 @@ void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
 }
 
 void ObjectData::raiseReadDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdclassClass ||
+  if (m_cls == SystemLib::s_stdClassClass ||
       m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
     // these classes (but not classes derived from them) don't get notices
     return;

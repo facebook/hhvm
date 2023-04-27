@@ -1,2 +1,0 @@
-File "functional_anon_fun2.php", line 23, characters 8-8:
-The argument to `fun()` must be a single-quoted, constant literal string representing a valid function name. (Naming[2024])

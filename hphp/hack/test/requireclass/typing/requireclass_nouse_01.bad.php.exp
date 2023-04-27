@@ -1,0 +1,12 @@
+File "requireclass_nouse_01.bad.php", line 9, characters 7-8:
+Trait T1 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "requireclass_nouse_01.bad.php", line 17, characters 13-13:
+  Class C is defined here.
+  File "requireclass_nouse_01.bad.php", line 10, characters 17-17:
+  The require class requirement is here.
+File "requireclass_nouse_01.bad.php", line 13, characters 7-8:
+Trait T2 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "requireclass_nouse_01.bad.php", line 17, characters 13-13:
+  Class C is defined here.
+  File "requireclass_nouse_01.bad.php", line 10, characters 17-17:
+  The require class requirement is here.

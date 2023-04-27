@@ -831,7 +831,7 @@ void optimize(Env& env) {
  * which will just be an lea off of the rvmfp() physical register).
  */
 void optimizeCopies(Vunit& unit, const Abi& abi) {
-  Timer timer(Timer::vasm_copy);
+  Timer timer(Timer::vasm_copy, unit.log_entry);
   VpassTracer tracer{&unit, Trace::vasm_copy, "vasm-copy"};
   Env env { unit, abi };
   analyze_defs(env);

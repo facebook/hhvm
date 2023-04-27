@@ -433,9 +433,9 @@ constexpr const std::array<char*,NumHeaderKinds> header_names = {{
   "Vec", "BespokeVec", "Dict", "BespokeDict", "Keyset", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "RClsMeth", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
-  "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
-  "AsyncFuncFrame", "NativeData", "ClosureHdr", "MemoData", "Cpp",
-  "SmallMalloc", "BigMalloc",
+  "ConcurrentWH", "Closure", "Vector", "Map", "Set", "Pair", "ImmVector",
+  "ImmMap", "ImmSet", "AsyncFuncFrame", "NativeData", "ClosureHdr", "MemoData",
+  "Cpp", "SmallMalloc", "BigMalloc",
   "Free", "Hole", "Slab"
 }};
 
@@ -490,6 +490,8 @@ void MemoryManager::reinitFree() {
       }
     }
   }
+  m_lastInitFreeAllocated = m_stats.mmAllocated();
+  m_lastInitFreeFreed = m_stats.mm_freed;
 }
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
@@ -539,6 +541,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::WaitHandle:
       case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::ConcurrentWH:
       case HeaderKind::Closure:
       case HeaderKind::Vector:
       case HeaderKind::Map:
@@ -658,8 +661,7 @@ alignas(64) const uint8_t kContigIndexTab[] = {
  * Store slab tail bytes (if any) in freelists.
  */
 inline
-void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes,
-               Slab* slab) {
+void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes) {
   void* rem = tail;
   for (auto remBytes = tailBytes; remBytes > 0;) {
     auto fragBytes = remBytes;
@@ -684,8 +686,7 @@ void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes,
  */
 inline
 void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
-               size_t split_bytes, size_t splitUsable, size_t index,
-               Slab* slab) {
+               size_t split_bytes, size_t splitUsable, size_t index) {
   assertx(tailBytes >= kSmallSizeAlign);
   assertx((tailBytes & kSmallSizeAlignMask) == 0);
   assertx((splitUsable & kSmallSizeAlignMask) == 0);
@@ -706,14 +707,14 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
 
   auto remBytes = tailBytes - split_bytes;
   assertx(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
-  storeTail(freelists, rem, remBytes, slab);
+  storeTail(freelists, rem, remBytes);
 }
 }
 
 void MemoryManager::freeOveralloc(void* base, size_t bytes) {
   if (!bytes) return;
   m_stats.mm_udebt += bytes;
-  storeTail(m_freelists, base, bytes, Slab::fromPtr(base));
+  storeTail(m_freelists, base, bytes);
 }
 
 /*
@@ -723,8 +724,7 @@ void MemoryManager::freeOveralloc(void* base, size_t bytes) {
 NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   refreshStats();
   if (m_front < m_limit) {
-    storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front,
-              Slab::fromPtr(m_front));
+    storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
   }
   auto mem = m_heap.allocSlab(m_stats);
   always_assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
@@ -751,10 +751,8 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 
   auto ptr = m_front;
   auto next = (void*)(uintptr_t(ptr) + nbytes);
-  Slab* slab;
   if (uintptr_t(next) <= uintptr_t(m_limit)) {
     m_front = next;
-    slab = Slab::fromPtr(ptr);
   } else {
     if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
       // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt
@@ -764,7 +762,6 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
       return mallocBigSize(nbytes);
     }
     ptr = newSlab(nbytes); // sets start bit at ptr
-    slab = Slab::fromPtr(ptr);
   }
   // Preallocate more of the same in order to amortize entry into this method.
   auto split_bytes = kContigTab[index] - nbytes;
@@ -775,7 +772,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   if (split_bytes > 0) {
     auto tail = m_front;
     m_front = (void*)(uintptr_t(tail) + split_bytes);
-    splitTail(m_freelists, tail, split_bytes, split_bytes, nbytes, index, slab);
+    splitTail(m_freelists, tail, split_bytes, split_bytes, nbytes, index);
   }
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", nbytes,
             index, ptr, m_front, m_limit);
@@ -811,7 +808,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
                 sizeIndex2Size(i), p);
       // Split tail into preallocations and store them back into freelists.
       splitTail(m_freelists, (char*)p + nbytes, sizeIndex2Size(i) - nbytes,
-                kContigTab[index] - nbytes, nbytes, index, Slab::fromPtr(p));
+                kContigTab[index] - nbytes, nbytes, index);
       return p;
     }
   }
@@ -1128,6 +1125,25 @@ bool MemoryManager::isGCEnabled() {
 void MemoryManager::setGCEnabled(bool isGCEnabled) {
   m_gc_enabled = isGCEnabled;
   updateNextGc();
+}
+
+void MemoryManager::debugFreeFill(void* ptr, size_t bytes) {
+  if (bytes >= sizeof(FreeNode) + 16u) {
+    auto node = static_cast<FreeNode*>(ptr);
+    auto p = reinterpret_cast<uint64_t*>(node + 1);
+    // try to remember the class of the object when applicable.
+    auto const obj = innerObj(static_cast<HeapObject*>(ptr));
+    if (obj) {
+      *p = reinterpret_cast<uint64_t>(obj->getVMClass());
+    } else {
+      *p = *(reinterpret_cast<uint64_t*>(ptr) + 1);
+    }
+    *(p + 1) = *reinterpret_cast<uint64_t*>(ptr);
+    memset(ptr, kSmallFreeFill, sizeof(FreeNode));
+    memset(p + 2, kSmallFreeFill, bytes - sizeof(FreeNode) - 16);
+  } else {
+    memset(ptr, kSmallFreeFill, bytes);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

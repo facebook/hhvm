@@ -1,29 +1,24 @@
 <?hh
 
 // untyped
-function f($a) {
-  echo $a;
-}
-
-// partially typed array
-function g(varray_or_darray $a) {
+function f(dynamic $a):void {
   echo $a;
 }
 
 // partially typed return value
-async function h() {
+async function h():Awaitable<dynamic> {
   return 1;
 }
 
-// partially typed return value used here
-function i() {
-  echo h();
+async function i():Awaitable<void> {
+  $x = await h();
+  echo $x;
 }
 
 function strict(int $x): int {
   return $x;
 }
 
-function use_strict() {
+function use_strict():void {
   echo strict(1);
 }

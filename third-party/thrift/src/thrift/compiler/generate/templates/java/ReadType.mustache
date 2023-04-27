@@ -1,0 +1,112 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#type:typedef?}}{{!
+  }}{{#type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
+  }}{{^type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+}}{{#type:set?}}{{> ReadTypeContainer}}{{/type:set?}}{{!
+
+}}{{#type:list?}}{{> ReadTypeContainer}}{{/type:list?}}{{!
+
+}}{{#type:map?}}{{> ReadTypeContainer}}{{/type:map?}}{{!
+
+}}{{#type:struct?}}{{!
+}}{{#field:isNested?}}{{> BoxedType}}.read0(oprot){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{#field:hasAdapter?}}{{> ThriftBoxedType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{/field:isNested?}}{{!
+}}{{/type:struct?}}{{!
+
+}}{{#type:enum?}}{{!
+}}{{#field:isNested?}}{{> BoxedType}}.fromInteger(oprot.readI32()){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = {{> ThriftFieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
+}}{{/type:enum?}}{{!
+
+}}{{#type:binary?}}{{!
+}}{{#field:isNested?}}{{!
+  }}{{> ReadTypeBinary}}{{!
+}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{!
+  }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+  }}{{> ReadTypeBinary}};{{!
+}}{{/field:isNested?}}{{!
+}}{{/type:binary?}}{{!
+
+}}{{#type:string?}}{{!
+}}{{#field:isNested?}}{{!
+  }}{{#type:isBinaryString?}}{{!
+    }}{{> ReadTypeBinary}}{{!
+  }}{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{!
+    }}oprot.readString({{> Utf8Validation}}){{!
+  }}{{/type:isBinaryString?}}{{!
+}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{!
+  }}{{#type:isBinaryString?}}{{!
+    }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+    }}{{> ReadTypeBinary}};{{!
+  }}{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{> ThriftFieldType}} {{field:javaName}} = {{!
+    }}oprot.readString({{> Utf8Validation}});{{!
+  }}{{/type:isBinaryString?}}{{!
+}}{{/field:isNested?}}{{!
+}}{{/type:string?}}{{!
+
+}}{{#type:bool?}}{{!
+}}{{#field:isNested?}}oprot.readBool(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readBool();{{/field:isNested?}}{{!
+}}{{/type:bool?}}{{!
+
+}}{{#type:byte?}}{{!
+}}{{#field:isNested?}}oprot.readByte(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readByte();{{/field:isNested?}}{{!
+}}{{/type:byte?}}{{!
+
+}}{{#type:i16?}}{{!
+}}{{#field:isNested?}}oprot.readI16(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI16();{{/field:isNested?}}{{!
+}}{{/type:i16?}}{{!
+
+}}{{#type:i32?}}{{!
+}}{{#field:isNested?}}oprot.readI32(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI32();{{/field:isNested?}}{{!
+}}{{/type:i32?}}{{!
+
+}}{{#type:i64?}}{{!
+}}{{#field:isNested?}}oprot.readI64(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI64();{{/field:isNested?}}{{!
+}}{{/type:i64?}}{{!
+
+}}{{#type:float?}}{{!
+}}{{#field:isNested?}}oprot.readFloat(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readFloat();{{/field:isNested?}}{{!
+}}{{/type:float?}}{{!
+
+}}{{#type:double?}}{{!
+}}{{#field:isNested?}}oprot.readDouble(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readDouble();{{/field:isNested?}}{{!
+}}{{/type:double?}}{{!
+
+}}{{/type:typedef?}}{{!
+}}

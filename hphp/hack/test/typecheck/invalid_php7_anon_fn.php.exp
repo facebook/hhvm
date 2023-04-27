@@ -1,8 +1,8 @@
 File "invalid_php7_anon_fn.php", line 4, characters 20-20:
 Bad signature: use(...) should occur after the type (Parsing[1002])
-File "invalid_php7_anon_fn.php", line 4, characters 20-20:
-Unbound name: `:` (a global constant) (Naming[2049])
 File "invalid_php7_anon_fn.php", line 4, characters 22-24:
 Unexpected collection type `int` (Naming[2013])
+File "invalid_php7_anon_fn.php", line 4, characters 20-20:
+Unbound name: `:` (a global constant) (Naming[2049])
 File "invalid_php7_anon_fn.php", line 4, characters 20-20:
 Unbound global constant (Typing) (Typing[4106])

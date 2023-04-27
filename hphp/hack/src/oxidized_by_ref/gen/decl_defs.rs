@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed878f0db873438ff7a17da865ea1f3d>>
+// @generated SignedSource<<119333b259de483ff86af8c980c8b42a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,15 +11,14 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
 
 /// A substitution context contains all the information necessary for
 /// changing the type of an inherited class element to the class that is
@@ -66,6 +65,8 @@ pub use typing_defs::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, ord)")]
+#[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct SubstContext<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -78,8 +79,6 @@ impl<'a> TrivialDrop for SubstContext<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SubstContext<'arena>);
 
 pub use oxidized::decl_defs::SourceType;
-
-pub use oxidized::decl_defs::LinearizationKind;
 
 #[derive(
     Clone,
@@ -97,8 +96,10 @@ pub use oxidized::decl_defs::LinearizationKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError<'a> {
+    #[rust_to_ocaml(name = "Wrong_extend_kind")]
     WrongExtendKind {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         pos: &'a pos::Pos<'a>,
@@ -111,6 +112,7 @@ pub enum DeclError<'a> {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         parent_name: &'a str,
     },
+    #[rust_to_ocaml(name = "Cyclic_class_def")]
     CyclicClassDef {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         pos: &'a pos::Pos<'a>,
@@ -136,6 +138,8 @@ arena_deserializer::impl_deserialize_in_arena!(DeclError<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
@@ -196,10 +200,13 @@ pub struct DeclClassType<'a> {
     pub xhp_attr_deps: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
+    pub xhp_marked_empty: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_type: Option<&'a EnumType<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub decl_errors: &'a [DeclError<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub docs_url: Option<&'a str>,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
@@ -219,6 +226,8 @@ arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "elt_")]
 #[repr(C)]
 pub struct Element<'a> {
     pub flags: typing_defs_flags::class_elt::ClassElt,

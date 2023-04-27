@@ -49,11 +49,11 @@ function test_basic(): void {
   }
 
   f(...make_int_args());
-  $make = fun('make_int_args');
+  $make = make_int_args<>;
   f(...$make());
 
   f(1, ...make_mixed_args());
-  $make = fun('make_mixed_args');
+  $make = make_mixed_args<>;
   f(1, ...$make());
 
   g(
@@ -83,7 +83,7 @@ function test_limitations(): void {
   // fails at runtime, but we don't unpack the container's content type
   // because issuing errors for mixed pretty much destroys the feature
   f(...make_mixed());
-  $make = fun('make_mixed');
+  $make = make_mixed<>;
   f(...$make());
 }
 

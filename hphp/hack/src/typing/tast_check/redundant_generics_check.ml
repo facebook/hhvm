@@ -89,12 +89,11 @@ let ft_redundant_generics env tparams ty =
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
-  | (lazy (ty as ft)) ->
-    begin
-      match get_node ty with
-      | Tfun { ft_tparams; _ } -> ft_redundant_generics env ft_tparams ft
-      | _ -> assert false
-    end
+  | (lazy (ty as ft)) -> begin
+    match get_node ty with
+    | Tfun { ft_tparams; _ } -> ft_redundant_generics env ft_tparams ft
+    | _ -> assert false
+  end
 
 let check_redundant_generics_fun env ft =
   ft_redundant_generics env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
@@ -114,33 +113,34 @@ let get_tracing_info env =
     file = Tast_env.get_file env;
   }
 
-let make_handler ctx =
+let create_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base
 
-      method! at_fun_ env f =
-        match
-          Decl_provider.get_fun
-            ~tracing_info:(get_tracing_info env)
-            ctx
-            (snd f.f_name)
-        with
-        | Some { fe_type; _ } ->
-          begin
+      method! at_fun_def env fd =
+        if not (Tast_env.is_hhi env) then
+          match
+            Decl_provider.get_fun
+              ~tracing_info:(get_tracing_info env)
+              ctx
+              (snd fd.fd_name)
+          with
+          | Some { fe_type; _ } -> begin
             match get_node fe_type with
             | Tfun ft -> check_redundant_generics_fun env ft
             | _ -> ()
           end
-        | _ -> ()
+          | _ -> ()
 
       method! at_class_ env c =
-        let cid = snd c.c_name in
-        match
-          Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
-        with
-        | None -> ()
-        | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
+        if not (Tast_env.is_hhi env) then
+          let cid = snd c.c_name in
+          match
+            Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
+          with
+          | None -> ()
+          | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
     end
   in
   if

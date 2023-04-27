@@ -1,0 +1,29 @@
+HH_FIXME
+`HH_FIXME[N]` disables type checker error N on the next line. It does
+not change runtime behavior.
+
+**`HH_FIXME` is almost always a bad idea**. You might get an
+exception, or you might get an unexpected value. Even scarier, you
+might cause an exception in a totally different part of the codebase.
+
+```
+/* HH_FIXME[4110] My reason here */
+takes_num("x") + takes_num("y");
+```
+
+In this example, the type checker will accept the code, but the code
+will still crash when you run it (`TypeHintViolationException` when
+calling `takes_num`).
+
+Note that `HH_FIXME` applies to all occurrences of the error on the
+next line.
+
+## You can fix it!
+
+It is always possible to write code without `HH_FIXME`. This usually
+requires changing type signatures and some refactoring. Your code will
+be more reliable, the type checker can help you, and future changes
+will be less scary.
+
+See also `HH\FIXME\UNSAFE_CAST()`, which is still bad, but much more
+precise.

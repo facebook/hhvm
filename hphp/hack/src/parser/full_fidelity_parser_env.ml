@@ -7,6 +7,8 @@
  *
  *)
 
+open Sexplib.Std
+
 type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
@@ -21,12 +23,10 @@ type t = {
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
   disable_xhp_children_declarations: bool;
-  disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  disallow_inst_meth: bool;
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
 }
-[@@deriving show]
+[@@deriving show, sexp_of]
 
 let default =
   {
@@ -43,8 +43,6 @@ let default =
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
     disable_xhp_children_declarations = false;
-    disallow_fun_and_cls_meth_pseudo_funcs = false;
-    disallow_inst_meth = false;
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
   }
@@ -61,14 +59,11 @@ let make
     ?(disable_legacy_attribute_syntax = default.disable_legacy_attribute_syntax)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
          * it's eventually disposed to avoid memory leak. *)
-    leak_rust_tree = default.leak_rust_tree)
+      leak_rust_tree = default.leak_rust_tree)
     ?(enable_xhp_class_modifier = default.enable_xhp_class_modifier)
     ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
     ?(disable_xhp_children_declarations =
       default.disable_xhp_children_declarations)
-    ?(disallow_fun_and_cls_meth_pseudo_funcs =
-      default.disallow_fun_and_cls_meth_pseudo_funcs)
-    ?(disallow_inst_meth = default.disallow_inst_meth)
     ?(interpret_soft_types_as_like_types =
       default.interpret_soft_types_as_like_types)
     ?(is_systemlib = default.is_systemlib)
@@ -87,8 +82,6 @@ let make
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
     disable_xhp_children_declarations;
-    disallow_fun_and_cls_meth_pseudo_funcs;
-    disallow_inst_meth;
     interpret_soft_types_as_like_types;
     is_systemlib;
   }
@@ -120,8 +113,5 @@ let enable_xhp_class_modifier e = e.enable_xhp_class_modifier
 let disable_xhp_element_mangling e = e.disable_xhp_element_mangling
 
 let disable_xhp_children_declarations e = e.disable_xhp_children_declarations
-
-let disallow_fun_and_cls_meth_pseudo_funcs e =
-  e.disallow_fun_and_cls_meth_pseudo_funcs
 
 let interpret_soft_types_as_like_types e = e.interpret_soft_types_as_like_types

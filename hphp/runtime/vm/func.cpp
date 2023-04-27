@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -296,7 +297,7 @@ void Func::setFullName(int /*numParams*/) {
     // `methodSlot', which refers to its slot in its `baseCls' (which still
     // points to a subclass of Closure).
     if (!isMethod()) {
-      setNamedEntity(NamedEntity::get(m_name));
+      setNamedFunc(NamedFunc::get(m_name));
     }
   }
 }
@@ -428,18 +429,12 @@ bool Func::isDVEntry(Offset offset) const {
   return false;
 }
 
-int Func::getEntryNumParams(Offset offset) const {
-  if (offset == 0) return numNonVariadicParams();
-  return getDVEntryNumParams(offset);
-}
-
-int Func::getDVEntryNumParams(Offset offset) const {
+bool Func::hasNonTrivialDVFuncEntry() const {
   auto const nparams = numNonVariadicParams();
-  for (int i = 0; i < nparams; i++) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
+  for (auto i = numRequiredParams(); i < nparams; ++i) {
+    if (!params()[i].hasTrivialDefaultValue()) return true;
   }
-  return -1;
+  return false;
 }
 
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
@@ -563,9 +558,10 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrPublic)    { out << " public"; }
   if (attrs & AttrProtected) { out << " protected"; }
   if (attrs & AttrPrivate)   { out << " private"; }
+  if (attrs & AttrInternal)  { out << " internal"; }
   if (attrs & AttrAbstract)  { out << " abstract"; }
   if (attrs & AttrFinal)     { out << " final"; }
-  if (attrs & AttrNoOverride){ out << " (nooverride)"; }
+  if (attrs & AttrNoOverride){ out << " (no-override)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
@@ -719,7 +715,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_returnByValue = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
-  m_allFlags.m_isPolicyShardedMemoize = false;
+  m_allFlags.m_memoizeICType = Func::MemoizeICType::NoIC;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;
@@ -789,7 +785,7 @@ void Func::def(Func* func) {
   // Don't define the __debugger_main() function
   DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().count(s_DebuggerMain.get())) { return; });
 
-  auto const ne = func->getNamedEntity();
+  auto const ne = func->getNamedFunc();
 
   Func* f = ne->getCachedFunc();
   if (f == nullptr) {
@@ -831,12 +827,12 @@ void Func::def(Func* func) {
   raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
-Func* Func::lookup(const NamedEntity* ne) {
+Func* Func::lookup(const NamedFunc* ne) {
   return ne->getCachedFunc();
 }
 
 Func* Func::lookup(const StringData* name) {
-  const NamedEntity* ne = NamedEntity::get(name);
+  const NamedFunc* ne = NamedFunc::get(name);
   return ne->getCachedFunc();
 }
 
@@ -844,13 +840,13 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // Builtins are either persistent (the normal case), or defined at the
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
-  // NamedEntity.
-  auto const ne = NamedEntity::get(name);
+  // NamedFunc.
+  auto const ne = NamedFunc::get(name);
   auto const f = ne->getCachedFunc();
   return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
 }
 
-Func* Func::load(const NamedEntity* ne, const StringData* name) {
+Func* Func::load(const NamedFunc* ne, const StringData* name) {
   Func* func = ne->getCachedFunc();
   if (LIKELY(func != nullptr)) return func;
   if (AutoloadHandler::s_instance->autoloadFunc(
@@ -862,7 +858,7 @@ Func* Func::load(const NamedEntity* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
+  auto ne = NamedFunc::get(name, true, &normStr);
 
   // Try to fetch from cache
   Func* func_ = ne->getCachedFunc();
@@ -879,6 +875,28 @@ Func* Func::load(const StringData* name) {
   ) ? ne->getCachedFunc() : nullptr;
 }
 
+namespace {
+void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
+  if (!callee || !caller) return;
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
+    raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
+  }
+}
+} // namespace
+
+Func* Func::resolve(const NamedFunc* ne, const StringData* name,
+                    const Func* callerFunc) {
+  Func* func = load(ne, name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
+Func* Func::resolve(const StringData* name, const Func* callerFunc) {
+  Func* func = load(name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
@@ -886,9 +904,9 @@ Func::ExtendedLineInfoCache Func::s_extendedLineInfo;
 
 void Func::setLineTable(LineTable lineTable) {
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(
+  lock.update(
     LineTablePtr::FromPtr(new LineTable{std::move(lineTable)})
   );
 }
@@ -896,9 +914,9 @@ void Func::setLineTable(LineTable lineTable) {
 void Func::setLineTable(LineTablePtr::Token token) {
   assertx(RO::RepoAuthoritative);
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(LineTablePtr::FromToken(token));
+  lock.update(LineTablePtr::FromToken(token));
 }
 
 void Func::stashExtendedLineTable(SourceLocTable table) const {
@@ -968,18 +986,15 @@ const LineTable& Func::getOrLoadLineTable() const {
   assertx(RO::RepoAuthoritative);
 
   auto& wrapper = shared()->m_lineTable;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
 
   auto const table = wrapper.copy();
-  if (table.isPtr()) {
-    wrapper.unlock();
-    return *table.ptr();
-  }
+  if (table.isPtr()) return *table.ptr();
 
   auto newTable = new LineTable{
     FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
   };
-  wrapper.update_and_unlock(LineTablePtr::FromPtr(newTable));
+  lock.update(LineTablePtr::FromPtr(newTable));
   return *newTable;
 }
 
@@ -1020,33 +1035,25 @@ int Func::getLineNumber(Offset offset) const {
     return SourceLocation::getLineNumber(getOrLoadLineTable(), offset);
   }
 
-  shared()->m_lineMap.lock_for_update();
-  try {
-    line = findLine();
-    if (line != INT_MIN) {
-      shared()->m_lineMap.unlock();
-      return line;
-    }
+  auto lock = shared()->m_lineMap.lock_for_update();
+  line = findLine();
+  if (line != INT_MIN) return line;
 
-    auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
-    auto copy = shared()->m_lineMap.copy();
-    auto const it = std::upper_bound(
-      copy.begin(), copy.end(),
-      info,
-      [&] (const LineInfo& a, const LineInfo& b) {
-        return a.first.base < b.first.past;
-      }
-    );
-    assertx(it == copy.end() ||
-            (it->first.past > offset && it->first.base > offset));
-    copy.insert(it, info);
-    auto old = shared()->m_lineMap.update_and_unlock(std::move(copy));
-    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
-    return info.second;
-  } catch (...) {
-    shared()->m_lineMap.unlock();
-    throw;
-  }
+  auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
+  auto copy = shared()->m_lineMap.copy();
+  auto const it = std::upper_bound(
+    copy.begin(), copy.end(),
+    info,
+    [&] (const LineInfo& a, const LineInfo& b) {
+      return a.first.base < b.first.past;
+    }
+  );
+  assertx(it == copy.end() ||
+          (it->first.past > offset && it->first.base > offset));
+  copy.insert(it, info);
+  auto old = lock.update(std::move(copy));
+  Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+  return info.second;
 }
 
 bool Func::getSourceLoc(Offset offset, SourceLoc& sLoc) const {
@@ -1074,30 +1081,12 @@ bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
 
-namespace {
-
-using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
-static BytecodeArena& bytecode_arena() {
-  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
-  return arena;
-}
-
-}
-
-/*
- * Export for the admin server.
- */
-size_t hhbc_arena_capacity() {
-  if (!RuntimeOption::RepoAuthoritative) return 0;
-  return bytecode_arena().capacity();
-}
-
 unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
   g_hhbc_size->addValue(bclen);
+  auto arena = get_swappable_readonly_arena();
   auto mem = static_cast<unsigned char*>(
-    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
-                                     : malloc(bclen));
+    arena ? arena->allocate(bclen) : malloc(bclen));
   std::copy(bc, bc + bclen, mem);
   return mem;
 }
@@ -1117,17 +1106,16 @@ void freeBCRegion(const unsigned char* bc, size_t bclen) {
 PC Func::loadBytecode() {
   assertx(RO::RepoAuthoritative);
   auto& wrapper = shared()->m_bc;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
   auto const bc = wrapper.copy();
-  if (bc.isPtr()) {
-    wrapper.unlock();
-    return bc.ptr();
-  }
+  if (bc.isPtr()) return bc.ptr();
   auto const length = bclen();
   g_hhbc_size->addValue(length);
-  auto mem = (unsigned char*)bytecode_arena().allocate(length);
+  auto arena = get_swappable_readonly_arena();
+  auto mem = static_cast<unsigned char*>(
+    arena ? arena->allocate(length) : malloc(length));
   RepoFile::readRawFromUnit(m_unit->sn(), bc.token(), mem, length);
-  wrapper.update_and_unlock(BCPtr::FromPtr(mem));
+  lock.update(BCPtr::FromPtr(mem));
   return mem;
 }
 
@@ -1182,6 +1170,7 @@ static InitFiniNode s_covLinksReinit([]{
 
 InitFiniNode s_clear_called_functions([]{
   tl_called_functions.nullOut();
+  if (s_coverage_index.bound()) *s_coverage_index = 0;
 }, InitFiniNode::When::RequestFini, "tl_called_functions clear");
 }
 

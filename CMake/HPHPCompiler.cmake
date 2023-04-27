@@ -65,8 +65,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     "fno-omit-frame-pointer"
     "fno-operator-names"
     "Wall"
-    "Woverloaded-virtual"
     "Werror=format-security"
+    "Wno-unused-variable"
+    "Wno-unused-value"
+    "Wno-comment"
+    "Wno-class-memaccess"
+    "Wno-adress"
+    "Wno-error=stringop-overflow"
   )
 
   # Options to pass for debug mode to the C++ compiler
@@ -88,19 +93,23 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     )
   endif()
 
-  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
-    if (IS_X64)
-      list(APPEND GENERAL_OPTIONS
-        # For unclear reasons, our detection for what crc32 intrinsics you have
-        # will cause clang to ICE. Specifying a baseline here works around the
-        # issue. (SSE4.2 has been available on processors for quite some time now.)
+  if (IS_X64)
+    # For unclear reasons, our detection for what crc32 intrinsics you have
+    # will cause Apple clang to ICE. Specifying a baseline here works around
+    # the issue. (SSE4.2 has been available on processors for quite some time now.)
+    if(ENABLE_SSE4_2 OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+      list(APPEND GENERAL_CXX_OPTIONS
+        # SSE4.2 has been available on processors for quite some time now. This
+        # allows enabling CRC hash function code
         "msse4.2"
       )
-      # Also need to pass the right option to ASM files to avoid inconsistencies
+      # Also pass the right option to ASM files to avoid inconsistencies
       # in CRC hash function handling
       set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
     endif()
+  endif()
 
+  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )
@@ -125,8 +134,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 
     if(CLANG_FORCE_LIBSTDCXX)
       list(APPEND GENERAL_CXX_OPTIONS "stdlib=libstdc++")
-    else()
-      list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
     endif()
   else() # using GCC
     list(APPEND DISABLED_NAMED_WARNINGS
@@ -163,12 +170,12 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4)
-      message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
+      message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 10.3 OR
-       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.3)
-     message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 11.3 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 11.3)
+     message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR
@@ -202,16 +209,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     # X64
     if(IS_X64)
       list(APPEND GENERAL_CXX_OPTIONS "mcrc32")
-        if(ENABLE_SSE4_2)
-          list(APPEND GENERAL_CXX_OPTIONS
-          # SSE4.2 has been available on processors for quite some time now. This
-          # allows enabling CRC hash function code
-          "msse4.2"
-          )
-          # Also pass the right option to ASM files to avoid inconsistencies
-          # in CRC hash function handling
-          set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
-        endif()
     endif()
 
     # ARM64

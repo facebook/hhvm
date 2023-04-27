@@ -44,7 +44,7 @@ function g3($p1, inout $p2) {
 }
 
 class State {
-  static $count = 0;
+  public static $count = 0;
 }
 function g4() {
   ++State::$count;

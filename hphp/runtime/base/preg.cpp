@@ -71,7 +71,7 @@ PCREglobals::PCREglobals() {
   jit_stack = pcre_jit_stack_alloc(32768, 524288);
   // Set these to handle uses of pcre prior to PcreExtension::threadInit
   // In particular, for matching tier overrides during RuntimeOption::Load
-  preg_backtrace_limit = RuntimeOption::PregBacktraceLimit;
+  preg_backtrack_limit = RuntimeOption::PregBacktrackLimit;
   preg_recursion_limit = RuntimeOption::PregRecursionLimit;
 }
 
@@ -83,8 +83,8 @@ PCREglobals::~PCREglobals() {
 // PCRECache definition
 
 struct PCRECache {
-  typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
-  typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
+  using EntryPtr = std::shared_ptr<const pcre_cache_entry>;
+  using TempKeyCache = std::unique_ptr<LRUCacheKey>;
 
   enum class CacheKind {
     Static,
@@ -100,13 +100,13 @@ private:
     }
   };
 
-  typedef folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
-          string_data_hash, ahm_string_data_same> StaticCache;
-  typedef ConcurrentLRUCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> LRUCache;
-  typedef ConcurrentScalableCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> ScalableCache;
-  typedef StaticCache::value_type StaticCachePair;
+  using StaticCache = folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
+          string_data_hash, ahm_string_data_same>;
+  using LRUCache = ConcurrentLRUCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using ScalableCache = ConcurrentScalableCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using StaticCachePair = StaticCache::value_type;
 
 public:
   struct Accessor {
@@ -244,6 +244,7 @@ private:
 RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
+static auto pc_counter = ServiceData::createCounter("admin.pcre-cache");
 
 // The last pcre error code is available for the whole thread.
 static RDS_LOCAL(int, rl_last_error_code);
@@ -587,6 +588,7 @@ void pcre_reinit() {
                     "lru or scalable");
     kind = PCRECache::CacheKind::Scalable;
   }
+  pc_counter->setValue(0);
   s_pcreCache.reinit(kind);
 }
 
@@ -617,7 +619,7 @@ private:
   void* p;
 };
 
-typedef FreeHelperImpl<true> SmartFreeHelper;
+using SmartFreeHelper = FreeHelperImpl<true>;
 }
 
 static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
@@ -627,7 +629,7 @@ static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
     memset(local, 0, sizeof(pcre_extra));
     local->flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
   }
-  local->match_limit = tl_pcre_globals->preg_backtrace_limit;
+  local->match_limit = tl_pcre_globals->preg_backtrack_limit;
   local->match_limit_recursion = tl_pcre_globals->preg_recursion_limit;
 }
 
@@ -861,6 +863,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       }
     }
 
+    pc_counter->increment();
     s_pcreCache.insert(accessor, regex, tkc, new_entry);
     return true;
   };
@@ -976,7 +979,7 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
     "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    tl_pcre_globals->preg_backtrace_limit,
+    tl_pcre_globals->preg_backtrack_limit,
     tl_pcre_globals->preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);
@@ -1010,6 +1013,9 @@ void pcre_handle_exec_error(int pcre_code) {
     break;
   case PCRE_ERROR_BADUTF8_OFFSET:
     preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
+    break;
+  case PCRE_ERROR_JIT_STACKLIMIT:
+    preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
     break;
   default:
     preg_code = PHP_PCRE_INTERNAL_ERROR;

@@ -1,11 +1,11 @@
 File "test_consts4.php", line 11, characters 22-24:
 Expected constant expression for initializer (Parsing[1002])
+File "test_consts4.php", line 11, characters 22-24:
+Illegal constant value (Naming[2023])
 File "test_consts4.php", line 9, characters 19-19:
 Unbound name: `X` (a global constant) (Naming[2049])
 File "test_consts4.php", line 9, characters 33-33:
 Unbound name: `X` (a global constant) (Naming[2049])
-File "test_consts4.php", line 11, characters 22-24:
-Illegal constant value (Naming[2023])
 File "test_consts4.php", line 9, characters 19-19:
 Unbound global constant (Typing) (Typing[4106])
 File "test_consts4.php", line 9, characters 33-33:

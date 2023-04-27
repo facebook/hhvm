@@ -1,0 +1,17 @@
+//// redundant_as.php
+<?hh
+
+class C {}
+class D extends C {}
+
+function redundant_as(D $d): void {
+  $d;
+}
+
+function non_redundant_as(C $c): void {
+  $c as D;
+}
+
+
+There were input 1 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

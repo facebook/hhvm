@@ -1,10 +1,10 @@
 <?hh
 /* Prototype  : proto array get_declared_classes()
- * Description: Returns an array of all declared classes. 
+ * Description: Returns an array of all declared classes.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_classes_error_001(): void {
 echo "*** Testing get_declared_classes() : error conditions ***\n";
 
 // One argument

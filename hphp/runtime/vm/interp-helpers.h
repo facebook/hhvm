@@ -19,22 +19,51 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Random.h>
 
 namespace HPHP {
+
+template<class TGetCtx>
+void verifyParamType(const Func* func, int32_t id, tv_lval val,
+                     TGetCtx getCtx) {
+  assertx(id < func->numNonVariadicParams());
+  assertx(func->numParams() == int(func->params().size()));
+  const TypeConstraint& tc = func->params()[id].typeConstraint;
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? getCtx() : nullptr;
+    tc.verifyParam(val, ctx, func, id);
+  }
+  if (func->hasParamsWithMultiUBs()) {
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
+    auto it = ubs.find(id);
+    if (it != ubs.end()) {
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
+        if (ub.isCheckable()) {
+          auto const ctx = ub.isThis() ? getCtx() : nullptr;
+          ub.verifyParam(val, ctx, func, id);
+        }
+      }
+    }
+  }
+}
 
 /*
  * RAII wrapper for popping/pushing generics from/to the VM stack.
@@ -217,7 +246,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,
-                                      uint32_t numArgsInclUnpack) {
+                                      uint32_t& numArgsInclUnpack) {
   if (numArgsInclUnpack < callee->numRequiredParams()) {
     throwMissingArgument(callee, numArgsInclUnpack);
   }
@@ -225,6 +254,7 @@ inline void calleeArgumentArityChecks(const Func* callee,
   if (numArgsInclUnpack > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
+    --numArgsInclUnpack;
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
 
@@ -233,17 +263,43 @@ inline void calleeArgumentArityChecks(const Func* callee,
     vmStack().popC();
 
     if (numUnpackArgs != 0) {
-      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs - 1);
+      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs);
     }
   }
 }
 
+inline void calleeArgumentTypeChecks(const Func* callee,
+                                     uint32_t numArgsInclUnpack,
+                                     void* prologueCtx) {
+  // Builtins use a separate non-standard mechanism.
+  if (callee->isCPPBuiltin()) return;
+
+  auto const getCtx = [&] () -> const Class* {
+    if (!callee->cls()) return nullptr;
+    assertx(prologueCtx);
+    auto const ctx = callee->isClosureBody()
+      ? reinterpret_cast<c_Closure*>(prologueCtx)->getThisOrClass()
+      : prologueCtx;
+    return callee->isStatic()
+      ? reinterpret_cast<Class*>(ctx)
+      : reinterpret_cast<ObjectData*>(ctx)->getVMClass();
+  };
+
+  auto const numArgs =
+    std::min(numArgsInclUnpack, callee->numNonVariadicParams());
+  auto const firstArgIdx =
+    numArgsInclUnpack - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+  for (auto i = 0; i < numArgs; ++i) {
+    verifyParamType(callee, i, vmStack().indC(firstArgIdx - i), getCtx);
+  }
+}
+
 inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
-  assertx(numArgsInclUnpack <= callee->numNonVariadicParams() + 1);
+  assertx(numArgsInclUnpack <= callee->numParams());
 
   // All arguments already initialized. Extra arguments already popped
   // by calleeArgumentArityChecks().
-  if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
+  if (LIKELY(numArgsInclUnpack == callee->numParams())) return;
 
   CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
@@ -260,17 +316,6 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
   }
 
   assertx(numArgsInclUnpack == callee->numParams());
-}
-
-/*
- * This helper only does a stack overflow check for the native stack.
- * Both native and VM stack overflows are independently possible.
- */
-inline void checkNativeStack() {
-  // Check whether we're going out of bounds of our native stack.
-  if (LIKELY(stack_in_bounds())) return;
-  TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  throw_stack_overflow();
 }
 
 /*

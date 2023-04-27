@@ -2,14 +2,7 @@ object(foo) (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure%s) (2) {
-    ["static"]=>
-    dict(1) {
-      ["a"]=>
-      *RECURSION*
-    }
-    ["this"]=>
-    *RECURSION*
+  object(Closure%s) (0) {
   }
 }
 bool(true)

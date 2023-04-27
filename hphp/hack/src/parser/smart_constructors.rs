@@ -7,14 +7,13 @@
 pub mod smart_constructors_generated;
 pub mod smart_constructors_wrappers;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-
-use parser_core_types::{
-    lexable_token::LexableToken,
-    syntax_by_ref::{syntax::Syntax, syntax_variant_generated::SyntaxVariant},
-    syntax_kind::SyntaxKind,
-    token_kind::TokenKind,
-};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::smart_constructors_generated::*;
 pub use crate::smart_constructors_wrappers::*;
@@ -23,8 +22,8 @@ pub use crate::smart_constructors_wrappers::*;
 pub struct NoState; // zero-overhead placeholder when there is no state
 
 pub trait NodeType {
-    type R;
-    fn extract(self) -> Self::R;
+    type Output;
+    fn extract(self) -> Self::Output;
     fn is_missing(&self) -> bool;
     fn is_abstract(&self) -> bool;
     fn is_variable_expression(&self) -> bool;
@@ -41,9 +40,9 @@ pub trait NodeType {
 }
 
 impl<R> NodeType for (SyntaxKind, R) {
-    type R = R;
+    type Output = R;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self.1
     }
 
@@ -142,9 +141,9 @@ impl<R> NodeType for (SyntaxKind, R) {
 }
 
 impl<'a, T: LexableToken, V> NodeType for Syntax<'a, T, V> {
-    type R = Self;
+    type Output = Self;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self
     }
 

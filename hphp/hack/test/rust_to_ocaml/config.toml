@@ -1,0 +1,19 @@
+[modules]
+rename = [
+  ["i_map", "IMap"],
+  ["i_set", "ISet"],
+  ["s_map", "SMap"],
+  ["s_set", "SSet"],
+]
+
+[types]
+transparent = [
+  "Box", "std::boxed::Box",
+  "Rc", "std::rc::Rc",
+  "Arc", "std::sync::Arc",
+  "RcOc", "ocamlrep::rc::RcOc",
+]
+rename = [
+  ["Vec", "list"],
+  ["std::vec::Vec", "list"],
+]

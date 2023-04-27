@@ -13,6 +13,7 @@ class Struct1 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class BadAdapter {}
@@ -29,6 +30,7 @@ class Struct2 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function testBinary() {
@@ -48,12 +50,12 @@ function testBinary() {
 function testCompact() {
   $p = new DummyProtocol();
   try {
-    thrift_protocol_write_compact($p, 'foomethod', 2, new Struct1(42), 20);
+    thrift_protocol_write_compact2($p, 'foomethod', 2, new Struct1(42), 20);
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }
   try {
-    thrift_protocol_write_compact($p, 'foomethod', 2, new Struct2(42), 20);
+    thrift_protocol_write_compact2($p, 'foomethod', 2, new Struct2(42), 20);
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }

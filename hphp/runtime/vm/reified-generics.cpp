@@ -27,11 +27,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* addToReifiedGenericsTable(
+ArrayData* addToTypeReifiedGenericsTable(
   const StringData* name,
   ArrayData* tsList
 ) {
-  auto const ne = NamedEntity::get(name, true);
+  auto const ne = NamedType::get(name, true);
   auto const generics = ne->getCachedReifiedGenerics();
   if (!generics) {
     // We have created a new entry on the named entity table
@@ -63,11 +63,6 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   auto tv = obj->props()->at(index).tv();
   assertx(tvIsVec(tv));
   return tv.m_data.parr;
-}
-
-ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
-  auto const this_ = ar->getThis();
-  return getClsReifiedGenericsProp(cls, this_);
 }
 
 ReifiedGenericsInfo
@@ -220,7 +215,15 @@ void raise_warning_for_soft_reified(size_t i, bool fun,
                 name->data());
 }
 
-
+void checkClassReifiedGenericsSoft(const Class* cls) {
+  assertx(cls->hasReifiedGenerics());
+  if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
+    raise_warning_for_soft_reified(0, false, cls->name());
+  } else {
+    raise_error("Cannot create a new instance of a reified class without "
+                "the reified generics");
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class asd {
-  static $PROP = 2;
+  public static $PROP = 2;
 }
 
 

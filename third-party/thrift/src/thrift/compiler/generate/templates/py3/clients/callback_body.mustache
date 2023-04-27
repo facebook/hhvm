@@ -1,0 +1,21 @@
+client, pyfuture, options = <object> userdata  {{! so client lives on until we exit }}
+if {{#function:exceptions}}{{!
+}}result.hasException[{{#field:type}}{{> types/cython_cpp_type}}{{/field:type}}]():
+    {{#field:type}}
+    try:
+        exc = {{> types/cython_python_type}}._fbthrift_create(try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()))
+    except Exception as ex:
+        {{! This is probably a UnicodeDecodeError }}
+        pyfuture.set_exception(ex.with_traceback(None))
+    else:
+        pyfuture.set_exception(exc)
+    {{/field:type}}
+elif {{/function:exceptions}}{{!
+}}result.hasException():
+    pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+else:
+    try:
+        pyfuture.set_result({{#function:return_type}}{{> clients/cython_cpp_value_to_return_value}}{{/function:return_type}})
+    except Exception as ex:
+        {{! Most likely this is only ever unicode decode errors }}
+        pyfuture.set_exception(ex.with_traceback(None))

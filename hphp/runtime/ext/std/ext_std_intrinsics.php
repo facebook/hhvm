@@ -26,6 +26,14 @@ function trigger_crash(): void;
 <<__Native>>
 function launder_value(mixed $value): mixed;
 
+/**
+ * Do nothing to the given value. This function is purposefully not optimized.
+ * It's really here as a way to verify how systemlib handles generic inout
+ * functions.
+ */
+<<__Native>>
+function launder_value_inout<T>(inout T $value): void;
+
 /*
  * Builtins for testing array-ish builtin typehints.
  */
@@ -60,10 +68,16 @@ function dummy_darray_await(): Awaitable;
 function dummy_dict_await(): Awaitable;
 
 <<__Native>>
+function dummy_int_upper_bound<T as int>(): T;
+
+<<__Native>>
 function create_class_pointer(string $name): mixed;
 
 <<__Native>>
 function create_clsmeth_pointer(string $cls, string $meth): mixed;
+
+<<__Native>>
+function is_lazy_class(mixed $val): bool;
 
 <<__Native>>
 function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
@@ -83,6 +97,9 @@ function apc_fetch_no_check(mixed $key) {
   $ignored = false;
   return \apc_fetch($key, inout $ignored);
 }
+
+<<__Native>>
+function is_module_in_deployment(string $module, string $deployment): bool;
 
 <<__Native, __IsFoldable>>
 function builtin_io_foldable(
@@ -187,13 +204,32 @@ function is_unit_loaded(string $path): bool;
 <<__Native>>
 function drain_unit_prefetcher(): void;
 
+
 /*
- * Return information about the current contents of the non-repo Unit
- * cache and per-hash Unit cache. Due to the nature of the caches this
- * information may be out of date immediately. Only really meant for
- * Unit tests.
+ * Returns a string containing the pretty printed bytecode for the calling
+ * function.
  */
 <<__Native>>
-function non_repo_unit_cache_info(): dict;
+function debug_get_bytecode(): string;
+
+/*
+ * Return an array of recorded dependencies for the file in which this builtin
+ * is called.
+ */
+<<__Native>>
+function debug_file_deps(): vec<string>;
+
+/*
+ * We need to be able to unit test functionality of __NativeData classes
+ * without tripping over the funky behavior or (intentional) limitations
+ * of the __NativeData classes that actually do something.
+ */
+<<__NativeData("DummyNativeData")>>
+class ExtensibleNewableClassWithNativeData {
+  <<__Native>>
+  public function setDummyValue(int $v): void;
+  <<__Native>>
+  public function getDumyValue(): int;
+}
 
 }

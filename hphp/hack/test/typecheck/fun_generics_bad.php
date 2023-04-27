@@ -20,7 +20,7 @@ function demo(): bool {
     $array[$k] = null;
   }
 
-  $fun1 = fun('cannot_be_nullable');
+  $fun1 = cannot_be_nullable<>;
 
   $val1 = special_array_map($fun1, $array);
 

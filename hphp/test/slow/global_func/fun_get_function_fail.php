@@ -21,6 +21,6 @@ function expect_exception($arg) {
 <<__EntryPoint>>
 function main() {
   expect_exception('func');
-  expect_exception(class_meth('A', 'clsMeth'));
+  expect_exception(A::clsMeth<>);
   expect_exception(null);
 }

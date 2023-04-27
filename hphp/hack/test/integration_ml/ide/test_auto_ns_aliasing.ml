@@ -91,11 +91,12 @@ function testTypecheck(): void {
 "
 
 let test () =
-  let global_opts =
-    GlobalOptions.make
+  let global_opts : GlobalOptions.t =
+    GlobalOptions.set
+      ~tco_saved_state:GlobalOptions.default_saved_state
       ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
       ~po_deregister_php_stdlib:true
-      ()
+      GlobalOptions.default
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_tc_options custom_config global_opts in

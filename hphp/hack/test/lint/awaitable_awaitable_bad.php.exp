@@ -1,0 +1,4 @@
+File "awaitable_awaitable_bad.php", line 7, characters 7-47:
+This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type. (Lint[5651])
+File "awaitable_awaitable_bad.php", line 12, characters 8-67:
+This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type. (Lint[5651])

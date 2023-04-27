@@ -4,11 +4,20 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope::Scope;
 use env::emitter::Emitter;
-use error::{Error, Result};
-use ffi::{Maybe::Just, Slice};
-use hhbc::{hhas_body::HhasBody, Local};
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{aast, ast, pos::Pos};
+use error::Error;
+use error::Result;
+use ffi::Maybe::Just;
+use ffi::Slice;
+use hhbc::Body;
+use hhbc::Local;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast;
+use oxidized::ast;
+use oxidized::pos::Pos;
+
+use crate::emit_body;
+use crate::emit_param;
 
 pub fn emit_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -17,7 +26,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     name: &ast::Sid,
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
-) -> Result<HhasBody<'arena>> {
+) -> Result<Body<'arena>> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()
@@ -30,11 +39,27 @@ pub fn emit_body<'a, 'arena, 'decl>(
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
-            return_type_info.map(|rti| HhasBody {
-                body_instrs: Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect()),
-                params: Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0)),
-                return_type_info: Just(rti),
-                ..Default::default()
+            return_type_info.and_then(|rti| {
+                let body_instrs =
+                    Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect());
+                let params = Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0));
+                let stack_depth =
+                    stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+                        .map_err(error::Error::from_error)?;
+
+                Ok(Body {
+                    body_instrs,
+                    params,
+                    return_type_info: Just(rti),
+                    decl_vars: Default::default(),
+                    doc_comment: Default::default(),
+                    is_memoize_wrapper: Default::default(),
+                    is_memoize_wrapper_lsb: Default::default(),
+                    num_iters: Default::default(),
+                    shadowed_tparams: Default::default(),
+                    stack_depth,
+                    upper_bounds: Default::default(),
+                })
             })
         })
     })
@@ -58,7 +83,7 @@ fn emit_native_opcode_impl<'arena>(
         }
     };
     Err(Error::fatal_runtime(
-        &Pos::make_none(),
+        &Pos::NONE,
         format!("OpCodeImpl attribute is not applicable to {}", name),
     ))
 }
@@ -68,36 +93,36 @@ fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result
         "send" => {
             let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
-                instr::contcheck_check(),
-                instr::pushl(local),
-                instr::contenter(),
+                instr::cont_check_check(),
+                instr::push_l(local),
+                instr::cont_enter(),
             ])
         }
         "raise" | "throw" => {
             let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
-                instr::contcheck_check(),
-                instr::pushl(local),
-                instr::contraise(),
+                instr::cont_check_check(),
+                instr::push_l(local),
+                instr::cont_raise(),
             ])
         }
         "next" | "rewind" => InstrSeq::gather(vec![
-            instr::contcheck_ignore(),
+            instr::cont_check_ignore(),
             instr::null(),
-            instr::contenter(),
+            instr::cont_enter(),
         ]),
-        "valid" => instr::contvalid(),
-        "current" => instr::contcurrent(),
-        "key" => instr::contkey(),
-        "getReturn" => instr::contgetreturn(),
+        "valid" => instr::cont_valid(),
+        "current" => instr::cont_current(),
+        "key" => instr::cont_key(),
+        "getReturn" => instr::cont_get_return(),
         _ => {
             return Err(Error::fatal_runtime(
-                &Pos::make_none(),
+                &Pos::NONE,
                 "incorrect native generator function",
             ));
         }
     };
-    Ok(InstrSeq::gather(vec![instrs, instr::retc()]))
+    Ok(InstrSeq::gather(vec![instrs, instr::ret_c()]))
 }
 
 fn get_first_param_local(params: &[ast::FunParam]) -> Result<Local> {

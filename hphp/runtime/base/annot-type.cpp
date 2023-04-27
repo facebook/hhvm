@@ -35,9 +35,7 @@ using StdStrToTypeMap = hphp_string_imap<AnnotType>;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
-  s_HH_RX_Traversable("HH\\Rx\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
-  s_HH_RX_KeyedTraversable("HH\\Rx\\KeyedTraversable"),
   s_HH_Container("HH\\Container"),
   s_HH_KeyedContainer("HH\\KeyedContainer"),
   s_XHPChild("XHPChild"),
@@ -139,8 +137,6 @@ bool interface_supports_arrlike(const StringData* s) {
 bool interface_supports_arrlike(folly::StringPiece s) {
   return isame(s, s_HH_Traversable.slice()) ||
          isame(s, s_HH_KeyedTraversable.slice()) ||
-         isame(s, s_HH_RX_Traversable.slice()) ||
-         isame(s, s_HH_RX_KeyedTraversable.slice()) ||
          isame(s, s_HH_Container.slice()) ||
          isame(s, s_HH_KeyedContainer.slice()) ||
          isame(s, s_XHPChild.slice());
@@ -341,6 +337,36 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   assertx(at == AnnotType::Unresolved);
   return isClassType(dt) || isLazyClassType(dt)
     ? AnnotAction::FallbackCoerce : AnnotAction::Fallback;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const char* annotName(AnnotType at) {
+  switch (at) {
+    case AnnotType::Mixed:      return "mixed";
+    case AnnotType::This:       return "this";
+    case AnnotType::Callable:   return "callable";
+    case AnnotType::Resource:   return "resource";
+    case AnnotType::Object:     return "object";
+    case AnnotType::Unresolved: return "unresolved";
+    case AnnotType::Nothing:    return "nothing";
+    case AnnotType::NoReturn:   return "noreturn";
+    case AnnotType::Classname:  return "classname";
+    case AnnotType::Null:       return "null";
+    case AnnotType::Nonnull:    return "nonnull";
+    case AnnotType::Number:     return "number";
+    case AnnotType::ArrayKey:   return "arraykey";
+    case AnnotType::Int:        return "int";
+    case AnnotType::Bool:       return "bool";
+    case AnnotType::Float:      return "float";
+    case AnnotType::ArrayLike:  return "arraylike";
+    case AnnotType::VecOrDict:  return "vec-or-dict";
+    case AnnotType::Vec:        return "vec";
+    case AnnotType::String:     return "string";
+    case AnnotType::Dict:       return "dict";
+    case AnnotType::Keyset:     return "keyset";
+  }
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

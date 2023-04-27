@@ -20,13 +20,11 @@ namespace HPHP {
 namespace Facts {
 
 FactsExtractionExc::FactsExtractionExc(const std::string& msg)
-    : std::runtime_error{msg} {
-}
+    : std::runtime_error{msg} {}
 
 FactsExtractionExc::~FactsExtractionExc() = default;
 
-UpdateExc::UpdateExc(const std::string& msg) : std::runtime_error{msg} {
-}
+UpdateExc::UpdateExc(const std::string& msg) : std::runtime_error{msg} {}
 
 UpdateExc::~UpdateExc() = default;
 

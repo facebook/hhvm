@@ -1,11 +1,14 @@
 use env::emitter::Emitter;
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use naming_special_names_rust::pseudo_consts;
-use oxidized::{
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast, ast_defs,
-    pos::Pos,
-};
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 
 struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
     phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl ())>,
@@ -56,8 +59,13 @@ fn rewrite_xml_<'arena, 'decl>(
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {
-    use ast::{ClassId, ClassId_, Expr, Expr_, XhpAttribute};
-    use ast_defs::{Id, ShapeFieldName};
+    use ast::ClassId;
+    use ast::ClassId_;
+    use ast::Expr;
+    use ast::Expr_;
+    use ast::XhpAttribute;
+    use ast_defs::Id;
+    use ast_defs::ShapeFieldName;
 
     let (_, attributes) =
         attributes

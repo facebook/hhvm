@@ -1,0 +1,6 @@
+*.bundle
+*.gem
+*.so
+Gemfile.lock
+mkmf.log
+vendor

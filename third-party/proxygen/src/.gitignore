@@ -1,0 +1,30 @@
+*~
+\#*\#
+
+# Build artifacts
+.libs
+*.log
+*.trs
+*.o
+*.lo
+*.a
+*.la
+gen-cpp
+gen-cpp2
+
+# Generated files
+/proxygen/lib/http/HTTPCommonHeaders.cpp
+/proxygen/lib/http/HTTPCommonHeaders.h
+/proxygen/lib/utils/TraceEventType.cpp
+/proxygen/lib/utils/TraceEventType.h
+/proxygen/lib/utils/TraceFieldType.cpp
+/proxygen/lib/utils/TraceFieldType.h
+_build/
+
+# common editor artifacts
+*~
+*.vscode*
+
+# Generated document
+html/
+latex/

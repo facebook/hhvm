@@ -58,7 +58,6 @@ std::string show(const IRGS& irgs) {
 
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
-  assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
   for (auto i = 0; i < stackDepth; ) {
     auto const spRel = offsetFromIRSP(irgs, BCSPRelOffset{i});

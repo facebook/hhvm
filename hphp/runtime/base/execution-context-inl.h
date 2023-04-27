@@ -41,6 +41,13 @@ inline Transport* ExecutionContext::getTransport() {
   return m_transport;
 }
 
+// This method may return different implementations of StreamTransport
+// based on runtime options.
+inline std::shared_ptr<stream_transport::StreamTransport>
+ExecutionContext::getServerStreamTransport() const {
+  return m_transport->getStreamTransport();
+}
+
 inline rqtrace::Trace* ExecutionContext::getRequestTrace() {
   return m_requestTrace;
 }
@@ -201,6 +208,13 @@ inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
   return m_requestOptions.get_pointer();
 }
 
+inline const PackageInfo& ExecutionContext::getPackageInfo() const {
+  if (RO::RepoAuthoritative) return RepoFile::packageInfo();
+  auto const opts = getRepoOptionsForRequest();
+  assertx(opts);
+  return opts->packageInfo();
+}
+
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;
@@ -280,7 +294,7 @@ inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
 
 inline TypedValue ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
-  return lookupClsCns(NamedEntity::get(cls), cls, cns);
+  return lookupClsCns(NamedType::get(cls), cls, cns);
 }
 
 inline ActRec*
@@ -309,4 +323,3 @@ template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

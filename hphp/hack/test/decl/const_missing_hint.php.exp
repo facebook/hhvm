@@ -39,8 +39,9 @@
              [(Rhint ([23:6-7]), (Tapply (([23:6-7], "\\E"), [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false;
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([24:3-12], "FromConst");
@@ -51,8 +52,6 @@
         sc_user_attributes = [];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([23:10-13]), (Tprim Tint));
-                te_constraint = None; te_includes = [] })
-        }))
+                te_constraint = None; te_includes = [] });
+        sc_docs_url = None }))
   ]
-
-They matched!

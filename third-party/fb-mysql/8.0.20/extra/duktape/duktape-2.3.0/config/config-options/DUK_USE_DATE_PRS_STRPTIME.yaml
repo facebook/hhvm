@@ -1,0 +1,12 @@
+define: DUK_USE_DATE_PRS_STRPTIME
+introduced: 1.0.0
+default: false
+tags:
+  - date
+  - portability
+description: >
+  Use strptime() to parse a platform specific datetime string into Ecmascript
+  time.
+
+# FIXME: add an include file metadata entry to cause default #include
+# directives to be emitted?

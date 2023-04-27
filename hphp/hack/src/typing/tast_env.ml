@@ -77,7 +77,9 @@ let get_class_or_typedef env x =
 
 let is_in_expr_tree = Typing_env.is_in_expr_tree
 
-let set_in_expr_tree = Typing_env.set_in_expr_tree
+let inside_expr_tree = Typing_env.inside_expr_tree
+
+let outside_expr_tree = Typing_env.outside_expr_tree
 
 let is_static = Typing_env.is_static
 
@@ -143,7 +145,6 @@ let get_receiver_ids env ty =
       let upper_bounds = Typing_env.get_upper_bounds env name targs in
       Typing_set.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
     | Tdynamic -> [RIdynamic]
-    | Terr -> [RIerr]
     | Tany _ -> [RIany]
     | _ -> acc
   in
@@ -163,8 +164,6 @@ let is_visible = Typing_visibility.is_visible
 
 let assert_nontrivial = Typing_equality_check.assert_nontrivial
 
-let assert_nullable = Typing_equality_check.assert_nullable
-
 let hint_to_ty env = Decl_hint.hint env.Typing_env_types.decl_env
 
 let localize env ety_env dty =
@@ -180,6 +179,8 @@ let localize_no_subst env ~ignore_errors dty =
   (env, lty)
 
 let get_upper_bounds = Typing_env.get_upper_bounds
+
+let fresh_type = Typing_env.fresh_type
 
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
@@ -242,6 +243,7 @@ let restore_saved_env env saved_env =
         saved_env.Tast.inference_env;
     Env.tpenv = saved_env.Tast.tpenv;
     Env.fun_tast_info = saved_env.Tast.fun_tast_info;
+    Env.checked = saved_env.Tast.checked;
   }
 
 module EnvFromDef = Typing_env_from_def
@@ -306,6 +308,7 @@ let def_env ctx d =
   | Namespace _
   | NamespaceUse _
   | SetNamespaceEnv _
+  | SetModule _
   | FileAttributes _
   (* TODO(T108206307) *)
   | Module _ ->
@@ -357,3 +360,7 @@ let consts env cls = Typing_env.consts env cls
 
 let fill_in_pos_filename_if_in_current_decl =
   Typing_env.fill_in_pos_filename_if_in_current_decl
+
+let is_hhi = Typing_env.is_hhi
+
+let get_check_status env = env.Typing_env_types.checked

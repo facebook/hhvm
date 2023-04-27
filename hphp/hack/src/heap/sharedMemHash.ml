@@ -6,6 +6,6 @@
  *
  *)
 
-external get_hash : string -> int64 = "get_hash_ocaml"
+external get_hash : string -> int64 = "hh_get_hash_ocaml"
 
 let hash_string s = get_hash (Digest.string s)

@@ -18,7 +18,7 @@ else()
   set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
   set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}
-    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/CMake"
+    "${CMAKE_INSTALL_FULL_LIBDIR}/hhvm/CMake"
     ${CMAKE_MODULE_PATH})
 endif()
 
@@ -39,7 +39,7 @@ foreach (def ${HHVM_DEFINITIONS})
 endforeach()
 
 add_custom_target(test COMMAND
-                       HHVM_BIN=${CMAKE_INSTALL_PREFIX}/bin/hhvm
+                       HHVM_BIN=${CMAKE_INSTALL_FULL_BINDIR}/hhvm
                        ${CMAKE_CURRENT_SOURCE_DIR}/run-test
                        -a "-vDynamicExtensions.99=${EXTENSION_NAME}.so" test
                        DEPENDS ${EXTENSION_NAME})

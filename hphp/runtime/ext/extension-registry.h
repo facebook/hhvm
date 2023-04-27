@@ -41,6 +41,8 @@ void threadShutdown();
 void requestInit();
 void requestShutdown();
 
+void moduleDeclInit();
+
 bool modulesInitialised();
 
 void serialize(jit::ProfDataSerializer& ser);
@@ -50,4 +52,3 @@ void deserialize(jit::ProfDataDeserializer& des);
 } // namespace HPHP::ExtensionRegistry
 
 }
-

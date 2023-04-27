@@ -5,7 +5,7 @@ Invalid argument (Typing[4323])
   File "t21684610.php", line 9, characters 44-48:
   This type constraint is violated
   File "t21684610.php", line 9, characters 44-48:
-  Expected `I1<[unresolved]>`
+  Expected `I1<_>`
   File "t21684610.php", line 23, characters 27-27:
   But got `int`
 File "t21684610.php", line 27, characters 16-16:
@@ -15,6 +15,6 @@ Invalid argument (Typing[4323])
   File "t21684610.php", line 9, characters 44-48:
   This type constraint is violated
   File "t21684610.php", line 9, characters 44-48:
-  Expected `I1<[unresolved]>`
+  Expected `I1<_>`
   File "t21684610.php", line 27, characters 16-16:
   But got `int`

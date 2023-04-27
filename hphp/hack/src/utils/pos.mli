@@ -42,6 +42,8 @@ val end_line_column : 'a pos -> int * int
 (** Return line number, beginning of line character number and character number of start position. *)
 val line_beg_offset : t -> int * int * int
 
+val end_line_beg_offset : t -> int * int * int
+
 (** For spans over just one line, return the line number, start column and end column.
     This returns a closed interval.
     Undefined for multi-line spans. *)
@@ -141,7 +143,13 @@ val compare : t -> t -> int
 
 val set_file : 'a -> 'b pos -> 'a pos
 
-val set_line_end : int -> 'a pos -> 'a pos
+(* Return a zero-width position that occurs at the start of input position. *)
+val shrink_to_start : 'a pos -> 'a pos
+
+(* Return a zero-width position that occurs at the end of input position. *)
+val shrink_to_end : 'a pos -> 'a pos
+
+val set_col_start : int -> 'a pos -> 'a pos
 
 val set_col_end : int -> 'a pos -> 'a pos
 

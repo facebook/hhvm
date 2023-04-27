@@ -1,10 +1,12 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+namespace Builtin4;
+
 function test_loaded($files) {
   foreach ($files as $v) {
     $loaded =
-      __hhvm_intrinsics\is_unit_loaded(__DIR__ . '/' . $v) ? "true" : "false";
+      \__hhvm_intrinsics\is_unit_loaded(__DIR__ . '/' . $v) ? "true" : "false";
     echo "  $v ==> $loaded\n";
   }
 }
@@ -16,8 +18,8 @@ function prefetch($files) {
   }
   // Advisory, but prefetching is enabled. Wait for the prefetcher to
   // finish.
-  HH\prefetch_units($f, true);
-  __hhvm_intrinsics\drain_unit_prefetcher();
+  \HH\prefetch_units($f, true);
+  \__hhvm_intrinsics\drain_unit_prefetcher();
 }
 
 <<__EntryPoint>>

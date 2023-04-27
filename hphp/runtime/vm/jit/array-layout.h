@@ -60,6 +60,7 @@ struct ArrayLayout {
   bool logging() const;
   bool monotype() const;
   bool is_struct() const;
+  bool is_type_structure() const;
   bool is_concrete() const;
 
   // The result is non-null iff the layout is a bespoke layout.

@@ -40,7 +40,7 @@
   "symbol_types":[
     {
       "pos":{"filename":"basic.php","line":3,"char_start":31,"char_end":34},
-      "type":"_",
+      "type":"int",
       "ident":0
     },
     {
@@ -55,7 +55,7 @@
     },
     {
       "pos":{"filename":"basic.php","line":6,"char_start":10,"char_end":13},
-      "type":"_",
+      "type":"int",
       "ident":0
     },
     {
@@ -70,7 +70,7 @@
     },
     {
       "pos":{"filename":"basic.php","line":16,"char_start":32,"char_end":35},
-      "type":"_",
+      "type":"mixed",
       "ident":0
     },
     {

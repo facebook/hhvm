@@ -19,11 +19,10 @@ let shapes_key_exists env shape field_name =
   let check pos shape_kind fields =
     match TShapeMap.find_opt field_name fields with
     | None ->
-      begin
-        match shape_kind with
-        | Closed_shape -> `DoesNotExist (pos, `Undefined)
-        | Open_shape -> `Unknown
-      end
+      if is_nothing shape_kind then
+        `DoesNotExist (pos, `Undefined)
+      else
+        `Unknown
     | Some { sft_optional; sft_ty } ->
       if not sft_optional then
         `DoesExist (get_pos sft_ty)
@@ -37,26 +36,19 @@ let shapes_key_exists env shape field_name =
         else
           `Unknown
   in
+  let tenv = Tast_env.tast_env_as_typing_env env in
+  let shape = Typing_utils.strip_dynamic tenv shape in
+  let (_, _, shape) = Typing_utils.strip_supportdyn tenv shape in
   let (_, shape) = Tast_env.expand_type env shape in
   match get_node shape with
-  | Tshape (shape_kind, fields) ->
+  | Tshape (_, shape_kind, fields) ->
     (check (get_pos shape) shape_kind fields, false)
   | Toption maybe_shape ->
     let (_, shape) = Tast_env.expand_type env maybe_shape in
     (match get_node shape with
-    | Tshape (shape_kind, fields) ->
+    | Tshape (_, shape_kind, fields) ->
       (check (get_pos shape) shape_kind fields, true)
     | _ -> (`Unknown, true))
-  | Tunion [ty1; ty2] ->
-    (* This implements ad-hoc support for ~shape(...) types; *)
-    (* the general union type case returns (`Unknown, false) *)
-    let (_, ty1) = Tast_env.expand_type env ty1 in
-    let (_, ty2) = Tast_env.expand_type env ty2 in
-    (match (get_node ty1, get_node ty2) with
-    | (Tdynamic, Tshape (shape_kind, fields))
-    | (Tshape (shape_kind, fields), Tdynamic) ->
-      (check (get_pos shape) shape_kind fields, false)
-    | _ -> (`Unknown, false))
   | _ -> (`Unknown, false)
 
 let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
@@ -90,7 +82,7 @@ let shapes_method_access_with_non_existent_field
   match (status, optional_shape) with
   | (`DoesExist _, false) ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
-  | (`DoesNotExist (decl_pos, reason), false) ->
+  | (`DoesNotExist (decl_pos, reason), _) ->
     Errors.add_typing_error
       Typing_error.(
         shape
@@ -102,11 +94,7 @@ let shapes_method_access_with_non_existent_field
                method_name;
                reason;
              })
-  | (`DoesNotExist _, true) when String.equal method_name SN.Shapes.idx ->
-    (* Shapes::at only supports non optional shapes *)
-    Lint.opt_closed_shape_idx_missing_field (Some method_name) pos1
   | (`DoesExist _, true)
-  | (`DoesNotExist _, true)
   | (`Unknown, _) ->
     ()
 
@@ -115,13 +103,12 @@ let shape_access_with_non_existent_field pos1 env (shape, _, _) field_name =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
   match (status, optional) with
-  | (`DoesNotExist (decl_pos, reason), false) ->
+  | (`DoesNotExist (decl_pos, reason), _) ->
     Errors.add_typing_error
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_access_with_non_existent_field
              { pos = pos1; field_name = snd field_name; decl_pos; reason })
-  | (`DoesNotExist _, true) -> Lint.opt_closed_shape_idx_missing_field None pos1
   | (`DoesExist _, _)
   | (`Unknown, _) ->
     ()
@@ -172,9 +159,11 @@ let handler =
       | ( _,
           p,
           Binop
-            ( Ast_defs.QuestionQuestion,
-              (_, _, Array_get (shape, Some (_, pos, String field_name))),
-              _ ) ) ->
+            {
+              bop = Ast_defs.QuestionQuestion;
+              lhs = (_, _, Array_get (shape, Some (_, pos, String field_name)));
+              _;
+            } ) ->
         shape_access_with_non_existent_field
           p
           env

@@ -12,6 +12,7 @@ class InnerStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class OldStruct {
@@ -44,6 +45,7 @@ class OldStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class NewStruct {
@@ -71,6 +73,7 @@ class NewStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function testBinary($val) {
@@ -85,7 +88,7 @@ function testBinary($val) {
 
 function testCompact($val) {
   $p = new DummyProtocol();
-  thrift_protocol_write_compact($p, 'OldStruct', 2, $val, 20);
+  thrift_protocol_write_compact2($p, 'OldStruct', 2, $val, 20);
   try {
     var_dump(thrift_protocol_read_compact($p, 'NewStruct'));
   } catch (TProtocolException $e) {

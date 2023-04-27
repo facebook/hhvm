@@ -19,6 +19,8 @@ type ce_visibility =
   | Vinternal of string
 [@@deriving eq, ord, show]
 
+type cross_package_decl = string option [@@deriving eq, ord]
+
 (* Represents <<Policied()>> or <<InferFlows>> attribute *)
 type ifc_fun_decl =
   | FDPolicied of string option
@@ -26,11 +28,6 @@ type ifc_fun_decl =
 [@@deriving eq, ord]
 
 val default_ifc_fun_decl : ifc_fun_decl
-
-type exact =
-  | Exact
-  | Nonexact
-[@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -63,9 +60,18 @@ type fun_tparams_kind =
       explicit type argument must be reified. *)
 [@@deriving eq]
 
-type shape_kind =
-  | Closed_shape
-  | Open_shape
+(** The origin of a type is a succinct key that is unique to the
+    type containing it. Consequently, two types with the same
+    origin are necessarily identical. Any change to a type with
+    origin needs to come with a *reset* of its origin. For example,
+    all type mappers have to reset origins to [Missing_origin]. *)
+type type_origin =
+  | Missing_origin
+      (** When we do not have any origin for the type. It is always
+          correct to use [Missing_origin]; so when in doubt, use it. *)
+  | From_alias of string
+      (** A type with origin [From_alias orig] is equivalent to
+           the expansion of the alias [orig]. *)
 [@@deriving eq, ord, show]
 
 type pos_string = Pos_or_decl.t * string [@@deriving eq, ord, show]
@@ -95,8 +101,8 @@ module TShapeField : sig
   val of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t
 end
 
-(** This is similar to Aast.ShapeMap, but contains Pos_or_decl.t
-    instead of Pos.t. Aast.ShapeMap is used in shape expressions,
+(** This is similar to Ast_defs.ShapeMap, but contains Pos_or_decl.t
+    instead of Pos.t. Ast_defs.ShapeMap is used in shape expressions,
     while this is used in shape types. *)
 module TShapeMap : sig
   include WrappedMap.S with type key = TShapeField.t
@@ -189,7 +195,7 @@ and neg_type =
 
    With this definition, the field 'a' may be unprovided in a shape. In this
    case, the field 'a' would have sf_optional set to true.
-   *)
+*)
 and 'phase shape_field_type = {
   sft_optional: bool;
   sft_ty: 'phase ty;
@@ -201,6 +207,7 @@ and _ ty_ =
   | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : pos_id * decl_ty list -> decl_phase ty_
+  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -230,7 +237,6 @@ and _ ty_ =
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
-  | Terr
   | Tnonnull
   (* A dynamic type is a special type which sometimes behaves as if it were a
    * top type; roughly speaking, where a specific value of a particular type is
@@ -255,7 +261,9 @@ and _ ty_ =
   (* Whether all fields of this shape are known, types of each of the
    * known arms.
    *)
-  | Tshape : shape_kind * 'phase shape_field_type TShapeMap.t -> 'phase ty_
+  | Tshape :
+      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
+      -> 'phase ty_
   | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
@@ -278,16 +286,6 @@ and _ ty_ =
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : 'phase taccess_type -> 'phase ty_
-  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  (* This represents a type alias that lacks necessary type arguments. Given
-   *   type Foo<T1,T2> = ...
-   * Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-   * further type arguments. In particular, Tunappliedalias always stands for
-   * a higher-kinded type. It is never used for an alias like
-   *   type Foo2 = ...
-   * that simply doesn't require type arguments.
-   *)
-  | Tunapplied_alias : string -> locl_phase ty_
   (* The type of an opaque type (e.g. a "newtype" outside of the file where it
    * was defined) or enum. They are "opaque", which means that they only unify with
    * themselves. However, it is possible to have a constraint that allows us to
@@ -301,7 +299,17 @@ and _ ty_ =
    *
    * Which means that my_type is abstract, but is subtype of int as well.
    *)
-  | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
+  | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
+  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  (* This represents a type alias that lacks necessary type arguments. Given
+   *   type Foo<T1,T2> = ...
+   * Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+   * further type arguments. In particular, Tunappliedalias always stands for
+   * a higher-kinded type. It is never used for an alias like
+   *   type Foo2 = ...
+   * that simply doesn't require type arguments.
+   *)
+  | Tunapplied_alias : string -> locl_phase ty_
   (* see dependent_type *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
   (* An instance of a class or interface, ty list are the arguments
@@ -310,6 +318,26 @@ and _ ty_ =
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
   | Tneg : neg_type -> locl_phase ty_
+
+and exact =
+  | Exact
+  | Nonexact of locl_phase class_refinement
+
+and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
+
+and 'phase refined_const = {
+  rc_bound: 'phase refined_const_bound;
+  rc_is_ctx: bool;
+}
+
+and 'phase refined_const_bound =
+  | TRexact : 'phase ty -> 'phase refined_const_bound
+  | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+
+and 'phase refined_const_bounds = {
+  tr_lower: 'phase ty list;
+  tr_upper: 'phase ty list;
+}
 
 and 'phase taccess_type = 'phase ty * pos_id
 
@@ -335,6 +363,7 @@ and 'ty fun_type = {
   (* Carries through the sync/async information from the aast *)
   ft_flags: int;
   ft_ifc_decl: ifc_fun_decl;
+  ft_cross_package: cross_package_decl;
 }
 
 and 'ty possibly_enforced_ty = {
@@ -350,6 +379,12 @@ and 'ty fun_param = {
 }
 
 and 'ty fun_params = 'ty fun_param list
+
+val nonexact : exact
+
+val is_nonexact : exact -> bool
+
+val refined_const_kind_str : 'phase refined_const -> string
 
 module Flags : sig
   val get_ft_return_disposable : 'a fun_type -> bool
@@ -427,8 +462,6 @@ module Pp : sig
 
   val pp_ty_ : Format.formatter -> 'a ty_ -> unit
 
-  val pp_ty_list : Format.formatter -> 'a ty list -> unit
-
   val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
   val pp_possibly_enforced_ty :
@@ -446,13 +479,13 @@ module Pp : sig
 
   val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
 
-  val pp_fun_params : Format.formatter -> 'a ty fun_params -> unit
-
   val show_decl_ty : decl_ty -> string
 
   val show_locl_ty : locl_ty -> string
 
   val pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit
+
+  val pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit
 end
 
 include module type of Pp
@@ -484,6 +517,14 @@ type locl_fun_param = locl_ty fun_param
 type decl_fun_params = decl_ty fun_params
 
 type locl_fun_params = locl_ty fun_params
+
+type decl_class_refinement = decl_phase class_refinement
+
+type locl_class_refinement = locl_phase class_refinement
+
+type decl_refined_const = decl_phase refined_const
+
+type locl_refined_const = locl_phase refined_const
 
 type has_member = {
   hm_name: Nast.sid;
@@ -534,14 +575,54 @@ type destructure = {
 }
 [@@deriving show]
 
+(* A can_index constraint represents the ability to do an array index operation.
+ * We should have t <: { ci_key; ci_shape; ci_val } when t is a type that supports
+ * being index with a value of type ci_key, and will return a value of ci_val. The
+ * ci_shape field is necessary because shapes (and tuples) are required to be
+ * indexed with certain literals, and so in those cases it is not sufficient to
+ * record simply the type of the index.
+ *)
+type can_index = {
+  ci_key: locl_ty;
+  ci_shape: tshape_field_name option;
+  ci_val: locl_ty;
+  ci_expr_pos: Pos.t;
+  ci_index_pos: Pos.t;
+}
+[@@deriving show]
+
+(* A can_traverse represents the ability to do a foreach over a certain type.
+   We should have t <: {ct_key; ct_val; ct_is_await} when type t supports foreach
+   and doing the foreack will bind values of type ct_val, and optionally bind keys of
+   type ct_key. *)
+type can_traverse = {
+  ct_key: locl_ty option;
+  ct_val: locl_ty;
+  ct_is_await: bool;
+  ct_reason: Reason.t;
+}
+[@@deriving show]
+
+type has_type_member = {
+  htm_id: string;
+  htm_lower: locl_ty;
+  htm_upper: locl_ty;
+}
+[@@deriving show]
+
 (* = Reason.t * constraint_type_ *)
 type constraint_type [@@deriving show]
 
 type constraint_type_ =
   | Thas_member of has_member
-  (* The type of a list destructuring assignment.
-   * Implements valid destructuring operations via subtyping *)
+  | Thas_type_member of has_type_member
+      (** [Thas_type_member('T',lo,hi)] is a supertype of all concrete class
+          types that have a type member [::T] satisfying [lo <: T <: hi] *)
+  | Tcan_index of can_index
+  | Tcan_traverse of can_traverse
   | Tdestructure of destructure
+      (** The type of a list destructuring assignment.
+          Implements valid destructuring operations via subtyping. *)
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
 [@@deriving show]

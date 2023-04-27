@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/unit-cache.h"
 
@@ -67,7 +66,6 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
 
 #ifdef ENABLE_EXTENSION_MYSQL
@@ -77,6 +75,7 @@
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
+#include <folly/json.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 
@@ -284,7 +283,7 @@ Optional<DumpFile> dump_file(const char* name) {
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
-  transport->addHeader("Content-Type", "text/plain");
+  transport->addHeader("Content-Type", "text/plain; charset=utf-8");
   std::string cmd = transport->getCommand();
 
   do {
@@ -382,7 +381,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/invalidate-units: remove specified files from the unit cache\n"
         "    path           absolute path of files to invalidate\n"
 
-        "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
         "/relocate:        relocate translations\n"
         "    random        optional, default false, relocate random subset\n"
         "       all        optional, default false, relocate all translations\n"
@@ -405,10 +403,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcaddr:       show addresses of translation cache sections\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
-        "/vm-namedentities:show size of the NamedEntityTable\n"
-        "/proxy:           set up request proxy\n"
-        "    origin        URL to proxy requests to\n"
-        "    percentage    percentage of requests to proxy\n"
+        "/vm-namedentities:show combined size of the NamedType and\n"
+        "                  NamedFunc tables\n"
         "/load-factor:     get or set load factor\n"
         "    set           optional, set new load factor (default 1.0,\n"
         "                  valid range [-1.0, 10.0])\n"
@@ -567,7 +563,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::Info("Got admin port prepare-to-stop request from %s",
                    transport->getRemoteHost());
       MemInfo info, newInfo;
-      Process::GetMemoryInfo(info);
+      Process::GetMemoryInfo(info, RO::EvalMemInfoCheckCgroup2);
       HttpServer::PrepareToStop();
 
       // We may consider purge_all() here, too.  But since requests
@@ -581,7 +577,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       // t.detach();
 
       transport->sendString("OK\n");
-      Process::GetMemoryInfo(newInfo);
+      Process::GetMemoryInfo(newInfo, RO::EvalMemInfoCheckCgroup2);
       Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
                     info.freeMb, info.cachedMb, info.buffersMb,
                     newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);
@@ -753,15 +749,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleVMRequest(cmd, transport)) {
       break;
     }
-    if (cmd == "proxy") {
-      handleProxyRequest(cmd, transport);
-      break;
-    }
-
-    if (cmd == "statcache-clear") {
-      StatCache::clearCache();
-      break;
-    }
 
     if (cmd == "pcre-cache-size") {
       std::ostringstream size;
@@ -777,12 +764,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       } else {
         transport->sendString("Unable to mkdir or file already exists.\n");
       }
-      break;
-    }
-
-    if (cmd == "start-stacktrace-profiler") {
-      enable_stacktrace_profiler = true;
-      transport->sendString("OK\n");
       break;
     }
 
@@ -843,7 +824,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "ini-get-all") {
-      auto out = IniSetting::GetAllAsJSON();
+      auto out = folly::toJson(IniSetting::GetAllAsDynamic());
       transport->sendString(out.c_str());
       break;
     }
@@ -1061,7 +1042,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
        out << folly::format("{} \"{}\":{}\n", first ? "" : ",", name, value);
        first = false;
     };
-    appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
+
+    auto const arena = get_swappable_readonly_arena();
+    appendStat("swappable-roarena-capac", arena ? arena->capacity() : 0);
     appendStat("hhbc-size", g_hhbc_size->getValue());
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
@@ -1070,8 +1053,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("fixups", jit::FixupMap::size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::maxFuncIdNum());
-    appendStat("named-entities", NamedEntity::tableSize());
-    for (auto& pair : NamedEntity::tableStats()) {
+    appendStat("named-entities", namedEntityTableSize());
+    for (auto& pair : namedEntityStats()) {
       appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);
     }
     appendStat("static-strings", makeStaticStringCount());
@@ -1419,7 +1402,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-namedentities") {
     std::ostringstream result;
-    result << NamedEntity::tableSize();
+    result << namedEntityTableSize();
     transport->sendString(result.str());
     return true;
   }
@@ -1434,21 +1417,6 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   return false;
 }
 
-void AdminRequestHandler::handleProxyRequest(const std::string& /*cmd*/,
-                                             Transport* transport) {
-  try {
-    auto const percentStr = transport->getParam("percentage");
-    auto const percent    = percentStr.empty() ? 0 : folly::to<int>(percentStr);
-    if (percent < 0 || percent > 100) {
-      throw std::range_error("must be in [0, 100]");
-    }
-
-    setProxyOriginPercentage(transport->getParam("origin"), percent);
-    transport->sendString("Origin and percentage updated");
-  } catch (const std::range_error& re) {
-    transport->sendString(folly::sformat("Invalid percentage: {}", re.what()));
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Dump cache content

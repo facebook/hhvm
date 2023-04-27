@@ -22,7 +22,6 @@
 #include <vector>
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/hash/Hash.h>
 
 #include "hphp/runtime/ext/facts/attribute-argument-map.h"
@@ -34,15 +33,15 @@
 namespace HPHP {
 namespace Facts {
 
-template <typename Key> struct AttributeMap {
+template <typename Key>
+struct AttributeMap {
   using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
 
   using TypeDefs = typename KeyToAttrMap::Keys;
   using Attrs = typename KeyToAttrMap::Values;
 
   explicit AttributeMap(std::shared_ptr<PathVersions> versions)
-      : m_attrMap{std::move(versions)} {
-  }
+      : m_attrMap{std::move(versions)} {}
 
   /**
    * Returns the attributes present in the map, or `nullptr` if the map needs
@@ -71,7 +70,8 @@ template <typename Key> struct AttributeMap {
    * Fill the map with `keysFromDB` and return a complete set of keys.
    */
   TypeDefs getKeysWithAttribute(
-      Symbol<SymKind::Type> attr, std::vector<Key> keysFromDB) {
+      Symbol<SymKind::Type> attr,
+      std::vector<Key> keysFromDB) {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
@@ -86,8 +86,9 @@ template <typename Key> struct AttributeMap {
     m_attrMap.setValuesForKey(std::move(key), std::move(attrs));
   }
 
-  const std::vector<folly::dynamic>*
-  getAttributeArgs(Key key, Symbol<SymKind::Type> attr) const {
+  const std::vector<folly::dynamic>* getAttributeArgs(
+      Key key,
+      Symbol<SymKind::Type> attr) const {
     return m_attrArgs.getAttributeArgs(key, attr);
   }
 

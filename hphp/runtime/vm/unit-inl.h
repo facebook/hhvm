@@ -143,6 +143,19 @@ inline bool Unit::hasCacheRef() const {
   return getExtended()->m_cacheRefCount > 0;
 }
 
+inline Unit* Unit::nextCachedByHash() const {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  return getExtended()->m_nextCachedByHash.load(std::memory_order_acquire);
+}
+
+inline void Unit::setNextCachedByHash(Unit* u) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  assertx(!u || u->sha1() == sha1());
+  return getExtended()->m_nextCachedByHash.store(u, std::memory_order_release);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Idle unit reaping
 
@@ -181,21 +194,32 @@ Unit::getLastTouch() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Litstrs and NamedEntitys.
+// Litstrs, NamedTypes, and NamedFuncs.
 
 inline size_t Unit::numLitstrs() const {
   return m_litstrs.size();
 }
 
-inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
-  return lookupNamedEntityPairId(id).second;
+inline const NamedType* Unit::lookupNamedTypeId(Id id) const {
+  return lookupNamedTypePairId(id).second;
 }
 
-inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
+inline const NamedFunc* Unit::lookupNamedFuncId(Id id) const {
+  return lookupNamedFuncPairId(id).second;
+}
+
+inline NamedTypePair Unit::lookupNamedTypePairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);
   assertx(name->data()[0] != '\\');
-  return { name, NamedEntity::get(name) };
+  return { name, NamedType::get(name) };
+}
+
+inline NamedFuncPair Unit::lookupNamedFuncPairId(Id id) const {
+  auto const name = lookupLitstrId(id);
+  assertx(name);
+  assertx(name->data()[0] != '\\');
+  return { name, NamedFunc::get(name) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,10 +232,21 @@ inline size_t Unit::numArrays() const {
 ///////////////////////////////////////////////////////////////////////////////
 // PreClasses
 
-inline PreClass* Unit::lookupPreClassId(Id id) const {
-  assertx(id < Id(m_preClasses.size()));
-  return m_preClasses[id].get();
+inline PreClass* Unit::lookupPreClass(const StringData* name) const {
+  auto const it = m_nameToPreClass.find(name);
+  return it == m_nameToPreClass.end() ? nullptr : it->second.get();
 }
+
+inline folly::Range<PreClassPtr*> Unit::preclasses() {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Metadata
 
 inline const Constant* Unit::lookupConstantId(Id id) const {
   assertx(id < Id(m_constants.size()));
@@ -226,14 +261,6 @@ inline const Module* Unit::lookupModuleId(Id id) const {
 inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
   assertx(id < Id(m_typeAliases.size()));
   return &m_typeAliases[id];
-}
-
-inline folly::Range<PreClassPtr*> Unit::preclasses() {
-  return { m_preClasses.data(), m_preClasses.size() };
-}
-
-inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
-  return { m_preClasses.data(), m_preClasses.size() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

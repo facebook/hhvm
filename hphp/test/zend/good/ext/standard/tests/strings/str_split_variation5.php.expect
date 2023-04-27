@@ -1,0 +1,59 @@
+*** Testing str_split() : heredoc strings as 'str' argument ***
+-- Iteration 1 --
+vec(1) {
+  string(0) ""
+}
+-- Iteration 2 --
+vec(1) {
+  string(0) ""
+}
+-- Iteration 3 --
+vec(1) {
+  string(1) "a"
+}
+-- Iteration 4 --
+vec(3) {
+  string(10) "This is si"
+  string(10) "mple hered"
+  string(9) "oc string"
+}
+-- Iteration 5 --
+vec(6) {
+  string(10) "This is to"
+  string(10) " check str"
+  string(10) "_split
+fun"
+  string(10) "ction with"
+  string(10) " multiline"
+  string(8) "
+heredoc"
+}
+-- Iteration 6 --
+vec(4) {
+  string(10) "This check"
+  string(10) "s heredoc "
+  string(10) "with $, %,"
+  string(9) " &, chars"
+}
+-- Iteration 7 --
+vec(4) {
+  string(10) "This check"
+  string(10) "s	 str_spl"
+  string(10) "it()
+Escap"
+  string(7) "echars"
+}
+-- Iteration 8 --
+vec(8) {
+  string(10) ""To check "
+  string(10) "" in hered"
+  string(10) "oc"
+I'm su"
+  string(10) "re it'll w"
+  string(10) "ork also w"
+  string(10) "ith \
+whic"
+  string(10) "h is singl"
+  string(7) "e slash"
+}
+Done

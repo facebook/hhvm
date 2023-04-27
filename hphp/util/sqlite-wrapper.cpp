@@ -105,6 +105,8 @@ SQLite SQLite::connect(const char* path, OpenMode mode) {
       case OpenMode::ReadOnly:
         return SQLITE_OPEN_READONLY;
       case OpenMode::ReadWrite:
+        return SQLITE_OPEN_READWRITE;
+      case OpenMode::ReadWriteCreate:
         return SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
     }
     not_reached();
@@ -320,6 +322,7 @@ SQLiteStmt::SQLiteStmt(SQLite& db, const std::string_view sql) {
 
 SQLiteQuery SQLiteStmt::query() noexcept {
   assertx(!m_queryExists);
+  assertx(m_stmt != nullptr);
   m_queryExists = true;
   return SQLiteQuery{*this};
 }
@@ -488,6 +491,18 @@ Optional<const std::string_view> SQLiteQuery::getNullableString(
     return {};
   }
   return {getString(iCol)};
+}
+
+std::string_view SQLite::openModeName(SQLite::OpenMode mode) noexcept {
+  switch(mode) {
+    case SQLite::OpenMode::ReadOnly:
+      return "READ";
+    case SQLite::OpenMode::ReadWrite:
+      return "READ/WRITE";
+    case SQLite::OpenMode::ReadWriteCreate:
+      return "READ/WRITE/CREATE";
+  }
+  not_reached();
 }
 
 SQLiteQuery::SQLiteQuery(SQLiteStmt& stmt) : m_stmt{&stmt} {}

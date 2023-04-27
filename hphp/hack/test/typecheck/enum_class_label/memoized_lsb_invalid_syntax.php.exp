@@ -1,0 +1,2 @@
+File "memoized_lsb_invalid_syntax.php", line 4, characters 18-22:
+The first argument to `__MemoizeLSB` must be a label, e.g. `#KeyedByIC`. (Parsing[1002])

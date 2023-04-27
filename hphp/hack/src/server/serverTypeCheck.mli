@@ -73,6 +73,7 @@ val type_check :
 
 val print_defs : string -> ('a * string) list -> unit
 
-val print_fast_pos : (('a * string) list * ('b * string) list) SMap.t -> unit
+val print_defs_per_file_pos :
+  (('a * string) list * ('b * string) list) SMap.t -> unit
 
 val print_fast : (SSet.t * SSet.t) SMap.t -> unit

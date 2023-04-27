@@ -98,7 +98,7 @@ let used_variables_visitor =
      * (We do still count operator-assignments) *)
     method! on_expr acc ((_, _, e_) as e) =
       match e_ with
-      | Binop (Ast_defs.Eq None, e1, e2) ->
+      | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
         let (_, not_vars) = List.partition_map (unpack_lvals e1) ~f:get_lvar in
         let acc = List.fold_left ~f:this#on_expr ~init:acc not_vars in
         this#on_expr acc e2
@@ -177,8 +177,8 @@ let sequence_visitor ~require_used used_vars =
       ~f:
         begin
           fun env1 env2 ->
-          check_unsequenced env1 env2;
-          merge env1 env2
+            check_unsequenced env1 env2;
+            merge env1 env2
         end
       ~init:tracking_env
   in
@@ -201,7 +201,7 @@ let sequence_visitor ~require_used used_vars =
       (* Assignment. This is pretty hairy because of list(...)
        * destructuring and the treatment necessary to allow
        * code like '$x = $x + 1'. *)
-      | Binop (Ast_defs.Eq _, e1, e2) ->
+      | Binop Aast.{ bop = Ast_defs.Eq _; lhs = e1; rhs = e2 } ->
         (* Unpack any list(...) destructuring and separate out locals
          * we are assigning to from other lvals. *)
         let (lvars, lval_exprs) =
@@ -236,21 +236,25 @@ let sequence_visitor ~require_used used_vars =
       (* leave && and || sequenced before making all
        * the other binops unsequenced *)
       | Binop
-          ((Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion), _, _)
-        ->
+          Aast.
+            {
+              bop =
+                Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion;
+              _;
+            } ->
         parent#on_expr env e
       (* These operations have unsequenced subexpressions. *)
-      | Binop (_, e1, e2)
+      | Binop Aast.{ lhs = e1; rhs = e2; _ }
       | Obj_get (e1, e2, _, _)
       | Array_get (e1, Some e2) ->
         this#check_unsequenced_exprs env e1 e2
-      | Efun (f, idl)
+      | Efun { ef_fun = f; ef_use = idl; _ }
       | Lfun (f, idl) ->
         let nb = f.f_body in
         (* Ignore the current environment and start fresh. *)
         let _acc = this#on_block empty_env nb.fb_ast in
         (* we use all the variables we are capturing *)
-        List.fold_left ~f:use_local ~init:env idl
+        List.fold_left ~f:(fun acc (_, id) -> use_local acc id) ~init:env idl
       | _ -> parent#on_expr env e
 
     method! on_field env (e1, e2) = this#check_unsequenced_exprs env e1 e2

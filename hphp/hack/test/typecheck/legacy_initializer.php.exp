@@ -1,4 +1,4 @@
 File "legacy_initializer.php", line 22, characters 7-29:
-Please add a type hint (Naming[2035])
-File "legacy_initializer.php", line 22, characters 7-29:
 Please add a type hint `const SomeType gconstWithoutHintNested` (Naming[2001])
+File "legacy_initializer.php", line 22, characters 7-29:
+Please add a type hint (Naming[2035])

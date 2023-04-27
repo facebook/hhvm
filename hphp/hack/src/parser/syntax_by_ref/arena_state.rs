@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::has_arena::HasArena;
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::ToOcamlRep;
+
+use super::has_arena::HasArena;
 
 #[derive(Clone)]
 pub struct State<'a> {
@@ -19,7 +21,7 @@ impl<'a> HasArena<'a> for State<'a> {
 }
 
 impl ToOcamlRep for State<'_> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         ().to_ocamlrep(alloc)
     }
 }

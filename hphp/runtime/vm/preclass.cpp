@@ -33,13 +33,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
-                   Attr attrs, const StringData* parent, const StringData* docComment,
-                   Id id)
+                   Attr attrs, const StringData* parent,
+                   const StringData* docComment)
   : m_unit(unit)
-  , m_namedEntity(NamedEntity::get(n))
+  , m_namedType(NamedType::get(n))
   , m_line1(line1)
   , m_line2(line2)
-  , m_id(id)
   , m_attrs(attrs)
   , m_name(n)
   , m_parent(parent)
@@ -93,7 +92,13 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrFinal) { out << "final "; }
   if (m_attrs & AttrInterface) { out << "interface "; }
   out << m_name->data();
-  if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
+  if (m_attrs & AttrNoOverrideRegular) {
+    if (m_attrs & AttrNoOverride) {
+      out << " (no-override)";
+    } else {
+      out << " (no-override-regular)";
+    }
+  }
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_attrs & AttrIsConst) {
@@ -104,9 +109,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
-  if (m_id != -1) {
-    out << " (ID " << m_id << ")";
-  }
+  if (m_attrs & AttrNoMock) out << " (no-mock)";
   out << std::endl;
 
   for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {
@@ -175,7 +178,6 @@ PreClass::Prop::Prop(PreClass* preClass,
                      RepoAuthType repoAuthType,
                      UserAttributeMap userAttributes)
   : m_name(name)
-  , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
   , m_userType{userType}
   , m_docComment(docComment)
@@ -194,6 +196,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPublic) { out << "public "; }
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
+  if (m_attrs & AttrInternal) { out << "internal "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrIsConst) { out << "(const) "; }
   if (m_attrs & AttrTrait) { out << "(trait) "; }

@@ -8,6 +8,8 @@
  */
 
 #define CAML_NAME_SPACE
+#include <caml/alloc.h>
+#include <caml/fail.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
@@ -18,31 +20,34 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
-value hh_sysinfo_totalram(void) {
+// This function returns an option of a 9-int-member struct
+value hh_sysinfo(void) {
   CAMLparam0();
 #ifdef __linux__
-  struct sysinfo info;
-  int success = sysinfo(&info);
-  assert(success == 0 && "sysinfo() failed");
-  CAMLreturn(Val_long(info.totalram));
+  CAMLlocal2(result, some);
+  result = caml_alloc_tuple(9);
+  struct sysinfo info = {0}; // this initializes all members to 0
+  if (sysinfo(&info) != 0) {
+    caml_failwith("Failed to sysinfo()");
+  }
+  Store_field(result, 0, Val_long(info.uptime));
+  Store_field(result, 1, Val_long(info.totalram * info.mem_unit));
+  Store_field(result, 2, Val_long(info.freeram * info.mem_unit));
+  Store_field(result, 3, Val_long(info.sharedram * info.mem_unit));
+  Store_field(result, 4, Val_long(info.bufferram * info.mem_unit));
+  Store_field(result, 5, Val_long(info.totalswap * info.mem_unit));
+  Store_field(result, 6, Val_long(info.freeswap * info.mem_unit));
+  Store_field(result, 7, Val_long(info.totalhigh * info.mem_unit));
+  Store_field(result, 8, Val_long(info.freehigh * info.mem_unit));
+  some = caml_alloc(1, 0);
+  Store_field(some, 0, result);
+  CAMLreturn(some);
 #else
-  /* Not implemented */
-  CAMLreturn(Val_long(0));
-#endif
-}
-
-value hh_sysinfo_uptime(void) {
-  CAMLparam0();
-#ifdef __linux__
-  struct sysinfo info;
-  int success = sysinfo(&info);
-  assert(success == 0 && "sysinfo() failed");
-  CAMLreturn(Val_long(info.uptime));
-#else
-  /* Not implemented */
-  CAMLreturn(Val_long(0));
+  CAMLreturn(Val_int(0)); // None
 #endif
 }
 
@@ -53,6 +58,19 @@ CAMLprim value hh_sysinfo_is_apple_os(void) {
 #else
   return Val_bool(0);
 #endif
+}
+
+value hh_nproc(void) {
+  CAMLparam0();
+  CAMLlocal1(result);
+#ifdef _WIN32
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  result = Val_long(sysinfo.dwNumberOfProcessors);
+#else
+  result = Val_long(sysconf(_SC_NPROCESSORS_ONLN));
+#endif
+  CAMLreturn(result);
 }
 
 /**

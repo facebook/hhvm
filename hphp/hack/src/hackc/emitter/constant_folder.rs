@@ -2,21 +2,27 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use class_expr::ClassExpr;
+use std::collections::hash_map::RandomState;
+use std::fmt;
+
 use env::emitter::Emitter;
-use ffi::{Pair, Str};
+use env::ClassExpr;
+use ffi::Str;
+use hhbc::DictEntry;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use naming_special_names_rust::{math, members, special_functions, typehints};
-use options::HhvmFlags;
-use oxidized::{
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast, ast_defs,
-    pos::Pos,
-};
-use std::{collections::hash_map::RandomState, fmt};
+use naming_special_names_rust::math;
+use naming_special_names_rust::members;
+use naming_special_names_rust::typehints;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -97,17 +103,13 @@ fn class_const_to_typed_value<'arena, 'decl>(
             emitter,
             false,
             true,
-            &ast_scope::Scope::toplevel(),
+            &ast_scope::Scope::default(),
             cid,
         );
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             let classid =
                 hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
-            if emitter.options().emit_class_pointers() == 2 {
-                return Ok(TypedValue::LazyClass(classid));
-            } else {
-                return Ok(TypedValue::String(classid));
-            }
+            return Ok(TypedValue::LazyClass(classid));
         }
     }
     Err(Error::UserDefinedConstant)
@@ -207,11 +209,7 @@ fn key_expr_to_typed_value<'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
     let tv = expr_to_typed_value(emitter, expr)?;
-    let fold_lc = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
+    let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
         TypedValue::LazyClass(_) if fold_lc => Ok(tv),
@@ -224,11 +222,7 @@ fn keyset_value_afield_to_typed_value<'arena, 'decl>(
     afield: &ast::Afield,
 ) -> Result<TypedValue<'arena>, Error> {
     let tv = value_afield_to_typed_value(emitter, afield)?;
-    let fold_lc = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
+    let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
         TypedValue::LazyClass(_) if fold_lc => Ok(tv),
@@ -269,18 +263,15 @@ fn shape_to_typed_value<'arena, 'decl>(
                     ast_defs::ShapeFieldName::SFclassConst(class_id, id) => {
                         class_const_to_typed_value(
                             emitter,
-                            &ast::ClassId(
-                                (),
-                                Pos::make_none(),
-                                ast::ClassId_::CI(class_id.clone()),
-                            ),
+                            &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
                             id,
                         )?
                     }
                 };
-                Ok((key, expr_to_typed_value(emitter, expr)?).into())
+                let value = expr_to_typed_value(emitter, expr)?;
+                Ok(DictEntry { key, value })
             })
-            .collect::<Result<Vec<Pair<_, _>>, _>>()?
+            .collect::<Result<Vec<_>, _>>()?
             .into_iter(),
     );
     Ok(TypedValue::dict(a))
@@ -304,134 +295,88 @@ pub fn expr_to_typed_value<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
-    expr_to_typed_value_(
-        e, expr, false, /*allow_maps*/
-        false, /*force_class_const*/
-    )
+    expr_to_typed_value_(e, expr, false /*allow_maps*/)
 }
 
 pub fn expr_to_typed_value_<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
     allow_maps: bool,
-    force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
-    if let Some(sl) = emitter.stack_limit.as_ref() {
-        sl.panic_if_exceeded();
-    }
-    // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    use ast::Expr_;
-    match &expr.2 {
-        Expr_::Int(s) => int_expr_to_typed_value(s),
-        Expr_::True => Ok(TypedValue::Bool(true)),
-        Expr_::False => Ok(TypedValue::Bool(false)),
-        Expr_::Null => Ok(TypedValue::Null),
-        Expr_::String(s) => string_expr_to_typed_value(emitter, s),
-        Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
-        Expr_::Call(id)
-            if (id.0.as_id()).map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
-        {
-            call_expr_to_typed_value(emitter, id)
-        }
+    stack_limit::maybe_grow(|| {
+        // TODO: ML equivalent has this as an implicit parameter that defaults to false.
+        use ast::Expr_;
+        match &expr.2 {
+            Expr_::Int(s) => int_expr_to_typed_value(s),
+            Expr_::True => Ok(TypedValue::Bool(true)),
+            Expr_::False => Ok(TypedValue::Bool(false)),
+            Expr_::Null => Ok(TypedValue::Null),
+            Expr_::String(s) => string_expr_to_typed_value(emitter, s),
+            Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
 
-        Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
-        Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
+            Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
+            Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
 
-        Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::double(std::f64::NAN)),
-        Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::double(std::f64::INFINITY)),
-        Expr_::Id(_) => Err(Error::UserDefinedConstant),
+            Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
+            Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
+            Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
-        Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
-        Expr_::Collection(x) if x.0.name().eq("keyset") => keyset_expr_to_typed_value(emitter, x),
-        Expr_::Collection(x)
-            if x.0.name().eq("dict")
-                || allow_maps
-                    && (string_utils::cmp(&(x.0).1, "Map", false, true)
-                        || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
-        {
-            dict_expr_to_typed_value(emitter, x)
-        }
-        Expr_::Collection(x)
-            if allow_maps
-                && (string_utils::cmp(&(x.0).1, "Set", false, true)
-                    || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
-        {
-            set_expr_to_typed_value(emitter, x)
-        }
-        Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
-        Expr_::ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
-            valcollection_vec_expr_to_typed_value(emitter, x)
-        }
-        Expr_::ValCollection(x) if x.0 == ast::VcKind::Keyset => {
-            valcollection_keyset_expr_to_typed_value(emitter, x)
-        }
-        Expr_::ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
-            valcollection_set_expr_to_typed_value(emitter, x)
-        }
-        Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
-        Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
-        Expr_::ClassConst(x) => class_const_expr_to_typed_value(emitter, x, force_class_const),
+            Expr_::Collection(x) if x.0.name().eq("keyset") => {
+                keyset_expr_to_typed_value(emitter, x)
+            }
+            Expr_::Collection(x)
+                if x.0.name().eq("dict")
+                    || allow_maps
+                        && (string_utils::cmp(&(x.0).1, "Map", false, true)
+                            || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
+            {
+                dict_expr_to_typed_value(emitter, x)
+            }
+            Expr_::Collection(x)
+                if allow_maps
+                    && (string_utils::cmp(&(x.0).1, "Set", false, true)
+                        || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
+            {
+                set_expr_to_typed_value(emitter, x)
+            }
+            Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
+            Expr_::ValCollection(x)
+                if x.0.1 == ast::VcKind::Vec || x.0.1 == ast::VcKind::Vector =>
+            {
+                valcollection_vec_expr_to_typed_value(emitter, x)
+            }
+            Expr_::ValCollection(x) if x.0.1 == ast::VcKind::Keyset => {
+                valcollection_keyset_expr_to_typed_value(emitter, x)
+            }
+            Expr_::ValCollection(x)
+                if x.0.1 == ast::VcKind::Set || x.0.1 == ast::VcKind::ImmSet =>
+            {
+                valcollection_set_expr_to_typed_value(emitter, x)
+            }
+            Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
+            Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
+            Expr_::ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
 
-        Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
-        ast::Expr_::As(x) if (x.1).1.is_hlike() => {
-            expr_to_typed_value_(emitter, &x.0, allow_maps, false)
+            Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
+            ast::Expr_::As(x) if (x.1).1.is_hlike() => {
+                expr_to_typed_value_(emitter, &x.0, allow_maps)
+            }
+            Expr_::Upcast(e) => expr_to_typed_value(emitter, &e.0),
+            _ => Err(Error::NotLiteral),
         }
-        _ => Err(Error::NotLiteral),
-    }
-}
-
-fn class_const_expr_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::ClassId, ast::Pstring),
-    force_class_const: bool,
-) -> Result<TypedValue<'arena>, Error> {
-    if emitter.options().emit_class_pointers() == 1 && !force_class_const {
-        Err(Error::NotLiteral)
-    } else {
-        class_const_to_typed_value(emitter, &x.0, &x.1)
-    }
-}
-
-fn call_expr_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    id: &(
-        ast::Expr,
-        Vec<ast::Targ>,
-        Vec<(ast_defs::ParamKind, ast::Expr)>,
-        Option<ast::Expr>,
-    ),
-) -> Result<TypedValue<'arena>, Error> {
-    use ast::{Expr, Expr_};
-    match id.2[..] {
-        [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::hhas_adata(
-                emitter
-                    .alloc
-                    .alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
-            ))
-        }
-        _ => Err(Error::NotLiteral),
-    }
+    })
 }
 
 fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let keys = emitter.alloc.alloc_slice_fill_iter(
         x.2.iter()
             .map(|e| {
                 expr_to_typed_value(emitter, e).and_then(|tv| match tv {
                     TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
-                    TypedValue::LazyClass(_)
-                        if emitter
-                            .options()
-                            .hhvm
-                            .flags
-                            .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
-                    {
+                    TypedValue::LazyClass(_) if emitter.options().hhbc.fold_lazy_class_keys => {
                         Ok(tv)
                     }
                     _ => Err(Error::NotLiteral),
@@ -449,7 +394,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
 fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     x: &(
-        ast::KvcKind,
+        (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
     ),
@@ -466,7 +411,7 @@ fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let values = emitter
         .alloc
@@ -480,7 +425,7 @@ fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let v: Vec<_> =
         x.2.iter()
@@ -565,14 +510,14 @@ fn float_expr_to_typed_value<'arena, 'decl>(
     s: &str,
 ) -> Result<TypedValue<'arena>, Error> {
     if s == math::INF {
-        Ok(TypedValue::double(std::f64::INFINITY))
+        Ok(TypedValue::float(std::f64::INFINITY))
     } else if s == math::NEG_INF {
-        Ok(TypedValue::double(std::f64::NEG_INFINITY))
+        Ok(TypedValue::float(std::f64::NEG_INFINITY))
     } else if s == math::NAN {
-        Ok(TypedValue::double(std::f64::NAN))
+        Ok(TypedValue::float(std::f64::NAN))
     } else {
         s.parse()
-            .map(TypedValue::double)
+            .map(TypedValue::float)
             .map_err(|_| Error::NotLiteral)
     }
 }
@@ -599,13 +544,13 @@ fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error>
 fn update_duplicates_in_map<'arena>(
     kvs: Vec<(TypedValue<'arena>, TypedValue<'arena>)>,
 ) -> impl IntoIterator<
-    Item = Pair<TypedValue<'arena>, TypedValue<'arena>>,
-    IntoIter = impl ExactSizeIterator + 'arena,
+    Item = DictEntry<'arena>,
+    IntoIter = impl Iterator<Item = DictEntry<'arena>> + ExactSizeIterator + 'arena,
 > + 'arena {
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()
-        .map(std::convert::Into::into)
+        .map(|(key, value)| DictEntry { key, value })
 }
 
 fn cast_value<'arena>(
@@ -621,7 +566,7 @@ fn cast_value<'arena>(
             } else if id == typehints::STRING {
                 cast_to_arena_str(v, alloc).map(TypedValue::string)
             } else if id == typehints::FLOAT {
-                cast_to_float(v).map(TypedValue::double)
+                cast_to_float(v).map(TypedValue::float)
             } else {
                 None
             }
@@ -640,7 +585,7 @@ fn unop_on_value<'arena>(
         ast_defs::Uop::Uplus => fold_add(v, TypedValue::Int(0)),
         ast_defs::Uop::Uminus => match v {
             TypedValue::Int(i) => Some(TypedValue::Int((-std::num::Wrapping(i)).0)),
-            TypedValue::Double(i) => Some(TypedValue::double(0.0 - i.to_f64())),
+            TypedValue::Float(i) => Some(TypedValue::float(0.0 - i.to_f64())),
             _ => None,
         },
         ast_defs::Uop::Utild => fold_bitwise_not(v),
@@ -674,7 +619,7 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     use ast::Expr_;
     match v {
         TypedValue::Int(i) => Ok(Expr_::Int(i.to_string())),
-        TypedValue::Double(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
+        TypedValue::Float(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
             f.to_f64(),
         ))),
         TypedValue::Bool(false) => Ok(Expr_::False),
@@ -685,7 +630,6 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
         TypedValue::Uninit => Err(Error::unrecoverable("value_to_expr: uninit value")),
         TypedValue::Vec(_) => Err(Error::unrecoverable("value_to_expr: vec NYI")),
         TypedValue::Keyset(_) => Err(Error::unrecoverable("value_to_expr: keyset NYI")),
-        TypedValue::HhasAdata(_) => Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
         TypedValue::Dict(_) => Err(Error::unrecoverable("value_to_expr: dict NYI")),
     }
 }
@@ -718,10 +662,10 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
                 .and_then(|v| unop_on_value(&e.0, v))
                 .map(value_to_expr_)
                 .ok(),
-            ast::Expr_::Binop(e) => expr_to_typed_value(self.emitter, &e.1)
+            ast::Expr_::Binop(binop) => expr_to_typed_value(self.emitter, &binop.lhs)
                 .and_then(|v1| {
-                    expr_to_typed_value(self.emitter, &e.2).and_then(|v2| {
-                        binop_on_values(self.emitter.alloc, &e.0, v1, v2).map(value_to_expr_)
+                    expr_to_typed_value(self.emitter, &binop.rhs).and_then(|v2| {
+                        binop_on_values(self.emitter.alloc, &binop.bop, v1, v2).map(value_to_expr_)
                     })
                 })
                 .ok(),
@@ -757,7 +701,7 @@ pub fn literals_from_exprs<'arena, 'decl>(
     }
     let ret = exprs
         .iter()
-        .map(|expr| expr_to_typed_value_(e, expr, false, true))
+        .map(|expr| expr_to_typed_value_(e, expr, false))
         .collect();
     if let Err(Error::NotLiteral) = ret {
         Err(Error::unrecoverable("literals_from_exprs: not literal"))
@@ -783,17 +727,17 @@ fn cast_to_arena_str<'a>(x: TypedValue<'a>, alloc: &'a bumpalo::Bump) -> Option<
 // and don't attempt to implement overflow-to-float semantics.
 fn fold_add<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
     match (x, y) {
-        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1.to_f64() + i2.to_f64()))
+        (TypedValue::Float(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1.to_f64() + i2.to_f64()))
         }
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) + std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1 as f64 + i2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1 as f64 + i2.to_f64()))
         }
-        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
-            Some(TypedValue::double(i1.to_f64() + i2 as f64))
+        (TypedValue::Float(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::float(i1.to_f64() + i2 as f64))
         }
         _ => None,
     }
@@ -806,8 +750,8 @@ fn fold_sub<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) - std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Double(f1), TypedValue::Double(f2)) => {
-            Some(TypedValue::double(f1.to_f64() - f2.to_f64()))
+        (TypedValue::Float(f1), TypedValue::Float(f2)) => {
+            Some(TypedValue::float(f1.to_f64() - f2.to_f64()))
         }
         _ => None,
     }
@@ -820,14 +764,14 @@ fn fold_mul<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) * std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1.to_f64() * i2.to_f64()))
+        (TypedValue::Float(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1.to_f64() * i2.to_f64()))
         }
-        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1 as f64 * i2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1 as f64 * i2.to_f64()))
         }
-        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
-            Some(TypedValue::double(i1.to_f64() * i2 as f64))
+        (TypedValue::Float(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::float(i1.to_f64() * i2 as f64))
         }
         _ => None,
     }
@@ -841,16 +785,16 @@ fn fold_div<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
             Some(TypedValue::Int(i1 / i2))
         }
         (TypedValue::Int(i1), TypedValue::Int(i2)) if i2 != 0 => {
-            Some(TypedValue::double(i1 as f64 / i2 as f64))
+            Some(TypedValue::float(i1 as f64 / i2 as f64))
         }
-        (TypedValue::Double(f1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
-            Some(TypedValue::double(f1.to_f64() / f2.to_f64()))
+        (TypedValue::Float(f1), TypedValue::Float(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::float(f1.to_f64() / f2.to_f64()))
         }
-        (TypedValue::Int(i1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
-            Some(TypedValue::double(i1 as f64 / f2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::float(i1 as f64 / f2.to_f64()))
         }
-        (TypedValue::Double(f1), TypedValue::Int(i2)) if i2 != 0 => {
-            Some(TypedValue::double(f1.to_f64() / i2 as f64))
+        (TypedValue::Float(f1), TypedValue::Int(i2)) if i2 != 0 => {
+            Some(TypedValue::float(f1.to_f64() / i2 as f64))
         }
         _ => None,
     }
@@ -916,13 +860,11 @@ pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
         TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
         TypedValue::LazyClass(_) => true,
         TypedValue::Int(i) => i != 0,
-        TypedValue::Double(f) => f.to_f64() != 0.0,
+        TypedValue::Float(f) => f.to_f64() != 0.0,
         // Empty collections cast to false if empty, otherwise true
         TypedValue::Vec(v) => !v.is_empty(),
         TypedValue::Keyset(v) => !v.is_empty(),
         TypedValue::Dict(v) => !v.is_empty(),
-        // Non-empty collections cast to true
-        TypedValue::HhasAdata(_) => true,
     }
 }
 
@@ -936,7 +878,7 @@ pub fn cast_to_int(x: TypedValue<'_>) -> Option<i64> {
         TypedValue::String(_) => None,    // not worth it
         TypedValue::LazyClass(_) => None, // not worth it
         TypedValue::Int(i) => Some(i),
-        TypedValue::Double(f) => match f.to_f64().classify() {
+        TypedValue::Float(f) => match f.to_f64().classify() {
             std::num::FpCategory::Nan | std::num::FpCategory::Infinite => {
                 Some(if f.to_f64() == f64::INFINITY {
                     0
@@ -958,7 +900,7 @@ pub fn cast_to_float(v: TypedValue<'_>) -> Option<f64> {
         TypedValue::String(_) => None,    // not worth it
         TypedValue::LazyClass(_) => None, // not worth it
         TypedValue::Int(i) => Some(i as f64),
-        TypedValue::Double(f) => Some(f.to_f64()),
+        TypedValue::Float(f) => Some(f.to_f64()),
         _ => Some(if cast_to_bool(v) { 1.0 } else { 0.0 }),
     }
 }
@@ -990,7 +932,7 @@ mod cast_tests {
 
     #[test]
     fn nan_to_int() {
-        let res = cast_to_int(TypedValue::double(std::f64::NAN)).unwrap();
+        let res = cast_to_int(TypedValue::float(std::f64::NAN)).unwrap();
         assert_eq!(res, std::i64::MIN);
     }
 }

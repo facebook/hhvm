@@ -90,13 +90,13 @@ Warning: Type-hint of 'C::p49' must be ?int (as in class A), not int in %s/redef
 
 Warning: Type-hint of 'C::p50' must be ?int (as in class A), not ?num in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p51' must be %r.?%rAlias12 (as in class A), not Alias6 in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p51' must be Alias12 (as in class A), not Alias6 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p52' must be ?Alias12 (as in class A), not ?Alias3 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p53' must be ?Alias1 (as in class A), not Alias1 in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p54' must be %r.?%rAlias12 (as in class A), not ?Alias2 in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p54' must be Alias12 (as in class A), not ?Alias2 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p55' must be ?Alias12 (as in class A), not Alias2 in %s/redefine-bad.php on line 553
 
@@ -108,7 +108,7 @@ Warning: Type-hint of 'C::p64' must be ?Enum2 (as in class A), not Enum2 in %s/r
 
 Warning: Type-hint of 'C::p65' must be ?int (as in class A), not ?arraykey in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p66' must be %r.?%rAlias13 (as in class A), not ?Enum3 in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p66' must be Alias13 (as in class A), not ?Enum3 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p67' must be ?Alias13 (as in class A), not Enum3 in %s/redefine-bad.php on line 553
 

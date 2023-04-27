@@ -1,4 +1,4 @@
-apc_add: bool(true)
+apc_add: bool(%s)
 apc_fetch: keyset(3) {
   int(1)
   int(2)

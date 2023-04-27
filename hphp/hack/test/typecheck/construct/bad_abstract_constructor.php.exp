@@ -1,4 +1,8 @@
 File "bad_abstract_constructor.php", line 9, characters 7-13:
 This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` (Typing[4047])
-File "bad_abstract_constructor.php", line 4, characters 19-29:
-Declaration is here
+  File "bad_abstract_constructor.php", line 9, characters 23-28:
+  `MyClass` uses `MyBase`
+  File "bad_abstract_constructor.php", line 7, characters 34-47:
+  `MyBase` uses `HasConstructor`
+  File "bad_abstract_constructor.php", line 4, characters 19-29:
+  The method is defined here

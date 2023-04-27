@@ -5,17 +5,19 @@
 //
 // For non-null defaults, see param_tostring_hh.php
 
+class MyObject {}
+
 class Foo {
   function bar(
     $untyped,
     mixed $m,
     string $str,
     int $i,
-    Object $o,
+    MyObject $o,
     this $thiz,
     $opt_untyped = null,
     mixed $opt_m = null,
-    Object $opt_o = null
+    MyObject $opt_o = null
   ) {
   }
 }

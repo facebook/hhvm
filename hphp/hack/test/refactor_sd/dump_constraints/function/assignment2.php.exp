@@ -1,0 +1,12 @@
+=== Sound Dynamic analysis results for assignment2.php
+Constraints for \f:
+
+Constraints for \g:
+
+Constraints for \h:
+Introduction at [10:8-11]
+Introduction at [15:8-11]
+Upcast at ?2
+[10:8-11] ⊆ ?1
+[15:8-11] ⊆ ?2
+

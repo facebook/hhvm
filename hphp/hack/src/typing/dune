@@ -27,6 +27,7 @@
  (modules
   coverage_level_defs
   type_visitor
+  class_refinement
   typing_defs
   typing_defs_core
   typing_defs_flags
@@ -56,18 +57,32 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name typing_class_types)
+ (wrapped false)
+ (modules typing_class_types)
+ (libraries
+  collections
+  decl_defs
+  pos_or_decl
+  shallow_decl_defs
+  typing_defs
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name typing_heap)
  (wrapped false)
  (modules typing_classes_heap)
  (libraries
   core_kernel
   decl
-  decl_ancestors
   decl_counters
-  decl_inheritance
+  decl_folded_class
   deferred_decl
   naming_provider
   shallow_decl_defs
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
@@ -161,7 +176,6 @@
   typing_async
   typing_attributes
   typing_debug
-  typing_deferred_members
   typing_escape
   typing_expand
   typing_exts
@@ -170,6 +184,7 @@
   typing_helpers
   typing_lenv
   typing_local_ops
+  typing_native
   typing_param
   typing_per_cont_ops
   typing_regex
@@ -187,6 +202,7 @@
   logging
   naming_special_names
   nast_check
+  package
   pcre
   procs_procs
   typing_common
@@ -208,6 +224,7 @@
  (wrapped false)
  (modules
   typing
+  typing_class
   typing_memoize
   typing_toplevel
   typing_typedef
@@ -218,9 +235,9 @@
  (name typing_wellformedness)
  (wrapped false)
  (modules
+  ancestor_route
   trait_reuse_check
   typing_extends
-  typing_inheritance
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)
@@ -260,6 +277,7 @@
   typing_logic_helpers
   typing_object_get
   typing_ops
+  typing_partial_enforcement
   typing_phase
   typing_return
   typing_solver
@@ -267,6 +285,7 @@
   typing_subtype
   typing_subtype_tconst
   typing_taccess
+  typing_type_member
   typing_union)
  (libraries
   type_mapper
@@ -275,7 +294,9 @@
   typing_env
   typing_log
   typing_utils
-  typing_visibility)
+  typing_visibility
+  decl_typedef_expand
+  lru)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -339,7 +360,12 @@
  (name typing_env)
  (wrapped false)
  (modules typing_env)
- (libraries decl_provider provider_context typing_env_types typing_log)
+ (libraries
+  decl_provider
+  provider_context
+  typing_env_types
+  typing_log
+  typing_pessimisation_deps)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -404,8 +430,8 @@
   errors
   file_info
   nast
+  substitution_mutation
   heap_global_storage
-  re_stubs
   typing_deps
   typing_toplevel)
  (preprocess
@@ -420,21 +446,25 @@
   cgroupprofiler
   core_kernel
   decl_counters
+  hh_distc_ffi
   decl_service
+  server_env
+  server_env_build
   deferred_decl
   diagnostic_pusher
   errors
   file_info
   nast
+  gc_utils
   global_options
+  hh_distc_types
   heap_global_storage
   procs_bucket
-  server_monitor
   counters
-  re_stubs
   typing
   typing_defs
   typing_deps
+  typing_pessimisation_deps
   typing_check_job
   typing_global_inference
   typing_service_api
@@ -448,5 +478,13 @@
  (wrapped false)
  (modules delta tast_typecheck)
  (libraries core_kernel typing utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name hh_distc_types)
+ (wrapped false)
+ (modules hh_distc_types)
+ (libraries errors)
  (preprocess
   (pps ppx_deriving.std)))

@@ -925,7 +925,7 @@ bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
       strcasecmp(haystack + pos, needle.c_str()) == 0) {
     return true;
   }
-  if (strcasecmp(StatCache::realpath(needle.c_str()).c_str(), haystack)
+  if (strcasecmp(realpathLibc(needle.c_str()).c_str(), haystack)
       == 0) {
     return true;
   }
@@ -950,8 +950,8 @@ bool BreakPointInfo::MatchFile(const std::string& file,
     return true;
   }
   // Perhaps file or fullPath is a symlink.
-  auto realFile = StatCache::realpath(file.c_str());
-  auto realFullPath = StatCache::realpath(fullPath.c_str());
+  auto realFile = realpathLibc(file.c_str());
+  auto realFullPath = realpathLibc(fullPath.c_str());
   if (realFile != file || realFullPath != fullPath) {
     return MatchFile(realFile, realFullPath);
   }

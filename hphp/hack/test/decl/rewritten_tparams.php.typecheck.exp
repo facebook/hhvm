@@ -1,13 +1,13 @@
-File "rewritten_tparams.php", line 11, characters 3-12:
-`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
-  File "rewritten_tparams.php", line 10, characters 2-16:
-  The local (enclosing) context provides the capability ctx $f
 File "rewritten_tparams.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
   File "rewritten_tparams.php", line 14, characters 26-28:
   Expected `int`
   File "rewritten_tparams.php", line 14, characters 14-15:
   But got `P`
+File "rewritten_tparams.php", line 11, characters 3-12:
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+  File "rewritten_tparams.php", line 10, characters 2-16:
+  The local (enclosing) context provides the capability ctx $f
 File "rewritten_tparams.php", line 22, characters 3-12:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "rewritten_tparams.php", line 21, characters 2-16:

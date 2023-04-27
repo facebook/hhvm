@@ -52,8 +52,8 @@ TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
 
     FTRACE(5, "findPredTrans: toSmash = {}   srcID = {}\n",
            inBr.toSmash(), srcID);
-    auto srcSuccOffsets = srcRec->lastSrcKey().succOffsets();
-    if (srcSuccOffsets.count(dstSK.offset())) {
+    auto srcSuccSrcKeys = srcRec->lastSrcKey().succSrcKeys();
+    if (srcSuccSrcKeys.count(dstSK)) {
       predSet.insert(srcID);
     } else {
       FTRACE(5, "findPredTrans: WARNING: incoming branch with impossible "
@@ -117,6 +117,10 @@ TransCFG::TransCFG(FuncId funcId,
   for (auto const dstId : nodes()) {
     auto const rec = profData->transRec(dstId);
     auto const dstSK = rec->srcKey();
+
+    // Make sure we start a new translation at each FuncEntry.
+    if (dstSK.funcEntry()) continue;
+
     auto const dstBlock = rec->region()->entry();
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
     TransIDSet predIDs = findPredTrans(*rec->region(), profData);
@@ -186,6 +190,20 @@ TransCFG::Node::~Node() {
   }
 }
 
+void TransCFG::Node::removeInArc(Arc* arc) {
+  auto pos = std::find(m_inArcs.begin(), m_inArcs.end(), arc);
+  assertx(pos != m_inArcs.end());
+  *pos = m_inArcs.back();
+  m_inArcs.pop_back();
+}
+
+void TransCFG::Node::removeOutArc(Arc* arc) {
+  auto pos = std::find(m_outArcs.begin(), m_outArcs.end(), arc);
+  assertx(pos != m_outArcs.end());
+  *pos = m_outArcs.back();
+  m_outArcs.pop_back();
+}
+
 void TransCFG::addNode(TransID id, int64_t weight) {
   auto const idx = m_transIds.size();
   m_transIds.push_back(id);
@@ -214,6 +232,26 @@ void TransCFG::addArc(TransID srcId, TransID dstId, int64_t weight) {
   Arc* arc = new Arc(srcId, dstId, weight);
   m_nodeInfo[srcIdx].addOutArc(arc);
   m_nodeInfo[dstIdx].addInArc(arc);
+}
+
+void TransCFG::removeArc(TransID srcId, TransID dstId) {
+  assertx(hasNode(srcId));
+  assertx(hasNode(dstId));
+  auto const srcIdx = m_idToIdx[srcId];
+  auto const dstIdx = m_idToIdx[dstId];
+
+  Arc* toRemove = nullptr;
+  for (auto arc : m_nodeInfo[srcIdx].outArcs()) {
+    if (arc->dst() == dstId) {
+      toRemove = arc;
+      break;
+    }
+  }
+
+  assertx(toRemove != nullptr);
+  m_nodeInfo[srcIdx].removeOutArc(toRemove);
+  m_nodeInfo[dstIdx].removeInArc(toRemove);
+  delete toRemove;
 }
 
 bool TransCFG::hasArc(TransID srcId, TransID dstId) const {

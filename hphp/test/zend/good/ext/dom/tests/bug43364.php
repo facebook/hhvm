@@ -25,7 +25,7 @@ $xml = <<<DOC
 </root>
 DOC;
 
-$doc = new DomDocument();
+$doc = new DOMDocument();
 $doc->loadXML($xml);
 $doc->xinclude();
 

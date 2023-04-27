@@ -57,12 +57,10 @@ struct Option {
   static bool CachePHPFile;
 
   /*
-   * Autoload information for resolving parse on-demand
+   * If true, HHBBC will const fold File and Dir bytecodes to static
+   * strings (using SourceRoot).
    */
-  static hphp_fast_string_imap<std::string> AutoloadClassMap;
-  static hphp_fast_string_imap<std::string> AutoloadFuncMap;
-  static hphp_fast_string_map<std::string> AutoloadConstMap;
-  static std::string AutoloadRoot;
+  static bool ConstFoldFileBC;
 
   /*
    * Whether to generate HHBC, HHAS, or a textual dump of HHBC
@@ -92,12 +90,39 @@ struct Option {
    */
   static bool ParserAsyncCleanup;
 
+  /*
+   * If true, as an optimization, we'll assume the files have already
+   * been stored with extern_worker previously and proceed as if they
+   * had. If not (so execution fails), we'll then store them and try
+   * again. This avoids doing a lot of redundant stores in the common
+   * case.
+   */
+  static bool ParserOptimisticStore;
+
+  /*
+   * When an ActiveDeployment is specified, we disable SymbolRefs
+   * logic and only compile the requested files. This option will
+   * be used to force include SymbolRefs even when ActiveDeployment
+   * is specified.
+   */
+  static bool ForceEnableSymbolRefs;
+
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
+  static std::string ExternWorkerFeaturesFile;
   static bool ExternWorkerForceSubprocess;
   static int ExternWorkerTimeoutSecs;
   static bool ExternWorkerUseExecCache;
   static bool ExternWorkerCleanup;
+  static bool ExternWorkerUseRichClient;
+  static bool ExternWorkerUseZippyRichClient;
+  static bool ExternWorkerUseP2P;
+  static int ExternWorkerCasConnectionCount;
+  static int ExternWorkerEngineConnectionCount;
+  static int ExternWorkerAcConnectionCount;
+  static bool ExternWorkerVerboseLogging;
+  static int ExternWorkerThrottleRetries;
+  static int ExternWorkerThrottleBaseWaitMSecs;
   static std::string ExternWorkerWorkingDir;
 
 private:

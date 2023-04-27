@@ -57,9 +57,9 @@ let rec policy_occurrences pty =
     in
     on_list
       ((pol f_self, emp, pol f_pc)
-       ::
-       policy_occurrences f_ret
-       :: policy_occurrences f_exn :: List.map ~f:swap_policy_occurrences f_args)
+      :: policy_occurrences f_ret
+      :: policy_occurrences f_exn
+      :: List.map ~f:swap_policy_occurrences f_args)
   | Tcow_array { a_key; a_value; a_length; _ } ->
     on_list
       [
@@ -87,11 +87,10 @@ let rec subtype ~pos t1 t2 acc =
   let err msg = raise (SubtypeFailure (msg, t1, t2)) in
   let rec first_ok ~f msg = function
     | [] -> err msg
-    | x :: l ->
-      begin
-        try f x with
-        | SubtypeFailure (msg, _, _) -> first_ok ~f msg l
-      end
+    | x :: l -> begin
+      try f x with
+      | SubtypeFailure (msg, _, _) -> first_ok ~f msg l
+    end
   in
   match (t1, t2) with
   | (Tnull p1, Tnull p2)
@@ -176,13 +175,12 @@ let rec subtype ~pos t1 t2 acc =
     in
     let preprocess kind = function
       (* A missing field of an open shape becomes an optional field of type mixed *)
-      | None ->
-        begin
-          match kind with
-          | Open_shape sft_ty ->
-            Some { sft_optional = true; sft_policy = pbot; sft_ty }
-          | Closed_shape -> None
-        end
+      | None -> begin
+        match kind with
+        | Open_shape sft_ty ->
+          Some { sft_optional = true; sft_policy = pbot; sft_ty }
+        | Closed_shape -> None
+      end
       (* If a field is optional with type nothing, consider it missing.
           Since it has type nothing, it can never be assigned and therefore
           we do not need to consider its policy *)
@@ -314,12 +312,11 @@ let refine renv tyori pos ltyref =
       (* only store bounds that apply to the refined type and
          are from the origin type *)
       match pref with
-      | Pfree_var (var, s) when Scope.equal s ref_scope ->
-        begin
-          match pori with
-          | Pfree_var (_, s) when Scope.equal s ref_scope -> vmap
-          | _ -> SMap.add var pori vmap
-        end
+      | Pfree_var (var, s) when Scope.equal s ref_scope -> begin
+        match pori with
+        | Pfree_var (_, s) when Scope.equal s ref_scope -> vmap
+        | _ -> SMap.add var pori vmap
+      end
       | _ -> vmap
     in
     match acc with
@@ -809,7 +806,7 @@ let cow_array ~pos renv ty =
 let assign_helper
     ?(use_pc = true) ~expr ~pos renv env (lhs_ty, _, lhs_exp) rhs_pty =
   match lhs_exp with
-  | A.Lvar (_, lid) ->
+  | A.(Lvar (_, lid) | Dollardollar (_, lid)) ->
     let prefix = Local_id.to_string lid in
     let lhs_pty = Lift.ty ~prefix renv lhs_ty in
     let env = Env.set_local_type env lid lhs_pty in
@@ -869,7 +866,7 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
   let ix = int_of_exp ix_exp in
   match tuple_pty with
   | Ttuple ptys ->
-    let ptys = List.take ptys ix @ pty :: List.drop ptys (ix + 1) in
+    let ptys = List.take ptys ix @ (pty :: List.drop ptys (ix + 1)) in
     Ttuple ptys
   | _ -> fail "policy type overwrite expected a tuple"
 
@@ -879,7 +876,7 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
      $x->p[4][] = "hi";
 
    does not mutate an array cell, but the property p of
-   the object $x instead.  *)
+   the object $x instead. *)
 let rec assign
     ?(use_pc = true) ~expr ~pos renv env ((lhs_ty, _, lhs_expr_) as lhs) rhs_pty
     =
@@ -945,34 +942,33 @@ let rec assign
           arry.a_key
           arry.a_value
           arry.a_length
-      | Tshape { sh_kind; sh_fields } ->
-        begin
-          match Option.(ix_opt >>= shape_field_name renv) with
-          | Some key ->
-            (* The key can only be a literal (int, string) or class const, so
-               it is always public *)
-            let p = Env.new_policy_var renv "field" in
-            let pc = Env.get_lpc env |> PSet.elements in
-            let env =
-              Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
-            in
-            let sh_fields =
-              Typing_defs.TShapeMap.add
-                key
-                { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
-                sh_fields
-            in
-            let tshape = Tshape { sh_kind; sh_fields } in
-            let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
-            (env, false)
-          | None ->
-            Errors.add_typing_error
-              Typing_error.(
-                ifc
-                @@ Primary.Ifc.Unknown_information_flow
-                     { pos; what = "shape key" });
-            (env, true)
-        end
+      | Tshape { sh_kind; sh_fields } -> begin
+        match Option.(ix_opt >>= shape_field_name renv) with
+        | Some key ->
+          (* The key can only be a literal (int, string) or class const, so
+             it is always public *)
+          let p = Env.new_policy_var renv "field" in
+          let pc = Env.get_lpc env |> PSet.elements in
+          let env =
+            Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
+          in
+          let sh_fields =
+            Typing_defs.TShapeMap.add
+              key
+              { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
+              sh_fields
+          in
+          let tshape = Tshape { sh_kind; sh_fields } in
+          let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
+          (env, false)
+        | None ->
+          Errors.add_typing_error
+            Typing_error.(
+              ifc
+              @@ Primary.Ifc.Unknown_information_flow
+                   { pos; what = "shape key" });
+          (env, true)
+      end
       | Ttuple _ ->
         let ix =
           match ix_opt with
@@ -1132,19 +1128,25 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
   | A.String _ ->
     (* literals are public *)
     (env, Tprim (Env.new_policy_var renv "lit"))
-  | A.Binop (Ast_defs.Eq None, e1, e2) ->
-    let (env, ty2) = expr env e2 in
-    let env = assign ~expr ~pos renv env e1 ty2 in
+  | A.(Binop { bop = Ast_defs.Eq None; lhs; rhs }) ->
+    let (env, ty2) = expr env rhs in
+    let env = assign ~expr ~pos renv env lhs ty2 in
     (env, ty2)
-  | A.Binop (Ast_defs.Eq (Some op), e1, e2) ->
-    (* it is simpler to create a fake expression e1 = e1 op e2 to
+  | A.(Binop { bop = Ast_defs.Eq (Some op); lhs; rhs }) ->
+    (* it is simpler to create a fake expression lhs = lhs op rhs to
        make sure all operations (e.g., ??) are handled correctly *)
     expr
       env
       ( ety,
         epos,
-        A.Binop (Ast_defs.Eq None, e1, (ety, epos, A.Binop (op, e1, e2))) )
-  | A.Binop (Ast_defs.QuestionQuestion, e1, e2)
+        A.(
+          Binop
+            {
+              bop = Ast_defs.Eq None;
+              lhs;
+              rhs = (ety, epos, Binop { bop = op; lhs; rhs });
+            }) )
+  | A.(Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 })
   | A.Eif (e1, None, e2) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr_with_deps env (object_policy ty1) e2 in
@@ -1166,12 +1168,16 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     let ty = Lift.ty ~prefix:"eif" renv ety in
     let env = Env.acc env (L.(subtype ty2 ty && subtype ty3 ty) ~pos) in
     (env, ty)
-  | A.Binop
-      ( Ast_defs.(
-          ( Plus | Minus | Star | Slash | Starstar | Percent | Ltlt | Gtgt | Xor
-          | Amp | Bar | Dot )),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            Ast_defs.(
+              ( Plus | Minus | Star | Slash | Starstar | Percent | Ltlt | Gtgt
+              | Xor | Amp | Bar | Dot ));
+          lhs = e1;
+          rhs = e2;
+        }) ->
     (* arithmetic and bitwise operations all take primitive types
        and return a primitive type; string concatenation (Dot) is
        also handled here although it might need special casing
@@ -1182,12 +1188,16 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     let env = Env.acc env (subtype ~pos ty1 ty) in
     let env = Env.acc env (subtype ~pos ty2 ty) in
     (env, ty)
-  | A.Binop
-      ( (Ast_defs.(
-           ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
-           | Gte | Cmp )) as op),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            Ast_defs.(
+              ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
+              | Gte | Cmp )) as op;
+          lhs = e1;
+          rhs = e2;
+        }) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
     let deps =
@@ -1215,45 +1225,44 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
       join_policies ~pos ~prefix:"cmp" renv env (PSet.elements deps)
     in
     (env, Tprim cmp_policy)
-  | A.Unop (op, e) ->
-    begin
-      match op with
-      (* Operators that mutate *)
-      | Ast_defs.Uincr
-      | Ast_defs.Udecr
-      | Ast_defs.Upincr
-      | Ast_defs.Updecr ->
-        (* register constraints that'd be generated if
-           e = e +/- 1 were being analyzed *)
-        let (env, tye) = expr env e in
-        let env = assign ~expr ~pos renv env e tye in
-        (env, tye)
-      (* Prim operators that don't mutate *)
-      | Ast_defs.Unot ->
-        let (env, tye) = expr env e in
-        (* use object_policy to account for both booleans
-           and null checks *)
-        let (env, not_policy) =
-          join_policies
-            ~prefix:"not"
-            ~pos
-            renv
-            env
-            (PSet.elements (object_policy tye))
-        in
-        (env, Tprim not_policy)
-      | Ast_defs.Utild
-      | Ast_defs.Uplus
-      | Ast_defs.Uminus ->
-        expr env e
-      | Ast_defs.Usilence ->
-        Errors.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "silence (@) operator" });
-        expr env e
-    end
+  | A.Unop (op, e) -> begin
+    match op with
+    (* Operators that mutate *)
+    | Ast_defs.Uincr
+    | Ast_defs.Udecr
+    | Ast_defs.Upincr
+    | Ast_defs.Updecr ->
+      (* register constraints that'd be generated if
+         e = e +/- 1 were being analyzed *)
+      let (env, tye) = expr env e in
+      let env = assign ~expr ~pos renv env e tye in
+      (env, tye)
+    (* Prim operators that don't mutate *)
+    | Ast_defs.Unot ->
+      let (env, tye) = expr env e in
+      (* use object_policy to account for both booleans
+         and null checks *)
+      let (env, not_policy) =
+        join_policies
+          ~prefix:"not"
+          ~pos
+          renv
+          env
+          (PSet.elements (object_policy tye))
+      in
+      (env, Tprim not_policy)
+    | Ast_defs.Utild
+    | Ast_defs.Uplus
+    | Ast_defs.Uminus ->
+      expr env e
+    | Ast_defs.Usilence ->
+      Errors.add_typing_error
+        Typing_error.(
+          ifc
+          @@ Primary.Ifc.Unknown_information_flow
+               { pos; what = "silence (@) operator" });
+      expr env e
+  end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, _, A.Id (_, property)), _, _) ->
     let (env, obj_ptype) = expr env obj in
@@ -1372,17 +1381,17 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     (env, ty)
   | A.Varray (_, exprs) -> cow_array_literal ~prefix:"varray" exprs
   | A.ValCollection
-      (((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind), _, exprs) ->
+      ((_, ((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind)), _, exprs) ->
     let prefix = A.show_vc_kind kind in
     cow_array_literal ~prefix exprs
-  | A.ValCollection (((A.Vector | A.Set) as kind), _, exprs) ->
+  | A.ValCollection ((_, ((A.Vector | A.Set) as kind)), _, exprs) ->
     let prefix = A.show_vc_kind kind in
     mut_array_literal ~prefix exprs
   | A.Darray (_, fields) -> cow_keyed_array_literal ~prefix:"darray" fields
-  | A.KeyValCollection (((A.Dict | A.ImmMap) as kind), _, fields) ->
+  | A.KeyValCollection ((_, ((A.Dict | A.ImmMap) as kind)), _, fields) ->
     let prefix = A.show_kvc_kind kind in
     cow_keyed_array_literal ~prefix fields
-  | A.KeyValCollection ((A.Map as kind), _, fields) ->
+  | A.KeyValCollection ((_, (A.Map as kind)), _, fields) ->
     let prefix = A.show_kvc_kind kind in
     mut_keyed_array_literal ~prefix fields
   | A.Array_get (arry, ix_opt) ->
@@ -1490,14 +1499,16 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         (env, obj_pty)
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
-  | A.Efun (fun_, captured_ids)
+  | A.Efun { A.ef_fun = fun_; ef_use = captured_ids; _ }
   | A.Lfun (fun_, captured_ids) ->
     (* weaken all the captured local variables and reset the local
        pc to create the initial continuation we'll use to check the
        lambda literal *)
     let (env, start_cont) =
       let (env, k_vars) =
-        let lids = List.map ~f:snd captured_ids |> LSet.of_list in
+        let lids =
+          List.map ~f:(fun (_, (_, id)) -> id) captured_ids |> LSet.of_list
+        in
         Env.get_locals env
         |> LMap.filter (fun lid _ -> LSet.mem lid lids)
         |> LMap.map_env
@@ -1604,7 +1615,10 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
       Typing_error.(
         ifc
         @@ Primary.Ifc.Unknown_information_flow
-             { pos; what = sprintf "expression (%s)" (Utils.expr_name e) });
+             {
+               pos;
+               what = sprintf "expression (%s)" (Aast_names_utils.expr_name e);
+             });
     (env, Lift.ty renv ety)
 
 and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
@@ -2013,7 +2027,10 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       Typing_error.(
         ifc
         @@ Primary.Ifc.Unknown_information_flow
-             { pos; what = sprintf "statement (%s)" (Utils.stmt_name s) });
+             {
+               pos;
+               what = sprintf "statement (%s)" (Aast_names_utils.stmt_name s);
+             });
     Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =
@@ -2173,9 +2190,9 @@ let analyse_callable
 let walk_tast opts decl_env ctx =
   let def = function
     | A.Fun fd ->
+      let (_, name) = fd.A.fd_name in
       let {
-        A.f_name = (_, name);
-        f_annotation = saved_env;
+        A.f_annotation = saved_env;
         f_params = params;
         f_body = body;
         f_ret = (return, _);

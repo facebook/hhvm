@@ -1,0 +1,16 @@
+File "typedef_cycle_indirect.php", line 12, characters 6-6:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycle_indirect.php", line 15, characters 10-10:
+  Cyclic use is here
+File "typedef_cycle_indirect.php", line 13, characters 6-6:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycle_indirect.php", line 12, characters 10-10:
+  Cyclic use is here
+File "typedef_cycle_indirect.php", line 14, characters 6-6:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycle_indirect.php", line 13, characters 10-10:
+  Cyclic use is here
+File "typedef_cycle_indirect.php", line 15, characters 6-6:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycle_indirect.php", line 14, characters 10-10:
+  Cyclic use is here

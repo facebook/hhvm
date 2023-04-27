@@ -1,3 +1,3 @@
 <?hh
 
-module Foobar {}
+new module Foobar {}

@@ -31,9 +31,8 @@ struct Index;
  * and free the the Unit's Funcs' bytecode. We choose to do so in order
  * to release memory as soon as possible.
  */
-std::unique_ptr<UnitEmitter> emit_unit(const Index&, php::Unit&);
+std::unique_ptr<UnitEmitter> emit_unit(Index&, php::Unit&);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

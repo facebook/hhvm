@@ -23,7 +23,7 @@ class C extends B {
     static private function static_priv() {}
 }
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function method_exists_basic_001(): void {
 $methods = varray[
     'inherit_pub', 'inherit_prot', 'inherit_priv',
     'inherit_static_pub', 'inherit_static_prot', 'inherit_static_priv',

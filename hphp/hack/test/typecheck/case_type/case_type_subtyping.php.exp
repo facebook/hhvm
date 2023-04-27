@@ -1,0 +1,24 @@
+File "case_type_subtyping.php", line 17, characters 8-11:
+Invalid argument (Typing[4110])
+  File "case_type_subtyping.php", line 6, characters 13-19:
+  Expected `CT<int>`
+  File "case_type_subtyping.php", line 17, characters 8-11:
+  But got `float`
+File "case_type_subtyping.php", line 18, characters 8-13:
+Invalid argument (Typing[4110])
+  File "case_type_subtyping.php", line 6, characters 13-19:
+  Expected `CT<int>`
+  File "case_type_subtyping.php", line 18, characters 8-13:
+  But got `string`
+File "case_type_subtyping.php", line 19, characters 8-16:
+Invalid argument (Typing[4110])
+  File "case_type_subtyping.php", line 6, characters 13-19:
+  Expected `CT<int>`
+  File "case_type_subtyping.php", line 19, characters 8-16:
+  But got `vec<null>`
+File "case_type_subtyping.php", line 20, characters 8-25:
+Invalid argument (Typing[4110])
+  File "case_type_subtyping.php", line 6, characters 13-19:
+  Expected `CT<int>`
+  File "case_type_subtyping.php", line 20, characters 8-25:
+  But got `Vector<_>`

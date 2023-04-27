@@ -1,2 +1,3 @@
 -vCheckPropTypeHints=1
 -vRuntime.Eval.CoeffectEnforcementLevels.zoned=0
+--inputs=__DIR__/thrift-defs.inc

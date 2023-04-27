@@ -61,6 +61,12 @@ SyntaxVariant::QualifiedName (QualifiedNameChildren{parts} ) => {
       ss.serialize_field("qualified_name_parts", &self.with(parts))?;
       ss.end()
 } 
+SyntaxVariant::ModuleName (ModuleNameChildren{parts} ) => {
+      let mut ss = s.serialize_struct("", 2)?;
+      ss.serialize_field("kind", "module_name")?;
+      ss.serialize_field("module_name_parts", &self.with(parts))?;
+      ss.end()
+} 
 SyntaxVariant::SimpleTypeSpecifier (SimpleTypeSpecifierChildren{specifier} ) => {
       let mut ss = s.serialize_struct("", 2)?;
       ss.serialize_field("kind", "simple_type_specifier")?;
@@ -80,12 +86,12 @@ SyntaxVariant::PrefixedStringExpression (PrefixedStringExpressionChildren{name,s
 ss.serialize_field("prefixed_string_str", &self.with(str))?;
       ss.end()
 } 
-SyntaxVariant::PrefixedCodeExpression (PrefixedCodeExpressionChildren{prefix,left_backtick,expression,right_backtick} ) => {
+SyntaxVariant::PrefixedCodeExpression (PrefixedCodeExpressionChildren{prefix,left_backtick,body,right_backtick} ) => {
       let mut ss = s.serialize_struct("", 5)?;
       ss.serialize_field("kind", "prefixed_code")?;
       ss.serialize_field("prefixed_code_prefix", &self.with(prefix))?;
 ss.serialize_field("prefixed_code_left_backtick", &self.with(left_backtick))?;
-ss.serialize_field("prefixed_code_expression", &self.with(expression))?;
+ss.serialize_field("prefixed_code_body", &self.with(body))?;
 ss.serialize_field("prefixed_code_right_backtick", &self.with(right_backtick))?;
       ss.end()
 } 
@@ -111,10 +117,11 @@ ss.serialize_field("file_attribute_specification_attributes", &self.with(attribu
 ss.serialize_field("file_attribute_specification_right_double_angle", &self.with(right_double_angle))?;
       ss.end()
 } 
-SyntaxVariant::EnumDeclaration (EnumDeclarationChildren{attribute_spec,keyword,name,colon,base,type_,left_brace,use_clauses,enumerators,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 11)?;
+SyntaxVariant::EnumDeclaration (EnumDeclarationChildren{attribute_spec,modifiers,keyword,name,colon,base,type_,left_brace,use_clauses,enumerators,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
       ss.serialize_field("kind", "enum_declaration")?;
       ss.serialize_field("enum_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("enum_modifiers", &self.with(modifiers))?;
 ss.serialize_field("enum_keyword", &self.with(keyword))?;
 ss.serialize_field("enum_name", &self.with(name))?;
 ss.serialize_field("enum_colon", &self.with(colon))?;
@@ -170,10 +177,12 @@ ss.serialize_field("enum_class_enumerator_initializer", &self.with(initializer))
 ss.serialize_field("enum_class_enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
-      let mut ss = s.serialize_struct("", 9)?;
+SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,modifiers,module_kw_opt,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 11)?;
       ss.serialize_field("kind", "alias_declaration")?;
       ss.serialize_field("alias_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("alias_modifiers", &self.with(modifiers))?;
+ss.serialize_field("alias_module_kw_opt", &self.with(module_kw_opt))?;
 ss.serialize_field("alias_keyword", &self.with(keyword))?;
 ss.serialize_field("alias_name", &self.with(name))?;
 ss.serialize_field("alias_generic_parameter", &self.with(generic_parameter))?;
@@ -194,6 +203,29 @@ ss.serialize_field("ctx_alias_as_constraint", &self.with(as_constraint))?;
 ss.serialize_field("ctx_alias_equal", &self.with(equal))?;
 ss.serialize_field("ctx_alias_context", &self.with(context))?;
 ss.serialize_field("ctx_alias_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
+SyntaxVariant::CaseTypeDeclaration (CaseTypeDeclarationChildren{attribute_spec,modifiers,case_keyword,type_keyword,name,generic_parameter,as_,bounds,equal,variants,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
+      ss.serialize_field("kind", "case_type_declaration")?;
+      ss.serialize_field("case_type_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("case_type_modifiers", &self.with(modifiers))?;
+ss.serialize_field("case_type_case_keyword", &self.with(case_keyword))?;
+ss.serialize_field("case_type_type_keyword", &self.with(type_keyword))?;
+ss.serialize_field("case_type_name", &self.with(name))?;
+ss.serialize_field("case_type_generic_parameter", &self.with(generic_parameter))?;
+ss.serialize_field("case_type_as", &self.with(as_))?;
+ss.serialize_field("case_type_bounds", &self.with(bounds))?;
+ss.serialize_field("case_type_equal", &self.with(equal))?;
+ss.serialize_field("case_type_variants", &self.with(variants))?;
+ss.serialize_field("case_type_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
+SyntaxVariant::CaseTypeVariant (CaseTypeVariantChildren{bar,type_} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "case_type_variant")?;
+      ss.serialize_field("case_type_variant_bar", &self.with(bar))?;
+ss.serialize_field("case_type_variant_type", &self.with(type_))?;
       ss.end()
 } 
 SyntaxVariant::PropertyDeclaration (PropertyDeclarationChildren{attribute_spec,modifiers,type_,declarators,semicolon} ) => {
@@ -361,33 +393,6 @@ SyntaxVariant::ClassishBody (ClassishBodyChildren{left_brace,elements,right_brac
       ss.serialize_field("classish_body_left_brace", &self.with(left_brace))?;
 ss.serialize_field("classish_body_elements", &self.with(elements))?;
 ss.serialize_field("classish_body_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
-SyntaxVariant::TraitUsePrecedenceItem (TraitUsePrecedenceItemChildren{name,keyword,removed_names} ) => {
-      let mut ss = s.serialize_struct("", 4)?;
-      ss.serialize_field("kind", "trait_use_precedence_item")?;
-      ss.serialize_field("trait_use_precedence_item_name", &self.with(name))?;
-ss.serialize_field("trait_use_precedence_item_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_precedence_item_removed_names", &self.with(removed_names))?;
-      ss.end()
-} 
-SyntaxVariant::TraitUseAliasItem (TraitUseAliasItemChildren{aliasing_name,keyword,modifiers,aliased_name} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "trait_use_alias_item")?;
-      ss.serialize_field("trait_use_alias_item_aliasing_name", &self.with(aliasing_name))?;
-ss.serialize_field("trait_use_alias_item_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_alias_item_modifiers", &self.with(modifiers))?;
-ss.serialize_field("trait_use_alias_item_aliased_name", &self.with(aliased_name))?;
-      ss.end()
-} 
-SyntaxVariant::TraitUseConflictResolution (TraitUseConflictResolutionChildren{keyword,names,left_brace,clauses,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
-      ss.serialize_field("kind", "trait_use_conflict_resolution")?;
-      ss.serialize_field("trait_use_conflict_resolution_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_conflict_resolution_names", &self.with(names))?;
-ss.serialize_field("trait_use_conflict_resolution_left_brace", &self.with(left_brace))?;
-ss.serialize_field("trait_use_conflict_resolution_clauses", &self.with(clauses))?;
-ss.serialize_field("trait_use_conflict_resolution_right_brace", &self.with(right_brace))?;
       ss.end()
 } 
 SyntaxVariant::TraitUse (TraitUseChildren{keyword,names,semicolon} ) => {
@@ -585,26 +590,15 @@ ss.serialize_field("while_right_paren", &self.with(right_paren))?;
 ss.serialize_field("while_body", &self.with(body))?;
       ss.end()
 } 
-SyntaxVariant::IfStatement (IfStatementChildren{keyword,left_paren,condition,right_paren,statement,elseif_clauses,else_clause} ) => {
-      let mut ss = s.serialize_struct("", 8)?;
+SyntaxVariant::IfStatement (IfStatementChildren{keyword,left_paren,condition,right_paren,statement,else_clause} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "if_statement")?;
       ss.serialize_field("if_keyword", &self.with(keyword))?;
 ss.serialize_field("if_left_paren", &self.with(left_paren))?;
 ss.serialize_field("if_condition", &self.with(condition))?;
 ss.serialize_field("if_right_paren", &self.with(right_paren))?;
 ss.serialize_field("if_statement", &self.with(statement))?;
-ss.serialize_field("if_elseif_clauses", &self.with(elseif_clauses))?;
 ss.serialize_field("if_else_clause", &self.with(else_clause))?;
-      ss.end()
-} 
-SyntaxVariant::ElseifClause (ElseifClauseChildren{keyword,left_paren,condition,right_paren,statement} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
-      ss.serialize_field("kind", "elseif_clause")?;
-      ss.serialize_field("elseif_keyword", &self.with(keyword))?;
-ss.serialize_field("elseif_left_paren", &self.with(left_paren))?;
-ss.serialize_field("elseif_condition", &self.with(condition))?;
-ss.serialize_field("elseif_right_paren", &self.with(right_paren))?;
-ss.serialize_field("elseif_statement", &self.with(statement))?;
       ss.end()
 } 
 SyntaxVariant::ElseClause (ElseClauseChildren{keyword,statement} ) => {
@@ -1381,6 +1375,38 @@ ss.serialize_field("closure_parameter_readonly", &self.with(readonly))?;
 ss.serialize_field("closure_parameter_type", &self.with(type_))?;
       ss.end()
 } 
+SyntaxVariant::TypeRefinement (TypeRefinementChildren{type_,keyword,left_brace,members,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
+      ss.serialize_field("kind", "type_refinement")?;
+      ss.serialize_field("type_refinement_type", &self.with(type_))?;
+ss.serialize_field("type_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("type_refinement_left_brace", &self.with(left_brace))?;
+ss.serialize_field("type_refinement_members", &self.with(members))?;
+ss.serialize_field("type_refinement_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::TypeInRefinement (TypeInRefinementChildren{keyword,name,type_parameters,constraints,equal,type_} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
+      ss.serialize_field("kind", "type_in_refinement")?;
+      ss.serialize_field("type_in_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("type_in_refinement_name", &self.with(name))?;
+ss.serialize_field("type_in_refinement_type_parameters", &self.with(type_parameters))?;
+ss.serialize_field("type_in_refinement_constraints", &self.with(constraints))?;
+ss.serialize_field("type_in_refinement_equal", &self.with(equal))?;
+ss.serialize_field("type_in_refinement_type", &self.with(type_))?;
+      ss.end()
+} 
+SyntaxVariant::CtxInRefinement (CtxInRefinementChildren{keyword,name,type_parameters,constraints,equal,ctx_list} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
+      ss.serialize_field("kind", "ctx_in_refinement")?;
+      ss.serialize_field("ctx_in_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("ctx_in_refinement_name", &self.with(name))?;
+ss.serialize_field("ctx_in_refinement_type_parameters", &self.with(type_parameters))?;
+ss.serialize_field("ctx_in_refinement_constraints", &self.with(constraints))?;
+ss.serialize_field("ctx_in_refinement_equal", &self.with(equal))?;
+ss.serialize_field("ctx_in_refinement_ctx_list", &self.with(ctx_list))?;
+      ss.end()
+} 
 SyntaxVariant::ClassnameTypeSpecifier (ClassnameTypeSpecifierChildren{keyword,left_angle,type_,trailing_comma,right_angle} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "classname_type_specifier")?;
@@ -1539,14 +1565,50 @@ ss.serialize_field("enum_class_label_hash", &self.with(hash))?;
 ss.serialize_field("enum_class_label_expression", &self.with(expression))?;
       ss.end()
 } 
-SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,keyword,name,left_brace,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
+SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,new_keyword,module_keyword,name,left_brace,exports,imports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 9)?;
       ss.serialize_field("kind", "module_declaration")?;
       ss.serialize_field("module_declaration_attribute_spec", &self.with(attribute_spec))?;
-ss.serialize_field("module_declaration_keyword", &self.with(keyword))?;
+ss.serialize_field("module_declaration_new_keyword", &self.with(new_keyword))?;
+ss.serialize_field("module_declaration_module_keyword", &self.with(module_keyword))?;
 ss.serialize_field("module_declaration_name", &self.with(name))?;
 ss.serialize_field("module_declaration_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_declaration_exports", &self.with(exports))?;
+ss.serialize_field("module_declaration_imports", &self.with(imports))?;
 ss.serialize_field("module_declaration_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::ModuleExports (ModuleExportsChildren{exports_keyword,left_brace,exports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
+      ss.serialize_field("kind", "module_exports")?;
+      ss.serialize_field("module_exports_exports_keyword", &self.with(exports_keyword))?;
+ss.serialize_field("module_exports_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_exports_exports", &self.with(exports))?;
+ss.serialize_field("module_exports_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::ModuleImports (ModuleImportsChildren{imports_keyword,left_brace,imports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
+      ss.serialize_field("kind", "module_imports")?;
+      ss.serialize_field("module_imports_imports_keyword", &self.with(imports_keyword))?;
+ss.serialize_field("module_imports_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_imports_imports", &self.with(imports))?;
+ss.serialize_field("module_imports_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::ModuleMembershipDeclaration (ModuleMembershipDeclarationChildren{module_keyword,name,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "module_membership_declaration")?;
+      ss.serialize_field("module_membership_declaration_module_keyword", &self.with(module_keyword))?;
+ss.serialize_field("module_membership_declaration_name", &self.with(name))?;
+ss.serialize_field("module_membership_declaration_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
+SyntaxVariant::PackageExpression (PackageExpressionChildren{keyword,name} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "package_expression")?;
+      ss.serialize_field("package_expression_keyword", &self.with(keyword))?;
+ss.serialize_field("package_expression_name", &self.with(name))?;
       ss.end()
 } 
 

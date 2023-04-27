@@ -76,7 +76,7 @@ class MessageFormatter {
    */
   public static function formatMessage(string $locale,
                                        string $pattern,
-                                       darray $args): mixed {
+                                       darray<arraykey, mixed> $args): mixed {
     $fmt = new MessageFormatter($locale, $pattern);
     return $fmt->format($args);
   }
@@ -89,7 +89,7 @@ class MessageFormatter {
    * @return string - The formatted string, or FALSE if an error occurred
    */
   <<__Native>>
-  public function format(darray $args): mixed;
+  public function format(darray<arraykey, mixed> $args): mixed;
 
   /**
    * Get the error code from last operation
@@ -203,8 +203,10 @@ function msgfmt_create(string $locale,
  */
 function msgfmt_format_message(string $locale,
                                string $pattern,
-                               darray $args): string {
-  return MessageFormatter::formatMessage($locale, $pattern, $args);
+                               darray<arraykey, mixed> $args): string {
+  return HH\FIXME\UNSAFE_CAST<mixed, string>(
+    MessageFormatter::formatMessage($locale, $pattern, $args)
+  );
 }
 
 /**
@@ -216,7 +218,7 @@ function msgfmt_format_message(string $locale,
  * @return string - The formatted string, or FALSE if an error occurred
  */
 function msgfmt_format(MessageFormatter $fmt,
-                       darray $args): mixed {
+                       darray<arraykey, mixed> $args): mixed {
   return $fmt->format($args);
 }
 

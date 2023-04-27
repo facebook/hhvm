@@ -16,7 +16,7 @@ class C {
 }
 
 class D {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_basic_001(): void {
 echo "*** Testing get_class_methods() : basic functionality ***\n";
 
 echo "Argument is class name:\n";

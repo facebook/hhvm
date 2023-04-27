@@ -32,7 +32,7 @@ type native_load_result = {
 type saved_state_handle = {
   saved_state_for_rev: Hg.rev;
   saved_state_everstore_handle: string;
-  watchman_mergebase: ServerMonitorUtils.watchman_mergebase option;
+  watchman_mergebase: MonitorUtils.watchman_mergebase option;
 }
 
 type error = unit
@@ -52,7 +52,7 @@ val cached_state :
   ?saved_state_handle:saved_state_handle ->
   config_hash:string ->
   rev:Hg.rev ->
-  (Hg.rev * string * ServerMonitorUtils.watchman_mergebase option) option
+  (Hg.rev * string * MonitorUtils.watchman_mergebase option) option
 
 val fetch_saved_state :
   load_64bit:bool ->

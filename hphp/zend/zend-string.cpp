@@ -36,9 +36,9 @@
 namespace HPHP {
 
 int string_copy(char *dst, const char *src, int siz) {
-  register char *d = dst;
-  register const char *s = src;
-  register size_t n = siz;
+  char *d = dst;
+  const char *s = src;
+  size_t n = siz;
 
   /* Copy as many bytes as will fit */
   if (n != 0 && --n != 0) {
@@ -308,7 +308,7 @@ static const unsigned int crc32tab[256] = {
 
 int string_crc32(const char *p, int len) {
   uint32_t crcinit = 0;
-  register int32_t crc = crcinit ^ 0xFFFFFFFF;
+  int32_t crc = crcinit ^ 0xFFFFFFFF;
   for (; len--; ++p) {
     crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF];
   }

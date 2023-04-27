@@ -121,14 +121,13 @@ let solve_chunk_group env ?range ?source_text chunk_group =
   let init_state = Solve_state.make env chunk_group rbm in
   match find_best_state env init_state with
   | Some state -> state
-  | None ->
-    begin
-      match source_text with
-      | Some s -> Solve_state.from_source env s chunk_group
-      | None ->
-        let rbm = Solve_state.rbm_broken_everywhere chunk_group in
-        Solve_state.from_rbm env rbm chunk_group
-    end
+  | None -> begin
+    match source_text with
+    | Some s -> Solve_state.from_source env s chunk_group
+    | None ->
+      let rbm = Solve_state.rbm_broken_everywhere chunk_group in
+      Solve_state.from_rbm env rbm chunk_group
+  end
 
 let find_solve_states
     (env : Env.t)

@@ -6,6 +6,7 @@ from typing import List
 
 import attr
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 FANOUT_INFORMATION_RE: re.Pattern = re.compile(r"\[fanout_information\]\s+(.*)$")
 
 

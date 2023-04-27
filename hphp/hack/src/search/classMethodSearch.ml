@@ -17,7 +17,7 @@ let query_class_methods
     let matches_query method_name =
       if String.length method_query > 0 then
         let method_name = String.lowercase method_name in
-        String_utils.is_substring method_query method_name
+        String.is_substring ~substring:method_query method_name
       else
         true
     in

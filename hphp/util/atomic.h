@@ -39,7 +39,7 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
   assert(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
          ( uintptr_t(address)                  & ~63ul) &&
         "Atomically accessed addresses may not span cache lines");
-#elif __aarch64__ || __powerpc64__
+#elif __aarch64__
   // N-byte accesses must be N-byte aligned
   assert((uintptr_t(address) & (sizeof(T) - 1)) == 0);
 #else
@@ -49,4 +49,3 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

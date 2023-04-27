@@ -1,10 +1,10 @@
 <?hh
 
 class A {
- static $a = 1;
+ public static $a = 1;
 }
  class B extends A {
- static $a = 2;
+ public static $a = 2;
 }
 
  <<__EntryPoint>>

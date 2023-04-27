@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -25,7 +26,19 @@ namespace HPHP {
 
 struct ImplicitContext {
 
-static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+////////////////////////////////////////////////////////////////////////////
+// Members
+////////////////////////////////////////////////////////////////////////////
+
+enum class State : uint8_t {
+  Value,
+  Inaccessible,
+  SoftInaccessible,
+  SoftSet,
+};
+
+// Current state of IC
+State m_state;
 
 // Combination of the instance keys
 StringData* m_memokey;
@@ -34,20 +47,40 @@ StringData* m_memokey;
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
 
-static Object setByValue(Object&&);
+// Blame of when an event happened resulting in state transition
+req::vector<const StringData*> m_blameFromSoftInaccessible;
+req::vector<const StringData*> m_blameFromSoftSet;
+
+////////////////////////////////////////////////////////////////////////////
+// Statics
+////////////////////////////////////////////////////////////////////////////
+
+static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+
+static std::string stateToString(State);
+
+static bool isStateSoft(State);
+
+static Variant getBlameVectors();
+
+static constexpr ptrdiff_t memoKeyOffset() {
+  return offsetof(ImplicitContext, m_memokey);
+}
+
+////////////////////////////////////////////////////////////////////////////
+// RAII wrappers
+////////////////////////////////////////////////////////////////////////////
 
 /*
  * RAII wrapper for saving implicit context
  */
 struct Saver {
   Saver() {
-    if (RO::EvalEnableImplicitContext) {
-      m_context = *ImplicitContext::activeCtx;
-      *ImplicitContext::activeCtx = nullptr;
-    }
+    m_context = *ImplicitContext::activeCtx;
+    *ImplicitContext::activeCtx = nullptr;
   }
   ~Saver() {
-    if (RO::EvalEnableImplicitContext) *ImplicitContext::activeCtx = m_context;
+    *ImplicitContext::activeCtx = m_context;
   }
 
 private:
@@ -57,4 +90,3 @@ private:
 };
 
 } // namespace HPHP
-

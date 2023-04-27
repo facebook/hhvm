@@ -1,0 +1,2489 @@
+'\" t
+.\"     Title: \fBmyisamchk\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYISAMCHK\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+myisamchk \- MyISAM table\-maintenance utility
+.SH "SYNOPSIS"
+.HP \w'\fBmyisamchk\ [\fR\fB\fIoptions\fR\fR\fB]\ \fR\fB\fItbl_name\fR\fR\fB\ \&.\&.\&.\fR\ 'u
+\fBmyisamchk [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fItbl_name\fR\fR\fB \&.\&.\&.\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBmyisamchk\fR
+utility gets information about your database tables or checks, repairs, or optimizes them\&.
+\fBmyisamchk\fR
+works with
+MyISAM
+tables (tables that have
+\&.MYD
+and
+\&.MYI
+files for storing data and indexes)\&.
+.PP
+You can also use the
+CHECK TABLE
+and
+REPAIR TABLE
+statements to check and repair
+MyISAM
+tables\&. See
+Section\ \&13.7.3.2, \(lqCHECK TABLE Statement\(rq, and
+Section\ \&13.7.3.5, \(lqREPAIR TABLE Statement\(rq\&.
+.PP
+The use of
+\fBmyisamchk\fR
+with partitioned tables is not supported\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBCaution\fR
+.ps -1
+.br
+.PP
+It is best to make a backup of a table before performing a table repair operation; under some circumstances the operation might cause data loss\&. Possible causes include but are not limited to file system errors\&.
+.sp .5v
+.RE
+.PP
+Invoke
+\fBmyisamchk\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fItbl_name\fR\fR\fB \&.\&.\&.\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fIoptions\fR
+specify what you want
+\fBmyisamchk\fR
+to do\&. They are described in the following sections\&. You can also get a list of options by invoking
+\fBmyisamchk \-\-help\fR\&.
+.PP
+With no options,
+\fBmyisamchk\fR
+simply checks your table as the default operation\&. To get more information or to tell
+\fBmyisamchk\fR
+to take corrective action, specify options as described in the following discussion\&.
+.PP
+\fItbl_name\fR
+is the database table you want to check or repair\&. If you run
+\fBmyisamchk\fR
+somewhere other than in the database directory, you must specify the path to the database directory, because
+\fBmyisamchk\fR
+has no idea where the database is located\&. In fact,
+\fBmyisamchk\fR
+does not actually care whether the files you are working on are located in a database directory\&. You can copy the files that correspond to a database table into some other location and perform recovery operations on them there\&.
+.PP
+You can name several tables on the
+\fBmyisamchk\fR
+command line if you wish\&. You can also specify a table by naming its index file (the file with the
+\&.MYI
+suffix)\&. This enables you to specify all tables in a directory by using the pattern
+*\&.MYI\&. For example, if you are in a database directory, you can check all the
+MyISAM
+tables in that directory like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk *\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If you are not in the database directory, you can check all the tables there by specifying the path to the directory:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \fR\fB\fI/path/to/database_dir/\fR\fR\fB*\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+You can even check all tables in all databases by specifying a wildcard with the path to the MySQL data directory:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \fR\fB\fI/path/to/datadir/*/*\fR\fR\fB\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The recommended way to quickly check all
+MyISAM
+tables is:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \-\-silent \-\-fast \fR\fB\fI/path/to/datadir/*/*\fR\fR\fB\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If you want to check all
+MyISAM
+tables and repair any that are corrupted, you can use the following command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \-\-silent \-\-force \-\-fast \-\-update\-state \e\fR
+          \fB\-\-key_buffer_size=64M \-\-myisam_sort_buffer_size=64M \e\fR
+          \fB\-\-read_buffer_size=1M \-\-write_buffer_size=1M \e\fR
+          \fB\fI/path/to/datadir/*/*\fR\fR\fB\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This command assumes that you have more than 64MB free\&. For more information about memory allocation with
+\fBmyisamchk\fR, see
+the section called \(lqMYISAMCHK MEMORY USAGE\(rq\&.
+.PP
+For additional information about using
+\fBmyisamchk\fR, see
+Section\ \&7.6, \(lqMyISAM Table Maintenance and Crash Recovery\(rq\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+\fIYou must ensure that no other program is using the tables while you are running \fR\fI\fBmyisamchk\fR\fR\&. The most effective means of doing so is to shut down the MySQL server while running
+\fBmyisamchk\fR, or to lock all tables that
+\fBmyisamchk\fR
+is being used on\&.
+.PP
+Otherwise, when you run
+\fBmyisamchk\fR, it may display the following error message:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+warning: clients are using or haven\*(Aqt closed the table properly
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This means that you are trying to check a table that has been updated by another program (such as the
+\fBmysqld\fR
+server) that hasn\*(Aqt yet closed the file or that has died without closing the file properly, which can sometimes lead to the corruption of one or more
+MyISAM
+tables\&.
+.PP
+If
+\fBmysqld\fR
+is running, you must force it to flush any table modifications that are still buffered in memory by using
+FLUSH TABLES\&. You should then ensure that no one is using the tables while you are running
+\fBmyisamchk\fR
+.PP
+However, the easiest way to avoid this problem is to use
+CHECK TABLE
+instead of
+\fBmyisamchk\fR
+to check tables\&. See
+Section\ \&13.7.3.2, \(lqCHECK TABLE Statement\(rq\&.
+.sp .5v
+.RE
+.PP
+\fBmyisamchk\fR
+supports the following options, which can be specified on the command line or in the
+[myisamchk]
+group of an option file\&. For information about option files used by MySQL programs, see
+Section\ \&4.2.2.2, \(lqUsing Option Files\(rq\&.
+.SH "MYISAMCHK GENERAL OPTIONS"
+.PP
+The options described in this section can be used for any type of table maintenance operation performed by
+\fBmyisamchk\fR\&. The sections following this one describe options that pertain only to specific operations, such as table checking or repairing\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.sp
+Display a help message and exit\&. Options are grouped by type of operation\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-HELP\fR,
+\fB\-H\fR
+.sp
+Display a help message and exit\&. Options are presented in a single list\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
+\fB\-# \fR\fB\fIdebug_options\fR\fR
+.sp
+Write a debugging log\&. A typical
+\fIdebug_options\fR
+string is
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o,/tmp/myisamchk\&.trace\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file after the global option file but (on Unix) before the user option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-group\-suffix=\fR\fB\fIstr\fR\fR
+.sp
+Read not only the usual option groups, but also groups with the usual names and a suffix of
+\fIstr\fR\&. For example,
+\fBmyisamchk\fR
+normally reads the
+[myisamchk]
+group\&. If the
+\fB\-\-defaults\-group\-suffix=_other\fR
+option is given,
+\fBmyisamchk\fR
+also reads the
+[myisamchk_other]
+group\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&.
+.sp
+The exception is that the
+\&.mylogin\&.cnf
+file, if it exists, is read in all cases\&. This permits passwords to be specified in a safer way than on the command line even when
+\fB\-\-no\-defaults\fR
+is used\&. (\&.mylogin\&.cnf
+is created by the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.)
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-print\-defaults\fR
+.sp
+Print the program name and all options that it gets from option files\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-silent\fR,
+\fB\-s\fR
+.sp
+Silent mode\&. Write output only when errors occur\&. You can use
+\fB\-s\fR
+twice (\fB\-ss\fR) to make
+\fBmyisamchk\fR
+very silent\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Verbose mode\&. Print more information about what the program does\&. This can be used with
+\fB\-d\fR
+and
+\fB\-e\fR\&. Use
+\fB\-v\fR
+multiple times (\fB\-vv\fR,
+\fB\-vvv\fR) for even more output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Display version information and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-wait\fR,
+\fB\-w\fR
+.sp
+Instead of terminating with an error if the table is locked, wait until the table is unlocked before continuing\&. If you are running
+\fBmysqld\fR
+with external locking disabled, the table can be locked only by another
+\fBmyisamchk\fR
+command\&.
+.RE
+.PP
+You can also set the following variables by using
+\fB\-\-\fR\fB\fIvar_name\fR\fR\fB=\fR\fB\fIvalue\fR\fR
+syntax:
+.TS
+allbox tab(:);
+lB lB.
+T{
+Variable
+T}:T{
+Default Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l.
+T{
+decode_bits
+T}:T{
+9
+T}
+T{
+ft_max_word_len
+T}:T{
+version-dependent
+T}
+T{
+ft_min_word_len
+T}:T{
+4
+T}
+T{
+ft_stopword_file
+T}:T{
+built-in list
+T}
+T{
+key_buffer_size
+T}:T{
+523264
+T}
+T{
+myisam_block_size
+T}:T{
+1024
+T}
+T{
+myisam_sort_key_blocks
+T}:T{
+16
+T}
+T{
+read_buffer_size
+T}:T{
+262136
+T}
+T{
+sort_buffer_size
+T}:T{
+2097144
+T}
+T{
+sort_key_blocks
+T}:T{
+16
+T}
+T{
+stats_method
+T}:T{
+nulls_unequal
+T}
+T{
+write_buffer_size
+T}:T{
+262136
+T}
+.TE
+.sp 1
+.PP
+The possible
+\fBmyisamchk\fR
+variables and their default values can be examined with
+\fBmyisamchk \-\-help\fR:
+.PP
+myisam_sort_buffer_size
+is used when the keys are repaired by sorting keys, which is the normal case when you use
+\fB\-\-recover\fR\&.
+sort_buffer_size
+is a deprecated synonym for
+myisam_sort_buffer_size\&.
+.PP
+key_buffer_size
+is used when you are checking the table with
+\fB\-\-extend\-check\fR
+or when the keys are repaired by inserting keys row by row into the table (like when doing normal inserts)\&. Repairing through the key buffer is used in the following cases:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+You use
+\fB\-\-safe\-recover\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The temporary files needed to sort the keys would be more than twice as big as when creating the key file directly\&. This is often the case when you have large key values for
+CHAR,
+VARCHAR, or
+TEXT
+columns, because the sort operation needs to store the complete key values as it proceeds\&. If you have lots of temporary space and you can force
+\fBmyisamchk\fR
+to repair by sorting, you can use the
+\fB\-\-sort\-recover\fR
+option\&.
+.RE
+.PP
+Repairing through the key buffer takes much less disk space than using sorting, but is also much slower\&.
+.PP
+If you want a faster repair, set the
+key_buffer_size
+and
+myisam_sort_buffer_size
+variables to about 25% of your available memory\&. You can set both variables to large values, because only one of them is used at a time\&.
+.PP
+myisam_block_size
+is the size used for index blocks\&.
+.PP
+stats_method
+influences how
+NULL
+values are treated for index statistics collection when the
+\fB\-\-analyze\fR
+option is given\&. It acts like the
+myisam_stats_method
+system variable\&. For more information, see the description of
+myisam_stats_method
+in
+Section\ \&5.1.8, \(lqServer System Variables\(rq, and
+Section\ \&8.3.8, \(lqInnoDB and MyISAM Index Statistics Collection\(rq\&.
+.PP
+ft_min_word_len
+and
+ft_max_word_len
+indicate the minimum and maximum word length for
+FULLTEXT
+indexes on
+MyISAM
+tables\&.
+ft_stopword_file
+names the stopword file\&. These need to be set under the following circumstances\&.
+.PP
+If you use
+\fBmyisamchk\fR
+to perform an operation that modifies table indexes (such as repair or analyze), the
+FULLTEXT
+indexes are rebuilt using the default full\-text parameter values for minimum and maximum word length and the stopword file unless you specify otherwise\&. This can result in queries failing\&.
+.PP
+The problem occurs because these parameters are known only by the server\&. They are not stored in
+MyISAM
+index files\&. To avoid the problem if you have modified the minimum or maximum word length or the stopword file in the server, specify the same
+ft_min_word_len,
+ft_max_word_len, and
+ft_stopword_file
+values to
+\fBmyisamchk\fR
+that you use for
+\fBmysqld\fR\&. For example, if you have set the minimum word length to 3, you can repair a table with
+\fBmyisamchk\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \-\-recover \-\-ft_min_word_len=3 \fR\fB\fItbl_name\fR\fR\fB\&.MYI\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+To ensure that
+\fBmyisamchk\fR
+and the server use the same values for full\-text parameters, you can place each one in both the
+[mysqld]
+and
+[myisamchk]
+sections of an option file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[mysqld]
+ft_min_word_len=3
+[myisamchk]
+ft_min_word_len=3
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+An alternative to using
+\fBmyisamchk\fR
+is to use the
+REPAIR TABLE,
+ANALYZE TABLE,
+OPTIMIZE TABLE, or
+ALTER TABLE\&. These statements are performed by the server, which knows the proper full\-text parameter values to use\&.
+.SH "MYISAMCHK CHECK OPTIONS"
+.PP
+\fBmyisamchk\fR
+supports the following options for table checking operations:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-check\fR,
+\fB\-c\fR
+.sp
+Check the table for errors\&. This is the default operation if you specify no option that selects an operation type explicitly\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-check\-only\-changed\fR,
+\fB\-C\fR
+.sp
+Check only tables that have changed since the last check\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-extend\-check\fR,
+\fB\-e\fR
+.sp
+Check the table very thoroughly\&. This is quite slow if the table has many indexes\&. This option should only be used in extreme cases\&. Normally,
+\fBmyisamchk\fR
+or
+\fBmyisamchk \-\-medium\-check\fR
+should be able to determine whether there are any errors in the table\&.
+.sp
+If you are using
+\fB\-\-extend\-check\fR
+and have plenty of memory, setting the
+key_buffer_size
+variable to a large value helps the repair operation run faster\&.
+.sp
+See also the description of this option under table repair options\&.
+.sp
+For a description of the output format, see
+the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fast\fR,
+\fB\-F\fR
+.sp
+Check only tables that haven\*(Aqt been closed properly\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\fR,
+\fB\-f\fR
+.sp
+Do a repair operation automatically if
+\fBmyisamchk\fR
+finds any errors in the table\&. The repair type is the same as that specified with the
+\fB\-\-recover\fR
+or
+\fB\-r\fR
+option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-information\fR,
+\fB\-i\fR
+.sp
+Print informational statistics about the table that is checked\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-medium\-check\fR,
+\fB\-m\fR
+.sp
+Do a check that is faster than an
+\fB\-\-extend\-check\fR
+operation\&. This finds only 99\&.99% of all errors, which should be good enough in most cases\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-read\-only\fR,
+\fB\-T\fR
+.sp
+Do not mark the table as checked\&. This is useful if you use
+\fBmyisamchk\fR
+to check a table that is in use by some other application that does not use locking, such as
+\fBmysqld\fR
+when run with external locking disabled\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-update\-state\fR,
+\fB\-U\fR
+.sp
+Store information in the
+\&.MYI
+file to indicate when the table was checked and whether the table crashed\&. This should be used to get full benefit of the
+\fB\-\-check\-only\-changed\fR
+option, but you shouldn\*(Aqt use this option if the
+\fBmysqld\fR
+server is using the table and you are running it with external locking disabled\&.
+.RE
+.SH "MYISAMCHK REPAIR OPTIONS"
+.PP
+\fBmyisamchk\fR
+supports the following options for table repair operations (operations performed when an option such as
+\fB\-\-recover\fR
+or
+\fB\-\-safe\-recover\fR
+is given):
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-backup\fR,
+\fB\-B\fR
+.sp
+Make a backup of the
+\&.MYD
+file as
+\fIfile_name\fR\-\fItime\fR\&.BAK
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-character\-sets\-dir=\fR\fB\fIdir_name\fR\fR
+.sp
+The directory where character sets are installed\&. See
+Section\ \&10.15, \(lqCharacter Set Configuration\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-correct\-checksum\fR
+.sp
+Correct the checksum information for the table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-data\-file\-length=\fR\fB\fIlen\fR\fR,
+\fB\-D \fR\fB\fIlen\fR\fR
+.sp
+The maximum length of the data file (when re\-creating data file when it is
+\(lqfull\(rq)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-extend\-check\fR,
+\fB\-e\fR
+.sp
+Do a repair that tries to recover every possible row from the data file\&. Normally, this also finds a lot of garbage rows\&. Do not use this option unless you are desperate\&.
+.sp
+See also the description of this option under table checking options\&.
+.sp
+For a description of the output format, see
+the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\fR,
+\fB\-f\fR
+.sp
+Overwrite old intermediate files (files with names like
+\fItbl_name\fR\&.TMD) instead of aborting\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-keys\-used=\fR\fB\fIval\fR\fR,
+\fB\-k \fR\fB\fIval\fR\fR
+.sp
+For
+\fBmyisamchk\fR, the option value is a bit value that indicates which indexes to update\&. Each binary bit of the option value corresponds to a table index, where the first index is bit 0\&. An option value of 0 disables updates to all indexes, which can be used to get faster inserts\&. Deactivated indexes can be reactivated by using
+\fBmyisamchk \-r\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-symlinks\fR,
+\fB\-l\fR
+.sp
+Do not follow symbolic links\&. Normally
+\fBmyisamchk\fR
+repairs the table that a symlink points to\&. This option does not exist as of MySQL 4\&.0 because versions from 4\&.0 on do not remove symlinks during repair operations\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-max\-record\-length=\fR\fB\fIlen\fR\fR
+.sp
+Skip rows larger than the given length if
+\fBmyisamchk\fR
+cannot allocate memory to hold them\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-parallel\-recover\fR,
+\fB\-p\fR
+.sp
+Use the same technique as
+\fB\-r\fR
+and
+\fB\-n\fR, but create all the keys in parallel, using different threads\&.
+\fIThis is beta\-quality code\&. Use at your own risk!\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-quick\fR,
+\fB\-q\fR
+.sp
+Achieve a faster repair by modifying only the index file, not the data file\&. You can specify this option twice to force
+\fBmyisamchk\fR
+to modify the original data file in case of duplicate keys\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-recover\fR,
+\fB\-r\fR
+.sp
+Do a repair that can fix almost any problem except unique keys that are not unique (which is an extremely unlikely error with
+MyISAM
+tables)\&. If you want to recover a table, this is the option to try first\&. You should try
+\fB\-\-safe\-recover\fR
+only if
+\fBmyisamchk\fR
+reports that the table cannot be recovered using
+\fB\-\-recover\fR\&. (In the unlikely case that
+\fB\-\-recover\fR
+fails, the data file remains intact\&.)
+.sp
+If you have lots of memory, you should increase the value of
+myisam_sort_buffer_size\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-safe\-recover\fR,
+\fB\-o\fR
+.sp
+Do a repair using an old recovery method that reads through all rows in order and updates all index trees based on the rows found\&. This is an order of magnitude slower than
+\fB\-\-recover\fR, but can handle a couple of very unlikely cases that
+\fB\-\-recover\fR
+cannot\&. This recovery method also uses much less disk space than
+\fB\-\-recover\fR\&. Normally, you should repair first using
+\fB\-\-recover\fR, and then with
+\fB\-\-safe\-recover\fR
+only if
+\fB\-\-recover\fR
+fails\&.
+.sp
+If you have lots of memory, you should increase the value of
+key_buffer_size\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-set\-collation=\fR\fB\fIname\fR\fR
+.sp
+Specify the collation to use for sorting table indexes\&. The character set name is implied by the first part of the collation name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sort\-recover\fR,
+\fB\-n\fR
+.sp
+Force
+\fBmyisamchk\fR
+to use sorting to resolve the keys even if the temporary files would be very large\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tmpdir=\fR\fB\fIdir_name\fR\fR,
+\fB\-t \fR\fB\fIdir_name\fR\fR
+.sp
+The path of the directory to be used for storing temporary files\&. If this is not set,
+\fBmyisamchk\fR
+uses the value of the
+TMPDIR
+environment variable\&.
+\fB\-\-tmpdir\fR
+can be set to a list of directory paths that are used successively in round\-robin fashion for creating temporary files\&. The separator character between directory names is the colon (:) on Unix and the semicolon (;) on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-unpack\fR,
+\fB\-u\fR
+.sp
+Unpack a table that was packed with
+\fBmyisampack\fR\&.
+.RE
+.SH "OTHER MYISAMCHK OPTIONS"
+.PP
+\fBmyisamchk\fR
+supports the following options for actions other than table checks and repairs:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-analyze\fR,
+\fB\-a\fR
+.sp
+Analyze the distribution of key values\&. This improves join performance by enabling the join optimizer to better choose the order in which to join the tables and which indexes it should use\&. To obtain information about the key distribution, use a
+\fBmyisamchk \-\-description \-\-verbose \fR\fB\fItbl_name\fR\fR
+command or the
+SHOW INDEX FROM \fItbl_name\fR
+statement\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-block\-search=\fR\fB\fIoffset\fR\fR,
+\fB\-b \fR\fB\fIoffset\fR\fR
+.sp
+Find the record that a block at the given offset belongs to\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-description\fR,
+\fB\-d\fR
+.sp
+Print some descriptive information about the table\&. Specifying the
+\fB\-\-verbose\fR
+option once or twice produces additional information\&. See
+the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-set\-auto\-increment[=\fR\fB\fIvalue\fR\fR\fB]\fR,
+\fB\-A[\fR\fB\fIvalue\fR\fR\fB]\fR
+.sp
+Force
+AUTO_INCREMENT
+numbering for new records to start at the given value (or higher, if there are existing records with
+AUTO_INCREMENT
+values this large)\&. If
+\fIvalue\fR
+is not specified,
+AUTO_INCREMENT
+numbers for new records begin with the largest value currently in the table, plus one\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sort\-index\fR,
+\fB\-S\fR
+.sp
+Sort the index tree blocks in high\-low order\&. This optimizes seeks and makes table scans that use indexes faster\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sort\-records=\fR\fB\fIN\fR\fR,
+\fB\-R \fR\fB\fIN\fR\fR
+.sp
+Sort records according to a particular index\&. This makes your data much more localized and may speed up range\-based
+SELECT
+and
+ORDER BY
+operations that use this index\&. (The first time you use this option to sort a table, it may be very slow\&.) To determine a table\*(Aqs index numbers, use
+SHOW INDEX, which displays a table\*(Aqs indexes in the same order that
+\fBmyisamchk\fR
+sees them\&. Indexes are numbered beginning with 1\&.
+.sp
+If keys are not packed (PACK_KEYS=0), they have the same length, so when
+\fBmyisamchk\fR
+sorts and moves records, it just overwrites record offsets in the index\&. If keys are packed (PACK_KEYS=1),
+\fBmyisamchk\fR
+must unpack key blocks first, then re\-create indexes and pack the key blocks again\&. (In this case, re\-creating indexes is faster than updating offsets for each index\&.)
+.RE
+.SH "OBTAINING TABLE INFORMATION WITH MYISAMCHK"
+.PP
+To obtain a description of a
+MyISAM
+table or statistics about it, use the commands shown here\&. The output from these commands is explained later in this section\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmyisamchk \-d \fR\fB\fItbl_name\fR\fR
+.sp
+Runs
+\fBmyisamchk\fR
+in
+\(lqdescribe mode\(rq
+to produce a description of your table\&. If you start the MySQL server with external locking disabled,
+\fBmyisamchk\fR
+may report an error for a table that is updated while it runs\&. However, because
+\fBmyisamchk\fR
+does not change the table in describe mode, there is no risk of destroying data\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmyisamchk \-dv \fR\fB\fItbl_name\fR\fR
+.sp
+Adding
+\fB\-v\fR
+runs
+\fBmyisamchk\fR
+in verbose mode so that it produces more information about the table\&. Adding
+\fB\-v\fR
+a second time produces even more information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmyisamchk \-eis \fR\fB\fItbl_name\fR\fR
+.sp
+Shows only the most important information from a table\&. This operation is slow because it must read the entire table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmyisamchk \-eiv \fR\fB\fItbl_name\fR\fR
+.sp
+This is like
+\fB\-eis\fR, but tells you what is being done\&.
+.RE
+.PP
+The
+\fItbl_name\fR
+argument can be either the name of a
+MyISAM
+table or the name of its index file, as described in
+\fBmyisamchk\fR(1)\&. Multiple
+\fItbl_name\fR
+arguments can be given\&.
+.PP
+Suppose that a table named
+person
+has the following structure\&. (The
+MAX_ROWS
+table option is included so that in the example output from
+\fBmyisamchk\fR
+shown later, some values are smaller and fit the output format more easily\&.)
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE TABLE person
+(
+  id         INT NOT NULL AUTO_INCREMENT,
+  last_name  VARCHAR(20) NOT NULL,
+  first_name VARCHAR(20) NOT NULL,
+  birth      DATE,
+  death      DATE,
+  PRIMARY KEY (id),
+  INDEX (last_name, first_name),
+  INDEX (birth)
+) MAX_ROWS = 1000000 ENGINE=MYISAM;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Suppose also that the table has these data and index file sizes:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-rw\-rw\-\-\-\-  1 mysql  mysql  9347072 Aug 19 11:47 person\&.MYD
+\-rw\-rw\-\-\-\-  1 mysql  mysql  6066176 Aug 19 11:47 person\&.MYI
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Example of
+\fBmyisamchk \-dvv\fR
+output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+MyISAM file:         person
+Record format:       Packed
+Character set:       utf8mb4_0900_ai_ci (255)
+File\-version:        1
+Creation time:       2017\-03\-30 21:21:30
+Status:              checked,analyzed,optimized keys,sorted index pages
+Auto increment key:              1  Last value:                306688
+Data records:               306688  Deleted blocks:                 0
+Datafile parts:             306688  Deleted data:                   0
+Datafile pointer (bytes):        4  Keyfile pointer (bytes):        3
+Datafile length:           9347072  Keyfile length:           6066176
+Max datafile length:    4294967294  Max keyfile length:   17179868159
+Recordlength:                   54
+table description:
+Key Start Len Index   Type                     Rec/key         Root  Blocksize
+1   2     4   unique  long                           1                    1024
+2   6     80  multip\&. varchar prefix                 0                    1024
+    87    80          varchar                        0
+3   168   3   multip\&. uint24 NULL                    0                    1024
+Field Start Length Nullpos Nullbit Type
+1     1     1                                                         
+2     2     4                      no zeros                           
+3     6     81                     varchar                            
+4     87    81                     varchar                            
+5     168   3      1       1       no zeros                           
+6     171   3      1       2       no zeros                           
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Explanations for the types of information
+\fBmyisamchk\fR
+produces are given here\&.
+\(lqKeyfile\(rq
+refers to the index file\&.
+\(lqRecord\(rq
+and
+\(lqrow\(rq
+are synonymous, as are
+\(lqfield\(rq
+and
+\(lqcolumn\&.\(rq
+.PP
+The initial part of the table description contains these values:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+MyISAM file
+.sp
+Name of the
+MyISAM
+(index) file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Record format
+.sp
+The format used to store table rows\&. The preceding examples use
+Fixed length\&. Other possible values are
+Compressed
+and
+Packed\&. (Packed
+corresponds to what
+SHOW TABLE STATUS
+reports as
+Dynamic\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Chararacter set
+.sp
+The table default character set\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+File\-version
+.sp
+Version of
+MyISAM
+format\&. Always 1\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Creation time
+.sp
+When the data file was created\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Recover time
+.sp
+When the index/data file was last reconstructed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Status
+.sp
+Table status flags\&. Possible values are
+crashed,
+open,
+changed,
+analyzed,
+optimized keys, and
+sorted index pages\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Auto increment key,
+Last value
+.sp
+The key number associated the table\*(Aqs
+AUTO_INCREMENT
+column, and the most recently generated value for this column\&. These fields do not appear if there is no such column\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Data records
+.sp
+The number of rows in the table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Deleted blocks
+.sp
+How many deleted blocks still have reserved space\&. You can optimize your table to minimize this space\&. See
+Section\ \&7.6.4, \(lqMyISAM Table Optimization\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Datafile parts
+.sp
+For dynamic\-row format, this indicates how many data blocks there are\&. For an optimized table without fragmented rows, this is the same as
+Data records\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Deleted data
+.sp
+How many bytes of unreclaimed deleted data there are\&. You can optimize your table to minimize this space\&. See
+Section\ \&7.6.4, \(lqMyISAM Table Optimization\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Datafile pointer
+.sp
+The size of the data file pointer, in bytes\&. It is usually 2, 3, 4, or 5 bytes\&. Most tables manage with 2 bytes, but this cannot be controlled from MySQL yet\&. For fixed tables, this is a row address\&. For dynamic tables, this is a byte address\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Keyfile pointer
+.sp
+The size of the index file pointer, in bytes\&. It is usually 1, 2, or 3 bytes\&. Most tables manage with 2 bytes, but this is calculated automatically by MySQL\&. It is always a block address\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Max datafile length
+.sp
+How long the table data file can become, in bytes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Max keyfile length
+.sp
+How long the table index file can become, in bytes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Recordlength
+.sp
+How much space each row takes, in bytes\&.
+.RE
+.PP
+The
+table description
+part of the output includes a list of all keys in the table\&. For each key,
+\fBmyisamchk\fR
+displays some low\-level information:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Key
+.sp
+This key\*(Aqs number\&. This value is shown only for the first column of the key\&. If this value is missing, the line corresponds to the second or later column of a multiple\-column key\&. For the table shown in the example, there are two
+table description
+lines for the second index\&. This indicates that it is a multiple\-part index with two parts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Start
+.sp
+Where in the row this portion of the index starts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Len
+.sp
+How long this portion of the index is\&. For packed numbers, this should always be the full length of the column\&. For strings, it may be shorter than the full length of the indexed column, because you can index a prefix of a string column\&. The total length of a multiple\-part key is the sum of the
+Len
+values for all key parts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Index
+.sp
+Whether a key value can exist multiple times in the index\&. Possible values are
+unique
+or
+multip\&.
+(multiple)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Type
+.sp
+What data type this portion of the index has\&. This is a
+MyISAM
+data type with the possible values
+packed,
+stripped, or
+empty\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Root
+.sp
+Address of the root index block\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Blocksize
+.sp
+The size of each index block\&. By default this is 1024, but the value may be changed at compile time when MySQL is built from source\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Rec/key
+.sp
+This is a statistical value used by the optimizer\&. It tells how many rows there are per value for this index\&. A unique index always has a value of 1\&. This may be updated after a table is loaded (or greatly changed) with
+\fBmyisamchk \-a\fR\&. If this is not updated at all, a default value of 30 is given\&.
+.RE
+.PP
+The last part of the output provides information about each column:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Field
+.sp
+The column number\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Start
+.sp
+The byte position of the column within table rows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Length
+.sp
+The length of the column in bytes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Nullpos,
+Nullbit
+.sp
+For columns that can be
+NULL,
+MyISAM
+stores
+NULL
+values as a flag in a byte\&. Depending on how many nullable columns there are, there can be one or more bytes used for this purpose\&. The
+Nullpos
+and
+Nullbit
+values, if nonempty, indicate which byte and bit contains that flag indicating whether the column is
+NULL\&.
+.sp
+The position and number of bytes used to store
+NULL
+flags is shown in the line for field 1\&. This is why there are six
+Field
+lines for the
+person
+table even though it has only five columns\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Type
+.sp
+The data type\&. The value may contain any of the following descriptors:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+constant
+.sp
+All rows have the same value\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+no endspace
+.sp
+Do not store endspace\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+no endspace, not_always
+.sp
+Do not store endspace and do not do endspace compression for all values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+no endspace, no empty
+.sp
+Do not store endspace\&. Do not store empty values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+table\-lookup
+.sp
+The column was converted to an
+ENUM\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+zerofill(\fIN\fR)
+.sp
+The most significant
+\fIN\fR
+bytes in the value are always 0 and are not stored\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+no zeros
+.sp
+Do not store zeros\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+always zero
+.sp
+Zero values are stored using one bit\&.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Huff tree
+.sp
+The number of the Huffman tree associated with the column\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Bits
+.sp
+The number of bits used in the Huffman tree\&.
+.RE
+.PP
+The
+Huff tree
+and
+Bits
+fields are displayed if the table has been compressed with
+\fBmyisampack\fR\&. See
+\fBmyisampack\fR(1), for an example of this information\&.
+.PP
+Example of
+\fBmyisamchk \-eiv\fR
+output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Checking MyISAM file: person
+Data records:  306688   Deleted blocks:       0
+\- check file\-size
+\- check record delete\-chain
+No recordlinks
+\- check key delete\-chain
+block_size 1024:
+\- check index reference
+\- check data record references index: 1
+Key:  1:  Keyblocks used:  98%  Packed:    0%  Max levels:  3
+\- check data record references index: 2
+Key:  2:  Keyblocks used:  99%  Packed:   97%  Max levels:  3
+\- check data record references index: 3
+Key:  3:  Keyblocks used:  98%  Packed:  \-14%  Max levels:  3
+Total:    Keyblocks used:  98%  Packed:   89%
+\- check records and index references\fI*** LOTS OF ROW NUMBERS DELETED ***\fR
+Records:            306688  M\&.recordlength:       25  Packed:            83%
+Recordspace used:       97% Empty space:           2% Blocks/Record:   1\&.00
+Record blocks:      306688  Delete blocks:         0
+Record data:       7934464  Deleted data:          0
+Lost space:         256512  Linkdata:        1156096
+User time 43\&.08, System time 1\&.68
+Maximum resident set size 0, Integral resident set size 0
+Non\-physical pagefaults 0, Physical pagefaults 0, Swaps 0
+Blocks in 0 out 7, Messages in 0 out 0, Signals 0
+Voluntary context switches 0, Involuntary context switches 0
+Maximum memory usage: 1046926 bytes (1023k)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmyisamchk \-eiv\fR
+output includes the following information:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Data records
+.sp
+The number of rows in the table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Deleted blocks
+.sp
+How many deleted blocks still have reserved space\&. You can optimize your table to minimize this space\&. See
+Section\ \&7.6.4, \(lqMyISAM Table Optimization\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Key
+.sp
+The key number\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Keyblocks used
+.sp
+What percentage of the keyblocks are used\&. When a table has just been reorganized with
+\fBmyisamchk\fR, the values are very high (very near theoretical maximum)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Packed
+.sp
+MySQL tries to pack key values that have a common suffix\&. This can only be used for indexes on
+CHAR
+and
+VARCHAR
+columns\&. For long indexed strings that have similar leftmost parts, this can significantly reduce the space used\&. In the preceding example, the second key is 40 bytes long and a 97% reduction in space is achieved\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Max levels
+.sp
+How deep the B\-tree for this key is\&. Large tables with long key values get high values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Records
+.sp
+How many rows are in the table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+M\&.recordlength
+.sp
+The average row length\&. This is the exact row length for tables with fixed\-length rows, because all rows have the same length\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Packed
+.sp
+MySQL strips spaces from the end of strings\&. The
+Packed
+value indicates the percentage of savings achieved by doing this\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Recordspace used
+.sp
+What percentage of the data file is used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Empty space
+.sp
+What percentage of the data file is unused\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Blocks/Record
+.sp
+Average number of blocks per row (that is, how many links a fragmented row is composed of)\&. This is always 1\&.0 for fixed\-format tables\&. This value should stay as close to 1\&.0 as possible\&. If it gets too large, you can reorganize the table\&. See
+Section\ \&7.6.4, \(lqMyISAM Table Optimization\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Recordblocks
+.sp
+How many blocks (links) are used\&. For fixed\-format tables, this is the same as the number of rows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Deleteblocks
+.sp
+How many blocks (links) are deleted\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Recorddata
+.sp
+How many bytes in the data file are used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Deleted data
+.sp
+How many bytes in the data file are deleted (unused)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Lost space
+.sp
+If a row is updated to a shorter length, some space is lost\&. This is the sum of all such losses, in bytes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Linkdata
+.sp
+When the dynamic table format is used, row fragments are linked with pointers (4 to 7 bytes each)\&.
+Linkdata
+is the sum of the amount of storage used by all such pointers\&.
+.RE
+.SH "MYISAMCHK MEMORY USAGE"
+.PP
+Memory allocation is important when you run
+\fBmyisamchk\fR\&.
+\fBmyisamchk\fR
+uses no more memory than its memory\-related variables are set to\&. If you are going to use
+\fBmyisamchk\fR
+on very large tables, you should first decide how much memory you want it to use\&. The default is to use only about 3MB to perform repairs\&. By using larger values, you can get
+\fBmyisamchk\fR
+to operate faster\&. For example, if you have more than 512MB RAM available, you could use options such as these (in addition to any other options you might specify):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmyisamchk \-\-myisam_sort_buffer_size=256M \e\fR
+           \fB\-\-key_buffer_size=512M \e\fR
+           \fB\-\-read_buffer_size=64M \e\fR
+           \fB\-\-write_buffer_size=64M \&.\&.\&.\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Using
+\fB\-\-myisam_sort_buffer_size=16M\fR
+is probably enough for most cases\&.
+.PP
+Be aware that
+\fBmyisamchk\fR
+uses temporary files in
+TMPDIR\&. If
+TMPDIR
+points to a memory file system, out of memory errors can easily occur\&. If this happens, run
+\fBmyisamchk\fR
+with the
+\fB\-\-tmpdir=\fR\fB\fIdir_name\fR\fR
+option to specify a directory located on a file system that has more space\&.
+.PP
+When performing repair operations,
+\fBmyisamchk\fR
+also needs a lot of disk space:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Twice the size of the data file (the original file and a copy)\&. This space is not needed if you do a repair with
+\fB\-\-quick\fR; in this case, only the index file is re\-created\&.
+\fIThis space must be available on the same file system as the original data file\fR, as the copy is created in the same directory as the original\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Space for the new index file that replaces the old one\&. The old index file is truncated at the start of the repair operation, so you usually ignore this space\&. This space must be available on the same file system as the original data file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+When using
+\fB\-\-recover\fR
+or
+\fB\-\-sort\-recover\fR
+(but not when using
+\fB\-\-safe\-recover\fR), you need space on disk for sorting\&. This space is allocated in the temporary directory (specified by
+TMPDIR
+or
+\fB\-\-tmpdir=\fR\fB\fIdir_name\fR\fR)\&. The following formula yields the amount of space required:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+(\fIlargest_key\fR + \fIrow_pointer_length\fR) * \fInumber_of_rows\fR * 2
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+You can check the length of the keys and the
+\fIrow_pointer_length\fR
+with
+\fBmyisamchk \-dv \fR\fB\fItbl_name\fR\fR
+(see
+the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq)\&. The
+\fIrow_pointer_length\fR
+and
+\fInumber_of_rows\fR
+values are the
+Datafile pointer
+and
+Data records
+values in the table description\&. To determine the
+\fIlargest_key\fR
+value, check the
+Key
+lines in the table description\&. The
+Len
+column indicates the number of bytes for each key part\&. For a multiple\-column index, the key size is the sum of the
+Len
+values for all key parts\&.
+.RE
+.PP
+If you have a problem with disk space during repair, you can try
+\fB\-\-safe\-recover\fR
+instead of
+\fB\-\-recover\fR\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

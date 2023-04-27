@@ -23,7 +23,7 @@ exception Syntax_error of string
 
 (* A function conforming to `show`'s pretty printing signature;
     calls `json_to_multiline` internally
- *)
+*)
 val pp_json : Format.formatter -> json -> unit
 
 (** Calling this with [~pretty:true] is the same as calling [json_to_multiline] *)
@@ -97,6 +97,8 @@ val bool_ : bool -> json
 val opt_ : ('a -> json) -> 'a option -> json
 
 val array_ : ('a -> json) -> 'a list -> json
+
+val string_map : ('a -> json) -> 'a SMap.t -> json
 
 (* Types and functions for monadic API for traversing a JSON object. *)
 

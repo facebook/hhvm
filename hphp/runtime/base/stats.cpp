@@ -37,7 +37,7 @@ const char* g_counterNames[] = {
 #undef O
 };
 
-typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
+using StatGroupMap = hphp_const_char_map<hphp_const_char_map<uint64_t>>;
 
 RDS_LOCAL(StatCounters, rl_counters);
 RDS_LOCAL(StatGroupMap*, rl_stat_groups);
@@ -62,7 +62,7 @@ void dump() {
 #undef STAT
 #undef O
 
-  typedef std::pair<const char*, uint64_t> StatPair;
+  using StatPair = std::pair<const char*, uint64_t>;
   for (auto const& group : **rl_stat_groups) {
     std::string stats;
     auto const& map = group.second;

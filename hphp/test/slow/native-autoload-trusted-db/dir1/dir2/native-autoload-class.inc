@@ -1,4 +1,9 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class TestClass {}
+class A1 implements HH\MethodAttribute {}
+
+class TestClass {
+  <<A1>>
+  function decorated(): void {}
+}

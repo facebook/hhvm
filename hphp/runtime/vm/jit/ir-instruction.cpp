@@ -17,11 +17,13 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -40,7 +42,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -211,6 +213,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case CreateSSWH:
       return srcNo == 0;
 
+    case InitDictElem:
     case InitVecElem:
     case InitStructElem:
       return srcNo == 1;
@@ -221,6 +224,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case NewPair:
     case NewColFromArray:
       return true;
+
+    case VerifyParamCoerce:
+    case VerifyRetCoerce:
+      return move != MustMove && srcNo == 0;
 
     case VerifyPropCoerce:
     case VerifyPropCoerceAll:
@@ -284,7 +291,6 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
-    case AllocObjReified:
       return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : TObj;
@@ -301,8 +307,8 @@ Type allocObjReturn(const IRInstruction* inst) {
     case CreateAGWH:
       return Type::ExactObj(c_AsyncGeneratorWaitHandle::classof());
 
-    case CreateAAWH:
-      return Type::ExactObj(c_AwaitAllWaitHandle::classof());
+    case CreateCCWH:
+      return Type::ExactObj(c_ConcurrentWaitHandle::classof());
 
     case CreateSSWH:
       return Type::ExactObj(c_StaticWaitHandle::classof());
@@ -569,6 +575,19 @@ Type structDictReturn(const IRInstruction* inst) {
   return TDict.narrowToLayout(layout);
 }
 
+Type typeStructElemReturn(const IRInstruction* inst) {
+  assertx(inst->is(LdTypeStructureValCns));
+  auto const key = inst->extra<KeyedData>()->key;
+  auto const dt = bespoke::TypeStructure::getFieldPair(key).first;
+  if (dt == KindOfBoolean) return TBool;
+  if (dt == KindOfInt64) return TInt;
+  if (dt == KindOfVec) return TVec|TNullptr;
+  if (dt == KindOfDict) return TDict|TNullptr;
+  if (isStringType(dt)) return TStr|TNullptr;
+  assertx(dt == KindOfUninit);
+  return TNullptr;
+}
+
 Type arrLikeSetReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeSet, DictSet));
   auto const arr = inst->src(0)->type();
@@ -648,10 +667,23 @@ Type typeCnsClsName(const IRInstruction* inst) {
   always_assert(false);
 }
 
-Type verifyParamFailReturn(const IRInstruction* inst) {
-  assertx(inst->is(VerifyParamFail, VerifyRetFail));
-  auto const tc = inst->extra<FuncParamWithTCData>()->tc;
-  auto const srcTy = inst->src(0)->type();
+Type verifyCoerceReturn(const IRInstruction* inst) {
+  auto const [tc, srcTy] = [&]() {
+    if (inst->is(VerifyParamCoerce, VerifyRetCoerce)) {
+      return std::make_tuple(
+        inst->extra<FuncParamWithTCData>()->tc,
+        inst->src(0)->type()
+      );
+    }
+    if (inst->is(VerifyPropCoerce)) {
+      return std::make_tuple(
+        inst->extra<TypeConstraintData>()->tc,
+        inst->src(2)->type()
+      );
+    }
+    always_assert(false);
+  }();
+
   auto dstTy = srcTy;
   if (tc->maybeStringCompatible() &&
       (srcTy.maybe(TCls) || srcTy.maybe(TLazyCls))) {
@@ -685,6 +717,36 @@ Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
     return layout.getTypeBound(inst->src(2)->type());
   }();
   return inst->src(0)->type() & type;
+}
+
+Type specialICReturn(const IRInstruction* inst) {
+  assertx(inst->is(CreateSpecialImplicitContext));
+
+  auto const type = inst->src(0)->type();
+  auto const memoKey = inst->src(1)->type();
+  auto const func = inst->src(2)->type();
+
+  if (!type.hasConstVal(TInt)) return TObj|TInitNull;
+
+  switch (static_cast<ImplicitContext::State>(type.intVal())) {
+    case ImplicitContext::State::Value:
+      return TObj|TInitNull;
+    case ImplicitContext::State::SoftInaccessible: {
+      auto const sampleRate = [&] () -> uint32_t {
+        if (!memoKey.maybe(TInitNull)) return 1;
+        if (!func.hasConstVal(TFunc)) return 0;
+        auto const f = func.funcVal();
+        assertx(f->isMemoizeWrapper() || f->isMemoizeWrapperLSB());
+        assertx(f->isSoftMakeICInaccessibleMemoize());
+        return f->softMakeICInaccessibleSampleRate();
+      }();
+      return sampleRate == 1 ? TObj : (TObj | TInitNull);
+    }
+    case ImplicitContext::State::Inaccessible:
+    case ImplicitContext::State::SoftSet:
+      return TObj;
+  }
+  always_assert(false);
 }
 
 // Is this instruction an array cast that always modifies the type of the
@@ -766,6 +828,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DArrLikeUnset     return arrLikeUnsetReturn(inst);
 #define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DStructDict     return structDictReturn(inst);
+#define DTypeStructElem return typeStructElemReturn(inst);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -777,12 +840,13 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
-#define DVerifyParamFail return verifyParamFailReturn(inst);
+#define DVerifyCoerce   return verifyCoerceReturn(inst);
 #define DPropLval       return propLval(inst);
 #define DElemLval       return elemLval(inst);
 #define DElemLvalPos    return elemLvalPos(inst);
 #define DCOW            return cowReturn(inst);
 #define DStructTypeBound return structDictTypeBoundCheckReturn(inst);
+#define DSpecialIC      return specialICReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -815,6 +879,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLastKey
 #undef DLoggingArrLike
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DMulti
 #undef DSetElem
@@ -832,6 +897,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
+#undef DSpecialIC
 
 }
 
@@ -841,6 +907,7 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
     // Profiling
     case DebugBacktrace:
     case LogArrayReach:
+    case LogGuardFailure:
     case NewLoggingArray:
     case ProfileArrLikeProps:
     case ProfileDictAccess:
@@ -853,6 +920,9 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
       auto const loggingLayout =
         ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
       auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
+      // bespoke type structures can be created in HHBBC and bespoke arrays
+      // should not be compared in profiling mode
+      if (src(0)->type().arrSpec().is_type_structure()) return false;
       return src(0)->type().maybe(loggingArray);
     }
 

@@ -1,0 +1,6 @@
+/**
+ * <fizz/fizz-config.h> holds compile time configuration options for Fizz.
+ */
+#pragma once
+
+#define FIZZ_HAS_AEGIS 0

@@ -1,0 +1,281 @@
+#!/bin/sh
+
+# Copyright (C) 2003 MySQL AB
+# Use is subject to license terms
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+#<pre>
+(
+echo "DROP TABLE lang;"
+echo "CREATE TABLE lang (lang varchar(128), letters text character set utf8);"
+(
+grep -v "^#" << END
+#
+Greenlandic	&#x00C1;&#x00C2;&#x00C3;&#x00CA;&#x00CD;&#x00CE;&#x00D4;&#x00DA;&#x00DB;&#x00E1;&#x00E2;&#x00E3;&#x00EA;&#x00ED;&#x00EE;&#x00F4;&#x00FA;&#x00FB;&#x0128;&#x0129;&#x0138;&#x0168;&#x0169;
+#Use of these letters was abolished in a spelling reform in 1973:
+#Greenlandic	&#x00C5;&#x00C6;&#x00D8;&#x00E5;&#x00E6;&#x00F8;
+#Characters not found in the UCS:
+#	K LATIN CAPITAL LETTER KRA
+#############################################################
+#Basque	&#x00D1;&#x00DC;&#x00F1;&#x00FC;&#x0154;&#x0155;
+#Characters not found in the UCS:
+#	D LATIN CAPITAL LETTER D WITH MACRON
+#	d LATIN SMALL LETTER D WITH MACRON
+#	L LATIN CAPITAL LETTER L WITH MACRON
+#	l LATIN SMALL LETTER L WITH MACRON
+#	T LATIN CAPITAL LETTER T WITH MACRON
+#	t LATIN SMALL LETTER T WITH MACRON
+#############################################################
+#Maltese	#&#x00C0;&#x00C1;&#x00C2;&#x00C8;&#x00C9;&#x00CA;&#x00CC;&#x00CD;&#x00CE;&#x00D2;&#x00D3;&#x00D4;&#x00D9;&#x00DA;&#x00DB;#&#x00E0;&#x00E1;&#x00E2;&#x00E8;&#x00E9;&#x00EA;&#x00EC;&#x00ED;&#x00EE;&#x00F2;&#x00D3;&#x00F4;&#x00F9;&#x00FA;&#x00FB;#&#x010A;&#x010B;&#x0120;&#x0121;&#x0126;&#x0127;&#x017B;&#x017C;&#x02BC;
+#BosnianCyr	&#x0402;&#x0408;&#x0409;&#x040A;&#x040B;&#x040F;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0452;&#x0458;&#x0459;&#x045A;&#x045B;&#x045F;
+#Scots	&#x0041;
+#Scots1	&#x01B7;&#x021C;&#x021D;&#x0292;
+###########################################
+#### Hiragana 3040-309F
+Hiragana	&#x3041;&#x3042;&#x3043;&#x3044;&#x3045;&#x3046;&#x3047;&#x3048;&#x3049;&#x304A;&#x304B;&#x304C;&#x304D;&#x304E;&#x304F;&#x3050;&#x3051;&#x3052;&#x3053;&#x3054;&#x3055;&#x3056;&#x3057;&#x3058;&#x3059;&#x305A;&#x305B;&#x305C;&#x305D;&#x305E;&#x305F;&#x3060;&#x3061;&#x3062;&#x3063;&#x3064;&#x3065;&#x3066;&#x3067;&#x3068;&#x3069;&#x306A;&#x306B;&#x306C;&#x306D;&#x306E;&#x306F;&#x3070;&#x3071;&#x3072;&#x3073;&#x3074;&#x3075;&#x3076;&#x3077;&#x3078;&#x3079;&#x307A;&#x307B;&#x307C;&#x307D;&#x307E;&#x307F;&#x3080;&#x3081;&#x3082;&#x3083;&#x3084;&#x3085;&#x3086;&#x3087;&#x3088;&#x3089;&#x308A;&#x308B;&#x308C;&#x308D;&#x308E;&#x308F;&#x3090;&#x3091;&#x3092;&#x3093;
+Hiragana1	&#x3094;&#x3099;&#x309A;
+Hiragana2	&#x309B;&#x309C;&#x309D;&#x309E;
+#### Katakana 30A0-30FF
+Katakana	&#x30A1;&#x30A2;&#x30A3;&#x30A4;&#x30A5;&#x30A6;&#x30A7;&#x30A8;&#x30A9;&#x30AA;&#x30AB;&#x30AC;&#x30AD;&#x30AE;&#x30AF;&#x30B0;&#x30B1;&#x30B2;&#x30B3;&#x30B4;&#x30B5;&#x30B6;&#x30B7;&#x30B8;&#x30B9;&#x30BA;&#x30BB;&#x30BC;&#x30BD;&#x30BE;&#x30BF;&#x30C0;&#x30C1;&#x30C2;&#x30C3;&#x30C4;&#x30C5;&#x30C6;&#x30C7;&#x30C8;&#x30C9;&#x30CA;&#x30CB;&#x30CC;&#x30CD;&#x30CE;&#x30CF;&#x30D0;&#x30D1;&#x30D2;&#x30D3;&#x30D4;&#x30D5;&#x30D6;&#x30D7;&#x30D8;&#x30D9;&#x30DA;&#x30DB;&#x30DC;&#x30DD;&#x30DE;&#x30DF;&#x30E0;&#x30E1;&#x30E2;&#x30E3;&#x30E4;&#x30E5;&#x30E6;&#x30E7;&#x30E8;&#x30E9;&#x30EA;&#x30EB;&#x30EC;&#x30ED;&#x30EE;&#x30EF;&#x30F0;&#x30F1;&#x30F2;&#x30F3;&#x30F4;&#x30F5;&#x30F6;
+Katakana1	&#x30F7;&#x30F8;&#x30F9;&#x30FA;
+Katakana2	&#x30FB;&#x30FC;&#x30FD;&#x30FE;
+############################################
+Albanian	&#x00C2;&#x00C7;&#x00CB;&#x00E2;&#x00E7;&#x00EB;
+Bosnian	&#x0106;&#x0107;&#x010C;&#x010D;&#x0110;&#x0111;&#x0160;&#x0161;&#x017D;&#x017E;
+Breton	&#x00C2;&#x00CA;&#x00D1;&#x00D9;&#x00DC;&#x00E2;&#x00EA;&#x00F1;&#x00F9;&#x00FC;
+Catalan	&#x00C0;&#x00C7;&#x00C8;&#x00C9;&#x00CD;&#x00CF;&#x00D2;&#x00D3;&#x00DA;&#x00DC;&#x00E0;&#x00E7;&#x00E8;&#x00E9;&#x00ED;&#x00EF;&#x00F2;&#x00F3;&#x00FA;&#x00FC;
+#Catalan1	&#x00B7;&#x013F;&#x0140;
+Croatian	&#x0106;&#x0107;&#x010C;&#x010D;&#x0110;&#x0111;&#x0160;&#x0161;&#x017D;&#x017E;
+CroatianLig	&#x01F1;&#x01F2;&#x01F3;&#x01C4;&#x01C5;&#x01C6;&#x01C7;&#x01C8;&#x01C9;&#x01CA;&#x01CB;&#x01CC;
+Czech	&#x00C1;&#x00C9;&#x00CD;&#x00D3;&#x00DA;&#x00DD;&#x00E1;&#x00E9;&#x00ED;&#x00F3;&#x00FA;&#x00FD;&#x010C;&#x010D;&#x010E;&#x010F;&#x011A;&#x011B;&#x0147;&#x0148;&#x0158;&#x0159;&#x0160;&#x0161;&#x0164;&#x0165;&#x016E;&#x016F;&#x017D;&#x017E;
+Danish	&#x00C1;&#x00C4;&#x00C5;&#x00C6;&#x00C9;&#x00D3;&#x00D6;&#x00D8;&#x00DC;&#x00E1;&#x00E4;&#x00E5;&#x00E6;&#x00E9;&#x00F3;&#x00F6;&#x00F8;&#x00FC;
+Dutch	&#x00C0;&#x00C2;&#x00C4;&#x00C6;&#x00C7;&#x00C8;&#x00C9;&#x00CA;&#x00CB;&#x00CE;&#x00CF;&#x00D1;&#x00D2;&#x00D3;&#x00D4;&#x00D6;&#x00D9;&#x00DA;&#x00DB;&#x00DC;&#x00E0;&#x00E2;&#x00E4;&#x00E6;&#x00E7;&#x00E8;&#x00E9;&#x00EA;&#x00EB;&#x00EE;&#x00EF;&#x00F1;&#x00F2;&#x00F3;&#x00F4;&#x00F6;&#x00F9;&#x00FA;&#x00FB;&#x00FC;
+Esperanto	&#x0108;&#x0109;&#x011C;&#x011D;&#x0124;&#x0125;&#x0134;&#x0135;&#x015C;&#x015D;&#x016C;&#x016D;
+Estonian	&#x00C4;&#x00D5;&#x00D6;&#x00DC;&#x00E4;&#x00F5;&#x00F6;&#x00FC;&#x0160;&#x0161;&#x017D;&#x017E;
+Faroese	&#x00C5;&#x00C6;&#x00D0;&#x00D3;&#x00D6;&#x00D8;&#x00DA;&#x00DD;&#x00E5;&#x00E6;&#x00F0;&#x00F3;&#x00F6;&#x00F8;&#x00FA;&#x00FD;
+Finnish	&#x00C4;&#x00C5;&#x00D6;&#x00DC;&#x00E4;&#x00E5;&#x00F6;&#x00FC;
+#Finnish1	&#x0160;&#x0161;&#x017D;&#x017E;
+French(limited)	&#x00C0;&#x00C2;&#x00C6;&#x00C7;&#x00C8;&#x00C9;&#x00CA;&#x00CB;&#x00CE;&#x00CF;&#x00D1;&#x00D4;&#x00D9;&#x00DB;&#x00E0;&#x00E2;&#x00E6;&#x00E7;&#x00E8;&#x00E9;&#x00EA;&#x00EB;&#x00EE;&#x00EF;&#x00F1;&#x00F4;&#x00F9;&#x00FB;&#x00FF;
+French	&#x0152;&#x0153;&#x0178;
+German	&#x00C4;&#x00D6;&#x00DC;&#x00DF;&#x00E4;&#x00F6;&#x00FC;
+Hungarian	&#x00C1;&#x00C9;&#x00CD;&#x00D3;&#x00D6;&#x00DA;&#x00DC;&#x00E1;&#x00E9;&#x00ED;&#x00F3;&#x00F6;&#x00FA;&#x00FC;&#x0150;&#x0151;&#x0170;&#x0171;
+Icelandic	&#x00C1;&#x00C6;&#x00C9;&#x00CD;&#x00D0;&#x00D3;&#x00D6;&#x00DA;&#x00DD;&#x00DE;&#x00E1;&#x00E6;&#x00E9;&#x00ED;&#x00F0;&#x00F3;&#x00F6;&#x00FA;&#x00FD;&#x00FE;
+Italian	&#x00C0;&#x00C8;&#x00C9;&#x00CC;&#x00CD;&#x00CF;&#x00D2;&#x00D3;&#x00D9;&#x00DA;&#x00E0;&#x00E8;&#x00E9;&#x00EC;&#x00ED;&#x00EF;&#x00F2;&#x00F3;&#x00F9;&#x00FA;
+#Latin	&#x0041;
+Latvian	&#x0100;&#x0101;&#x010C;&#x010D;&#x0112;&#x0113;&#x0122;&#x0123;&#x012A;&#x012B;&#x0136;&#x0137;&#x013B;&#x013C;&#x0145;&#x0146;&#x0160;&#x0161;&#x016A;&#x016B;&#x017D;&#x017E;
+Lithuanian	&#x0104;&#x0105;&#x010C;&#x010D;&#x0116;&#x0117;&#x0118;&#x0119;&#x012E;&#x012F;&#x0160;&#x0161;&#x016A;&#x016B;&#x0172;&#x0173;&#x017D;&#x017E;
+Norwegian	&#x00C5;&#x00C6;&#x00D8;&#x00E5;&#x00E6;&#x00F8;
+Polish	&#x00D3;&#x00F3;&#x0104;&#x0105;&#x0106;&#x0107;&#x0118;&#x0119;&#x0141;&#x0142;&#x0143;&#x0144;&#x015A;&#x015B;&#x0179;&#x017A;&#x017B;&#x017C;
+Portuguese	&#x00C0;&#x00C1;&#x00C2;&#x00C3;&#x00C7;&#x00C9;&#x00CA;&#x00CD;&#x00D3;&#x00D4;&#x00D5;&#x00DA;&#x00DC;&#x00E0;&#x00E1;&#x00E2;&#x00E3;&#x00E7;&#x00E9;&#x00EA;&#x00ED;&#x00F3;&#x00F4;&#x00F5;&#x00FA;&#x00FC;
+#http://en.wikipedia.org/wiki/Special_Romanian_Unicode_characters
+Romanian	&#x00C2;&#x00CE;&#x00E2;&#x00EE;&#x0102;&#x0103;&#x0218;&#x0219;&#x021A;&#x021B;
+Romanian(ErrorST)	&#x00C2;&#x00CE;&#x00E2;&#x00EE;&#x0102;&#x0103;&#x015E;&#x015F;&#x0162;&#x0163;
+Slovak	&#x00C1;&#x00C4;&#x00C9;&#x00CD;&#x00D3;&#x00D4;&#x00DA;&#x00DD;&#x00E1;&#x00E4;&#x00E9;&#x00ED;&#x00F3;&#x00F4;&#x00FA;&#x00FD;&#x010C;&#x010D;&#x010E;&#x010F;&#x0139;&#x013A;&#x013D;&#x013E;&#x0147;&#x0148;&#x0154;&#x0155;&#x0160;&#x0161;&#x0164;&#x0165;&#x017D;&#x017E;
+Slovene	&#x010C;&#x010D;&#x0160;&#x0161;&#x017D;&#x017E
+Sorbian-Lower	&#x0106;&#x0107;&#x010C;&#x010D;&#x011A;&#x011B;&#x0141;&#x0142;&#x0143;&#x0144;&#x0158;&#x0159;&#x015A;&#x015B;&#x0160;&#x0161;&#x0179;&#x017A;&#x017D;&#x017E;
+Sorbian-Upper	&#x00D3;&#x00F3;&#x0106;&#x0107;&#x010C;&#x010D;&#x011A;&#x011B;&#x0141;&#x0142;&#x0143;&#x0144;&#x0158;&#x0159;&#x0160;&#x0161;&#x017D;&#x017E;
+Spanish	&#x00C1;&#x00C9;&#x00CD;&#x00D1;&#x00D3;&#x00DA;&#x00DC;&#x00E1;&#x00E9;&#x00ED;&#x00F1;&#x00F3;&#x00FA;&#x00FC;
+Swedish	&#x00C4;&#x00C5;&#x00D6;&#x00E4;&#x00E5;&#x00F6;
+Turkish	&#x00C2;&#x00C7;&#x00D6;&#x00DB;&#x00DC;&#x00E2;&#x00E7;&#x00F6;&#x00FB;&#x00FC;&#x011E;&#x011F;&#x0130;&#x0131;
+Welsh	&#x00C0;&#x00C1;&#x00C2;&#x00C4;&#x00C8;&#x00C9;&#x00CA;&#x00CB;&#x00CC;&#x00CD;&#x00CE;&#x00CF;&#x00D2;&#x00D3;&#x00D4;&#x00D6;&#x00D9;&#x00DA;&#x00DB;&#x00DC;&#x00DD;&#x00E0;&#x00E1;&#x00E2;&#x00E4;&#x00E8;&#x00E9;&#x00EA;&#x00EB;&#x00EC;&#x00ED;&#x00EE;&#x00EF;&#x00F2;&#x00F3;&#x00F4;&#x00F6;&#x00F9;&#x00FA;&#x00FB;&#x00FC;&#x00FD;&#x00FF;&#x0174;&#x0175;&#x0176;&#x0177;&#x0178;&#x1E80;&#x1E81;&#x1E82;&#x1E83;&#x1E84;&#x1E85;&#x1EF2;&#x1EF3;
+##################################
+Belarusian	&#x0401;&#x0406;&#x040E;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x0419;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0429;&#x042A;&#x042B;&#x042C;&#x042D;&#x042E;&#x042F;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x0439;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0449;&#x044A;&#x044B;&#x044C;&#x044D;&#x044E;&#x044F;&#x0451;&#x0456;&#x045E;
+Bulgarian	&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x0419;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0429;&#x042A;&#x042C;&#x042E;&#x042F;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x0439;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0449;&#x044A;&#x044C;&#x044E;&#x044F;
+Bulgarian1	&#x0400;&#x04AD;&#x0450;&#x045D;&#x0462;&#x0463;&#x046A;&#x046B;
+Macedonian	&#x0403;&#x0405;&#x0408;&#x0409;&#x040A;&#x040C;&#x040F;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0453;&#x0455;&#x0458;&#x0459;&#x045A;&#x045C;&#x045F;
+Russian	&#x0401;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x0419;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0429;&#x042A;&#x042B;&#x042C;&#x042D;&#x042E;&#x042F;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x0439;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0449;&#x044A;&#x044B;&#x044C;&#x044D;&#x044E;&#x044F;&#x0451;
+RussianOLD	&#x0406;&#x0456;&#x0462;&#x0463;&#x0472;&#x0473;&#x0474;&#x0475;
+Serbian	&#x0402;&#x0408;&#x0409;&#x040A;&#x040B;&#x040F;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0452;&#x0458;&#x0459;&#x045A;&#x045B;&#x045F;
+Ukrainian	&#x0404;&#x0406;&#x0407;&#x0410;&#x0411;&#x0412;&#x0413;&#x0414;&#x0415;&#x0416;&#x0417;&#x0418;&#x0419;&#x041A;&#x041B;&#x041C;&#x041D;&#x041E;&#x041F;&#x0420;&#x0421;&#x0422;&#x0423;&#x0424;&#x0425;&#x0426;&#x0427;&#x0428;&#x0429;&#x042C;&#x042D;&#x042E;&#x042F;&#x0430;&#x0431;&#x0432;&#x0433;&#x0434;&#x0435;&#x0436;&#x0437;&#x0438;&#x0439;&#x043A;&#x043B;&#x043C;&#x043D;&#x043E;&#x043F;&#x0440;&#x0441;&#x0442;&#x0443;&#x0444;&#x0445;&#x0446;&#x0447;&#x0448;&#x0449;&#x044C;&#x044D;&#x044E;&#x044F;&#x0454;&#x0456;&#x0457;&#x0490;&#x0491;
+##################################
+Armenian	&#x0531;&#x0532;&#x0533;&#x0534;&#x0535;&#x0536;&#x0537;&#x0538;&#x0539;&#x053A;&#x053B;&#x053C;&#x053D;&#x053E;&#x053F;&#x0541;&#x0542;&#x0543;&#x0544;&#x0545;&#x0546;&#x0547;&#x0548;&#x0549;&#x054A;&#x054B;&#x054C;&#x054D;&#x054E;&#x054F;&#x0551;&#x0552;&#x0553;&#x0554;&#x0555;&#x0556;&#x055B;&#x055C;&#x055D;&#x055E;&#x055F;&#x0561;&#x0562;&#x0563;&#x0564;&#x0565;&#x0586;&#x0589;
+#Armenian1	&#x055A;&#x058A;
+#Characters not found in the UCS:
+#	ARMENIAN ETERNITY SIGN
+#
+GeorgianOld	&#x10A0;&#x10A1;&#x10A2;&#x10A3;&#x10A4;&#x10A5;&#x10A6;&#x10A7;&#x10A8;&#x10A9;&#x10AA;&#x10AB;&#x10AC;&#x10AD;&#x10AE;&#x10AF;&#x10B0;&#x10B1;&#x10B2;&#x10B3;&#x10B4;&#x10B5;&#x10B6;&#x10B7;&#x10B8;&#x10B9;&#x10BA;&#x10BB;&#x10BC;&#x10BD;&#x10BE;&#x10BF;&#x10C0;&#x10C1;&#x10C2;&#x10C3;&#x10C4;&#x10C5;
+Georgian	&#x10D0;&#x10D1;&#x10D2;&#x10D3;&#x10D4;&#x10D5;&#x10D6;&#x10D7;&#x10D8;&#x10D9;&#x10DA;&#x10DB;&#x10DC;&#x10DD;&#x10DE;&#x10DF;&#x10E0;&#x10E1;&#x10E2;&#x10E3;&#x10E4;&#x10E5;&#x10E6;&#x10E7;&#x10E8;&#x10E9;&#x10EA;&#x10EB;&#x10EC;&#x10ED;&#x10EE;&#x10EF;&#x10F0;
+GeorgianArc	&#x10F1;&#x10F2;&#x10F3;&#x10F4;&#x10F5;&#x10F6;
+GeorgianPunc	&#x10FB;
+#
+GreekExt1	&#x0384;&#x0385;&#x0386;&#x00B7;&#x0388;&#x0389;&#x038A;&#x00BB;&#x038C;&#x00BD;&#x038E;&#x038F;&#x0390;
+Greek	&#x0391;&#x0392;&#x0393;&#x0394;&#x0395;&#x0396;&#x0397;&#x0398;&#x0399;&#x039A;&#x039B;&#x039C;&#x039D;&#x039E;&#x039F;&#x03A0;&#x03A1;&#x03A3;&#x03A4;&#x03A5;&#x03A6;&#x03A7;&#x03A8;&#x03A9;&#x03B1;&#x03B2;&#x03B3;&#x03B4;&#x03B5;&#x03B6;&#x03B7;&#x03B8;&#x03B9;&#x03BA;&#x03BB;&#x03BC;&#x03BD;&#x03BE;&#x03BF;&#x03C0;&#x03C1;&#x03C3;&#x03C4;&#x03C5;&#x03C6;&#x03C7;&#x03C8;&#x03C9;
+GreekExt2	&#x03AA;&#x03AB;&#x03AC;&#x03AD;&#x03AE;&#x03AF;&#x03B0;&#x03CA;&#x03CB;&#x03CC;&#x03CD;&#x03CE;
+GreekExt4	&#x03C2;
+#
+Hebrew	&#x05D0;&#x05D1;&#x05D2;&#x05D3;&#x05D4;&#x05D5;&#x05D6;&#x05D7;&#x05D8;&#x05D9;&#x05DA;&#x05DB;&#x05DC;&#x05DD;&#x05DE;&#x05DF;&#x05E0;&#x05E1;&#x05E2;&#x05E3;&#x05E4;&#x05E5;&#x05E6;&#x05E7;&#x05E8;&#x05E9;&#x05EA;
+##################################
+#Abaza
+#Abkhaz
+#Adyghe
+#Agul *
+#(Aisor)
+#Akhvakh *
+#(?lvdalska)
+#(Andi) *
+#(Aragonese)
+#Archi *
+#Arumanian
+#(Arvanite)
+#Asturian
+#Avar
+#Azerbaijani
+#(Bagulal) *
+#Balkar
+#Bashkir
+#Basque			!
+#Bats *
+#Bezhta *
+#(Botlikh) *
+#Budukh *
+#(Chamalal)
+#Chechen
+#Chuvash
+#Cornish		!
+#(Corsican)
+#Dargwa
+#Erzya
+#(Franco-Proven?al)
+#(Frisian, East)
+#(Frisian, North)
+#Frisian, West
+#Friulian
+#Gagauz
+#Gaelic, Irish		!
+#Gaelic, Manx		!
+#Gaelic, Scottish	!
+#Galician		!
+#(German, Low)		!
+#(German, Swiss)	!
+#Godoberi *
+#(Hinukh) *
+#(Hunzib) *
+#Ingrian
+#Ingush
+#Istro-Romanian
+#(Judeo-Georgian)
+#(Judeo-Kurdish)
+#(Judeo-Tati)
+#Kabardian
+#Kalmyk
+#Karachay
+#(Karaim)
+#(Karata) *
+#Karelian
+#Kashubian
+#Kazakh
+#Khinalug
+#(Khvarshi) *
+#(Kirmanji)
+#Komi
+#Komi-Permyak
+#(Kryts)
+#Kumyk
+#(Kurdish)
+#(Ladin)
+#(Ladino)
+#Lak
+#Laz
+#Lezgian
+#Livonian
+#(Ludian)
+#Luxemburgish		!
+#Mari, Hill
+#Mari, Meadow
+#Megleno-Romanian
+#(Mingrelian)
+#Moksha
+#Moldavian
+#Nenets, Tundra
+#Nogai
+#Occitan
+#Old Church Slavonic
+#(Olonets)
+#Ossetian
+#(Romani)
+#Romansch
+#(Rusyn)
+#Rutul
+#Sami, Inari
+#Sami, Kildin
+#Sami, Lule
+#Sami, Northern
+#Sami, Skolt
+#Sami, Southern
+#(Sami, Ter) *
+#(Sami, Ume) *
+#(Sardinian) *
+#Scots			!
+#Svan
+#Tabasaran
+#(Talysh)
+#Tatar, Crimean
+#Tatar, Kazan
+#Tati
+#(Tindi) *
+#(Tsakonian) *
+#Tsakhur *
+#(Tsez) *
+#(Turkish, Crimean)
+#Ubykh *
+#Udi
+#Udmurt
+#(V?mhusm?l)
+#Vepsian
+#Votic
+#(Walloon)
+#(Yiddish) 
+################################
+#      4	Gaelic-new-orthography
+#      4	Frisian
+#      3	Rhaeto-Romanic
+#      2	S&AACUTEmi-with-restrictions
+#      1	Rhjaeto-Romanic
+#      1	Gaelic-old-and-new-orthographies
+END
+) | 
+
+while read a b
+do
+  c=`echo $b | replace "&#x" "" ";" ""`
+  printf "INSERT INTO lang VALUES ('$a',_ucs2 X'$c');\n"
+done
+) | mysql -f test
+
+#mysql test << END
+#SELECT * FROM lang WHERE CONVERT(letters USING latin1) NOT LIKE _binary'%?%';
+#SELECT * FROM lang WHERE CONVERT(letters USING latin2) NOT LIKE _binary'%?%';
+#END
+
+
+
+list="big5 dec8 cp850 hp8 koi8r latin1 latin2 swe7 ascii ujis sjis hebrew euckr koi8u gb2312 greek cp1250 gbk latin5 armscii8 cp866 keybcs2 macce macroman cp852 latin7 cp1251 cp1256 cp1257 geostd8"
+
+for p in $list
+do
+echo "-----------------"
+echo $p:
+mysql  -sss test << END
+SELECT lang FROM lang WHERE CONVERT(letters USING $p) NOT LIKE _binary'%?%' ORDER BY lang;
+END
+done
+

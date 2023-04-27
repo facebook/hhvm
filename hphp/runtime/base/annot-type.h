@@ -90,6 +90,8 @@ inline AnnotType enumDataTypeToAnnotType(DataType dt) {
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
 
+const char* annotName(AnnotType);
+
 const AnnotType* nameToAnnotType(const StringData* typeName);
 const AnnotType* nameToAnnotType(const std::string& typeName);
 MaybeDataType nameToMaybeDataType(const StringData* typeName);
@@ -109,6 +111,14 @@ bool interface_supports_arrlike(folly::StringPiece s);
 
 TypedValue annotDefaultValue(AnnotType at);
 
+inline bool enumSupportsAnnot(AnnotType at) {
+  return
+    at == AnnotType::String ||
+    at == AnnotType::Int ||
+    at == AnnotType::ArrayKey ||
+    at == AnnotType::Classname;
+}
+
 enum class AnnotAction {
   Pass,
   Fail,
@@ -125,7 +135,7 @@ enum class AnnotAction {
 
 /*
  * annotCompat() takes a DataType (`dt') and tries to determine if a value
- * with DataType `dt' could be compatiable with a given AnnotType (`at')
+ * with DataType `dt' could be compatible with a given AnnotType (`at')
  * and class name (`annotClsName').  Note that this function does not have
  * access to the actual value, nor does it do any run time resolution on
  * the annotation's class name.  Here are the possible values that can be

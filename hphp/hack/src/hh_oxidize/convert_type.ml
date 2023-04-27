@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 open Asttypes
 open Longident
 open Parsetree
@@ -119,6 +119,8 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
     rust_ref (lifetime "a") (rust_simple_type "str")
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
     rust_type "bstr::BString" [] []
+  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_box ->
+    rust_type "bstr::BString" [] []
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
     rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
   | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->
@@ -136,12 +138,11 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
       | Lident "bool" -> "bool"
       | Lident "float" -> "f64"
       | Lident "list" -> "Vec"
-      | Lident "ref" ->
-        begin
-          match Configuration.mode () with
-          | Configuration.ByRef -> "std::cell::Cell"
-          | Configuration.ByBox -> "std::cell::RefCell"
-        end
+      | Lident "ref" -> begin
+        match Configuration.mode () with
+        | Configuration.ByRef -> "std::cell::Cell"
+        | Configuration.ByBox -> "std::cell::RefCell"
+      end
       | Ldot (Lident "Int64", "t") ->
         raise (Skip_type_decl "cannot convert type Int64.t")
       | id -> Convert_longident.longident_to_string id

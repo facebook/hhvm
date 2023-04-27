@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <filesystem>
 #include <vector>
 
 #include <folly/Try.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
@@ -29,8 +29,7 @@ namespace HPHP {
 namespace Facts {
 
 struct Extractor {
-  explicit Extractor(folly::Executor& exec) : m_exec(exec) {
-  }
+  explicit Extractor(folly::Executor& exec) : m_exec(exec) {}
 
   virtual ~Extractor() = default;
 
@@ -38,10 +37,10 @@ struct Extractor {
    * Convert a path/hash tuple representing a file into the JSON-encoded Facts
    * for that file.
    */
-  virtual folly::SemiFuture<std::string>
-  get(const PathAndOptionalHash& PathAndOptionalHash) = 0;
+  virtual folly::SemiFuture<std::string> get(
+      const PathAndOptionalHash& PathAndOptionalHash) = 0;
 
-protected:
+ protected:
   Extractor() = delete;
   Extractor(const Extractor&) = delete;
   Extractor(Extractor&&) noexcept = delete;
@@ -57,18 +56,20 @@ using ExtractorFactory = std::unique_ptr<Extractor> (*)(folly::Executor&);
 void setExtractorFactory(ExtractorFactory factory);
 
 /**
- * Synchronously extract Facts, as JSON, from the given path.
+ * Synchronously extract Facts, as JSON, from the given absolute path.
  *
- * Throw FactsExtractionExc on error.
+ * Throw FactsExtractionExc on error, including the case when a hash
+ * is given but doesn't match the loaded file.
  */
-std::string facts_json_from_path(const folly::fs::path& path);
+std::string facts_json_from_path(const PathAndOptionalHash& path);
 
 /**
  * Call facts_json_from_path on each path and return the results
  * (or a FactsExtractionExc in the case of an error).
  */
 std::vector<folly::Try<FileFacts>> facts_from_paths(
-    const folly::fs::path& root, const std::vector<PathAndOptionalHash>& paths);
+    const std::filesystem::path& root,
+    const std::vector<PathAndOptionalHash>& paths);
 
 } // namespace Facts
 } // namespace HPHP

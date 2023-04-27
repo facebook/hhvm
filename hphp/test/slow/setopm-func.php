@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() {
-  $f1 = fun('main');
+  $f1 = main<>;
   $f2 = __hhvm_intrinsics\launder_value($f1);
 
   $f1[0] .= 'x';

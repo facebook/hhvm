@@ -75,13 +75,15 @@ and instantiate_ subst x =
   | Taccess (ty, id) ->
     let ty = instantiate subst ty in
     Taccess (ty, id)
+  | Trefinement (ty, rs) ->
+    let ty = instantiate subst ty in
+    let rs = Class_refinement.map (instantiate subst) rs in
+    Trefinement (ty, rs)
   | Tvec_or_dict (ty1, ty2) ->
     let ty1 = instantiate subst ty1 in
     let ty2 = instantiate subst ty2 in
     Tvec_or_dict (ty1, ty2)
-  | (Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as
-    x ->
-    x
+  | (Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Tprim _) as x -> x
   | Ttuple tyl ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Ttuple tyl
@@ -110,8 +112,7 @@ and instantiate_ subst x =
       List.fold_left
         ~f:
           begin
-            fun subst t ->
-            SMap.remove (snd t.tp_name) subst
+            (fun subst t -> SMap.remove (snd t.tp_name) subst)
           end
         ~init:subst
         tparams
@@ -173,9 +174,13 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
-  | Tshape (shape_kind, fdm) ->
+  | Tshape (_, shape_kind, fdm) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-    Tshape (shape_kind, fdm)
+    Tshape (Missing_origin, shape_kind, fdm)
+  | Tnewtype (name, tyl, ty) ->
+    let tyl = List.map tyl ~f:(instantiate subst) in
+    let ty = instantiate subst ty in
+    Tnewtype (name, tyl, ty)
 
 and instantiate_possibly_enforced_ty subst et =
   { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }

@@ -20,7 +20,8 @@ let entry =
 let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
  fun f x ->
   try f x with
-  | Decl_class.Decl_heap_elems_bug -> Exit.exit Exit_status.Decl_heap_elems_bug
+  | Decl_class.Decl_heap_elems_bug _ ->
+    Exit.exit Exit_status.Decl_heap_elems_bug
   | File_provider.File_provider_stale ->
     Exit.exit Exit_status.File_provider_stale
   | Decl_defs.Decl_not_found x ->

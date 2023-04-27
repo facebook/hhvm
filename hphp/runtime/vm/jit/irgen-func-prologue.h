@@ -44,7 +44,10 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
                               SSATmp* prologueFlags, bool pushed);
 
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
-                                   uint32_t argc);
+                                   uint32_t& argc);
+
+void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
+                                  uint32_t argc, SSATmp* prologueCtx);
 
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                 SSATmp* prologueFlags);
@@ -57,8 +60,6 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee);
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);
-
-void emitInitClosureLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx);
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);

@@ -4,23 +4,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 use digest::Digest;
-use hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
+use hhbc_string_utils::mangle_xhp_id;
+use hhbc_string_utils::strip_global_ns;
 use naming_special_names_rust::user_attributes;
-use oxidized_by_ref::{
-    ast_defs::{Abstraction, ClassishKind},
-    direct_decl_parser::Decls,
-    shallow_decl_defs::{ClassDecl, TypedefDecl},
-    typing_defs::{Ty, Ty_, UserAttribute},
-};
+use oxidized_by_ref::ast_defs::Abstraction;
+use oxidized_by_ref::ast_defs::ClassishKind;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use oxidized_by_ref::shallow_decl_defs::ClassDecl;
+use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+use oxidized_by_ref::typing_defs::Ty;
+use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::UserAttribute;
+use serde::de::SeqAccess;
+use serde::de::Visitor;
 use serde::ser::SerializeSeq;
+use serde::Deserializer;
 use serde::Serializer;
+use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::json;
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TypeKind {
     Class,
@@ -33,80 +41,108 @@ pub enum TypeKind {
     Mixed,
 }
 
+impl Default for TypeKind {
+    fn default() -> Self {
+        Self::Unknown
+    }
+}
+
 pub type StringSet = BTreeSet<String>;
 pub type Attributes = BTreeMap<String, Vec<String>>;
-
-#[derive(Debug, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MethodFacts {
-    #[serde(skip_serializing_if = "Attributes::is_empty")]
-    pub attributes: Attributes,
-}
-
 pub type Methods = BTreeMap<String, MethodFacts>;
-
-#[derive(Debug, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TypeFacts {
-    pub base_types: StringSet,
-    #[serde(rename = "kindOf")]
-    pub kind: TypeKind,
-    pub attributes: Attributes,
-    pub flags: isize,
-    pub require_extends: StringSet,
-    pub require_implements: StringSet,
-    #[serde(skip_serializing_if = "Methods::is_empty")]
-    pub methods: Methods,
-}
-
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
-#[derive(Default, Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MethodFacts {
+    #[serde(default, skip_serializing_if = "Attributes::is_empty")]
+    pub attributes: Attributes,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct TypeFacts {
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
+    pub base_types: StringSet,
+
+    #[serde(rename = "kindOf")]
+    pub kind: TypeKind,
+
+    #[serde(default)]
+    pub attributes: Attributes,
+
+    pub flags: isize,
+
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
+    pub require_extends: StringSet,
+
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
+    pub require_implements: StringSet,
+
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
+    pub require_class: StringSet,
+
+    #[serde(default, skip_serializing_if = "Methods::is_empty")]
+    pub methods: Methods,
+}
+// Currently module facts are empty, but added for backward compatibility
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleFacts {}
+
+pub type ModuleFactsByName = BTreeMap<String, ModuleFacts>;
+
+#[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
-    #[serde(serialize_with = "types_to_json")]
+    #[serde(
+        default,
+        skip_serializing_if = "TypeFactsByName::is_empty",
+        serialize_with = "types_to_json",
+        deserialize_with = "json_to_types"
+    )]
     pub types: TypeFactsByName,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub functions: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub constants: Vec<String>,
-    pub type_aliases: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub file_attributes: Attributes,
+    #[serde(
+        default,
+        skip_serializing_if = "ModuleFactsByName::is_empty",
+        serialize_with = "modules_to_json",
+        deserialize_with = "json_to_modules"
+    )]
+    pub modules: ModuleFactsByName,
 }
+
 impl Facts {
-    pub fn to_json(&self, text: &[u8]) -> String {
-        let (md5sum, sha1sum) = md5_and_sha1(text);
+    pub fn to_json_value(&self, sha1sum: &str) -> serde_json::Value {
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
-            m.insert(
-                String::from("md5sum0"),
-                json!(hex_number_to_i64(&md5sum[0..16])),
-            );
-            m.insert(
-                String::from("md5sum1"),
-                json!(hex_number_to_i64(&md5sum[16..32])),
-            );
-            m.insert(String::from("sha1sum"), json!(sha1sum));
-            if self.skip_file_attributes() {
-                m.remove("fileAttributes");
-            }
+            m.insert("sha1sum".into(), json!(sha1sum));
         };
-        serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
+        json
     }
 
-    fn skip_file_attributes(&self) -> bool {
-        self.file_attributes.is_empty()
+    pub fn to_json(&self, pretty: bool, sha1sum: &str) -> String {
+        let json = self.to_json_value(sha1sum);
+        if pretty {
+            serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
+        } else {
+            serde_json::to_string(&json).expect("Could not serialize facts to JSON")
+        }
     }
 
-    pub fn facts_of_decls(
-        decls: &Decls<'_>,
-        file_attributes: &[&UserAttribute<'_>],
-        disable_xhp_element_mangling: bool,
-    ) -> Facts {
-        // 10/15/2021 TODO(T103413083): Fill out the implementation
-
+    pub fn from_decls(parsed_file: &ParsedFile<'_>) -> Facts {
         let mut types = TypeFactsByName::new();
-        decls.classes().for_each(|(class_name, decl)| {
+        parsed_file.decls.classes().for_each(|(class_name, decl)| {
             let mut name = format(class_name);
-            if !disable_xhp_element_mangling && decl.is_xhp {
+            if !parsed_file.disable_xhp_element_mangling && decl.is_xhp {
                 // strips the namespace and mangles the class id
                 if let Some(id) = name.rsplit('\\').next() {
                     name = id.to_string();
@@ -115,20 +151,16 @@ impl Facts {
             let type_fact = TypeFacts::of_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
-        let mut type_aliases = decls
-            .typedefs()
-            .filter_map(|(name, decl)| {
-                if decl.is_ctx {
-                    // ignore context aliases
-                    None
-                } else {
-                    let type_fact = TypeFacts::of_typedef_decl(decl);
-                    add_or_update_classish_decl(format(name), type_fact, &mut types);
-                    Some(format(name))
-                }
-            })
-            .collect::<Vec<String>>();
-        let mut functions = decls
+        for (name, decl) in parsed_file.decls.typedefs().filter(|(_, decl)| {
+            // Ignore context aliases
+            !decl.is_ctx
+        }) {
+            let type_fact = TypeFacts::of_typedef_decl(decl);
+            add_or_update_classish_decl(format(name), type_fact, &mut types);
+        }
+
+        let mut functions = parsed_file
+            .decls
             .funs()
             .filter_map(|(name, _)| {
                 let name = format(name);
@@ -139,21 +171,31 @@ impl Facts {
                 }
             })
             .collect::<Vec<String>>();
-        let mut constants = decls
+        let mut constants = parsed_file
+            .decls
             .consts()
             .map(|(name, _)| format(name))
             .collect::<Vec<String>>();
 
+        let mut modules = ModuleFactsByName::new();
+        parsed_file
+            .decls
+            .modules()
+            .for_each(|(module_name, _decl)| {
+                let name = format(module_name);
+                add_or_update_module_decl(name, ModuleFacts {}, &mut modules);
+            });
         functions.reverse();
         constants.reverse();
-        type_aliases.reverse();
+
+        let file_attributes = to_facts_attributes(parsed_file.file_attributes);
 
         Facts {
             types,
             functions,
             constants,
-            type_aliases,
-            file_attributes: to_facts_attributes(file_attributes),
+            file_attributes,
+            modules,
         }
     }
 }
@@ -165,6 +207,7 @@ pub enum Flag {
     Final = 2,
     MultipleDeclarations = 4,
 }
+
 impl Flag {
     pub fn as_flags(&self) -> Flags {
         *self as isize
@@ -172,7 +215,6 @@ impl Flag {
     pub fn default() -> Flags {
         0
     }
-    #[allow(dead_code)]
     pub fn is_set(&self, flags: Flags) -> bool {
         (flags & (*self as Flags)) != 0
     }
@@ -184,15 +226,31 @@ impl Flag {
     }
 }
 
-pub fn md5_and_sha1(text: &[u8]) -> (String, String) {
-    (
-        hash_and_hexify(md5::Md5::new(), text),
-        hash_and_hexify(sha1::Sha1::new(), text),
-    )
+pub fn sha1(text: &[u8]) -> String {
+    let mut digest = sha1::Sha1::new();
+    digest.update(text);
+    hex::encode(digest.finalize())
 }
 
 // implementation details
 
+fn modules_to_json<S: Serializer>(
+    modules_by_name: &ModuleFactsByName,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    let mut seq = s.serialize_seq(None)?;
+    for (name, modules) in modules_by_name.iter() {
+        let mut modules_json = json!(modules);
+        if let Some(m) = modules_json.as_object_mut() {
+            m.insert("name".to_owned(), json!(name));
+        };
+        seq.serialize_element(&modules_json)?;
+    }
+    seq.end()
+}
+
+/// Serialize the Map<Name, TypeFacts> as a sequence of JSON objects with `name`
+/// as one of the fields.
 fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result<S::Ok, S::Error> {
     let mut seq = s.serialize_seq(None)?;
     for (name, types) in types_by_name.iter() {
@@ -216,9 +274,76 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
                 .as_object_mut()
                 .map(|m| m.remove("requireImplements"));
         }
+        if types.skip_require_class() {
+            types_json.as_object_mut().map(|m| m.remove("requireClass"));
+        }
         seq.serialize_element(&types_json)?;
     }
     seq.end()
+}
+
+/// Deserialize a sequence of TypeFacts with `name` fields as a Map by hoisting
+/// the name as the map key.
+fn json_to_types<'de, D: Deserializer<'de>>(d: D) -> Result<TypeFactsByName, D::Error> {
+    struct TypeFactsSeqVisitor;
+    impl<'de> Visitor<'de> for TypeFactsSeqVisitor {
+        type Value = TypeFactsByName;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "a sequence of TypeFacts")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+            let mut types = TypeFactsByName::new();
+            while let Some(mut v) = seq.next_element::<serde_json::Value>()? {
+                let obj = v
+                    .as_object_mut()
+                    .ok_or_else(|| serde::de::Error::custom("Expected TypeFacts JSON Object"))?;
+                let name = obj
+                    .remove("name")
+                    .ok_or_else(|| serde::de::Error::missing_field("name"))?;
+                let name = name
+                    .as_str()
+                    .ok_or_else(|| serde::de::Error::custom("Expected name JSON String"))?;
+                types.insert(
+                    name.into(),
+                    serde_json::from_value(v).map_err(serde::de::Error::custom)?,
+                );
+            }
+            Ok(types)
+        }
+    }
+    d.deserialize_seq(TypeFactsSeqVisitor)
+}
+
+/// Deserialize a sequence of TypeFacts with `name` fields as a Map by hoisting
+/// the name as the map key.
+fn json_to_modules<'de, D: Deserializer<'de>>(d: D) -> Result<ModuleFactsByName, D::Error> {
+    struct ModuleFactsSeqVisitor;
+    impl<'de> Visitor<'de> for ModuleFactsSeqVisitor {
+        type Value = ModuleFactsByName;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "a sequence of ModuleFacts")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+            let mut modules = ModuleFactsByName::new();
+            while let Some(mut v) = seq.next_element::<serde_json::Value>()? {
+                let obj = v
+                    .as_object_mut()
+                    .ok_or_else(|| serde::de::Error::custom("Expected ModuleFacts JSON Object"))?;
+                let name = obj
+                    .remove("name")
+                    .ok_or_else(|| serde::de::Error::missing_field("name"))?;
+                let name = name
+                    .as_str()
+                    .ok_or_else(|| serde::de::Error::custom("Expected name JSON String"))?;
+                modules.insert(
+                    name.into(),
+                    serde_json::from_value(v).map_err(serde::de::Error::custom)?,
+                );
+            }
+            Ok(modules)
+        }
+    }
+    d.deserialize_seq(ModuleFactsSeqVisitor)
 }
 
 impl TypeFacts {
@@ -234,6 +359,12 @@ impl TypeFacts {
             _ => self.require_implements.is_empty(),
         }
     }
+    fn skip_require_class(&self) -> bool {
+        match self.kind {
+            TypeKind::Trait => false,
+            _ => self.require_class.is_empty(),
+        }
+    }
     fn skip_attributes(&self) -> bool {
         self.attributes.is_empty()
     }
@@ -244,6 +375,7 @@ impl TypeFacts {
             final_,
             req_implements,
             req_extends,
+            req_class,
             uses,
             extends,
             implements,
@@ -321,6 +453,16 @@ impl TypeFacts {
                 }
             })
             .collect::<StringSet>();
+        let require_class = req_class
+            .iter()
+            .filter_map(|&ty| {
+                if check_require {
+                    Some(extract_type_name(ty))
+                } else {
+                    None
+                }
+            })
+            .collect::<StringSet>();
 
         // TODO(T101762617): modify the direct decl parser to
         // preserve the attribute params that facts expects
@@ -347,6 +489,7 @@ impl TypeFacts {
             require_extends,
             flags,
             require_implements,
+            require_class,
             attributes,
             methods,
         }
@@ -360,6 +503,7 @@ impl TypeFacts {
             require_extends: StringSet::new(),
             flags: Flags::default(),
             require_implements: StringSet::new(),
+            require_class: StringSet::new(),
             methods: BTreeMap::new(),
         }
     }
@@ -378,24 +522,23 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
             tf.attributes.append(&mut delta.attributes);
             tf.require_extends.append(&mut delta.require_extends);
             tf.require_implements.append(&mut delta.require_implements);
+            tf.require_class.append(&mut delta.require_class)
         })
         .or_insert(delta);
 }
 
-fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
-    digest.input(text);
-    hex::encode(digest.result())
-}
-
-fn hex_number_to_i64(s: &str) -> i64 {
-    u64::from_str_radix(s, 16).unwrap() as i64
+fn add_or_update_module_decl(name: String, delta: ModuleFacts, types: &mut ModuleFactsByName) {
+    types
+        .entry(name)
+        // .and_modify(|mf| {}) (to be added when modules have actual bodies)
+        .or_insert(delta);
 }
 
 // TODO: move to typing_defs_core_impl.rs once completed
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
-        Ty_::Tapply(((_, id), _)) => format(*id),
-        Ty_::Tgeneric((id, _)) => format(*id),
+        Ty_::Tapply(((_, id), _)) => format(id),
+        Ty_::Tgeneric((id, _)) => format(id),
         _ => unimplemented!("{:?}", ty),
     }
 }
@@ -437,7 +580,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
                     attr_name,
                     ua.classname_params
                         .iter()
-                        .map(|param| format(*param))
+                        .map(|param| format(param))
                         .collect::<Vec<String>>(),
                 ))
             }
@@ -449,8 +592,9 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
+    use pretty_assertions::assert_eq;
+
+    use super::*; // make assert_eq print huge diffs more human-readable
 
     #[test]
     fn type_kind_to_json() {
@@ -459,20 +603,11 @@ mod tests {
     }
 
     #[test]
-    fn hex_number_to_json() {
-        assert_eq!(hex_number_to_i64("23"), 35);
-        assert_eq!(hex_number_to_i64("fffffffffffffffe"), -2);
-    }
-
-    #[test]
-    fn md5_and_sha1_some_text() {
+    fn sha1_some_text() {
         let text = b"some text";
         assert_eq!(
-            md5_and_sha1(text),
-            (
-                String::from("552e21cd4cd9918678e3c1a0df491bc3"),
-                String::from("37aa63c77398d954473262e1a0057c1e632eda77"),
-            ),
+            sha1(text),
+            String::from("37aa63c77398d954473262e1a0057c1e632eda77"),
         );
     }
 
@@ -490,133 +625,146 @@ mod tests {
         );
     }
 
+    fn fake_facts() -> (Facts, String) {
+        let mut types = TypeFactsByName::new();
+        let mut base_types = StringSet::new();
+        base_types.insert("bt3".into());
+        base_types.insert("bt1".into());
+        base_types.insert("bt2".into());
+        types.insert(
+            String::from("include_empty_both_when_trait_kind"),
+            TypeFacts {
+                kind: TypeKind::Trait,
+                base_types,
+                flags: 6,
+                ..Default::default()
+            },
+        );
+        // verify requireImplements, requireExtends and requireClass are skipped if empty and Class kind
+        types.insert(
+            String::from("include_empty_neither_when_class_kind"),
+            TypeFacts {
+                kind: TypeKind::Class,
+                flags: 0,
+                ..Default::default()
+            },
+        );
+        // verify only requireImplements is skipped if empty and Interface kind
+        types.insert(
+            String::from("include_empty_req_extends_when_interface_kind"),
+            TypeFacts {
+                kind: TypeKind::Interface,
+                flags: 1,
+                ..Default::default()
+            },
+        );
+        // verify non-empty require* is included
+        types.insert(
+            String::from("include_nonempty_always"),
+            TypeFacts {
+                kind: TypeKind::Unknown,
+                flags: 9,
+                attributes: {
+                    let mut map = Attributes::new();
+                    map.insert("A".into(), vec!["'B'".into()]);
+                    map.insert("C".into(), Vec::new());
+                    map
+                },
+                require_extends: {
+                    let mut set = StringSet::new();
+                    set.insert("extends1".into());
+                    set
+                },
+                require_implements: {
+                    let mut set = StringSet::new();
+                    set.insert("impl1".into());
+                    set
+                },
+                require_class: {
+                    let mut set = StringSet::new();
+                    set.insert("class1".into());
+                    set
+                },
+                ..Default::default()
+            },
+        );
+        types.insert(
+            String::from("include_method_attrs"),
+            TypeFacts {
+                kind: TypeKind::Class,
+                flags: 6,
+                methods: vec![
+                    (
+                        String::from("no_attrs"),
+                        MethodFacts {
+                            attributes: Attributes::new(),
+                        },
+                    ),
+                    (
+                        String::from("one_attr_with_arg"),
+                        MethodFacts {
+                            attributes: vec![(
+                                String::from("attr_with_arg"),
+                                vec![String::from("arg")],
+                            )]
+                            .into_iter()
+                            .collect(),
+                        },
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+                ..Default::default()
+            },
+        );
+        types.insert(
+            String::from("my_type_alias"),
+            TypeFacts {
+                kind: TypeKind::TypeAlias,
+                ..Default::default()
+            },
+        );
+        let mut modules = ModuleFactsByName::new();
+        modules.insert(String::from("foo"), ModuleFacts {});
+        let facts = Facts {
+            constants: vec!["c1".into(), "c2".into()],
+            file_attributes: BTreeMap::new(),
+            functions: vec![],
+            modules,
+            types,
+        };
+        (facts, super::sha1(b"fake source text"))
+    }
+
+    #[test]
+    fn round_trip_json() -> serde_json::Result<()> {
+        let (f1, sha1) = fake_facts();
+        let ugly = f1.to_json(false, &sha1);
+        let f2 = serde_json::from_str(&ugly)?;
+        assert_eq!(f1, f2);
+        let pretty = f1.to_json(true, &sha1);
+        let f2 = serde_json::from_str(&pretty)?;
+        assert_eq!(f1, f2);
+        Ok(())
+    }
+
     #[test]
     fn to_json() {
-        let mut types = TypeFactsByName::new();
-        {
-            let mut base_types = StringSet::new();
-            base_types.insert("bt3".into());
-            base_types.insert("bt1".into());
-            base_types.insert("bt2".into());
-            types.insert(
-                String::from("include_empty_both_when_trait_kind"),
-                TypeFacts {
-                    kind: TypeKind::Trait,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types,
-                    flags: 6,
-                    methods: Methods::new(),
-                },
-            );
-            // verify requireImplements and requireExtends are skipped if empty and Class kind
-            types.insert(
-                String::from("include_empty_neither_when_class_kind"),
-                TypeFacts {
-                    kind: TypeKind::Class,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 0,
-                    methods: Methods::new(),
-                },
-            );
-            // verify only requireImplements is skipped if empty and Interface kind
-            types.insert(
-                String::from("include_empty_req_extends_when_interface_kind"),
-                TypeFacts {
-                    kind: TypeKind::Interface,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 1,
-                    methods: Methods::new(),
-                },
-            );
-            // verify non-empty require* is included
-            types.insert(
-                String::from("include_nonempty_always"),
-                TypeFacts {
-                    kind: TypeKind::Unknown,
-                    attributes: {
-                        let mut map = Attributes::new();
-                        map.insert("A".into(), vec!["'B'".into()]);
-                        map.insert("C".into(), Vec::new());
-                        map
-                    },
-                    require_extends: {
-                        let mut set = StringSet::new();
-                        set.insert("extends1".into());
-                        set
-                    },
-                    require_implements: {
-                        let mut set = StringSet::new();
-                        set.insert("impl1".into());
-                        set
-                    },
-                    base_types: StringSet::new(),
-                    flags: 9,
-                    methods: Methods::new(),
-                },
-            );
-            types.insert(
-                String::from("include_method_attrs"),
-                TypeFacts {
-                    kind: TypeKind::Class,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 6,
-                    methods: vec![
-                        (
-                            String::from("no_attrs"),
-                            MethodFacts {
-                                attributes: Attributes::new(),
-                            },
-                        ),
-                        (
-                            String::from("one_attr_with_arg"),
-                            MethodFacts {
-                                attributes: vec![(
-                                    String::from("attr_with_arg"),
-                                    vec![String::from("arg")],
-                                )]
-                                .into_iter()
-                                .collect(),
-                            },
-                        ),
-                    ]
-                    .into_iter()
-                    .collect(),
-                },
-            );
-        }
-        // to_string_pretty
+        // test to_string_pretty()
+        let (facts, sha1) = fake_facts();
         assert_eq!(
-            (Facts {
-                constants: vec!["c1".into(), "c2".into()],
-                file_attributes: BTreeMap::new(),
-                functions: vec![],
-                type_aliases: vec!["my_type_alias".into()],
-                types,
-            })
-            .to_json(b"some text"),
+            facts.to_json(true, &sha1),
             r#"{
   "constants": [
     "c1",
     "c2"
   ],
-  "functions": [],
-  "md5sum0": 6137880507793904006,
-  "md5sum1": 8711019000949709763,
-  "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
-  "typeAliases": [
-    "my_type_alias"
+  "modules": [
+    {
+      "name": "foo"
+    }
   ],
+  "sha1sum": "883c01f3eb209c249f88908675c8632a04a817cf",
   "types": [
     {
       "baseTypes": [
@@ -626,25 +774,19 @@ mod tests {
       ],
       "flags": 6,
       "kindOf": "trait",
-      "name": "include_empty_both_when_trait_kind",
-      "requireExtends": [],
-      "requireImplements": []
+      "name": "include_empty_both_when_trait_kind"
     },
     {
-      "baseTypes": [],
       "flags": 0,
       "kindOf": "class",
       "name": "include_empty_neither_when_class_kind"
     },
     {
-      "baseTypes": [],
       "flags": 1,
       "kindOf": "interface",
-      "name": "include_empty_req_extends_when_interface_kind",
-      "requireExtends": []
+      "name": "include_empty_req_extends_when_interface_kind"
     },
     {
-      "baseTypes": [],
       "flags": 6,
       "kindOf": "class",
       "methods": {
@@ -666,16 +808,23 @@ mod tests {
         ],
         "C": []
       },
-      "baseTypes": [],
       "flags": 9,
       "kindOf": "unknown",
       "name": "include_nonempty_always",
+      "requireClass": [
+        "class1"
+      ],
       "requireExtends": [
         "extends1"
       ],
       "requireImplements": [
         "impl1"
       ]
+    },
+    {
+      "flags": 0,
+      "kindOf": "typeAlias",
+      "name": "my_type_alias"
     }
   ]
 }"#,

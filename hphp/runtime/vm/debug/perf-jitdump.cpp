@@ -35,9 +35,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
+#include <filesystem>
 
 const char padding_bytes[7] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 
@@ -98,10 +97,10 @@ static inline uint64_t perfGetTimestamp(void) {
 static bool checkJitdumpDir(const char* dirName) {
   if (!dirName || !strlen(dirName))  return false;
 
-  namespace bfs = boost::filesystem;
-  boost::system::error_code ec;
-  bfs::path dirPath(dirName);
-  return bfs::is_directory(dirPath, ec);
+  namespace fs = std::filesystem;
+  std::error_code ec;
+  fs::path dirPath(dirName);
+  return fs::is_directory(dirPath, ec);
 }
 
 void DebugInfo::initPerfJitDump() {

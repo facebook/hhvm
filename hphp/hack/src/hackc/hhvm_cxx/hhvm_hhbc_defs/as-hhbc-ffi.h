@@ -35,4 +35,4 @@ namespace HPHP {
  * Convert an fcall flag `to a string of space-separated flag names.
  */
 rust::String fcall_flags_to_string_ffi(FCallArgsFlags);
-}
+} // namespace HPHP

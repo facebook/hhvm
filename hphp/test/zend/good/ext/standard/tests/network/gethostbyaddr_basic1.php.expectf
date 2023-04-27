@@ -1,3 +1,0 @@
-*** Testing gethostbyaddr() : basic functionality ***
-%rloopback|localhost(\.localdomain)?|%s%r
-===DONE===

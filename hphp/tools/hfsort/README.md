@@ -42,7 +42,7 @@ cd hphp/tools/hfsort
                 --profBC \
                 --exec-after-warmup="SLEEP_TIME=60 HHVM_BIN_PATH=${HHVM_BIN_PATH} HHVM_PID=\`pgrep -n hhvm\` hf-prod-collect.sh > dump_hfprod.txt 2>&1 &" \
                 --hhvm=${HHVM_BIN_PATH} \
-                --hhvm-extra-arguments "-vEval.KeepPerfPidMap=true -vEval.ProfleHWEnable=false"
+                --hhvm-extra-arguments "-vEval.KeepPerfPidMap=true -vEval.ProfileHWEnable=false"
 
 ```
 

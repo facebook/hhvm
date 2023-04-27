@@ -1,0 +1,45 @@
+/*
+  Hide all symbols from the standard library.
+
+  This is a workaround for libstdc++ problems on redhat 6, which are caused
+  by our INSTALL_DEBUG_TARGET cmake macro: we *link* with one .so library,
+  but *run* with a different version.
+
+  The installed mysqld-debug will not start because of:
+  bin/mysqld-debug: symbol lookup error: undefined symbol: _ZNSs4backEv
+  Running c++filt on that symbol, we get
+  std::basic_string<char, std::char_traits<char>, std::allocator<char> >::back()
+
+  Parts of the std C++ library are not found in /usr/lib64/libstdc++.so.6
+  but must be linked from -lstdc++_nonshared.
+
+  Try on RedHat 6:
+  readelf -Ws /usr/lib64/libstdc++.so.6 | grep _ZNSs4backEv
+
+  That symbol has a weak implementation in libprotobuf-lite-debug.so
+  but is undefined in mysqld-debug, which means mysqld-debug will not
+  run with libprotobuf-lite.so (the non-debug version).
+
+  The solution is to add this version-script which explicitly makes
+  all symbols from the standard library hidden. It is really only needed
+  on RedHat 6/7, but we might as well use it on all Linuxes.
+
+  https://itanium-cxx-abi.github.io/cxx-abi/abi.html#mangling
+
+   <substitution> ::= St # ::std::
+   <substitution> ::= Sa # ::std::allocator
+   <substitution> ::= Sb # ::std::basic_string
+   <substitution> ::= Ss # ::std::basic_string < char,
+						 ::std::char_traits<char>,
+						 ::std::allocator<char> >
+   <substitution> ::= Si # ::std::basic_istream<char,  std::char_traits<char> >
+   <substitution> ::= So # ::std::basic_ostream<char,  std::char_traits<char> >
+   <substitution> ::= Sd # ::std::basic_iostream<char, std::char_traits<char> >
+ */
+
+MYSQL_HIDE_STD {
+        local:
+                _ZS[tabsiod]*;
+                _ZNS[tabsiod]*;
+                _ZNKS[tabsiod]*;
+};

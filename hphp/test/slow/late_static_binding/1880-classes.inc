@@ -1,5 +1,5 @@
 <?hh
 
 class B extends A {
- static $a = 'B';
+ public static $a = 'B';
 }

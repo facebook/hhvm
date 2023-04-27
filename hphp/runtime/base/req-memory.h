@@ -191,12 +191,9 @@ struct weak_ptr final : private std::weak_ptr<T> {
     type_scan::Index m_scan_index = type_scan::kIndexUnknownNoPtrs;
 };
 
-#ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
   sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),
   "req::unique_ptr pointer should not be larger than std::unique_ptr"
 );
-#endif
 
 }
-

@@ -34,7 +34,8 @@ exception Token_not_found
 
 let sign_file data =
   let data = Str.global_replace sign_or_old_token token data in
-  if not @@ String_utils.is_substring token data then raise Token_not_found;
+  if not @@ Core.String.is_substring ~substring:token data then
+    raise Token_not_found;
   let signature = "SignedSource<<" ^ hash data ^ ">>" in
   Str.global_replace token_regexp signature data
 

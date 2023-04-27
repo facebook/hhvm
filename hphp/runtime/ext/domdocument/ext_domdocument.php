@@ -192,7 +192,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 /**
@@ -221,7 +221,7 @@ class DOMAttr extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 /**
@@ -302,7 +302,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 /**
@@ -368,7 +368,7 @@ class DOMText extends DOMCharacterData {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 class DOMCdataSection extends DOMText {
@@ -621,7 +621,7 @@ class DOMDocument extends DOMNode {
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  public function load($filename, $options = 0): bool {
+  public function load(string $filename, int $options = 0): bool {
     return $this->_load($filename, $options, true);
   }
 
@@ -635,7 +635,7 @@ class DOMDocument extends DOMNode {
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  public function loadHTML($source, $options = 0): bool {
+  public function loadHTML(string $source, int $options = 0): bool {
     return $this->_loadHTML($source, $options, false);
   }
 
@@ -650,7 +650,7 @@ class DOMDocument extends DOMNode {
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  public function loadHTMLFile($filename, $options = 0): bool {
+  public function loadHTMLFile(string $filename, int $options = 0): bool {
     return $this->_loadHTML($filename, $options, true);
   }
 
@@ -662,7 +662,7 @@ class DOMDocument extends DOMNode {
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  public function loadXML($source, $options = 0): bool {
+  public function loadXML(string $source, int $options = 0): bool {
     return $this->_load($source, $options, false);
   }
 
@@ -819,7 +819,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 class DOMDocumentFragment extends DOMNode {
@@ -856,7 +856,7 @@ class DOMDocumentType extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 <<__NativeData("DOMElement")>>
@@ -1110,7 +1110,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 
 }
 
@@ -1126,7 +1126,7 @@ class DOMEntity extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 class DOMEntityReference extends DOMNode {
@@ -1142,7 +1142,7 @@ class DOMNotation extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 class DOMProcessingInstruction extends DOMNode {
@@ -1155,36 +1155,36 @@ class DOMProcessingInstruction extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 class DOMNameSpaceNode extends DOMNode {
 }
 
 <<__NativeData("DOMNodeIterator")>>
-class DOMNodeIterator implements Iterator {
+class DOMNodeIterator implements Iterator<?DOMNode> {
 
   public function __construct(): void {
   }
 
   <<__Native>>
-  public function current(): mixed;
+  public function current(): ?DOMNode;
 
   <<__Native>>
   public function key(): mixed;
 
   <<__Native>>
-  public function next(): mixed;
+  public function next(): void;
 
   <<__Native>>
-  public function rewind(): mixed;
+  public function rewind(): void;
 
   <<__Native>>
-  public function valid(): mixed;
+  public function valid(): bool;
 }
 
 <<__NativeData("DOMIterable")>>
-class DOMNamedNodeMap implements IteratorAggregate {
+class DOMNamedNodeMap implements IteratorAggregate<?DOMNode> {
 
   public function __construct()[]: void {
   }
@@ -1228,11 +1228,11 @@ class DOMNamedNodeMap implements IteratorAggregate {
   public function item(int $index): mixed;
 
   <<__Native>>
-  public function getIterator()[]: mixed;
+  public function getIterator()[]: DOMNodeIterator;
 }
 
 <<__NativeData("DOMIterable")>>
-class DOMNodeList implements IteratorAggregate {
+class DOMNodeList implements IteratorAggregate<?DOMNode> {
 
   public function __construct()[]: void {
   }
@@ -1252,14 +1252,14 @@ class DOMNodeList implements IteratorAggregate {
   public function item(int $index): mixed;
 
   <<__Native>>
-  public function getIterator()[]: mixed;
+  public function getIterator()[]: DOMNodeIterator;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 /**
@@ -1402,7 +1402,7 @@ class DOMXPath {
   public function registerPHPFunctions(mixed $funcs = null): mixed;
 
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 function dom_document_create_element(DOMDocument $obj,
@@ -1795,7 +1795,7 @@ function dom_element_set_attribute_node_ns(DOMElement $obj,
 function dom_element_get_elements_by_tag_name_ns(DOMElement $obj,
                                                  string $namespaceuri,
                                                  string $localname): object {
-  return $obj->getElementsByTagNameNS($namepaceuri, $localname);
+  return $obj->getElementsByTagNameNS($namespaceuri, $localname);
 }
 
 function dom_element_has_attribute(DOMElement $obj, string $name): bool {
@@ -1805,13 +1805,13 @@ function dom_element_has_attribute(DOMElement $obj, string $name): bool {
 function dom_element_has_attribute_ns(DOMElement $obj,
                                       string $namespaceuri,
                                       string $localname): bool {
-  return $obj->hasAttribtueNS($namespaceuri, $localname);
+  return $obj->hasAttributeNS($namespaceuri, $localname);
 }
 
 function dom_element_set_id_attribute(DOMElement $obj,
                                       string $name,
                                       bool $isid): mixed {
-  return $obj->setIdAttribute($name, $isid);
+  return $obj->setIDAttribute($name, $isid);
 }
 
 function dom_element_set_id_attribute_ns(DOMElement $obj,

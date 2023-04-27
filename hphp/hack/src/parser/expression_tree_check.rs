@@ -4,10 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{
-    aast::{Expr, Expr_, Program},
-    aast_visitor::{visit, AstParams, Node, Visitor},
-};
+use oxidized::aast::Expr;
+use oxidized::aast::Expr_;
+use oxidized::aast::Program;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
 use parser_core_types::syntax_error::SyntaxError;
 
 struct Checker {

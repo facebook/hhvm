@@ -80,8 +80,14 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     // - new native frame will be initialized at rvmsp() and linked to rvmfp()
     // - fp(env) and sp(env) will be backed by the same rvmfp() register
     // - stack base is numSlotsInFrame() away from sp(env)
-    gen(env, DefFuncEntryFP, FuncData { curFunc(env) });
+    gen(env, DefFuncEntryFP);
     updateMarker(env);
+    env.funcEntryPrevFP = gen(env, DefFuncEntryPrevFP);
+
+    if (!curSrcKey(env).trivialDVFuncEntry()) {
+      gen(env, EnterFrame, fp(env), env.funcEntryPrevFP);
+      updateMarker(env);
+    }
 
     assertx(bcSPOff == spOffEmpty(env));
     auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
@@ -104,8 +110,11 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
   gen(env, EnterTranslation);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that we're in the correct function.
+  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+      !curSrcKey(env).trivialDVFuncEntry()) {
+    // Assert that we're in the correct function, but we can't do so
+    // for trivial DV FuncEntries because the frame isn't setup yet
+    // (we skip EnterFrame for them above).
     gen(env, DbgAssertFunc, fp(env));
   }
 }

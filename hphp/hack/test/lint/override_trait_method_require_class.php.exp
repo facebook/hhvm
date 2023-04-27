@@ -1,0 +1,2 @@
+File "override_trait_method_require_class.php", line 9, characters 19-21:
+Method `foo` in trait `T` is overriden in class `C` and trait `T` has `require class `C``. This method is never used. (Lint[5642])

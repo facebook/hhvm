@@ -100,13 +100,13 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
       ignore_errors = opts[s_ignore_errors].toBoolean();
     }
     if (opts.exists(s_proxy)) {
-      Variant host = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_HOST);
-      Variant port = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PORT);
+      Variant host = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_HOST);
+      Variant port = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_PORT);
       if (!same(host, false) && !same(port, false)) {
         proxy_host = host.toString();
         proxy_port = port.toInt64();
-        Variant user = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_USER);
-        Variant pass = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PASS);
+        Variant user = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_USER);
+        Variant pass = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_PASS);
         if (!same(user, false) && !same(pass, false)) {
           proxy_user = user.toString();
           proxy_pass = pass.toString();

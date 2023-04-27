@@ -30,9 +30,12 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     td_vis = _;
     td_tparams;
     td_type;
-    td_constraint;
+    td_as_constraint;
+    td_super_constraint = _;
     td_is_ctx = _;
     td_attributes = _;
+    td_internal = _;
+    td_docs_url = _;
   } =
     td
   in
@@ -49,13 +52,17 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
             @@ Primary.Cyclic_typedef
                  { pos = initial_taccess_pos; decl_pos = pos }))
     in
-    ((env, ty_err_opt), (ety_env, MakeType.err r))
+    let (env, ty) =
+      Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
+    in
+    ((env, ty_err_opt), (ety_env, ty))
   | None ->
     let should_expand =
       force_expand
       || Typing_env.is_typedef_visible
            env
            ~expand_visible_newtype:ety_env.expand_visible_newtype
+           ~name:x
            td
     in
     let ety_env =
@@ -72,17 +79,24 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
       if should_expand then
         Phase.localize ~ety_env env td_type
       else
-        let (env, td_constraint) =
-          match td_constraint with
+        let (env, td_as_constraint) =
+          match td_as_constraint with
           | None ->
             let r_cstr =
               Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull")
             in
             let cstr = MakeType.mixed r_cstr in
             ((env, None), cstr)
-          | Some cstr -> Phase.localize ~ety_env env cstr
+          | Some cstr ->
+            (* Special case for supportdyn<T> defined with "as T" in order to
+             * avoid supportdynamic.hhi appearing in reason *)
+            if String.equal x Naming_special_names.Classes.cSupportDyn then
+              ((env, None), List.hd_exn argl)
+            else
+              Phase.localize ~ety_env env cstr
         in
-        (env, mk (r, Tnewtype (x, argl, td_constraint)))
+        (* TODO: update Tnewtype and pass in super constraint as well *)
+        (env, mk (r, Tnewtype (x, argl, td_as_constraint)))
     in
     (env, (ety_env, with_reason expanded_ty r))
 

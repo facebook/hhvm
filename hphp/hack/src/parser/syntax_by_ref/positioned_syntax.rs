@@ -4,8 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{positioned_token::PositionedToken, positioned_value::PositionedValue, syntax::Syntax};
-use crate::{source_text::SourceText, syntax_trait::SyntaxTrait};
+use super::positioned_token::PositionedToken;
+use super::positioned_value::PositionedValue;
+use super::syntax::Syntax;
+use crate::source_text::SourceText;
+use crate::syntax_trait::SyntaxTrait;
 
 pub type PositionedSyntax<'a> = Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>;
 

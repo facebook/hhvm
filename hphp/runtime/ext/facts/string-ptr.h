@@ -35,9 +35,7 @@ namespace Facts {
  * std::string.
  */
 struct StringPtr {
-
-  explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {
-  }
+  explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {}
 
   StringPtr() = default;
 
@@ -120,7 +118,7 @@ struct StringPtr {
     return *get();
   }
 
-private:
+ private:
   friend std::ostream& operator<<(std::ostream& os, const StringPtr& s);
   const StringData* m_impl = nullptr;
 };
@@ -133,7 +131,8 @@ std::ostream& operator<<(std::ostream& os, const StringPtr& s);
 } // namespace Facts
 } // namespace HPHP
 
-template <> struct std::hash<HPHP::Facts::StringPtr> {
+template <>
+struct std::hash<HPHP::Facts::StringPtr> {
   std::size_t operator()(const HPHP::Facts::StringPtr& s) const noexcept {
     return s.hash();
   }

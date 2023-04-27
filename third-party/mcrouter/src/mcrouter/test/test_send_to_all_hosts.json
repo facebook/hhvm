@@ -1,0 +1,26 @@
+{
+  "pools": {
+    "poolA": {
+      "servers": [ "127.0.0.1:11810" ]
+    },
+    "poolB": {
+      "servers": [
+        "127.0.0.1:11811",
+        "127.0.0.1:11812"
+      ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "a": {
+        "type": "AllSyncRoute",
+        "children": [
+          "Pool|poolA",
+          "AllSyncRoute|Pool|poolB"
+        ]
+      }
+    },
+    "wildcard": "PoolRoute|poolA"
+  }
+}

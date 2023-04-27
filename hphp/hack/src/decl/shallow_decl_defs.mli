@@ -21,6 +21,7 @@ module PropFlags : sig
   val get_needs_init  : t -> bool
   val get_php_std_lib : t -> bool
   val get_readonly    : t -> bool
+  val get_safe_global_variable: t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
@@ -29,6 +30,7 @@ module PropFlags : sig
   val set_needs_init  : bool -> t -> t
   val set_php_std_lib : bool -> t -> t
   val set_readonly    : bool -> t -> t
+  val set_safe_global_variable: bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -38,6 +40,7 @@ module PropFlags : sig
     needs_init:bool ->
     php_std_lib:bool ->
     readonly: bool ->
+    safe_global_variable: bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -92,7 +95,7 @@ type shallow_typeconst = {
 type shallow_prop = {
   sp_name: Typing_defs.pos_id;
   sp_xhp_attr: xhp_attr option;
-  sp_type: decl_ty option;
+  sp_type: decl_ty;
   sp_visibility: Ast_defs.visibility;
   sp_flags: PropFlags.t;
 }
@@ -107,6 +110,8 @@ type shallow_method = {
   sm_attributes: user_attribute list;
 }
 [@@deriving eq, show]
+
+type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
 
 type shallow_class = {
   sc_mode: FileInfo.mode;
@@ -123,7 +128,8 @@ type shallow_class = {
   sc_extends: decl_ty list;
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;
-  sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  sc_xhp_enum_values: xhp_enum_values;
+  sc_xhp_marked_empty: bool;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_req_class: decl_ty list;
@@ -138,6 +144,7 @@ type shallow_class = {
   sc_methods: shallow_method list;
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
+  sc_docs_url: string option;
 }
 [@@deriving eq, show]
 
@@ -154,6 +161,8 @@ val sp_needs_init : shallow_prop -> bool
 val sp_php_std_lib : shallow_prop -> bool
 
 val sp_readonly : shallow_prop -> bool
+
+val sp_safe_global_variable : shallow_prop -> bool
 
 val sm_abstract : shallow_method -> bool
 
@@ -184,3 +193,13 @@ type decl =
   | Const of const_decl
   | Module of module_decl
 [@@deriving show]
+
+val to_class_decl_opt : decl -> class_decl option
+
+val to_fun_decl_opt : decl -> fun_decl option
+
+val to_typedef_decl_opt : decl -> typedef_decl option
+
+val to_const_decl_opt : decl -> const_decl option
+
+val to_module_decl_opt : decl -> module_decl option

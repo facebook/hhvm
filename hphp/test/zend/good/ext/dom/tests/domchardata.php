@@ -25,8 +25,8 @@ function main_entry(): void {
   echo "New Comment Length: ".$comment->length."\n";
   echo "New Comment Data: ".$comment->data."\n";
 
-  /* DOMCDataSection */
-  $cdata = new DOMCDataSection('Chars: <>&"');
+  /* DOMCdataSection */
+  $cdata = new DOMCdataSection('Chars: <>&"');
   $charnode->appendChild($cdata);
 
   echo "Substring: ".$cdata->substringData(7, 4)."\n";

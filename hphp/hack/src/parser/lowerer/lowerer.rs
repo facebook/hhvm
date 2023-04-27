@@ -4,57 +4,73 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{desugar_expression_tree::desugar, modifier};
-use bstr::{BString, B};
+use std::cell::Ref;
+use std::cell::RefCell;
+use std::cell::RefMut;
+use std::matches;
+use std::mem;
+use std::rc::Rc;
+use std::slice::Iter;
+use std::str::FromStr;
+
+use bstr::BString;
+use bstr::B;
 use bumpalo::Bump;
 use escaper::*;
-use hash::{HashMap, HashSet};
-use itertools::{Either, Itertools};
+use hash::HashMap;
+use hash::HashSet;
+use itertools::Either;
+use itertools::Itertools;
 use lint_rust::LintError;
-use naming_special_names_rust::{
-    classes as special_classes, literal, special_functions, special_idents,
-    typehints as special_typehints, user_attributes as special_attrs,
-};
-use ocaml_helper::{int_of_string_opt, parse_int, ParseIntError};
+use naming_special_names_rust as sn;
+use naming_special_names_rust::classes as special_classes;
+use naming_special_names_rust::literal;
+use naming_special_names_rust::special_functions;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::typehints as special_typehints;
+use naming_special_names_rust::user_attributes as special_attrs;
+use ocaml_helper::int_of_string_opt;
+use ocaml_helper::parse_int;
+use ocaml_helper::ParseIntError;
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    aast,
-    aast_visitor::{AstParams, Node, Visitor},
-    ast,
-    ast::{Expr, Expr_},
-    doc_comment::DocComment,
-    errors::{Error as HHError, Naming, NastCheck},
-    file_info,
-    global_options::GlobalOptions,
-    namespace_env::Env as NamespaceEnv,
-    pos::Pos,
-};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::{LexablePositionedToken, LexableToken},
-    source_text::SourceText,
-    syntax::SyntaxValueWithKind,
-    syntax_by_ref::{
-        positioned_token::{PositionedToken, TokenFactory as PositionedTokenFactory},
-        positioned_value::PositionedValue,
-        syntax::Syntax,
-        syntax_variant_generated::{SyntaxVariant::*, *},
-    },
-    syntax_error, syntax_kind,
-    syntax_trait::SyntaxTrait,
-    token_factory::TokenMutator,
-    token_kind::TokenKind as TK,
-};
+use oxidized::aast;
+use oxidized::aast::Binop;
+use oxidized::aast_defs::ClassReq;
+use oxidized::aast_defs::DocComment;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
+use oxidized::errors::Error as HHError;
+use oxidized::errors::Naming;
+use oxidized::errors::NastCheck;
+use oxidized::file_info;
+use oxidized::global_options::GlobalOptions;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::pos::Pos;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexablePositionedToken;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxValueWithKind;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_token::TokenFactory as PositionedTokenFactory;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::*;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_kind;
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::token_factory::TokenMutator;
+use parser_core_types::token_kind::TokenKind as TK;
 use regex::bytes::Regex;
-use stack_limit::StackLimit;
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    matches, mem,
-    rc::Rc,
-    slice::Iter,
-    str::FromStr,
-};
 use thiserror::Error;
+
+use crate::desugar_expression_tree::desugar;
+use crate::modifier;
 
 fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
     Ok(escaper::unescape_single(s)?.into())
@@ -146,13 +162,9 @@ pub struct State {
     pub fn_generics: HashMap<String, bool>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
-    /// This provides a generic mechanism to delay raising parsing errors;
-    /// since we're moving FFP errors away from CST to a stage after lowering
-    /// _and_ want to prioritize errors before lowering, the lowering errors
-    /// must be merely stored when the lowerer runs (until check for FFP runs (on AST)
-    /// and raised _after_ FFP error checking (unless we run the lowerer twice,
-    /// which would be expensive).
-    pub lowpri_errors: Vec<(Pos, String)>,
+    /// Parsing errors emitted during lowering. Note that most parsing
+    /// errors are emitted in the initial FFP parse.
+    pub parsing_errors: Vec<(Pos, String)>,
     /// hh_errors captures errors after parsing, naming, nast, etc.
     pub hh_errors: Vec<HHError>,
     pub lint_errors: Vec<LintError>,
@@ -176,7 +188,6 @@ pub struct Env<'a> {
     /// until we can properly set up saved states to surface parse errors during
     /// typechecking properly.
     pub show_all_errors: bool,
-    fail_open: bool,
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
@@ -190,7 +201,6 @@ pub struct Env<'a> {
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a GlobalOptions,
-    pub stack_limit: Option<&'a StackLimit>,
 
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
@@ -204,12 +214,10 @@ impl<'a> Env<'a> {
         quick_mode: bool,
         keep_errors: bool,
         show_all_errors: bool,
-        fail_open: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
         namespace_env: RcOc<NamespaceEnv>,
-        stack_limit: Option<&'a StackLimit>,
         token_factory: PositionedTokenFactory<'a>,
         arena: &'a Bump,
     ) -> Self {
@@ -218,7 +226,6 @@ impl<'a> Env<'a> {
             keep_errors,
             quick_mode,
             show_all_errors,
-            fail_open,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -226,9 +233,8 @@ impl<'a> Env<'a> {
             tmp_var_counter: 1,
             indexed_source_text,
             parser_options,
-            pos_none: Pos::make_none(),
+            pos_none: Pos::NONE,
             empty_ns_env: namespace_env,
-            stack_limit,
             token_factory,
             arena,
 
@@ -237,7 +243,7 @@ impl<'a> Env<'a> {
                 fn_generics: HashMap::default(),
                 in_static_method: false,
                 parent_maybe_reified: false,
-                lowpri_errors: vec![],
+                parsing_errors: vec![],
                 doc_comments: vec![],
                 local_id_counter: 1,
                 hh_errors: vec![],
@@ -265,10 +271,6 @@ impl<'a> Env<'a> {
 
     fn source_text(&self) -> &SourceText<'a> {
         self.indexed_source_text.source_text()
-    }
-
-    fn fail_open(&self) -> bool {
-        self.fail_open
     }
 
     fn cls_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
@@ -303,8 +305,8 @@ impl<'a> Env<'a> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    pub fn lowpri_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
-        RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
+    pub fn parsing_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.parsing_errors)
     }
 
     pub fn hh_errors(&mut self) -> RefMut<'_, Vec<HHError>> {
@@ -360,12 +362,6 @@ impl<'a> Env<'a> {
             Either::Right(e)
         }
     }
-
-    fn check_stack_limit(&self) {
-        if let Some(limit) = &self.stack_limit {
-            limit.panic_if_exceeded()
-        }
-    }
 }
 
 impl<'a> AsMut<Env<'a>> for Env<'a> {
@@ -376,7 +372,7 @@ impl<'a> AsMut<Env<'a>> for Env<'a> {
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum Error {
     #[error(
         "missing case in {expecting:?}.\n - pos: {pos:?}\n - unexpected: '{node_name:?}'\n - kind: {kind:?}\n"
@@ -387,38 +383,53 @@ pub enum Error {
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
-    #[error("{0}")]
-    Failwith(String),
+    #[error("{message}")]
+    ParsingError { message: String, pos: Pos },
+}
+
+fn emit_error<'a>(error: Error, env: &mut Env<'a>) {
+    // Don't emit multiple parsing errors during lowering. Once we've
+    // seen one parsing error, later parsing errors are rarely
+    // meaningful.
+    if !env.parsing_errors().is_empty() {
+        return;
+    }
+
+    match error {
+        Error::MissingSyntax {
+            expecting,
+            pos,
+            node_name,
+            ..
+        } => {
+            let msg = syntax_error::lowering_parsing_error(&node_name, &expecting);
+            env.parsing_errors().push((pos, msg.to_string()));
+        }
+        Error::ParsingError { message, pos } => {
+            env.parsing_errors().push((pos, message));
+        }
+    }
 }
 
 type S<'arena> = &'arena Syntax<'arena, PositionedToken<'arena>, PositionedValue<'arena>>;
 
 fn p_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
     node.position_exclusive(env.indexed_source_text)
-        .unwrap_or_else(|| env.mk_none_pos())
+        .map_or_else(|| env.mk_none_pos(), Into::into)
 }
 
 fn raise_parsing_error<'a>(node: S<'a>, env: &mut Env<'a>, msg: &str) {
-    raise_parsing_error_(Either::Left(node), env, msg)
+    let pos = p_pos(node, env);
+    raise_parsing_error_(pos, env, msg)
 }
 
-fn raise_parsing_error_pos<'a>(pos: &Pos, env: &mut Env<'a>, msg: &str) {
-    raise_parsing_error_(Either::Right(pos), env, msg)
+fn raise_parsing_error_pos(pos: &Pos, env: &mut Env<'_>, msg: &str) {
+    raise_parsing_error_(pos.clone(), env, msg)
 }
 
-fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>, msg: &str) {
-    if env.should_surface_error() {
-        let pos = node_or_pos.either(|node| p_pos(node, env), |pos| pos.clone());
-        env.lowpri_errors().push((pos, String::from(msg)))
-    } else if env.codegen() {
-        let pos = node_or_pos.either(
-            |node| {
-                node.position_exclusive(env.indexed_source_text)
-                    .unwrap_or_else(|| env.mk_none_pos())
-            },
-            |pos| pos.clone(),
-        );
-        env.lowpri_errors().push((pos, String::from(msg)))
+fn raise_parsing_error_(pos: Pos, env: &mut Env<'_>, msg: &str) {
+    if env.should_surface_error() || env.codegen() {
+        env.parsing_errors().push((pos, String::from(msg)))
     }
 }
 
@@ -430,8 +441,11 @@ fn raise_lint_error(env: &mut Env<'_>, err: LintError) {
     env.lint_errors().push(err);
 }
 
-fn failwith<N>(msg: impl Into<String>) -> Result<N> {
-    Err(Error::Failwith(msg.into()))
+fn parsing_error<N>(msg: impl Into<String>, pos: Pos) -> Result<N> {
+    Err(Error::ParsingError {
+        message: msg.into(),
+        pos,
+    })
 }
 
 fn text<'a>(node: S<'a>, env: &Env<'_>) -> String {
@@ -443,7 +457,7 @@ fn text_str<'b, 'a>(node: S<'a>, env: &'b Env<'_>) -> &'b str {
 }
 
 fn lowering_error(env: &mut Env<'_>, pos: &Pos, text: &str, syntax_kind: &str) {
-    if env.is_typechecker() && env.lowpri_errors().is_empty() {
+    if env.is_typechecker() && env.parsing_errors().is_empty() {
         raise_parsing_error_pos(
             pos,
             env,
@@ -452,30 +466,20 @@ fn lowering_error(env: &mut Env<'_>, pos: &Pos, text: &str, syntax_kind: &str) {
     }
 }
 
-fn missing_syntax_<N>(
-    fallback: Option<N>,
-    expecting: &str,
-    node: S<'_>,
-    env: &mut Env<'_>,
-) -> Result<N> {
+fn raise_missing_syntax(expecting: &str, node: S<'_>, env: &mut Env<'_>) {
     let pos = p_pos(node, env);
     let text = text(node, env);
     lowering_error(env, &pos, &text, expecting);
-    if let Some(x) = fallback {
-        if env.fail_open() {
-            return Ok(x);
-        }
-    }
+}
+
+fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N> {
+    let text = text(node, env);
     Err(Error::MissingSyntax {
         expecting: String::from(expecting),
         pos: p_pos(node, env),
         node_name: text,
         kind: node.kind(),
     })
-}
-
-fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N> {
-    missing_syntax_(None, expecting, node, env)
 }
 
 fn map_optional<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<Option<R>>
@@ -486,6 +490,42 @@ where
         Missing => Ok(None),
         _ => p(node, env).map(Some),
     }
+}
+
+fn map_optional_emit_error<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Option<R>
+where
+    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
+{
+    match &node.children {
+        Missing => None,
+        _ => match p(node, env) {
+            Ok(v) => Some(v),
+            Err(e) => {
+                emit_error(e, env);
+                None
+            }
+        },
+    }
+}
+
+fn pos_module_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
+    if let ModuleName(c) = &node.children {
+        if let SyntaxList(l) = &c.parts.children {
+            let p = p_pos(node, env);
+            let mut s = String::with_capacity(node.width());
+            for i in l.iter() {
+                match &i.children {
+                    ListItem(li) => {
+                        s += text_str(&li.item, env);
+                        s += text_str(&li.separator, env);
+                    }
+                    _ => s += text_str(i, env),
+                }
+            }
+            return Ok(ast::Id(p, s));
+        }
+    }
+    missing_syntax("module name", node, env)
 }
 
 fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
@@ -767,16 +807,22 @@ fn p_targ<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Targ> {
     Ok(ast::Targ((), p_hint(node, env)?))
 }
 
+fn p_unary_hint<'a>(kw: S<'a>, ty: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
+    Ok(ast::Hint_::Happly(
+        pos_name(kw, env)?,
+        could_map(ty, env, p_hint)?,
+    ))
+}
+
+fn p_binary_hint<'a>(kw: S<'a>, key: S<'a>, ty: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
+    let kw = pos_name(kw, env)?;
+    let key = p_hint(key, env)?;
+    let value = p_hint(ty, env)?;
+    Ok(ast::Hint_::Happly(kw, vec![key, value]))
+}
+
 fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
     use ast::Hint_::*;
-    let unary =
-        |kw, ty, env: &mut Env<'a>| Ok(Happly(pos_name(kw, env)?, could_map(ty, env, p_hint)?));
-    let binary = |kw, key, ty, env: &mut Env<'a>| {
-        let kw = pos_name(kw, env)?;
-        let key = p_hint(key, env)?;
-        let value = p_hint(ty, env)?;
-        Ok(Happly(kw, vec![key, value]))
-    };
 
     match &node.children {
         Token(token) if token.kind() == TK::Variable => {
@@ -786,25 +832,29 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         /* Dirty hack; CastExpression can have type represented by token */
         Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
             let ast::Id(pos, name) = pos_name(node, env)?;
-            let mut suggest = |name: &str, canonical: &str| {
-                raise_parsing_error(
-                    node,
-                    env,
-                    &syntax_error::invalid_typehint_alias(name, canonical),
-                );
-            };
+
             if "integer".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::INT);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::INT),
+                );
             } else if "boolean".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::BOOL);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::BOOL),
+                );
             } else if "double".eq_ignore_ascii_case(&name) || "real".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::FLOAT);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::FLOAT),
+                );
             }
 
-            use naming_special_names_rust::coeffects::{CAPABILITIES, CONTEXTS};
             if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
                 let sn = strip_ns(&name);
-                if sn.starts_with(CONTEXTS) || sn.starts_with(CAPABILITIES) {
+                if sn.starts_with(sn::coeffects::CONTEXTS)
+                    || sn.starts_with(sn::coeffects::CAPABILITIES)
+                {
                     raise_parsing_error(node, env, &syntax_error::direct_coeffects_reference);
                 }
             }
@@ -847,12 +897,12 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             pos_name(&c.keyword, env)?,
             could_map(&c.type_, env, p_hint)?,
         )),
-        VectorTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        ClassnameTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        TupleTypeExplicitSpecifier(c) => unary(&c.keyword, &c.types, env),
-        VarrayTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        DarrayTypeSpecifier(c) => binary(&c.keyword, &c.key, &c.value, env),
-        DictionaryTypeSpecifier(c) => unary(&c.keyword, &c.members, env),
+        VectorTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        ClassnameTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        TupleTypeExplicitSpecifier(c) => p_unary_hint(&c.keyword, &c.types, env),
+        VarrayTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        DarrayTypeSpecifier(c) => p_binary_hint(&c.keyword, &c.key, &c.value, env),
+        DictionaryTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.members, env),
         GenericTypeSpecifier(c) => {
             let name = pos_name(&c.class_type, env)?;
             let args = &c.argument_list;
@@ -892,10 +942,13 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 })
                 .collect::<Result<Vec<_>, _>>()?;
             if variadic_hints.len() > 1 {
-                return failwith(format!(
-                    "{} variadic parameters found. There should be no more than one.",
-                    variadic_hints.len()
-                ));
+                return parsing_error(
+                    format!(
+                        "{} variadic parameters found. There should be no more than one.",
+                        variadic_hints.len()
+                    ),
+                    p_pos(&c.parameter_list, env),
+                );
             }
             let ctxs = p_contexts(
                 &c.contexts,
@@ -904,7 +957,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                     "A closure type hint cannot have a polymorphic context",
                     true,
                 )),
-            )?;
+            );
             Ok(Hfun(ast::HintFun {
                 is_readonly: map_optional(&c.readonly_keyword, env, p_readonly)?,
                 param_tys: type_hints,
@@ -954,6 +1007,10 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             raise_parsing_error(node, env, &syntax_error::invalid_reified);
             missing_syntax("refied type", node, env)
         }
+        TypeRefinement(c) => Ok(ast::Hint_::Hrefinement(
+            p_hint(&c.type_, env)?,
+            could_map(&c.members, env, p_refinement_member)?,
+        )),
         _ => missing_syntax("type hint", node, env),
     }
 }
@@ -964,6 +1021,42 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
     let hint = ast::Hint::new(pos, hint_);
     check_valid_reified_hint(env, node, &hint);
     Ok(hint)
+}
+
+fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refinement> {
+    match &node.children {
+        TypeInRefinement(c) => Ok(ast::Refinement::Rtype(
+            pos_name(&c.name, env)?,
+            if c.type_.is_missing() {
+                let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env);
+                ast::TypeRefinement::TRloose(ast::TypeRefinementBounds { lower, upper })
+            } else {
+                ast::TypeRefinement::TRexact(p_hint(&c.type_, env)?)
+            },
+        )),
+        CtxInRefinement(c) => {
+            let name = pos_name(&c.name, env)?;
+            if c.ctx_list.is_missing() {
+                let (lower, upper) = p_ctx_constraints(&c.constraints, env)?;
+                Ok(ast::Refinement::Rctx(
+                    name,
+                    ast::CtxRefinement::CRloose(ast::CtxRefinementBounds { lower, upper }),
+                ))
+            } else if let Some(hint) = p_context_list_to_intersection(
+                &c.ctx_list,
+                env,
+                "Refinement members cannot alias polymorphic contexts",
+            ) {
+                Ok(ast::Refinement::Rctx(
+                    name,
+                    ast::CtxRefinement::CRexact(hint),
+                ))
+            } else {
+                missing_syntax("refinement member's bound(s)", node, env)
+            }
+        }
+        _ => missing_syntax("refinement member", node, env),
+    }
 }
 
 fn p_simple_initializer<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr> {
@@ -997,11 +1090,18 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield> {
     }
 }
 
+fn p_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Field, Error> {
+    match &node.children {
+        ElementInitializer(c) => Ok(ast::Field(p_expr(&c.key, env)?, p_expr(&c.value, env)?)),
+        _ => missing_syntax("key-value collection element", node, env),
+    }
+}
+
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
-fn process_readonly_expr<'a>(mut e: ast::Expr) -> Expr_ {
+fn process_readonly_expr(mut e: ast::Expr) -> Expr_ {
     match &mut e {
-        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
-            efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.fun.readonly_this.is_none() => {
+            efun.fun.readonly_this = Some(ast::ReadonlyKind::Readonly);
             e.2
         }
         ast::Expr(_, _, Expr_::Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
@@ -1056,11 +1156,14 @@ fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor
     }
 }
 
-fn wrap_unescaper<F>(s: &str, unescaper: F) -> Result<BString>
+fn wrap_unescaper<F>(s: &str, unescaper: F, err_pos: Pos) -> Result<BString>
 where
     F: FnOnce(&str) -> Result<BString, InvalidString>,
 {
-    unescaper(s).map_err(|e| Error::Failwith(e.msg))
+    unescaper(s).map_err(|e| Error::ParsingError {
+        message: e.msg,
+        pos: err_pos,
+    })
 }
 
 fn fail_if_invalid_class_creation<'a>(node: S<'a>, env: &mut Env<'a>, id: impl AsRef<str>) {
@@ -1085,18 +1188,18 @@ fn fail_if_invalid_reified_generic<'a>(node: S<'a>, env: &mut Env<'a>, id: impl 
     }
 }
 
-fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize> {
+fn rfind(s: &[u8], mut i: usize, c: u8) -> Option<usize> {
     if i >= s.len() {
-        return failwith("index out of range");
+        return None;
     }
     i += 1;
     while i > 0 {
         i -= 1;
         if s[i] == c {
-            return Ok(i);
+            return Some(i);
         }
     }
-    failwith("char not found")
+    None
 }
 
 fn prep_string2<'a>(
@@ -1137,11 +1240,14 @@ fn prep_string2<'a>(
                 raise(env);
                 Ok((first_token_op, Noop))
             } else if is_heredoc(text) {
-                let trim_size = text
-                    .iter()
-                    .position(|c| *c == b'\n')
-                    .ok_or_else(|| Error::Failwith(String::from("newline not found")))?
-                    + 1;
+                let trim_size =
+                    text.iter()
+                        .position(|c| *c == b'\n')
+                        .ok_or_else(|| Error::ParsingError {
+                            message: String::from("newline not found"),
+                            pos: p_pos(first.unwrap(), env),
+                        })?
+                        + 1;
                 let first_token_op = match trim_size {
                     _ if trim_size == text.len() => Skip,
                     _ => LeftTrim(trim_size),
@@ -1150,7 +1256,13 @@ fn prep_string2<'a>(
                     let text = t.text_raw(env.source_text());
                     let len = text.len();
                     if len != 0 {
-                        let n = rfind(text, len - 2, b'\n')?;
+                        let n = (match rfind(text, len - 2, b'\n') {
+                            Some(n) => Ok(n),
+                            None => Err(Error::ParsingError {
+                                message: String::from("newline not found"),
+                                pos: p_pos(first.unwrap(), env),
+                            }),
+                        })?;
                         let last_token_op = match n {
                             0 => Skip,
                             _ => RightTrim(len - n),
@@ -1177,7 +1289,7 @@ fn process_token_op<'a>(env: &mut Env<'a>, op: TokenOp, node: S<'a>) -> Result<O
                 let node = env.arena.alloc(Syntax::make_token(token));
                 Ok(Some(node))
             }
-            _ => failwith("Token expected"),
+            _ => missing_syntax("token in operator", node, env),
         },
         RightTrim(n) => match &node.children {
             Token(t) => {
@@ -1185,7 +1297,7 @@ fn process_token_op<'a>(env: &mut Env<'a>, op: TokenOp, node: S<'a>) -> Result<O
                 let node = env.arena.alloc(Syntax::make_token(token));
                 Ok(Some(node))
             }
-            _ => failwith("Token expected"),
+            _ => missing_syntax("token in operator", node, env),
         },
         _ => Ok(None),
     }
@@ -1327,7 +1439,7 @@ fn p_expr_lit<'a>(
                 | (_, Some(TK::OctalLiteral))
                 | (_, Some(TK::HexadecimalLiteral))
                 | (_, Some(TK::BinaryLiteral)) => {
-                    let s = s.replace("_", "");
+                    let s = s.replace('_', "");
                     match parse_int(&s) {
                         Err(ParseIntError::OutOfRange) => {
                             raise_parsing_error(expr, env, &syntax_error::out_of_int_range(&s));
@@ -1341,7 +1453,7 @@ fn p_expr_lit<'a>(
                             missing_syntax(&format!("{}", int_kind), expr, env)?;
                         }
                         Err(ParseIntError::Empty) => {
-                            failwith("Unexpected int literal error")?;
+                            missing_syntax("int literal", expr, env)?;
                         }
                         Ok(_) => {}
                     }
@@ -1354,7 +1466,7 @@ fn p_expr_lit<'a>(
                     if f64::from_str(&s).is_err() {
                         raise_parsing_error(expr, env, &syntax_error::out_of_float_range(&s))
                     }
-                    Ok(Expr_::Float(s.into()))
+                    Ok(Expr_::Float(s))
                 }
                 (_, Some(TK::SingleQuotedStringLiteral)) => {
                     Ok(Expr_::String(mk_str(expr, env, s, unescape_single)))
@@ -1398,10 +1510,13 @@ fn p_expr_recurse<'a>(
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
     if *env.exp_recursion_depth() >= EXP_RECURSION_LIMIT {
-        Err(Error::Failwith("Expression recursion limit reached".into()))
+        Err(Error::ParsingError {
+            message: "Expression recursion limit reached".into(),
+            pos: parent_pos.unwrap_or_else(|| env.mk_none_pos()),
+        })
     } else {
         *env.exp_recursion_depth() += 1;
-        let r = p_expr_impl(location, node, env, parent_pos);
+        let r = stack_limit::maybe_grow(|| p_expr_impl(location, node, env, parent_pos));
         *env.exp_recursion_depth() -= 1;
         r
     }
@@ -1438,7 +1553,6 @@ fn p_expr_impl<'a>(
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
-    env.check_stack_limit();
     let pos = match parent_pos {
         Some(pos) => pos,
         None => p_pos(node, env),
@@ -1449,13 +1563,71 @@ fn p_expr_impl<'a>(
         EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
         ParenthesizedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         DictionaryIntrinsicExpression(c) => {
-            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+            let ty_args = expand_type_args(&c.explicit_type, env)?;
+            let hints = if ty_args.len() == 2 {
+                let mut tys = ty_args.into_iter();
+                Some((
+                    ast::Targ((), tys.next().unwrap()),
+                    ast::Targ((), tys.next().unwrap()),
+                ))
+            } else if ty_args.is_empty() {
+                None
+            } else {
+                raise_parsing_error(
+                    &c.explicit_type,
+                    env,
+                    "`dict` takes exactly two type arguments",
+                );
+                None
+            };
+
+            Ok(Expr_::mk_key_val_collection(
+                (p_pos(&c.keyword, env), aast::KvcKind::Dict),
+                hints,
+                could_map(&c.members, env, p_field)?,
+            ))
         }
         KeysetIntrinsicExpression(c) => {
-            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+            let mut ty_args = expand_type_args(&c.explicit_type, env)?;
+            let hint = if ty_args.len() == 1 {
+                Some(ast::Targ((), ty_args.pop().unwrap()))
+            } else if ty_args.is_empty() {
+                None
+            } else {
+                raise_parsing_error(
+                    &c.explicit_type,
+                    env,
+                    "`keyset` takes exactly one type argument",
+                );
+                None
+            };
+
+            Ok(Expr_::mk_val_collection(
+                (p_pos(&c.keyword, env), aast::VcKind::Keyset),
+                hint,
+                could_map(&c.members, env, p_expr)?,
+            ))
         }
         VectorIntrinsicExpression(c) => {
-            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+            let mut ty_args = expand_type_args(&c.explicit_type, env)?;
+            let hint = if ty_args.len() == 1 {
+                Some(ast::Targ((), ty_args.pop().unwrap()))
+            } else if ty_args.is_empty() {
+                None
+            } else {
+                raise_parsing_error(
+                    &c.explicit_type,
+                    env,
+                    "`vec` takes exactly one type argument",
+                );
+                None
+            };
+
+            Ok(Expr_::mk_val_collection(
+                (p_pos(&c.keyword, env), aast::VcKind::Vec),
+                hint,
+                could_map(&c.members, env, p_expr)?,
+            ))
         }
         CollectionLiteralExpression(c) => p_collection_literal_expr(node, c, env),
         VarrayIntrinsicExpression(c) => p_varray_intrinsic_expr(node, c, env),
@@ -1501,10 +1673,14 @@ fn p_expr_impl<'a>(
         NullableAsExpression(c) => p_as_expr(&c.left_operand, &c.right_operand, env, true),
         UpcastExpression(c) => p_upcast_expr(&c.left_operand, &c.right_operand, env),
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
-        AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
+        AwaitableCreationExpression(c) => p_awaitable_creation_expr(c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
         EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
-        _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
+        PackageExpression(p) => p_package_expr(p, env),
+        _ => {
+            raise_missing_syntax("expression", node, env);
+            Ok(Expr_::Null)
+        }
     }
 }
 
@@ -1523,7 +1699,7 @@ fn p_lambda_expression<'a>(
                 env,
                 // TODO(coeffects) Lambdas may be able to support this:: contexts
                 Some((&syntax_error::lambda_effect_polymorphic("A lambda"), false)),
-            )?;
+            );
             let unsafe_ctxs = ctxs.clone();
             let ret = map_optional(&c.type_, env, p_hint)?;
             (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
@@ -1540,7 +1716,7 @@ fn p_lambda_expression<'a>(
                     expr: None,
                     callconv: ast::ParamKind::Pnormal,
                     readonly: None,
-                    user_attributes: vec![],
+                    user_attributes: Default::default(),
                     visibility: None,
                 }],
                 (None, None),
@@ -1559,20 +1735,17 @@ fn p_lambda_expression<'a>(
     };
     let external = c.body.is_external();
     let fun = ast::Fun_ {
-        span: pos.clone(),
+        span: pos,
         readonly_this: None, // filled in by mk_unop
         annotation: (),
         readonly_ret,
         ret: ast::TypeHint((), ret),
-        name: ast::Id(pos, String::from(";anonymous")),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
         fun_kind: mk_fun_kind(suspension_kind, yield_),
         params,
         ctxs,
         unsafe_ctxs,
-        user_attributes: p_user_attributes(&c.attribute_spec, env)?,
+        user_attributes: p_user_attributes(&c.attribute_spec, env),
         external,
         doc_comment: None,
     };
@@ -1663,57 +1836,22 @@ fn p_function_call_expr<'a>(
 ) -> Result<Expr_> {
     let recv = &c.receiver;
     let args = &c.argument_list;
-    let get_hhas_adata = || {
-        if text_str(recv, env) == "__hhas_adata" {
-            if let SyntaxList(l) = &args.children {
-                if let Some(li) = l.first() {
-                    if let ListItem(i) = &li.children {
-                        if let LiteralExpression(le) = &i.item.children {
-                            let expr = &le.expression;
-                            if token_kind(expr) == Some(TK::NowdocStringLiteral) {
-                                return Some(expr);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        None
+    let targs = match (&recv.children, &c.type_args.children) {
+        (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
+        /* TODO might not be needed */
+        (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
+            TypeArguments(c) => could_map(&c.types, env, p_targ)?,
+            _ => vec![],
+        },
+        _ => vec![],
     };
-    match get_hhas_adata() {
-        Some(expr) => {
-            let literal_expression_pos = p_pos(expr, env);
-            let s = extract_unquoted_string(text_str(expr, env), 0, expr.width())
-                .map_err(|e| Error::Failwith(e.msg))?;
-            Ok(Expr_::mk_call(
-                p_expr(recv, env)?,
-                vec![],
-                vec![(
-                    ast::ParamKind::Pnormal,
-                    Expr::new((), literal_expression_pos, Expr_::String(s.into())),
-                )],
-                None,
-            ))
-        }
-        None => {
-            let targs = match (&recv.children, &c.type_args.children) {
-                (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
-                /* TODO might not be needed */
-                (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
-                    TypeArguments(c) => could_map(&c.types, env, p_targ)?,
-                    _ => vec![],
-                },
-                _ => vec![],
-            };
 
-            // Mark expression as CallReceiver so that we can correctly set
-            // PropOrMethod field in ObjGet and ClassGet
-            let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-            let (args, varargs) = split_args_vararg(args, env)?;
+    // Mark expression as CallReceiver so that we can correctly set
+    // PropOrMethod field in ObjGet and ClassGet
+    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
+    let (args, varargs) = split_args_vararg(args, env)?;
 
-            Ok(Expr_::mk_call(recv, targs, args, varargs))
-        }
-    }
+    Ok(Expr_::mk_call(recv, targs, args, varargs))
 }
 
 fn p_function_pointer_expr<'a>(
@@ -1881,11 +2019,12 @@ fn p_token<'a>(
         (InDoubleQuotedString, TK::HeredocStringLiteral)
         | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
         | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
-            wrap_unescaper(text_str(node, env), unescape_heredoc)?,
+            wrap_unescaper(text_str(node, env), unescape_heredoc, p_pos(node, env))?,
         )),
         (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
             text_str(node, env),
             unesc_dbl,
+            p_pos(node, env),
         )?)),
         (MemberSelect, _)
         | (TopLevel, _)
@@ -1937,15 +2076,25 @@ fn p_scope_resolution_expr<'a>(
     }
     match &c.name.children {
         Token(token) if token.kind() == TK::Variable => {
-            let ast::Id(p, name) = pos_name(&c.name, env)?;
-            Ok(Expr_::mk_class_get(
-                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                ast::ClassGetExpr::CGstring((p, name)),
-                match location {
-                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                    _ => ast::PropOrMethod::IsProp,
-                },
-            ))
+            if location == ExprLocation::CallReceiver {
+                let ast::Id(p, name) = pos_name(&c.name, env)?;
+                Ok(Expr_::mk_class_get(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    ast::ClassGetExpr::CGexpr(Expr(
+                        (),
+                        p.clone(),
+                        Expr_::mk_lvar(ast::Lid::new(p, name)),
+                    )),
+                    ast::PropOrMethod::IsMethod,
+                ))
+            } else {
+                let ast::Id(p, name) = pos_name(&c.name, env)?;
+                Ok(Expr_::mk_class_get(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    ast::ClassGetExpr::CGstring((p, name)),
+                    ast::PropOrMethod::IsProp,
+                ))
+            }
         }
         _ => {
             let Expr(_, p, expr_) = p_expr(&c.name, env)?;
@@ -1953,8 +2102,11 @@ fn p_scope_resolution_expr<'a>(
                 Expr_::String(id) => Ok(Expr_::mk_class_const(
                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                     (
-                        p,
-                        String::from_utf8(id.into()).map_err(|e| Error::Failwith(e.to_string()))?,
+                        p.clone(),
+                        String::from_utf8(id.into()).map_err(|e| Error::ParsingError {
+                            message: e.to_string(),
+                            pos: p,
+                        })?,
                     ),
                 )),
                 Expr_::Id(id) => {
@@ -1964,15 +2116,12 @@ fn p_scope_resolution_expr<'a>(
                         (p, n),
                     ))
                 }
-                Expr_::Lvar(id) => {
+                Expr_::Lvar(id) if location != ExprLocation::CallReceiver => {
                     let ast::Lid(p, (_, n)) = *id;
                     Ok(Expr_::mk_class_get(
                         ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                         ast::ClassGetExpr::CGstring((p, n)),
-                        match location {
-                            ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                            _ => ast::PropOrMethod::IsProp,
-                        },
+                        ast::PropOrMethod::IsProp,
                     ))
                 }
                 _ => Ok(Expr_::mk_class_get(
@@ -2002,7 +2151,34 @@ fn p_prefixed_code_expr<'a>(
     c: &'a PrefixedCodeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
-    let src_expr = p_expr(&c.expression, env)?;
+    let src_expr = if !c.body.is_compound_statement() {
+        p_expr(&c.body, env)?
+    } else {
+        let pos = p_pos(&c.body, env);
+        // Take the body and create a no argument lambda expression
+        let (body, yield_) = map_yielding(&c.body, env, p_function_body)?;
+        let external = c.body.is_external();
+        let fun = ast::Fun_ {
+            span: pos.clone(),
+            readonly_this: None, // filled in by mk_unop
+            annotation: (),
+            readonly_ret: None,
+            ret: ast::TypeHint((), None),
+            body: ast::FuncBody { fb_ast: body },
+            fun_kind: mk_fun_kind(SuspensionKind::SKSync, yield_),
+            params: vec![],
+            ctxs: None,
+            unsafe_ctxs: None,
+            user_attributes: ast::UserAttributes(vec![]),
+            external,
+            doc_comment: None,
+        };
+        let recv = ast::Expr::new((), pos.clone(), Expr_::mk_lfun(fun, vec![]));
+
+        // Immediately invoke the lambda by wrapping in a call expression node
+        let expr = Expr_::mk_call(recv, vec![], vec![], None);
+        ast::Expr::new((), pos, expr)
+    };
 
     let hint = p_hint(&c.prefix, env)?;
 
@@ -2135,15 +2311,21 @@ fn p_upcast_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Exp
     Ok(Expr_::mk_upcast(p_expr(left, env)?, p_hint(right, env)?))
 }
 
+fn p_use_var<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<ast::CaptureLid> {
+    match &n.children {
+        Token(_) => {
+            let lid = mk_name_lid(n, e)?;
+            Ok(ast::CaptureLid((), lid))
+        }
+        _ => missing_syntax("use variable", n, e),
+    }
+}
+
 fn p_anonymous_function<'a>(
     node: S<'a>,
     c: &'a AnonymousFunctionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
-    let p_arg = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-        Token(_) => mk_name_lid(n, e),
-        _ => missing_syntax("use variable", n, e),
-    };
     let ctxs = p_contexts(
         &c.ctx_list,
         env,
@@ -2152,10 +2334,10 @@ fn p_anonymous_function<'a>(
             &syntax_error::lambda_effect_polymorphic("An anonymous function"),
             false,
         )),
-    )?;
+    );
     let unsafe_ctxs = ctxs.clone();
     let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-        AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_arg),
+        AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_use_var),
         _ => Ok(vec![]),
     };
     let suspension_kind = mk_suspension_kind(&c.async_keyword);
@@ -2164,19 +2346,15 @@ fn p_anonymous_function<'a>(
         map_yielding(&c.body, env1.as_mut(), p_function_body)?
     };
     let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
-    let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+    let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.body.is_external();
     let params = could_map(&c.parameters, env, p_fun_param)?;
-    let name_pos = p_fun_pos(node, env);
     let fun = ast::Fun_ {
         span: p_pos(node, env),
         readonly_this: None, // set in process_readonly_expr
         annotation: (),
         readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
         ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
-        name: ast::Id(name_pos, String::from(";anonymous")),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
         fun_kind: mk_fun_kind(suspension_kind, yield_),
         params,
@@ -2186,34 +2364,33 @@ fn p_anonymous_function<'a>(
         external,
         doc_comment,
     };
-    let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
-    Ok(Expr_::mk_efun(fun, uses))
+    let use_ = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
+    Ok(Expr_::mk_efun(ast::Efun {
+        fun,
+        use_,
+        closure_class_name: None,
+    }))
 }
 
 fn p_awaitable_creation_expr<'a>(
-    node: S<'a>,
     c: &'a AwaitableCreationExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
     pos: Pos,
 ) -> Result<Expr_> {
     let suspension_kind = mk_suspension_kind(&c.async_);
     let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
-    let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+    let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.compound_statement.is_external();
-    let name_pos = p_fun_pos(node, env);
     let body = ast::Fun_ {
         span: pos.clone(),
         annotation: (),
         readonly_this: None, // set in process_readonly_expr
         readonly_ret: None,  // TODO: awaitable creation expression
         ret: ast::TypeHint((), None),
-        name: ast::Id(name_pos, String::from(";anonymous")),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody {
             fb_ast: if blk.is_empty() {
                 let pos = p_pos(&c.compound_statement, env);
-                vec![ast::Stmt::noop(pos)]
+                ast::Block(vec![ast::Stmt::noop(pos)])
             } else {
                 blk
             },
@@ -2257,7 +2434,7 @@ fn p_xhp_expr<'a>(
             id, attrs, exprs,
         ))
     } else {
-        failwith("expect xhp open")
+        missing_syntax("XHP open", &c.open, env)
     }
 }
 
@@ -2291,6 +2468,14 @@ fn p_enum_class_label_expr<'a>(
     Ok(Expr_::mk_enum_class_label(qual, label_name))
 }
 
+fn p_package_expr<'a>(
+    p: &'a PackageExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let id = pos_name(&p.name, env)?;
+    Ok(Expr_::mk_package(id))
+}
+
 fn mk_lid(p: Pos, s: String) -> ast::Lid {
     ast::Lid(p, (0, s))
 }
@@ -2306,16 +2491,6 @@ fn mk_lvar<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {
 
 fn mk_id_expr(name: ast::Sid) -> ast::Expr {
     ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-}
-
-fn p_intri_expr<'a>(node: S<'a>, kw: S<'a>, ty: S<'a>, v: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {
-    let hints = expand_type_args(ty, e)?;
-    let hints = check_intrinsic_type_arg_varity(node, e, hints);
-    Ok(Expr_::mk_collection(
-        pos_name(kw, e)?,
-        hints,
-        could_map(v, e, p_afield)?,
-    ))
 }
 
 fn p_special_call<'a>(recv: S<'a>, args: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {
@@ -2455,8 +2630,14 @@ fn p_bop<'a>(
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
     use ast::Bop::*;
-    let mk = |op, l, r| Ok(Expr_::mk_binop(op, l, r));
-    let mk_eq = |op, l, r| Ok(Expr_::mk_binop(Eq(Some(Box::new(op))), l, r));
+    let mk = |bop, lhs, rhs| Ok(Expr_::mk_binop(Binop { bop, lhs, rhs }));
+    let mk_eq = |op, lhs, rhs| {
+        Ok(Expr_::mk_binop(Binop {
+            bop: Eq(Some(Box::new(op))),
+            lhs,
+            rhs,
+        }))
+    };
     match token_kind(node) {
         Some(TK::Equal) => mk(Eq(None), lhs, rhs),
         Some(TK::Bar) => mk(Bar, lhs, rhs),
@@ -2538,7 +2719,7 @@ fn p_stmt_list_<'a>(
                                 is_block_scoped: false,
                                 has_await: !c.await_keyword.is_missing(),
                                 exprs: p_exprs_with_loc(&c.expression, e)?,
-                                block: body,
+                                block: ast::Block(body),
                             }),
                         ))
                     };
@@ -2557,12 +2738,12 @@ fn p_stmt_list_<'a>(
 
 fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let list: Vec<_> = node.syntax_node_to_list_skip_separator().collect();
-    let blk: Vec<_> = p_stmt_list_(&pos, list.iter(), env)?
+    let blk: ast::Block = p_stmt_list_(&pos, list.iter(), env)?
         .into_iter()
         .filter(|stmt| !stmt.1.is_noop())
         .collect();
     let body = if blk.is_empty() {
-        vec![mk_noop(env)]
+        ast::Block(vec![mk_noop(env)])
     } else {
         blk
     };
@@ -2608,16 +2789,19 @@ where
     let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
     let result = result?;
     let awaits = match lifted_awaits {
-        Some(la) => process_lifted_awaits(la)?,
-        None => failwith("lifted awaits should not be None")?,
+        Some(la) => process_lifted_awaits(la, env)?,
+        None => parsing_error("lifted awaits should not be None", env.mk_none_pos())?,
     };
     Ok((awaits, result))
 }
 
-fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs> {
+fn process_lifted_awaits<'a>(
+    mut awaits: LiftedAwaits,
+    env: &mut Env<'a>,
+) -> Result<LiftedAwaitExprs> {
     for await_ in awaits.awaits.iter() {
         if (await_.1).1.is_none() {
-            return failwith("none pos in lifted awaits");
+            return parsing_error("none pos in lifted awaits", env.mk_none_pos());
         }
     }
     awaits
@@ -2675,14 +2859,14 @@ where
     };
     if let Some(lifted_awaits) = lifted_awaits {
         if !lifted_awaits.awaits.is_empty() {
-            let awaits = process_lifted_awaits(lifted_awaits)?;
+            let awaits = process_lifted_awaits(lifted_awaits, env)?;
             let pos = match pos {
                 Either::Left(n) => p_pos(n, env),
                 Either::Right(p) => p.clone(),
             };
             return Ok(ast::Stmt::new(
                 pos,
-                ast::Stmt_::mk_awaitall(awaits, vec![result]),
+                ast::Stmt_::mk_awaitall(awaits, ast::Block(vec![result])),
             ));
         }
     }
@@ -2695,7 +2879,9 @@ fn lift_await<'a>(
     env: &mut Env<'a>,
     location: ExprLocation,
 ) -> Expr_ {
-    use ExprLocation::{AsStatement, RightOfAssignmentInUsingStatement, UsingStatement};
+    use ExprLocation::AsStatement;
+    use ExprLocation::RightOfAssignmentInUsingStatement;
+    use ExprLocation::UsingStatement;
     match (&env.lifted_awaits, location) {
         (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
             Expr_::mk_await(expr)
@@ -2732,7 +2918,8 @@ fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
 
 fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let pos = p_pos(node, env);
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
@@ -2758,12 +2945,10 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
         ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c, node),
         MarkupSection(_) => p_markup(node, env),
-        _ => missing_syntax_(
-            Some(new(env.mk_none_pos(), S_::Noop)),
-            "statement",
-            node,
-            env,
-        ),
+        _ => {
+            raise_missing_syntax("statement", node, env);
+            Ok(new(env.mk_none_pos(), S_::Noop))
+        }
     }
 }
 
@@ -2773,7 +2958,8 @@ fn p_while_stmt<'a>(
     c: &'a WhileStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     Ok(new(
         pos,
@@ -2787,7 +2973,8 @@ fn p_throw_stmt<'a>(
     c: &'a ThrowStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
@@ -2800,7 +2987,8 @@ fn p_try_stmt<'a>(
     c: &'a TryStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     Ok(new(
@@ -2816,8 +3004,8 @@ fn p_try_stmt<'a>(
                 _ => missing_syntax("catch clause", n, e),
             })?,
             match &c.finally_clause.children {
-                FinallyClause(c) => p_block(false, &c.body, env)?,
-                _ => vec![],
+                FinallyClause(c) => p_finally_block(false, &c.body, env)?,
+                _ => Default::default(),
             },
         ),
     ))
@@ -2829,7 +3017,8 @@ fn p_concurrent_stmt<'a>(
     c: &'a ConcurrentStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let keyword_pos = p_pos(&c.keyword, env);
@@ -2854,7 +3043,12 @@ fn p_concurrent_stmt<'a>(
                 if let Some(tv) = tmp_vars.next() {
                     if let Stmt(p1, S_::Expr(expr)) = n {
                         if let Expr(_, p2, Expr_::Binop(bop)) = *expr {
-                            if let (Eq(op), e1, e2) = *bop {
+                            if let Binop {
+                                bop: Eq(op),
+                                lhs: e1,
+                                rhs: e2,
+                            } = *bop
+                            {
                                 let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
                                 if tmp_n.lvar_name() != e2.lvar_name() {
                                     let new_n = new(
@@ -2862,7 +3056,11 @@ fn p_concurrent_stmt<'a>(
                                         S_::mk_expr(Expr::new(
                                             (),
                                             p2.clone(),
-                                            Expr_::mk_binop(Eq(None), tmp_n.clone(), e2.clone()),
+                                            Expr_::mk_binop(Binop {
+                                                bop: Eq(None),
+                                                lhs: tmp_n.clone(),
+                                                rhs: e2.clone(),
+                                            }),
                                         )),
                                     );
                                     body_stmts.push(new_n);
@@ -2872,7 +3070,11 @@ fn p_concurrent_stmt<'a>(
                                     S_::mk_expr(Expr::new(
                                         (),
                                         p2,
-                                        Expr_::mk_binop(Eq(op), e1, tmp_n),
+                                        Expr_::mk_binop(Binop {
+                                            bop: Eq(op),
+                                            lhs: e1,
+                                            rhs: tmp_n,
+                                        }),
                                     )),
                                 );
                                 assign_stmts.push(assign_stmt);
@@ -2881,7 +3083,7 @@ fn p_concurrent_stmt<'a>(
                         }
                     }
 
-                    failwith("Expect assignment stmt")?;
+                    raise_missing_syntax("assignment statement", &c.keyword, env);
                 } else {
                     raise_parsing_error_pos(
                         &stmt_pos,
@@ -2892,11 +3094,14 @@ fn p_concurrent_stmt<'a>(
                 }
             }
             body_stmts.append(&mut assign_stmts);
-            new(stmt_pos, S_::mk_block(body_stmts))
+            new(stmt_pos, S_::mk_block(ast::Block(body_stmts)))
         }
-        _ => failwith("Unexpected concurrent stmt structure")?,
+        _ => missing_syntax("block in concurrent", &c.keyword, env)?,
     };
-    Ok(new(keyword_pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
+    Ok(new(
+        keyword_pos,
+        S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
+    ))
 }
 
 fn p_unset_stmt<'a>(
@@ -2905,7 +3110,8 @@ fn p_unset_stmt<'a>(
     c: &'a UnsetStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2935,7 +3141,8 @@ fn p_echo_stmt<'a>(
     c: &'a EchoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2990,7 +3197,8 @@ fn p_foreach_stmt<'a>(
     c: &'a ForeachStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3018,7 +3226,8 @@ fn p_for_stmt<'a>(
     c: &'a ForStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
         let ini = could_map(&c.initializer, e, p_expr)?;
@@ -3036,7 +3245,8 @@ fn p_using_statement_function_scoped_stmt<'a>(
     c: &'a UsingStatementFunctionScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3046,7 +3256,7 @@ fn p_using_statement_function_scoped_stmt<'a>(
                 is_block_scoped: false,
                 has_await: !&c.await_keyword.is_missing(),
                 exprs: p_exprs_with_loc(&c.expression, e)?,
-                block: vec![mk_noop(e)],
+                block: ast::Block(vec![mk_noop(e)]),
             }),
         ))
     };
@@ -3059,7 +3269,8 @@ fn p_using_statement_block_scoped_stmt<'a>(
     c: &'a UsingStatementBlockScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3082,7 +3293,8 @@ fn p_do_stmt<'a>(
     c: &'a DoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     Ok(new(
@@ -3100,7 +3312,8 @@ fn p_expression_stmt<'a>(
     c: &'a ExpressionStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let expr = &c.expression;
@@ -3127,31 +3340,19 @@ fn p_if_stmt<'a>(
     c: &'a IfStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
-        match &n.children {
-            ElseifClause(c) => Ok((p_expr(&c.condition, e)?, p_block(true, &c.statement, e)?)),
-            _ => missing_syntax("elseif clause", n, e),
-        }
-    };
     let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
         let condition = p_expr(&c.condition, env)?;
         let statement = p_block(true /* remove noop */, &c.statement, env)?;
         let else_ = match &c.else_clause.children {
             ElseClause(c) => p_block(true, &c.statement, env)?,
-            Missing => vec![mk_noop(env)],
+            Missing => ast::Block(vec![mk_noop(env)]),
             _ => missing_syntax("else clause", &c.else_clause, env)?,
         };
-        let else_ifs = could_map(&c.elseif_clauses, env, p_else_if)?;
-        let else_if = else_ifs
-            .into_iter()
-            .rev()
-            .fold(else_, |child, (cond, stmts)| {
-                vec![new(pos.clone(), S_::mk_if(cond, stmts, child))]
-            });
-        Ok(new(pos, S_::mk_if(condition, statement, else_if)))
+        Ok(new(pos, S_::mk_if(condition, statement, else_)))
     };
     lift_awaits_in_statement(node, env, f)
 }
@@ -3162,18 +3363,19 @@ fn p_switch_stmt_<'a>(
     c: &'a SwitchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::GenCase> {
         match &n.children {
             CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
                 p_expr(&c.expression, e)?,
-                vec![],
+                Default::default(),
             ))),
             DefaultLabel(_) => Ok(aast::GenCase::Default(aast::DefaultCase(
                 p_pos(n, e),
-                vec![],
+                Default::default(),
             ))),
             _ => missing_syntax("switch label", n, e),
         }
@@ -3181,7 +3383,7 @@ fn p_switch_stmt_<'a>(
     let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>> {
         match &n.children {
             SwitchSection(c) => {
-                let mut blk = could_map(&c.statements, e, p_stmt)?;
+                let mut blk = ast::Block(could_map(&c.statements, e, p_stmt)?);
                 if !c.fallthrough.is_missing() {
                     blk.push(new(e.mk_none_pos(), S_::Fallthrough));
                 }
@@ -3261,7 +3463,7 @@ fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             let stmt_ = ast::Stmt_::mk_markup((pos.clone(), text(markup_hashbang, env)));
             Ok(ast::Stmt::new(pos, stmt_))
         }
-        _ => failwith("invalid node"),
+        _ => missing_syntax("XHP markup node", node, env),
     }
 }
 
@@ -3270,7 +3472,7 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
     mut init: R,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(modifier::KindSet, R)> {
+) -> (modifier::KindSet, R) {
     let mut kind_set = modifier::KindSet::new();
     for n in node.syntax_node_to_list_skip_separator() {
         let token_kind = token_kind(n).and_then(modifier::from_token_kind);
@@ -3279,14 +3481,16 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
                 kind_set.add(kind);
                 init = on_kind(init, kind);
             }
-            _ => missing_syntax("kind", n, env)?,
+            _ => {
+                raise_missing_syntax("kind", n, env);
+            }
         }
     }
-    Ok((kind_set, init))
+    (kind_set, init)
 }
 
-fn p_kinds<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<modifier::KindSet> {
-    p_modifiers(|_, _| {}, (), node, env).map(|r| r.0)
+fn p_kinds<'a>(node: S<'a>, env: &mut Env<'a>) -> modifier::KindSet {
+    p_modifiers(|_, _| {}, (), node, env).0
 }
 
 /// Apply `f` to every item in `node`, and build a vec of the values returned.
@@ -3303,22 +3507,41 @@ where
     Ok(v)
 }
 
-fn p_visibility<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>> {
-    let first_vis = |r: Option<ast::Visibility>, kind| r.or_else(|| modifier::to_visibility(kind));
-    p_modifiers(first_vis, None, node, env).map(|r| r.1)
+fn could_map_emit_error<'a, R, F>(node: S<'a>, env: &mut Env<'a>, f: F) -> Vec<R>
+where
+    F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
+{
+    let mut v = vec![];
+    for n in node.syntax_node_to_list_skip_separator() {
+        match f(n, env) {
+            Ok(value) => {
+                v.push(value);
+            }
+            Err(e) => {
+                emit_error(e, env);
+            }
+        }
+    }
+
+    v
 }
 
-fn p_visibility_last_win<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>> {
+fn p_visibility<'a>(node: S<'a>, env: &mut Env<'a>) -> Option<ast::Visibility> {
+    let first_vis = |r: Option<ast::Visibility>, kind| r.or_else(|| modifier::to_visibility(kind));
+    p_modifiers(first_vis, None, node, env).1
+}
+
+fn p_visibility_last_win<'a>(node: S<'a>, env: &mut Env<'a>) -> Option<ast::Visibility> {
     let last_vis = |r, kind| modifier::to_visibility(kind).or(r);
-    p_modifiers(last_vis, None, node, env).map(|r| r.1)
+    p_modifiers(last_vis, None, node, env).1
 }
 
 fn p_visibility_last_win_or<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     default: ast::Visibility,
-) -> Result<ast::Visibility> {
-    p_visibility_last_win(node, env).map(|v| v.unwrap_or(default))
+) -> ast::Visibility {
+    p_visibility_last_win(node, env).unwrap_or(default)
 }
 
 fn has_soft(attrs: &[ast::UserAttribute]) -> bool {
@@ -3343,7 +3566,10 @@ fn strip_ns(name: &str) -> &str {
 // The contexts `ctx $f`, `$a::C`, and `T::C` all depend on the ability to generate a backing tparam
 // on the function or method. The `this::C` context does not, so it may appear in more places.
 fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: bool) -> bool {
-    use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
+    use ast::Hint_::HfunContext;
+    use ast::Hint_::Hvar;
     match *hint.1 {
         HfunContext(_) => true,
         Haccess(ref root, _) => match &*root.1 {
@@ -3352,7 +3578,7 @@ fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: 
                 /* TODO(coeffects) There is an opportunity to represent this structurally
                  * in the AST if we refactor so generic hints lower as Habstr instead of
                  * Happly, like we do in the direct decl parser. */
-                (strip_ns(s) == naming_special_names_rust::typehints::THIS && !ignore_this)
+                (strip_ns(s) == sn::typehints::THIS && !ignore_this)
                     || env.fn_generics_mut().contains_key(s)
                     || env.cls_generics_mut().contains_key(s)
             }
@@ -3376,13 +3602,46 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Context
 fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                naming_special_names_rust::coeffects::is_any_zoned(id)
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned(id),
             _ => false,
         });
     } else {
         false
+    }
+}
+
+fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned_or_defaults(id),
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
+fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
+fn contexts_cannot_access_ic(haystack: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
+        return context_hints.iter().all(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                sn::coeffects::is_any_without_implicit_policy_or_unsafe(id)
+            }
+            _ => false,
+        });
+    } else {
+        false // no context list -> implicit [defaults]
     }
 }
 
@@ -3396,7 +3655,9 @@ fn rewrite_fun_ctx<'a>(
     hint: &mut ast::Hint,
     name: &str,
 ) {
-    use ast::{Hint_, ReifyKind, Variance};
+    use ast::Hint_;
+    use ast::ReifyKind;
+    use ast::Variance;
 
     let mut invalid =
         |p| raise_parsing_error_pos(p, env, &syntax_error::ctx_fun_invalid_type_hint(name));
@@ -3413,7 +3674,7 @@ fn rewrite_fun_ctx<'a>(
                                 parameters: vec![],
                                 constraints: vec![],
                                 reified: ReifyKind::Erased,
-                                user_attributes: vec![],
+                                user_attributes: Default::default(),
                             });
                         } else {
                             invalid(pos);
@@ -3445,13 +3706,19 @@ fn rewrite_fun_ctx<'a>(
 }
 fn rewrite_effect_polymorphism<'a>(
     env: &mut Env<'a>,
-    params: &mut Vec<ast::FunParam>,
+    params: &mut [ast::FunParam],
     tparams: &mut Vec<ast::Tparam>,
     contexts: Option<&ast::Contexts>,
     where_constraints: &mut Vec<ast::WhereConstraintHint>,
 ) {
-    use ast::{Hint, Hint_, ReifyKind, Variance};
-    use Hint_::{Haccess, Happly, HfunContext, Hvar};
+    use ast::Hint;
+    use ast::Hint_;
+    use ast::ReifyKind;
+    use ast::Variance;
+    use Hint_::Haccess;
+    use Hint_::Happly;
+    use Hint_::HfunContext;
+    use Hint_::Hvar;
 
     if !has_polymorphic_context(env, contexts) {
         return;
@@ -3463,7 +3730,7 @@ fn rewrite_effect_polymorphism<'a>(
         parameters: vec![],
         constraints: v,
         reified: ReifyKind::Erased,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
     };
 
     // For polymorphic context with form `$g::C`
@@ -3655,7 +3922,7 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
         expr: None,
         callconv: ast::ParamKind::Pnormal,
         readonly: None,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         visibility: None,
     }
 }
@@ -3691,7 +3958,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                 }
                 _ => (false, name),
             };
-            let user_attributes = p_user_attributes(attribute, env)?;
+            let user_attributes = p_user_attributes(attribute, env);
             let pos = p_pos(name, env);
             let name = text(name, env);
             let hint = map_optional(type_, env, p_hint)?;
@@ -3718,7 +3985,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                  * This is always None except for constructors and the modifier
                  * can be only Public or Protected or Private.
                  */
-                visibility: p_visibility(visibility, env)?,
+                visibility: p_visibility(visibility, env),
             })
         }
         VariadicParameter(_) => {
@@ -3767,7 +4034,7 @@ fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::T
             param_params,
             constraints,
         }) => {
-            let user_attributes = p_user_attributes(attribute_spec, env)?;
+            let user_attributes = p_user_attributes(attribute_spec, env);
             let is_reified = !reified.is_missing();
 
             let type_name = text(name, env);
@@ -3824,7 +4091,7 @@ fn p_ctx_constraints<'a>(
                 &c.ctx_list,
                 env,
                 "Contexts cannot be bounded by polymorphic contexts",
-            )? {
+            ) {
                 Ok(match token_kind(&c.keyword) {
                     Some(TK::Super) => Either::Left(hint),
                     Some(TK::As) => Either::Right(hint),
@@ -3858,11 +4125,11 @@ fn p_contexts<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     error_on_polymorphic: Option<(&str, bool)>,
-) -> Result<Option<ast::Contexts>> {
+) -> Option<ast::Contexts> {
     match &node.children {
-        Missing => Ok(None),
+        Missing => None,
         Contexts(c) => {
-            let hints = could_map(&c.types, env, |node, env| {
+            let hints = could_map_emit_error(&c.types, env, |node, env| {
                 let h = p_hint(node, env)?;
                 if let Some((e, ignore_this)) = error_on_polymorphic {
                     if is_polymorphic_context(env, &h, ignore_this) {
@@ -3870,12 +4137,15 @@ fn p_contexts<'a>(
                     }
                 }
                 Ok(h)
-            })?;
+            });
             let pos = p_pos(node, env);
             let ctxs = ast::Contexts(pos, hints);
-            Ok(Some(ctxs))
+            Some(ctxs)
         }
-        _ => missing_syntax("contexts", node, env),
+        _ => {
+            raise_missing_syntax("contexts", node, env);
+            None
+        }
     }
 }
 
@@ -3883,9 +4153,9 @@ fn p_context_list_to_intersection<'a>(
     ctx_list: S<'a>,
     env: &mut Env<'a>,
     polymorphic_error: &str,
-) -> Result<Option<ast::Hint>> {
-    Ok(p_contexts(ctx_list, env, Some((polymorphic_error, false)))?
-        .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
+) -> Option<ast::Hint> {
+    p_contexts(ctx_list, env, Some((polymorphic_error, false)))
+        .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1)))
 }
 
 fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
@@ -3904,7 +4174,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             if name.value.is_missing() {
                 raise_parsing_error(name, env, &syntax_error::empty_method_name);
             }
-            let kinds = p_kinds(modifiers, env)?;
+            let kinds = p_kinds(modifiers, env);
             let has_async = kinds.has(modifier::ASYNC);
             let internal = kinds.has(modifier::INTERNAL);
             let readonly_this = if kinds.has(modifier::READONLY) {
@@ -3914,8 +4184,14 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             };
             let readonly_ret = map_optional(readonly_return, env, p_readonly)?;
             let mut type_parameters = p_tparam_l(false, type_parameter_list, env)?;
-            let mut parameters = could_map(parameter_list, env, p_fun_param)?;
-            let contexts = p_contexts(contexts, env, None)?;
+            let mut parameters = match could_map(parameter_list, env, p_fun_param) {
+                Ok(params) => params,
+                Err(e) => {
+                    emit_error(e, env);
+                    vec![]
+                }
+            };
+            let contexts = p_contexts(contexts, env, None);
             let mut constrs = p_where_constraint(false, node, where_clause, env)?;
             rewrite_effect_polymorphism(
                 env,
@@ -3953,7 +4229,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             let readonly_ret = map_optional(readonly_return, env, p_readonly)?;
             let mut header = FunHdr::make_empty(env);
             header.parameters = could_map(parameters, env, p_fun_param)?;
-            let contexts = p_contexts(contexts, env, None)?;
+            let contexts = p_contexts(contexts, env, None);
             let unsafe_contexts = contexts.clone();
             header.contexts = contexts;
             header.unsafe_contexts = unsafe_contexts;
@@ -3987,11 +4263,27 @@ fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
     if let ast::Stmt_::Block(blk) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
-            return Ok(vec![]);
+            return Ok(Default::default());
         }
         Ok(blk)
     } else {
-        Ok(vec![ast::Stmt(p, stmt_)])
+        Ok(ast::Block(vec![ast::Stmt(p, stmt_)]))
+    }
+}
+
+fn p_finally_block<'a>(
+    remove_noop: bool,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<ast::FinallyBlock> {
+    let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
+    if let ast::Stmt_::Block(blk) = stmt_ {
+        if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
+            return Ok(Default::default());
+        }
+        Ok(ast::FinallyBlock(blk.0))
+    } else {
+        Ok(ast::FinallyBlock(vec![ast::Stmt(p, stmt_)]))
     }
 }
 
@@ -4000,10 +4292,10 @@ fn mk_noop(env: &Env<'_>) -> ast::Stmt {
 }
 
 fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
-    let mk_noop_result = |e: &Env<'_>| Ok(vec![mk_noop(e)]);
+    let mk_noop_result = |e: &Env<'_>| Ok(ast::Block(vec![mk_noop(e)]));
     let f = |e: &mut Env<'a>| -> Result<ast::Block> {
         match &node.children {
-            Missing => Ok(vec![]),
+            Missing => Ok(Default::default()),
             CompoundStatement(c) => {
                 let compound_statements = &c.statements.children;
                 let compound_right_brace = &c.right_brace.children;
@@ -4034,9 +4326,9 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
                     ))
                 };
                 if is_simple_await_expression(node) {
-                    Ok(vec![f(e)?])
+                    Ok(ast::Block(vec![f(e)?]))
                 } else {
-                    Ok(vec![lift_awaits_in_statement(node, e, f)?])
+                    Ok(ast::Block(vec![lift_awaits_in_statement(node, e, f)?]))
                 }
             }
         }
@@ -4084,9 +4376,48 @@ fn process_attribute_constructor_call<'a>(
             > 0
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
+    } else if sn::user_attributes::is_memoized(&name.1) {
+        let list: Vec<_> = constructor_call_argument_list
+            .syntax_node_to_list_skip_separator()
+            .collect();
+
+        if let Some(first_arg) = list.first() {
+            if !matches!(first_arg.children, EnumClassLabelExpression(_)) {
+                raise_parsing_error(
+                    first_arg,
+                    env,
+                    &syntax_error::memoize_requires_label(&name.1),
+                );
+            }
+        }
+
+        if list.len() > 1 {
+            let ast::Id(_, first) = pos_name(list[0], env)?;
+            let ast::Id(_, second) = pos_name(list[1], env)?;
+
+            if first == "#SoftMakeICInaccessible" {
+                if list.len() > 2 {
+                    raise_parsing_error(
+                        list[2],
+                        env,
+                        &syntax_error::memoize_invalid_arity(&name.1, 2, &first),
+                    );
+                }
+
+                if second.parse::<u32>().is_err() {
+                    raise_parsing_error(list[1], env, &syntax_error::memoize_invalid_sample_rate);
+                }
+            } else {
+                raise_parsing_error(
+                    list[1],
+                    env,
+                    &syntax_error::memoize_invalid_arity(&name.1, 1, &first),
+                );
+            }
+        }
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
-        is_valid_attribute_arg(n, e);
+        is_valid_attribute_arg(n, e, &name.1);
         p_expr(n, e)
     })?;
     Ok(ast::UserAttribute { name, params })
@@ -4095,17 +4426,25 @@ fn process_attribute_constructor_call<'a>(
 // Arguments to attributes must be literals (int, string, etc), collections
 // (eg vec, dict, keyset, etc), Foo::class strings, shapes, string
 // concatenations, or tuples.
-fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
-    let mut is_valid_list = |nodes: S<'a>| {
+fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
+    let is_valid_list = |nodes: S<'a>, env: &mut Env<'a>| {
         let _ = could_map(nodes, env, |n, e| {
-            is_valid_attribute_arg(n, e);
+            is_valid_attribute_arg(n, e, attr_name);
             Ok(())
         });
     };
     match &node.children {
-        ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env),
+        ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env, attr_name),
         // Normal literals (string, int, etc)
         LiteralExpression(_) => {}
+        // Only allow enum class label syntax on __Memoize and __MemizeLSB.
+        EnumClassLabelExpression(ecl) if sn::user_attributes::is_memoized(attr_name) => {
+            if let Ok(ast::Id(_, label_name)) = pos_name(&ecl.expression, env) {
+                if !sn::memoize_option::is_valid(&label_name) {
+                    raise_parsing_error(node, env, &syntax_error::memoize_invalid_label(attr_name));
+                }
+            }
+        }
         // ::class strings
         ScopeResolutionExpression(c) => {
             if let Some(TK::Class) = token_kind(&c.name) {
@@ -4115,7 +4454,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
         }
         // Negations
         PrefixUnaryExpression(c) => {
-            is_valid_attribute_arg(&c.operand, env);
+            is_valid_attribute_arg(&c.operand, env, attr_name);
             match token_kind(&c.operator) {
                 Some(TK::Minus) => {}
                 Some(TK::Plus) => {}
@@ -4127,35 +4466,35 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
         // String concatenation
         BinaryExpression(c) => {
             if let Some(TK::Dot) = token_kind(&c.operator) {
-                is_valid_attribute_arg(&c.left_operand, env);
-                is_valid_attribute_arg(&c.right_operand, env);
+                is_valid_attribute_arg(&c.left_operand, env, attr_name);
+                is_valid_attribute_arg(&c.right_operand, env, attr_name);
             } else {
                 raise_parsing_error(node, env, &syntax_error::expression_as_attribute_arguments);
             }
         }
         // Top-level Collections
-        DarrayIntrinsicExpression(c) => is_valid_list(&c.members),
-        DictionaryIntrinsicExpression(c) => is_valid_list(&c.members),
-        KeysetIntrinsicExpression(c) => is_valid_list(&c.members),
-        VarrayIntrinsicExpression(c) => is_valid_list(&c.members),
-        VectorIntrinsicExpression(c) => is_valid_list(&c.members),
-        ShapeExpression(c) => is_valid_list(&c.fields),
-        TupleExpression(c) => is_valid_list(&c.items),
+        DarrayIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        DictionaryIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        KeysetIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        VarrayIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        VectorIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        ShapeExpression(c) => is_valid_list(&c.fields, env),
+        TupleExpression(c) => is_valid_list(&c.items, env),
         // Collection Internals
         FieldInitializer(c) => {
-            is_valid_attribute_arg(&c.name, env);
-            is_valid_attribute_arg(&c.value, env);
+            is_valid_attribute_arg(&c.name, env, attr_name);
+            is_valid_attribute_arg(&c.value, env, attr_name);
         }
         ElementInitializer(c) => {
-            is_valid_attribute_arg(&c.key, env);
-            is_valid_attribute_arg(&c.value, env);
+            is_valid_attribute_arg(&c.key, env, attr_name);
+            is_valid_attribute_arg(&c.value, env, attr_name);
         }
         // Everything else is not allowed
         _ => raise_parsing_error(node, env, &syntax_error::expression_as_attribute_arguments),
     }
 }
 
-fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
+fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::UserAttributes> {
     let p_attr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute> {
         match &n.children {
             ConstructorCall(c) => {
@@ -4173,11 +4512,49 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserA
         }),
         _ => missing_syntax("attribute specification", node, env),
     }
+    .map(ast::UserAttributes)
 }
 
-fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
-    let attributes = could_map(node, env, p_user_attribute)?;
-    Ok(attributes.into_iter().flatten().collect())
+fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::UserAttributes {
+    let attributes = could_map_emit_error(node, env, p_user_attribute);
+    attributes.into_iter().flatten().collect()
+}
+
+/// Extract the URL in `<<__Docs("http://example.com")>>` if the __Docs attribute
+/// is present.
+fn p_docs_url<'a>(attrs: &ast::UserAttributes, env: &mut Env<'a>) -> Option<String> {
+    let mut url = None;
+
+    for attr in attrs {
+        if attr.name.1 == sn::user_attributes::DOCS {
+            match attr.params.as_slice() {
+                [param] => match &param.2 {
+                    ast::Expr_::String(s) => match String::from_utf8(s.to_vec()) {
+                        Ok(s) => {
+                            url = Some(s);
+                        }
+                        Err(_) => raise_parsing_error_pos(
+                            &attr.name.0,
+                            env,
+                            "`__Docs` URLs must be valid UTF-8",
+                        ),
+                    },
+                    _ => raise_parsing_error_pos(
+                        &attr.name.0,
+                        env,
+                        "`__Docs` URLs must be a string literal",
+                    ),
+                },
+                _ => {
+                    // Wrong number of arguments to __Docs,
+                    // ignore. The attribute arity checks will tell
+                    // the user their code is wrong.
+                }
+            }
+        }
+    }
+
+    url
 }
 
 fn map_yielding<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<(R, bool)>
@@ -4270,9 +4647,9 @@ fn extract_docblock<'a>(node: S<'a>, env: &Env<'_>) -> Option<DocComment> {
         let anchor = node.leading_start_offset();
         let pos = env
             .indexed_source_text
-            .relative_pos(anchor + start, anchor + end);
-        let ps = (pos, txt);
-        oxidized::doc_comment::DocComment::new(ps)
+            .relative_pos(anchor + start, anchor + end)
+            .into();
+        (pos, txt)
     })
 }
 
@@ -4308,131 +4685,306 @@ fn p_xhp_child<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpChild> {
     }
 }
 
-fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
-    use ast::Visibility;
-    let doc_comment_opt = extract_docblock(node, env);
-    let has_fun_header =
-        |m: &MethodishDeclarationChildren<'_, PositionedToken<'a>, PositionedValue<'a>>| {
-            matches!(
-                m.function_decl_header.children,
-                FunctionDeclarationHeader(_)
-            )
-        };
-    let p_method_vis = |node: S<'a>, name_pos: &Pos, env: &mut Env<'a>| -> Result<Visibility> {
-        match p_visibility_last_win(node, env)? {
-            None => {
-                raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
-                Ok(Visibility::Public)
+fn p_tconstraints_into_lower_and_upper<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> (Vec<ast::Hint>, Vec<ast::Hint>) {
+    let mut lower = vec![];
+    let mut upper = vec![];
+    for constraint in node.syntax_node_to_list_skip_separator() {
+        let (kind, ty) = match p_tconstraint(constraint, env) {
+            Ok(v) => v,
+            Err(e) => {
+                emit_error(e, env);
+                continue;
             }
-            Some(v) => Ok(v),
+        };
+        match kind {
+            ast::ConstraintKind::ConstraintAs => upper.push(ty),
+            ast::ConstraintKind::ConstraintSuper => lower.push(ty),
+            _ => (),
+        };
+    }
+    (lower, upper)
+}
+
+fn merge_constraints(
+    mut constraints: Vec<ast::Hint>,
+    f: fn(Vec<ast::Hint>) -> ast::Hint_,
+) -> Option<ast::Hint> {
+    if constraints.len() == 1 {
+        constraints.pop()
+    } else {
+        #[allow(clippy::manual_map)]
+        // map doesn't allow moving out of borrowed constraints
+        match constraints.first() {
+            None => None, // no bounds
+            Some(fst) => Some(ast::Hint::new(fst.0.clone(), f(constraints))),
         }
+    }
+}
+
+fn p_method_vis<'a>(node: S<'a>, name_pos: &Pos, env: &mut Env<'a>) -> ast::Visibility {
+    match p_visibility_last_win(node, env) {
+        None => {
+            let first_token_pos = match node.syntax_node_to_list_skip_separator().next() {
+                Some(token_node) => p_pos(token_node, env),
+                None => name_pos.clone(),
+            };
+
+            raise_hh_error(
+                env,
+                Naming::method_needs_visibility(first_token_pos, name_pos.clone()),
+            );
+            ast::Visibility::Public
+        }
+        Some(v) => v,
+    }
+}
+
+fn has_fun_header(
+    m: &MethodishDeclarationChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+) -> bool {
+    matches!(
+        m.function_decl_header.children,
+        FunctionDeclarationHeader(_)
+    )
+}
+
+fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::XhpAttr, ast::Hint>> {
+    let mk_attr_use = |n: S<'a>, env: &mut Env<'a>| {
+        Ok(Either::Right(ast::Hint(
+            p_pos(n, env),
+            Box::new(ast::Hint_::Happly(pos_name(n, env)?, vec![])),
+        )))
     };
     match &node.children {
-        ConstDeclaration(c) => {
-            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let kinds = p_kinds(&c.modifiers, env)?;
-            let has_abstract = kinds.has(modifier::ABSTRACT);
-            // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
-            let type_ = map_optional(&c.type_specifier, env, p_hint)?;
-            // ocaml's behavior is that if anything throw, it will
-            // discard all lowered elements. So adding to class
-            // must be at the last.
-            let mut class_consts = could_map(&c.declarators, env, |n, e| match &n.children {
-                ConstantDeclarator(c) => {
-                    let id = pos_name(&c.name, e)?;
-                    use aast::ClassConstKind::*;
-                    let kind = if has_abstract {
-                        CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
-                    } else {
-                        CCConcrete(p_simple_initializer(&c.initializer, e)?)
-                    };
-                    Ok(ast::ClassConst {
-                        user_attributes: user_attributes.clone(),
-                        type_: type_.clone(),
-                        id,
-                        kind,
-                        doc_comment: doc_comment_opt.clone(),
-                    })
+        XHPClassAttribute(c) => {
+            let ast::Id(p, name) = pos_name(&c.name, env)?;
+            if let TypeConstant(_) = &c.type_.children {
+                if env.is_typechecker() {
+                    raise_parsing_error(
+                        &c.type_,
+                        env,
+                        &syntax_error::xhp_class_attribute_type_constant,
+                    )
                 }
-                _ => missing_syntax("constant declarator", n, e),
-            })?;
-            Ok(class.consts.append(&mut class_consts))
+            }
+            let req = match &c.required.children {
+                XHPRequired(_) => Some(ast::XhpAttrTag::Required),
+                XHPLateinit(_) => Some(ast::XhpAttrTag::LateInit),
+                _ => None,
+            };
+            let pos = if c.initializer.is_missing() {
+                p.clone()
+            } else {
+                Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(|message| {
+                    Error::ParsingError {
+                        message,
+                        pos: p.clone(),
+                    }
+                })?
+            };
+            let (hint, like, enum_values, enum_) = match &c.type_.children {
+                XHPEnumType(c1) => {
+                    let p = p_pos(&c.type_, env);
+                    let like = match &c1.like.children {
+                        Missing => None,
+                        _ => Some(p_pos(&c1.like, env)),
+                    };
+                    let vals = could_map(&c1.values, env, p_expr)?;
+                    let mut enum_vals = vec![];
+                    for val in vals.clone() {
+                        match val {
+                            ast::Expr(_, _, Expr_::String(xev)) => {
+                                enum_vals.push(ast::XhpEnumValue::XEVString(xev.to_string()))
+                            }
+                            ast::Expr(_, _, Expr_::Int(xev)) => match xev.parse() {
+                                Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
+                                Err(_) =>
+                                    // Since we have parse checks for
+                                // malformed integer literals already,
+                                // we assume this won't happen and ignore
+                                // the case.
+                                    {}
+                            },
+                            _ => {}
+                        }
+                    }
+                    (None, like, enum_vals, Some((p, vals)))
+                }
+                _ => (Some(p_hint(&c.type_, env)?), None, vec![], None),
+            };
+            let init_expr = map_optional(&c.initializer, env, p_simple_initializer)?;
+            let xhp_attr = ast::XhpAttr(
+                ast::TypeHint((), hint.clone()),
+                ast::ClassVar {
+                    final_: false,
+                    xhp_attr: Some(ast::XhpAttrInfo {
+                        like,
+                        tag: req,
+                        enum_values,
+                    }),
+                    abstract_: false,
+                    readonly: false,
+                    visibility: ast::Visibility::Public,
+                    type_: ast::TypeHint((), hint),
+                    id: ast::Id(p, String::from(":") + &name),
+                    expr: init_expr,
+                    user_attributes: Default::default(),
+                    doc_comment: None,
+                    is_promoted_variadic: false,
+                    is_static: false,
+                    span: pos,
+                },
+                req,
+                enum_,
+            );
+            Ok(Either::Left(xhp_attr))
         }
+        XHPSimpleClassAttribute(c) => mk_attr_use(&c.type_, env),
+        Token(_) => mk_attr_use(node, env),
+        _ => missing_syntax("XHP attribute", node, env),
+    }
+}
+
+fn p_type_constant<'a>(
+    node: S<'a>,
+    doc_comment_opt: Option<DocComment>,
+    env: &mut Env<'a>,
+    cls: &mut ast::Class_,
+) {
+    match &node.children {
         TypeConstDeclaration(c) => {
-            use ast::ClassTypeconst::{TCAbstract, TCConcrete};
+            use ast::ClassTypeconst::TCAbstract;
+            use ast::ClassTypeconst::TCConcrete;
             if !c.type_parameters.is_missing() {
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
-            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let type__ = map_optional(&c.type_specifier, env, p_hint)?
+            let user_attributes = p_user_attributes(&c.attribute_spec, env);
+            let type__ = map_optional_emit_error(&c.type_specifier, env, p_hint)
                 .map(|hint| soften_hint(&user_attributes, hint));
-            let kinds = p_kinds(&c.modifiers, env)?;
-            let name = pos_name(&c.name, env)?;
-            let as_constraint = {
-                let mut constraints = could_map(&c.type_constraints, env, p_tconstraint_ty)?;
-                if constraints.len() == 1 {
-                    constraints.pop()
-                } else {
-                    #[allow(clippy::manual_map)]
-                    // map doesn't allow moving out of borrowed constraints
-                    match constraints.first() {
-                        None => None, // no bounds
-                        Some(fst) => {
-                            // desugar multiple as constraints into an intersection type
-                            // e.g., `as num as T1` -> `as (num & T1)`
-                            Some(ast::Hint::new(
-                                fst.0.clone(),
-                                ast::Hint_::Hintersection(constraints),
-                            ))
-                        }
-                    }
+            let kinds = p_kinds(&c.modifiers, env);
+            let name = match pos_name(&c.name, env) {
+                Ok(name) => name,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
                 }
             };
+
+            // desugar multiple same-kinded constraints as folows:
+            let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.type_constraints, env);
+            // `as num as T1` -> `as (num & T1)`
+            let as_constraint = merge_constraints(upper, ast::Hint_::Hintersection);
+            // `super int as T2` -> `as (int | T2)`
+            let super_constraint = merge_constraints(lower, ast::Hint_::Hunion);
+
             let span = p_pos(node, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
             let kind = if has_abstract {
                 TCAbstract(ast::ClassAbstractTypeconst {
                     as_constraint,
-                    super_constraint: None,
+                    super_constraint,
                     default: type__,
                 })
             } else if let Some(type_) = type__ {
-                if env.is_typechecker() && as_constraint.is_some() {
+                if env.is_typechecker() && (as_constraint.is_some() || super_constraint.is_some()) {
                     raise_hh_error(
                         env,
-                        NastCheck::partially_abstract_typeconst_definition(name.0.clone()),
+                        NastCheck::partially_abstract_typeconst_definition(
+                            name.0.clone(),
+                            if as_constraint.is_some() {
+                                "as"
+                            } else {
+                                "super"
+                            },
+                        ),
                     );
                 }
                 TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ })
             } else {
-                raise_hh_error(
-                    env,
-                    NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                );
-                missing_syntax("value for the type constant", node, env)?
+                raise_hh_error(env, NastCheck::not_abstract_without_typeconst(name.0));
+                raise_missing_syntax("value for the type constant", node, env);
+                return;
             };
-            Ok(class.typeconsts.push(ast::ClassTypeconstDef {
+            cls.typeconsts.push(ast::ClassTypeconstDef {
                 name,
                 kind,
                 user_attributes,
                 span,
                 doc_comment: doc_comment_opt,
                 is_ctx: false,
-            }))
+            })
         }
+        _ => {}
+    }
+}
+
+/// Given an FFP `node` that represents a class element (e.g a
+/// property, a method or a class constant), lower it to the
+/// equivalent AAST representation and store in `class`.
+///
+/// If we encounter an error, write the error to `env` and don't add
+/// anything to `class`.
+fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
+    let doc_comment_opt = extract_docblock(node, env);
+
+    match &node.children {
+        ConstDeclaration(c) => {
+            let user_attributes = p_user_attributes(&c.attribute_spec, env);
+            let kinds = p_kinds(&c.modifiers, env);
+            let has_abstract = kinds.has(modifier::ABSTRACT);
+            // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
+            let type_ = map_optional_emit_error(&c.type_specifier, env, p_hint);
+            let span = p_pos(node, env);
+
+            let mut class_consts =
+                could_map_emit_error(&c.declarators, env, |n, e| match &n.children {
+                    ConstantDeclarator(c) => {
+                        let id = pos_name(&c.name, e)?;
+                        let pos = &id.0;
+                        use aast::ClassConstKind::*;
+                        let kind = if has_abstract {
+                            CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
+                        } else {
+                            CCConcrete(p_const_value(&c.initializer, e, pos.clone())?)
+                        };
+                        Ok(ast::ClassConst {
+                            user_attributes: user_attributes.clone(),
+                            type_: type_.clone(),
+                            id,
+                            kind,
+                            span: span.clone(),
+                            doc_comment: doc_comment_opt.clone(),
+                        })
+                    }
+                    _ => missing_syntax("constant declarator", n, e),
+                });
+            class.consts.append(&mut class_consts)
+        }
+        TypeConstDeclaration(_) => p_type_constant(node, doc_comment_opt, env, class),
         ContextConstDeclaration(c) => {
-            use ast::ClassTypeconst::{TCAbstract, TCConcrete};
+            use ast::ClassTypeconst::TCAbstract;
+            use ast::ClassTypeconst::TCConcrete;
             if !c.type_parameters.is_missing() {
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
-            let name = pos_name(&c.name, env)?;
+            let name = match pos_name(&c.name, env) {
+                Ok(name) => name,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
+                }
+            };
             let context = p_context_list_to_intersection(
                 &c.ctx_list,
                 env,
                 "Context constants cannot alias polymorphic contexts",
-            )?;
+            );
             if let Some(ref hint) = context {
-                use ast::Hint_::{Happly, Hintersection};
+                use ast::Hint_::Happly;
+                use ast::Hint_::Hintersection;
                 let ast::Hint(_, ref h) = hint;
                 if let Hintersection(hl) = &**h {
                     for h in hl {
@@ -4450,9 +5002,10 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 }
             }
             let span = p_pos(node, env);
-            let kinds = p_kinds(&c.modifiers, env)?;
+            let kinds = p_kinds(&c.modifiers, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
-            let (super_constraint, as_constraint) = p_ctx_constraints(&c.constraint, env)?;
+            let (super_constraint, as_constraint) =
+                p_ctx_constraints(&c.constraint, env).unwrap_or((None, None));
             let kind = if has_abstract {
                 TCAbstract(ast::ClassAbstractTypeconst {
                     as_constraint,
@@ -4469,33 +5022,31 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 };
                 TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
             } else {
-                raise_hh_error(
-                    env,
-                    NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                );
-                missing_syntax("value for the context constant", node, env)?
+                raise_hh_error(env, NastCheck::not_abstract_without_typeconst(name.0));
+                raise_missing_syntax("value for the context constant", node, env);
+                return;
             };
-            Ok(class.typeconsts.push(ast::ClassTypeconstDef {
+            class.typeconsts.push(ast::ClassTypeconstDef {
                 name,
                 kind,
-                user_attributes: vec![],
+                user_attributes: Default::default(),
                 span,
                 doc_comment: doc_comment_opt,
                 is_ctx: true,
-            }))
+            });
         }
         PropertyDeclaration(c) => {
-            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let type_ =
-                map_optional(&c.type_, env, p_hint)?.map(|t| soften_hint(&user_attributes, t));
-            let kinds = p_kinds(&c.modifiers, env)?;
-            let vis = p_visibility_last_win_or(&c.modifiers, env, Visibility::Public)?;
+            let user_attributes = p_user_attributes(&c.attribute_spec, env);
+            let type_ = map_optional_emit_error(&c.type_, env, p_hint)
+                .map(|t| soften_hint(&user_attributes, t));
+            let kinds = p_kinds(&c.modifiers, env);
+            let vis = p_visibility_last_win_or(&c.modifiers, env, ast::Visibility::Public);
             let doc_comment = if env.quick_mode {
                 None
             } else {
                 doc_comment_opt
             };
-            let name_exprs = could_map(&c.declarators, env, |n, e| match &n.children {
+            let name_exprs = could_map_emit_error(&c.declarators, env, |n, e| match &n.children {
                 PropertyDeclarator(c) => {
                     let name = pos_name_(&c.name, e, Some('$'))?;
                     let pos = p_pos(n, e);
@@ -4503,7 +5054,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     Ok((pos, name, expr))
                 }
                 _ => missing_syntax("property declarator", n, e),
-            })?;
+            });
 
             for (i, name_expr) in name_exprs.into_iter().enumerate() {
                 class.vars.push(ast::ClassVar {
@@ -4522,7 +5073,6 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     span: name_expr.0,
                 });
             }
-            Ok(())
         }
         MethodishDeclaration(c) if has_fun_header(c) => {
             // keep cls_generics
@@ -4541,16 +5091,16 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 (
                     ast::Stmt::new(
                         p.clone(),
-                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(
-                            ast::Bop::Eq(None),
-                            e(Expr_::mk_obj_get(
+                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(Binop {
+                            bop: ast::Bop::Eq(None),
+                            lhs: e(Expr_::mk_obj_get(
                                 e(Expr_::mk_lvar(lid(special_idents::THIS))),
                                 e(Expr_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                 ast::OgNullFlavor::OGNullthrows,
                                 ast::PropOrMethod::IsProp,
                             )),
-                            e(Expr_::mk_lvar(lid(&param.name))),
-                        ))),
+                            rhs: e(Expr_::mk_lvar(lid(&param.name))),
+                        }))),
                     ),
                     ast::ClassVar {
                         final_: false,
@@ -4578,29 +5128,42 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 FunctionDeclarationHeader(h) => h,
                 _ => panic!(),
             };
-            let hdr = p_fun_hdr(header, env)?;
+            let hdr = match p_fun_hdr(header, env) {
+                Ok(hdr) => hdr,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
+                }
+            };
             let (mut member_init, mut member_def): (Vec<ast::Stmt>, Vec<ast::ClassVar>) = hdr
                 .parameters
                 .iter()
                 .filter_map(|p| p.visibility.map(|_| classvar_init(p)))
                 .unzip();
 
-            let kinds = p_kinds(&h.modifiers, env)?;
-            let visibility = p_method_vis(&h.modifiers, &hdr.name.0, env)?;
+            let kinds = p_kinds(&h.modifiers, env);
+            let visibility = p_method_vis(&h.modifiers, &hdr.name.0, env);
             let is_static = kinds.has(modifier::STATIC);
             let readonly_this = kinds.has(modifier::READONLY);
             *env.in_static_method() = is_static;
             check_effect_polymorphic_reification(hdr.contexts.as_ref(), env, node);
-            let (mut body, body_has_yield) = map_yielding(&c.function_body, env, p_function_body)?;
+            let (mut body, body_has_yield) =
+                match map_yielding(&c.function_body, env, p_function_body) {
+                    Ok(value) => value,
+                    Err(e) => {
+                        emit_error(e, env);
+                        return;
+                    }
+                };
             if env.codegen() {
                 member_init.reverse();
             }
-            member_init.append(&mut body);
-            let body = member_init;
+            member_init.append(&mut body.0);
+            let body = ast::Block(member_init);
             *env.in_static_method() = false;
             let is_abstract = kinds.has(modifier::ABSTRACT);
             let is_external = !is_abstract && c.function_body.is_external();
-            let user_attributes = p_user_attributes(&c.attribute, env)?;
+            let user_attributes = p_user_attributes(&c.attribute, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "method", env);
             let method = ast::Method_ {
                 span: p_fun_pos(node, env),
@@ -4625,90 +5188,25 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 doc_comment: doc_comment_opt,
             };
             class.vars.append(&mut member_def);
-            Ok(class.methods.push(method))
-        }
-        TraitUseConflictResolution(c) => {
-            type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>>;
-            let p_item = |n: S<'a>, e: &mut Env<'a>| -> Ret {
-                match &n.children {
-                    TraitUsePrecedenceItem(c) => {
-                        let (qualifier, name) = match &c.name.children {
-                            ScopeResolutionExpression(c) => {
-                                (pos_name(&c.qualifier, e)?, p_pstring(&c.name, e)?)
-                            }
-                            _ => missing_syntax("trait use precedence item", n, e)?,
-                        };
-                        let removed_names = could_map(&c.removed_names, e, pos_name)?;
-                        raise_hh_error(e, Naming::unsupported_instead_of(name.0.clone()));
-                        Ok(Either::Left(ast::InsteadofAlias(
-                            qualifier,
-                            name,
-                            removed_names,
-                        )))
-                    }
-                    TraitUseAliasItem(c) => {
-                        let (qualifier, name) = match &c.aliasing_name.children {
-                            ScopeResolutionExpression(c) => {
-                                (Some(pos_name(&c.qualifier, e)?), p_pstring(&c.name, e)?)
-                            }
-                            _ => (None, p_pstring(&c.aliasing_name, e)?),
-                        };
-                        let (kinds, mut vis_raw) = p_modifiers(
-                            |mut acc, kind| -> Vec<ast::UseAsVisibility> {
-                                if let Some(v) = modifier::to_use_as_visibility(kind) {
-                                    acc.push(v);
-                                }
-                                acc
-                            },
-                            vec![],
-                            &c.modifiers,
-                            e,
-                        )?;
-                        let vis = if kinds.is_empty() || kinds.has_any(modifier::VISIBILITIES) {
-                            vis_raw
-                        } else {
-                            let mut v = vec![ast::UseAsVisibility::UseAsPublic];
-                            v.append(&mut vis_raw);
-                            v
-                        };
-                        let aliased_name = if !c.aliased_name.is_missing() {
-                            Some(pos_name(&c.aliased_name, e)?)
-                        } else {
-                            None
-                        };
-                        raise_hh_error(e, Naming::unsupported_trait_use_as(name.0.clone()));
-                        Ok(Either::Right(ast::UseAsAlias(
-                            qualifier,
-                            name,
-                            aliased_name,
-                            vis,
-                        )))
-                    }
-                    _ => missing_syntax("trait use conflict resolution item", n, e),
-                }
-            };
-            let mut uses = could_map(&c.names, env, p_hint)?;
-            let elts = could_map(&c.clauses, env, p_item)?;
-            class.uses.append(&mut uses);
-            for elt in elts.into_iter() {
-                match elt {
-                    Either::Left(l) => class.insteadof_alias.push(l),
-                    Either::Right(r) => class.use_as_alias.push(r),
-                }
-            }
-            Ok(())
+            class.methods.push(method)
         }
         TraitUse(c) => {
-            let mut uses = could_map(&c.names, env, p_hint)?;
-            Ok(class.uses.append(&mut uses))
+            let mut uses = could_map_emit_error(&c.names, env, p_hint);
+            class.uses.append(&mut uses)
         }
         RequireClause(c) => {
             use aast::RequireKind::*;
             use ast::Hint_;
-            let hint = p_hint(&c.name, env)?;
+            let hint = match p_hint(&c.name, env) {
+                Ok(hint) => hint,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
+                }
+            };
             let require_kind = match token_kind(&c.kind) {
-                Some(TK::Implements) => RequireImplements,
-                Some(TK::Extends) => RequireExtends,
+                Some(TK::Implements) => Some(RequireImplements),
+                Some(TK::Extends) => Some(RequireExtends),
                 Some(TK::Class) => {
                     let ast::Hint(_pos, hint_) = &hint;
                     match hint_.as_ref() {
@@ -4722,142 +5220,56 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                                     &syntax_error::require_class_applied_to_generic,
                                 )
                             };
-                            RequireClass
+                            Some(RequireClass)
                         }
-                        _ => missing_syntax("class name", &c.name, env)?,
+                        _ => {
+                            raise_missing_syntax("class name", &c.name, env);
+                            None
+                        }
                     }
                 }
-                _ => missing_syntax("trait require kind", &c.kind, env)?,
+                _ => {
+                    raise_missing_syntax("trait require kind", &c.kind, env);
+                    None
+                }
             };
-            Ok(class.reqs.push((hint, require_kind)))
+            if let Some(require_kind) = require_kind {
+                class.reqs.push(ClassReq(hint, require_kind));
+            }
         }
         XHPClassAttributeDeclaration(c) => {
-            type Ret = Result<Either<ast::XhpAttr, ast::Hint>>;
-            let p_attr = |node: S<'a>, env: &mut Env<'a>| -> Ret {
-                let mk_attr_use = |n: S<'a>, env: &mut Env<'a>| {
-                    Ok(Either::Right(ast::Hint(
-                        p_pos(n, env),
-                        Box::new(ast::Hint_::Happly(pos_name(n, env)?, vec![])),
-                    )))
-                };
-                match &node.children {
-                    XHPClassAttribute(c) => {
-                        let ast::Id(p, name) = pos_name(&c.name, env)?;
-                        if let TypeConstant(_) = &c.type_.children {
-                            if env.is_typechecker() {
-                                raise_parsing_error(
-                                    &c.type_,
-                                    env,
-                                    &syntax_error::xhp_class_attribute_type_constant,
-                                )
-                            }
-                        }
-                        let req = match &c.required.children {
-                            XHPRequired(_) => Some(ast::XhpAttrTag::Required),
-                            XHPLateinit(_) => Some(ast::XhpAttrTag::LateInit),
-                            _ => None,
-                        };
-                        let pos = if c.initializer.is_missing() {
-                            p.clone()
-                        } else {
-                            Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(Error::Failwith)?
-                        };
-                        let (hint, like, enum_values, enum_) = match &c.type_.children {
-                            XHPEnumType(c1) => {
-                                let p = p_pos(&c.type_, env);
-                                let like = match &c1.like.children {
-                                    Missing => None,
-                                    _ => Some(p_pos(&c1.like, env)),
-                                };
-                                let vals = could_map(&c1.values, env, p_expr)?;
-                                let mut enum_vals = vec![];
-                                for val in vals.clone() {
-                                    match val {
-                                        ast::Expr(_, _, Expr_::String(xev)) => enum_vals
-                                            .push(ast::XhpEnumValue::XEVString(xev.to_string())),
-                                        ast::Expr(_, _, Expr_::Int(xev)) => match xev.parse() {
-                                            Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
-                                            Err(_) =>
-                                                // Since we have parse checks for
-                                            // malformed integer literals already,
-                                            // we assume this won't happen and ignore
-                                            // the case.
-                                                {}
-                                        },
-                                        _ => {}
-                                    }
-                                }
-                                (None, like, enum_vals, Some((p, vals)))
-                            }
-                            _ => (Some(p_hint(&c.type_, env)?), None, vec![], None),
-                        };
-                        let init_expr = map_optional(&c.initializer, env, p_simple_initializer)?;
-                        let xhp_attr = ast::XhpAttr(
-                            ast::TypeHint((), hint.clone()),
-                            ast::ClassVar {
-                                final_: false,
-                                xhp_attr: Some(ast::XhpAttrInfo {
-                                    like,
-                                    tag: req,
-                                    enum_values,
-                                }),
-                                abstract_: false,
-                                readonly: false,
-                                visibility: ast::Visibility::Public,
-                                type_: ast::TypeHint((), hint),
-                                id: ast::Id(p, String::from(":") + &name),
-                                expr: init_expr,
-                                user_attributes: vec![],
-                                doc_comment: None,
-                                is_promoted_variadic: false,
-                                is_static: false,
-                                span: pos,
-                            },
-                            req,
-                            enum_,
-                        );
-                        Ok(Either::Left(xhp_attr))
-                    }
-                    XHPSimpleClassAttribute(c) => mk_attr_use(&c.type_, env),
-                    Token(_) => mk_attr_use(node, env),
-                    _ => missing_syntax("XHP attribute", node, env),
-                }
-            };
-            let attrs = could_map(&c.attributes, env, p_attr)?;
+            let attrs = could_map_emit_error(&c.attributes, env, p_xhp_class_attr);
             for attr in attrs.into_iter() {
                 match attr {
                     Either::Left(attr) => class.xhp_attrs.push(attr),
                     Either::Right(xhp_attr_use) => class.xhp_attr_uses.push(xhp_attr_use),
                 }
             }
-            Ok(())
         }
         XHPChildrenDeclaration(c) => {
             let p = p_pos(node, env);
-            Ok(class
-                .xhp_children
-                .push((p, p_xhp_child(&c.expression, env)?)))
+            match p_xhp_child(&c.expression, env) {
+                Ok(child) => {
+                    class.xhp_children.push((p, child));
+                }
+                Err(e) => {
+                    emit_error(e, env);
+                }
+            }
         }
         XHPCategoryDeclaration(c) => {
             let p = p_pos(node, env);
-            let categories = could_map(&c.categories, env, |n, e| p_pstring_(n, e, Some('%')))?;
+
+            let categories =
+                could_map_emit_error(&c.categories, env, |n, e| p_pstring_(n, e, Some('%')));
             if let Some((_, cs)) = &class.xhp_category {
                 if let Some(category) = cs.first() {
                     raise_hh_error(env, NastCheck::multiple_xhp_category(category.0.clone()))
                 }
             }
-            Ok(class.xhp_category = Some((p, categories)))
+            class.xhp_category = Some((p, categories))
         }
-        _ => missing_syntax("class element", node, env),
-    }
-}
-
-fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
-    let r = p_class_elt_(class, node, env);
-    match r {
-        // match ocaml behavior, don't throw if missing syntax when fail_open is true
-        Err(Error::MissingSyntax { .. }) if env.fail_open() => Ok(()),
-        _ => r,
+        _ => raise_missing_syntax("class element", node, env),
     }
 }
 
@@ -4971,16 +5383,109 @@ fn p_namespace_use_clause<'a>(
     }
 }
 
+fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
+    sn::user_attributes::is_memoized(&u.name.1)
+        && (match flavor {
+            Some(flavor) => u.params.iter().any(
+                |p| matches!(p, Expr(_, _, ast::Expr_::EnumClassLabel(ecl)) if ecl.1 == flavor),
+            ),
+            None => u.params.is_empty(),
+        })
+}
+
+fn pos_qualified_referenced_module_name<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<ast::MdNameKind> {
+    if let ModuleName(c) = &node.children {
+        if let SyntaxList(l) = &c.parts.children {
+            let p = p_pos(node, env);
+            let mut s = String::with_capacity(node.width());
+
+            for i in l.iter() {
+                match &i.children {
+                    ListItem(li) => match &li.item.children {
+                        Token(t) => match t.kind() {
+                            TK::SelfToken => {
+                                s += &name.1;
+                            }
+                            TK::Global => {
+                                return Ok(ast::MdNameKind::MDNameGlobal(p));
+                            }
+                            TK::Star => {
+                                return Ok(ast::MdNameKind::MDNamePrefix(ast::Id(p, s)));
+                            }
+                            TK::Name => {
+                                if !s.is_empty() {
+                                    s += ".";
+                                }
+                                s += text_str(&li.item, env);
+                            }
+                            _ => {
+                                return missing_syntax("module name", node, env);
+                            }
+                        },
+                        _ => {
+                            return missing_syntax("module name", node, env);
+                        }
+                    },
+                    _ => {
+                        return missing_syntax("module name", node, env);
+                    }
+                }
+            }
+            return Ok(ast::MdNameKind::MDNameExact(ast::Id(p, s)));
+        }
+    }
+    missing_syntax("module name", node, env)
+}
+
+fn p_module_exports<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Option<Vec<ast::MdNameKind>>> {
+    match &node.children {
+        Missing => Ok(None),
+        ModuleExports(e) => Ok(Some(
+            e.exports
+                .syntax_node_to_list_skip_separator()
+                .map(|n| pos_qualified_referenced_module_name(name, n, env))
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
+        _ => missing_syntax("module exports", node, env),
+    }
+}
+
+fn p_module_imports<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Option<Vec<ast::MdNameKind>>> {
+    match &node.children {
+        Missing => Ok(None),
+        ModuleImports(e) => Ok(Some(
+            e.imports
+                .syntax_node_to_list_skip_separator()
+                .map(|n| pos_qualified_referenced_module_name(name, n, env))
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
+        _ => missing_syntax("module imports", node, env),
+    }
+}
+
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
     kind: &str,
     env: &mut Env<'a>,
 ) {
+    // functions with dependent contexts cannot be memoized
     if has_polymorphic_context(env, contexts) {
         if let Some(u) = user_attributes
             .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized(&u.name.1))
+            .find(|u| sn::user_attributes::is_memoized(&u.name.1))
         {
             raise_parsing_error_pos(
                 &u.name.0,
@@ -4989,11 +5494,11 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    let has_policied = has_any_policied_context(contexts);
-    if has_policied {
+    // memoized functions with zoned or zoned_with must be #KeyedByIC
+    if has_any_policied_context(contexts) {
         if let Some(u) = user_attributes
             .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1))
+            .find(|u| is_memoize_attribute_with_flavor(u, None))
         {
             raise_parsing_error_pos(
                 &u.name.0,
@@ -5002,11 +5507,12 @@ fn check_effect_memoized<'a>(
             )
         }
     }
+    // #KeyedByIC can only be used on functions with defaults or zoned*
     if let Some(u) = user_attributes
         .iter()
-        .find(|u| naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1))
+        .find(|u| is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::KEYED_BY_IC)))
     {
-        if !has_policied {
+        if !has_any_policied_or_defaults_context(contexts) {
             raise_parsing_error_pos(
                 &u.name.0,
                 env,
@@ -5014,15 +5520,53 @@ fn check_effect_memoized<'a>(
             )
         }
     }
+    // #(Soft)?MakeICInaccessible can only be used on functions with defaults
+    if let Some(u) = user_attributes.iter().find(|u| {
+        is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::MAKE_IC_INACCESSSIBLE))
+            || is_memoize_attribute_with_flavor(
+                u,
+                Some(sn::memoize_option::SOFT_MAKE_IC_INACCESSSIBLE),
+            )
+    }) {
+        if !has_any_context(
+            contexts,
+            vec![
+                sn::coeffects::DEFAULTS,
+                sn::coeffects::LEAK_SAFE_LOCAL,
+                sn::coeffects::LEAK_SAFE_SHALLOW,
+            ],
+        ) {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::memoize_make_ic_inaccessible_without_defaults(kind),
+            )
+        }
+    }
+    // functions whose contexts prevent getting the IC (effectively <= [leak_safe, globals])
+    // cannot pass a memoize argument
+    if contexts_cannot_access_ic(contexts) {
+        if let Some(u) = user_attributes
+            .iter()
+            .find(|u| sn::user_attributes::is_memoized(&u.name.1) && !u.params.is_empty())
+        {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::memoize_category_without_implicit_policy_capability(kind),
+            )
+        }
+    }
 }
 
 fn check_context_has_this<'a>(contexts: Option<&ast::Contexts>, env: &mut Env<'a>) {
-    use ast::Hint_::{Haccess, Happly};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
     if let Some(ast::Contexts(pos, ref context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
                 Happly(oxidized::ast::Id(_, id), _)
-                    if strip_ns(id.as_str()) == naming_special_names_rust::typehints::THIS =>
+                    if strip_ns(id.as_str()) == sn::typehints::THIS =>
                 {
                     raise_parsing_error_pos(
                         pos,
@@ -5042,7 +5586,8 @@ fn check_effect_polymorphic_reification<'a>(
     env: &mut Env<'a>,
     node: S<'a>,
 ) {
-    use ast::Hint_::{Haccess, Happly};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
@@ -5053,6 +5598,18 @@ fn check_effect_polymorphic_reification<'a>(
             },
             _ => {}
         });
+    }
+}
+
+fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result<ast::Expr> {
+    match &node.children {
+        SimpleInitializer(c) => p_expr(&c.value, env),
+        _ if env.file_mode() == file_info::Mode::Mhhi && !env.codegen() => {
+            // We use Omitted as a placeholder here because we don't care about
+            // the constant's value when in HHI mode
+            Ok(Expr::new((), default_pos, Expr_::Omitted))
+        }
+        _ => missing_syntax("simple initializer", node, env),
     }
 }
 
@@ -5070,11 +5627,11 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let hdr = p_fun_hdr(declaration_header, env)?;
             let is_external = body.is_external();
             let (block, yield_) = if is_external {
-                (vec![], false)
+                (Default::default(), false)
             } else {
                 map_yielding(body, env, p_function_body)?
             };
-            let user_attributes = p_user_attributes(attribute_spec, env)?;
+            let user_attributes = p_user_attributes(attribute_spec, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
             check_context_has_this(hdr.contexts.as_ref(), env);
             let ret = ast::TypeHint((), hdr.return_type);
@@ -5085,9 +5642,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 ret,
                 readonly_ret: hdr.readonly_return,
-                name: hdr.name,
-                tparams: hdr.type_parameters,
-                where_constraints: hdr.constrs,
                 params: hdr.parameters,
                 ctxs: hdr.contexts,
                 unsafe_ctxs: hdr.unsafe_contexts,
@@ -5102,16 +5656,22 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 namespace: mk_empty_ns_env(env),
                 file_attributes: vec![],
                 mode: env.file_mode(),
+                name: hdr.name,
                 fun,
                 internal: hdr.internal,
+                module: None,
+                tparams: hdr.type_parameters,
+                where_constraints: hdr.constrs,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {
             let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
             let env = env.as_mut();
             let mode = env.file_mode();
-            let user_attributes = p_user_attributes(&c.attribute, env)?;
-            let kinds = p_kinds(&c.modifiers, env)?;
+            let user_attributes = p_user_attributes(&c.attribute, env);
+            let docs_url = p_docs_url(&user_attributes, env);
+
+            let kinds = p_kinds(&c.modifiers, env);
             let final_ = kinds.has(modifier::FINAL);
             let is_xhp = matches!(
                 token_kind(&c.name),
@@ -5152,8 +5712,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 tparams,
                 extends,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],
@@ -5163,8 +5721,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 typeconsts: vec![],
                 vars: vec![],
                 methods: vec![],
-                // TODO: what is this attbiute? check ast_to_aast
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 namespace,
@@ -5174,11 +5730,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 doc_comment: doc_comment_opt,
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
             };
             match &c.body.children {
                 ClassishBody(c1) => {
                     for elt in c1.elements.syntax_node_to_list_skip_separator() {
-                        p_class_elt(&mut class_, elt, env)?;
+                        p_class_elt(&mut class_, elt, env);
                     }
                 }
                 _ => missing_syntax("classish body", &c.body, env)?,
@@ -5199,7 +5757,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             mode: env.file_mode(),
                             name: pos_name(name, env)?,
                             type_: map_optional(ty, env, p_hint)?,
-                            value: p_simple_initializer(init, env)?,
+                            value: p_const_value(init, env, p_pos(name, env))?,
                             namespace: mk_empty_ns_env(env),
                             span: p_pos(node, env),
                             emit_id: None,
@@ -5214,27 +5772,48 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
         }
         AliasDeclaration(c) => {
             let tparams = p_tparam_l(false, &c.generic_parameter, env)?;
+            let kinds = p_kinds(&c.modifiers, env);
+            let is_module_newtype = !c.module_kw_opt.is_missing();
             for tparam in tparams.iter() {
                 if tparam.reified != ast::ReifyKind::Erased {
                     raise_parsing_error(node, env, &syntax_error::invalid_reified)
                 }
             }
+            let user_attributes = itertools::concat(
+                c.attribute_spec
+                    .syntax_node_to_list_skip_separator()
+                    .map(|attr| p_user_attribute(attr, env))
+                    .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
+            );
+            let docs_url = p_docs_url(&user_attributes, env);
+
+            let (super_constraints, as_constraints) =
+                p_tconstraints_into_lower_and_upper(&c.constraint, env);
+            let require_one = &mut |kind: &str, cs: Vec<_>| {
+                if cs.len() > 1 {
+                    let msg = format!(
+                        "Multiple `{}` constraints on an alias are not allowed",
+                        kind
+                    );
+                    raise_parsing_error(node, env, &msg);
+                }
+                cs.into_iter().next()
+            };
+            let as_constraint = require_one("as", as_constraints);
+            let super_constraint = require_one("super", super_constraints);
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
                 tparams,
-                constraint: map_optional(&c.constraint, env, p_tconstraint)?.map(|x| x.1),
-                user_attributes: itertools::concat(
-                    c.attribute_spec
-                        .syntax_node_to_list_skip_separator()
-                        .map(|attr| p_user_attribute(attr, env))
-                        .collect::<Result<Vec<Vec<_>>, _>>()?,
-                ),
+                as_constraint,
+                super_constraint,
+                user_attributes,
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
                 vis: match token_kind(&c.keyword) {
                     Some(TK::Type) => ast::TypedefVisibility::Transparent,
+                    Some(TK::Newtype) if is_module_newtype => ast::TypedefVisibility::OpaqueModule,
                     Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
                     _ => missing_syntax("kind", &c.keyword, env)?,
                 },
@@ -5242,10 +5821,99 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: false,
+                internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
+            })])
+        }
+        CaseTypeDeclaration(c) => {
+            let kinds = p_kinds(&c.modifiers, env);
+
+            let tparams = p_tparam_l(false, &c.generic_parameter, env)?;
+            for tparam in tparams.iter() {
+                if tparam.reified != ast::ReifyKind::Erased {
+                    raise_parsing_error(node, env, &syntax_error::invalid_reified)
+                }
+            }
+
+            let user_attributes = itertools::concat(
+                c.attribute_spec
+                    .syntax_node_to_list_skip_separator()
+                    .map(|attr| p_user_attribute(attr, env))
+                    .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
+            );
+            let docs_url = p_docs_url(&user_attributes, env);
+
+            let expect_hint = |node, env: &mut _| match p_hint(node, env) {
+                Ok(hint) => Some(hint),
+                Err(e) => {
+                    emit_error(e, env);
+                    None
+                }
+            };
+
+            let as_constraints = c
+                .bounds
+                .syntax_node_to_list_skip_separator()
+                .filter_map(|bound| expect_hint(bound, env))
+                .collect::<Vec<_>>();
+
+            let variants = c
+                .variants
+                .syntax_node_to_list()
+                .filter_map(|variant| {
+                    if let CaseTypeVariant(ctv) = &variant.children {
+                        expect_hint(&ctv.type_, env)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            // If there are more than one constraints create an intersection
+            let as_constraint = if as_constraints.len() > 1 {
+                let hint_ = ast::Hint_::Hintersection(as_constraints);
+                let pos = p_pos(&c.bounds, env);
+                Some(ast::Hint::new(pos, hint_))
+            } else {
+                as_constraints.into_iter().next()
+            };
+
+            // If there are more than one variants create an union
+            let kind = if variants.len() > 1 {
+                let hint_ = ast::Hint_::Hunion(variants);
+                let pos = p_pos(&c.variants, env);
+                ast::Hint::new(pos, hint_)
+            } else {
+                match variants.into_iter().next() {
+                    Some(hint) => hint,
+                    // If there less than one variant it is an ill-defined case type
+                    None => return missing_syntax("case type variant", node, env),
+                }
+            };
+
+            Ok(vec![ast::Def::mk_typedef(ast::Typedef {
+                annotation: (),
+                name: pos_name(&c.name, env)?,
+                tparams,
+                as_constraint,
+                super_constraint: None,
+                user_attributes,
+                file_attributes: vec![],
+                namespace: mk_empty_ns_env(env),
+                mode: env.file_mode(),
+                vis: ast::TypedefVisibility::CaseType,
+                kind,
+                span: p_pos(node, env),
+                emit_id: None,
+                is_ctx: false,
+                internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
             })])
         }
         ContextAliasDeclaration(c) => {
-            let (_super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
+            let (super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
 
             let pos_name = pos_name(&c.name, env)?;
             if let Some(first_char) = pos_name.1.chars().next() {
@@ -5268,7 +5936,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 &c.context,
                 env,
                 "Context aliases cannot alias polymorphic contexts",
-            )? {
+            ) {
                 Some(h) => h,
                 None => {
                     let pos = pos_name.0.clone();
@@ -5281,12 +5949,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 name: pos_name,
                 tparams: vec![],
-                constraint: as_constraint,
+                as_constraint,
+                super_constraint,
                 user_attributes: itertools::concat(
                     c.attribute_spec
                         .syntax_node_to_list_skip_separator()
                         .map(|attr| p_user_attribute(attr, env))
-                        .collect::<Result<Vec<Vec<_>>, _>>()?,
+                        .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
                 ),
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
@@ -5296,21 +5965,28 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: true,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
+                module: None,
+                docs_url: None,
             })])
         }
         EnumDeclaration(c) => {
+            let span = p_pos(node, env);
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
-                        user_attributes: vec![],
+                        user_attributes: Default::default(),
                         type_: None,
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
+                        span: span.clone(),
                         doc_comment: None,
                     }),
                     _ => missing_syntax("enumerator", n, e),
                 }
             };
+            let kinds = p_kinds(&c.modifiers, env);
 
             let mut includes = vec![];
 
@@ -5328,10 +6004,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 p_enum_use(elt, env)?;
             }
 
+            let user_attributes = p_user_attributes(&c.attribute_spec, env);
+            let docs_url = p_docs_url(&user_attributes, env);
+
             Ok(vec![ast::Def::mk_class(ast::Class_ {
                 annotation: (),
                 mode: env.file_mode(),
-                user_attributes: p_user_attributes(&c.attribute_spec, env)?,
+                user_attributes,
                 file_attributes: vec![],
                 final_: false,
                 kind: ast::ClassishKind::Cenum,
@@ -5352,39 +6031,40 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 }),
                 doc_comment: doc_comment_opt,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],
                 vars: vec![],
                 typeconsts: vec![],
                 methods: vec![],
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
             })])
         }
 
         EnumClassDeclaration(c) => {
             let name = pos_name(&c.name, env)?;
             // Adding __EnumClass
-            let mut user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+            let mut user_attributes = p_user_attributes(&c.attribute_spec, env);
             let enum_class_attribute = ast::UserAttribute {
                 name: ast::Id(name.0.clone(), special_attrs::ENUM_CLASS.to_string()),
                 params: vec![],
             };
             user_attributes.push(enum_class_attribute);
+
+            let docs_url = p_docs_url(&user_attributes, env);
+
             // During lowering we store the base type as is. It will be updated during
             // the naming phase
             let base_type = p_hint(&c.base, env)?;
 
             let name_s = name.1.clone(); // TODO: can I avoid this clone ?
 
-            let kinds = p_kinds(&c.modifiers, env)?;
+            let kinds = p_kinds(&c.modifiers, env);
 
             let class_kind = if kinds.has(modifier::ABSTRACT) {
                 ast::ClassishKind::CenumClass(ast::Abstraction::Abstract)
@@ -5428,19 +6108,18 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 }),
                 doc_comment: doc_comment_opt,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],
                 vars: vec![],
                 typeconsts: vec![],
                 methods: vec![],
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {
@@ -5453,7 +6132,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                         // - const MemberOf<enum_name, type> name = expression
                         let name = pos_name(&c.name, env)?;
                         let pos = &name.0;
-                        let kinds = p_kinds(&c.modifiers, env)?;
+                        let kinds = p_kinds(&c.modifiers, env);
                         let has_abstract = kinds.has(modifier::ABSTRACT);
                         let elt_type = p_hint(&c.type_, env)?;
                         let full_type = build_elt(pos.clone(), elt_type);
@@ -5466,13 +6145,18 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             )?)
                         };
                         let class_const = ast::ClassConst {
-                            user_attributes: vec![],
+                            user_attributes: Default::default(),
                             type_: Some(full_type),
                             id: name,
                             kind,
+                            span: p_pos(node, env),
                             doc_comment: None,
                         };
                         enum_class.consts.push(class_const)
+                    }
+                    TypeConstDeclaration(_) => {
+                        let doc_comment_opt = extract_docblock(n, env);
+                        p_type_constant(n, doc_comment_opt, env, &mut enum_class)
                     }
                     _ => {
                         let pos = p_pos(n, env);
@@ -5543,20 +6227,35 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 namespace: mk_empty_ns_env(env),
             })])
         }
-        ModuleDeclaration(md) => Ok(vec![ast::Def::mk_module(ast::ModuleDef {
-            annotation: (),
-            name: pos_name(&md.name, env)?,
-            user_attributes: p_user_attributes(&md.attribute_spec, env)?,
-            span: p_pos(node, env),
-            mode: env.file_mode(),
-        })]),
+        ModuleDeclaration(md) => {
+            let name = pos_module_name(&md.name, env)?;
+            let exports = p_module_exports(&name, &md.exports, env)?;
+            let imports = p_module_imports(&name, &md.imports, env)?;
+
+            Ok(vec![ast::Def::mk_module(ast::ModuleDef {
+                annotation: (),
+                name,
+                user_attributes: p_user_attributes(&md.attribute_spec, env),
+                file_attributes: vec![],
+                span: p_pos(node, env),
+                mode: env.file_mode(),
+                doc_comment: doc_comment_opt,
+                exports,
+                imports,
+            })])
+        }
+        ModuleMembershipDeclaration(mm) => {
+            Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])
+        }
         _ if env.file_mode() == file_info::Mode::Mhhi => Ok(vec![]),
         _ => Ok(vec![ast::Def::mk_stmt(p_stmt(node, env)?)]),
     }
 }
 
 fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
-    use aast::{Def, Def::*, Stmt_::*};
+    use aast::Def;
+    use aast::Def::*;
+    use aast::Stmt_::*;
     let mut saw_ns: Option<(ast::Sid, Vec<ast::Def>)> = None;
     for def in program.into_iter() {
         if let Namespace(_) = &def {
@@ -5613,31 +6312,39 @@ fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast
     }
 }
 
-fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program> {
+fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
     let nodes = node.syntax_node_to_list_skip_separator();
     let mut acc = vec![];
     for n in nodes {
         match &n.children {
             EndOfFile(_) => break,
             _ => match p_def(n, env) {
-                Err(Error::MissingSyntax { .. }) if env.fail_open => {}
-                Err(e) => return Err(e),
+                Err(e) => {
+                    emit_error(e, env);
+                }
                 Ok(mut def) => acc.append(&mut def),
             },
         }
     }
     let mut program = vec![];
     post_process(env, acc, &mut program);
-    Ok(ast::Program(program))
+    ast::Program(program)
 }
 
-fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program> {
+fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
     match &node.children {
         Script(c) => p_program(&c.declarations, env),
-        _ => missing_syntax("script", node, env),
+        _ => {
+            raise_missing_syntax("script", node, env);
+            ast::Program(vec![])
+        }
     }
 }
 
-pub fn lower<'a>(env: &mut Env<'a>, script: S<'a>) -> Result<ast::Program, String> {
-    p_script(script, env).map_err(|e| e.to_string())
+/// Convert the FFP syntax `script` to an AAST.
+///
+/// If we encounter parse errors, write them to `env`, and return as
+/// much of an AAST as we can.
+pub fn lower<'a>(env: &mut Env<'a>, script: S<'a>) -> ast::Program {
+    p_script(script, env)
 }

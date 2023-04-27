@@ -66,6 +66,10 @@ struct NamedLocal {
   }
   LocalName name;
   LocalId id;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(name)(id);
+  }
 };
 
 inline bool operator==(NamedLocal a, NamedLocal b) {
@@ -115,6 +119,17 @@ struct MKey {
     int64_t idx;
     NamedLocal local;
   };
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(mcode)(rop);
+    switch (mcode) {
+      case MEL: case MPL:           sd(local);  break;
+      case MEC: case MPC:           sd(idx);    break;
+      case MET: case MPT: case MQT: sd(litstr); break;
+      case MEI:                     sd(int64);  break;
+      case MW:                                  break;
+    }
+  }
 };
 
 inline bool operator==(MKey a, MKey b) {
@@ -131,6 +146,9 @@ inline bool operator!=(MKey a, MKey b) {
 struct LocalRange {
   LocalId  first;
   uint32_t count;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(first)(count);
+  }
 };
 
 inline bool operator==(const LocalRange& a, const LocalRange& b) {
@@ -150,8 +168,17 @@ struct FCallArgsLong : FCallArgsBase {
     , inoutArgs(std::move(inoutArgs))
     , readonlyArgs(std::move(readonlyArgs))
     , asyncEagerTarget(asyncEagerTarget)
-    , context(context) {
-  }
+    , context(context) {}
+  explicit FCallArgsLong(FCallArgsBase base,
+                         std::unique_ptr<uint8_t[]> inoutArgs,
+                         std::unique_ptr<uint8_t[]> readonlyArgs,
+                         BlockId asyncEagerTarget, LSString context)
+    : FCallArgsBase(std::move(base))
+    , inoutArgs(std::move(inoutArgs))
+    , readonlyArgs(std::move(readonlyArgs))
+    , asyncEagerTarget(asyncEagerTarget)
+    , context(context) {}
+
   FCallArgsLong(const FCallArgsLong& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, nullptr,
                     o.asyncEagerTarget, o.context) {
@@ -294,29 +321,77 @@ struct FCallArgsLong : FCallArgsBase {
   std::unique_ptr<uint8_t[]> readonlyArgs;
   BlockId asyncEagerTarget;
   LSString context;
+
+  template <typename SerDe>
+  static copy_ptr<FCallArgsLong> makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+
+    auto base = sd.template make<FCallArgsBase>();
+    BlockId asyncEagerTarget;
+    LSString context;
+    sd(asyncEagerTarget)(context);
+
+    bool hasInout;
+    bool hasReadonly;
+    sd(hasInout)(hasReadonly);
+
+    auto const numBytes = (base.numArgs + 7) / 8;
+    std::unique_ptr<uint8_t[]> inoutArgs;
+    std::unique_ptr<uint8_t[]> readonlyArgs;
+
+    if (hasInout) {
+      inoutArgs = std::make_unique<uint8_t[]>(numBytes);
+      assertx(sd.remaining() >= numBytes);
+      std::memcpy(inoutArgs.get(), sd.data(), numBytes);
+      sd.advance(numBytes);
+    }
+
+    if (hasReadonly) {
+      readonlyArgs = std::make_unique<uint8_t[]>(numBytes);
+      assertx(sd.remaining() >= numBytes);
+      std::memcpy(readonlyArgs.get(), sd.data(), numBytes);
+      sd.advance(numBytes);
+    }
+
+    return copy_ptr<FCallArgsLong>{
+      std::move(base),
+      std::move(inoutArgs),
+      std::move(readonlyArgs),
+      asyncEagerTarget,
+      context
+    };
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(static_cast<const FCallArgsBase&>(*this))
+      (asyncEagerTarget)
+      (context)
+      ((bool)inoutArgs)
+      ((bool)readonlyArgs);
+    auto const numBytes = (numArgs + 7) / 8;
+    if (inoutArgs)    sd.writeRaw((const char*)inoutArgs.get(), numBytes);
+    if (readonlyArgs) sd.writeRaw((const char*)readonlyArgs.get(), numBytes);
+  }
 };
 
 struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {}
+    : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr,
+                NoBlockId, nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             std::unique_ptr<uint8_t[]> readonlyArgs,
             BlockId asyncEagerTarget,
-            LSString context) {
-    raw = 0;
-    l.emplace(flags, numArgs, numRets,
-              std::move(inoutArgs), std::move(readonlyArgs),
-              asyncEagerTarget, context);
-  }
+            LSString context)
+    : l{flags, numArgs, numRets,
+        std::move(inoutArgs), std::move(readonlyArgs),
+        asyncEagerTarget, context} {}
+  FCallArgs(const FCallArgs&) = default;
+  FCallArgs(FCallArgs&&) = default;
+
   FCallArgs(const FCallArgsLong& o) : l{o} {}
-  FCallArgs(const FCallArgs& o) : l{} {
-    l = o.l;
-  }
-  ~FCallArgs() {
-    l.~copy_ptr();
-  }
 
   bool enforceInOut() const {
     return l->enforceInOut();
@@ -440,11 +515,20 @@ struct FCallArgs {
     return l->template popFlavor<nin,nobj>(i);
   }
   LSString context() const { return l->context; }
+
+  template <typename SerDe> static FCallArgs makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    return FCallArgs{ FCallArgsLong::makeForSerde(sd) };
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    assertx(l);
+    sd(*l);
+  }
+
 private:
-  union {
-    copy_ptr<FCallArgsLong> l;
-    uint64_t                raw;
-  };
+  explicit FCallArgs(copy_ptr<FCallArgsLong> l) : l{std::move(l)} {}
+  copy_ptr<FCallArgsLong> l;
 };
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -718,26 +802,6 @@ namespace imm {
                                f(fca.asyncEagerTarget());               \
                              }
 
-#define IMM_EXTRA_BLA
-#define IMM_EXTRA_SLA
-#define IMM_EXTRA_IVA
-#define IMM_EXTRA_I64A
-#define IMM_EXTRA_LA
-#define IMM_EXTRA_NLA
-#define IMM_EXTRA_ILA
-#define IMM_EXTRA_IA
-#define IMM_EXTRA_DA
-#define IMM_EXTRA_SA
-#define IMM_EXTRA_RATA
-#define IMM_EXTRA_AA
-#define IMM_EXTRA_BA
-#define IMM_EXTRA_OA(x)
-#define IMM_EXTRA_VSA
-#define IMM_EXTRA_KA
-#define IMM_EXTRA_LAR
-#define IMM_EXTRA_ITA
-#define IMM_EXTRA_FCA
-
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
 #define IMM_MEM_ONE(x)                IMM_MEM(x, 1);
@@ -752,6 +816,52 @@ namespace imm {
 #define IMM_MEM_SIX(x, y, z, l, m, n) IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                       IMM_MEM(z, 3); IMM_MEM(l, 4); \
                                       IMM_MEM(m, 5); IMM_MEM(n, 6);
+
+#define IMM_SERDE_SD(which, n)             sd(IMM_NAME_##which(n))
+#define IMM_SERDE_SD_NA
+#define IMM_SERDE_SD_ONE(x)                IMM_SERDE_SD(x, 1);
+#define IMM_SERDE_SD_TWO(x, y)             IMM_SERDE_SD(x, 1); IMM_SERDE_SD(y, 2);
+#define IMM_SERDE_SD_THREE(x, y, z)        IMM_SERDE_SD(x, 1); IMM_SERDE_SD(y, 2); \
+                                           IMM_SERDE_SD(z, 3);
+#define IMM_SERDE_SD_FOUR(x, y, z, l)      IMM_SERDE_SD(x, 1); IMM_SERDE_SD(y, 2); \
+                                           IMM_SERDE_SD(z, 3); IMM_SERDE_SD(l, 4);
+#define IMM_SERDE_SD_FIVE(x, y, z, l, m)   IMM_SERDE_SD(x, 1); IMM_SERDE_SD(y, 2); \
+                                           IMM_SERDE_SD(z, 3); IMM_SERDE_SD(l, 4); \
+                                           IMM_SERDE_SD(m, 5);
+#define IMM_SERDE_SD_SIX(x, y, z, l, m, n) IMM_SERDE_SD(x, 1); IMM_SERDE_SD(y, 2); \
+                                           IMM_SERDE_SD(z, 3); IMM_SERDE_SD(l, 4); \
+                                           IMM_SERDE_SD(m, 5); IMM_SERDE_SD(n, 6);
+
+#define IMM_SERDE_MAKE(which, n)             auto IMM_NAME_##which(n) = \
+                                               sd.template make<IMM_TY_##which>()
+#define IMM_SERDE_MAKE_NA
+#define IMM_SERDE_MAKE_ONE(x)                IMM_SERDE_MAKE(x, 1);
+#define IMM_SERDE_MAKE_TWO(x, y)             IMM_SERDE_MAKE(x, 1); IMM_SERDE_MAKE(y, 2);
+#define IMM_SERDE_MAKE_THREE(x, y, z)        IMM_SERDE_MAKE(x, 1); IMM_SERDE_MAKE(y, 2); \
+                                             IMM_SERDE_MAKE(z, 3);
+#define IMM_SERDE_MAKE_FOUR(x, y, z, l)      IMM_SERDE_MAKE(x, 1); IMM_SERDE_MAKE(y, 2); \
+                                             IMM_SERDE_MAKE(z, 3); IMM_SERDE_MAKE(l, 4);
+#define IMM_SERDE_MAKE_FIVE(x, y, z, l, m)   IMM_SERDE_MAKE(x, 1); IMM_SERDE_MAKE(y, 2); \
+                                             IMM_SERDE_MAKE(z, 3); IMM_SERDE_MAKE(l, 4); \
+                                             IMM_SERDE_MAKE(m, 5);
+#define IMM_SERDE_MAKE_SIX(x, y, z, l, m, n) IMM_SERDE_MAKE(x, 1); IMM_SERDE_MAKE(y, 2); \
+                                             IMM_SERDE_MAKE(z, 3); IMM_SERDE_MAKE(l, 4); \
+                                             IMM_SERDE_MAKE(m, 5); IMM_SERDE_MAKE(n, 6);
+
+#define IMM_SERDE_ARG(which, n)             std::move(IMM_NAME_##which(n))
+#define IMM_SERDE_ARG_NA
+#define IMM_SERDE_ARG_ONE(x)                IMM_SERDE_ARG(x, 1)
+#define IMM_SERDE_ARG_TWO(x, y)             IMM_SERDE_ARG(x, 1), IMM_SERDE_ARG(y, 2)
+#define IMM_SERDE_ARG_THREE(x, y, z)        IMM_SERDE_ARG(x, 1), IMM_SERDE_ARG(y, 2), \
+                                            IMM_SERDE_ARG(z, 3)
+#define IMM_SERDE_ARG_FOUR(x, y, z, l)      IMM_SERDE_ARG(x, 1), IMM_SERDE_ARG(y, 2), \
+                                            IMM_SERDE_ARG(z, 3), IMM_SERDE_ARG(l, 4)
+#define IMM_SERDE_ARG_FIVE(x, y, z, l, m)   IMM_SERDE_ARG(x, 1), IMM_SERDE_ARG(y, 2), \
+                                            IMM_SERDE_ARG(z, 3), IMM_SERDE_ARG(l, 4), \
+                                            IMM_SERDE_ARG(m, 5)
+#define IMM_SERDE_ARG_SIX(x, y, z, l, m, n) IMM_SERDE_ARG(x, 1), IMM_SERDE_ARG(y, 2), \
+                                            IMM_SERDE_ARG(z, 3), IMM_SERDE_ARG(l, 4), \
+                                            IMM_SERDE_ARG(m, 5), IMM_SERDE_ARG(n, 6)
 
 #define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
 #define IMM_EQ(which, n)          detail::eq_operand<     \
@@ -789,14 +899,6 @@ namespace imm {
 #define IMM_TARGETS_FOUR(x,y,z,l)    IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
 #define IMM_TARGETS_FIVE(x,y,z,l,m)  IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
 #define IMM_TARGETS_SIX(x,y,z,l,m,n) IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_##n(6)
-
-#define IMM_EXTRA_NA
-#define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
-#define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)          IMM_EXTRA_ONE(y)
-#define IMM_EXTRA_THREE(x,y,z)     IMM_EXTRA_TWO(x,y)        IMM_EXTRA_ONE(z)
-#define IMM_EXTRA_FOUR(x,y,z,l)    IMM_EXTRA_THREE(x,y,z)    IMM_EXTRA_ONE(l)
-#define IMM_EXTRA_FIVE(x,y,z,l,m)  IMM_EXTRA_FOUR(x,y,z,l)   IMM_EXTRA_ONE(m)
-#define IMM_EXTRA_SIX(x,y,z,l,m,n) IMM_EXTRA_FIVE(x,y,z,l,m) IMM_EXTRA_ONE(n)
 
 #define IMM_CTOR(which, n)         IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_CTOR_NA
@@ -902,7 +1004,6 @@ namespace imm {
     {}                                          \
                                                 \
     IMM_MEM_##imms                              \
-    IMM_EXTRA_##imms                            \
     POP_##inputs                                \
     PUSH_##outputs                              \
                                                 \
@@ -937,6 +1038,20 @@ namespace imm {
     template <typename F>                       \
     void forEachTarget(F&& f) const {           \
       IMM_TARGETS_##imms                        \
+    }                                           \
+                                                \
+    template <typename SerDe>                   \
+    static opcode makeForSerde(SerDe& sd) {     \
+      static_assert(SerDe::deserializing);      \
+      IMM_SERDE_MAKE_##imms                     \
+      return bc::opcode {                       \
+        IMM_SERDE_ARG_##imms                    \
+      };                                        \
+    }                                           \
+                                                \
+    template <typename SerDe>                   \
+    void serde(SerDe& sd) {                     \
+      IMM_SERDE_SD_##imms                       \
     }                                           \
   };
 OPCODES
@@ -1032,25 +1147,6 @@ OPCODES
 #undef IMM_TARGETS_FIVE
 #undef IMM_TARGETS_SIX
 
-#undef IMM_EXTRA_BLA
-#undef IMM_EXTRA_SLA
-#undef IMM_EXTRA_IVA
-#undef IMM_EXTRA_I64A
-#undef IMM_EXTRA_LA
-#undef IMM_EXTRA_NLA
-#undef IMM_EXTRA_ILA
-#undef IMM_EXTRA_IA
-#undef IMM_EXTRA_DA
-#undef IMM_EXTRA_SA
-#undef IMM_EXTRA_RATA
-#undef IMM_EXTRA_AA
-#undef IMM_EXTRA_BA
-#undef IMM_EXTRA_OA
-#undef IMM_EXTRA_KA
-#undef IMM_EXTRA_LAR
-#undef IMM_EXTRA_ITA
-#undef IMM_EXTRA_FCA
-
 #undef IMM_MEM
 #undef IMM_MEM_NA
 #undef IMM_MEM_ONE
@@ -1059,6 +1155,33 @@ OPCODES
 #undef IMM_MEM_FOUR
 #undef IMM_MEM_FIVE
 #undef IMM_MEM_SIX
+
+#undef IMM_SERDE_SD
+#undef IMM_SERDE_SD_NA
+#undef IMM_SERDE_SD_ONE
+#undef IMM_SERDE_SD_TWO
+#undef IMM_SERDE_SD_THREE
+#undef IMM_SERDE_SD_FOUR
+#undef IMM_SERDE_SD_FIVE
+#undef IMM_SERDE_SD_SIX
+
+#undef IMM_SERDE_MAKE
+#undef IMM_SERDE_MAKE_NA
+#undef IMM_SERDE_MAKE_ONE
+#undef IMM_SERDE_MAKE_TWO
+#undef IMM_SERDE_MAKE_THREE
+#undef IMM_SERDE_MAKE_FOUR
+#undef IMM_SERDE_MAKE_FIVE
+#undef IMM_SERDE_MAKE_SIX
+
+#undef IMM_SERDE_ARG
+#undef IMM_SERDE_ARG_NA
+#undef IMM_SERDE_ARG_ONE
+#undef IMM_SERDE_ARG_TWO
+#undef IMM_SERDE_ARG_THREE
+#undef IMM_SERDE_ARG_FOUR
+#undef IMM_SERDE_ARG_FIVE
+#undef IMM_SERDE_ARG_SIX
 
 #undef IMM_EQ
 #undef IMM_EQ_NA
@@ -1195,6 +1318,27 @@ struct Bytecode {
     switch (op) { OPCODES }
 #undef O
     not_reached();
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      if (UNLIKELY(op != Op::Nop)) destruct();
+      sd(op)(srcLoc);
+#define O(opcode, ...)                                           \
+      case Op::opcode:                                           \
+      new (&opcode) bc::opcode{sd.template make<bc::opcode>()};  \
+      break;
+      switch (op) { OPCODES }
+#undef O
+      return;
+    } else {
+      sd(op)(srcLoc);
+#define O(opcode, ...)                            \
+      case Op::opcode: return opcode.serde(sd);
+      switch (op) { OPCODES }
+#undef O
+      not_reached();
+    }
   }
 
   Op op;

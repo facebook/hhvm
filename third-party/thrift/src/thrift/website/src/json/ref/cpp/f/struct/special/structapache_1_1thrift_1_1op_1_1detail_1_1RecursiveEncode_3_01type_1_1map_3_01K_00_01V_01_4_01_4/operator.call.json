@@ -1,0 +1,65 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator()",
+  "compoundname_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::map&lt; K, V &gt; &gt;::operator()",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Protocol"
+        },
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "uint32_t",
+      "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+      "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        },
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "map"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "506",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "506",
+        "bodyend": "518"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+        "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
+        "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+        "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
+        "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+        "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode",
+      "compoundname_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::map&lt; K, V &gt; &gt;::operator()"
+    }
+  ],
+  "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1map_3_01K_00_01V_01_4_01_4/operator.call",
+  "minprot": "public",
+  "displayname_html": "operator()",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1map_3_01K_00_01V_01_4_01_4/operator.call",
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1map_3_01K_00_01V_01_4_01_4/operator.call"
+}

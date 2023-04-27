@@ -1,0 +1,146 @@
+'\" t
+.\"     Title: \fBndb_select_count\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_SELECT_COUNT\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_select_count \- print row counts for NDB tables
+.SH "SYNOPSIS"
+.HP \w'\fBndb_select_count\ [\-c\ \fR\fB\fIconnection_string\fR\fR\fB]\ \-d\ \fR\fB\fIdb_name\fR\fR\fB\ \fR\fB\fItbl_name\fR\fR\fB[\ \fR\fB\fItbl_name2\fR\fR\fB[\ \&.\&.\&.]]\fR\ 'u
+\fBndb_select_count [\-c \fR\fB\fIconnection_string\fR\fR\fB] \-d \fR\fB\fIdb_name\fR\fR\fB \fR\fB\fItbl_name\fR\fR\fB[ \fR\fB\fItbl_name2\fR\fR\fB[ \&.\&.\&.]]\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_select_count\fR
+prints the number of rows in one or more
+NDB
+tables\&. With a single table, the result is equivalent to that obtained by using the MySQL statement
+SELECT COUNT(*) FROM \fItbl_name\fR\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_select_count [\-c \fIconnection_string\fR] \-d\fIdb_name\fR \fItbl_name\fR[, \fItbl_name2\fR[, \&.\&.\&.]]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to the NDB Cluster native backup restoration program
+\fBndb_select_count\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_select_count\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.270.\ \&Command\-line options for the ndb_select_count program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--database=dbname\fR,
+.PP
+\fB-d\fR
+T}:T{
+Name of the database in which the table is found
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--parallelism=#\fR,
+.PP
+\fB-p\fR
+T}:T{
+Degree of parallelism
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--lock=#\fR,
+.PP
+\fB-l\fR
+T}:T{
+Lock type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.PP
+You can obtain row counts from multiple tables in the same database by listing the table names separated by spaces when invoking this command, as shown under
+\fBSample Output\fR\&.
+Sample Output
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_select_count \-c localhost \-d ctest1 fish dogs\fR
+6 records in table fish
+4 records in table dogs
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

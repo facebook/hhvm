@@ -19,6 +19,11 @@ class virtual iter =
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
     method! on_method_ env x =
@@ -45,13 +50,13 @@ class virtual iter =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        self#on_bop env op;
-        self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1;
-        self#on_expr env e2
-      | _ -> super#on_Binop env op e1 e2
+        self#on_bop env bop;
+        self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs;
+        self#on_expr env rhs
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -74,14 +79,14 @@ class virtual iter =
           } =
       self#on_hint env et_hint;
       self#on_block env et_splices;
-      let env = Env.set_in_expr_tree env true in
+      let env = Env.inside_expr_tree env et_hint in
       self#on_block env et_function_pointers;
       self#on_expr env et_virtualized_expr;
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       self#on_expr env et_runtime_expr
 
     method! on_ET_Splice env e =
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       super#on_ET_Splice env e
   end
 
@@ -94,6 +99,11 @@ class virtual ['state] iter_with_state =
       self#on_list (fun () -> self#go_def ctx state) () program
 
     method go_def ctx state x = self#on_def (Env.def_env ctx x, state) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
 
     method on_fun_with_env (env, state) x = super#on_fun_ (env, state) x
 
@@ -129,13 +139,13 @@ class virtual ['state] iter_with_state =
       in
       self#on_class_var_with_env (env, state) cv
 
-    method! on_Binop (env, state) op e1 e2 =
-      match op with
+    method! on_Binop (env, state) (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        self#on_bop (env, state) op;
-        self#on_expr (Env.set_val_kind env Typing_defs.Lval, state) e1;
-        self#on_expr (env, state) e2
-      | _ -> super#on_Binop (env, state) op e1 e2
+        self#on_bop (env, state) bop;
+        self#on_expr (Env.set_val_kind env Typing_defs.Lval, state) lhs;
+        self#on_expr (env, state) rhs
+      | _ -> super#on_Binop (env, state) binop
 
     method! on_Is (env, state) e h =
       let env = Env.set_allow_wildcards env in
@@ -158,14 +168,14 @@ class virtual ['state] iter_with_state =
           } =
       self#on_hint (env, state) et_hint;
       self#on_block (env, state) et_splices;
-      let env = Env.set_in_expr_tree env true in
+      let env = Env.inside_expr_tree env et_hint in
       self#on_block (env, state) et_function_pointers;
       self#on_expr (env, state) et_virtualized_expr;
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       self#on_expr (env, state) et_runtime_expr
 
     method! on_ET_Splice (env, state) e =
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       super#on_ET_Splice (env, state) e
   end
 
@@ -178,6 +188,11 @@ class virtual ['a] reduce =
       self#on_list (fun () -> self#go_def ctx) () program
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> self#zero
+      | _ -> super#on_expr_ env expr_
 
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
@@ -205,14 +220,14 @@ class virtual ['a] reduce =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        let op = self#on_bop env op in
-        let e1 = self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1 in
-        let e2 = self#on_expr env e2 in
+        let op = self#on_bop env bop in
+        let e1 = self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs in
+        let e2 = self#on_expr env rhs in
         self#plus e1 (self#plus op e2)
-      | _ -> super#on_Binop env op e1 e2
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -226,19 +241,19 @@ class virtual ['a] reduce =
         env
         Aast.
           {
-            et_hint;
+            et_hint = hint;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
-      let et_hint = self#on_hint env et_hint in
+      let et_hint = self#on_hint env hint in
       let et_splices = self#on_block env et_splices in
-      let env = Env.set_in_expr_tree env true in
+      let env = Env.inside_expr_tree env hint in
       let et_function_pointers = self#on_block env et_function_pointers in
       let et_virtualized_expr = self#on_expr env et_virtualized_expr in
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       self#plus
         et_hint
@@ -249,7 +264,7 @@ class virtual ['a] reduce =
               (self#plus et_virtualized_expr et_runtime_expr)))
 
     method! on_ET_Splice env e =
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       super#on_ET_Splice env e
   end
 
@@ -267,6 +282,11 @@ class virtual map =
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> expr_
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
     method! on_method_ env x =
@@ -293,14 +313,17 @@ class virtual map =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
         Aast.Binop
-          ( self#on_bop env op,
-            self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1,
-            self#on_expr env e2 )
-      | _ -> super#on_Binop env op e1 e2
+          Aast.
+            {
+              bop = self#on_bop env bop;
+              lhs = self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs;
+              rhs = self#on_expr env rhs;
+            }
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -324,11 +347,11 @@ class virtual map =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
       let et_function_pointers =
-        let env = Env.set_in_expr_tree env true in
+        let env = Env.inside_expr_tree env et_hint in
         self#on_block env et_function_pointers
       in
       let et_virtualized_expr =
-        let env = Env.set_in_expr_tree env true in
+        let env = Env.inside_expr_tree env et_hint in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
@@ -343,7 +366,7 @@ class virtual map =
         }
 
     method! on_ET_Splice env e =
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       super#on_ET_Splice env e
   end
 
@@ -360,6 +383,11 @@ class virtual endo =
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> expr_
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
     method! on_method_ env x =
@@ -386,7 +414,7 @@ class virtual endo =
       in
       super#on_class_var env cv
 
-    method! on_Binop env this op e1 e2 =
+    method! on_Binop env this (Aast.{ bop = op; lhs = e1; rhs = e2 } as binop) =
       match op with
       | Ast_defs.Eq _ ->
         let op' = self#on_bop env op in
@@ -396,8 +424,8 @@ class virtual endo =
         then
           this
         else
-          Aast.Binop (op', e1', e2')
-      | _ -> super#on_Binop env this op e1 e2
+          Aast.(Binop { bop = op'; lhs = e1'; rhs = e2' })
+      | _ -> super#on_Binop env this binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -421,11 +449,11 @@ class virtual endo =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
       let et_function_pointers =
-        let env = Env.set_in_expr_tree env true in
+        let env = Env.inside_expr_tree env et_hint in
         self#on_block env et_function_pointers
       in
       let et_virtualized_expr =
-        let env = Env.set_in_expr_tree env true in
+        let env = Env.inside_expr_tree env et_hint in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
@@ -440,7 +468,7 @@ class virtual endo =
         }
 
     method! on_ET_Splice env e =
-      let env = Env.set_in_expr_tree env false in
+      let env = Env.outside_expr_tree env in
       super#on_ET_Splice env e
   end
 

@@ -6,9 +6,10 @@
           tp_name = ([3:9-10], "T"); tp_tparams = []; tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       td_constraint = None;
+       td_as_constraint = None; td_super_constraint = None;
        td_type = (Rhint ([3:14-15]), (Tgeneric ("T", [])));
-       td_is_ctx = false; td_attributes = [] }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\Test1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:6-11];
@@ -35,14 +36,15 @@
            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
            }
           ];
-        td_constraint = None;
+        td_as_constraint = None; td_super_constraint = None;
         td_type =
         (Rhint ([5:33-44]),
          (Tgeneric ("TC",
             [(Rhint ([5:36-39]), (Tprim Tint));
               (Rhint ([5:41-43]), (Tapply (([5:41-43], "\\ID"), [])))]
             )));
-        td_is_ctx = false; td_attributes = [] }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\filter",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -94,9 +96,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
         fe_pos = [7:10-16]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]
-
-They matched!

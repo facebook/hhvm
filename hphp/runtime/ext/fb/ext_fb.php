@@ -125,7 +125,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function fb_utf8ize(inout mixed $input): bool;
 
 /** Count the number of UTF-8 code points in string or byte count if it's not
@@ -134,7 +134,7 @@ function fb_utf8ize(inout mixed $input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /** Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -229,6 +229,58 @@ function fb_lazy_lstat(string $filename): mixed;
 <<__Native>>
 function fb_lazy_realpath(string $filename): mixed;
 
+/* Similar as call_user_func_array(), except that it executes the function on
+ * a separate worker thread and returns an object immediately without waiting
+ * for the function to finish. The object can be used with
+ * fb_end_user_func_async() to eventually retrieve function's return value, if
+ * needed. NULL is returned if the call fails.
+ */
+<<__Native>>
+function fb_call_user_func_array_async(string $initialDoc,
+                                       mixed $function,
+                                       vec<mixed> $params): mixed;
+
+/* Similar to call_user_func(), except that it executes the function on a
+ * separate worker thread and returns an object immediately without waiting
+ * for the function to finish. The object can be used with
+ * fb_end_user_func_async() to eventually retrieve function's return value, if
+ * needed. NULL is returned if the call fails.
+ */
+function fb_call_user_func_async(string $initialDoc,
+                                 mixed $function,
+                                 mixed ...$args): resource {
+  $ret = fb_call_user_func_array_async($initialDoc, $function, $args);
+  if ($ret is resource) {
+    return $ret;
+  }
+  throw new \InvalidArgumentException('Invalid initialDoc or function');
+}
+
+/* Check to see if a specified job is done or not.
+ */
+<<__Native>>
+function fb_check_user_func_async(resource $handle): mixed;
+
+/* Block until function returns. Used with fb_call_user_func_async() or
+ * fb_call_user_func_array_async().
+ */
+<<__Native("NoFCallBuiltin")>>
+function fb_end_user_func_async(resource $handle): mixed;
+
+/* Similar to fb_call_user_func_async(), except that the invocation is treated
+ * as an async function call and returns a wait handle.
+ */
+<<__Native>>
+function fb_gen_user_func_array(string $initialDoc,
+                                mixed $function,
+                                vec<mixed> $argv): mixed;
+
+function fb_gen_user_func(string $initialDoc,
+                          mixed $function,
+                          mixed ...$args): mixed {
+  return fb_gen_user_func_array($initialDoc, $function, $args);
+}
+
 } // namespace
 
 namespace HH {
@@ -275,7 +327,7 @@ function non_crypto_md5_lower(string $str)[]: int;
  * (unsigned)$a and (unsigned)$b. (The lower 64 bits is just `$a * $b`
  * regardless of signed/unsigned).
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function int_mul_overflow(int $a, int $b): int;
 
 /** Returns the overflow part of multiplying two ints plus another int, as if
@@ -283,7 +335,7 @@ function int_mul_overflow(int $a, int $b): int;
  * full (unsigned)$a * (unsigned)$b + (unsigned)$bias. $bias can be used to
  * manipulate rounding of the result.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
 type INCORRECT_TYPE<T> = T;

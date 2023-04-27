@@ -96,11 +96,11 @@ module ExprDepTy = struct
       | Dep_This -> (env, ty)
       | Dep_Expr id -> (env, mk (r_dep_ty, Tdependent (DTexpr id, ty)))
     in
-    let rec make env ty =
+    let rec make ~seen env ty =
       let (env, ty) = Env.expand_type env ty in
       match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
-      | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
+      | (_, Tclass (((_, x) as c), Nonexact _, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
            * since we can't statically guarantee what the runtime type
@@ -108,7 +108,7 @@ module ExprDepTy = struct
         *)
         if
           Option.value_map class_ ~default:false ~f:(fun class_ty ->
-              TUtils.class_is_final_and_not_contravariant class_ty)
+              TUtils.class_is_final_and_invariant class_ty)
         then
           (env, ty)
         else (
@@ -120,41 +120,46 @@ module ExprDepTy = struct
       | (_, Tgeneric (s, _tyargs)) when DependentKind.is_generic_dep_ty s ->
         (* TODO(T69551141) handle type arguments *)
         (env, ty)
-      | (_, Tgeneric _) ->
-        (* TODO(T69551141) handle type arguments here? *)
-        let (env, tyl) =
-          Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
-        in
-        let (env, tyl') = List.fold_map tyl ~init:env ~f:make in
-        if tyl_equal tyl tyl' then
+      | (_, Tgeneric (name, _)) ->
+        if SSet.mem name seen then
           (env, ty)
         else
-          apply env ty
+          (* TODO(T69551141) handle type arguments here? *)
+          let (env, tyl) =
+            Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
+          in
+          let (env, tyl') =
+            List.fold_map tyl ~init:env ~f:(make ~seen:(SSet.add name seen))
+          in
+          if tyl_equal tyl tyl' then
+            (env, ty)
+          else
+            apply env ty
       | (r, Toption ty) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Toption ty))
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | (r, Tnewtype (n, p, ty)) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Tnewtype (n, p, ty)))
       | (_, Tdependent (_, _)) -> (env, ty)
       | (r, Tunion tyl) ->
-        let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:(make ~seen) in
         (env, mk (r, Tunion tyl))
       | (r, Tintersection tyl) ->
-        let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:(make ~seen) in
         (env, mk (r, Tintersection tyl))
       | (r, Taccess (ty, ids)) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Taccess (ty, ids)))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Terr | Tneg _ ) ) ->
+          | Tfun _ | Tany _ | Tvar _ | Tneg _ ) ) ->
         (env, ty)
     in
-    make env ty
+    make ~seen:SSet.empty env ty
 
   let make env ~cid ty =
     make_with_dep_kind env (from_cid env (get_reason ty) cid) ty

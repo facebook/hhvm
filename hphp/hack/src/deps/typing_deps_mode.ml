@@ -6,6 +6,7 @@
  *
  *)
 
+(* CAUTION: This type must be kept in sync with typing_deps.rs *)
 (** Which dependency graph format are we using? *)
 type t =
   | InMemoryMode of string option
@@ -26,6 +27,10 @@ type t =
         * The first parameter is (optionally) a path to an existing custom 64-bit
         * dependency graph. If it is present, only new edges will be written,
         * of not, all edges will be written. *)
+  | HhFanoutRustMode of {
+      hh_fanout: Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi;
+      human_readable_dep_map_dir: string option;
+    }  (** Mode that keeps track of edges via hh_fanout's Rust API **)
 
 let to_opaque_json (t : t) : Hh_json.json =
   let open Hh_json in
@@ -49,4 +54,5 @@ let to_opaque_json (t : t) : Hh_json.json =
                 opt_string_to_json (opaque human_readable_dep_map_dir) );
             ] );
       ]
+  | HhFanoutRustMode _ -> failwith "TODO"
   [@@deriving show]

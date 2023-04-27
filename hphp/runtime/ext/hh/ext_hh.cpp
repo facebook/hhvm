@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include <folly/json.h>
+#include <folly/Random.h>
 #include <folly/synchronization/AtomicNotification.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -32,19 +33,18 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
-#include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -85,6 +85,30 @@ bool HHVM_FUNCTION(autoload_set_paths,
     return false;
   }
 
+  if (RuntimeOption::AutoloadUserlandDisabled > 1) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Attempted to call HH\\autoload_set_paths() when "
+      "Autoload.UserlandDisabled is greater than 1. HH\\autoload_set_paths() "
+      "will soon be deleted so HHVM internals can start depending on native "
+      "autoloading.");
+  }
+
+  if (RuntimeOption::AutoloadUserlandDisabled > 0) {
+    auto const rate = RuntimeOption::AutoloadUserlandDisabledSampleRate;
+    if (StructuredLog::coinflip(rate)) {
+      StructuredLogEntry ent;
+      ent.force_init = true;
+      ent.setInt("autoload_is_native", HHVM_FN(autoload_is_native)());
+      ent.setInt("sample_rate", rate);
+      if (!root.isNull()) ent.setStr("root", root.slice());
+      StructuredLog::log("hhvm_autoload_set_paths", ent);
+    }
+    raise_notice(
+      "Attempted to call HH\\autoload_set_paths() while the native autoloader "
+      "is enabled. HH\\autoload_set_paths() disables the native autoloader, "
+      "putting us on a deprecated code path that will soon stop working.");
+  }
+
   if (map.isArray()) {
     return AutoloadHandler::s_instance->setMap(map.asCArrRef(), root);
   }
@@ -111,11 +135,11 @@ Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) 
     SystemLib::throwInvalidOperationExceptionObject(
       "Only available when autoloader is active");
   }
-  auto path = AutoloadHandler::s_instance->getFile(symbol, kind);
-  if (!path) {
+  auto pathRes = AutoloadHandler::s_instance->getFile(symbol, kind);
+  if (!pathRes) {
     return null_string;
   }
-  return *path;
+  return pathRes->path;
 }
 
 } // end anonymous namespace
@@ -138,6 +162,10 @@ Variant HHVM_FUNCTION(autoload_function_to_path, const String& function) {
 
 Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
   return autoload_symbol_to_path(constant, AutoloadMap::KindOf::Constant);
+}
+
+Variant HHVM_FUNCTION(autoload_module_to_path, const String& module) {
+  return autoload_symbol_to_path(module, AutoloadMap::KindOf::Module);
 }
 
 Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
@@ -165,6 +193,10 @@ Array HHVM_FUNCTION(autoload_path_to_functions, const String& path) {
 
 Array HHVM_FUNCTION(autoload_path_to_constants, const String& path) {
   return autoload_path_to_symbols(path, AutoloadMap::KindOf::Constant);
+}
+
+Array HHVM_FUNCTION(autoload_path_to_modules, const String& path) {
+  return autoload_path_to_symbols(path, AutoloadMap::KindOf::Module);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
@@ -281,8 +313,9 @@ ALWAYS_INLINE void serialize_memoize_int64(StringBuffer& sb, int64_t val) {
   }
 }
 
-ALWAYS_INLINE void serialize_memoize_string_data(StringBuffer& sb,
-                                                 const StringData* str) {
+} // namespace
+
+void serialize_memoize_string_data(StringBuffer& sb, const StringData* str) {
   int len = str->size();
   serialize_memoize_int64(sb, len);
   sb.append(str->data(), len);
@@ -293,6 +326,8 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv);
 void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
   serialize_memoize_tv(sb, depth, *tv);
 }
+
+namespace {
 
 ALWAYS_INLINE void serialize_memoize_arraykey(StringBuffer& sb,
                                               const TypedValue& c) {
@@ -380,6 +415,8 @@ void serialize_memoize_rcls_meth(StringBuffer& sb, int depth,
   serialize_memoize_string_data(sb, rclsmeth->m_func->fullName());
   serialize_memoize_array(sb, depth, rclsmeth->m_arr);
 }
+
+} // namespace
 
 void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
   if (depth > 256) {
@@ -469,6 +506,8 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
     }
   }
 }
+
+namespace {
 
 ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
   if (str->empty()) {
@@ -996,6 +1035,10 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
   return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
 }
 
+TypedValue HHVM_FUNCTION(classname_from_string_unsafe, StringArg cls) {
+  return make_tv<KindOfLazyClass>(LazyClassData::create(cls.get()));
+}
+
 namespace {
 
 const StaticString
@@ -1092,120 +1135,208 @@ void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
   u->clearCoverage();
 }
 
-TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
-  auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return make_tv<KindOfNull>();
-  auto const context = Native::data<ImplicitContext>(obj);
-  auto const it = context->m_map.find(key.get());
-  if (it == context->m_map.end()) return make_tv<KindOfNull>();
-  auto const result = it->second.first;
-  if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
-  return result;
-}
-
-Class* s_ImplicitContextDataClass = nullptr;
-const StaticString
-  s_ImplicitContext("ImplicitContext"),
-  s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData");
-
-Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
-                                           TypedValue data) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
-  auto const key = keyarg.get();
-  // Reserve the underscore prefix for the time being in case we want to
-  // emit keys from the compiler. This would allow us to avoid having
-  // conflicts with other key generation mechanisms.
-  if (key->size() == 0 || key->data()[0] == '_') {
-    throw_implicit_context_exception(
-      "Implicit context keys cannot be empty or start with _");
-  }
-  auto const prev = *ImplicitContext::activeCtx;
-
-  assertx(s_ImplicitContextDataClass);
-  auto obj = Object{s_ImplicitContextDataClass};
-  auto const context = Native::data<ImplicitContext>(obj.get());
-
-  // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
-  // suspend/resume routine, we should properly refcount the data but that is
-  // expensive. Leak and let the GC take care of it.
-  obj.get()->incRefCount();
-
-  if (prev) context->m_map = Native::data<ImplicitContext>(prev)->m_map;
-  // Leak `data`, `key` and `memokey` to the end of the request
-  if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
-  key->incRefCount();
-  auto const memokey = HHVM_FN(serialize_memoize_param)(data);
-  auto entry = std::make_pair(data, memokey);
-  auto const it = context->m_map.insert({key, entry});
-  // If the insertion failed, overwrite
-  if (!it.second) it.first->second = entry;
-
-  using Elem = std::pair<const StringData*, TypedValue>;
-  req::vector<Elem> vec;
-  for (auto const& p : context->m_map) {
-    vec.push_back(std::make_pair(p.first, p.second.second));
-  }
-  std::sort(vec.begin(), vec.end(), [](const Elem e1, const Elem e2) {
-                                      return e1.first->hash() < e2.first->hash();
-                                    });
-  StringBuffer sb;
-  for (auto const& e : vec) {
-    serialize_memoize_string_data(sb, e.first);
-    serialize_memoize_tv(sb, 0, e.second);
-  }
-  context->m_memokey = sb.detach().detach();
-
-  return ImplicitContext::setByValue(std::move(obj));
-}
-
-String HHVM_FUNCTION(get_implicit_context_memo_key) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
-  auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return "";
-  auto const context = Native::data<ImplicitContext>(obj);
-  assertx(context->m_memokey);
-  return String{context->m_memokey};
-}
-
 namespace {
 
-Variant coeffects_call_helper(const Variant& function, const char* name,
-                              RuntimeCoeffects coeffects,
-                              bool getCoeffectsFromClosure) {
-  CallCtx ctx;
-  vm_decode_function(function, ctx);
-  if (!ctx.func) {
-    raise_error("%s expects first argument to be a closure or a "
-                "function pointer",
-                name);
-  }
-  if (getCoeffectsFromClosure &&
-      ctx.func->hasCoeffectRules() &&
-      ctx.func->getCoeffectRules().size() == 1 &&
-      ctx.func->getCoeffectRules()[0].isClosureParentScope()) {
-    assertx(ctx.func->isClosureBody());
-    auto const closure = reinterpret_cast<c_Closure*>(ctx.this_);
-    coeffects = closure->getCoeffects();
-  }
-  return Variant::attach(
-    g_context->invokeFunc(ctx.func, init_null_variant, ctx.this_, ctx.cls,
-                          coeffects, ctx.dynamic)
-  );
+bespoke::TypeStructure* getBespokeTS(const Array& ts) {
+  return bespoke::TypeStructure::isBespokeTypeStructure(ts.get())
+    ? bespoke::TypeStructure::As(ts.get())
+    : nullptr;
+}
+bool getBool(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return false;
+  assertx(isBoolType(tv.m_type));
+  return tv.m_data.num;
+}
+String getString(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return String{};
+  assertx(isStringType(tv.m_type));
+  return String{tv.m_data.pstr};
+}
+Array getArray(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return Array{};
+  assertx(isArrayLikeType(tv.m_type));
+  return Array{tv.m_data.parr};
 }
 
 } // namespace
 
-Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
-  return coeffects_call_helper(function,
-                               "HH\\Coeffects\\_Private\\enter_zoned_with",
-                               RuntimeCoeffects::zoned_with(), false);
+int64_t HHVM_FUNCTION(get_kind, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->kind();
+  }
+  auto const tv = ts.get()->get(s_kind.get());
+  assertx(isIntType(tv.m_type));
+  return tv.m_data.num;
+}
+
+bool HHVM_FUNCTION(get_nullable, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->nullable();
+  }
+  return getBool(ts, s_nullable);
+}
+
+bool HHVM_FUNCTION(get_soft, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->soft();
+  }
+  return getBool(ts, s_soft);
+}
+
+bool HHVM_FUNCTION(get_like, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->like();
+  }
+  return getBool(ts, s_like);
+}
+
+bool HHVM_FUNCTION(get_opaque, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->opaque();
+  }
+  return getBool(ts, s_opaque);
+}
+
+bool HHVM_FUNCTION(get_optional_shape_field, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->optionalShapeField();
+  }
+  return getBool(ts, s_optional_shape_field);
+}
+
+String HHVM_FUNCTION(get_alias, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return String{bespokeTS->alias()};
+  }
+  return getString(ts, s_alias);
+}
+
+String HHVM_FUNCTION(get_typevars, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return String{bespokeTS->typevars()};
+  }
+  return getString(ts, s_typevars);
+}
+
+Array HHVM_FUNCTION(get_typevar_types, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return Array{bespokeTS->typevarTypes()};
+  }
+  return getArray(ts, s_typevar_types);
+}
+
+Array HHVM_FUNCTION(get_fields, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_shape) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSShape*>(bespokeTS);
+    return Array{s->fields()};
+  }
+  return getArray(ts, s_fields);
+}
+
+bool HHVM_FUNCTION(get_allows_unknown_fields, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_shape) {
+      return false;
+    }
+    auto const s = reinterpret_cast<bespoke::TSShape*>(bespokeTS);
+    return s->allowsUnknownFields();
+  }
+  return getBool(ts, s_allows_unknown_fields);
+}
+
+Array HHVM_FUNCTION(get_elem_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_tuple) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSTuple*>(bespokeTS);
+    return Array{s->elemTypes()};
+  }
+  return getArray(ts, s_elem_types);
+}
+
+Array HHVM_FUNCTION(get_param_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->paramTypes()};
+  }
+  return getArray(ts, s_param_types);
+}
+
+Array HHVM_FUNCTION(get_return_type, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->returnType()};
+  }
+  return getArray(ts, s_return_type);
+}
+
+Array HHVM_FUNCTION(get_variadic_type, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->variadicType()};
+  }
+  return getArray(ts, s_variadic_type);
+}
+
+String HHVM_FUNCTION(get_name, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_typevar) {
+      return String{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSTypevar*>(bespokeTS);
+    return String{s->name()};
+  }
+  return getString(ts, s_name);
+}
+
+Array HHVM_FUNCTION(get_generic_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithGenericTypes::kFieldsByte &&
+        bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithGenericTypes*>(bespokeTS);
+    return Array{s->genericTypes()};
+  }
+  return getArray(ts, s_generic_types);
+}
+
+String HHVM_FUNCTION(get_classname, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return String{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithClassishTypes*>(bespokeTS);
+    return String{s->classname()};
+  }
+  return getString(ts, s_classname);
+}
+
+bool HHVM_FUNCTION(get_exact, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return false;
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithClassishTypes*>(bespokeTS);
+    return s->exact();
+  }
+  return getBool(ts, s_exact);
 }
 
 namespace {
@@ -1346,29 +1477,75 @@ Array HHVM_FUNCTION(collect_function_coverage) {
   return Func::GetCoverage();
 }
 
-Resource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
-                                                     const Variant& val) {
-  return Resource(req::make<OpaqueResource>(id, val));
+namespace {
+const StaticString
+  s_uses("uses"),
+  s_includes("includes"),
+  s_soft_includes("soft_includes"),
+  s_packages("packages"),
+  s_soft_packages("soft_packages"),
+  s_domains("domains");
+} // namespace
+
+Array HHVM_FUNCTION(get_all_packages) {
+  auto const& packageInfo = g_context->getPackageInfo();
+  DictInit result(packageInfo.packages().size());
+  for (auto const& [name, p] : packageInfo.packages()) {
+    DictInit package(3);
+
+    VecInit uses(p.m_uses.size());
+    for (auto& s : p.m_uses) uses.append(String{makeStaticString(s)});
+    package.set(s_uses.get(), uses.toVariant());
+
+    VecInit includes(p.m_includes.size());
+    for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
+    package.set(s_includes.get(), includes.toVariant());
+
+    VecInit soft_includes(p.m_soft_includes.size());
+    for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
+    package.set(s_soft_includes.get(), soft_includes.toVariant());
+    result.set(makeStaticString(name), package.toVariant());
+  }
+
+  return result.toArray();
 }
 
-Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
-                                           const Resource& res) {
-  if (!res->instanceof<OpaqueResource>()) {
-    SystemLib::throwInvalidArgumentExceptionObject("Invalid OpaqueValue");
+Array HHVM_FUNCTION(get_all_deployments) {
+  auto const& packageInfo = g_context->getPackageInfo();
+  DictInit result(packageInfo.deployments().size());
+  for (auto const& [name, d] : packageInfo.deployments()) {
+    DictInit deployment(3);
+
+    VecInit packages(d.m_packages.size());
+    for (auto& s : d.m_packages) packages.append(String{makeStaticString(s)});
+    deployment.set(s_packages.get(), packages.toVariant());
+
+    VecInit soft_packages(d.m_soft_packages.size());
+    for (auto& s : d.m_soft_packages) soft_packages.append(String{makeStaticString(s)});
+    deployment.set(s_soft_packages.get(), soft_packages.toVariant());
+
+    VecInit domains(d.m_domains.size());
+    for (auto& r : d.m_domains) {
+      domains.append(String{makeStaticString(r->pattern())});
+    }
+    deployment.set(s_domains.get(), domains.toVariant());
+
+    result.set(makeStaticString(name), deployment.toVariant());
   }
-  auto const ov = cast<OpaqueResource>(res);
-  if (ov->opaqueId() != id) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Could not unwrap OpaqueValue: id does not match"
-    );
-  }
-  return ov->opaqueValue();
+
+  return result.toArray();
+}
+
+bool HHVM_FUNCTION(package_exists, StringArg name) {
+  assertx(name.get());
+  if (name.get()->empty()) return false;
+  auto const& packageInfo = g_context->getPackageInfo();
+  return packageInfo.isPackageInActiveDeployment(name.get());
 }
 
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
-    Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContext.get());
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
     X(autoload_set_paths);
@@ -1376,10 +1553,12 @@ static struct HHExtension final : Extension {
     X(autoload_type_to_path);
     X(autoload_function_to_path);
     X(autoload_constant_to_path);
+    X(autoload_module_to_path);
     X(autoload_type_alias_to_path);
     X(autoload_path_to_types);
     X(autoload_path_to_functions);
     X(autoload_path_to_constants);
+    X(autoload_path_to_modules);
     X(autoload_path_to_type_aliases);
     X(could_include);
     X(serialize_memoize_param);
@@ -1395,6 +1574,7 @@ static struct HHExtension final : Extension {
     X(dynamic_fun_force);
     X(dynamic_class_meth);
     X(dynamic_class_meth_force);
+    X(classname_from_string_unsafe);
     X(enable_per_file_coverage);
     X(disable_per_file_coverage);
     X(get_files_with_coverage);
@@ -1404,6 +1584,9 @@ static struct HHExtension final : Extension {
     X(hphp_get_logger_request_id);
     X(enable_function_coverage);
     X(collect_function_coverage);
+    X(get_all_packages);
+    X(get_all_deployments);
+    X(package_exists);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);
@@ -1413,22 +1596,34 @@ static struct HHExtension final : Extension {
     X(request_event_stats);
     X(process_event_stats);
 #undef X
+#define X(nm) HHVM_NAMED_FE(HH\\TypeStructure\\nm, HHVM_FN(nm))
+    X(get_kind);
+    X(get_nullable);
+    X(get_soft);
+    X(get_like);
+    X(get_opaque);
+    X(get_optional_shape_field);
+    X(get_alias);
+    X(get_typevars);
+    X(get_typevar_types);
+    X(get_fields);
+    X(get_allows_unknown_fields);
+    X(get_elem_types);
+    X(get_param_types);
+    X(get_return_type);
+    X(get_variadic_type);
+    X(get_name);
+    X(get_generic_types);
+    X(get_classname);
+    X(get_exact);
+#undef X
+
 #define X(n, t) HHVM_RC_INT(HH\\n, static_cast<int64_t>(AutoloadMap::KindOf::t))
     X(AUTOLOAD_MAP_KIND_OF_TYPE, Type);
     X(AUTOLOAD_MAP_KIND_OF_FUNCTION, Function);
     X(AUTOLOAD_MAP_KIND_OF_CONSTANT, Constant);
     X(AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS, TypeAlias);
 #undef X
-
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context,
-                  HHVM_FN(get_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
-                  HHVM_FN(set_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
-                  HHVM_FN(get_implicit_context_memo_key));
-
-    HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
-                  HHVM_FN(enter_zoned_with));
 
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(is_dynamically_callable_inst_method);
@@ -1437,15 +1632,9 @@ static struct HHExtension final : Extension {
     X(reflection_class_is_abstract);
     X(reflection_class_is_final);
     X(reflection_class_is_interface);
-    X(create_opaque_value_internal);
-    X(unwrap_opaque_value);
 #undef X
 
     loadSystemlib();
-
-    s_ImplicitContextDataClass =
-      Class::lookup(s_ImplicitContextDataClassName.get());
-    assertx(s_ImplicitContextDataClass);
   }
 } s_hh_extension;
 

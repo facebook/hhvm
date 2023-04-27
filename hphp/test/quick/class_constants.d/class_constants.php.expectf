@@ -1,0 +1,22 @@
+Test begin
+int(5)
+int(5)
+int(6)
+int(5)
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+int(123)
+int(123)
+int(123)
+int(123)
+int(123)
+int(123)
+int(711)
+Test end
+
+Fatal error: Couldn't find constant D::FakeConstant in %s on line %d

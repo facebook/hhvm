@@ -1,0 +1,22 @@
+<?hh
+
+module foo;
+
+internal class Foo {
+  internal int $fooProp = 0;
+  internal static int $fooStaticProp = 4;
+  internal function foo(): int {
+    return 5;
+  }
+  public static function fooStatic(): int {
+    return 2;
+  }
+}
+
+public function getFoo(): Foo {
+  return new Foo();
+}
+
+internal function fooFun(): int {
+  return 5;
+}

@@ -8,7 +8,7 @@ class MyClass {
 
 function my_array_map<Tm>((function(Tm): void) $f, varray<Tm> $a): void {}
 function render(): void {
-  $f = class_meth(MyClass::class, 'element');
+  $f = MyClass::element<>;
   $f(new Base());
   my_array_map($f, varray[]);
 }

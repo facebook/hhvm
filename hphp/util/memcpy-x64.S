@@ -110,7 +110,7 @@ ETCH_NAME(_hhvm_memcpy):
 ETCH_LABEL(L8):
               mov   (%rsi), %r9
               //    This stores garbage if coming from _memcpy8, but it won't
-              //    cause corretness problem. The address is writable, and the
+              //    cause correctness problem. The address is writable, and the
               //    data there will be overwritten later. I don't want to move
               //    this store before L8 because that will slow down the
               //    loading of (%rsi).
@@ -234,7 +234,7 @@ ETCH_NAME(_memcpy16):
 
 ETCH_LABEL(32_OR_0):
               //    The path for length == 16 comes through several conditional
-              //    jumps. We expect (and should make) such sitatuions rare
+              //    jumps. We expect (and should make) such situations rare
               //    when this is invoked.
               jnc   ETCH_LABEL(END16)
               movdqu 16(%rsi), %xmm1

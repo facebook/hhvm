@@ -43,18 +43,30 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | ModuleDeclaration
+  | ModuleDefinition
+  | FileCall
+  | GlobalNamespaceAlias
+  | IndexerInputsHash
+  | TypeInfo
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
 
+type gencode = GenCode [@@deriving ord]
+
 type t =
   | Hack of hack
   | Src of src
+  | Gencode of gencode
 [@@deriving ord]
 
 type predicate = t
 
 let compare_predicate = compare
+
+let gencode_to_string = function
+  | GenCode -> "GenCode"
 
 let hack_to_string = function
   | ClassConstDeclaration -> "ClassConstDeclaration"
@@ -88,15 +100,23 @@ let hack_to_string = function
   | TypeConstDefinition -> "TypeConstDefinition"
   | TypedefDeclaration -> "TypedefDeclaration"
   | TypedefDefinition -> "TypedefDefinition"
+  | ModuleDeclaration -> "ModuleDeclaration"
+  | ModuleDefinition -> "ModuleDefinition"
+  | FileCall -> "FileCall"
+  | GlobalNamespaceAlias -> "GlobalNamespaceAlias"
+  | IndexerInputsHash -> "IndexerInputsHash"
+  | TypeInfo -> "TypeInfo"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
 let ordered_all =
   [
+    Gencode GenCode;
     Hack MethodOccurrence;
     Hack NamespaceDeclaration;
     Hack GlobalConstDeclaration;
     Hack TypedefDeclaration;
+    Hack ModuleDeclaration;
     Hack InterfaceDeclaration;
     Hack TraitDeclaration;
     Hack ClassDeclaration;
@@ -104,6 +124,7 @@ let ordered_all =
     Hack Enumerator;
     Hack FunctionDeclaration;
     Hack TypeConstDeclaration;
+    Hack TypeInfo;
     Hack PropertyDeclaration;
     Hack ClassConstDeclaration;
     Hack MethodDeclaration;
@@ -112,6 +133,7 @@ let ordered_all =
     Hack DeclarationComment;
     Hack GlobalConstDefinition;
     Hack TypedefDefinition;
+    Hack ModuleDefinition;
     Hack InterfaceDefinition;
     Hack TraitDefinition;
     Hack ClassDefinition;
@@ -124,6 +146,9 @@ let ordered_all =
     Hack MethodOverrides;
     Hack FileXRefs;
     Hack FileDeclarations;
+    Hack FileCall;
+    Hack GlobalNamespaceAlias;
+    Hack IndexerInputsHash;
     Src FileLines;
   ]
 
@@ -131,18 +156,19 @@ let src_to_string = function
   | FileLines -> "FileLines"
 
 let to_string = function
-  | Hack x -> "hack." ^ hack_to_string x ^ "." ^ Hh_glean_version.hack_version
+  | Hack x -> "hack." ^ hack_to_string x ^ ".6"
   | Src x -> "src." ^ src_to_string x ^ ".1"
+  | Gencode x -> "gencode." ^ gencode_to_string x ^ ".1"
 
 (* Containers in inheritance relationships which share the four member
-types (excludes enum) *)
+   types (excludes enum) *)
 type parent_container_type =
   | ClassContainer
   | InterfaceContainer
   | TraitContainer
 
 (* Get the container name and predicate type for a given parent
-container kind. *)
+   container kind. *)
 let parent_decl_predicate parent_container_type =
   match parent_container_type with
   | ClassContainer -> ("class_", Hack ClassDeclaration)
@@ -170,7 +196,8 @@ let should_cache = function
   | Hack PropertyDeclaration
   | Hack TraitDeclaration
   | Hack TypeConstDeclaration
-  | Hack TypedefDeclaration ->
+  | Hack TypedefDeclaration
+  | Hack ModuleDeclaration ->
     true
   | _ -> false
 
@@ -197,6 +224,7 @@ module Fact_acc = struct
     resultJson: owned_facts Map.t;
     factIds: Fact_id.t JsonPredicateMap.t;
     mutable ownership_unit: ownership_unit;
+    mutable xrefs: Symbol_xrefs.pos_map option;
     ownership: bool;
   }
 
@@ -233,10 +261,17 @@ module Fact_acc = struct
     in
     { progress with resultJson; factIds }
 
-  let add_fact predicate json_key ({ ownership_unit; ownership; _ } as progress)
-      =
+  let add_fact
+      predicate json_key ?value ({ ownership_unit; ownership; _ } as progress) =
+    let value =
+      match value with
+      | None -> []
+      | Some v -> [("value", v)]
+    in
     let fact_id = Fact_id.next () in
-    let fields = [("id", Fact_id.to_json_number fact_id); ("key", json_key)] in
+    let fields =
+      [("id", Fact_id.to_json_number fact_id); ("key", json_key)] @ value
+    in
     let json_fact = JSON_Object fields in
     match
       ( should_cache predicate,
@@ -264,6 +299,7 @@ module Fact_acc = struct
       factIds = JsonPredicateMap.empty;
       ownership_unit = None;
       ownership;
+      xrefs = None;
     }
 
   let set_ownership_unit t ou = t.ownership_unit <- ou
@@ -289,4 +325,8 @@ module Fact_acc = struct
         ordered_all
     in
     List.concat_map preds ~f:(owned_facts_to_json ~ownership)
+
+  let set_pos_map t xrefs = t.xrefs <- Some xrefs
+
+  let get_pos_map t = t.xrefs
 end

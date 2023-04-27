@@ -25,7 +25,7 @@ type entry = {
   mutable ast_errors: Errors.t option;
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
-  mutable naming_and_typing_errors: Errors.t option;
+  mutable all_errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
@@ -37,10 +37,18 @@ type t = {
   backend: Provider_backend.t;
   deps_mode: Typing_deps_mode.t;
   entries: entries;
+  package_info: Package.Info.t;
 }
 
-let empty_for_tool ~popt ~tcopt ~backend ~deps_mode =
-  { popt; tcopt; backend; deps_mode; entries = Relative_path.Map.empty }
+let empty_for_tool ~popt ~tcopt ~backend ~deps_mode ~package_info =
+  {
+    popt;
+    tcopt;
+    backend;
+    deps_mode;
+    entries = Relative_path.Map.empty;
+    package_info;
+  }
 
 let empty_for_worker ~popt ~tcopt ~deps_mode =
   {
@@ -49,6 +57,7 @@ let empty_for_worker ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    package_info = Package.Info.empty;
   }
 
 let empty_for_test ~popt ~tcopt ~deps_mode =
@@ -58,6 +67,7 @@ let empty_for_test ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    package_info = Package.Info.empty;
   }
 
 let empty_for_debugging ~popt ~tcopt ~deps_mode =
@@ -67,6 +77,7 @@ let empty_for_debugging ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    package_info = Package.Info.empty;
   }
 
 let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
@@ -78,7 +89,7 @@ let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
     ast_errors = None;
     cst = None;
     tast = None;
-    naming_and_typing_errors = None;
+    all_errors = None;
     symbols = None;
   }
 
@@ -103,6 +114,8 @@ let add_entry_if_missing ~(ctx : t) ~(path : Relative_path.t) : t * entry =
 let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
+
+let get_package_info (t : t) : Package.Info.t = t.package_info
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
@@ -220,27 +233,68 @@ let get_telemetry (t : t) : Telemetry.t =
        it not being the intended provider. *)
   in
   match t.backend with
-  | Provider_backend.Local_memory lmem ->
+  | Provider_backend.Local_memory
+      {
+        Provider_backend.shallow_decl_cache;
+        decl_cache;
+        folded_class_cache;
+        reverse_naming_table_delta;
+        fixmes;
+        naming_db_path_ref = _;
+      } ->
     let open Provider_backend in
     telemetry
-    |> Decl_cache.get_telemetry lmem.decl_cache ~key:"decl_cache"
+    |> Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
     |> Shallow_decl_cache.get_telemetry
-         lmem.shallow_decl_cache
+         shallow_decl_cache
          ~key:"shallow_decl_cache"
-    |> Linearization_cache.get_telemetry
-         lmem.linearization_cache
-         ~key:"linearization_cache"
+    |> Folded_class_cache.get_telemetry
+         folded_class_cache
+         ~key:"folded_class_cache"
     |> Reverse_naming_table_delta.get_telemetry
-         lmem.reverse_naming_table_delta
+         reverse_naming_table_delta
          ~key:"reverse_naming_table_delta"
-    |> Fixmes.get_telemetry lmem.fixmes ~key:"fixmes"
+    |> Fixmes.get_telemetry fixmes ~key:"fixmes"
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =
   match t.backend with
   | Provider_backend.Local_memory
-      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
+      {
+        Provider_backend.shallow_decl_cache;
+        decl_cache;
+        folded_class_cache;
+        reverse_naming_table_delta = _;
+        fixmes = _;
+        naming_db_path_ref = _;
+      } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
+    Provider_backend.Folded_class_cache.reset_telemetry folded_class_cache;
     ()
   | _ -> ()
+
+let ctx_with_pessimisation_info_exn ctx info =
+  match ctx.backend with
+  | Provider_backend.Pessimised_shared_memory _ ->
+    { ctx with backend = Provider_backend.Pessimised_shared_memory info }
+  | _ ->
+    failwith
+      "This operation is only supported on contexts with a
+      Provider_backend.Pessimised_shared_memory backend."
+
+let noautodynamic this_class =
+  match this_class with
+  | None -> false
+  | Some sc ->
+    Typing_defs.Attributes.mem
+      Naming_special_names.UserAttributes.uaNoAutoDynamic
+      sc.Shallow_decl_defs.sc_user_attributes
+
+let implicit_sdt_for_class ctx this_class =
+  TypecheckerOptions.everything_sdt (get_tcopt ctx)
+  && not (noautodynamic this_class)
+
+let implicit_sdt_for_fun ctx fe =
+  TypecheckerOptions.everything_sdt (get_tcopt ctx)
+  && not fe.Typing_defs.fe_no_auto_dynamic

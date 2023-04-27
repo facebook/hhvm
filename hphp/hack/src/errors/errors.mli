@@ -14,7 +14,6 @@ type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 
 (* The analysis phase that the error is coming from. *)
 type phase =
-  | Init
   | Parsing
   | Naming
   | Decl
@@ -22,9 +21,7 @@ type phase =
 [@@deriving eq]
 
 module PhaseMap : sig
-  include
-    Reordered_argument_collections.Reordered_argument_map_S
-      with type key = phase
+  include Reordered_argument_collections.Map_S with type key = phase
 
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 
@@ -35,6 +32,7 @@ type format =
   | Context
   | Raw
   | Highlighted
+  | Plain
 
 (** Type representing the errors for a single file. *)
 type per_file_errors
@@ -64,15 +62,13 @@ val add_error : error -> unit
 
 val add_parsing_error : Parsing_error.t -> unit
 
-val add_naming_error : Naming_error.t -> unit
-
 val add_nast_check_error : Nast_check_error.t -> unit
 
 val apply_error_from_reasons_callback :
   ?code:Typing.t ->
   ?claim:Pos.t Message.t Lazy.t ->
   ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-  ?quickfixes:Quickfix.t list ->
+  ?quickfixes:Pos.t Quickfix.t list ->
   Typing_error.Reasons_callback.t ->
   unit
 
@@ -82,13 +78,6 @@ val apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit
 
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
-
-val allowed_fixme_codes_partial : ISet.t ref
-
-val codes_not_raised_partial : ISet.t ref
-
-(* Error codes that should be treated strictly, regardless of their file mode. *)
-val error_codes_treated_strictly : ISet.t ref
 
 val report_pos_from_reason : bool ref
 
@@ -102,6 +91,8 @@ val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 
 val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 
+val code_agnostic_fixme : bool ref
+
 val phase_to_string : phase -> string
 
 val phase_of_string : string -> phase option
@@ -113,14 +104,22 @@ val combining_sort : 'a list -> f:('a -> string) -> 'a list
 
 val to_string : finalized_error -> string
 
+(** Prints a summary indicating things like how many errors were
+  found, how many are displayed and how many were dropped. *)
 val format_summary :
-  format -> ('pp, 'p) User_error.t list -> int -> int option -> string option
+  format ->
+  displayed_count:int ->
+  dropped_count:int option ->
+  max_errors:int option ->
+  string option
 
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
 val try_pred : fail:('a -> bool) -> (unit -> 'a) -> (unit -> 'a) -> 'a
 
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
+
+val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
 
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)
@@ -137,7 +136,7 @@ val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,
     since we collect it later in do_with_lazy_decls_ *)
-val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
+val run_in_decl_mode : (unit -> 'a) -> 'a
 
 (* Run this function with span for the definition being checked.
  * This is used to check that the primary position for errors is not located
@@ -161,6 +160,9 @@ val merge : t -> t -> t
 
 val merge_into_current : t -> unit
 
+(** [incremental_update ~old ~new_ ~rechecked phase] is for updating errors.
+It starts with [old], removes every error in [rechecked]+[phase],
+then adds every error mentioned in [new_]. *)
 val incremental_update :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
 
@@ -198,7 +200,7 @@ val fold_errors :
   ?phase:phase ->
   t ->
   init:'a ->
-  f:(Relative_path.t -> error -> 'a -> 'a) ->
+  f:(Relative_path.t -> phase -> error -> 'a -> 'a) ->
   'a
 
 val fold_errors_in :
@@ -215,6 +217,8 @@ val get_failed_files : t -> phase -> Relative_path.Set.t
 val as_telemetry : t -> Telemetry.t
 
 val choose_code_opt : t -> int option
+
+val compare : error -> error -> int
 
 val sort : error list -> error list
 
@@ -247,8 +251,7 @@ val method_is_not_dynamically_callable :
   (Pos.t, Pos_or_decl.t) User_error.t option ->
   unit
 
-val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit
+val function_is_not_dynamically_callable : string -> error -> unit
 
-val global_var_write_error : Pos.t -> string -> unit
-
-val global_var_in_fun_call_error : Pos.t -> string -> unit
+val global_access_error :
+  Error_codes.GlobalAccessCheck.t -> Pos.t -> string -> unit

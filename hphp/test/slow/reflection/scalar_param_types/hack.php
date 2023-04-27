@@ -2,7 +2,7 @@
 
 function foo(int $bar, AnyArray $baz) {
 }
-function herp(\hh\int $derp) {
+function herp(\HH\int $derp) {
 }
 
 <<__EntryPoint>>

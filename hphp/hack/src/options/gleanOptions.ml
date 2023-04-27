@@ -6,14 +6,20 @@
  *
  *)
 
+[@@@warning "-33"]
+
+open Hh_prelude
+
+[@@@warning "+33"]
+
 type t = GlobalOptions.t [@@deriving show]
 
-let service = GlobalOptions.glean_service
+let service t = t.GlobalOptions.glean_service
 
-let hostname = GlobalOptions.glean_hostname
+let hostname t = t.GlobalOptions.glean_hostname
 
-let port = GlobalOptions.glean_port
+let port t = t.GlobalOptions.glean_port
 
-let reponame = GlobalOptions.glean_reponame
+let reponame t = t.GlobalOptions.glean_reponame
 
 let default = GlobalOptions.default

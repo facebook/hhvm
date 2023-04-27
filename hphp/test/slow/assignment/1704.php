@@ -4,7 +4,7 @@ function f($a) {
   var_dump($a);
 }
 class ClassA {
-  static $val = 1;
+  public static $val = 1;
   function foo() {
     f($val = 'val');
     f($this->$val = 2);

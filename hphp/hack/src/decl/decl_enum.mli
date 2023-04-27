@@ -6,7 +6,6 @@
  *
  *)
 
-open Hh_prelude
 module SN = Naming_special_names
 
 type t = {
@@ -43,9 +42,3 @@ val rewrite_class :
   get_ancestor:(string -> Typing_defs.decl_phase Typing_defs.ty option) ->
   Typing_defs.class_const SMap.t ->
   Typing_defs.class_const SMap.t
-
-(** Same as [rewrite_class], but for use when shallow_class_decl is enabled *)
-val rewrite_class_consts :
-  t option Lazy.t ->
-  (string * Typing_defs.class_const) Sequence.t ->
-  (string * Typing_defs.class_const) Sequence.t

@@ -51,7 +51,7 @@ enum InterruptType : int8_t {
   // The server has finished all processing of a web request
   // also known as Post Send Processing has Ended.
   PSPEnded,
-  // The server has executed f_hphpd_break()
+  // The server has executed hphpd_break()
   HardBreakPoint,
   // The server has reached a point where it has been told to stop and wait
   // for the debugger to tell it to resume execution. For example,

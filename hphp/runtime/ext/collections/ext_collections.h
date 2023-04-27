@@ -79,6 +79,13 @@ struct CollectionsExtension : Extension {
     initSet();
   }
 
+  void loadDecls() override {
+    loadDeclsFrom("collections-map");
+    loadDeclsFrom("collections-pair");
+    loadDeclsFrom("collections-set");
+    loadDeclsFrom("collections-vector");
+  }
+
  private:
   void initPair();
   void initVector();

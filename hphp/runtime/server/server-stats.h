@@ -54,6 +54,7 @@ public:
   static void LogBytes(int64_t bytes);
   static void StartRequest(const char* url, const char* clientIP,
                            const char* vhost);
+  static void SetEndpoint(const char* endpoint);
   static void SetThreadMode(ThreadMode mode);
   static ThreadMode GetThreadMode();
   static const char* ThreadModeString(ThreadMode mode);
@@ -138,6 +139,7 @@ private:
    */
   void logBytes(int64_t bytes);
   void startRequest(const char* url, const char* clientIP, const char* vhost);
+  void setEndpoint(const char* endpoint);
   void setThreadMode(ThreadMode mode) { m_threadStatus.m_mode = mode; }
 
   void setThreadIOStatus(const char* name, const char* addr,
@@ -178,6 +180,7 @@ private:
     char m_clientIP[64];
     char m_vhost[64];
     char m_url[512];
+    char m_endpoint[512];
 
     IOStatusMap m_ioStatuses;
   };

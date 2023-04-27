@@ -31,6 +31,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/timer.h"
 
 #include <signal.h>
 #include <time.h>
@@ -88,54 +89,12 @@ const StaticString
   s_line("line"),
   s_metadata("metadata"),
   s_native("Native"),
-  s_phpStack("phpStack"),
   s_sourceType("sourceType"),
   s_stack("stack"),
-  s_time("time"),
   s_time_ns("timeNano"),
   s_lastTriggerTime("lastTriggerTimeNano"),
   s_unwinder("Unwinder");
 
-
-namespace {
-
-Array parsePhpStack(const Array& bt) {
-  VecInit stack(bt->size());
-  for (ArrayIter it(bt); it; ++it) {
-    const auto& frame = it.second().toArray();
-    if (frame.exists(s_function)) {
-      bool fileline = frame.exists(s_file) && frame.exists(s_line);
-      bool metadata = frame.exists(s_metadata);
-
-      DictInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
-
-      if (frame.exists(s_class)) {
-        auto func = folly::to<std::string>(
-          frame[s_class].toString().c_str(),
-          "::",
-          frame[s_function].toString().c_str()
-        );
-        element.set(s_function, func);
-      } else {
-        element.set(s_function, frame[s_function].toString());
-      }
-
-      if (fileline) {
-        element.set(s_file, frame[s_file]);
-        element.set(s_line, frame[s_line]);
-      }
-
-      if (metadata) {
-        element.set(s_metadata, frame[s_metadata]);
-      }
-
-      stack.append(element.toArray());
-    }
-  }
-  return stack.toArray();
-}
-
-} // namespace
 
 ///////////////////////////////////////////////////////////////////////////
 // A singleton object that handles the two Xenon modes (always or timer).
@@ -149,10 +108,9 @@ Xenon& Xenon::getInstance() noexcept {
   return instance;
 }
 
-Xenon::Xenon() noexcept : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
+Xenon::Xenon() noexcept
+  : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
   m_timerid = 0;
-#endif
 }
 
 void Xenon::incrementMissedSampleCount(ssize_t val) {
@@ -174,7 +132,6 @@ static void onXenonTimer(int signo) {
 // The number of milliseconds has to be greater than zero.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(uint64_t msec) {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
   if (!RuntimeOption::XenonForceAlwaysOn && !m_timerid && msec > 0) {
     time_t sec = msec / 1000;
@@ -203,18 +160,15 @@ void Xenon::start(uint64_t msec) {
     ts.it_interval.tv_nsec = nsec;
     timer_settime(m_timerid, 0, &ts, nullptr);
   }
-#endif
 }
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
 void Xenon::stop() {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_timerid) {
     m_stopping = true;
     TRACE(1, "Xenon::stop has stopped the waiting thread\n");
     timer_delete(m_timerid);
   }
-#endif
 }
 
 // Xenon data is gathered for logging per request, "if we should"
@@ -275,11 +229,9 @@ Array XenonRequestLocalData::createResponse() {
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
     stacks.append(make_dict_array(
-      s_time, frame[s_time],
       s_time_ns, frame[s_time_ns],
       s_lastTriggerTime, frame[s_lastTriggerTime],
       s_stack, frame[s_stack].toArray(),
-      s_phpStack, parsePhpStack(frame[s_stack].toArray()),
       s_isWait, frame[s_isWait],
       s_sourceType, frame[s_sourceType]
     ));
@@ -306,7 +258,6 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   if (!m_isProfiledRequest) return;
 
   TRACE(1, "XenonRequestLocalData::log\n");
-  time_t now = time(nullptr);
   auto now_ns = gettime_ns(CLOCK_REALTIME);
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
@@ -315,7 +266,6 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .withMetadata()
                              .ignoreArgs());
   m_stackSnapshots.append(make_dict_array(
-    s_time, now,
     s_time_ns, now_ns,
     s_lastTriggerTime, triggerTime,
     s_stack, bt,

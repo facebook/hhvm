@@ -5,6 +5,7 @@
 HPHP::s_numaNode
 HPHP::s_readline
 HPHP::tl_heap_id
+HPHP::tl_heap_sanitizer
 HPHP::AsioSession::s_current
 HPHP::ServerStats::s_logger
 HPHP::s_hugeRange
@@ -103,6 +104,13 @@ HPHP::arrprov::(anonymous namespace)::tl_tag_override
 HPHP::tracing::detail::tl_active
 HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unitEmitter
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_defer
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_indexer
+HPHP::extern_worker::g_in_job
 
 # Native Facts is not request-scoped.
 HPHP::Facts::(anonymous namespace)::t_adb

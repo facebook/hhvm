@@ -1,0 +1,775 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "thrift",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "Beta" : {
+      "lineno" : 28,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 30,
+          "column" : 15
+        }
+      }
+    },
+    "Experimental" : {
+      "lineno" : 36,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 36,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 23
+        }
+      }
+    },
+    "Testing" : {
+      "lineno" : 48,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 48,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 50,
+          "column" : 18
+        }
+      }
+    },
+    "Deprecated" : {
+      "lineno" : 55,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Beta" : {  },
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "message" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 59,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 59,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 55,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 60,
+          "column" : 2
+        }
+      }
+    },
+    "ReserveIds" : {
+      "lineno" : 78,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Enum" : {  }
+      },
+      "fields" : {
+        "ids" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 82,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 82,
+              "column" : 20
+            }
+          }
+        },
+        "id_ranges" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 91,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 91,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 78,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 92,
+          "column" : 2
+        }
+      }
+    },
+    "Legacy" : {
+      "lineno" : 101,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Deprecated" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+        "message" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 104,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 104,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 101,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 105,
+          "column" : 2
+        }
+      }
+    },
+    "RequiresBackwardCompatibility" : {
+      "lineno" : 112,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "field_name" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 115,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 115,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 112,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 116,
+          "column" : 2
+        }
+      }
+    },
+    "NoTesting" : {
+      "lineno" : 119,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 119,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 121,
+          "column" : 20
+        }
+      }
+    },
+    "NoExperimental" : {
+      "lineno" : 124,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 124,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 126,
+          "column" : 25
+        }
+      }
+    },
+    "NoBeta" : {
+      "lineno" : 129,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoExperimental" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 129,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 131,
+          "column" : 17
+        }
+      }
+    },
+    "Released" : {
+      "lineno" : 137,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoBeta" : {  },
+        "NoTesting" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 137,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 140,
+          "column" : 19
+        }
+      }
+    },
+    "NoLegacy" : {
+      "lineno" : 147,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 147,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 150,
+          "column" : 19
+        }
+      }
+    },
+    "NoDeprecated" : {
+      "lineno" : 159,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoLegacy" : {  },
+        "Beta" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 159,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 162,
+          "column" : 23
+        }
+      }
+    },
+    "TerseWrite" : {
+      "lineno" : 181,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Struct" : {  },
+        "scope.Exception" : {  },
+        "scope.Field" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 181,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 186,
+          "column" : 21
+        }
+      }
+    },
+    "Box" : {
+      "lineno" : 189,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Beta" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 189,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 191,
+          "column" : 14
+        }
+      }
+    },
+    "Mixin" : {
+      "lineno" : 194,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Beta" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 194,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 196,
+          "column" : 16
+        }
+      }
+    },
+    "Bit" : {
+      "lineno" : 210,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "scope.Typedef" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 210,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 213,
+          "column" : 14
+        }
+      }
+    },
+    "SerializeInFieldIdOrder" : {
+      "lineno" : 221,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 221,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 223,
+          "column" : 34
+        }
+      }
+    },
+    "BitmaskEnum" : {
+      "lineno" : 228,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Enum" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 228,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 230,
+          "column" : 22
+        }
+      }
+    },
+    "GenDefaultEnumValue" : {
+      "lineno" : 243,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Enum" : {  },
+        "scope.Program" : {  },
+        "Beta" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : "Unspecified",
+          "source_range" : {
+            "begin" : {
+              "line" : 260,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 260,
+              "column" : 34
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 243,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 261,
+          "column" : 2
+        }
+      }
+    },
+    "GenEnumSet" : {
+      "lineno" : 284,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Enum" : {  },
+        "BitmaskEnum" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 289,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 289,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 284,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 290,
+          "column" : 2
+        }
+      }
+    },
+    "v1" : {
+      "lineno" : 298,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 298,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 299,
+          "column" : 13
+        }
+      }
+    },
+    "v1beta" : {
+      "lineno" : 309,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "v1" : {  },
+        "GenDefaultEnumValue" : {  },
+        "Beta" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 309,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 315,
+          "column" : 17
+        }
+      }
+    },
+    "v1alpha" : {
+      "lineno" : 324,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "v1beta" : {  },
+        "SerializeInFieldIdOrder" : {  },
+        "Experimental" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 324,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 328,
+          "column" : 18
+        }
+      }
+    },
+    "v1test" : {
+      "lineno" : 334,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoDeprecated" : {  },
+        "v1alpha" : {  },
+        "Testing" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 334,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 338,
+          "column" : 17
+        }
+      }
+    },
+    "ExceptionMessage" : {
+      "lineno" : 347,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Exception" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "field" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 350,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 350,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 347,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 351,
+          "column" : 2
+        }
+      }
+    },
+    "GenerateRuntimeSchema" : {
+      "lineno" : 358,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Service" : {  },
+        "scope.Const" : {  },
+        "scope.Enum" : {  },
+        "scope.Typedef" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 365,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 365,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 358,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 366,
+          "column" : 2
+        }
+      }
+    },
+    "InternBox" : {
+      "lineno" : 372,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 372,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 374,
+          "column" : 20
+        }
+      }
+    }
+  }
+}

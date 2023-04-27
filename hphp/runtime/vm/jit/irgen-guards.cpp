@@ -27,10 +27,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 template<typename Check, typename Ld>
-void checkTypeImpl(IRGS& env, Type type, SrcKey dest, Check check, Ld ld) {
-  auto exit = env.irb->guardFailBlock();
-  if (exit == nullptr) exit = makeExit(env, dest);
-
+void checkTypeImpl(IRGS& env, Type type, Block* exit, Check check, Ld ld) {
   if (env.formingRegion || !type.isSpecialized()) {
     check(type, exit);
   } else {
@@ -40,8 +37,8 @@ void checkTypeImpl(IRGS& env, Type type, SrcKey dest, Check check, Ld ld) {
   }
 }
 
-void checkTypeLocal(IRGS& env, uint32_t locId, Type type, SrcKey dest) {
-  checkTypeImpl(env, type, dest,
+void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Block* exit) {
+  checkTypeImpl(env, type, exit,
     [&](Type test, Block* exit) {
       gen(env, CheckLoc, test, LocalId(locId), exit, fp(env));
     },
@@ -52,9 +49,9 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, SrcKey dest) {
   );
 }
 
-void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, SrcKey dest) {
+void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, Block* exit) {
   auto const soff = IRSPRelOffsetData { offsetFromIRSP(env, idx) };
-  checkTypeImpl(env, type, dest,
+  checkTypeImpl(env, type, exit,
     [&](Type test, Block* exit) {
       gen(env, CheckStk, test, soff, exit, sp(env));
     },
@@ -65,9 +62,9 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, SrcKey dest) {
   );
 }
 
-void checkTypeMBase(IRGS& env, Type type, SrcKey dest) {
+void checkTypeMBase(IRGS& env, Type type, Block* exit) {
   auto const mbr = ldMBase(env);
-  checkTypeImpl(env, type, dest,
+  checkTypeImpl(env, type, exit,
     [&](Type test, Block* exit) {
       gen(env, CheckMBase, test, exit, mbr);
     },
@@ -111,18 +108,18 @@ void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
    }
 }
 
-void checkType(IRGS& env, const Location& loc, Type type, SrcKey dest) {
+void checkType(IRGS& env, const Location& loc, Type type, Block* exit) {
   assertx(type <= TCell);
 
   switch (loc.tag()) {
     case LTag::Stack:
-      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()), type, dest);
+      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()), type, exit);
       break;
     case LTag::Local:
-      checkTypeLocal(env, loc.localId(), type, dest);
+      checkTypeLocal(env, loc.localId(), type, exit);
       break;
     case LTag::MBase:
-      checkTypeMBase(env, type, dest);
+      checkTypeMBase(env, type, exit);
       break;
   }
 }

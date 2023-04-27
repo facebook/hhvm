@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
@@ -70,6 +71,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
@@ -89,6 +91,8 @@ constexpr uint32_t kMagic = 0x4d564848;
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
 constexpr uint32_t k86linitSlot = 0x80000002u;
+
+Optional<std::string> s_deserializedFile{};
 
 enum class SeenType : uint8_t {
   Class,
@@ -452,7 +456,7 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   return ret;
 }
 
-bool write_seen_type(ProfDataSerializer& ser, const NamedEntity* ne) {
+bool write_seen_type(ProfDataSerializer& ser, const NamedType* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
     if (!(cls->attrs() & AttrUnique)) return false;
@@ -476,7 +480,7 @@ bool write_seen_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   return false;
 }
 
-void write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
+void write_named_type(ProfDataSerializer& ser, const NamedType* ne) {
   always_assert(ne);
   if (auto const cls = ne->clsList()) {
     write_raw(ser, SeenType::Class);
@@ -492,44 +496,48 @@ void write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
 void read_named_type(ProfDataDeserializer& ser);
 
 Class* read_class_internal(ProfDataDeserializer& ser) {
-  auto const id = read_raw<decltype(std::declval<PreClass*>()->id())>(ser);
+  auto const name = read_string(ser);
   auto const unit = read_unit(ser);
 
   read_container(ser,
                  [&] {
                    auto const dep = read_class(ser);
-                   auto const ne = dep->preClass()->namedEntity();
+                   auto const ne = dep->preClass()->namedType();
                    // if it's not persistent, make sure that dep
-                   // is the active class for this NamedEntity
+                   // is the active class for this NamedType
                    assertx(ne->m_cachedClass.bound());
                    if (ne->m_cachedClass.isNormal()) {
                      ne->setCachedClass(dep);
                    }
                  });
 
-  auto const preClass = unit->lookupPreClassId(id);
+  auto const preClass = unit->lookupPreClass(name);
+  assertx(preClass);
+
   if (preClass->attrs() & AttrEnum &&
       preClass->enumBaseTy().isUnresolved()) {
     read_named_type(ser);
   }
 
-  auto const ne = preClass->namedEntity();
-  // If it's not persistent, make sure its NamedEntity is
+  auto const ne = preClass->namedType();
+  // If it's not persistent, make sure its NamedType is
   // unbound, ready for DefClass
   if (ne->m_cachedClass.bound() &&
       ne->m_cachedClass.isNormal()) {
     ne->m_cachedClass.markUninit();
   }
 
-  auto const cls = Class::def(preClass, true);
-  if (cls->pinitVec().size()) cls->initPropHandle();
-  if (cls->numStaticProperties()) cls->initSPropHandles();
-
-  if (cls->parent() == c_Closure::classof()) {
+  if (preClass->parent() == c_Closure::classof()->name()) {
     auto const ctx = read_class(ser);
-    if (ctx != cls) return cls->rescope(ctx);
+    auto const cls = Class::defClosure(preClass, true);
+    assertx(!cls->needInitialization());
+    return cls->rescope(ctx);
+  } else {
+    auto const cls = Class::def(preClass, true);
+    if (cls->pinitVec().size()) cls->initPropHandle();
+    if (cls->numStaticProperties()) cls->initSPropHandles();
+    return cls;
   }
-  return cls;
 }
 
 const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
@@ -546,7 +554,7 @@ const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
 /*
  * This reads in TypeAliases and Classes that are used for code gen,
  * but otherwise aren't needed for profiling. We just need them to be
- * loaded into the NamedEntity table, so this function just returns
+ * loaded into the NamedType table, so this function just returns
  * whether or not to continue.
  */
 bool read_seen_type(ProfDataDeserializer& ser) {
@@ -600,15 +608,15 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
   pd->forEachProfilingFunc([&](auto const& func) {
     always_assert(func);
     for (auto const& p : func->params()) {
-      if (auto const ne = p.typeConstraint.anyNamedEntity()) {
+      if (auto const ne = p.typeConstraint.anyNamedType()) {
         write_seen_type(ser, ne);
       }
     }
   });
 
   // Now just iterate and write anything that remains
-  NamedEntity::foreach_name(
-    [&] (NamedEntity& ne) {
+  NamedType::foreach_name(
+    [&] (NamedType& ne) {
       write_seen_type(ser, &ne);
     }
   );
@@ -620,7 +628,7 @@ void read_seen_types(ProfDataDeserializer& ser) {
                          RuntimeOption::ServerExecutionMode());
   while (read_seen_type(ser)) {
     // nothing to do. this was just to make sure everything is loaded
-    // into the NamedEntity table
+    // into the NamedType table
   }
 }
 
@@ -737,13 +745,13 @@ struct TargetProfileVisitor : boost::static_visitor<void> {
   void process(T& out, const StringData* name) {
     write_raw(ser, size);
     write_string(ser, name);
-    write_raw(ser, sym);
+    auto& p = boost::get<rds::Profile>(sym);
+    write_raw(ser, p.kind);
+    write_raw(ser, p.transId);
+    write_raw(ser, p.bcOff);
+    write_string(ser, p.name);
     TargetProfile<T>::reduce(out, handle, size);
-    if (size == sizeof(T)) {
-      write_maybe_serializable(ser, out);
-    } else {
-      write_raw(ser, &out, size);
-    }
+    write_maybe_serializable(ser, out);
   }
 
   template<typename T> void operator()(const T&) {}
@@ -887,11 +895,7 @@ struct SymbolFixup : boost::static_visitor<void> {
     auto prof = TargetProfile<T>::deserialize(
       {pt.transId}, TransKind::Profile, pt.bcOff, name, size - sizeof(T));
 
-    if (size == sizeof(T)) {
-      read_maybe_serializable(ser, prof.value());
-    } else {
-      read_raw(ser, &prof.value(), size);
-    }
+    read_maybe_serializable(ser, prof.value());
     maybe_output_target_profile_trace(name, prof, pt);
   }
 
@@ -920,7 +924,14 @@ void read_target_profiles(ProfDataDeserializer& ser) {
     auto const size = read_raw<uint32_t>(ser);
     if (!size) break;
     auto const name = read_string(ser);
-    auto sym = read_raw<rds::Symbol>(ser);
+
+    // For now, we only write rds::Profile.
+    rds::Profile profile{};
+    profile.kind = read_raw<rds::ProfileKind>(ser);
+    profile.transId = read_raw<TransID>(ser);
+    profile.bcOff = read_raw<Offset>(ser);
+    profile.name = read_string(ser);
+    rds::Symbol sym{profile};
     auto sf = SymbolFixup{ser, name, size};
     boost::apply_visitor(sf, sym);
   }
@@ -1329,9 +1340,11 @@ void write_string(ProfDataSerializer& ser, const StringData* str) {
 }
 
 void write_string(ProfDataSerializer& ser, const std::string& str) {
+  ITRACE(2, "cpp string>\n");
   uint64_t size = str.size();
   write_raw(ser, size);
   write_raw(ser, str.data(), size);
+  ITRACE(2, "cpp string {}\n", str);
 }
 
 StringData* read_string(ProfDataDeserializer& ser) {
@@ -1342,6 +1355,7 @@ StringData* read_string(ProfDataDeserializer& ser) {
 }
 
 std::string read_cpp_string(ProfDataDeserializer& ser) {
+  ITRACE(2, "cpp string>\n");
   auto const size = read_raw<uint64_t>(ser);
   constexpr uint32_t kMaxStringLen = 2 << 20;
   if (size > kMaxStringLen) {
@@ -1349,7 +1363,9 @@ std::string read_cpp_string(ProfDataDeserializer& ser) {
   }
   auto const buf = std::make_unique<char[]>(size);
   read_raw(ser, buf.get(), size);
-  return std::string{buf.get(), size};
+  auto const res = std::string{buf.get(), size};
+  ITRACE(2, "cpp string : {}\n", res);
+  return res;
 }
 
 void write_array(ProfDataSerializer& ser, const ArrayData* arr) {
@@ -1448,7 +1464,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   if (old) return write_id(ser, id);
 
   write_serialized_id(ser, id);
-  write_raw(ser, cls->preClass()->id());
+  write_string(ser, cls->preClass()->name());
   write_unit(ser, cls->preClass()->unit());
 
   jit::vector<const Class*> dependents;
@@ -1486,7 +1502,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
 
   if (cls->attrs() & AttrEnum &&
       cls->preClass()->enumBaseTy().isUnresolved()) {
-    write_named_type(ser, cls->preClass()->enumBaseTy().typeNamedEntity());
+    write_named_type(ser, cls->preClass()->enumBaseTy().typeNamedType());
   }
 
   if (cls->parent() == c_Closure::classof()) {
@@ -1588,7 +1604,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
       (!func->isMethod() && func->isBuiltin() &&
       !func->isMethCaller())) {
     if (func == SystemLib::s_nullCtor) {
-      assertx(func->name()->isame(s_86ctor.get()));
+      assertx(func->name() == s_86ctor.get());
     }
     write_raw(ser, true);
     return write_string(ser, func->name());
@@ -1599,7 +1615,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
     auto const* cls = func->implCls();
     auto const nslot = [&] () -> uint32_t {
       const uint32_t slot = func->methodSlot();
-      if (cls->getMethod(slot) != func) {
+      if (cls->getMethodSafe(slot) != func) {
         if (func->name() == s_86pinit.get()) return k86pinitSlot;
         if (func->name() == s_86sinit.get()) return k86sinitSlot;
         if (func->name() == s_86linit.get()) return k86linitSlot;
@@ -1631,7 +1647,7 @@ Func* read_func(ProfDataDeserializer& ser) {
       auto const func = [&] () -> const Func* {
         if (builtin_func) {
           auto const name = read_string(ser);
-          if (name->isame(s_86ctor.get())) return SystemLib::s_nullCtor;
+          if (name->same(s_86ctor.get())) return SystemLib::s_nullCtor;
           return Func::lookup(name);
         }
         auto const id = read_raw<uint32_t>(ser);
@@ -1646,8 +1662,8 @@ Func* read_func(ProfDataDeserializer& ser) {
         auto const unit = read_unit(ser);
         for (auto const f : unit->funcs()) {
           if (f->sn() == id) {
-            auto const ne = f->getNamedEntity();
-            // If it's not persistent, make sure its NamedEntity is
+            auto const ne = f->getNamedFunc();
+            // If it's not persistent, make sure its NamedFunc is
             // unbound, ready for DefFunc
             if (ne->m_cachedFunc.bound() && ne->m_cachedFunc.isNormal()) {
               ne->m_cachedFunc.markUninit();
@@ -1801,6 +1817,7 @@ std::string serializeProfData(const std::string& filename) {
     if (RO::EnableIntrinsicsExtension) {
       write_container(ser, prioritySerializeClasses(), write_class);
     }
+    write_container(ser, Class::serializeLazyAPCClasses(), write_class);
 
     serializeSharedProfiles(ser);
 
@@ -1808,7 +1825,7 @@ std::string serializeProfData(const std::string& filename) {
 
     // We've written everything directly referenced by the profile
     // data, but jitted code might still use Classes and TypeAliases
-    // that haven't been otherwise mentioned (eg VerifyParamType,
+    // that haven't been otherwise mentioned (eg TypeConstraint types,
     // InstanceOfD etc).
     write_seen_types(ser, pd);
 
@@ -1863,6 +1880,7 @@ std::string serializeOptProfData(const std::string& filename) {
 std::string deserializeProfData(const std::string& filename,
                                 int numWorkers,
                                 bool rds) {
+  s_deserializedFile = filename;
   try {
     if (!rds) ProfData::setTriedDeserialization();
 
@@ -1874,8 +1892,8 @@ std::string deserializeProfData(const std::string& filename,
     auto signature = read_raw<decltype(RepoFile::globalData().Signature)>(ser);
     if (signature != RepoFile::globalData().Signature) {
       auto const msg =
-        folly::sformat("Mismatched repo-schema (expected signature '{}')",
-                       RepoFile::globalData().Signature);
+        folly::sformat("Mismatched repo signature (expected signature '{}', got '{}')",
+                       RepoFile::globalData().Signature, signature);
 
       throw std::runtime_error(msg);
     }
@@ -1885,8 +1903,8 @@ std::string deserializeProfData(const std::string& filename,
     read_raw(ser, &schema[0], size);
     if (schema != repoSchemaId()) {
       auto const msg =
-        folly::sformat("Mismatched repo-schema (expected schema_id '{}')",
-          repoSchemaId());
+        folly::sformat("Mismatched repo-schema (expected schema_id '{}', got '{}')",
+          repoSchemaId(), schema);
 
       throw std::runtime_error(msg);
     }
@@ -1930,8 +1948,31 @@ std::string deserializeProfData(const std::string& filename,
     read_prof_data(ser, pd);
     pd->setDeserialized(buildHost, tag, buildTime);
 
+    // Optionally log function info from jit profile
+    if (RuntimeOption::EvalDumpJitProfileStats) {
+      auto const logFunc = [&](auto const& func) {
+        StructuredLogEntry entry;
+        entry.force_init = true;
+        entry.setInt("signature", signature);
+        entry.setStr("repo_schema", schema);
+        entry.setStr("build_host", buildHost);
+        entry.setInt("build_time", buildTime);
+        entry.setStr("orig_filepath", func->unit()->origFilepath()->data());
+        entry.setStr("function_name", func->fullName()->data());
+        entry.setInt("function_bytecode_hash", func->bcHash());
+        StructuredLog::log("hhvm_jit_profile_stats", entry);
+      };
+
+      pd->forEachProfilingFunc(logFunc);
+    }
+
     if (RO::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
+    }
+    {
+      std::vector<const Class*> list;
+      read_container(ser, [&] { list.push_back(read_class(ser)); });
+      Class::deserializeLazyAPCClasses(list);
     }
 
     deserializeSharedProfiles(ser);
@@ -2000,6 +2041,10 @@ bool tryDeserializePartialProfData(const std::string& filename,
 bool serializeOptProfEnabled() {
   return RuntimeOption::EvalJitSerializeOptProfSeconds  > 0 ||
          RuntimeOption::EvalJitSerializeOptProfRequests > 0;
+}
+
+Optional<std::string> getFilenameDeserialized() {
+  return s_deserializedFile;
 }
 
 //////////////////////////////////////////////////////////////////////

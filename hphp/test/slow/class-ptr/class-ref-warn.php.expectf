@@ -4,10 +4,14 @@ object(C0) (1) {
   ["a"]=>
   int(1)
 }
+
+Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(2)
 }
+
+Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(3)
@@ -18,6 +22,8 @@ object(C0) (1) {
   ["a"]=>
   int(4)
 }
+
+Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(5)

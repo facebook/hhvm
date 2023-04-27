@@ -201,7 +201,7 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
     v = var.toString();
   } else {
     flag |= MMC_SERIALIZED;
-    v = f_serialize(var);
+    v = HHVM_FN(serialize)(var);
   }
   std::vector<char> payload;
   size_t value_len = v.length();
@@ -766,16 +766,16 @@ struct MemcacheExtension final : Extension {
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_strategy,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_strategy));
+                         nullptr,
+                         &MEMCACHEG(hash_strategy)
+                       ));
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_function", "crc32",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_function,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_function));
+                         nullptr,
+                         &MEMCACHEG(hash_function)
+                       ));
     }
     void threadShutdown() override {
       delete *s_memcache_globals;

@@ -1,0 +1,12 @@
+function invariant(
+  mixed $condition,
+  HH\FormatString<PlainSprintf> $f,
+  mixed $f_args...
+)[]: void
+Call `invariant_violation` if the condition is false.
+
+```
+invariant($x >= 0, "Value cannot be negative: %d", $x);
+```
+
+See http://docs.hhvm.com/hack/reference/function/HH.invariant/

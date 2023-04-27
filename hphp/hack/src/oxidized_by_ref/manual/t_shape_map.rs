@@ -5,13 +5,16 @@
 
 use std::cmp::Ordering;
 
-use serde::{Deserialize, Serialize};
-
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::typing_defs_core::{PosByteString, PosString, TshapeFieldName};
+use crate::typing_defs_core::PosByteString;
+use crate::typing_defs_core::PosString;
+use crate::typing_defs_core::TshapeFieldName;
 
 #[derive(
     Copy,

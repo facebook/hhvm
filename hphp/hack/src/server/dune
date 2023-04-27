@@ -46,7 +46,7 @@
  (name server_revision_tracker)
  (wrapped false)
  (modules serverRevisionTracker)
- (libraries hg server_env watchman_utils)
+ (libraries hg server_config watchman_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -69,7 +69,7 @@
 (library
  (name server_find_refs)
  (wrapped false)
- (modules serverFindRefs)
+ (modules serverFindRefs serverDepsInBatch)
  (libraries
   provider_context
   server_command_types
@@ -77,6 +77,14 @@
   server_prechecked_files
   server_services
   utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_call_hierarchy)
+ (wrapped false)
+ (modules serverPrepareCallHierarchy serverCallHierarchyIncomingCalls serverCallHierarchyOutgoingCalls serverCallHierarchyUtils)
+ (libraries provider_context server_find_refs server_services lsp server_command_types)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -113,37 +121,101 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name monitor_rpc)
+  (wrapped false)
+  (modules monitorRpc)
+  (libraries
+    connection_tracker
+    hh_json
+    logging
+    sys_utils
+  )
+)
+
+(library
+ (name server_args)
+ (wrapped false)
+ (modules serverArgs)
+ (libraries
+   ai_options
+   cli_args
+   string
+   sys_utils
+   utils_core
+   utils_exit
+   utils_www_root
+   version))
+
+(library
+ (name server_progress)
+ (wrapped false)
+ (modules serverProgress)
+ (libraries
+   errors
+   server_command_types
+   server_files
+   watchman
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_progress_lwt)
+ (wrapped false)
+ (modules serverProgressLwt)
+ (libraries
+   server_progress
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_notifier)
+ (wrapped false)
+ (modules serverNotifier)
+ (libraries
+   server_command_types
+   server_files
+   server_revision_tracker
+   dfind
+   watchman)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name server_config)
+  (wrapped false)
+  (modules serverConfig serverLocalConfig)
+  (libraries
+   server_args
+   errors
+   experiments_config_file
+   heap_shared_mem
+   typechecker_options
+   glean_options
+   ai_options
+   build_options
+   symbol_write_options
+   parser_options
+   procs_bucket
+   server_local_config_knobs_stubs
+   utils_config_file)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+
+(library
  (name server_env)
  (wrapped false)
- (modules serverArgs serverArgs_sig serverConfig serverEnv serverLocalConfig)
+ (modules serverEnv )
  (libraries
-  ai_options
-  build_options
   ci_util
-  cli_args
   diagnostic_pusher
-  disk
-  errors
-  experiments_config_file
-  file_info
-  glean_options
-  server_local_config_knobs_stubs
-  symbol_write_options
-  parser_options
-  pos
-  procs_bucket
-  re_stubs
   server_client_provider
-  server_command_types
-  server_monitor
-  state_loader
-  typechecker_options
+  server_config
+  server_notifier
   typing_service_api
-  typing_service_delegate
-  utils_config_file
-  utils_core
-  utils_www_root
-  version)
+  typing_service_delegate_types)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -164,13 +236,14 @@
   find
   decl
   decl_class
+  decl_provider
   hhi
   procs_bucket
   procs_procs
   relative_path
   server_files
-  server_monitor
   sys_utils
+  tast_env
   utils_core
   watchman)
  (preprocess
@@ -193,9 +266,8 @@
   serverGlobalInferenceTypes
   serverHighlightRefsTypes
   serverLintTypes
-  serverNotifierTypes
   serverRageTypes
-  serverRefactorTypes
+  serverRenameTypes
   tastHolesService)
  (libraries
   connection_tracker
@@ -209,6 +281,7 @@
   search_utils
   symbol
   typing_defs
+  typing_deps
   utils_lint
   version)
  (preprocess
@@ -226,8 +299,10 @@
   testClientProvider)
  (libraries
   libancillary
+  monitor_rpc
   relative_path
   server_command_types
+  server_progress
   server_utils
   utils_core)
  (preprocess
@@ -238,11 +313,6 @@
  (wrapped false)
  (modules
   autocompleteService
-  ffpAutocompleteContextParser
-  ffpAutocompleteGlobals
-  ffpAutocompleteKeywords
-  ffpAutocompleteService
-  ffpAutocompleteTypeCheck
   serverAutoComplete)
  (libraries
   provider_utils
@@ -262,6 +332,8 @@
   identifySymbolService
   methodJumps
   saveStateService
+  serverDepsOutBatch
+  serverDepsUtil
   serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch
@@ -302,7 +374,9 @@
 (library
  (name server_code_actions_services)
  (wrapped false)
- (modules codeActionsService)
+ (modules
+  codeActionsService
+  codeActionsServiceExtractVariable)
  (libraries
   annotated_ast
   ast
@@ -335,6 +409,7 @@
   typing
   typing_check
   typing_service_api
+  state_loader
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
@@ -424,13 +499,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (rule
- (target serverHotClassesDescription.fb.ml)
- (action
-  (copy#
-   facebook/serverHotClassesDescription.ml
-   serverHotClassesDescription.fb.ml)))
-
-(rule
  (target serverInvalidateUnits.fb.ml)
  (action
   (copy# facebook/serverInvalidateUnits.ml serverInvalidateUnits.fb.ml)))
@@ -441,7 +509,6 @@
  (modules
   fullFidelityParseService
   searchServiceRunner
-  serverBigCode
   serverBusyStatus
   serverCheckUtils
   serverCheckpoint
@@ -453,26 +520,25 @@
   serverFileDependents
   serverFileSync
   serverFormat
-  serverHotClasses
   serverGenPrefetchDir
-  serverHotClassesDescription
+  serverGenRemoteDecls
+  serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
+  serverTastHolesBatch
   serverInvalidateUnits
+  serverIsSubtype
   serverLint
   serverMethodJumps
   serverMethodJumpsBatch
   serverRage
   serverRecheckCapture
-  serverRefactor
+  serverRename
   serverRewriteLambdaParameters
   serverRewriteTypeParamsType
   serverSignatureHelp
   serverStamp
   serverStatusSingle
-  serverStatusSingleRemoteExecution
-  serverStatusRemoteExecution
-  serverStatusMultiRemoteExecution
   serverTypeCheck
   serverTypeDefinition
   serverWorker
@@ -496,7 +562,6 @@
   linting_main
   lints_core
   lsp
-  parsing_service
   remote
   security_stubs
   shallow_classes_provider
@@ -504,7 +569,6 @@
   direct_decl_utils
   server_api
   server_codemod_type_printer
-  recli_stubs
   server_code_actions_services
   server_coverage_metric_utils
   server_docblock_at
@@ -526,11 +590,6 @@
   version
   watchman_utils
   (select
-   serverHotClassesDescription.ml
-   from
-   (facebook signed_source -> serverHotClassesDescription.fb.ml)
-   (-> serverHotClassesDescription.stubs.ml))
-  (select
    serverInvalidateUnits.ml
    from
    (facebook signed_source -> serverInvalidateUnits.fb.ml)
@@ -548,11 +607,7 @@
   (wrapped false)
   (modules
     client_command_handler
-    hhMonitorInformant
-    hhMonitorInformant_sig
-    hhServerMonitor
-    hhServerMonitorConfig
-    serverAiInit
+    packageConfig
     serverCommand
     serverCommandLwt
     serverEagerInit
@@ -565,6 +620,7 @@
     serverRemoteInit
     serverRpc)
   (libraries
+    ast
     ast_and_decl_service
     build
     ci_util
@@ -580,6 +636,7 @@
     server
     server_env_build
     server_global_inference
+    server_call_hierarchy
     server_go_to
     server_highlight_refs
     server_search

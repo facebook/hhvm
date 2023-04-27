@@ -22,14 +22,14 @@ vec(1) {
   string(10) "1234NULL23"
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(2) {
   string(10) "1234NULL23"
-  string(43) "00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(43) "00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 -- Iteration 4 --
 string(57) "explode() expects parameter 1 to be string, integer given"
@@ -45,14 +45,14 @@ vec(5) {
   string(0) ""
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(2) {
   string(14) "1234NULL23abcd"
-  string(42) "0000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(42) "0000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 -- Iteration 6 --
 string(57) "explode() expects parameter 1 to be string, boolean given"
@@ -85,14 +85,14 @@ vec(2) {
   string(3) "PHP"
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(1) {
-  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
 vec(2) {
   string(48) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24"
-  string(8) "PHP%ZEND"
+  string(8) "PHP%%ZEND"
 }
 
 *** Testing explode() with miscelleneous input arguments ***
@@ -146,22 +146,22 @@ vec(51) {
   string(2) "55"
   string(1) "5"
   string(1) "5"
-  string(2) "5%"
-  string(1) "%"
-  string(1) "%"
-  string(1) "%"
+  string(2) "5%%"
+  string(1) "%%"
+  string(1) "%%"
+  string(1) "%%"
   string(1) "5"
   string(1) "5"
   string(1) "5"
-  string(1) "%"
-  string(1) "%"
+  string(1) "%%"
+  string(1) "%%"
   string(1) "5"
   string(1) "5"
   string(1) "5"
   string(1) "5"
-  string(2) "5%"
-  string(1) "%"
-  string(1) "%"
+  string(2) "5%%"
+  string(1) "%%"
+  string(1) "%%"
   string(2) "55"
   string(1) "1"
 }

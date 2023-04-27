@@ -724,6 +724,7 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
       return VariableValue{dblString};
     }
 
+    case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
       std::string value {variable.asCStrRef().toCppString()};

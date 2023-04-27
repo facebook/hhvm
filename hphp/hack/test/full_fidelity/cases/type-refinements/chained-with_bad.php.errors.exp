@@ -1,0 +1,2 @@
+(7,47)-(7,47) A type refinement cannot be chained (e.g., `Cls with { ... } with { type T2 ... }`), consider combining members into a single with-block.
+(9,30)-(9,30) A type refinement cannot be chained (e.g., `Cls with { ... } with { type T2 ... }`), consider combining members into a single with-block.

@@ -38,7 +38,7 @@ namespace HPHP {
 struct Class;
 struct Func;
 struct ObjectData;
-struct NamedEntity;
+struct NamedType;
 struct StaticCoeffects;
 struct StringData;
 struct Unit;
@@ -93,7 +93,6 @@ struct PreClass : AtomicCountable {
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
-    const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
     const StringData* userType()       const { return m_userType; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
@@ -106,7 +105,6 @@ struct PreClass : AtomicCountable {
 
   private:
     LowStringPtr m_name;
-    LowStringPtr m_mangledName;
     Attr m_attrs;
     LowStringPtr m_userType;
     LowStringPtr m_docComment;
@@ -255,15 +253,20 @@ struct PreClass : AtomicCountable {
   /*
    * Trait and interface requirements.
    *
-   * Represents a `require implements' or `require extends' declaration.
+   * Represents a `require implements', `require extends', or `require class' declaration.
    */
+  enum RequirementKind {
+    RequirementImplements = 0,
+    RequirementExtends    = 0x1,
+    RequirementClass      = 0x2,
+  };
+
   struct ClassRequirement {
     ClassRequirement();
-    ClassRequirement(const StringData* req, bool isExtends);
+    ClassRequirement(const StringData* req, const RequirementKind reqKind);
 
     const StringData* name() const;
-    bool is_extends() const;
-    bool is_implements() const;
+    RequirementKind kind() const;
     bool is_same(const ClassRequirement* other) const;
     size_t hash() const;
 
@@ -280,25 +283,24 @@ struct PreClass : AtomicCountable {
   };
 
 private:
-  typedef IndexedStringMap<Func*,Slot> MethodMap;
-  typedef IndexedStringMap<Prop,Slot> PropMap;
-  typedef IndexedStringMap<Const,Slot> ConstMap;
+  using MethodMap = IndexedStringMap<Func*,Slot>;
+  using PropMap = IndexedStringMap<Prop,Slot>;
+  using ConstMap = IndexedStringMap<Const,Slot>;
 
 public:
-  typedef VMFixedVector<LowStringPtr> InterfaceVec;
-  typedef VMFixedVector<LowStringPtr> IncludedEnumsVec;
-  typedef VMFixedVector<LowStringPtr> UsedTraitVec;
-  typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
-  typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef VMFixedVector<TraitAliasRule> TraitAliasRuleVec;
+  using InterfaceVec = VMFixedVector<LowStringPtr>;
+  using IncludedEnumsVec = VMFixedVector<LowStringPtr>;
+  using UsedTraitVec = VMFixedVector<LowStringPtr>;
+  using ClassRequirementsVec = VMFixedVector<ClassRequirement>;
+  using TraitPrecRuleVec = VMFixedVector<TraitPrecRule>;
+  using TraitAliasRuleVec = VMFixedVector<TraitAliasRule>;
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
 
   PreClass(Unit* unit, int line1, int line2, const StringData* n,
-           Attr attrs, const StringData* parent, const StringData* docComment,
-           Id id);
+           Attr attrs, const StringData* parent, const StringData* docComment);
   ~PreClass();
 
   void atomicRelease();
@@ -311,10 +313,9 @@ public:
    * Basic info.
    */
   Unit*             unit()         const { return m_unit; }
-  NamedEntity*      namedEntity()  const { return m_namedEntity; }
+  NamedType*        namedType()    const { return m_namedType; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
-  Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
   const StringData* parent()       const { return m_parent; }
@@ -351,8 +352,6 @@ public:
   const IncludedEnumsVec& includedEnums()    const { return m_includedEnums; }
   const UsedTraitVec& usedTraits()           const { return m_usedTraits; }
   const ClassRequirementsVec& requirements() const { return m_requirements; }
-  const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
-  const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
 
   /*
@@ -435,6 +434,7 @@ public:
    */
   static constexpr Offset nameOffset()  { return offsetof(PreClass, m_name); }
   static constexpr Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
+  static constexpr Offset unitOffset() { return offsetof(PreClass, m_unit); }
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -455,10 +455,9 @@ public:
 
 private:
   Unit* m_unit;
-  LowPtr<NamedEntity> m_namedEntity;
+  LowPtr<NamedType> m_namedType;
   int m_line1;
   int m_line2;
-  Id m_id;
   Attr m_attrs;
   LowStringPtr m_name;
   LowStringPtr m_parent;
@@ -470,8 +469,6 @@ private:
   IncludedEnumsVec m_includedEnums;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;
-  TraitPrecRuleVec m_traitPrecRules;
-  TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
   MethodMap m_methods;
@@ -480,7 +477,7 @@ private:
   int64_t m_dynConstructSampleRate;
 };
 
-typedef AtomicSharedPtr<PreClass> PreClassPtr;
+using PreClassPtr = AtomicSharedPtr<PreClass>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -7,5 +7,27 @@
  *)
 
 open Shape_analysis_types
+module HT = Hips_types
 
-val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
+val deduce : constraint_ list -> constraint_ list
+
+val produce_results :
+  Typing_env_types.env -> constraint_ list -> shape_result list
+
+val embed_entity : HT.entity -> entity_
+
+(** Backwards substitutes the intra-procedural constraint in the second argument
+    with respect to the inter-procedural constraint in the first argument *)
+val substitute_inter_intra_backwards :
+  inter_constraint_ -> constraint_ -> constraint_ option
+
+(** Forwards substitutes the intra-procedural constraint in the second argument
+    with respect to the inter-procedural constraint in the first argument *)
+val substitute_inter_intra_forwards :
+  inter_constraint_ -> constraint_ -> constraint_ option
+
+val equiv : any_constraint list -> any_constraint list -> bool
+
+val widen : entity_ list -> constraint_ list
+
+val subsets : entity_ -> entity_ -> constraint_

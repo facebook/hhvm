@@ -19,9 +19,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/timer.h"
 
-#ifndef _MSC_VER
 #include <sys/errno.h>
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

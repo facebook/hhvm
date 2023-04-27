@@ -20,9 +20,7 @@ let check_types env (_, p, te) =
       let rec iter ty1 =
         let (_, ety1) = Env.expand_type env ty1 in
         match get_node ety1 with
-        | Tany _
-        | Terr ->
-          true
+        | Tany _ -> true
         | Tvec_or_dict _
         | Ttuple _
         | Tshape _
@@ -34,6 +32,7 @@ let check_types env (_, p, te) =
                || String.equal cn SN.Collections.cVec ->
           true
         | Tunion tyl -> List.for_all ~f:iter tyl
+        | Tintersection tyl -> List.exists ~f:iter tyl
         | Tgeneric _
         | Tnewtype _
         | Tdependent _ ->

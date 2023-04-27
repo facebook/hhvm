@@ -1,3 +1,9 @@
-:name ?string
-:color ?string
-genRender (function(): _)
+:name
+  INSERT :name
+  ?string
+:color
+  INSERT :color
+  ?string
+genRender
+  INSERT genRender()
+  function(): _

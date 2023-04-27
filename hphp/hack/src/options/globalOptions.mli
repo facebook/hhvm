@@ -7,13 +7,40 @@
  *
  *)
 
-(* Naming conventions in this file:
+type saved_state_loading = {
+  saved_state_manifold_api_key: string option;
+      (** A string from hh.conf. The API key is used for saved state downloads
+       when we call out to manifold *)
+  log_saved_state_age_and_distance: bool;
+      (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
+  use_manifold_cython_client: bool;
+      (** Required for Hedwig support for saved state downloads *)
+}
+
+val default_saved_state_loading : saved_state_loading
+
+type saved_state = {
+  loading: saved_state_loading;
+  rollouts: Saved_state_rollouts.t;
+  project_metadata_w_flags: bool;
+}
+[@@deriving show, eq]
+
+val default_saved_state : saved_state
+
+val with_saved_state_manifold_api_key :
+  string option -> saved_state -> saved_state
+
+val with_use_manifold_cython_client : bool -> saved_state -> saved_state
+
+val with_log_saved_state_age_and_distance : bool -> saved_state -> saved_state
+
+(** Naming conventions for fieds:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
-  - so_<feature/flag/setting> - server option
-*)
-
+  - so_<feature/flag/setting> - server option *)
 type t = {
+  tco_saved_state: saved_state;
   (* Set of experimental features, in lowercase. *)
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
@@ -22,10 +49,6 @@ type t = {
      If the delegate fails to type check, the typing check service as a whole
      will fail. *)
   tco_num_local_workers: int option;
-  (* If the number of files to type check is fewer than this value, the files
-     will be type checked sequentially (in the master process). Otherwise,
-     the files will be type checked in parallel (in MultiWorker workers). *)
-  tco_parallel_type_checking_threshold: int;
   (* If set, typechecker workers will quit after they exceed this limit *)
   tco_max_typechecker_worker_memory_mb: int option;
   (* If set, defers class declarations after N lazy declarations; if not set,
@@ -35,22 +58,20 @@ type t = {
   tco_prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
      type check exceeds the threshold. If not set, then always checks everything locally. *)
-  tco_remote_type_check_threshold: int option;
+  tco_remote_type_check_threshold: int;
   (* Turns on remote type checking *)
   tco_remote_type_check: bool;
   (* If set, uses the key to fetch type checking jobs *)
   tco_remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
   tco_remote_check_id: string option;
-  (* The max batch size that a remote worker can receive to type check *)
-  tco_remote_max_batch_size: int;
-  (* The min batch size that a remote worker can receive to type check *)
-  tco_remote_min_batch_size: int;
   (* Dictates the number of remote type checking workers *)
   tco_num_remote_workers: int;
+  (* The capacity of the localization cache for large types *)
+  tco_locl_cache_capacity: int;
+  (* The number of nodes a type has to exceed to enter the localization cache *)
+  tco_locl_cache_node_threshold: int;
   so_remote_version_specifier: string option;
-  (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
-  so_remote_worker_vfs_checkout_threshold: int;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
   (* Namespace aliasing map *)
@@ -63,6 +84,7 @@ type t = {
   po_disallow_toplevel_requires: bool;
   (* Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   po_allow_unstable_features: bool;
+  tco_log_large_fanouts_threshold: int option;
   (* Print types of size bigger than 1000 after performing a type union. *)
   tco_log_inference_constraints: bool;
   (*
@@ -89,25 +111,18 @@ type t = {
    * [e.g. foo(&$bar)].
    *)
   tco_disallow_byref_calls: bool;
+  (* HH_FIXME should silence *any* error, not just the one specified by code *)
+  code_agnostic_fixme: bool;
   (* Error codes for which we allow HH_FIXMEs in strict mode *)
   allowed_fixme_codes_strict: ISet.t;
-  allowed_fixme_codes_partial: ISet.t;
-  codes_not_raised_partial: ISet.t;
   (* Initial hh_log_level settings *)
   log_levels: int SMap.t;
   (* Flag to disable using lvals as expressions. *)
   po_disable_lval_as_an_expression: bool;
-  (* Flag to ignore the string in vec<string>[...] *)
-  (* Look up class members lazily from shallow declarations instead of eagerly
-     computing folded declarations representing the entire class type. *)
-  tco_shallow_class_decl: bool;
-  (* Use shallow decl fanout algorithm while remaining to use folded decls
-     for typechecking *)
-  tco_force_shallow_decl_fanout: bool;
   (* Flag to fetch old decls from remote decl store *)
+  tco_remote_old_decls_no_limit: bool;
+  (* Don't limit amount of remote old decls fetched *)
   tco_fetch_remote_old_decls: bool;
-  (* Always load hot shallow decls from saved state *)
-  tco_force_load_hot_shallow_decls: bool;
   (* Populate the member signature heaps.
 
      If disabled, instead load lazily from shallow classes. *)
@@ -134,10 +149,6 @@ type t = {
   (* A simpler form of pessimization, only wraps the outermost type in like
    * if the type is not enforceable *)
   tco_simple_pessimize: float;
-  (* Enables complex coercion interactions that involve like types *)
-  tco_complex_coercion: bool;
-  (* Set of codes to be treated as if they were in strict mode files *)
-  error_codes_treated_strictly: ISet.t;
   (* static check xhp required attribute *)
   tco_check_xhp_attribute: bool;
   (* Check redundant generics in return types *)
@@ -203,6 +214,14 @@ type t = {
   symbol_write_index_paths_file_output: string option;
   (* Write symbol indexing data for hhi files *)
   symbol_write_include_hhi: bool;
+  (* Use symbols hash table for incremental indexing *)
+  symbol_write_sym_hash_in: string option;
+  (* Path to file containing units to exclude *)
+  symbol_write_exclude_out: string option;
+  (* Path to file containing referenced files *)
+  symbol_write_referenced_out: string option;
+  (* Generate symbols hash table *)
+  symbol_write_sym_hash_out: bool;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
   (* Flag to report an error on php style anonymous functions *)
@@ -224,9 +243,10 @@ type t = {
   po_disable_xhp_children_declarations: bool;
   (* Enable enum class syntax *)
   po_enable_enum_classes: bool;
-  po_disable_hh_ignore_error: bool;
+  (* Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
+  po_disable_hh_ignore_error: int;
   (* Enable features used to typecheck systemlib *)
-  tco_enable_systemlib_annotations: bool;
+  tco_is_systemlib: bool;
   (* Controls if higher-kinded types are supported *)
   tco_higher_kinded_types: bool;
   (* Controls if method-call inference is supported *)
@@ -241,23 +261,14 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
-  (* Disable parsing of fun() and class_meth() *)
-  po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  (* Disable parsing of inst_meth() *)
-  po_disallow_inst_meth: bool;
-  (* Enable use of the direct decl parser for parsing type signatures. *)
-  tco_use_direct_decl_parser: bool;
+  (* Skip second check of method under dynamic assumptions *)
+  tco_skip_check_under_dynamic: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
   tco_ifc_enabled: string list;
-  (* Enable global write check on the specified list of path prefixes
-     (a list containing the empty string would denote all files,
-     an empty list denotes no files) *)
-  tco_global_write_check_enabled: string list;
-  (* Enable global write check on the spcified set of functions
-     (Empty denotes no functions) *)
-  tco_global_write_check_functions_enabled: SSet.t;
+  (* Enable global access checker to check global writes and reads *)
+  tco_global_access_check_enabled: bool;
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
   (* <<__Soft>> T -> ~T *)
@@ -266,8 +277,8 @@ type t = {
   tco_enable_strict_string_concat_interp: bool;
   (* Ignores unsafe_cast and retains the original type of the expression *)
   tco_ignore_unsafe_cast: bool;
-  (* Enable Unstable feature readonly tast check *)
-  tco_readonly: bool;
+  (* Disable parser-based readonly checking *)
+  tco_no_parser_readonly_check: bool;
   (* Enable expression trees via unstable features flag *)
   tco_enable_expression_trees: bool;
   (* Enable unstable feature: modules *)
@@ -280,8 +291,13 @@ type t = {
   (* Raise an error when a concrete type constant is overridden by a concrete type constant
      in a child class. *)
   tco_typeconst_concrete_concrete_error: bool;
-  (* Raise an error whenever a concrete const is defined multiple times *)
-  tco_enable_strict_const_semantics: bool;
+  (* When the value is 1, raises a 4734 error when an inherited constant comes from a conflicting
+   * hierarchy, but not if the constant is locally defined. When the value is 2, raises a conflict
+   * any time two parents declare concrete constants with the same name, matching HHVM
+   * -vEval.TraitConstantInterfaceBehavior=1 *)
+  tco_enable_strict_const_semantics: int;
+  (* Different levels here raise previously missing well-formedness errors (see Typing_type_wellformedness) *)
+  tco_strict_wellformedness: int;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
@@ -294,7 +310,6 @@ type t = {
   tco_everything_sdt: bool;
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;
-  tco_enable_disk_heap: bool;
   (* Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
    * explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
    * for all classish *)
@@ -305,24 +320,48 @@ type t = {
   (* Sets the amount of fuel that the type printer can use to display an
    * individual type. More of a type is printed as the value increases. *)
   tco_type_printer_fuel: int;
-  tco_log_saved_state_age_and_distance: bool;
   (* allows saved_state_loader to shell out to hg to find globalrev and timestamp of revisions *)
   tco_specify_manifold_api_key: bool;
-  tco_saved_state_manifold_api_key: string option;
   (* Measures and reports the time it takes to typecheck each top-level
      definition. *)
   tco_profile_top_level_definitions: bool;
+  tco_allow_all_files_for_module_declarations: bool;
+  tco_allowed_files_for_module_declarations: string list;
+  (* If enabled, the type checker records more fine-grained dependencies than usual,
+     for example between individual methods. *)
+  tco_record_fine_grained_dependencies: bool;
+  (* When set, uses the given number of iterations while typechecking loops *)
+  tco_loop_iteration_upper_bound: int option;
+  (* When enabled, wrap function types in Expression Trees in user defined virtual function types *)
+  tco_expression_tree_virtualize_functions: bool;
+  (* When set, mutates generic entities by substituting type parameters and
+     typechecks the mutated program *)
+  tco_substitution_mutation: bool;
+  tco_use_type_alias_heap: bool;
+  (* Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
+     heap. This is only needed in dead UNSAFE_CAST removal mode. This option
+     controls whether the heap will be populated or not. *)
+  tco_populate_dead_unsafe_cast_heap: bool;
+  po_disallow_static_constants_in_default_func_args: bool;
+  tco_load_hack_64_distc_saved_state: bool;
+  tco_ide_should_use_hack_64_distc: bool;
+  (* Produce variations of methods and functions in TASTs that are cheked under
+     dynamic assumptions. *)
+  tco_tast_under_dynamic: bool;
+  (* Use the Rust implementation of naming elaboration and NAST checks. *)
+  tco_rust_elab: bool;
 }
 [@@deriving eq, show]
 
-val make :
+val set :
+  ?tco_saved_state:saved_state ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
+  ?tco_log_large_fanouts_threshold:int ->
   ?tco_log_inference_constraints:bool ->
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_num_local_workers:int ->
-  ?tco_parallel_type_checking_threshold:int ->
   ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_prefetch_deferred_files:bool ->
@@ -330,27 +369,24 @@ val make :
   ?tco_remote_type_check:bool ->
   ?tco_remote_worker_key:string ->
   ?tco_remote_check_id:string ->
-  ?tco_remote_max_batch_size:int ->
-  ?tco_remote_min_batch_size:int ->
   ?tco_num_remote_workers:int ->
+  ?tco_locl_cache_capacity:int ->
+  ?tco_locl_cache_node_threshold:int ->
   ?so_remote_version_specifier:string ->
-  ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
+  ?po_codegen:bool ->
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_disallow_byref_dynamic_calls:bool ->
   ?tco_disallow_byref_calls:bool ->
+  ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
-  ?allowed_fixme_codes_partial:ISet.t ->
-  ?codes_not_raised_partial:ISet.t ->
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
-  ?tco_shallow_class_decl:bool ->
-  ?tco_force_shallow_decl_fanout:bool ->
+  ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
-  ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?tco_skip_tast_checks:bool ->
@@ -361,8 +397,6 @@ val make :
   ?tco_strict_contexts:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
-  ?tco_complex_coercion:bool ->
-  ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
@@ -394,6 +428,10 @@ val make :
   ?symbol_write_index_paths_file:string ->
   ?symbol_write_index_paths_file_output:string ->
   ?symbol_write_include_hhi:bool ->
+  ?symbol_write_sym_hash_in:string ->
+  ?symbol_write_exclude_out:string ->
+  ?symbol_write_referenced_out:string ->
+  ?symbol_write_sym_hash_out:bool ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
@@ -401,328 +439,68 @@ val make :
   ?po_disable_xhp_element_mangling:bool ->
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_enum_classes:bool ->
-  ?po_disable_hh_ignore_error:bool ->
+  ?po_disable_hh_ignore_error:int ->
   ?po_allow_unstable_features:bool ->
-  ?tco_enable_systemlib_annotations:bool ->
+  ?tco_is_systemlib:bool ->
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
-  ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
-  ?po_disallow_inst_meth:bool ->
-  ?tco_use_direct_decl_parser:bool ->
+  ?tco_skip_check_under_dynamic:bool ->
   ?tco_ifc_enabled:string list ->
-  ?tco_global_write_check_enabled:string list ->
-  ?tco_global_write_check_functions_enabled:SSet.t ->
+  ?tco_global_access_check_enabled:bool ->
   ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->
-  ?tco_readonly:bool ->
+  ?tco_no_parser_readonly_check:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_enable_modules:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
-  ?tco_enable_strict_const_semantics:bool ->
+  ?tco_enable_strict_const_semantics:int ->
+  ?tco_strict_wellformedness:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
   ?tco_pessimise_builtins:bool ->
-  ?tco_enable_disk_heap:bool ->
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
   ?tco_type_printer_fuel:int ->
-  ?tco_log_saved_state_age_and_distance:bool ->
   ?tco_specify_manifold_api_key:bool ->
-  ?tco_saved_state_manifold_api_key:string option ->
   ?tco_profile_top_level_definitions:bool ->
-  unit ->
+  ?tco_allow_all_files_for_module_declarations:bool ->
+  ?tco_allowed_files_for_module_declarations:string list ->
+  ?tco_record_fine_grained_dependencies:bool ->
+  ?tco_loop_iteration_upper_bound:int option ->
+  ?tco_expression_tree_virtualize_functions:bool ->
+  ?tco_substitution_mutation:bool ->
+  ?tco_use_type_alias_heap:bool ->
+  ?tco_populate_dead_unsafe_cast_heap:bool ->
+  ?po_disallow_static_constants_in_default_func_args:bool ->
+  ?tco_load_hack_64_distc_saved_state:bool ->
+  ?tco_ide_should_use_hack_64_distc:bool ->
+  ?tco_tast_under_dynamic:bool ->
+  ?tco_rust_elab:bool ->
+  t ->
   t
-
-val tco_experimental_feature_enabled : t -> SSet.elt -> bool
-
-val tco_migration_flag_enabled : t -> SSet.elt -> bool
-
-val tco_num_local_workers : t -> int option
-
-val tco_parallel_type_checking_threshold : t -> int
-
-val tco_max_typechecker_worker_memory_mb : t -> int option
-
-val tco_defer_class_declaration_threshold : t -> int option
-
-val tco_prefetch_deferred_files : t -> bool
-
-val tco_remote_type_check_threshold : t -> int option
-
-val tco_remote_type_check : t -> bool
-
-val tco_remote_worker_key : t -> string option
-
-val tco_remote_check_id : t -> string option
-
-val tco_remote_max_batch_size : t -> int
-
-val tco_remote_min_batch_size : t -> int
-
-val tco_num_remote_workers : t -> int
-
-val so_remote_version_specifier : t -> string option
-
-val so_remote_worker_vfs_checkout_threshold : t -> int
-
-val so_naming_sqlite_path : t -> string option
-
-val po_auto_namespace_map : t -> (string * string) list
-
-val po_deregister_php_stdlib : t -> bool
-
-val po_disallow_toplevel_requires : t -> bool
-
-val po_codegen : t -> bool
-
-val tco_log_inference_constraints : t -> bool
-
-val tco_language_feature_logging : t -> bool
-
-val tco_timeout : t -> int
-
-val tco_disallow_invalid_arraykey : t -> bool
-
-val tco_disallow_byref_dynamic_calls : t -> bool
-
-val tco_disallow_byref_calls : t -> bool
 
 val default : t
 
-val tco_experimental_generics_arity : string
+(* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
+(* NOTE: set/getters for po_* options moved to ParserOptions *)
 
-val tco_experimental_forbid_nullable_cast : string
+val so_remote_version_specifier : t -> string option
 
-val tco_experimental_disallow_static_memoized : string
-
-val tco_experimental_type_param_shadowing : string
-
-val tco_experimental_abstract_type_const_with_default : string
-
-val tco_experimental_infer_flows : string
-
-val tco_experimental_supportdynamic_type_hint : string
-
-val tco_experimental_all : SSet.t
-
-val tco_migration_flags_all : SSet.t
+val so_naming_sqlite_path : t -> string option
 
 val allowed_fixme_codes_strict : t -> ISet.t
 
-val allowed_fixme_codes_partial : t -> ISet.t
+val code_agnostic_fixme : t -> bool
 
-val codes_not_raised_partial : t -> ISet.t
-
-val log_levels : t -> int SMap.t
-
-val po_disable_lval_as_an_expression : t -> bool
-
-val tco_shallow_class_decl : t -> bool
-
-val tco_force_shallow_decl_fanout : t -> bool
-
-val tco_fetch_remote_old_decls : t -> bool
-
-val tco_force_load_hot_shallow_decls : t -> bool
-
-val tco_populate_member_heaps : t -> bool
-
-val tco_skip_hierarchy_checks : t -> bool
-
-val tco_skip_tast_checks : t -> bool
-
-val tco_like_type_hints : t -> bool
-
-val tco_union_intersection_type_hints : t -> bool
-
-val tco_call_coeffects : t -> bool
-
-val tco_local_coeffects : t -> bool
-
-val tco_strict_contexts : t -> bool
-
-val ifc_enabled : t -> string list
-
-val enable_ifc : t -> t
-
-val global_write_check_enabled : t -> string list
-
-val enable_global_write_check : t -> t
-
-val global_write_check_functions_enabled : t -> SSet.t
-
-val tco_like_casts : t -> bool
-
-val tco_simple_pessimize : t -> float
-
-val tco_complex_coercion : t -> bool
-
-val error_codes_treated_strictly : t -> ISet.t
-
-val tco_check_xhp_attribute : t -> bool
-
-val tco_check_redundant_generics : t -> bool
-
-val tco_disallow_unresolved_type_variables : t -> bool
-
-val po_enable_class_level_where_clauses : t -> bool
-
-val po_disable_legacy_soft_typehints : t -> bool
-
-val po_allowed_decl_fixme_codes : t -> ISet.t
-
-val po_allow_new_attribute_syntax : t -> bool
-
-val tco_global_inference : t -> bool
-
-val tco_gi_reinfer_types : t -> string list
-
-val tco_ordered_solving : t -> bool
-
-val tco_const_static_props : t -> bool
-
-val po_disable_legacy_attribute_syntax : t -> bool
-
-val tco_const_attribute : t -> bool
-
-val po_const_default_func_args : t -> bool
-
-val po_const_default_lambda_args : t -> bool
-
-val po_disallow_silence : t -> bool
-
-val po_abstract_static_props : t -> bool
-
-val po_allow_unstable_features : t -> bool
-
-val set_global_inference : t -> t
-
-val set_ordered_solving : t -> bool -> t
-
-val po_parser_errors_only : t -> bool
-
-val tco_check_attribute_locations : t -> bool
-
-val glean_service : t -> string
-
-val glean_hostname : t -> string
-
-val glean_port : t -> int
-
-val glean_reponame : t -> string
-
-val symbol_write_ownership : t -> bool
-
-val symbol_write_root_path : t -> string
-
-val symbol_write_hhi_path : t -> string
-
-val symbol_write_ignore_paths : t -> string list
-
-val symbol_write_index_paths : t -> string list
-
-val symbol_write_index_paths_file : t -> string option
-
-val symbol_write_index_paths_file_output : t -> string option
-
-val symbol_write_include_hhi : t -> bool
-
-val po_disallow_func_ptrs_in_constants : t -> bool
-
-val tco_error_php_lambdas : t -> bool
-
-val tco_disallow_discarded_nullable_awaitables : t -> bool
-
-val po_enable_xhp_class_modifier : t -> bool
-
-val po_disable_xhp_element_mangling : t -> bool
-
-val po_disable_xhp_children_declarations : t -> bool
-
-val po_enable_enum_classes : t -> bool
-
-val po_disable_hh_ignore_error : t -> bool
-
-val tco_enable_systemlib_annotations : t -> bool
-
-val tco_higher_kinded_types : t -> bool
-
-val tco_method_call_inference : t -> bool
-
-val tco_report_pos_from_reason : t -> bool
-
-val tco_typecheck_sample_rate : t -> float
-
-val tco_enable_sound_dynamic : t -> bool
-
-val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
-
-val po_disallow_inst_meth : t -> bool
-
-val tco_use_direct_decl_parser : t -> bool
-
-val po_enable_enum_supertyping : t -> bool
-
-val po_interpret_soft_types_as_like_types : t -> bool
-
-val tco_enable_strict_string_concat_interp : t -> bool
-
-val tco_ignore_unsafe_cast : t -> bool
-
-val tco_readonly : t -> bool
-
-val set_tco_readonly : t -> bool -> t
-
-val set_tco_enable_expression_trees : t -> bool -> t
-
-val tco_enable_modules : t -> bool
-
-val set_tco_enable_modules : t -> bool -> t
-
-val expression_trees_enabled : t -> bool
-
-val allowed_expression_tree_visitors : t -> string list
-
-val tco_math_new_code : t -> bool
-
-val tco_typeconst_concrete_concrete_error : t -> bool
-
-val tco_enable_strict_const_semantics : t -> bool
-
-val tco_meth_caller_only_public_visibility : t -> bool
-
-val tco_require_extends_implements_ancestors : t -> bool
-
-val tco_strict_value_equality : t -> bool
-
-val tco_enforce_sealed_subclasses : t -> bool
-
-val tco_everything_sdt : t -> bool
-
-val tco_pessimise_builtins : t -> bool
-
-val tco_enable_disk_heap : t -> bool
-
-val tco_explicit_consistent_constructors : t -> int
-
-val tco_require_types_class_consts : t -> int
-
-val tco_type_printer_fuel : t -> int
-
-val tco_log_saved_state_age_and_distance : t -> bool
-
-val tco_specify_manifold_api_key : t -> bool
-
-val tco_saved_state_manifold_api_key : t -> string option
-
-val tco_profile_top_level_definitions : t -> bool
+(* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
+(* NOTE: set/getters for po_* options moved to ParserOptions *)

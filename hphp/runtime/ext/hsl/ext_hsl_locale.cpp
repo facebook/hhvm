@@ -87,10 +87,11 @@ Array HSLLocale::__debugInfo() const {
 
 HSLLocale* HSLLocale::fromObject(const Object& obj) {
   if (obj.isNull()) {
-    raise_typehint_error("Expected an HSL Locale, got null");
+    raise_typehint_error_without_first_frame(
+      "Expected an HSL Locale, got null");
   }
   if (!obj->instanceof(s_FQHSLLocale)) {
-    raise_typehint_error(
+    raise_typehint_error_without_first_frame(
       folly::sformat(
         "Expected an HSL Locale, got instance of class '{}'",
         obj->getClassName().c_str()
@@ -202,9 +203,6 @@ struct LocaleExtension final : Extension {
     LC_(MONETARY);
     LC_(NUMERIC);
     LC_(TIME);
-#if defined(__APPLE__) || defined(__GLIBC__)
-    LC_(MESSAGES);
-#endif
 #ifdef __GLIBC__
     LC_(PAPER);
     LC_(NAME);

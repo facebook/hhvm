@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/unit.h"
@@ -78,7 +80,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    */
 
   const StringData* typeName = thisType->value;
-  auto targetNE = NamedEntity::get(typeName);
+  auto targetNE = NamedType::get(typeName);
 
   if (auto klass = Class::lookup(targetNE)) {
     return typeAliasFromClass(thisType, klass);
@@ -90,7 +92,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   }
 
   if (failIsFatal &&
-      AutoloadHandler::s_instance->autoloadNamedType(
+      AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Class::lookup(targetNE)) {
@@ -117,9 +119,30 @@ bool TypeAlias::compat(const PreTypeAlias& alias) const {
           Class::lookup(alias.value) == klass);
 }
 
+size_t TypeAlias::stableHash() const {
+  return folly::hash::hash_combine(
+    name()->hashStatic(),
+    unit()->sn()
+  );
+}
+
+const Array TypeAlias::resolvedTypeStructure() const {
+  auto const ts = m_preTypeAlias->resolvedTypeStructure;
+  if (ts.isNull() || !ts.get()->isVanilla()) return ts;
+
+  auto newTs = Array(ts.get());
+  bespoke::profileArrLikeTypeAlias(this, &newTs);
+  return newTs;
+}
+
+void TypeAlias::setResolvedTypeStructure(ArrayData* ad) {
+  auto const preTA = const_cast<PreTypeAlias*>(m_preTypeAlias);
+  preTA->resolvedTypeStructure = ad;
+}
+
 const TypeAlias* TypeAlias::lookup(const StringData* name,
                                    bool* persistent) {
-  auto ne = NamedEntity::get(name);
+  auto ne = NamedType::get(name);
   auto target = ne->getCachedTypeAlias();
   if (persistent) *persistent = ne->isPersistentTypeAlias();
   return target;
@@ -127,10 +150,10 @@ const TypeAlias* TypeAlias::lookup(const StringData* name,
 
 const TypeAlias* TypeAlias::load(const StringData* name,
                                  bool* persistent) {
-  auto ne = NamedEntity::get(name);
+  auto ne = NamedType::get(name);
   auto target = ne->getCachedTypeAlias();
   if (!target) {
-    if (AutoloadHandler::s_instance->autoloadNamedType(
+    if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(name))
         )) {
       target = ne->getCachedTypeAlias();
@@ -144,7 +167,7 @@ const TypeAlias* TypeAlias::load(const StringData* name,
 }
 
 const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) {
-  auto nameList = NamedEntity::get(thisType->name);
+  auto nameList = NamedType::get(thisType->name);
   const StringData* typeName = thisType->value;
 
   /*

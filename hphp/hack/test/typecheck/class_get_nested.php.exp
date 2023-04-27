@@ -1,4 +1,4 @@
 File "class_get_nested.php", line 5, characters 5-18:
 Only classnames and variables are allowed before `::`. (Parsing[1002])
 File "class_get_nested.php", line 5, characters 5-14:
-Cannot use dynamic class name in strict mode (Naming[2078])
+Cannot use dynamic class or method name in strict mode (Naming[2078])

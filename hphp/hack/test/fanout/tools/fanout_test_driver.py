@@ -9,13 +9,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import attr
 
 from .fanout_information import FanoutInformation
 from .fanout_test_parser import FanoutTest
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 WHITESPACE_SPLITTER: re.Pattern = re.compile(r"\s+")
 
 DEFAULT_HH_SERVER_FLAGS: List[str] = [
@@ -30,13 +31,15 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "symbolindex_search_provider=NoIndex",
     "--config",
-    "use_direct_decl_parser=true",
-    "--config",
     "num_local_workers=1",
     "--config",
     "max_workers=1",
     "--config",
     "allow_unstable_features=true",
+    "--config",
+    "allow_all_files_for_module_declarations=true",
+    "--config",
+    "disable_xhp_element_mangling=false",
 ]
 
 
@@ -60,7 +63,7 @@ class Binaries(object):
         allow_type_errors: bool = True,
         env: Optional[Dict[str, str]] = None,
         check: bool = True,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> subprocess.CompletedProcess[str]:
         if env is None:
             env = {}
@@ -146,7 +149,7 @@ def _exec(
     timeout: int = 300,
     text: bool = True,
     check: bool = True,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("_exec: run: %s (%s)", args, kwargs)
     try:
@@ -156,7 +159,7 @@ def _exec(
             timeout=timeout,
             text=text,
             check=check,
-            **kwargs
+            **kwargs,
         )
     except subprocess.CalledProcessError as e:
         logging.debug(
@@ -320,21 +323,9 @@ def _strip_repo_root_from_output(repo_root: str, output: str) -> str:
 
 
 def _format_result(
-    repo_root: RepoRoot,
-    hh_result_base: subprocess.CompletedProcess[str],
-    hh_result_changed: subprocess.CompletedProcess[str],
     fanout_information: List[FanoutInformation],
     fanout_hash_map: Dict[str, str],
 ) -> None:
-    print("=== base errors ===")
-    sys.stdout.write(
-        _strip_repo_root_from_output(repo_root.path, hh_result_base.stdout)
-    )
-    print("=== changed errors ===")
-    sys.stdout.write(
-        _strip_repo_root_from_output(repo_root.path, hh_result_changed.stdout)
-    )
-    print("=== fanout ===")
     symbols = []
     for fi in fanout_information:
         symbols += [fanout_hash_map.get(h, h) for h in fi.hashes]
@@ -360,7 +351,7 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
 
     (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
     changed_files = _make_repo_change(repo_root, test)
-    hh_result_changed = _launch_hh_from_saved_state(
+    _launch_hh_from_saved_state(
         bins,
         repo_root,
         saved_state_dir,
@@ -374,9 +365,6 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )
@@ -411,7 +399,7 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
         changed_files=[],
     )
     _make_repo_change(repo_root, test)
-    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh(["--error-format", "raw", repo_root.path])
     bins.exec_hh_stop(repo_root.path)
 
     fanout_information = _extract_fanout_information(
@@ -419,9 +407,6 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )
@@ -457,7 +442,7 @@ def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) ->
         changed_files=test.all_base_php_files(),
     )
     _make_repo_change(repo_root, test)
-    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh(["--error-format", "raw", repo_root.path])
     bins.exec_hh_stop(repo_root.path)
 
     fanout_information = _extract_fanout_information(
@@ -465,9 +450,6 @@ def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) ->
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )

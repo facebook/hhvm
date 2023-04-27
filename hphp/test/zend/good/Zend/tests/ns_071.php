@@ -3,7 +3,7 @@
 namespace foo;
 
 class bar {
-    public function __construct(AnyArray $x = NULL) {
+    public function __construct(?AnyArray $x = NULL) {
         \var_dump($x);
     }
 }

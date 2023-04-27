@@ -8,8 +8,8 @@
  *)
 
 (***************************************************
-           ("Who watches the Watchmen?")
-****************************************************)
+             ("Who watches the Watchmen?")
+  ****************************************************)
 
 open Hh_prelude
 
@@ -321,18 +321,17 @@ let main root =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   let result = init root in
   match result with
-  | Ok env ->
-    begin
-      try serve env with
-      | exn ->
-        let e = Exception.wrap exn in
-        let () =
-          Hh_logger.exception_
-            ~prefix:"WatchmanEventWatcher uncaught exception. exiting."
-            e
-        in
-        Exception.reraise e
-    end
+  | Ok env -> begin
+    try serve env with
+    | exn ->
+      let e = Exception.wrap exn in
+      let () =
+        Hh_logger.exception_
+          ~prefix:"WatchmanEventWatcher uncaught exception. exiting."
+          e
+      in
+      Exception.reraise e
+  end
   | Error Failure_daemon_already_running
   | Error Failure_watchman_init ->
     exit 1

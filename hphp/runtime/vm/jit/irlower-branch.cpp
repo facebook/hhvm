@@ -73,7 +73,7 @@ RegSet cross_trace_args(const BCMarker& marker) {
 void popFrameToFuncEntryRegs(Vout& v) {
   v << unrecordbasenativesp{};
   v << copy{rvmfp(), rvmsp()};
-  v << pushm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
 }
 
@@ -397,7 +397,7 @@ void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    if (!inst->marker().prologue()) popFrameToFuncEntryRegs(v);
+    if (extra->popFrame) popFrameToFuncEntryRegs(v);
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }
@@ -431,7 +431,7 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   assertx(inst->marker().sk().funcEntry());
   assertx(inst->marker().bcSPOff() == SBInvOffset{0});
   auto& v = vmain(env);
-  v << copy{v.cns(inst->marker().sk().entryOffset()), rarg(0)};
+  v << copy{v.cns(inst->marker().sk().numEntryArgs()), rarg(0)};
   v << jmpi{
     tc::ustubs().handleRetranslateOpt,
     leave_trace_regs() | arg_regs(1)
@@ -443,7 +443,7 @@ void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    popFrameToFuncEntryRegs(v);
+    if (extra->popFrame) popFrameToFuncEntryRegs(v);
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }

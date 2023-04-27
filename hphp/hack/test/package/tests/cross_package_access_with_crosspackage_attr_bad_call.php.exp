@@ -1,0 +1,15 @@
+Typing[4472] Cannot call this CrossPackage method using package pkg2 from package pkg1 [1]
+-> This function is marked cross package, so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
+
+cross_package_access_with_crosspackage_attr_bad_call.php--a.php:11:7
+     4 | class A {
+     5 |   <<__CrossPackage("pkg2")>>
+[2]  6 |   public function test() : void {
+     7 |   }
+     8 | }
+     9 | function test(): void {
+    10 |   $x = new A();
+[1] 11 |   $x->test(); // error
+    12 | }
+
+1 error found.

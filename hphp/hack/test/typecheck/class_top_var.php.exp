@@ -2,3 +2,9 @@ File "class_top_var.php", line 7, characters 3-5:
 Encountered unexpected text `var`, was expecting a class element. (Parsing[1002])
 File "class_top_var.php", line 7, characters 7-7:
 A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])
+File "class_top_var.php", line 7, characters 7-10:
+Please add a type hint `public SomeType $foo` (Naming[2001])
+File "class_top_var.php", line 3, characters 19-35:
+Was expecting a return type hint (Typing[4030])
+File "class_top_var.php", line 9, characters 19-41:
+Was expecting a return type hint (Typing[4030])

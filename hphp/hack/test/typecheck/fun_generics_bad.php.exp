@@ -1,12 +1,12 @@
-File "fun_generics_bad.php", line 9, characters 10-26:
-Invalid return type (Typing[4336])
-  File "fun_generics_bad.php", line 12, characters 4-18:
-  Expected `dict<int, T2>`
-  File "fun_generics_bad.php", line 9, characters 10-26:
-  But got `void` because this function does not always return a value
 File "fun_generics_bad.php", line 25, characters 36-41:
 Invalid argument (Typing[4110])
   File "fun_generics_bad.php", line 4, characters 29-31:
   Expected `int`
   File "fun_generics_bad.php", line 20, characters 18-21:
   But got `null`
+File "fun_generics_bad.php", line 9, characters 10-26:
+Invalid return type (Typing[4336])
+  File "fun_generics_bad.php", line 12, characters 4-18:
+  Expected `dict<int, T2>`
+  File "fun_generics_bad.php", line 9, characters 10-26:
+  But got `void` because this function does not always return a value

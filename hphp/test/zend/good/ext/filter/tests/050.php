@@ -10,7 +10,7 @@ foreach ($test as $src => $dst) {
     if ($dst !== $out) {
         if ($out === false) {
             echo "$src -> false != $dst\n";
-        } elseif ($dst === false) {
+        } else if ($dst === false) {
             echo "$src -> $out != false\n";
         } else {
             echo "$src -> $out != $dst\n";

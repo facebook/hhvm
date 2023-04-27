@@ -11,7 +11,7 @@ function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
 }
 
 class Herp {
-  static $derp;
+  public static $derp;
   public $baz;
 }
 

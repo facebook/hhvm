@@ -1,2 +1,2 @@
 
-Fatal error: Class undefined: test\ns1\Exception in %s/ns_004.php on line 4
+Fatal error: Failure to resolve undefined class test\ns1\Exception in %s/ns_004.php on line 4

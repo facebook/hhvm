@@ -3,15 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a635e66348a4a733c28ae5b8ada79480>>
+// @generated SignedSource<<b63800277691d071702e9766e3aced3f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -33,9 +33,11 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
-pub enum QfPos {
-    Qpos(pos::Pos),
+pub enum QfPos<Pos> {
+    Qpos(Pos),
+    #[rust_to_ocaml(name = "Qclassish_start")]
     QclassishStart(String),
 }
 
@@ -54,8 +56,9 @@ pub enum QfPos {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
-pub struct Edit(pub String, pub QfPos);
+pub struct Edit<Pos>(pub String, pub QfPos<Pos>);
 
 #[derive(
     Clone,
@@ -72,8 +75,9 @@ pub struct Edit(pub String, pub QfPos);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
-pub struct Quickfix {
+pub struct Quickfix<Pos> {
     pub title: String,
-    pub edits: Vec<Edit>,
+    pub edits: Vec<Edit<Pos>>,
 }

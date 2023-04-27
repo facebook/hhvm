@@ -25,8 +25,8 @@ function main() {
   test_clsmeth_builtins(varray[A::class, 'func1']);
 
   print "test on clsmeth:\n";
-  test_legacy_usecase(HH\class_meth(A::class, 'func1'));
-  test_clsmeth_builtins(HH\class_meth(A::class, 'func1'));
+  test_legacy_usecase(A::func1<>);
+  test_clsmeth_builtins(A::func1<>);
 
   // failure
   var_dump(HH\class_meth_get_class(varray[A::class, 'func1']));

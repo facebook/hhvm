@@ -129,7 +129,7 @@ class Soap12test {
 
 function test() {
 	ini_set("soap.wsdl_cache_enabled",0);
-	$server = new soapserver(dirname(__FILE__)."/soap12-test.wsdl", darray['soap_version'=>SOAP_1_2,'actor'=>"http://example.org/ts-tests/C"]);
+	$server = new SoapServer(dirname(__FILE__)."/soap12-test.wsdl", darray['soap_version'=>SOAP_1_2,'actor'=>"http://example.org/ts-tests/C"]);
 	$server->setClass("Soap12test");
 
 	$server->handle(\HH\global_get('HTTP_RAW_POST_DATA'));

@@ -1,0 +1,5 @@
+mstch_cpp2 src/module2.thrift
+mstch_java src/module0.thrift
+mstch_java src/module1.thrift
+mstch_java src/module2.thrift
+mstch_py3 src/module2.thrift

@@ -22,7 +22,7 @@ class C {
   }
 }
 
-class D extends C {
+final class D extends C {
   use T;
 
   public static function bar(): int {

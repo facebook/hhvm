@@ -1,0 +1,17 @@
+{
+  "pools": {
+    "wildcard-new": {
+      "servers": [ "localhost:12345" ]
+    },
+    "wildcard-old": {
+      "servers": [ "localhost:12346" ]
+    }
+  },
+  "route": {
+    "type": "MigrateRoute",
+    "from": "PoolRoute|wildcard-old",
+    "to": "PoolRoute|wildcard-new",
+    "start_time": START_TIME,
+    "interval": 4
+  }
+}

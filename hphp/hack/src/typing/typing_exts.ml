@@ -55,10 +55,31 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
   | Tclass ((_, className), _, []) ->
     let ( >>= ) = Option.( >>= ) in
     let ce_type =
-      (Env.get_class env className >>= fun c -> Env.get_member true env c fname)
+      let lookup_def c =
+        Option.first_some
+          (Env.get_member true env c fname)
+          (Env.get_member true env c "format_wild")
+      in
+      Env.get_class env className >>= lookup_def
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->
+        (* Ugly hack to remove like-type from return syntactically so that in dynamic mode
+         * we don't simplify it to dynamic.
+         *)
+        let fty =
+          {
+            fty with
+            ft_ret =
+              {
+                fty.ft_ret with
+                et_type =
+                  (match get_node fty.ft_ret.et_type with
+                  | Tlike ty -> ty
+                  | _ -> fty.ft_ret.et_type);
+              };
+          }
+        in
         let ety_env = empty_expand_env in
         let instantiation =
           Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
@@ -80,8 +101,9 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
         Option.iter ty_err_opt ~f:Errors.add_typing_error;
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
-          match get_node (Typing_utils.strip_dynamic env ty) with
+          match get_node ty with
           | Tprim Tstring -> None
+          | Tdynamic -> None
           | _ -> Some ty
         in
         (env, Some (pars, ty_opt))
@@ -171,9 +193,9 @@ let rec const_string_of (env : env) (e : Nast.expr) :
   | (_, p, String2 xs) ->
     let (env, xs) = mapM const_string_of env (List.rev xs) in
     (env, List.fold_right ~f:glue xs ~init:(Left p))
-  | (_, _, Binop (Ast_defs.Dot, a, b)) ->
-    let (env, stra) = const_string_of env a in
-    let (env, strb) = const_string_of env b in
+  | (_, _, Binop Aast.{ bop = Ast_defs.Dot; lhs; rhs }) ->
+    let (env, stra) = const_string_of env lhs in
+    let (env, strb) = const_string_of env rhs in
     (env, glue stra strb)
   | (_, p, _) -> (env, Left p)
 
@@ -200,32 +222,30 @@ let retype_magic_func
     | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
       when is_some (get_possibly_like_format_string_type_arg et_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) ->
-      begin
-        match get_possibly_like_format_string_type_arg et_type with
-        | Some type_arg ->
-          (match const_string_of env arg with
-          | (env, Right str) ->
-            let (_, pos, _) = arg in
-            let (env, argl) = parse_printf_string env str pos type_arg in
-            ( env,
-              Some
-                ({
-                   fp with
-                   fp_type =
-                     {
-                       et_type = mk (get_reason et_type, Tprim Tstring);
-                       et_enforced = Unenforced;
-                     };
-                 }
-                 :: argl) )
-          | (env, Left pos) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary @@ Primary.Expected_literal_format_string pos);
-            (env, None))
-        | None -> (env, None)
-      end
+    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) -> begin
+      match get_possibly_like_format_string_type_arg et_type with
+      | Some type_arg ->
+        (match const_string_of env arg with
+        | (env, Right str) ->
+          let (_, pos, _) = arg in
+          let (env, argl) = parse_printf_string env str pos type_arg in
+          ( env,
+            Some
+              ({
+                 fp with
+                 fp_type =
+                   {
+                     et_type = mk (get_reason et_type, Tprim Tstring);
+                     et_enforced = Unenforced;
+                   };
+               }
+              :: argl) )
+        | (env, Left pos) ->
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Expected_literal_format_string pos);
+          (env, None))
+      | None -> (env, None)
+    end
     | (param :: params, _ :: args) ->
       (match f env params args with
       | (env, None) -> (env, None)

@@ -53,7 +53,7 @@ extent_purge_lazy(extent_hooks_t* /*extent_hooks*/, void* addr, size_t size,
 
 static bool extent_split(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
                          size_t /*size*/, size_t /*sizea*/, size_t /*sizeb*/,
-                         bool /*comitted*/, unsigned /*arena_ind*/) {
+                         bool /*committed*/, unsigned /*arena_ind*/) {
   return false;
 }
 

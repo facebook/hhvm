@@ -5,4 +5,4 @@ Invalid return type (Typing[4110])
   File "asyncgen3.php", line 7, characters 15-47:
   Expected `AsyncGenerator<int, string, void>`
   File "asyncgen3.php", line 7, characters 15-47:
-  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+  But got `Generator<_, _, _>` (result of function containing a `yield`)

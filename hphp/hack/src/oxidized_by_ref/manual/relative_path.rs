@@ -3,17 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt::{self, Debug, Display};
-use std::path::{Path, PathBuf};
+use std::fmt;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::path::Path;
 
 use bumpalo::Bump;
-use serde::{Deserialize, Serialize};
-
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
-
-pub use oxidized::relative_path::{Prefix, PrefixPathMap};
+use relative_path::Prefix;
+use serde::Deserialize;
+use serde::Serialize;
 
 // Named Relative_path.default in OCaml, but it really isn't a suitable default
 // for most purposes.
@@ -83,21 +84,13 @@ impl<'a> RelativePath<'a> {
         self.prefix
     }
 
-    pub fn to_absolute(&self, prefix_map: &PrefixPathMap) -> PathBuf {
-        let prefix = self.prefix.to_path(prefix_map);
-        let mut r = PathBuf::from(prefix);
-        r.push(self.path());
-        r
+    /// TODO(ljw): rename this
+    pub fn to_oxidized(&self) -> relative_path::RelativePath {
+        relative_path::RelativePath::make(self.prefix, self.path().to_owned())
     }
 
-    pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {
-        oxidized::relative_path::RelativePath::make(self.prefix, self.path().to_owned())
-    }
-
-    pub fn from_oxidized_in(
-        path: &oxidized::relative_path::RelativePath,
-        arena: &'a Bump,
-    ) -> &'a Self {
+    /// TODO(ljw): rename this
+    pub fn from_oxidized_in(path: &relative_path::RelativePath, arena: &'a Bump) -> &'a Self {
         let path_str =
             bumpalo::collections::String::from_str_in(path.path_str(), arena).into_bump_str();
         arena.alloc(Self::make(path.prefix(), path_str))
@@ -121,10 +114,7 @@ impl Display for RelativePath<'_> {
 impl arena_trait::TrivialDrop for RelativePath<'_> {}
 
 impl ToOcamlRep for RelativePath<'_> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(2);
         alloc.set_field(&mut block, 0, alloc.add(&self.prefix));
         alloc.set_field(&mut block, 1, alloc.add(self.path()));
@@ -158,7 +148,7 @@ fn parse(value: &str) -> Result<RelativePath<'_>, String> {
     let mut split = value.splitn(2, '|');
     let prefix_str = split.next();
     let path_str = split.next();
-    assert!(split.next() == None, "splitn(2) should yield <=2 results");
+    assert!(split.next().is_none(), "splitn(2) should yield <=2 results");
     let prefix = match prefix_str {
         Some("root") => Prefix::Root,
         Some("hhi") => Prefix::Hhi,
@@ -260,9 +250,12 @@ pub mod map {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use arena_deserializer::{ArenaDeserializer, DeserializeInArena};
     use std::path::Path;
+
+    use arena_deserializer::ArenaDeserializer;
+    use arena_deserializer::DeserializeInArena;
+
+    use super::*;
 
     #[test]
     fn test_serde() {

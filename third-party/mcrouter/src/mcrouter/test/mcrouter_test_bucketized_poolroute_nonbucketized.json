@@ -1,0 +1,12 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [ "localhost:12345", "localhost:12346", "localhost:12347", "localhost:12348", "localhost:12349" ]
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "foo",
+    "bucketize": false
+  }
+}

@@ -15,5 +15,5 @@ Warning: is_executable() expects parameter 1 to be string, boolean given in %s/z
 Warning: is_executable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_executable_variation3.php on line %d
 bool(false)
 
-Warning: is_executable() expects parameter 1 to be string, %r(varray|vec)%r given in %s/zend/good/ext/standard/tests/file/is_executable_variation3.php on line %d
+Warning: is_executable() expects parameter 1 to be string, vec given in %s/zend/good/ext/standard/tests/file/is_executable_variation3.php on line %d
 Done

@@ -37,13 +37,17 @@ type position_descr =
   | Rtype_parameter (* The declaration site of a type-parameter *)
   | Rfun_parameter
   | Rfun_return
-  | Rtype_argument of string (* The argument of a parametric class or
-                              * typedef:
-                              * A<T1, ..>, T1 is (Rtype_argument "A")
-                              *)
+  | Rtype_argument of string
+    (* The argument of a parametric class or
+     * typedef:
+     * A<T1, ..>, T1 is (Rtype_argument "A")
+     *)
   | Rconstraint_as
   | Rconstraint_eq
   | Rconstraint_super
+  | Rrefinement_eq
+  | Rrefinement_as
+  | Rrefinement_super
   | Rwhere_as
   | Rwhere_super
   | Rwhere_eq
@@ -116,8 +120,7 @@ let reason_stack_to_string variance reason_stack =
        reason_stack
        ~f:
          begin
-           fun (_, _, pvariance) acc ->
-           variance_to_sign pvariance ^ acc
+           (fun (_, _, pvariance) acc -> variance_to_sign pvariance ^ acc)
          end
        ~init:"")
 
@@ -151,6 +154,9 @@ let reason_to_string ~sign (_, descr, variance) =
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
   | Rfun_inout_parameter ->
     "Inout/ref function parameters are both covariant and contravariant"
+  | Rrefinement_eq -> "exact refinements are invariant"
+  | Rrefinement_as -> "`as` refinement bounds are covariant"
+  | Rrefinement_super -> "`super` refinement bounds are contravariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -158,9 +164,8 @@ let detailed_message variance pos stack =
   | [((p, _, _) as r)] -> [(p, reason_to_string ~sign:false r)]
   | _ ->
     (pos, reason_stack_to_string variance stack)
-    ::
-    List.map stack ~f:(fun ((p, _, _) as r) ->
-        (p, reason_to_string ~sign:true r))
+    :: List.map stack ~f:(fun ((p, _, _) as r) ->
+           (p, reason_to_string ~sign:true r))
 
 (*****************************************************************************)
 (* Converts an annotation (+/-) to a type. *)
@@ -296,8 +301,24 @@ let rec get_typarams_union ~tracked tenv acc (ty : decl_ty) =
 and get_typarams ~tracked tenv (ty : decl_ty) =
   let empty = (SMap.empty, SMap.empty) in
   let get_typarams_union = get_typarams_union ~tracked tenv in
+  let get_typarams_list tyl =
+    List.fold_left tyl ~init:empty ~f:get_typarams_union
+  in
   let get_typarams = get_typarams ~tracked tenv in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
+  let rec get_typarams_variance_list acc variancel tyl =
+    match (variancel, tyl) with
+    | (variance :: variancel, ty :: tyl) ->
+      let param = get_typarams ty in
+      let param =
+        match variance with
+        | Vcovariant _ -> param
+        | Vcontravariant _ -> flip param
+        | _ -> union param (flip param)
+      in
+      get_typarams_variance_list (union acc param) variancel tyl
+    | _ -> acc
+  in
   match get_node ty with
   | Tgeneric (id, _tyargs) ->
     (* TODO(T69551141) handle type arguments *)
@@ -310,7 +331,6 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tdynamic
   | Tprim _
   | Tany _
-  | Terr
   | Tthis
   | Tmixed
   | Tvar _ ->
@@ -319,11 +339,32 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tlike ty
   | Taccess (ty, _) ->
     get_typarams ty
+  | Trefinement (ty, rs) ->
+    SMap.fold
+      (fun _ { rc_bound; _ } acc ->
+        match rc_bound with
+        | TRexact bnd ->
+          let tp = get_typarams bnd in
+          union acc @@ union (flip tp) tp
+        | TRloose bnds ->
+          (* Lower bounds on type members are contravariant
+           * while upper bounds are covariant. Interestingly,
+           * this differs from where constraints because,
+           * logically, those sit on the LHS of an
+           * implication while refinements are on the RHS.
+           *   (A => B) |- (A' => B ) if A' |- A
+           *   (A => B) |- (A  => B') if B  |- B'
+           *)
+          union
+            (flip (get_typarams_list bnds.tr_lower))
+            (get_typarams_list bnds.tr_upper))
+      rs.cr_consts
+      (get_typarams ty)
   | Tunion tyl
   | Tintersection tyl
   | Ttuple tyl ->
-    List.fold_left tyl ~init:empty ~f:get_typarams_union
-  | Tshape (_, m) ->
+    get_typarams_list tyl
+  | Tshape (_, _, m) ->
     TShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)
       m
@@ -452,14 +493,12 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
 
     (* If a type parameter appears covariantly, then treat its lower bounds as covariant *)
     let propagate_covariant_to_lower_bounds tp =
-      let tyl = get_lower_bounds tp in
-      List.fold_left tyl ~init:empty ~f:get_typarams_union
+      get_typarams_list (get_lower_bounds tp)
     in
 
     (* If a type parameter appears contravariantly, then treat its upper bounds as contravariant *)
     let propagate_contravariant_to_upper_bounds tp =
-      let tyl = get_upper_bounds tp in
-      flip (List.fold_left tyl ~init:empty ~f:get_typarams_union)
+      flip (get_typarams_list (get_upper_bounds tp))
     in
 
     (* Given a type parameter, propagate its variance (co and/or contra) to lower and upper bounds
@@ -483,21 +522,18 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     in
     List.fold_left ft.ft_tparams ~init:result ~f:propagate_typarams_tparam
   | Tapply (pos_name, tyl) ->
-    let rec get_typarams_variance_list acc variancel tyl =
-      match (variancel, tyl) with
-      | (variance :: variancel, ty :: tyl) ->
-        let param = get_typarams ty in
-        let param =
-          match variance with
-          | Vcovariant _ -> param
-          | Vcontravariant _ -> flip param
-          | _ -> union param (flip param)
-        in
-        get_typarams_variance_list (union acc param) variancel tyl
-      | _ -> acc
-    in
     let variancel =
       get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
+    in
+    get_typarams_variance_list empty variancel tyl
+  | Tnewtype (name, tyl, _) ->
+    let variancel =
+      let tparams =
+        match Typing_env.get_typedef tenv name with
+        | Some { td_tparams; _ } -> td_tparams
+        | None -> []
+      in
+      List.map tparams ~f:make_decl_tparam_variance
     in
     get_typarams_variance_list empty variancel tyl
   | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)
@@ -551,6 +587,11 @@ let flip reason = function
   | Vcontravariant stack -> Vcovariant (reason :: stack)
   | Vinvariant _ as x -> x
   | Vboth -> Vboth
+
+let detail reason = function
+  | Vcovariant stack -> Vcovariant (reason :: stack)
+  | Vcontravariant stack -> Vcontravariant (reason :: stack)
+  | variance -> variance
 
 let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
  fun env variance (pos, h) ->
@@ -610,6 +651,9 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       nsi_field_map
       ~f:(fun { sfi_hint; sfi_optional = _; sfi_name = _ } ->
         hint env variance sfi_hint)
+  | Hrefinement (h, members) ->
+    List.iter members ~f:(refinement_member env variance);
+    hint env variance h
   | Hfun hfun ->
     let {
       hf_is_readonly = _;
@@ -631,10 +675,12 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
     iter2_shortest
       begin
         fun tparam_variance h ->
-        let pos = Ast_defs.get_pos h in
-        let reason = Rtype_argument (Utils.strip_ns @@ Ast_defs.get_id name) in
-        let variance = compose (pos, reason) variance tparam_variance in
-        hint env variance h
+          let pos = Ast_defs.get_pos h in
+          let reason =
+            Rtype_argument (Utils.strip_ns @@ Ast_defs.get_id name)
+          in
+          let variance = compose (pos, reason) variance tparam_variance in
+          hint env variance h
       end
       variancel
       hl
@@ -656,17 +702,42 @@ and hfun_param env variance info h =
 and fun_ret env variance h =
   let pos = Ast_defs.get_pos h in
   let reason_covariant = (pos, Rfun_return, Pcovariant) in
-  let variance =
-    match variance with
-    | Vcovariant stack -> Vcovariant (reason_covariant :: stack)
-    | Vcontravariant stack -> Vcontravariant (reason_covariant :: stack)
-    | variance -> variance
-  in
+  let variance = detail reason_covariant variance in
   hint env variance h
 
 and fun_arity env variance h =
   let empty_param_info = None in
   Option.iter h ~f:(hfun_param env variance empty_param_info)
+
+and refinement_member env variance member =
+  let check_exact h =
+    let pos = Ast_defs.get_pos h in
+    let reason = [(pos, Rrefinement_eq, Pinvariant)] in
+    let var = Vinvariant (reason, reason) in
+    hint env var h
+  in
+  let check_loose (lower, upper) =
+    List.iter lower ~f:(fun h ->
+        let pos = Ast_defs.get_pos h in
+        let reason = (pos, Rrefinement_super, Pcontravariant) in
+        let var = flip reason variance in
+        hint env var h);
+    List.iter upper ~f:(fun h ->
+        let pos = Ast_defs.get_pos h in
+        let reason = (pos, Rrefinement_as, Pcovariant) in
+        let var = detail reason variance in
+        hint env var h)
+  in
+  match member with
+  | Aast.Rtype (_, ref) ->
+    (match ref with
+    | Aast.TRexact h -> check_exact h
+    | Aast.TRloose { Aast.tr_lower = lb; tr_upper = ub } -> check_loose (lb, ub))
+  | Aast.Rctx (_, ref) ->
+    (match ref with
+    | Aast.CRexact h -> check_exact h
+    | Aast.CRloose { Aast.cr_lower = lb; cr_upper = ub } ->
+      check_loose (Option.to_list lb, Option.to_list ub))
 
 let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
  fun env variance param ->
@@ -946,22 +1017,21 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_is_xhp = _;
     c_has_xhp_keyword = _;
     c_name = _;
-    c_use_as_alias = _;
-    c_insteadof_alias = _;
     c_xhp_attr_uses = _;
     c_xhp_category = _;
     c_reqs = _;
     c_consts = _;
-    c_attributes = _;
     c_xhp_children = _;
     c_xhp_attrs = _;
     c_namespace = _;
     c_user_attributes = _;
     c_file_attributes = _;
+    c_module = _;
     c_enum = _;
     c_doc_comment = _;
     c_emit_id = _;
     c_internal = _;
+    c_docs_url = _;
   } =
     class_
   in
@@ -991,7 +1061,8 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_kind;
     t_annotation = _;
     t_name = _;
-    t_constraint = _;
+    t_as_constraint = _;
+    t_super_constraint = _;
     t_user_attributes = _;
     t_mode = _;
     t_vis = _;
@@ -1000,6 +1071,9 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_emit_id = _;
     t_is_ctx = _;
     t_file_attributes = _;
+    t_internal = _;
+    t_module = _;
+    t_docs_url = _;
   } =
     typedef
   in

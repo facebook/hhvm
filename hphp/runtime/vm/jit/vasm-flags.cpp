@@ -102,44 +102,9 @@ struct CCVisitor {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Check the particular SF uses and change the CC if the platform doesn't have
- * a simple CC mapping for the given def and use.
- *
- * This is to be done in the specializations below as general mappings are
- * usually correct.
- */
-template <typename Inst>
-void fixSFUses(const Env& /*env*/, Inst& /*inst*/) {}
-
-void fixSFUses(const Env& env, jcc& inst) {
-  if (!arch_any(Arch::ARM)) return;
-
-  if (env.sf_def_flags.at(inst.sf).def->op == Vinstr::ucomisd) {
-    switch (inst.cc) {
-    case CC_AE: // CC_NB
-      inst.cc = CC_GE;
-      break;
-    default:
-      break;
-    }
-  }
-}
-
-/*
  * For each use of an SF, return the StatusFlags bits needed by the use's CC.
- *
- * Optionally, check the uses, updating the CC as required by the platform.
  */
 Vflags annotateSFUses(const Env& env, Vinstr* inst) {
-  switch (inst->op) {
-#define O(name, imms, ...) \
-    case Vinstr::name: { \
-      fixSFUses(env, inst->name##_); \
-      break; \
-    }
-    VASM_OPCODES
-#undef O
-  }
   CCVisitor ccv;
   visitOperands(*inst, ccv);
   return required_flags(ccv.getCC());

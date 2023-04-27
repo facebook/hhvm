@@ -1,0 +1,18 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "localhost:12345" ]
+    },
+    "B": {
+      "servers": [ "localhost:12346" ]
+    }
+  },
+  "route": {
+    "type": "L1L2CacheRoute",
+    "l1": "PoolRoute|A",
+    "l2": "PoolRoute|B",
+    "upgradingL1Exptime": 0,
+    "ncacheExptime": 3600,
+    "ncacheUpdatePeriod": 5
+  }
+}

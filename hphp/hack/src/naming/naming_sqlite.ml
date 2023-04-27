@@ -25,10 +25,12 @@ type save_result = {
   files_added: int;
   symbols_added: int;
   errors: insertion_error list;
+  checksum: Int64.t;
 }
 [@@deriving show]
 
-let empty_save_result = { files_added = 0; symbols_added = 0; errors = [] }
+let empty_save_result ~(checksum : Int64.t) =
+  { files_added = 0; symbols_added = 0; errors = []; checksum }
 
 let insert_safe ~name ~name_kind ~hash ~canon_hash f :
     (unit, insertion_error) result =
@@ -57,35 +59,21 @@ type local_changes = {
 }
 [@@deriving show]
 
+type symbol_and_decl_hash = {
+  symbol: Int64.t;  (** the HASH column of NAMING_SYMBOLS *)
+  decl_hash: Int64.t;  (** the DECL_HASH column of NAMING_SYMBOLS *)
+}
+
+external checksum_addremove :
+  Int64.t ->
+  symbol:Int64.t ->
+  decl_hash:Int64.t ->
+  path:Relative_path.t ->
+  Int64.t = "checksum_addremove_ffi"
+
 let _ = show_forward_naming_table_delta
 
 let _ = show_local_changes
-
-module StatementCache = struct
-  type t = {
-    db: Sqlite3.db;
-    statements: (string, Sqlite3.stmt) Hashtbl.t;
-  }
-
-  let make ~db = { db; statements = Hashtbl.Poly.create () }
-
-  (** Prepared statements must be finalized before we can close the database
-  connection, or else an exception is thrown. Call this function before
-  attempting `Sqlite3.close_db`. *)
-  let close t =
-    Hashtbl.iter t.statements ~f:(fun stmt ->
-        Sqlite3.finalize stmt |> check_rc t.db);
-    Hashtbl.clear t.statements
-
-  let make_stmt t query =
-    let stmt =
-      Hashtbl.find_or_add t.statements query ~default:(fun () ->
-          Sqlite3.prepare t.db query)
-    in
-    (* Clear any previous bindings for prepared statement parameters. *)
-    Sqlite3.reset stmt |> check_rc t.db;
-    stmt
-end
 
 let make_relative_path ~prefix_int ~suffix =
   let prefix =
@@ -175,6 +163,29 @@ module LocalChanges = struct
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+end
+
+module ChecksumTable = struct
+  let create_table_sqlite =
+    "CREATE TABLE IF NOT EXISTS CHECKSUM (ID INTEGER PRIMARY KEY, CHECKSUM_VALUE INTEGER NOT NULL);"
+
+  let set db stmt_cache (checksum : Int64.t) : unit =
+    let stmt =
+      StatementCache.make_stmt
+        stmt_cache
+        "REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);"
+    in
+    Sqlite3.bind stmt 1 (Sqlite3.Data.INT checksum) |> check_rc db;
+    Sqlite3.step stmt |> check_rc db;
+    ()
+
+  let get stmt_cache : Int64.t =
+    let stmt =
+      StatementCache.make_stmt stmt_cache "SELECT CHECKSUM_VALUE FROM CHECKSUM;"
+    in
+    match Sqlite3.step stmt with
+    | Sqlite3.Rc.ROW -> column_int64 stmt 0
+    | rc -> failwith (Sqlite3.Rc.to_string rc)
 end
 
 (* These are just done as modules to keep the SQLite for related tables close together. *)
@@ -289,7 +300,7 @@ module FileInfoTable = struct
       stmt_cache
       relative_path
       ~(type_checker_mode : FileInfo.mode option)
-      ~(decl_hash : Int64.t option)
+      ~(file_decls_hash : Int64.t option)
       ~(classes : FileInfo.id list)
       ~(consts : FileInfo.id list)
       ~(funs : FileInfo.id list)
@@ -308,13 +319,13 @@ module FileInfoTable = struct
           (Int64.of_int (FileInfo.mode_to_enum type_checker_mode))
       | None -> Sqlite3.Data.NULL
     in
-    let decl_hash =
-      match decl_hash with
-      | Some decl_hash -> Sqlite3.Data.INT decl_hash
+    let file_decls_hash =
+      match file_decls_hash with
+      | Some file_decls_hash -> Sqlite3.Data.INT file_decls_hash
       | None -> Sqlite3.Data.NULL
     in
     let names_to_data_type names =
-      let open Core_kernel in
+      let open Core in
       let names =
         String.concat ~sep:"|" (List.map names ~f:(fun (_, x, _) -> x))
       in
@@ -329,7 +340,7 @@ module FileInfoTable = struct
 
     Sqlite3.bind insert_stmt 3 type_checker_mode |> check_rc db;
 
-    Sqlite3.bind insert_stmt 4 decl_hash |> check_rc db;
+    Sqlite3.bind insert_stmt 4 file_decls_hash |> check_rc db;
     Sqlite3.bind insert_stmt 5 (names_to_data_type classes) |> check_rc db;
     Sqlite3.bind insert_stmt 6 (names_to_data_type consts) |> check_rc db;
     Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
@@ -346,7 +357,7 @@ module FileInfoTable = struct
     let to_ids ~value ~name_type =
       match value with
       | Sqlite3.Data.TEXT s ->
-        Core_kernel.(
+        Core.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
               (FileInfo.File (name_type, path), name, None)))
       | Sqlite3.Data.NULL -> []
@@ -520,6 +531,7 @@ module SymbolTable = struct
   let insert
       db stmt_cache ~name ~hash ~canon_hash ~name_kind ~file_info_id ~decl_hash
       : (unit, insertion_error) result =
+    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     let flags = name_kind |> Naming_types.name_kind_to_enum |> Int64.of_int in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -527,7 +539,6 @@ module SymbolTable = struct
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 
   let get db stmt_cache dep stmt =
@@ -551,6 +562,20 @@ module SymbolTable = struct
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+
+  let get_symbols_and_decl_hashes_for_file_id
+      db stmt_cache (file_info_id : Int64.t) : symbol_and_decl_hash list =
+    let sqlite =
+      Printf.sprintf
+        "SELECT HASH, DECL_HASH FROM %s WHERE FILE_INFO_ID = ?"
+        table_name
+    in
+    let stmt = StatementCache.make_stmt stmt_cache sqlite in
+    Sqlite3.bind stmt 1 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    fold_sqlite stmt ~init:[] ~f:(fun iter_stmt acc ->
+        let symbol = column_int64 iter_stmt 0 in
+        let decl_hash = column_int64 iter_stmt 1 in
+        { symbol; decl_hash } :: acc)
 end
 
 let db_cache :
@@ -583,15 +608,15 @@ let validate_can_open_db (db_path : db_path) : unit =
 
 let free_db_cache () : unit = db_cache := `Not_yet_cached
 
-let save_file_info db stmt_cache relative_path file_info :
-    int * insertion_error list =
-  let open Core_kernel in
+let save_file_info db stmt_cache relative_path checksum file_info : save_result
+    =
+  let open Core in
   FileInfoTable.insert
     db
     stmt_cache
     relative_path
     ~type_checker_mode:file_info.FileInfo.file_mode
-    ~decl_hash:file_info.FileInfo.hash
+    ~file_decls_hash:file_info.FileInfo.hash
     ~consts:file_info.FileInfo.consts
     ~classes:file_info.FileInfo.classes
     ~funs:file_info.FileInfo.funs
@@ -612,8 +637,11 @@ let save_file_info db stmt_cache relative_path file_info :
     | Some id -> id
     | None -> failwith "Could not get last inserted row ID"
   in
-  let insert ~name_kind ~dep_ctor (symbols_inserted, errors) (_, name, decl_hash)
-      =
+  let insert
+      ~name_kind
+      ~dep_ctor
+      (symbols_inserted, errors, checksum)
+      (_pos, name, decl_hash) =
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64
@@ -624,6 +652,9 @@ let save_file_info db stmt_cache relative_path file_info :
       |> dep_ctor
       |> Typing_deps.Dep.make
       |> Typing_deps.Dep.to_int64
+    in
+    let checksum : Int64.t =
+      checksum_addremove checksum ~symbol:hash ~decl_hash ~path:relative_path
     in
     match
       SymbolTable.insert
@@ -636,10 +667,10 @@ let save_file_info db stmt_cache relative_path file_info :
         ~file_info_id
         ~decl_hash
     with
-    | Ok () -> (symbols_inserted + 1, errors)
-    | Error error -> (symbols_inserted, error :: errors)
+    | Ok () -> (symbols_inserted + 1, errors, checksum)
+    | Error error -> (symbols_inserted, error :: errors, checksum)
   in
-  let results = (0, []) in
+  let results = (0, [], checksum) in
   let results =
     List.fold
       file_info.FileInfo.funs
@@ -682,7 +713,8 @@ let save_file_info db stmt_cache relative_path file_info :
         (insert ~name_kind:Naming_types.Module_kind ~dep_ctor:(fun name ->
              Typing_deps.Dep.Module name))
   in
-  results
+  let (symbols_added, errors, checksum) = results in
+  { files_added = 1; symbols_added; errors; checksum }
 
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in
@@ -692,6 +724,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc db;
     Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc db;
     Sqlite3.exec db SymbolTable.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db ChecksumTable.create_table_sqlite |> check_rc db;
 
     (* Incremental updates only update the single row in this table, so we need
      * to write in some dummy data to start. *)
@@ -699,15 +732,20 @@ let save_file_infos db_name file_info_map ~base_content_version =
     let save_result =
       Relative_path.Map.fold
         file_info_map
-        ~init:empty_save_result
-        ~f:(fun path fi acc ->
-          let (symbols_added, errors) = save_file_info db stmt_cache path fi in
+        ~init:(empty_save_result ~checksum:Int64.zero)
+        ~f:(fun path file_info acc ->
+          let per_file =
+            save_file_info db stmt_cache path acc.checksum file_info
+          in
+
           {
-            files_added = acc.files_added + 1;
-            symbols_added = acc.symbols_added + symbols_added;
-            errors = List.rev_append acc.errors errors;
+            files_added = acc.files_added + per_file.files_added;
+            symbols_added = acc.symbols_added + per_file.symbols_added;
+            errors = List.rev_append acc.errors per_file.errors;
+            checksum = per_file.checksum;
           })
     in
+    ChecksumTable.set db stmt_cache save_result.checksum;
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db SymbolTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
@@ -732,38 +770,84 @@ let copy_and_update
   Sqlite3.exec new_db SymbolTable.create_temporary_index_sqlite
   |> check_rc new_db;
 
-  (*
-     First do all symbol deletions to prevent file_deltas order from causing duplicate
-     symbol sqlite errors
+  (* Our update plan is to use two phases: (1) go through every single file that has been
+     changed in any way and delete the old entries, (2) go through every file and add the
+     updated entries if any. First step is to gather from the database the FILE_INFO_ID
+     of every old file... *)
+  let old_files : (Relative_path.t * Int64.t) list =
+    List.filter_map
+      (Relative_path.Map.elements local_changes.file_deltas)
+      ~f:(fun (path, _delta) ->
+        match FileInfoTable.get_file_info_id new_db stmt_cache path with
+        | None -> None
+        | Some file_info_id -> Some (path, file_info_id))
+  in
 
-     * if there are truly no symbol collisions then we won't fail due to order of inserts
-     * if there truly is a symbol collision then we will fail
-  *)
-  Relative_path.Map.iter local_changes.file_deltas ~f:(fun path _ ->
-      let file_info_id =
-        FileInfoTable.get_file_info_id new_db stmt_cache path
-      in
-      Option.iter file_info_id ~f:(fun file_info_id ->
-          SymbolTable.delete new_db stmt_cache file_info_id;
-          FileInfoTable.delete new_db stmt_cache path));
+  (* Checksum: phase 1 is to remove from the checksum every item which used to be
+     there in the old entries. We've read the forward-naming-table to read which symbols
+     used to be there, and now we read the reverse-naming-table to read what decl-hashes they used to have.
+     This has to be done before any of those old symbols have yet been removed! *)
+  let checksum = ChecksumTable.get stmt_cache in
+  let checksum =
+    List.fold old_files ~init:checksum ~f:(fun checksum (path, file_info_id) ->
+        let symbols_and_decl_hashes =
+          SymbolTable.get_symbols_and_decl_hashes_for_file_id
+            new_db
+            stmt_cache
+            file_info_id
+        in
+        let checksum =
+          List.fold
+            symbols_and_decl_hashes
+            ~init:checksum
+            ~f:(fun checksum { symbol; decl_hash } ->
+              checksum_addremove checksum ~symbol ~decl_hash ~path)
+        in
+        checksum)
+  in
 
+  (* Symbols: phase 1 is to remove from forward and reverse naming table every symbol
+     which used to be there. Our strategy here is to read the forward-naming-table to learn
+     the FILE_INFO_ID, and then bulk delete all entries from the reverse-naming-table which
+     have this same FILE_INFO_ID. (The reverse table isn't indexed by FILE_INFO_ID, which is
+     why we had to create a temporary index for it. It would have been more efficient to
+     get ToplevelSymbolHash from the forward naming table and remove by that, since the reverse
+     naming table is already indexed by ToplevelSymbolHash. *)
+  List.iter old_files ~f:(fun (path, file_info_id) ->
+      SymbolTable.delete new_db stmt_cache file_info_id;
+      FileInfoTable.delete new_db stmt_cache path;
+      ());
+
+  (* Symbols: phase 2 is to add forward and reverse entries for every item in file_deltas.
+      Note: if we tried to combine phases 1 and 2, then in the case of symbol X being moved from
+      b.php to a.php, we might have done local-change b.php first and tried to add X->b.php,
+      even before X->a.php had been deleted. That would have lead to a duplicate primary key violation.
+      By doing it in two phases we avoid that problem. (Of course if someone adds a duplicate entry
+      then that truly will result in a duplicate primary key violation.)
+
+     Checksum: phase 2 is to add to the checksum every symbol in file_deltas. This would give
+     incorrect answers in case of duplicate symbol definitions (since the checksum is only meant
+     to include the winner) but symbols phase 2 would already have already raised a sqlite
+     duplicate violation if there were any duplicate symbol definitions. *)
   let result =
     Relative_path.Map.fold
       local_changes.file_deltas
-      ~init:empty_save_result
+      ~init:(empty_save_result ~checksum)
       ~f:(fun path file_info acc ->
         match file_info with
         | Deleted -> acc
         | Modified file_info ->
-          let (symbols_added, errors) =
-            save_file_info new_db stmt_cache path file_info
+          let per_file =
+            save_file_info new_db stmt_cache path acc.checksum file_info
           in
           {
-            files_added = acc.files_added + 1;
-            symbols_added = acc.symbols_added + symbols_added;
-            errors = List.rev_append acc.errors errors;
+            files_added = acc.files_added + per_file.files_added;
+            symbols_added = acc.symbols_added + per_file.symbols_added;
+            errors = List.rev_append acc.errors per_file.errors;
+            checksum = per_file.checksum;
           })
   in
+  ChecksumTable.set new_db stmt_cache result.checksum;
   Sqlite3.exec new_db "END TRANSACTION;" |> check_rc new_db;
   StatementCache.close stmt_cache;
   Sqlite3.exec new_db SymbolTable.drop_temporary_index_sqlite |> check_rc new_db;
@@ -804,19 +888,17 @@ let fold
    * properly (again, given our input sorting restraints). *)
   let rec consume_sorted_changes path fi (sorted_changes, acc) =
     match sorted_changes with
-    | hd :: tl when Relative_path.compare (fst hd) path < 0 ->
-      begin
-        match snd hd with
-        | Modified local_fi ->
-          consume_sorted_changes path fi (tl, f (fst hd) local_fi acc)
-        | Deleted -> consume_sorted_changes path fi (tl, acc)
-      end
-    | hd :: tl when Relative_path.equal (fst hd) path ->
-      begin
-        match snd hd with
-        | Modified fi -> (tl, f path fi acc)
-        | Deleted -> (tl, acc)
-      end
+    | hd :: tl when Relative_path.compare (fst hd) path < 0 -> begin
+      match snd hd with
+      | Modified local_fi ->
+        consume_sorted_changes path fi (tl, f (fst hd) local_fi acc)
+      | Deleted -> consume_sorted_changes path fi (tl, acc)
+    end
+    | hd :: tl when Relative_path.equal (fst hd) path -> begin
+      match snd hd with
+      | Modified fi -> (tl, f path fi acc)
+      | Deleted -> (tl, acc)
+    end
     | _ -> (sorted_changes, f path fi acc)
   in
   let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
@@ -831,9 +913,9 @@ let fold
       ~f:
         begin
           fun acc (path, delta) ->
-          match delta with
-          | Modified fi -> f path fi acc
-          | Deleted -> (* This probably shouldn't happen? *) acc
+            match delta with
+            | Modified fi -> f path fi acc
+            | Deleted -> (* This probably shouldn't happen? *) acc
         end
       ~init:acc
       remaining_changes
@@ -851,7 +933,7 @@ let get_file_info (db_path : db_path) path =
   FileInfoTable.get_file_info db stmt_cache path
 
 (* Same as `get_db_and_stmt_cache` but with logging for when opening the
-database fails. *)
+   database fails. *)
 let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
   try get_db_and_stmt_cache db_path with
   | Sqlite3.Error _ as exn ->

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -35,10 +36,9 @@ enum class TypeKind {
   Trait = 1 << 3,
   TypeAlias = 1 << 4,
 };
-inline constexpr TypeKindMask kTypeKindAll =
-    static_cast<int>(TypeKind::Class) | static_cast<int>(TypeKind::Interface) |
-    static_cast<int>(TypeKind::Enum) | static_cast<int>(TypeKind::Trait) |
-    static_cast<int>(TypeKind::TypeAlias);
+inline constexpr TypeKindMask kTypeKindAll = static_cast<int>(TypeKind::Class) |
+    static_cast<int>(TypeKind::Interface) | static_cast<int>(TypeKind::Enum) |
+    static_cast<int>(TypeKind::Trait) | static_cast<int>(TypeKind::TypeAlias);
 
 inline constexpr std::string_view kTypeKindClass = "class";
 inline constexpr std::string_view kTypeKindInterface = "interface";
@@ -76,17 +76,21 @@ enum class TypeFlag {
 //
 // `trait T { require extends B; }` means that, while T does not extend B
 // itself, any class using T must also extend B in order to be sound.
+// `trait T { require class B; }` means that trait T can only be used
+// by class T
 using DeriveKindMask = int;
 enum class DeriveKind {
   Extends = 1 << 0,
   RequireExtends = 1 << 1,
   // This should be merged into RequireExtends.
   RequireImplements = 1 << 2,
+  RequireClass = 1 << 3,
 };
 constexpr DeriveKindMask kDeriveKindAll =
     static_cast<int>(DeriveKind::Extends) |
     static_cast<int>(DeriveKind::RequireExtends) |
-    static_cast<int>(DeriveKind::RequireImplements);
+    static_cast<int>(DeriveKind::RequireImplements) |
+    static_cast<int>(DeriveKind::RequireClass);
 
 // Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
 // `{"IAmAnAttribute", vec[0, "Hello", null]}`
@@ -101,7 +105,6 @@ struct MethodDetails {
 };
 
 struct TypeDetails {
-
   std::string m_name;
   TypeKind m_kind;
   int m_flags{0};
@@ -111,6 +114,9 @@ struct TypeDetails {
 
   // List of attributes and their arguments
   std::vector<Attribute> m_attributes;
+
+  // List of classes which this `require class`
+  std::vector<std::string> m_requireClass;
 
   // List of classes or interfaces which this `require extends`
   std::vector<std::string> m_requireExtends;
@@ -129,8 +135,11 @@ struct TypeDetails {
   }
 };
 
-struct FileFacts {
+struct ModuleDetails {
+  std::string m_name;
+};
 
+struct FileFacts {
   bool isEmpty() const noexcept {
     return m_types.empty() && m_functions.empty() && m_constants.empty();
   }
@@ -138,6 +147,7 @@ struct FileFacts {
   std::vector<TypeDetails> m_types;
   std::vector<std::string> m_functions;
   std::vector<std::string> m_constants;
+  std::vector<ModuleDetails> m_modules;
   std::vector<Attribute> m_attributes;
   std::string m_sha1hex;
 };
@@ -146,7 +156,6 @@ struct FileFacts {
  * A string from Watchman representing a point in time.
  */
 struct Clock {
-
   /**
    * True iff this represents an initial load, where all files have changed
    * since this point in time
@@ -178,23 +187,68 @@ struct Clock {
 } // namespace HPHP
 
 namespace folly {
-template <> class FormatValue<HPHP::Facts::Clock> {
-public:
-  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {
-  }
+template <>
+class FormatValue<HPHP::Facts::Clock> {
+ public:
+  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {}
 
-  template <typename Callback> void format(FormatArg& arg, Callback& cb) const {
+  template <typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
     format_value::formatString(
         folly::sformat("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
   }
 
-private:
+ private:
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
 
-template <> struct fmt::formatter<HPHP::Facts::Clock> {
+namespace std {
 
+template <>
+struct hash<HPHP::Facts::Attribute> {
+  std::size_t operator()(const HPHP::Facts::Attribute& attr) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(attr.m_name),
+        folly::hash::hash_range(attr.m_args.begin(), attr.m_args.end()));
+  }
+};
+
+template <>
+struct hash<HPHP::Facts::MethodDetails> {
+  std::size_t operator()(
+      const HPHP::Facts::MethodDetails& method) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(method.m_name),
+        folly::hash::hash_range(
+            method.m_attributes.begin(), method.m_attributes.end()));
+  }
+};
+
+template <>
+struct hash<HPHP::Facts::TypeDetails> {
+  std::size_t operator()(const HPHP::Facts::TypeDetails& type) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(type.m_name),
+        std::hash<::HPHP::Facts::TypeKind>{}(type.m_kind),
+        std::hash<int>{}(type.m_flags),
+        folly::hash::hash_range(
+            type.m_baseTypes.begin(), type.m_baseTypes.end()),
+        folly::hash::hash_range(
+            type.m_attributes.begin(), type.m_attributes.end()),
+        folly::hash::hash_range(
+            type.m_requireClass.begin(), type.m_requireClass.end()),
+        folly::hash::hash_range(
+            type.m_requireExtends.begin(), type.m_requireExtends.end()),
+        folly::hash::hash_range(
+            type.m_requireImplements.begin(), type.m_requireImplements.end()),
+        folly::hash::hash_range(type.m_methods.begin(), type.m_methods.end()));
+  }
+};
+} // namespace std
+
+template <>
+struct fmt::formatter<HPHP::Facts::Clock> {
   // We don't support any settings within the braces, so nothing to do here.
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.end();

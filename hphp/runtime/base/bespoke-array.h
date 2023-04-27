@@ -78,13 +78,15 @@ ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void profileArrLikeStaticProps(const Class*);
 void profileArrLikeProps(ObjectData*);
+void profileArrLikeClsCns(const Class*, TypedValue*, Slot);
+void profileArrLikeTypeAlias(const TypeAlias*, Array*);
 void setLoggingEnabled(bool);
 void selectBespokeLayouts();
 void waitOnExportProfiles();
 }
 
 /*
- * A bespoke array is an array satisfing the ArrayData interface but backed by
+ * A bespoke array is an array satisfying the ArrayData interface but backed by
  * a variety of possible memory layouts. Eventually, our goal is to generate
  * these layouts at runtime, based on profiling information.
  *

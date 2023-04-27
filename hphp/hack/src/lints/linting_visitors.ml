@@ -131,9 +131,7 @@ class body_visitor_adder body_visitor =
   object
     inherit [unit] abstract_file_visitor
 
-    method! on_fun_def () _env fd =
-      let fun_ = fd.fd_fun in
-      add_visitor fun_.f_name body_visitor
+    method! on_fun_def () _env fd = add_visitor fd.fd_name body_visitor
 
     method! on_method () _env _class meth = add_visitor meth.m_name body_visitor
   end
@@ -144,7 +142,7 @@ let body_visitor_invoker =
 
     method! on_fun_def () env fd =
       let fun_ = fd.fd_fun in
-      let module Visitor = (val Hashtbl.find body_visitors (fst fun_.f_name)) in
+      let module Visitor = (val Hashtbl.find body_visitors (fst fd.fd_name)) in
       let nb = fun_.f_body in
       let env = { env with cfun = Some fd } in
       (new Visitor.visitor env)#on_body () nb.fb_ast

@@ -59,13 +59,19 @@ let interrupt_handler fd acc =
      done
    with
   | Caml.Not_found -> ());
-  (acc, MultiThreadedCall.Cancel)
+  ( acc,
+    MultiThreadedCall.Cancel
+      {
+        MultiThreadedCall.user_message = "cancel";
+        log_message = "";
+        timestamp = Unix.gettimeofday ();
+      } )
 
 let rec run_until_done fd_in workers (acc, iterations) = function
   | [] -> (acc, iterations)
   | work ->
     Hh_logger.log "Left: %d" (List.length work);
-    let (result, (), unfinished) =
+    let (result, (), unfinished_and_reason) =
       MultiWorker.call_with_interrupt
         (Some workers)
         ~job:do_work
@@ -79,7 +85,11 @@ let rec run_until_done fd_in workers (acc, iterations) = function
             env = ();
           }
     in
-    let unfinished = List.concat unfinished in
+    let unfinished =
+      match unfinished_and_reason with
+      | Some (unfinished, _reason) -> List.concat unfinished
+      | None -> []
+    in
     run_until_done fd_in workers (sum acc result, iterations + 1) unfinished
 
 (* Might raise because of Option.value_exn *)

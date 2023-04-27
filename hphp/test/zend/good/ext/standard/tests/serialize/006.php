@@ -8,7 +8,7 @@ class ÜberKööliäå
 <<__EntryPoint>> function main(): void {
 $åäöÅÄÖ = darray['åäöÅÄÖ' => 'åäöÅÄÖ'];
 
-$foo = new Überkööliäå();
+$foo = new ÜberKööliäå();
 
 var_dump(serialize($foo));
 var_dump(unserialize(serialize($foo)));

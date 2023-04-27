@@ -11,8 +11,8 @@ open Typing_defs
 
 (* Replace unserialized information from the type with dummy information.
 
-For example, we don't currently serialize the arity of function types, so update
-the input type to set it to a default arity value. *)
+   For example, we don't currently serialize the arity of function types, so update
+   the input type to set it to a default arity value. *)
 let rec strip_ty ty =
   let (reason, ty) = deref ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
@@ -23,8 +23,7 @@ let rec strip_ty ty =
     match ty with
     | Tany _
     | Tnonnull
-    | Tdynamic
-    | Terr ->
+    | Tdynamic ->
       ty
     | Tprim _ -> ty
     | Tvar _ -> ty
@@ -76,14 +75,15 @@ let rec strip_ty ty =
           ft_where_constraints = [];
           ft_flags = 0;
           ft_ifc_decl = default_ifc_fun_decl;
+          ft_cross_package = None;
         }
-    | Tshape (shape_kind, shape_fields) ->
+    | Tshape (_, shape_kind, shape_fields) ->
       let strip_field { sft_optional; sft_ty } =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
       let shape_fields = TShapeMap.map strip_field shape_fields in
-      Tshape (shape_kind, shape_fields)
+      Tshape (Missing_origin, shape_kind, shape_fields)
     | Taccess _ -> ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

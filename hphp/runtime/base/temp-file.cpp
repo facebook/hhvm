@@ -46,11 +46,11 @@ TempFile::TempFile(bool autoDelete /* = true */,
 }
 
 TempFile::~TempFile() {
-  closeImpl();
+  TempFile::close();
 }
 
 void TempFile::sweep() {
-  closeImpl();
+  TempFile::close();
   using std::string;
   m_rawName.~string();
   PlainFile::sweep();
@@ -61,19 +61,13 @@ bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
                              getName()).c_str());
 }
 
-bool TempFile::close() {
-  return closeImpl();
-}
-
-bool TempFile::closeImpl() {
+bool TempFile::close(int*) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (!isClosed()) {
     assertx(valid());
     if (m_stream) {
-      *s_pcloseRet = ::fclose(m_stream);
+      ret = (::fclose(m_stream) == 0);
     }
-    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
     setFd(-1);
@@ -84,7 +78,7 @@ bool TempFile::closeImpl() {
     }
     m_rawName.clear();
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 
@@ -141,7 +135,7 @@ bool TempFile::truncate(int64_t size) {
 
 int64_t TempFile::getLength() {
   struct stat sb;
-  if (StatCache::lstat(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
+  if (lstatSyscall(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
     // use fstat directly

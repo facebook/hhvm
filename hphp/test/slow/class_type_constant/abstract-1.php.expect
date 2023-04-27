@@ -1,5 +1,5 @@
 T1 abstract
-T2 not abstract
+T2 abstract
 T3 not abstract
 dict(1) {
   ["V2"]=>

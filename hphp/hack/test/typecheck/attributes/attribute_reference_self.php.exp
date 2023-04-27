@@ -1,0 +1,2 @@
+File "attribute_reference_self.php", line 7, characters 17-20:
+`self` is undefined outside of a class (Typing[4059])

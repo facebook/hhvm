@@ -2,12 +2,12 @@
 
 class ClassA
 {
-   static $prop;
+   public static $prop;
 }
 
 class ClassB extends ClassA
 {
-   static $prop;
+   public static $prop;
 }
 
 class ClassC extends ClassB

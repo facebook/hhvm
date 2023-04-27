@@ -6,5 +6,5 @@ class X {
 }
 
 function f(): (function(): void) {
-  return class_meth(X::class, 'foo');
+  return X::foo<>;
 }

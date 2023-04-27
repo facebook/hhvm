@@ -38,16 +38,17 @@ namespace {
   struct RandomExtension final : Extension {
     RandomExtension() : Extension("hsl_random", "1.0") {}
     void moduleInit() override {
-      HHVM_FALIAS(
-        HH\\Lib\\_Private\\Native\\pseudorandom_int,
+      // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+      HHVM_FALIAS_FE_STR(
+        "HH\\Lib\\_Private\\Native\\pseudorandom_int",
         HH_pseudorandom_int
       );
-      HHVM_FALIAS(
-        HH\\Lib\\_Private\\Native\\pseudorandom_seed,
+      HHVM_FALIAS_FE_STR(
+        "HH\\Lib\\_Private\\Native\\pseudorandom_seed",
         HH_pseudorandom_seed
       );
-      HHVM_FALIAS(
-        HH\\Lib\\_Private\\Native\\random_int,
+      HHVM_FALIAS_FE_STR(
+        "HH\\Lib\\_Private\\Native\\random_int",
         HH_random_int
       );
       loadSystemlib();

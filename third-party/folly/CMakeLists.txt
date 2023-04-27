@@ -1,14 +1,6 @@
 include(ExternalProject)
 include(HPHPFunctions)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  FOLLY_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/folly/releases/download/v2022.03.14.00/folly-v2022.03.14.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=dfa2bf72ef166b2f52a5d5ef6b0e728d3658aff090fb273c7f4fed5541c3e54a"
-)
-
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(DOUBLE_CONVERSION_LIBRARY double-conversion INTERFACE_LINK_LIBRARIES)
@@ -27,14 +19,10 @@ else()
 endif()
 get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 
-if("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
-  set(PARALLEL_FLAG "--parallel")
-endif()
-
 set(FOLLY_CXXFLAGS "-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include")
 message(STATUS "FOLLY_CXXFLAGS: ${FOLLY_CXXFLAGS}")
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+if(ENABLE_SSE4_2 OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
   if(IS_X64)
     message(STATUS "Enabling SSE 4.2 for bundled folly")
     set(FOLLY_CXXFLAGS "${FOLLY_CXXFLAGS} -msse4.2")
@@ -43,7 +31,8 @@ endif()
 
 ExternalProject_add(
   bundled_folly
-  ${FOLLY_SOURCE_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
     "${CMAKE_CURRENT_SOURCE_DIR}/patches"
@@ -59,7 +48,6 @@ ExternalProject_add(
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
     # Options
-    -DWITHOUT_GFLAGS=ON
     -DWITHOUT_LIBLZMA=ON
     -DWITHOUT_LIBSNAPPY=ON
     -DWITHOUT_LIBUNWIND=ON
@@ -68,7 +56,7 @@ ExternalProject_add(
     -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
     -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
     -DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
-    -DGLOG_LIBRARY=${LIBGLOG_LIBRARY}
+    -DGLOG_LIBRARY=glog::glog
     -DBoost_NO_SYSTEM_PATHS=ON
     -DBoost_NO_BOOST_CMAKE=ON
     -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
@@ -77,17 +65,14 @@ ExternalProject_add(
     -DBoost_DEBUG=1
     -DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}
     -DDOUBLE_CONVERSION_LIBRARY=${DOUBLE_CONVERSION_LIBRARY}
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     -DLIBSODIUM_INCLUDE_DIR=${LIBSODIUM_INCLUDE_DIR}
     -DLIBSODIUM_LIBRARY=${LIBSODIUM_LIBRARY}
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
-    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
+    $(MAKE) folly
   INSTALL_COMMAND
-    ${CMAKE_COMMAND} -E copy_directory
-      "${CMAKE_CURRENT_LIST_DIR}/include"
-      "<INSTALL_DIR>/include" &&
 # Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
@@ -104,6 +89,7 @@ set(
   libsodium
   jemalloc
   zstd
+  glog::glog
 )
 add_dependencies(bundled_folly ${FOLLY_DEPS})
 add_library(folly_deps INTERFACE)
@@ -133,7 +119,7 @@ endif()
 if(UNIX AND NOT APPLE)
   # symbolizer implementation details
   find_package(Libiberty)
-  find_package(LibUnwind)
+  find_package(LibUnwind NO_MODULE)
   target_link_libraries(folly INTERFACE ${LIBIBERTY_LIBRARIES} ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES} ${LIBUNWIND_LIBRARIES})
   target_include_directories(folly INTERFACE ${LIBIBERTY_INCLUDE_DIRS} ${LIBUNWIND_INCLUDE_DIRS})
 endif()

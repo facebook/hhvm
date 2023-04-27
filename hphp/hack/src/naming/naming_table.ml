@@ -142,16 +142,16 @@ open Hh_prelude
 *)
 
 (* Changes since baseline can be None if there was no baseline to begin with.
-  The scenario where we apply changes since baseline instead of relying on
-  the packaged local changes in the LOCAL_CHANGES table is this:
-    1) Load the naming table baseline (may include local changes if it was
-      incrementally updated at some point - not currently done in practice,
-      but possible and likely to happen in the future)
-    2) Load the changes since baseline that include naming changes processed
-      at another time (perhaps, on another host)
-  In the scenario where the naming table is saved to SQLite from an Unbacked
-  naming table, there is no baseline to speak of
-  *)
+   The scenario where we apply changes since baseline instead of relying on
+   the packaged local changes in the LOCAL_CHANGES table is this:
+     1) Load the naming table baseline (may include local changes if it was
+       incrementally updated at some point - not currently done in practice,
+       but possible and likely to happen in the future)
+     2) Load the changes since baseline that include naming changes processed
+       at another time (perhaps, on another host)
+   In the scenario where the naming table is saved to SQLite from an Unbacked
+   naming table, there is no baseline to speak of
+*)
 type changes_since_baseline = Naming_sqlite.local_changes option
 
 type t =
@@ -159,7 +159,7 @@ type t =
   | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
-type fast = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
@@ -185,13 +185,13 @@ let filter a ~f =
               ~f:
                 begin
                   fun path fi acc ->
-                  if f path fi then
-                    acc
-                  else
-                    Relative_path.Map.add
+                    if f path fi then
                       acc
-                      ~key:path
-                      ~data:Naming_sqlite.Deleted
+                    else
+                      Relative_path.Map.add
+                        acc
+                        ~key:path
+                        ~data:Naming_sqlite.Deleted
                 end
               ~file_deltas;
         },
@@ -472,7 +472,7 @@ let to_saved a =
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi))
 
-let to_fast ?(warn_on_naming_costly_iter = true) a =
+let to_defs_per_file ?(warn_on_naming_costly_iter = true) a =
   match a with
   | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.simplify
   | Backed _ ->
@@ -483,7 +483,8 @@ let to_fast ?(warn_on_naming_costly_iter = true) a =
       ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi))
 
-let saved_to_fast saved = Relative_path.Map.map saved ~f:FileInfo.saved_to_names
+let saved_to_defs_per_file saved =
+  Relative_path.Map.map saved ~f:FileInfo.saved_to_names
 
 (*****************************************************************************)
 (* Forward naming table creation functions *)
@@ -604,6 +605,9 @@ let load_from_sqlite_for_type_checking
   Db_path_provider.set_naming_db_path
     (Provider_context.get_backend ctx)
     (Some db_path);
+  (* I believe that changes_since_baseline is never used. I want to check... *)
+  if Option.is_some changes_since_baseline then
+    HackEventLogger.naming_sqlite_has_changes_since_baseline ();
   let local_changes =
     choose_local_changes
       ~local_changes:(Naming_sqlite.get_local_changes db_path)

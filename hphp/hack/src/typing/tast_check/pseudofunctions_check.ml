@@ -8,7 +8,6 @@
  *)
 
 open Aast
-module Env = Tast_env
 module SN = Naming_special_names
 
 let disallow_isset_inout_args_check p = function

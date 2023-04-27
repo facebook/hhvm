@@ -1,4 +1,8 @@
 <?hh
+<<file:__EnableUnstableFeatures("modules")>>
+
+new module a {}
+new module b {}
 
 class C1 {}
 

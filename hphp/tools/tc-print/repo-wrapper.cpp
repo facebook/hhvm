@@ -66,21 +66,14 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     RepoFile::globalData().load();
   }
 
-  std::string hhasLib;
-  auto const phpLib = get_systemlib(&hhasLib);
+  auto const phpLib = get_systemlib();
   if (!phpLib.empty()) {
     auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                   "systemlib.php",
                                   Native::s_systemNativeFuncs,
+                                  nullptr,
                                   RepoOptions::defaults());
     addUnit(phpUnit);
-  }
-  if (!hhasLib.empty()) {
-    auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
-                                   "systemlib.hhas",
-                                   Native::s_systemNativeFuncs,
-                                   RepoOptions::defaults());
-    addUnit(hhasUnit);
   }
 
   SystemLib::s_inited = true;
@@ -105,7 +98,7 @@ Unit* RepoWrapper::getUnit(SHA1 sha1) {
     auto const path = RepoFile::findUnitPath(sha1);
     if (!path) return nullptr;
     auto const ue =
-      RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false);
+      RepoFile::loadUnitEmitter(path, nullptr, Native::s_noNativeFuncs, false);
     if (!ue) return nullptr;
     return ue->create().release();
   }();

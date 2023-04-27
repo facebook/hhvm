@@ -1,4 +1,4 @@
-Warning: class_implements(): Class A does not exist in %s/test/slow/eval_order/1530.php on line 16
+Warning: class_implements(): Class A1530 does not exist in %s/test/slow/eval_order/1530.php on line 8
 bool(false)
 dict(1) {
   ["I"]=>

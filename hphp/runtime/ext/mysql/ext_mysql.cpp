@@ -575,7 +575,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
         return false;
       }
     } else {
-      field_offset = field.toInt32();
+      field_offset = (int)field.toInt64();
       if (field_offset < 0 ||
           field_offset >= (int)res->getFieldCount()) {
         raise_warning("Bad column offset specified");
@@ -840,7 +840,7 @@ void mysqlExtension::moduleInit() {
   // Added in MySQL 8.0.20
   // HHVM_RC_INT(MYSQL_CLIENT_CR_KERBEROS_USER_NOT_FOUND, CR_KERBEROS_USER_NOT_FOUND)
 
-  loadSystemlib("mysql");
+  loadSystemlib();
 }
 
 mysqlExtension s_mysql_extension;

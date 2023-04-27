@@ -643,6 +643,7 @@ void visit(Local& env, IRInstruction& inst) {
 
     [&] (ExitEffects l) {
       load(env, l.live);
+      kill(env, l.uninits);
       kill(env, l.kills);
     },
 
@@ -663,7 +664,8 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, ARdsAny);
       load(env, l.locals);
       load(env, l.inputs);
-      store(env, l.actrec);
+      kill(env, l.actrec);
+      kill(env, l.uninits);
       kill(env, l.kills);
     },
 

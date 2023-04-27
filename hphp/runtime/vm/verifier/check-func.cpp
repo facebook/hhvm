@@ -73,7 +73,9 @@ struct BlockInfo {
 };
 
 struct FuncChecker {
-  FuncChecker(const FuncEmitter* func, ErrorMode mode);
+  FuncChecker(const FuncEmitter* func,
+              ErrorMode mode,
+              StringToStringIMap& createCls);
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
@@ -164,6 +166,7 @@ struct FuncChecker {
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
   Id m_last_rpo_id; // rpo_id of the last block visited
+  StringToStringIMap& m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -211,14 +214,16 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   return true;
 }
 
-bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
+bool checkFunc(const FuncEmitter* func,
+               StringToStringIMap& createCls,
+               ErrorMode mode) {
   if (mode == kVerbose) {
     pretty_print(func, std::cout);
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
   }
-  FuncChecker v(func, mode);
+  FuncChecker v{func, mode, createCls};
   return v.checkInfo() &&
          v.checkDef() &&
          v.checkOffsets() &&
@@ -253,8 +258,8 @@ bool mayTakeExnEdges(Op op) {
   switch (op) {
     case Op::AssertRATL:
     case Op::AssertRATStk:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::Fatal:
     case Op::IterFree:
     case Op::LIterFree:
@@ -270,11 +275,14 @@ bool mayTakeExnEdges(Op op) {
   }
 }
 
-FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
+FuncChecker::FuncChecker(const FuncEmitter* f,
+                         ErrorMode mode,
+                         StringToStringIMap& createCls)
 : m_func(f)
 , m_graph(0)
 , m_instrs(m_arena, f->bcPos() + 1)
 , m_errmode(mode)
+, m_createCls(createCls)
 {}
 
 FuncChecker::~FuncChecker() {
@@ -383,7 +391,7 @@ bool FuncChecker::checkOffsets() {
  */
 bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
   bool ok = true;
-  typedef std::list<PC> BranchList;
+  using BranchList = std::list<PC>;
   BranchList branches;
   PC bc = m_func->bc();
   // Find instruction boundaries and branch instructions.
@@ -433,8 +441,8 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
     auto const targets = instrJumpTargets(bc, offset(branch));
     for (auto const& target : targets) {
       ok &= checkOffset("branch target", target, "primary body", base, past);
-      if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
-        error("JmpNS may not have zero offset in %s\n", "primary body");
+      if (peek_op(branch) == Op::Enter && target == offset(branch)) {
+        error("Enter may not have zero offset in %s\n", "primary body");
         ok = false;
       }
     }
@@ -824,6 +832,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     }
     return m_tmp_sig;
   case Op::FCallClsMethod:
+  case Op::FCallClsMethodM:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
@@ -1189,16 +1198,27 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
     case Op::CreateCl: {
-      auto const id = getImm(pc, 1).u_IVA;
-      if (id >= unit()->numPreClasses()) {
-        ferror("CreateCl must reference a closure defined in the same "
-               "unit\n");
+      auto const name = m_func->ue().lookupLitstrCopy(getImm(pc, 1).u_SA);
+      auto const preCls = [&] () -> const PreClassEmitter* {
+        for (auto const pce : unit()->preclasses()) {
+          if (pce->name()->isame(name.get())) return pce;
+        }
+        return nullptr;
+      }();
+      if (!preCls) {
+        ferror("CreateCl references non-existent class {}\n", name);
         return false;
       }
-      auto const preCls = unit()->pce(id);
-      if (preCls->parentName()->toCppString() != std::string("Closure")) {
-        ferror("CreateCl references non-closure class {} ({})\n",
-               preCls->name(), id);
+      if (!preCls->parentName() ||
+          preCls->parentName()->toCppString() != "Closure") {
+        ferror("CreateCl references non-closure class {}\n", preCls->name());
+        return false;
+      }
+      auto const [existing, emplaced] =
+        m_createCls.emplace(preCls->name(), m_func->name);
+      if (!emplaced && !existing->second->isame(m_func->name)) {
+        ferror("Closure {} referenced in multiple funcs {} and {}\n",
+               preCls->name(), existing->second, m_func->name);
         return false;
       }
       auto const numBound = getImm(pc, 0).u_IVA;
@@ -1438,7 +1458,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
+    case Op::VerifyImplicitContextState:
+      if (!m_func->isMemoizeWrapper && !m_func->isMemoizeWrapperLSB) {
+        ferror("VerifyImplicitContextState can only be used in memoize wrappers\n");
+        return false;
+      }
+      break;
     default:
       break;
   }
@@ -1751,9 +1776,8 @@ bool FuncChecker::checkFlow() {
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  int succs = numSuccBlocks(b);
 
-  if (isIter(b->last) && succs == 2) {
+  if (isIter(b->last) && b->succ_count == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
@@ -1774,11 +1798,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
     cur->iters[id] = save;
-  } else if (peek_op(b->last) == OpMemoGet && numSuccBlocks(b) == 2) {
+  } else if (peek_op(b->last) == OpMemoGet && b->succ_count == 2) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
-  } else if (peek_op(b->last) == OpMemoGetEager && numSuccBlocks(b) == 3) {
+  } else if (peek_op(b->last) == OpMemoGetEager && b->succ_count == 3) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
@@ -1794,13 +1818,18 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
   }
 
-  for (int i = 0; i < succs; i++) {
-    auto const t = b->succs[i];
-    if (t && offset(t->start) == 0) {
+  if (peek_op(b->last) == OpEnter) {
+    assertx(b->succ_count == 1);
+    auto const t = b->succs[0];
+    if (offset(t->start) != 0) {
+      error("Enter target offset %d must point to the entry block\n",
+            offset(t->start));
+      ok = false;
+    } else {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
-        error("%s: Control flow cycles from the entry-block "
-              "to itself are not allowed\n", opcodeToName(peek_op(b->last)));
+        error("DV initializer at B%d can't be reachable from the entry block\n",
+              b->id);
         ok = false;
       }
     }
@@ -1812,7 +1841,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     ok = false;
   }
 
-  if (succs == 0 && cur->silences.find_first() != cur->silences.npos &&
+  if (b->succ_count == 0 && cur->silences.find_first() != cur->silences.npos &&
       !b->exn) {
     error("Error reporting was silenced at end of terminal block B%d\n", b->id);
     return false;

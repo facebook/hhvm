@@ -52,20 +52,8 @@ enum TransPerfCounter {
 };
 #undef TPC
 
-#ifdef __APPLE__
-// Clang believes that it can force perf_counters into 16-byte alignment,
-// and thus emit an inlined version of memcpy later in this file using SSE
-// instructions which require  such alignment. It can, in fact, do this --
-// except due to what is as far as I can tell a linker bug on OS X, ld doesn't
-// actually lay this out with 16 byte alignment, and so the SSE instructions
-// crash. In order to work around this, tell clang to force it to only 8 byte
-// alignment, which causes it to emit an inlined version of memcpy which does
-// not assume 16-byte alignment. (Perversely, it also tickles the ld bug
-// differently such that it actually gets 16-byte alignment :\)
-struct alignas(8) PerfCounters : std::array<int64_t, tpc_num_counters> {};
-#else
 using PerfCounters = std::array<int64_t, tpc_num_counters>;
-#endif
+
 extern RDS_LOCAL_NO_CHECK(PerfCounters, rl_perf_counters);
 extern const char* const kPerfCounterNames[tpc_num_counters];
 
@@ -82,4 +70,3 @@ void getPerfCounters(Array& ret);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

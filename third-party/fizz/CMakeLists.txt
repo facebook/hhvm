@@ -20,14 +20,6 @@ get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  FIZZ_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebookincubator/fizz/releases/download/v2022.03.14.00/fizz-v2022.03.14.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=10fe63db9ac8ee06723d1aa95101f0f156a8db677a729170bca0bab12f1cc279"
-)
-
 set(
   FIZZ_DEPS
   boost
@@ -41,15 +33,12 @@ target_link_libraries(fizz_deps INTERFACE ${FIZZ_DEPS} ${OPENSSL_LIBRARIES})
 
 ExternalProject_Add(
   bundled_fizz
-  ${FIZZ_SOURCE_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"
     <SOURCE_DIR>/fizz/cmake/FindLibSodium.cmake
-    &&
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/fizz/cmake/FindGlog.cmake
     &&
     "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
     "${CMAKE_CURRENT_SOURCE_DIR}/patches"
@@ -77,17 +66,18 @@ ExternalProject_Add(
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
     -DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}
     -DDOUBLE_CONVERSION_LIBRARY=${DOUBLE_CONVERSION_LIBRARY}
-    -DLIBGGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
-    -DLIBGLOG_LIBRARY=${LIBGLOG_LIBRARY}
+    -DLIBGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR}
+    -DLIBGLOG_LIBRARY=${GLOG_LIBRARY}
     -DLIBSODIUM_INCLUDEDIR=${LIBSODIUM_INCLUDE_DIR}
     -DLIBSODIUM_LIBRARIES=${LIBSODIUM_LIBRARY}
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
+    "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
   DEPENDS ${FIZZ_DEPS}
 )
 ExternalProject_Get_property(bundled_fizz INSTALL_DIR)

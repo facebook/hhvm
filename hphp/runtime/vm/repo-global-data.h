@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include "hphp/util/optional.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -33,7 +35,8 @@ struct RepoGlobalData {
   /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
-  uint32_t InitialNamedEntityTableSize = 0;
+  uint32_t InitialTypeTableSize = 0;
+  uint32_t InitialFuncTableSize = 0;
 
   /*
    * Copy of InitialStaticStringTableSize for hhbbc to use.
@@ -47,18 +50,13 @@ struct RepoGlobalData {
 
   /*
    * Indicates whether a repo was compiled assumming that UpperBound type-hints
-   * will be verified by VerifyParamType and VerifyReturnType instructions
-   * at runtime.
+   * will be verified by the parameter type verification and VerifyReturnType
+   * instructions at runtime.
    *
    * This changes program behavior because this type hints that are checked
    * at runtime will enable additional HHBBC optimizations.
    */
   bool HardGenericsUB = false;
-
-  /*
-   * Indicates whether a repo was compiled with HardPrivatePropInference.
-   */
-  bool HardPrivatePropInference = false;
 
   /*
    * Indicates whether hex strings (e.g. "0x20") can be used for numeric
@@ -122,7 +120,6 @@ struct RepoGlobalData {
    */
   uint64_t Signature = 0;
 
-  int32_t EmitClassPointers = 0;
   bool EmitClsMethPointers = true;
 
   /*
@@ -139,6 +136,9 @@ struct RepoGlobalData {
 
   /* Whether passing (lazy) classes to classname can raise a notice */
   bool ClassnameNotices = false;
+
+  /* Whether passing (lazy) classes to string type-hints can raise a notice */
+  bool ClassStringHintNotices = false;
 
   /* Whether checking is string on (lazy) classes can raise a notice */
   bool ClassIsStringNotices = false;
@@ -160,12 +160,24 @@ struct RepoGlobalData {
 
   std::unordered_map<std::string, int> EvalCoeffectEnforcementLevels = {};
 
+  /*
+   * Describes the active deployment for selecting the set of packages
+   */
+  std::string ActiveDeployment = "";
+
   /* Enable a method defined in a trait to be imported multiple times
    * along trait use paths
    */
   bool DiamondTraitMethods = false;
 
-  bool EnableImplicitContext = false;
+  /* Whether bespoke type structures should be used */
+  bool EmitBespokeTypeStructures = false;
+
+  /*
+   * If set, const fold the File and Dir bytecodes, using this as the
+   * SourceRoot.
+   */
+  Optional<std::string> SourceRootForFileBC;
 
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
@@ -173,15 +185,21 @@ struct RepoGlobalData {
   // be done if the memory manager is initialized).
   void load(bool loadConstantFuncs = true) const;
 
+  /* Enable the "Module level traits" semantics: methods defined in a trait
+   * that belongs to module A, are considered as belonging to module A
+   * even if the trait is used by a class that lives in module B.
+   */
+  bool ModuleLevelTraits = false;
+
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(InitialNamedEntityTableSize)
+    sd(InitialTypeTableSize)
+      (InitialFuncTableSize)
       (InitialStaticStringTableSize)
       (HardGenericsUB)
       (CheckPropTypeHints)
-      (HardPrivatePropInference)
       (PHP7_NoHexNumerics)
       (PHP7_Substr)
       (PHP7_Builtins)
@@ -197,12 +215,12 @@ struct RepoGlobalData {
       (Signature)
       (AbortBuildOnVerifyError)
       (EnableArgsInBacktraces)
-      (EmitClassPointers)
       (EmitClsMethPointers)
       (IsVecNotices)
       (RaiseClassConversionWarning)
       (ClassPassesClassname)
       (ClassnameNotices)
+      (ClassStringHintNotices)
       (ClassIsStringNotices)
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
@@ -210,8 +228,11 @@ struct RepoGlobalData {
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)
       (DiamondTraitMethods)
-      (EvalCoeffectEnforcementLevels)
-      (EnableImplicitContext)
+      (EvalCoeffectEnforcementLevels, std::less<std::string>{})
+      (SourceRootForFileBC)
+      (EmitBespokeTypeStructures)
+      (ActiveDeployment)
+      (ModuleLevelTraits)
       ;
   }
 };

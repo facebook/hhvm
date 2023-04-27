@@ -117,6 +117,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isAsync()[]: bool;
 
   /**
+   * @return     bool   TRUE if the function is internal, otherwise FALSE.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
+
+  /**
    * Indicates whether the function has ...$varargs as its last parameter
    * to capture variadic arguments.
    *
@@ -514,8 +520,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       function(...$args) { return $this->invokeArgs($args); };
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function isClosure(): bool {
+  public function isClosure()[]: bool {
     return (bool) $this->closure;
   }
 
@@ -601,7 +606,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   <<__Native>>
   private function getClosureScopeClassname(object $closure)[]: ?string;
 
-  <<__Pure, __MaybeMutable>>
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure &&
         ($cls = $this->getClosureScopeClassname($this->closure))) {
@@ -727,7 +731,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
     if ($this->isPrivate()) {
       $funcAttrs[] = 'private';
-    } elseif ($this->isProtected()) {
+    } else if ($this->isProtected()) {
       $funcAttrs[] = 'protected';
     } else {
       $funcAttrs[] = 'public';
@@ -736,7 +740,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
-  <<__Pure, __MaybeMutable>>
   public function __debugInfo() {
     return darray['name' => $this->name, 'class' => $this->class];
   }
@@ -770,7 +773,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     print $str;
   }
 
-  <<__Pure, __MaybeMutable>>
   private function isAccessible(): bool {
     return $this->forcedAccessible || $this->isPublic();
   }
@@ -1084,11 +1086,11 @@ class ReflectionClass implements Reflector {
     }
     if ($this is ReflectionObject) {
       $ret .= 'Object of class [ ';
-    } elseif ($this->isInterface()) {
+    } else if ($this->isInterface()) {
       $ret .= 'Interface [ ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'Trait [ ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'Enum [ ';
     } else {
       $ret .= 'Class [ ';
@@ -1107,9 +1109,9 @@ class ReflectionClass implements Reflector {
     }
     if ($this->isInterface()) {
       $ret .= 'interface ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'trait ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'enum ';
     } else {
       if ($this->isAbstract()) {
@@ -1158,7 +1160,7 @@ class ReflectionClass implements Reflector {
     foreach ($props as $prop) {
       if ($prop->isStatic()) {
         ++$numStaticProps;
-      } elseif (!$prop->isDefault()) {
+      } else if (!$prop->isDefault()) {
         ++$numDynamicProps;
       }
     }
@@ -1577,20 +1579,6 @@ class ReflectionClass implements Reflector {
   public function getTraitNames()[]: varray<string>;
 
   /**
-   * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.gettraitaliases.php )
-   *
-   * Warning: This function is currently not documented; only its argument
-   * list is available.
-   *
-   * @return     mixed   Returns an array with new method names in keys and
-   *                     original names (in the format "TraitName::original")
-   *                     in values. Returns NULL in case of an error.
-   */
-  <<__Native>>
-  public function getTraitAliases()[]: darray<string, string>;
-
-  /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
    *
    * Warning: This function is currently not documented; only its argument
@@ -1647,6 +1635,22 @@ class ReflectionClass implements Reflector {
    */
   <<__Native>>
   public function isFinal()[]: bool;
+
+  /**
+   * Checks if a class is internal.
+   *
+   * @return     bool   Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
+
+  /*
+   * Returns the module associated with the given function.
+   *
+   * @return     ?string  Returns the module name if the class is part of a module, null otherwise.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
@@ -2169,7 +2173,6 @@ class ReflectionObject extends ReflectionClass {
    *
    *  Constructs a ReflectionObject.
    */
-  <<__Pure>>
   public function __construct($argument) {
     if (!is_object($argument)) {
       throw new ReflectionException(
@@ -2512,17 +2515,13 @@ final class ReflectionModule implements Reflector {
    * @name      string  Name of the module.
    */
   final public function __construct(string $name)[] {
-    $n = $this->__init($name);
-    if (!$n) {
-      throw new ReflectionException(
-        "module {$name} does not exist");
-    }
-    $this->name = $n;
+    $this->__init($name); // throws an exception if module doesn't exist
+    $this->name = $name;
   }
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name)[]: string;
+  private function __init(string $name)[]: void;
 
   /**
    * Gets all attributes
@@ -2536,6 +2535,15 @@ final class ReflectionModule implements Reflector {
   use ReflectionLegacyAttribute;
 
   use ReflectionTypedAttribute;
+
+  <<__Native>>
+  public function getDocComment()[]: mixed;
+
+  <<__Native>>
+  public function getExports()[]: ?varray<string>;
+
+  <<__Native>>
+  public function getImports()[]: ?varray<string>;
 
   /**
    * Get the name of the file.

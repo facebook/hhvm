@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 open Reordered_argument_collections
 
 type mode =

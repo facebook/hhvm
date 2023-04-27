@@ -3,7 +3,7 @@
 abstract class C {
   protected int $x = 42;
   abstract function foo();
-  function bar() { return class_meth(static::class, 'foo'); }
+  function bar() { return static::foo<>; }
 }
 
 class D extends C {

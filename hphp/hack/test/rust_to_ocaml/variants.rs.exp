@@ -1,0 +1,19 @@
+type a =
+  | I
+  | J of int
+  | K of int * int
+  | L of (int * int)
+  | M of {
+      x: int;
+      y: int;
+    }
+
+type prefixed =
+  | PI
+  | PJ of int
+  | PK of int * int
+  | PL of (int * int)
+  | PM of {
+      m_x: int;
+      m_y: int;
+    }

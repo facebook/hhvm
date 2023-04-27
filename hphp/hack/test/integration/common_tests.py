@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import ClassVar, List, Mapping, Optional, Tuple, NamedTuple
+from typing import ClassVar, List, Mapping, NamedTuple, Optional, Tuple
 
 from hh_paths import hackfmt, hh_client, hh_server
 from test_case import TestCase, TestDriver
@@ -59,7 +59,6 @@ class CommonTestDriver(TestDriver):
             **{
                 "HH_TEST_MODE": "1",
                 "HH_TMPDIR": cls.hh_tmp_dir,
-                "HACKFMT_TEST_PATH": hackfmt,
                 "PATH": (
                     "%s:%s:/bin:/usr/bin:/usr/local/bin" % (hh_server_dir, cls.bin_dir)
                 ),
@@ -278,15 +277,6 @@ class CommonTestDriver(TestDriver):
             stdin=stdin,
         )
 
-    # Check to see if you can run hackfmt
-    def run_hackfmt_check(self) -> bool:
-        try:
-            (stdout_data, stderr_data, retcode) = self.proc_call([hackfmt, "-help"])
-            return retcode == 0
-        # If the file isn't found you will get this
-        except FileNotFoundError:
-            return False
-
     def run_hackfmt(
         self,
         stdin: Optional[str] = None,
@@ -319,9 +309,21 @@ class CommonTestDriver(TestDriver):
         if expected_output is not None:
             # pyre-fixme[8]: Attribute has type `int`; used as `None`.
             self.maxDiff = None
-            self.assertCountEqual(
-                map(lambda x: x.format(root=root), expected_output), output.splitlines()
-            )
+            expected_lines = [x.format(root=root) for x in expected_output]
+            try:
+                # assertCountEqual basically sorts the two lists and determines
+                # if the sorted outputs are equal. We use this because we want
+                # to be insensitive to non-determinism in error message order.
+                self.assertCountEqual(expected_lines, output.splitlines())
+            except Exception:
+                # the error messages produced by assertCountEqual can be quite hard
+                # to read. Let's just write everything out plainly.
+                nl = "\n"
+                print(
+                    f"EXPECTED OUTPUT\n{nl.join(expected_lines)}\nACTUAL OUTPUT:\n{output}\n",
+                    file=sys.stderr,
+                )
+                raise
         return err
 
     def check_cmd_and_json_cmd(
@@ -692,7 +694,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             [],
             [
-                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"const"}}]'
+                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"class constant"}}]'
             ],
             options=["--identify", "FbidMapField::FBID"],
         )
@@ -707,19 +709,52 @@ class CommonTests(BarebonesTests):
 
     def test_ide_find_refs(self) -> None:
         self.test_driver.start_hh_server()
-
+        path = os.path.join(self.test_driver.repo_dir, "foo_2.php")
         self.test_driver.check_cmd_and_json_cmd(
             [
-                "Foo",
-                'File "{root}foo_3.php", line 10, characters 17-19:',
+                "g",
+                'File "{root}foo_2.php", line 3, characters 18-18:',
+                'File "{root}foo_1.php", line 4, characters 20-20:',
+                "2 total results",
+            ],
+            [
+                '[{{"name":"g","filename":"{root}foo_2.php",'
+                '"line":3,"char_start":18,"char_end":18}},'
+                '{{"name":"g","filename":"{root}foo_1.php",'
+                '"line":4,"char_start":20,"char_end":20}}]'
+            ],
+            options=["--ide-find-refs", "{}:3,18".format(path)],
+        )
+
+    def test_ide_go_to_impl(self) -> None:
+        self.test_driver.start_hh_server()
+        path = os.path.join(self.test_driver.repo_dir, "foo_6.php")
+        self.test_driver.check_cmd_and_json_cmd(
+            [
+                "IFoo",
+                'File "{root}foo_6.php", line 7, characters 7-23:',
                 "1 total results",
             ],
             [
-                '[{{"name":"Foo","filename":"{root}foo_3.php",'
-                '"line":10,"char_start":17,"char_end":19}}]'
+                '[{{"name":"IFoo","filename":"{root}foo_6.php",'
+                '"line":7,"char_start":7,"char_end":23}}]'
             ],
-            options=["--ide-find-refs", "1:20"],
-            stdin="<?hh function test(Foo $foo) { new Foo(); }",
+            options=["--ide-go-to-impl", "{}:3,11".format(path)],
+        )
+
+    def test_ide_refactor(self) -> None:
+        self.test_driver.start_hh_server()
+        path = os.path.join(self.test_driver.repo_dir, "foo_readonly.php")
+        self.test_driver.check_cmd_and_json_cmd(
+            ["Rewrote 1 file."],
+            [
+                '[{{"filename":"{root}foo_readonly.php","patches":[{{'
+                '"char_start":75,"char_end":77,"line":3,"col_start":70,'
+                '"col_end":71,"patch_type":"replace","replacement":"$renamed"}},'
+                '{{"char_start":94,"char_end":96,"line":4,"col_start":8,'
+                '"col_end":9,"patch_type":"replace","replacement":"$renamed"}}]}}]'
+            ],
+            options=["--ide-refactor", "{}:3:71:{}".format(path, "renamed")],
         )
 
     def test_ide_highlight_refs(self) -> None:
@@ -804,7 +839,6 @@ class CommonTests(BarebonesTests):
                 '"type":"(function(): void)",'
                 '"pos":{{"filename":"{root}foo_3.php",'
                 '"line":9,"char_start":18,"char_end":40}},'
-                '"func_details":{{"min_arity":0,"return_type":"void","params":[]}},'
                 '"expected_ty":false}}]'
             ],
             options=["--auto-complete"],
@@ -857,6 +891,31 @@ class CommonTests(BarebonesTests):
                 + '"name":"string"}}}}'
             ],
             options=["--type-at-pos-batch", "{root}foo_3.php:11:14"],
+        )
+
+    def test_type_at_pos_batch_readonly(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_readonly.php",'
+                + '"line":4,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":23,"char_end":68}},'
+                + '"kind":"function",'
+                + '"readonly_this":true,'
+                + '"params":[{{"callConvention":"normal","readonly":true,"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":51,"char_end":53}},"kind":"primitive","name":"int"}}}}],'
+                + '"readonly_return":true,'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":65,"char_end":67}},"kind":"primitive","name":"int"}}}}'
+                + "}}"
+            ],
+            options=["--type-at-pos-batch", "{root}foo_readonly.php:4:4"],
         )
 
     def test_ide_get_definition(self) -> None:
@@ -985,7 +1044,7 @@ class CommonTests(BarebonesTests):
         # We've sent a kill signal to the server, but it may take some time for
         # the server to actually die. For instance, it may be attempting to
         # print a backtrace in the signal handler, which takes less than a
-        # second in @mode/opt-clang, but can take minutes in @mode/dev. If we
+        # second in @//mode/opt-clang, but can take minutes in @//mode/dev. If we
         # attempt to connect before the server process actually dies, the
         # monitor will happily hand us off to the dying server, which will
         # abruptly close our connection when its process exits. What we want

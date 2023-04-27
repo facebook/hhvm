@@ -19,7 +19,7 @@ type env = {
   ctx: Provider_context.t;
   classish_kind: Ast_defs.classish_kind option;
   class_name: string option;
-  function_name: string option;
+  function_name: Ast_defs.id option;
   file_mode: FileInfo.mode;
   function_kind: Ast_defs.fun_kind option;
   is_finally: bool;
@@ -30,27 +30,18 @@ type env = {
 
 let get_tcopt env = Provider_context.get_tcopt env.ctx
 
-let fun_env env f =
-  {
-    env with
-    function_name = Some (snd f.f_name);
-    function_kind = Some f.f_fun_kind;
-  }
+let fun_env env f = { env with function_kind = Some f.f_fun_kind }
 
 let fun_def_env env fd =
   {
     (fun_env env fd.fd_fun) with
+    function_name = Some fd.fd_name;
     file_mode = fd.fd_mode;
-    module_ =
-      Naming_attributes_params.get_module_attribute fd.fd_file_attributes;
+    module_ = fd.fd_module;
   }
 
 let method_env env m =
-  {
-    env with
-    function_name = Some (snd m.m_name);
-    function_kind = Some m.m_fun_kind;
-  }
+  { env with function_name = Some m.m_name; function_kind = Some m.m_fun_kind }
 
 let class_env env c =
   {
@@ -58,15 +49,10 @@ let class_env env c =
     classish_kind = Some c.c_kind;
     class_name = Some (snd c.c_name);
     file_mode = c.c_mode;
-    module_ = Naming_attributes_params.get_module_attribute c.c_file_attributes;
+    module_ = c.c_module;
   }
 
-let typedef_env env t =
-  {
-    env with
-    file_mode = t.t_mode;
-    module_ = Naming_attributes_params.get_module_attribute t.t_file_attributes;
-  }
+let typedef_env env t = { env with file_mode = t.t_mode; module_ = t.t_module }
 
 let get_empty_env ctx =
   {
@@ -88,6 +74,7 @@ let def_env ctx x =
   | Fun f -> fun_def_env empty_env f
   | Class c -> class_env empty_env c
   | Typedef t -> typedef_env empty_env t
+  | SetModule _
   | Constant _
   | Stmt _
   | Namespace _

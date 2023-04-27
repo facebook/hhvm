@@ -13,10 +13,6 @@ open Hh_prelude
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"
-
-let context_xhp_member_regex = Str.regexp ".*->[a-zA-Z_0-9:]*$"
-
 (* For identifying case statements from text context *)
 let context_after_single_colon_regex = Str.regexp ".*[a-zA-Z_0-9\"']:$"
 
@@ -42,8 +38,6 @@ let get_autocomplete_context
   if pos.File_content.column = 1 then
     {
       AutocompleteTypes.is_manually_invoked;
-      is_xhp_classname = false;
-      is_instance_member = false;
       is_after_single_colon = false;
       is_after_double_right_angle_bracket = false;
       is_after_open_square_bracket = false;
@@ -61,12 +55,6 @@ let get_autocomplete_context
       String.sub file_content ~pos:offset_start ~len:(offset - offset_start)
     in
     (* text is the text from the start of the line up to the caret position *)
-    let is_xhp_classname =
-      Str.string_match context_xhp_classname_regex leading_text 0
-    in
-    let is_instance_member =
-      Str.string_match context_xhp_member_regex leading_text 0
-    in
     let is_after_single_colon =
       Str.string_match context_after_single_colon_regex leading_text 0
     in
@@ -97,8 +85,6 @@ let get_autocomplete_context
     in
     {
       AutocompleteTypes.is_manually_invoked;
-      is_xhp_classname;
-      is_instance_member;
       is_after_single_colon;
       is_after_double_right_angle_bracket;
       is_after_open_square_bracket;
@@ -113,16 +99,22 @@ let go_at_auto332_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(sienv : SearchUtils.si_env)
-    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context) :
-    AutocompleteTypes.complete_autocomplete_result list
-    Utils.With_complete_flag.t =
-  AutocompleteService.go_ctx ~ctx ~entry ~sienv ~autocomplete_context
+    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
+    ~(naming_table : Naming_table.t) :
+    AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
+  AutocompleteService.go_ctx
+    ~ctx
+    ~entry
+    ~sienv
+    ~autocomplete_context
+    ~naming_table
 
 (** Call this function if you have a raw text file that DOES NOT have "AUTO332" in it *)
 let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(sienv : SearchUtils.si_env)
+    ~(naming_table : Naming_table.t)
     ~(is_manually_invoked : bool)
     ~(line : int)
     ~(column : int) : AutocompleteTypes.ide_result =
@@ -158,6 +150,7 @@ let go_ctx
       ~entry:modified_auto332_entry
       ~sienv
       ~autocomplete_context
+      ~naming_table
   in
   {
     AutocompleteTypes.completions = result.Utils.With_complete_flag.value;

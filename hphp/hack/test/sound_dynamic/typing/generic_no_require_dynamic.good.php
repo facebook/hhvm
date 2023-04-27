@@ -5,6 +5,10 @@
 class C<T> {
   public function __construct(private T $x) {}
   public function get() : T { return $this->x; }
+
+  public function k((function (T) : T) $f) : T {
+    return $f($this->x);
+  }
 }
 
 function f() : void {

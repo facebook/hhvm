@@ -3,18 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// NOTE: Most of the types in this file come from runtime/vm/hhbc.h and need to
+// NOTE: Most of the types in this file come from runtime/vm/opcodes.h and need to
 // be kept in sync.
+
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 use bitflags::bitflags;
 use once_cell::sync::OnceCell;
-use std::collections::{HashMap, HashSet};
 
 #[cfg(fbcode_build)]
 mod opcodes;
 #[cfg(not(fbcode_build))]
 mod opcodes {
-    include!(concat!(env!("CMAKE_BINARY_DIR"), "/hphp/tools/opcodes.rs"));
+    include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -30,6 +32,7 @@ pub enum ImmType {
     BA,
     BLA,
     DA,
+    DUMMY,
     FCA,
     I64A,
     IA,
@@ -95,8 +98,9 @@ pub struct OpcodeData {
 }
 
 mod fixups {
-    use super::*;
     use maplit::hashmap;
+
+    use super::*;
 
     pub(crate) trait Action {
         fn perform(&self, opcode: &mut OpcodeData);
@@ -251,11 +255,14 @@ mod fixups {
             ],
             "CreateCl" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("NumParams")),
-                replace_imm("arg2", ImmType::IVA, ImmType::OA("ClassNum")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName")),
+            ],
+            "FCallClsMethodM" => vec![
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallClsMethodD" => vec![
-                replace_imm("str3", ImmType::SA, ImmType::OAL("ClassName")),
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName")),
+                replace_imm("str3", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallClsMethodSD" => vec![
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
@@ -280,12 +287,9 @@ mod fixups {
             ],
             "MemoGetEager" => vec![
                 replace_imm("target1", ImmType::BA, ImmType::BA2),
-                remove_imm("target2"),
+                replace_imm("target2", ImmType::BA, ImmType::DUMMY),
             ],
             "NewObjD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
-            ],
-            "NewObjRD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "QueryM" => vec![
@@ -338,21 +342,15 @@ mod fixups {
             "SSwitch" => vec![
                 // Instead of using a single [(String, Label)] field in HHAS we
                 // split the cases and targets.
+                // One of the immediates needs to be "_0" to satisfy opcodes
+                // translator macro in the HackC Translator.
                 add_flag(InstrFlags::AS_STRUCT),
                 insert_imm(0, "cases", ImmType::ARR(Box::new(ImmType::SA))),
+                insert_imm(2, "_0", ImmType::DUMMY),
                 replace_imm("targets", ImmType::SLA, ImmType::BLA),
             ],
             "UnsetM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
-            ],
-            "VerifyOutType" => vec![
-                replace_imm("arg1", ImmType::IVA, ImmType::OAL("ParamName")),
-            ],
-            "VerifyParamType" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
-            ],
-            "VerifyParamTypeTS" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
             ],
         }
     }
@@ -397,9 +395,14 @@ pub fn opcode_data() -> &'static [OpcodeData] {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use fixups::{add_flag, insert_imm, remove_imm, rename_imm, replace_imm};
+    use fixups::add_flag;
+    use fixups::insert_imm;
+    use fixups::remove_imm;
+    use fixups::rename_imm;
+    use fixups::replace_imm;
     use maplit::hashmap;
+
+    use super::*;
 
     #[test]
     fn test_replace_imm() {

@@ -32,30 +32,29 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving eq, show, ord]
+type t = S.t [@@deriving eq, show, ord, sexp_of]
 
 val default : t
 
-(* Checks that string indeed has the given prefix before constructing path *)
+(** Checks that the provided string indeed has the given prefix before constructing path *)
 val create : prefix -> string -> t
 
-(* Creates a new path, inferring the prefix. Will default to Dummy. *)
+(** Creates a new path, inferring the prefix. Will default to Dummy. *)
 val create_detect_prefix : string -> t
 
-(* Creates a Relative_path.t relative to the root. The argument must be
+(** Creates a Relative_path.t relative to the root. The argument must be
     a *relative* path (the path suffix). If you wish to construct
     a Relative_path.t from an absolute path, use
     `create_detect_prefix` instead. *)
 val from_root : suffix:string -> t
-
-(* Checks if a file is a partial file by checking if the extension is .hackpartial *)
-val is_partial : t -> bool
 
 val prefix : t -> prefix
 
 val suffix : t -> string
 
 val to_absolute : t -> string
+
+val to_absolute_with_prefix : www:Path.t -> hhi:Path.t -> t -> string
 
 val to_tmp : t -> t
 

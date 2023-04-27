@@ -2,10 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::{emitter::Emitter, LabelGen};
+use env::emitter::Emitter;
+use env::LabelGen;
 use error::Result;
-use hhbc::{Instruct, IterId, Label, Local, Opcode, Pseudo};
-use instruction_sequence::{instr, InstrSeq};
+use hhbc::Instruct;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::Opcode;
+use hhbc::Pseudo;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
@@ -102,7 +109,7 @@ where
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
-        Ok((instr::popl(tmp.clone()), emit(e)?, instr::pushl(tmp)))
+        Ok((instr::pop_l(tmp.clone()), emit(e)?, instr::push_l(tmp)))
     })
 }
 
@@ -110,7 +117,7 @@ fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::unsetl(Local::new(idx as usize)))
+            .map(|idx| instr::unset_l(Local::new(idx as usize)))
             .collect(),
     )
 }
@@ -119,7 +126,7 @@ fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::iterfree(IterId { idx }))
+            .map(|idx| instr::iter_free(IterId { idx }))
             .collect(),
     )
 }

@@ -15,10 +15,10 @@ module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
 (* If an expression e is of type `opt_ty_maybe`, then this function
-returns the type of `await e`.
+   returns the type of `await e`.
 
-There is the special case that
-  e : ?Awaitable<T> |- await e : ?T
+   There is the special case that
+     e : ?Awaitable<T> |- await e : ?T
 *)
 let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in
@@ -61,7 +61,6 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       ((env, e1), MakeType.dynamic r)
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Terr
     | Tany _
     | Tvec_or_dict _
     | Tnonnull
@@ -76,12 +75,16 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Tshape _
     | Taccess _
     | Tneg _ ->
-      let (env, type_var) = Env.fresh_type env p in
+      let (env, type_var) =
+        if TUtils.is_tyvar_error env e_opt_ty then
+          Env.fresh_type_error env p
+        else
+          Env.fresh_type env p
+      in
       let expected_type = MakeType.awaitable r type_var in
       let return_type =
         match get_node e_opt_ty with
         | Tany _ -> mk (r, Typing_defs.make_tany ())
-        | Terr -> MakeType.err r
         | Tdynamic -> MakeType.dynamic r
         | Tunapplied_alias _ ->
           Typing_defs.error_Tunapplied_alias_in_illegal_context ()

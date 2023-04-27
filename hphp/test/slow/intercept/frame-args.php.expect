@@ -1,10 +1,13 @@
 Regular with default args
-vec(1) {
+vec(3) {
   int(1)
+  int(20)
+  int(30)
 }
-vec(2) {
+vec(3) {
   int(1)
   int(2)
+  int(30)
 }
 vec(3) {
   int(1)
@@ -39,8 +42,9 @@ vec(2) {
 }
 
 Variadic and default args
-vec(1) {
+vec(2) {
   int(1)
+  int(20)
 }
 int(1)
 int(20)

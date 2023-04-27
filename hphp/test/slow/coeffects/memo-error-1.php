@@ -1,4 +1,4 @@
 <?hh
 
-<<__PolicyShardedMemoize>>
+<<__Memoize(#KeyedByIC)>>
 function f(mixed $arg)[ctx $arg] {}

@@ -108,7 +108,7 @@
                    (Lvar ([10:3-7], $obj))),
                   (([10:10-21], Inv<(function(string): arraykey)>),
                    (New (
-                      (([10:14-17], Inv<[unresolved]>),
+                      (([10:14-17], Inv<_>),
                        (CI ([10:14-17], "\\Inv"))),
                       [],
                       [(([10:18-20], (function(string): int)),

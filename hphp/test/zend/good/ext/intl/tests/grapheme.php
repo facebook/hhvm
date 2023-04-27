@@ -595,7 +595,7 @@ function ut_main()
           $tmp = null;
           $result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, 0, inout $tmp);
 		}
-		elseif ( 4 == count ( $test ) ) {
+		else if ( 4 == count ( $test ) ) {
 			$res_str .= " starting at byte position ".(string)$test[2];
             $tmp = null;
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2], inout $tmp);

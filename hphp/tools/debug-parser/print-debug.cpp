@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
 
   std::size_t begin = 0;
   std::size_t end = std::numeric_limits<std::size_t>::max();
+  bool dwp = false;
 
   po::options_description desc{"Allowed options"};
   desc.add_options()
@@ -47,7 +48,10 @@ int main(int argc, char** argv) {
      "offset to begin printing at")
     ("end",
      po::value<std::size_t>(&end),
-     "offset to stop printing at");
+     "offset to stop printing at")
+    ("dwp",
+     po::bool_switch(&dwp),
+     "print the dwp file instead of the binary");
 
   try {
     po::variables_map vm;
@@ -74,7 +78,7 @@ int main(int argc, char** argv) {
                     << std::endl;
           return 1;
         }
-        (*printer)(std::cout, begin, end);
+        (*printer)(std::cout, begin, end, dwp);
       } catch (const Exception& exn) {
         std::cerr << "ERROR: " << exn.what() << std::endl;
         return 1;

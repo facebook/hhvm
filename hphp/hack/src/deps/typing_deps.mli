@@ -63,6 +63,26 @@ module Dep : sig
         (** Represents a toplevel symbol being defined as a member of
         this module *)
 
+  val dependency_of_variant : 'a variant -> dependency variant
+
+  type dep_kind =
+    | KGConst
+    | KFun
+    | KType
+    | KExtends
+    | KConst
+    | KConstructor
+    | KProp
+    | KSProp
+    | KMethod
+    | KSMethod
+    | KAllMembers
+    | KGConstName
+    | KModule
+  [@@deriving enum]
+
+  val dep_kind_of_variant : 'a variant -> dep_kind
+
   module Member : sig
     type t
 
@@ -77,6 +97,8 @@ module Dep : sig
     val constructor : t
 
     val const : string -> t
+
+    val all : t
   end
 
   (** A 63bit hash *)
@@ -86,8 +108,12 @@ module Dep : sig
 
   val make_member_dep_from_type_dep : t -> Member.t -> t
 
+  val compare_variant : 'a variant -> 'a variant -> int
+
   (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64
+
+  val to_int : t -> int
 
   val is_class : t -> bool
 
@@ -96,6 +122,10 @@ module Dep : sig
   val compare : t -> t -> int
 
   val extract_name : 'a variant -> string
+
+  val extract_root_name : ?strip_namespace:bool -> 'a variant -> string
+
+  val extract_member_name : 'a variant -> string option
 
   val to_decl_reference : 'a variant -> Decl_reference.t
 
@@ -108,6 +138,8 @@ module Dep : sig
   val of_hex_string : string -> t
 
   val variant_to_string : 'a variant -> string
+
+  val pp_variant : Format.formatter -> 'a variant -> unit
 end
 
 module DepHashKey : sig
@@ -119,7 +151,7 @@ module DepHashKey : sig
 end
 
 module DepSet : sig
-  type t
+  type t [@@deriving show]
 
   type elt = Dep.t
 
@@ -148,8 +180,14 @@ module DepSet : sig
   val is_empty : t -> bool
 
   val of_list : elt list -> t
+end
 
-  val pp : Format.formatter -> t -> unit
+module DepMap : sig
+  include WrappedMap_sig.S with type key = Dep.t
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
 end
 
 module VisitedSet : sig
@@ -169,58 +207,66 @@ val worker_id : int option ref
 val trace : bool ref
 
 val add_dependency_callback :
-  string ->
+  name:string ->
   (Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit) ->
   unit
 
-(* returns the previous value of the flag *)
+(** Return the previous value of the flag *)
 val allow_dependency_table_reads : Mode.t -> bool -> bool
 
 val add_idep :
   Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
-val idep_exists :
-  Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> bool
+val replace : Mode.t -> unit
 
 val dep_edges_make : unit -> dep_edges
 
+(** Depending on [mode], either return discovered edges
+  which are not already in the dep graph
+  or write those edges to disk. *)
 val flush_ideps_batch : Mode.t -> dep_edges
+
+(** Re-architecture-specific (should only be used with
+  `Typing_deps_mode.HhFanoutRustMode`). Flush remaining buffered discovered
+  edges by committing them via hh_fanout. Also flushes human readable dep maps
+  to disk, if provided.
+*)
+val hh_fanout_flush_ideps : Mode.t -> unit
 
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
+(** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 val register_discovered_dep_edges : dep_edges -> unit
 
 (** Save discovered edges to a binary file.
-  *
-  * - If mode is [InMemoryMode], the dep table delta in [typing.rs] is saved.
-  * - If mode is [SaveToDiskMode], an exception is raised.
-  *
-  * Setting [reset_state_after_saving] will empty the dep table delta in
-  * [typing.rs].
-  *)
+
+  - If mode is [InMemoryMode], the dep table delta in [typing_deps.rs] is saved.
+  - If mode is [SaveToDiskMode], an exception is raised.
+
+  Setting [reset_state_after_saving] will empty the dep table delta in
+  [typing_deps.rs]. *)
 val save_discovered_edges :
   Mode.t -> dest:string -> reset_state_after_saving:bool -> int
 
 (** Load discovered edges from a binary file.
-  *
-  * - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
-  *   hashes and they will be added to the dep table delta in [typing.rs].
-  *   If we have an existing table attached, we will first filter out edges
-  *   that are already present in the attached table.
-  * - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
-  *   hashes and they will be added ot the current worker's on-disk
-  *   dependency edge file.
-  *)
+
+  - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
+    hashes and they will be added to the dep table delta in [typing_deps.rs].
+    If we have an existing table attached, we will first filter out edges
+    that are already present in the attached table.
+  - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
+    hashes and they will be added ot the current worker's on-disk
+    dependency edge file. *)
 val load_discovered_edges : Mode.t -> string -> int
 
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t
 
-(* Add to accumulator all extend dependencies of source_class. Visited is used
- * to avoid processing nodes reachable in multiple ways more than once. In other
- * words: use DFS to find all nodes reachable by "extends" edges starting from
- * source class *)
+(** Add to accumulator all extend dependencies of source_class. Visited is used
+  to avoid processing nodes reachable in multiple ways more than once. In other
+  words: use DFS to find all nodes reachable by "extends" edges starting from
+  source class *)
 val get_extend_deps :
   mode:Mode.t ->
   visited:VisitedSet.t ->
@@ -228,15 +274,18 @@ val get_extend_deps :
   acc:DepSet.t ->
   DepSet.t
 
-(* Grow input set by adding all its extend dependencies (including recursive) *)
+(** Grow input set by adding all its extend dependencies (including recursive) *)
 val add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* Grow input set by adding all its typing dependencies (direct only) *)
+(** Grow input set by adding all its typing dependencies (direct only) *)
 val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* add_extend_deps and add_typing_deps chained together *)
+(** add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option
 end
+
+val dump_current_edge_buffer_in_memory_mode :
+  ?deps_to_symbol_map:'a Dep.variant DepMap.t -> unit -> unit

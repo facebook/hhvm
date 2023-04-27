@@ -4,11 +4,27 @@ class SetProfileSimpleObject {
   public int $mine = 4;
 
   <<__NEVER_INLINE>>
+  public static function foo() {
+    $i = 100;
+    $j = 200;
+  }
+
+  <<__NEVER_INLINE>>
+  public static function bar() {
+    $i = 100;
+    $j = 200;
+  }
+
+  <<__NEVER_INLINE>>
   public function test() {
+    SetProfileSimpleObject::bar();
+    SetProfileSimpleObject::foo();
   }
 
   <<__NEVER_INLINE>>
   public static function testStatic() {
+    self::foo();
+    self::bar();
   }
 }
 
@@ -26,6 +42,14 @@ function fb_setprofile_this($event, $name, $info) {
     $is_null = idx($info, "this_obj") === null ? 0 : 1;
     echo "fb_setprofile_this this_obj=", $is_null, "\n";
     echo "fb_setprofile_this mine=", idx($info, "this_obj")?->mine, "\n";
+  }
+}
+function fb_setprofile_file_line($event, $name, $info) {
+  if ($event === "enter") {
+    $file_parts = explode("/", idx($info, "file"));
+    $file = $file_parts[count($file_parts) - 1];
+    $line = idx($info, "line");
+    echo "fb_setprofile_file_line name=", $name, " file=", $file, " line=", $line, "\n";
   }
 }
 
@@ -61,6 +85,15 @@ fb_setprofile(
   SETPROFILE_FLAGS_DEFAULT | SETPROFILE_FLAGS_FRAME_PTRS |
     SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK,
   vec['SetProfileSimpleObject::test', 'SetProfileSimpleObject::testStatic']
+);
+$obj = new SetProfileSimpleObject();
+$obj->test();
+SetProfileSimpleObject::testStatic();
+fb_setprofile(null);
+fb_setprofile(
+  fb_setprofile_file_line<>,
+  SETPROFILE_FLAGS_DEFAULT | SETPROFILE_FLAGS_FILE_LINE,
+  vec['SetProfileSimpleObject::test', 'SetProfileSimpleObject::testStatic', 'SetProfileSimpleObject::foo', 'SetProfileSimpleObject::bar']
 );
 $obj = new SetProfileSimpleObject();
 $obj->test();

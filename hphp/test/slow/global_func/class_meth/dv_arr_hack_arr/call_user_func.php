@@ -15,8 +15,8 @@ function main() {
   test('afunc');
   test('afunc');
   test(darray(vec['C', 'cfunc']));
-  \var_dump(is_callable(HH\class_meth('C', 'cfunc')));
-  \var_dump(call_user_func_array(HH\class_meth('C', 'cfunc'), darray(vec[2])));
-  register_postsend_function(HH\class_meth('C', 'postSend'));
-  register_shutdown_function(HH\class_meth('C', 'onShutdown'));
+  \var_dump(is_callable(C::cfunc<>));
+  \var_dump(call_user_func_array(C::cfunc<>, darray(vec[2])));
+  register_postsend_function(C::postSend<>);
+  register_shutdown_function(C::onShutdown<>);
 }

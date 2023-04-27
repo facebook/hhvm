@@ -104,7 +104,7 @@ struct Timer {
     }
   };
 
-  explicit Timer(Name name, StructuredLogEntry* = nullptr);
+  explicit Timer(Name name, StructuredLogEntry* log_entry);
   ~Timer();
 
   /*
@@ -112,7 +112,7 @@ struct Timer {
    */
   int64_t stop();
 
-  typedef std::vector<std::pair<const char*, Counter>> CounterVec;
+  using CounterVec = std::vector<std::pair<const char*, Counter>>;
   static CounterVec Counters();
   static Counter CounterValue(Name name);
   static void RequestInit();

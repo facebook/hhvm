@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'E' with message 'Exception thrown while getting the message' in %s:11
+Stack trace:
+#0 {main}

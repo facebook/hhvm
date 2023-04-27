@@ -34,7 +34,7 @@ function test1(supportdyn<mixed> $sd):void {
 }
 
 function voidfun():void { }
-function void_to_supportdynamic():supportdynamic {
+function void_to_supportdyn():supportdyn<nonnull> {
   return voidfun();
 }
 

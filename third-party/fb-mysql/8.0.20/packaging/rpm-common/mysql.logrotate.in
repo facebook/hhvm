@@ -1,0 +1,36 @@
+# The log file name and location can be set in
+# /etc/my.cnf by setting the "log-error" option
+# in [mysqld]  section as follows:
+#
+# [mysqld]
+# log-error=@LOGFILE_RPM@
+#
+# For the mysqladmin commands below to work, root account
+# password is required. Use mysql_config_editor(1) to store
+# authentication credentials in the encrypted login path file
+# ~/.mylogin.cnf
+#
+# Example usage:
+#
+#  mysql_config_editor set --login-path=client --user=root --host=localhost --password
+#
+# When these actions has been done, un-comment the following to
+# enable rotation of mysqld's log error.
+#
+
+#@LOGFILE_RPM@ {
+#        create 640 mysql mysql
+#        notifempty
+#        daily
+#        rotate 5
+#        missingok
+#        compress
+#    postrotate
+#       # just if mysqld is really running
+#       if test -x @bindir@/mysqladmin && \
+#          @bindir@/mysqladmin ping &>/dev/null
+#       then
+#          @bindir@/mysqladmin flush-logs
+#       fi
+#    endscript
+#}

@@ -7,7 +7,7 @@
 
 class caseSensitivityTest {}
 class caseSensitivityTestChild extends caseSensitivityTest {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_a_variation_003(): void {
 echo "*** Testing is_a() : usage variations ***\n";
 
 var_dump(is_a(new caseSensitivityTestChild, 'caseSensitivityTEST'));

@@ -40,7 +40,6 @@ async function expressions(readonly Foo $x): readonly Awaitable<Foo> {
   // note that the first readonly is redundant, just testing parsing.
   $correct = readonly await readonly returns_readonly();
 
-
   return $x;
 }
 
@@ -48,7 +47,6 @@ function closure_type_spec(
   (readonly function(readonly Foo, readonly Bar): readonly Foo) $f,
 ): readonly (function(): void) {
 }
-
 
 class Bar {
   public readonly Foo $x;

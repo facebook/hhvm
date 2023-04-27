@@ -9,10 +9,12 @@
 open Typing_env_types
 open Decl_provider
 open Typing_defs
+module Cls = Decl_provider.Class
 module TPEnv = Type_parameter_env
 
-type class_or_typedef_result =
-  | ClassResult of Typing_classes_heap.Api.t
+type 'a class_or_typedef_result =
+      'a Decl_enforceability.class_or_typedef_result =
+  | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
 val simplify_unions_ref : (env -> locl_ty -> env * locl_ty) ref
@@ -68,6 +70,12 @@ val fresh_type_reason :
     it won't be solved automatically at the end of the scope *)
 val fresh_type_invariant : env -> Pos.t -> env * locl_ty
 
+(** Generate a fresh type variable to stand for an unknown type in the
+    case of type errors. *)
+val fresh_type_error : env -> Pos.t -> env * locl_ty
+
+val fresh_type_error_contravariant : env -> Pos.t -> env * locl_ty
+
 (** What type variables are fresh in the current scope? *)
 val get_current_tyvars : env -> Ident.t list
 
@@ -95,7 +103,7 @@ val expand_internal_type : env -> internal_type -> env * internal_type
 val is_typedef : env -> type_key -> bool
 
 val is_typedef_visible :
-  env -> ?expand_visible_newtype:bool -> typedef_type -> bool
+  env -> ?expand_visible_newtype:bool -> name:string -> typedef_type -> bool
 
 val get_enum : env -> type_key -> class_decl option
 
@@ -111,12 +119,23 @@ val make_depend_on_constructor : env -> type_key -> unit
 
 (** Register the current top-level structure as being dependent on the current
     module *)
-val make_depend_on_module : env -> unit
+val make_depend_on_current_module : env -> unit
+
+(** Register the droot as being dependent on all of the ancestor classes,
+    interfaces, and traits of the given class (i.e., the recursive ancestors
+    returned by [Typing_classes_heap.Api.all_ancestor_names] and stored in
+    [Decl_defs.dc_ancestors]). Should be invoked once when typechecking the
+    given class (after [droot] has been set to correspond to the given class). *)
+val make_depend_on_ancestors : env -> Cls.t -> unit
+
+val add_extends_dependency : env -> string -> unit
+
+val env_with_method_droot_member : env -> string -> static:bool -> env
+
+val env_with_constructor_droot_member : env -> env
 
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
-
-val get_class_dep : env -> type_key -> class_decl option
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
@@ -124,7 +143,8 @@ val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 (** Get type alias declaration from the appropriate backend and add dependency. *)
 val get_typedef : env -> type_key -> typedef_decl option
 
-val get_class_or_typedef : env -> type_key -> class_or_typedef_result option
+val get_class_or_typedef :
+  env -> type_key -> Typing_classes_heap.Api.t class_or_typedef_result option
 
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option
@@ -163,9 +183,9 @@ val get_readonly : env -> bool
 
 val set_readonly : env -> bool -> env
 
-val get_params : env -> (locl_ty * Pos.t * param_mode) Local_id.Map.t
+val get_params : env -> (locl_ty * Pos.t * locl_ty option) Local_id.Map.t
 
-val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env
+val set_param : env -> Local_id.t -> locl_ty * Pos.t * locl_ty option -> env
 
 val set_log_level : env -> string -> int -> env
 
@@ -184,11 +204,17 @@ val with_origin : env -> Decl_counters.origin -> (env -> env * 'a) -> env * 'a
 val with_origin2 :
   env -> Decl_counters.origin -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
-val with_in_expr_tree : env -> bool -> (env -> env * 'a * 'b) -> env * 'a * 'b
+val with_inside_expr_tree :
+  env -> Aast_defs.hint -> (env -> env * 'a * 'b) -> env * 'a * 'b
+
+val with_outside_expr_tree :
+  env -> (env -> Aast.class_name option -> env * 'a * 'b) -> env * 'a * 'b
+
+val inside_expr_tree : env -> Aast_defs.hint -> env
+
+val outside_expr_tree : env -> env
 
 val is_in_expr_tree : env -> bool
-
-val set_in_expr_tree : env -> bool -> env
 
 val is_static : env -> bool
 
@@ -239,19 +265,29 @@ val invalid_type_hint_assert_primary_pos_in_current_decl :
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
-val set_module : env -> Ast_defs.id option -> env
+val set_current_module : env -> Ast_defs.id option -> env
 
 val set_internal : env -> bool -> env
 
 val set_support_dynamic_type : env -> bool -> env
 
-val get_module : env -> string option
+val set_everything_sdt : env -> bool -> env
+
+val get_module : env -> module_key -> module_decl option
+
+val get_current_module : env -> string option
 
 val get_internal : env -> bool
 
 val get_support_dynamic_type : env -> bool
 
 val set_self : env -> string -> locl_ty -> env
+
+(** Run a given function with self unset in the environment.
+    Restore self after the function finishes executing. This is used when
+    checking attributes applied to a class, because the self keyword is not
+    allowed as part of an argument to an attribute *)
+val run_with_no_self : env -> (env -> env * 'a) -> env * 'a
 
 val set_parent : env -> string -> decl_ty -> env
 
@@ -315,7 +351,8 @@ val get_local : env -> Local_id.t -> locl_ty
 
 val get_local_pos : env -> Local_id.t -> locl_ty * Pos.t
 
-val get_locals : env -> Aast.lid list -> Typing_local_types.t
+val get_locals :
+  ?quiet:bool -> env -> 'a Aast.capture_lid list -> Typing_local_types.t
 
 val set_locals : env -> Typing_local_types.t -> env
 
@@ -519,6 +556,16 @@ val update_variance_after_bind : env -> int -> Typing_defs.locl_ty -> env
 val is_consistent : env -> bool
 
 val mark_inconsistent : env -> env
+
+val get_package_for_module : env -> string -> Package.package option
+
+val get_package_by_name : env -> string -> Package.package option
+
+val load_packages : env -> SSet.t -> env
+
+val with_packages : env -> SSet.t -> (env -> env * 'a) -> env * 'a
+
+val is_package_loaded : env -> string -> bool
 
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :

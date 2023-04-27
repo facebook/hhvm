@@ -1,0 +1,11 @@
+{
+  "pools": {
+    "A": {
+      "servers": [
+        "localhost:11400",
+        {"totally" : "invalid"}
+      ]
+    }
+  },
+  "route": "PoolRoute|A"
+}

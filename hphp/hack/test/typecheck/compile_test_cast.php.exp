@@ -2,7 +2,7 @@ File "compile_test_cast.php", line 28, characters 12-14:
 Encountered unexpected token `$x3`. (Parsing[1002])
 File "compile_test_cast.php", line 28, characters 10-10:
 Unbound name: `A` (a global constant) (Naming[2049])
-File "compile_test_cast.php", line 26, characters 9-18:
-Cannot cast a value of type `A` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
 File "compile_test_cast.php", line 28, characters 10-10:
 Unbound global constant (Typing) (Typing[4106])
+File "compile_test_cast.php", line 26, characters 9-18:
+Cannot cast a value of type `A` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])

@@ -17,10 +17,13 @@
 #include <vector>
 #include <iomanip>
 
+#include "hphp/tools/tc-print/offline-code.h"
+#include "hphp/tools/tc-print/tc-print.h"
 
+#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/instructions-a64.h"
 
 #define MAX_INSTR_ASM_LEN 128
-
 
 namespace HPHP { namespace jit {
 
@@ -140,7 +143,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       callAddr = callAddr + (int64_t)kInstructionSize;
     }
 
-    string callDest="";
+    std::string callDest="";
     if ((insn & BLR_x18) == BLR_x18) {
       callDest = getSymbolName((TCA)callAddr);
       callAddr = 0;
@@ -150,7 +153,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       std::ostringstream binary_os;
       binary_os << folly::format("{:08" PRIx32 "}",
                                  *reinterpret_cast<int32_t*>(frontier));
-      binary_os << string(10, ' ');
+      binary_os << std::string(10, ' ');
       return binary_os.str();
     }();
 

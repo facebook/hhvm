@@ -18,27 +18,20 @@ type env = {
    * until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  fail_open: bool;
   is_systemlib: bool;
   parser_options: ParserOptions.t;
+  scour_comments: bool;
 }
 
-type 'aast result_ = {
+type result = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: ('aast, string) Stdlib.result;
-  lowpri_errors: (Pos.t * string) list;
+  aast: (unit, unit) Aast.program;
+  lowerer_parsing_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
   lint_errors: Pos.t Lints_core.t list;
-  parse_peak: int;
-  lower_peak: int;
-  arena_bytes: int;
 }
-
-type result = (unit, unit) Aast.program result_
-
-type tast_result = Tast.program result_
 
 type error =
   | NotAHackFile

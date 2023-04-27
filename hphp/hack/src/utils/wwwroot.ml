@@ -24,10 +24,11 @@ let assert_www_directory ?(config = ".hhconfig") (path : Path.t) : unit =
   if not (is_www_directory ~config path) then (
     Printf.fprintf
       stderr
-      "Error: could not find a %s file in %s or any of its parent directories. Do you have a %s in your code's root directory?\n"
+      "Error: could not find a %s file in %s or any of its parent directories. Do you have a %s in your code's root directory?\n%s\n"
       config
       (Path.to_string path)
-      config;
+      config
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     flush stderr;
     exit 1
   )
@@ -43,7 +44,18 @@ let rec guess_root config start ~recursion_limit : Path.t option =
   else
     guess_root config (Path.parent start) ~recursion_limit:(recursion_limit - 1)
 
-let get ?(config = ".hhconfig") (path : string option) : Path.t =
+let interpret_command_line_root_parameter
+    ?(config = ".hhconfig") (paths : string list) : Path.t =
+  let path =
+    match paths with
+    | [] -> None
+    | [path] -> Some path
+    | _ ->
+      Printf.fprintf
+        stderr
+        "Error: please provide at most one www directory\n%!";
+      exit 1
+  in
   let start_str =
     match path with
     | None -> "."

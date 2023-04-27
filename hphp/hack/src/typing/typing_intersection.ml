@@ -33,7 +33,7 @@ let negate_type env r ty ~approx =
     | Tneg (Neg_class (_, c)) when Typing_utils.class_has_no_params env c ->
       MkType.class_type r c []
     | Tnonnull -> MkType.null r
-    | Tclass (c, Nonexact, _) -> MkType.neg r (Neg_class c)
+    | Tclass (c, Nonexact _, _) -> MkType.neg r (Neg_class c)
     | _ ->
       if Utils.equal_approx approx Utils.ApproxUp then
         MkType.mixed r
@@ -98,7 +98,7 @@ let recompose_atomic env r tyl =
 
 (* Destructure an intersection into a list of its sub-types,
    decending into sub-intersections.
-   *)
+*)
 let destruct_inter_list env tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec dest_inter env ty tyl tyl_res r_inter =
@@ -154,9 +154,9 @@ let rec intersect env ~r ty1 ty2 =
   else
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
-    if Utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
+    if Utils.is_sub_type_for_union env ty1 ty2 then
       (env, ty1)
-    else if Utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
+    else if Utils.is_sub_type_for_union env ty2 ty1 then
       (env, ty2)
     else if Utils.is_type_disjoint env ty1 ty2 then (
       let inter_ty = MkType.nothing r in
@@ -174,12 +174,12 @@ let rec intersect env ~r ty1 ty2 =
               List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
             in
             (env, mk (r, Ttuple inter_tyl))
-          | ((_, Tshape (shape_kind1, fdm1)), (_, Tshape (shape_kind2, fdm2)))
-            ->
+          | ( (_, Tshape (_, shape_kind1, fdm1)),
+              (_, Tshape (_, shape_kind2, fdm2)) ) ->
             let (env, shape_kind, fdm) =
               intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2)
             in
-            (env, mk (r, Tshape (shape_kind, fdm)))
+            (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
           | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
             intersect_lists env r tyl1 tyl2
           (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
@@ -188,13 +188,13 @@ let rec intersect env ~r ty1 ty2 =
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty2) ->
             let (env, ty) = intersect ~r env ty1arg ty2 in
-            let res = mk (r, Tnewtype (name1, [ty], ty)) in
+            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
             (env, res)
           | (_, (r, Tnewtype (name1, [ty2arg], _)))
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty1) ->
             let (env, ty) = intersect ~r env ty1 ty2arg in
-            let res = mk (r, Tnewtype (name1, [ty], ty)) in
+            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
             (env, res)
           | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
           | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
@@ -256,28 +256,29 @@ let rec intersect env ~r ty1 ty2 =
 and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
   let (env, fdm) =
     TShapeMap.merge_env env fdm1 fdm2 ~combine:(fun env _sfn sft1 sft2 ->
-        match ((shape_kind1, sft1), (shape_kind2, sft2)) with
+        match
+          ((is_nothing shape_kind1, sft1), (is_nothing shape_kind2, sft2))
+        with
         | ((_, None), (_, None))
-        | ((_, Some { sft_optional = true; _ }), (Closed_shape, None))
-        | ((Closed_shape, None), (_, Some { sft_optional = true; _ })) ->
+        | ((_, Some { sft_optional = true; _ }), (true, None))
+        | ((true, None), (_, Some { sft_optional = true; _ })) ->
           (env, None)
-        | ((_, Some { sft_optional = false; _ }), (Closed_shape, None))
-        | ((Closed_shape, None), (_, Some { sft_optional = false; _ })) ->
+        | ((_, Some { sft_optional = false; _ }), (true, None))
+        | ((true, None), (_, Some { sft_optional = false; _ })) ->
           raise Nothing
-        | ((_, Some sft), (Open_shape, None))
-        | ((Open_shape, None), (_, Some sft)) ->
-          (env, Some sft)
+        | ((_, Some sft), (_, None)) ->
+          let (env, ty) = intersect env ~r shape_kind2 sft.sft_ty in
+          (env, Some { sft with sft_ty = ty })
+        | ((_, None), (_, Some sft)) ->
+          let (env, ty) = intersect env ~r shape_kind1 sft.sft_ty in
+          (env, Some { sft with sft_ty = ty })
         | ( (_, Some { sft_optional = opt1; sft_ty = ty1 }),
             (_, Some { sft_optional = opt2; sft_ty = ty2 }) ) ->
           let opt = opt1 && opt2 in
           let (env, ty) = intersect env ~r ty1 ty2 in
           (env, Some { sft_optional = opt; sft_ty = ty }))
   in
-  let shape_kind =
-    match (shape_kind1, shape_kind2) with
-    | (Open_shape, Open_shape) -> Open_shape
-    | _ -> Closed_shape
-  in
+  let (env, shape_kind) = intersect env ~r shape_kind1 shape_kind2 in
   (env, shape_kind, fdm)
 
 and intersect_lists env r tyl1 tyl2 =
@@ -409,9 +410,9 @@ let intersect env ~r ty1 ty2 =
 
 let rec intersect_i env r ty1 lty2 =
   let ty2 = LoclType lty2 in
-  if Utils.is_sub_type_for_union_i ~coerce:None env ty1 ty2 then
+  if Utils.is_sub_type_for_union_i env ty1 ty2 then
     (env, ty1)
-  else if Utils.is_sub_type_for_union_i ~coerce:None env ty2 ty1 then
+  else if Utils.is_sub_type_for_union_i env ty2 ty1 then
     (env, ty2)
   else
     let (env, ty) =
@@ -440,6 +441,9 @@ let rec intersect_i env r ty1 lty2 =
           | ConstraintType cty ->
             (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty)))))
         | (_, Thas_member _)
+        | (_, Thas_type_member _)
+        | (_, Tcan_index _)
+        | (_, Tcan_traverse _)
         | (_, Tdestructure _) ->
           ( env,
             ConstraintType (mk_constraint_type (r, TCintersection (lty2, cty1)))
@@ -452,3 +456,5 @@ let rec intersect_i env r ty1 lty2 =
 let () = Utils.negate_type_ref := negate_type
 
 let () = Utils.simplify_intersections_ref := simplify_intersections
+
+let () = Utils.intersect_list_ref := intersect_list

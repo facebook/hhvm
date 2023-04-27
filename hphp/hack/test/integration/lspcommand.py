@@ -12,6 +12,7 @@ import uuid
 from typing import (
     Callable,
     Iterator,
+    List,
     Mapping,
     NamedTuple,
     Optional,
@@ -61,14 +62,20 @@ class LspCommandProcessor:
 
     @classmethod
     @contextlib.contextmanager
-    def create(cls: Type[U], env: Mapping[str, str]) -> Iterator[U]:
-        args = ["--enhanced-hover", "--verbose"]
+    def create(
+        cls: Type[U],
+        env: Mapping[str, str],
+        lsp_args: List[str],
+        repo_dir: Optional[str] = None,
+    ) -> Iterator[U]:
+        args = lsp_args + ["--enhanced-hover", "--verbose"]
         proc = subprocess.Popen(
             [hh_client, "lsp"] + args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=None,  # so hh_client inherits (=> writes to) our own stderr
             env=env,
+            cwd=repo_dir,
         )
 
         # Use the unbuffered versions of these streams, as the buffered versions

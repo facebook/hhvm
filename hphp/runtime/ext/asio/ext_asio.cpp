@@ -170,6 +170,7 @@ void AsioExtension::moduleInit() {
   initResumableWaitHandle();
   initAsyncGenerator();
   initAwaitAllWaitHandle();
+  initConcurrentWaitHandle();
   initConditionWaitHandle();
   initSleepWaitHandle();
   initRescheduleWaitHandle();
@@ -182,6 +183,11 @@ void AsioExtension::moduleInit() {
 }
 
 void AsioExtension::requestInit() { requestInitSingletons(); }
+
+void AsioExtension::loadDecls() {
+  loadDeclsFrom("asio");
+  loadDeclsFrom("async-generator");
+}
 
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(

@@ -37,10 +37,12 @@ let () = Hh_logger.Level.set_min_level Hh_logger.Level.Off
 let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 
 let global_opts =
-  GlobalOptions.make
+  GlobalOptions.set
+    ~tco_num_local_workers:1
+    ~tco_saved_state:GlobalOptions.default_saved_state
     ~po_disable_xhp_element_mangling:false
     ~po_deregister_php_stdlib:true
-    ()
+    GlobalOptions.default
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 
@@ -69,6 +71,7 @@ let test_init_common ?(hhi_files = []) () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
+  ServerProgress.disable ();
 
   let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);
@@ -80,9 +83,9 @@ let test_init_common ?(hhi_files = []) () =
   ()
 
 (* Hhi files are loaded during server setup. If given a list of string + contents, we add them
-to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
-This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
-files, but to test incremental mode behavior with Hhi files present.
+   to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
+   This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
+   files, but to test incremental mode behavior with Hhi files present.
 *)
 let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
     =
@@ -122,6 +125,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
       ~savedstate_file_opt:None
       ~workers:None
   in
+  ServerProgress.disable ();
   (* Return environment *)
   {
     env with
@@ -156,20 +160,20 @@ let run_loop_once :
   List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let did_read_disk_changes_ref = ref false in
-  let notifier () =
-    if not !did_read_disk_changes_ref then (
-      did_read_disk_changes_ref := true;
-      SSet.of_list (List.map disk_changes ~f:fst)
-    ) else
-      SSet.empty
+  let get_changes_sync () =
+    ServerNotifier.SyncChanges
+      (if not !did_read_disk_changes_ref then (
+        did_read_disk_changes_ref := true;
+        SSet.of_list (List.map disk_changes ~f:fst)
+      ) else
+        SSet.empty)
   in
+  let get_changes_async () = get_changes_sync () in
   let genv =
     {
       !genv with
-      ServerEnv.notifier_async =
-        (fun () ->
-          ServerNotifierTypes.Notifier_synchronous_changes (notifier ()));
-      ServerEnv.notifier;
+      ServerEnv.notifier =
+        ServerNotifier.init_mock ~get_changes_sync ~get_changes_async;
     }
   in
   (* Always pick up disk changes in tests immediately *)
@@ -183,13 +187,17 @@ let run_loop_once :
         SearchServiceRunner.run_completely ctx env.ServerEnv.local_symbol_table;
     }
   in
-  let { ServerEnv.RecheckLoopStats.rechecked_count; total_rechecked_count; _ } =
+  let {
+    ServerEnv.RecheckLoopStats.total_changed_files_count;
+    total_rechecked_count;
+    _;
+  } =
     env.ServerEnv.last_recheck_loop_stats
   in
   ( env,
     {
       did_read_disk_changes = !did_read_disk_changes_ref;
-      rechecked_count;
+      total_changed_files_count;
       total_rechecked_count;
       last_actual_total_rechecked_count =
         (match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
@@ -268,7 +276,7 @@ let assert_errors_in_phase
     (env : ServerEnv.env) (expected_count : int) (phase : Errors.phase) :
     ServerEnv.env =
   let all_phases =
-    [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing; Errors.Init]
+    [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
   in
   let errors_in_phases =
     List.map
@@ -650,8 +658,6 @@ let load_state
     ?(local_changes = [])
     ?(load_hhi_files = false)
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
-    ?(load_decls_from_saved_state =
-      ServerLocalConfig.(default.load_decls_from_saved_state))
     ?(enable_naming_table_fallback = false)
     ?custom_config
     ~disk_state
@@ -669,7 +675,6 @@ let load_state
           lazy_init = true;
           prechecked_files = use_precheked_files;
           predeclare_ide = true;
-          load_decls_from_saved_state;
           naming_sqlite_path =
             (if enable_naming_table_fallback then
               Some (saved_state_dir ^ "/" ^ saved_naming_filename)
@@ -822,7 +827,7 @@ let assert_autocomplete loop_output expected =
     | _ -> fail "Expected autocomplete response"
   in
   let results =
-    results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_name)
+    results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_label)
   in
   (* The autocomplete results out of hack are unsorted *)
   let results_as_string =
@@ -840,7 +845,7 @@ let assert_autocomplete_does_not_contain loop_output not_expected =
     | _ -> fail "Expected autocomplete response"
   in
   let results =
-    List.map results ~f:(fun x -> x.AutocompleteTypes.res_name) |> SSet.of_list
+    List.map results ~f:(fun x -> x.AutocompleteTypes.res_label) |> SSet.of_list
   in
   let not_expected = SSet.of_list not_expected in
   let occured = SSet.inter results not_expected in
@@ -860,7 +865,7 @@ let assert_ide_autocomplete loop_output expected =
   in
   let results =
     List.map results.AutocompleteTypes.completions ~f:(fun x ->
-        x.AutocompleteTypes.res_name)
+        x.AutocompleteTypes.res_label)
   in
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in
@@ -968,17 +973,17 @@ let assert_ide_find_refs loop_output expected_name expected =
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 
-let assert_refactor loop_output expected =
+let assert_rename loop_output expected =
   let results = assert_response loop_output in
-  (* We don't have any (better than JSON) human-readable format for refactor results,
+  (* We don't have any (better than JSON) human-readable format for rename results,
    * and I'm too lazy to write it. Tests will have to compare JSON outputs for now. *)
-  let results_as_string = ClientRefactor.patches_to_json_string results in
+  let results_as_string = ClientRename.patches_to_json_string results in
   assertEqual expected results_as_string
 
-let assert_ide_refactor loop_output expected =
+let assert_ide_rename loop_output expected =
   let results = assert_response loop_output in
   let results = Result.ok_or_failwith results in
-  let results_as_string = ClientRefactor.patches_to_json_string results in
+  let results_as_string = ClientRename.patches_to_json_string results in
   assertEqual expected results_as_string
 
 let assert_needs_recheck env x =

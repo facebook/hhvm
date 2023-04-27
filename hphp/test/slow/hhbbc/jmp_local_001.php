@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function main(Foo $x = null) {
+function main(?Foo $x = null) {
   if (!$x) {
     echo (string)(is_object($x)) . "\n";
   } else {

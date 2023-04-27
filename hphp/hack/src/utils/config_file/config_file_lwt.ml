@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 include Config_file_version
 
 type t = Config_file_common.t

@@ -24,6 +24,7 @@ type t =
   | EndOfFile
   | Script
   | QualifiedName
+  | ModuleName
   | SimpleTypeSpecifier
   | LiteralExpression
   | PrefixedStringExpression
@@ -38,6 +39,8 @@ type t =
   | EnumClassEnumerator
   | AliasDeclaration
   | ContextAliasDeclaration
+  | CaseTypeDeclaration
+  | CaseTypeVariant
   | PropertyDeclaration
   | PropertyDeclarator
   | NamespaceDeclaration
@@ -56,9 +59,6 @@ type t =
   | MethodishTraitResolution
   | ClassishDeclaration
   | ClassishBody
-  | TraitUsePrecedenceItem
-  | TraitUseAliasItem
-  | TraitUseConflictResolution
   | TraitUse
   | RequireClause
   | ConstDeclaration
@@ -82,7 +82,6 @@ type t =
   | UsingStatementFunctionScoped
   | WhileStatement
   | IfStatement
-  | ElseifClause
   | ElseClause
   | TryStatement
   | CatchClause
@@ -170,6 +169,9 @@ type t =
   | DictionaryTypeSpecifier
   | ClosureTypeSpecifier
   | ClosureParameterTypeSpecifier
+  | TypeRefinement
+  | TypeInRefinement
+  | CtxInRefinement
   | ClassnameTypeSpecifier
   | FieldSpecifier
   | FieldInitializer
@@ -191,6 +193,10 @@ type t =
   | ListItem
   | EnumClassLabelExpression
   | ModuleDeclaration
+  | ModuleExports
+  | ModuleImports
+  | ModuleMembershipDeclaration
+  | PackageExpression
 [@@deriving show, eq]
 
 let to_string kind =
@@ -201,6 +207,7 @@ let to_string kind =
   | EndOfFile -> "end_of_file"
   | Script -> "script"
   | QualifiedName -> "qualified_name"
+  | ModuleName -> "module_name"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | LiteralExpression -> "literal"
   | PrefixedStringExpression -> "prefixed_string"
@@ -215,6 +222,8 @@ let to_string kind =
   | EnumClassEnumerator -> "enum_class_enumerator"
   | AliasDeclaration -> "alias_declaration"
   | ContextAliasDeclaration -> "context_alias_declaration"
+  | CaseTypeDeclaration -> "case_type_declaration"
+  | CaseTypeVariant -> "case_type_variant"
   | PropertyDeclaration -> "property_declaration"
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"
@@ -233,9 +242,6 @@ let to_string kind =
   | MethodishTraitResolution -> "methodish_trait_resolution"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
-  | TraitUsePrecedenceItem -> "trait_use_precedence_item"
-  | TraitUseAliasItem -> "trait_use_alias_item"
-  | TraitUseConflictResolution -> "trait_use_conflict_resolution"
   | TraitUse -> "trait_use"
   | RequireClause -> "require_clause"
   | ConstDeclaration -> "const_declaration"
@@ -259,7 +265,6 @@ let to_string kind =
   | UsingStatementFunctionScoped -> "using_statement_function_scoped"
   | WhileStatement -> "while_statement"
   | IfStatement -> "if_statement"
-  | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"
   | TryStatement -> "try_statement"
   | CatchClause -> "catch_clause"
@@ -347,6 +352,9 @@ let to_string kind =
   | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClosureParameterTypeSpecifier -> "closure_parameter_type_specifier"
+  | TypeRefinement -> "type_refinement"
+  | TypeInRefinement -> "type_in_refinement"
+  | CtxInRefinement -> "ctx_in_refinement"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"
@@ -368,3 +376,7 @@ let to_string kind =
   | ListItem -> "list_item"
   | EnumClassLabelExpression -> "enum_class_label"
   | ModuleDeclaration -> "module_declaration"
+  | ModuleExports -> "module_exports"
+  | ModuleImports -> "module_imports"
+  | ModuleMembershipDeclaration -> "module_membership_declaration"
+  | PackageExpression -> "package_expression"

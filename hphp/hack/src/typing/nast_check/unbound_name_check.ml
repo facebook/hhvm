@@ -35,7 +35,8 @@ let handle_unbound_name env (pos, name) kind =
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
   else begin
-    Errors.add_naming_error @@ Naming_error.Unbound_name { pos; name; kind };
+    Errors.add_error
+      Naming_error.(to_user_error @@ Unbound_name { pos; name; kind });
     (* In addition to reporting errors, we also add to the global dependency table *)
     let dep =
       let open Name_context in
@@ -46,6 +47,8 @@ let handle_unbound_name env (pos, name) kind =
       | TraitContext -> Typing_deps.Dep.Type name
       | ClassContext -> Typing_deps.Dep.Type name
       | ModuleNamespace -> Typing_deps.Dep.Module name
+      | PackageNamespace ->
+        failwith "impossible match case" (* TODO (T148526825) *)
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
   end
@@ -53,15 +56,15 @@ let handle_unbound_name env (pos, name) kind =
 let has_canon_name env get_name get_pos (pos, name) =
   match get_name env.ctx name with
   | None -> false
-  | Some suggest_name ->
-    begin
-      match get_pos env.ctx suggest_name with
-      | None -> false
-      | Some suggest_pos ->
-        Errors.add_naming_error
-        @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
-        true
-    end
+  | Some suggest_name -> begin
+    match get_pos env.ctx suggest_name with
+    | None -> false
+    | Some suggest_pos ->
+      Errors.add_error
+        Naming_error.(
+          to_user_error @@ Did_you_mean { pos; name; suggest_pos; suggest_name });
+      true
+  end
 
 let check_fun_name env ((_, name) as id) =
   if Naming_special_names.SpecialFunctions.is_special_function name then
@@ -91,6 +94,20 @@ let check_module_name env ((_, name) as id) =
   else
     handle_unbound_name env id Name_context.ModuleNamespace
 
+let check_module_if_present env id_opt =
+  Option.iter id_opt ~f:(check_module_name env)
+
+let check_package_name env (pos, name) =
+  if
+    Package.Info.package_exists (Provider_context.get_package_info env.ctx) name
+  then
+    ()
+  else
+    Errors.add_error
+      Naming_error.(
+        to_user_error
+        @@ Unbound_name { pos; name; kind = Name_context.PackageNamespace })
+
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
     env
@@ -119,29 +136,32 @@ let check_type_name
               @@ Primary.Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
-    | None ->
-      begin
-        match Naming_provider.get_type_pos_and_kind env.ctx name with
-        | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
-          let (decl_pos, _) =
-            Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Unexpected_typedef
-               { pos; decl_pos; expected_kind = kind }
-        | Some _ -> ()
-        | None ->
-          if
-            has_canon_name
-              env
-              Naming_provider.get_type_canon_name
-              Naming_global.GEnv.type_pos
-              id
-          then
-            ()
-          else
-            handle_unbound_name env id kind
-      end
+    | None -> begin
+      match Naming_provider.get_type_kind env.ctx name with
+      | Some Naming_types.TTypedef when not allow_typedef ->
+        let def_pos =
+          Naming_provider.get_type_pos env.ctx name |> Option.value_exn
+        in
+        let (decl_pos, _) =
+          Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
+        in
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Unexpected_typedef { pos; decl_pos; expected_kind = kind })
+      | Some _ -> ()
+      | None ->
+        if
+          has_canon_name
+            env
+            Naming_provider.get_type_canon_name
+            Naming_global.GEnv.type_pos
+            id
+        then
+          ()
+        else
+          handle_unbound_name env id kind
+    end
 
 let check_type_hint
     ?(kind = Name_context.TypeNamespace)
@@ -185,6 +205,7 @@ let handler ctx =
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
         }
       in
+      check_module_if_present new_env c.Aast.c_module;
       new_env
 
     method! at_typedef env td =
@@ -195,43 +216,23 @@ let handler ctx =
           type_params = extend_type_params SMap.empty td.Aast.t_tparams;
         }
       in
+      check_module_if_present new_env td.Aast.t_module;
       new_env
 
     method! at_fun_def env fd =
-      let f = fd.Aast.fd_fun in
       let new_env =
         {
           env with
-          droot = Typing_deps.Dep.Fun (snd f.Aast.f_name);
-          type_params = extend_type_params env.type_params f.Aast.f_tparams;
+          droot = Typing_deps.Dep.Fun (snd fd.Aast.fd_name);
+          type_params = extend_type_params env.type_params fd.Aast.fd_tparams;
         }
       in
+      check_module_if_present new_env fd.Aast.fd_module;
       new_env
 
     method! at_gconst env gconst =
       let new_env =
         { env with droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name) }
-      in
-      new_env
-
-    method! at_file_attribute env attrs =
-      let () =
-        attrs.Aast.fa_user_attributes
-        |> Naming_attributes.find Naming_special_names.UserAttributes.uaModule
-        |> function
-        | None
-        | Some { Aast.ua_name = _; Aast.ua_params = [] } ->
-          ()
-        | Some { Aast.ua_name = _; Aast.ua_params = ((_, p, _) as name) :: _ }
-          ->
-          begin
-            match Nast_eval.static_string name with
-            | Ok name -> check_module_name env (p, name)
-            | Error _ -> () (* TODO(T110227532) *)
-          end
-      in
-      let new_env =
-        { env with droot = Typing_deps.Dep.Fun ""; type_params = SMap.empty }
       in
       new_env
 
@@ -274,9 +275,6 @@ let handler ctx =
           | _ -> ()
         in
         env
-      | Aast.Fun_id id ->
-        let () = check_fun_name env id in
-        env
       | Aast.Method_caller (id, _)
       | Aast.Xml (id, _, _) ->
         let () =
@@ -304,6 +302,9 @@ let handler ctx =
             cname
         in
         env
+      | Aast.Package pkg ->
+        let () = check_package_name env pkg in
+        env
       | _ -> env
 
     method! at_shape_field_name env sfn =
@@ -320,7 +321,7 @@ let handler ctx =
       in
       env
 
-    method! at_user_attribute env { Aast.ua_name; _ } =
+    method! at_user_attribute env { Aast.ua_name; Aast.ua_params; _ } =
       let () =
         if not @@ Naming_special_names.UserAttributes.is_reserved (snd ua_name)
         then
@@ -330,6 +331,19 @@ let handler ctx =
             ~allow_generics:false
             ~kind:Name_context.ClassContext
             ua_name
+      in
+      let () =
+        if
+          String.equal
+            (snd ua_name)
+            Naming_special_names.UserAttributes.uaCrossPackage
+        then
+          List.iter
+            ~f:(function
+              | (_, pos, Aast.String pkg_name) ->
+                check_package_name env (pos, pkg_name)
+              | _ -> ())
+            ua_params
       in
       env
 
@@ -351,7 +365,7 @@ let handler ctx =
       let () =
         check_type_name
           env
-          ~allow_typedef:true
+          ~allow_typedef:false
           ~allow_generics:false
           ~kind:Name_context.ClassContext
           id

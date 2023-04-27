@@ -101,13 +101,9 @@ struct c_Closure final : ObjectData {
 
   static ObjectData* instanceCtor(Class* cls);
   static void instanceDtor(ObjectData* obj, const Class* cls);
+  static void releaseShallow(ObjectData* obj);
 
   /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * The closure's underlying function.
-   */
-  const Func* getInvokeFunc() const { return getVMClass()->getCachedInvoke(); }
 
   /*
    * The Class scope the closure was defined in.
@@ -176,6 +172,11 @@ private:
 
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
+
+  /*
+   * The closure's underlying function.
+   */
+  const Func* getInvokeFunc() const { return getVMClass()->getRegularInvoke(); }
 };
 
 ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
@@ -185,4 +186,3 @@ ObjectData* createClosure(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

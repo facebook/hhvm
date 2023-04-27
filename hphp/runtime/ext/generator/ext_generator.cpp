@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -185,7 +184,7 @@ struct GeneratorExtension final : Extension {
     Native::registerNativeDataInfo<Generator>(
       Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
-    loadSystemlib("generator");
+    loadSystemlib();
     Generator::s_class = Class::lookup(Generator::s_className.get());
     assertx(Generator::s_class);
   }

@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-15], "\\TestDict"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+      c_vars = [];
       c_methods =
       [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -21,23 +21,23 @@
          m_ret = ((void), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\n");
        fd_fun =
        { f_span = [7:1-39]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\n"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<int, int>);
             param_type_hint = ((dict<int, int>), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\dict"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))]))))); 
@@ -48,17 +48,16 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-19], "\\call_dict");
        fd_fun =
        { f_span = [9:1-24:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
-         f_name = ([9:10-19], "\\call_dict"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([10:3-20], (Happly (([10:3-7], "\\HH\\dict"), [([10:8-14], (Hprim Tstring)); ([10:16-19], (Hprim Tint))]))))); 
@@ -87,7 +86,9 @@
              ([18:3-25],
               (Expr
                  ((TestDict), [18:3-24],
-                  (Binop ((Eq None), ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo))), ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs = ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
@@ -106,17 +107,16 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([26:10-24], "\\call_dict_cast");
        fd_fun =
        { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid)))); 
-         f_name = ([26:10-24], "\\call_dict_cast"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))]))))); 
@@ -163,7 +163,9 @@
              ([35:3-25],
               (Expr
                  ((TestDict), [35:3-24],
-                  (Binop ((Eq None), ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo))), ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([38:3-71],
               (Expr
                  ((void), [38:3-70],
@@ -200,4 +202,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

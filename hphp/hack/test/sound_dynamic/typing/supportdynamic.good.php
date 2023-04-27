@@ -1,10 +1,10 @@
 <?hh
 
-function expr(supportdynamic $sd): void {
+function expr(supportdyn<nonnull> $sd): void {
   $sd === 1;
 }
 
-function stmt(supportdynamic $sd): void {
+function stmt(supportdyn<nonnull> $sd): void {
   if ($sd) {}
   switch ($sd) {
     case 42:

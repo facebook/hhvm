@@ -12,7 +12,7 @@ open Integration_test_base_types
 module Test = Integration_test_base
 
 let foo_contents = "<?hh
-function g($x) {
+function g(dynamic $x):dynamic {
   return $x;
 }
 "

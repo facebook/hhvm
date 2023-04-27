@@ -63,6 +63,7 @@ class virtual type_validator :
       Typing_defs.decl_ty list ->
       Typing_defs.decl_ty ->
       Typing_defs.decl_ty ->
+      Typing_defs.decl_ty ->
       validation_state
 
     method on_taccess :

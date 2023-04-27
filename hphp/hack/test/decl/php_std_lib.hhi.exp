@@ -14,9 +14,9 @@
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
        fe_pos = [4:10-11]; fe_php_std_lib = true;
-       fe_support_dynamic_type = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mhhi; sc_final = false;
@@ -24,22 +24,21 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([7:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:16-18], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([9:11-15]),
-                  (Toption (Rhint ([9:12-15]), (Tprim Tint)))));
+           (Rhint ([9:11-15]), (Toption (Rhint ([9:12-15]), (Tprim Tint))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_sprops =
         [{ Shallow_decl_defs.sp_name = ([12:23-25], "$y");
            sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([12:18-22]),
-                  (Toption (Rhint ([12:19-22]), (Tprim Tint)))));
+           (Rhint ([12:18-22]), (Toption (Rhint ([12:19-22]), (Tprim Tint))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_constructor = None;
@@ -58,7 +57,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib; sm_attributes = [] }
           ];
@@ -77,7 +76,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib; sm_attributes = [] }
           ];
@@ -85,7 +84,5 @@
         [{ Typing_defs_core.ua_name = ([6:3-14], "__PHPStdLib");
            ua_classname_params = [] }
           ];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

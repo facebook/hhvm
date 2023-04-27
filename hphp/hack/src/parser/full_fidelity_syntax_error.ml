@@ -7,18 +7,20 @@
  *
  *)
 
+open Sexplib.Std
+
 (* TODO: Integrate these with the rest of the Hack error messages. *)
 
 type error_type =
   | ParseError
   | RuntimeError
-[@@deriving show]
+[@@deriving show, sexp_of]
 
 type syntax_quickfix = {
   title: string;
   edits: (int * int * string) list;
 }
-[@@deriving show]
+[@@deriving show, sexp_of]
 
 type t = {
   child: t option;
@@ -28,7 +30,7 @@ type t = {
   message: string;
   quickfixes: syntax_quickfix list;
 }
-[@@deriving show]
+[@@deriving show, sexp_of]
 
 exception ParserFatal of t * Pos.t
 

@@ -30,7 +30,7 @@ dict(2) {
   }
 }
 
-Test string with badly formed % numbers
+Test string with badly formed %% numbers
 NULL
 dict(3) {
   ["first"]=>
@@ -38,7 +38,7 @@ dict(3) {
   ["second"]=>
   string(2) "%a"
   ["third"]=>
-  string(2) "%b"
+  string(2) "%%b"
 }
 
 Test string with non-binary safe name

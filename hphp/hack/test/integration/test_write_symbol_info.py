@@ -7,6 +7,7 @@ from typing import ClassVar, Dict, List, Optional, Type
 
 import test_case
 from common_tests import CommonTestDriver
+from glean.schema.gencode.types import GenCode
 from glean.schema.hack.types import (
     ClassConstDeclaration,
     ClassConstDefinition,
@@ -18,18 +19,23 @@ from glean.schema.hack.types import (
     EnumDeclaration,
     EnumDefinition,
     Enumerator,
+    FileCall,
     FileDeclarations,
     FileXRefs,
     FunctionDeclaration,
     FunctionDefinition,
     GlobalConstDeclaration,
     GlobalConstDefinition,
+    GlobalNamespaceAlias,
+    IndexerInputsHash,
     InterfaceDeclaration,
     InterfaceDefinition,
     MethodDeclaration,
     MethodDefinition,
     MethodOccurrence,
     MethodOverrides,
+    ModuleDeclaration,
+    ModuleDefinition,
     NamespaceDeclaration,
     NamespaceQName,
     PropertyDeclaration,
@@ -41,10 +47,11 @@ from glean.schema.hack.types import (
     TypeConstDefinition,
     TypedefDeclaration,
     TypedefDefinition,
+    TypeInfo,
 )
 from glean.schema.src.types import FileLines
 from hh_paths import hh_server
-from thrift.py3 import Protocol, Struct, deserialize
+from thrift.py3 import deserialize, Protocol, Struct
 
 
 class WriteSymbolInfoTests(test_case.TestCase[CommonTestDriver]):
@@ -127,6 +134,7 @@ max_workers = 2
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
         predicate_dict = {
+            "hack.FileCall": FileCall,
             "hack.ClassConstDeclaration": ClassConstDeclaration,
             "hack.ClassConstDefinition": ClassConstDefinition,
             "hack.ClassDeclaration": ClassDeclaration,
@@ -145,10 +153,13 @@ max_workers = 2
             "hack.GlobalConstDefinition": GlobalConstDefinition,
             "hack.InterfaceDeclaration": InterfaceDeclaration,
             "hack.InterfaceDefinition": InterfaceDefinition,
+            "hack.IndexerInputsHash": IndexerInputsHash,
             "hack.MethodDeclaration": MethodDeclaration,
             "hack.MethodDefinition": MethodDefinition,
             "hack.MethodOccurrence": MethodOccurrence,
             "hack.MethodOverrides": MethodOverrides,
+            "hack.ModuleDeclaration": ModuleDeclaration,
+            "hack.ModuleDefinition": ModuleDefinition,
             "hack.NamespaceDeclaration": NamespaceDeclaration,
             "hack.NamespaceQName": NamespaceQName,
             "hack.PropertyDeclaration": PropertyDeclaration,
@@ -160,7 +171,10 @@ max_workers = 2
             "hack.TypeConstDefinition": TypeConstDefinition,
             "hack.TypedefDeclaration": TypedefDeclaration,
             "hack.TypedefDefinition": TypedefDefinition,
+            "hack.TypeInfo": TypeInfo,
+            "hack.GlobalNamespaceAlias": GlobalNamespaceAlias,
             "src.FileLines": FileLines,
+            "gencode.GenCode": GenCode,
         }
         predicate_base = predicate_name[: predicate_name.rfind(".")]
         return predicate_dict.get(predicate_base)

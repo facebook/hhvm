@@ -10,7 +10,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
-module S = Core_kernel.Sequence
 module Cls = Decl_provider.Class
 module Env = Tast_env
 
@@ -34,10 +33,21 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
+  let tenv = Tast_env.tast_env_as_typing_env env in
   match get_node ty with
-  | Tunion (ty :: tys) ->
-    let collect = collect_attrs_from_ty env SSet.empty in
-    List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+  | Tunion tys ->
+    (* Filter out dynamic, as we conservatively assume that anything dynamic
+     * has the appropriate required attrs *)
+    let tys =
+      List.filter tys ~f:(fun ty -> not (Typing_utils.is_dynamic tenv ty))
+    in
+    begin
+      match tys with
+      | [] -> set
+      | ty :: tys ->
+        let collect = collect_attrs_from_ty env SSet.empty in
+        List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+    end
   | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true
@@ -67,23 +77,29 @@ let check_attrs pos env sid attrs =
   else
     SMap.iter
       (fun attr origin_sid ->
+        let attr_name = Utils.strip_xhp_ns attr in
         let ty_reason_msg =
           lazy
             (match Env.get_class env origin_sid with
             | None -> []
             | Some ty ->
+              let pos =
+                match Cls.get_prop ty attr with
+                | Some attr_decl -> Lazy.force attr_decl.ce_pos
+                | None -> Cls.pos ty
+              in
               Reason.to_string
-                ("The attribute " ^ attr ^ " is declared in this class.")
-                (Reason.Rwitness_from_decl (Cls.pos ty)))
+                ("The attribute `" ^ attr_name ^ "` is declared here.")
+                (Reason.Rwitness_from_decl pos))
         in
         Errors.add_typing_error
           Typing_error.(
             xhp
             @@ Primary.Xhp.Missing_xhp_required_attr
-                 { pos; attr; ty_reason_msg }))
+                 { pos; attr = attr_name; ty_reason_msg }))
       missing_attrs
 
-let make_handler ctx =
+let create_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base

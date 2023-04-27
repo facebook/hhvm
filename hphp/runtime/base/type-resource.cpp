@@ -16,10 +16,8 @@
 
 #include "hphp/runtime/base/type-resource.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
-
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,10 +34,6 @@ String Resource::toString() const {
 
 Array Resource::toArray() const {
   return m_res ? m_res->data()->o_toArray() : Array();
-}
-
-const char* Resource::classname_cstr() const {
-  return m_res->data()->o_getClassName().c_str();
 }
 
 void Resource::compileTimeAssertions() {

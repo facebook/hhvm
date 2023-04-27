@@ -1,2 +1,4 @@
 File "visibility.php", line 13, characters 3-7:
 Properties cannot be declared `final` (Parsing[1002])
+File "visibility.php", line 13, characters 3-15:
+Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])

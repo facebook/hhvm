@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
@@ -37,15 +38,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Extension::Extension(const char* name, const char* version /* = "" */)
+Extension::Extension(const char* name, const char* version, const char* oncall)
     : m_name(name)
-    , m_version(version ? version : "") {
+    , m_version(version)
+    , m_oncall(oncall) {
   ExtensionRegistry::registerExtension(this);
 }
 
-const static std::string
-  s_systemlibPhpName("systemlib.php"),
-  s_systemlibHhasName("systemlib.hhas.");
+const static std::string s_systemlibPhpName("systemlib.php");
 
 bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, 2, "/:");
@@ -68,11 +68,23 @@ void Extension::CompileSystemlib(const std::string &slib,
                  name.c_str(),
                  info->m_fatalMsg.c_str(),
                  info->m_fatalLoc.line1);
-    _Exit(0);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 
   unit->merge();
   SystemLib::addPersistentUnit(unit);
+}
+
+namespace {
+  std::string get_section(
+    std::string_view name,
+    const std::string& dsoName
+  ) {
+    assertx(!name.empty());
+    std::string section("ext.");
+    section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
+    return get_systemlib(section, dsoName);
+  }
 }
 
 /**
@@ -82,22 +94,10 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  assertx(!name.empty());
-#ifdef _MSC_VER
-  std::string section("ext_");
-#else
-  std::string section("ext.");
-#endif
-  section += HHVM_FN(md5)(name, false).substr(0, 12).data();
-  std::string hhas;
-  std::string slib = get_systemlib(&hhas, section, m_dsoName);
+  auto const slib = get_section(name, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
     CompileSystemlib(slib, phpname, m_nativeFuncs);
-  }
-  if (!hhas.empty()) {
-    std::string hhasname = s_systemlibHhasName + name;
-    CompileSystemlib(hhas, hhasname, m_nativeFuncs);
   }
 }
 
@@ -146,6 +146,19 @@ void Extension::registerExtensionFunction(const String& name) {
 
 const std::vector<StringData*>& Extension::getExtensionFunctions() const {
   return m_functions;
+}
+
+void Extension::loadDecls() {
+  // Look for "ext.{namehash}" in the binary and grab its decls
+  loadDeclsFrom(m_name);
+}
+
+void Extension::loadDeclsFrom(std::string_view name) {
+  auto const slib = get_section(name, m_dsoName);
+  // We *really* ought to assert that `slib` is non-empty here, but there are
+  // some extensions that don't have any source code, such as the ones created by
+  // `IMPLEMENT_DEFAULT_EXTENSION_VERSION`
+  Native::registerBuiltinSymbols(std::string(name), slib);
 }
 
 /////////////////////////////////////////////////////////////////////////////

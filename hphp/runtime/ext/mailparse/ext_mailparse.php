@@ -77,7 +77,27 @@ function mailparse_msg_extract_part(resource $mimemail,
  * @return array
  */
 <<__Native>>
-function mailparse_msg_get_part_data(resource $mimemail): darray;
+function mailparse_msg_get_part_data(resource $mimemail): shape(
+  'headers' => darray<arraykey, mixed>,
+  "starting-pos" => int,
+  "starting-pos-body" => int,
+  "ending-pos" => int,
+  "ending-pos-body" => int,
+  "line-count" => int,
+  "body-line-count" => int,
+  "charset" => string,
+  "transfer-encoding" => string,
+  "content-type" => mixed,
+  ?"content-disposition" => mixed,
+  ?"content-location" => string,
+  "content-base" => string,
+  ?"content-boundary" => string,
+  ?"content-id" => string,
+  ?"content-description" => mixed,
+  ?"content-language" => mixed,
+  ?"content-md5" => mixed,
+  ...
+);
 
 /* @param resource $mimemail
  * @param string $mimesection
@@ -91,7 +111,7 @@ function mailparse_msg_get_part(resource $mimemail,
  * @return array
  */
 <<__Native>>
-function mailparse_msg_get_structure(resource $mimemail): darray;
+function mailparse_msg_get_structure(resource $mimemail): darray<arraykey, string>;
 
 /* @param string $addresses - A string containing addresses, like in: Wez
  * Furlong <wez@example.com>, doe@example.com  This string must not include
@@ -103,7 +123,11 @@ function mailparse_msg_get_structure(resource $mimemail): darray;
  * newsgroup, FALSE otherwise.
  */
 <<__Native>>
-function mailparse_rfc822_parse_addresses(string $addresses): varray;
+function mailparse_rfc822_parse_addresses(string $addresses): varray<shape(
+  ?'display' => string,
+  ?'address' => string,
+  'is_group' => bool,
+)>;
 
 /* Streams data from the source file pointer, apply encoding and write to the
  * destination file pointer.

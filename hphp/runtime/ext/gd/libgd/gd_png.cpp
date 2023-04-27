@@ -360,9 +360,9 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       for (h = 0; h < height; h++) {
         int boffset = 0;
         for (w = 0; w < width; w++) {
-          register png_byte r = row_pointers[h][boffset++];
-          register png_byte g = row_pointers[h][boffset++];
-          register png_byte b = row_pointers[h][boffset++];
+          png_byte r = row_pointers[h][boffset++];
+          png_byte g = row_pointers[h][boffset++];
+          png_byte b = row_pointers[h][boffset++];
           im->tpixels[h][w] = gdTrueColor (r, g, b);
         }
       }
@@ -373,16 +373,16 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       for (h = 0; h < height; h++) {
         int boffset = 0;
         for (w = 0; w < width; w++) {
-          register png_byte r = row_pointers[h][boffset++];
-          register png_byte g = row_pointers[h][boffset++];
-          register png_byte b = row_pointers[h][boffset++];
+          png_byte r = row_pointers[h][boffset++];
+          png_byte g = row_pointers[h][boffset++];
+          png_byte b = row_pointers[h][boffset++];
 
           /* gd has only 7 bits of alpha channel resolution, and
            * 127 is transparent, 0 opaque. A moment of convenience,
            *  a lifetime of compatibility.
            */
 
-          register png_byte a = gdAlphaMax - (row_pointers[h][boffset++] >> 1);
+          png_byte a = gdAlphaMax - (row_pointers[h][boffset++] >> 1);
           im->tpixels[h][w] = gdTrueColorAlpha(r, g, b, a);
         }
       }
@@ -392,7 +392,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       /* Palette image, or something coerced to be one */
       for (h = 0; h < height; ++h) {
         for (w = 0; w < width; ++w) {
-          register png_byte idx = row_pointers[h][w];
+          png_byte idx = row_pointers[h][w];
           im->pixels[h][w] = idx;
           open[idx] = 0;
         }

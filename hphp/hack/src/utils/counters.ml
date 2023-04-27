@@ -84,7 +84,7 @@ let get_time (category : Category.t) : unit -> time_in_sec =
        1. let r = getrusage(RUSAGE_SELF) in r.ru_utime.tv_sec + r.ru_utime.tv_usec / 1e6
        2. let t = times() in t.tms_utime + t.tms_stime
        3. clock() / CLOCKS_PER_SPEC *)
-    Sys.time
+    Stdlib.Sys.time
 
 let get_time_label (category : Category.t) : string =
   match category with

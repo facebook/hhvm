@@ -14,6 +14,8 @@ type aggregate_type =
   | AttributeSpecification
   | Parameter
   | ClassBodyDeclaration
+  | EnumClassBodyDeclaration
+  | RefinementMember
   | Statement
   | SwitchLabel
   | LambdaBody
@@ -71,6 +73,15 @@ let schema : schema_node list =
       fields = [("parts", ZeroOrMore Token)];
     };
     {
+      kind_name = "ModuleName";
+      type_name = "module_name";
+      func_name = "module_name";
+      description = "module_name";
+      prefix = "module_name";
+      aggregates = [Name];
+      fields = [("parts", ZeroOrMore Token)];
+    };
+    {
       kind_name = "SimpleTypeSpecifier";
       type_name = "simple_type_specifier";
       func_name = "simple_type_specifier";
@@ -108,7 +119,7 @@ let schema : schema_node list =
         [
           ("prefix", Token);
           ("left_backtick", Token);
-          ("expression", Aggregate Expression);
+          ("body", Aggregate LambdaBody);
           ("right_backtick", Token);
         ];
     };
@@ -157,6 +168,7 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
           ("keyword", Token);
           ("name", Token);
           ("colon", Token);
@@ -216,7 +228,7 @@ let schema : schema_node list =
           ("extends", ZeroOrOne Token);
           ("extends_list", ZeroOrMore (Aggregate Specifier));
           ("left_brace", Token);
-          ("elements", ZeroOrMore (Just "EnumClassEnumerator"));
+          ("elements", ZeroOrMore (Aggregate EnumClassBodyDeclaration));
           ("right_brace", Token);
         ];
     };
@@ -226,7 +238,7 @@ let schema : schema_node list =
       func_name = "enum_class_enumerator";
       description = "enum_class_enumerator";
       prefix = "enum_class_enumerator";
-      aggregates = [];
+      aggregates = [EnumClassBodyDeclaration];
       fields =
         [
           ("modifiers", ZeroOrOne Token);
@@ -246,6 +258,8 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
+          ("module_kw_opt", ZeroOrOne Token);
           ("keyword", Token);
           ("name", ZeroOrOne Token);
           ("generic_parameter", ZeroOrOne (Just "TypeParameters"));
@@ -273,6 +287,37 @@ let schema : schema_node list =
           ("context", Aggregate Specifier);
           ("semicolon", Token);
         ];
+    };
+    {
+      kind_name = "CaseTypeDeclaration";
+      type_name = "case_type_declaration";
+      func_name = "case_type_declaration";
+      description = "case_type_declaration";
+      prefix = "case_type";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
+          ("case_keyword", Token);
+          ("type_keyword", Token);
+          ("name", Token);
+          ("generic_parameter", ZeroOrOne (Just "TypeParameters"));
+          ("as", ZeroOrOne Token);
+          ("bounds", ZeroOrMore (Aggregate Specifier));
+          ("equal", Token);
+          ("variants", ZeroOrMore (Aggregate Specifier));
+          ("semicolon", Token);
+        ];
+    };
+    {
+      kind_name = "CaseTypeVariant";
+      type_name = "case_type_variant";
+      func_name = "case_type_variant";
+      description = "case_type_variant";
+      prefix = "case_type_variant";
+      aggregates = [];
+      fields = [("bar", ZeroOrOne Token); ("type", Aggregate Specifier)];
     };
     {
       kind_name = "PropertyDeclaration";
@@ -540,51 +585,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "TraitUsePrecedenceItem";
-      type_name = "trait_use_precedence_item";
-      func_name = "trait_use_precedence_item";
-      description = "trait_use_precedence_item";
-      prefix = "trait_use_precedence_item";
-      aggregates = [];
-      fields =
-        [
-          ("name", Aggregate Specifier);
-          ("keyword", Token);
-          ("removed_names", ZeroOrMore (Aggregate Specifier));
-        ];
-    };
-    {
-      kind_name = "TraitUseAliasItem";
-      type_name = "trait_use_alias_item";
-      func_name = "trait_use_alias_item";
-      description = "trait_use_alias_item";
-      prefix = "trait_use_alias_item";
-      aggregates = [];
-      fields =
-        [
-          ("aliasing_name", Aggregate Specifier);
-          ("keyword", Token);
-          ("modifiers", ZeroOrMore Token);
-          ("aliased_name", ZeroOrOne (Aggregate Specifier));
-        ];
-    };
-    {
-      kind_name = "TraitUseConflictResolution";
-      type_name = "trait_use_conflict_resolution";
-      func_name = "trait_use_conflict_resolution";
-      description = "trait_use_conflict_resolution";
-      prefix = "trait_use_conflict_resolution";
-      aggregates = [];
-      fields =
-        [
-          ("keyword", Token);
-          ("names", ZeroOrMore (Aggregate Specifier));
-          ("left_brace", Token);
-          ("clauses", ZeroOrMore (Aggregate Specifier));
-          ("right_brace", Token);
-        ];
-    };
-    {
       kind_name = "TraitUse";
       type_name = "trait_use";
       func_name = "trait_use";
@@ -646,7 +646,7 @@ let schema : schema_node list =
       func_name = "type_const_declaration";
       description = "type_const_declaration";
       prefix = "type_const";
-      aggregates = [ClassBodyDeclaration];
+      aggregates = [ClassBodyDeclaration; EnumClassBodyDeclaration];
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
@@ -894,24 +894,7 @@ let schema : schema_node list =
           ("condition", Aggregate Expression);
           ("right_paren", Token);
           ("statement", Aggregate Statement);
-          ("elseif_clauses", ZeroOrMore (Just "ElseifClause"));
           ("else_clause", ZeroOrOne (Just "ElseClause"));
-        ];
-    };
-    {
-      kind_name = "ElseifClause";
-      type_name = "elseif_clause";
-      func_name = "elseif_clause";
-      description = "elseif_clause";
-      prefix = "elseif";
-      aggregates = [];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_paren", Token);
-          ("condition", Aggregate Expression);
-          ("right_paren", Token);
-          ("statement", Aggregate Statement);
         ];
     };
     {
@@ -2121,6 +2104,56 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "TypeRefinement";
+      type_name = "type_refinement";
+      func_name = "type_refinement";
+      description = "type_refinement";
+      prefix = "type_refinement";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("type", Aggregate Specifier);
+          ("keyword", Token);
+          ("left_brace", Token);
+          ("members", ZeroOrMore (Aggregate RefinementMember));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "TypeInRefinement";
+      type_name = "type_in_refinement";
+      func_name = "type_in_refinement";
+      description = "type_in_refinement";
+      prefix = "type_in_refinement";
+      aggregates = [RefinementMember];
+      fields =
+        [
+          ("keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("constraints", ZeroOrMore (Just "TypeConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("type", ZeroOrOne (Aggregate Specifier));
+        ];
+    };
+    {
+      kind_name = "CtxInRefinement";
+      type_name = "ctx_in_refinement";
+      func_name = "ctx_in_refinement";
+      description = "ctx_in_refinement";
+      prefix = "ctx_in_refinement";
+      aggregates = [RefinementMember];
+      fields =
+        [
+          ("keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("constraints", ZeroOrMore (Just "ContextConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("ctx_list", ZeroOrOne (Aggregate Specifier));
+        ];
+    };
+    {
       kind_name = "ClassnameTypeSpecifier";
       type_name = "classname_type_specifier";
       func_name = "classname_type_specifier";
@@ -2385,13 +2418,67 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
-          ("keyword", Token);
-          ("name", Token)
-          (* TODO(T108206307) This might need its own node in the future, to
-           * represent module names *);
+          ("new_keyword", Token);
+          ("module_keyword", Token);
+          ("name", Aggregate Name);
           ("left_brace", Token);
+          ("exports", Just "ModuleExports");
+          ("imports", Just "ModuleImports");
           ("right_brace", Token);
         ];
+    };
+    {
+      kind_name = "ModuleExports";
+      type_name = "module_exports";
+      func_name = "module_exports";
+      description = "module_exports";
+      prefix = "module_exports";
+      aggregates = [];
+      fields =
+        [
+          ("exports_keyword", Token);
+          ("left_brace", Token);
+          ("exports", ZeroOrMore (Aggregate Name));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "ModuleImports";
+      type_name = "module_imports";
+      func_name = "module_imports";
+      description = "module_imports";
+      prefix = "module_imports";
+      aggregates = [];
+      fields =
+        [
+          ("imports_keyword", Token);
+          ("left_brace", Token);
+          ("imports", ZeroOrMore (Aggregate Name));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "ModuleMembershipDeclaration";
+      type_name = "module_membership_declaration";
+      func_name = "module_membership_declaration";
+      description = "module_membership_declaration";
+      prefix = "module_membership_declaration";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("module_keyword", Token);
+          ("name", Aggregate Name);
+          ("semicolon", Token);
+        ];
+    };
+    {
+      kind_name = "PackageExpression";
+      type_name = "package_expression";
+      func_name = "package_expression";
+      description = "package_expression";
+      prefix = "package_expression";
+      aggregates = [];
+      fields = [("keyword", Token); ("name", Aggregate Name)];
     };
   ]
 
@@ -2405,6 +2492,8 @@ let generated_aggregate_types =
     Specifier;
     Parameter;
     ClassBodyDeclaration;
+    EnumClassBodyDeclaration;
+    RefinementMember;
     Statement;
     SwitchLabel;
     LambdaBody;
@@ -2423,6 +2512,8 @@ let string_of_aggregate_type = function
   | Parameter -> "Parameter"
   | AttributeSpecification -> "AttributeSpecification"
   | ClassBodyDeclaration -> "ClassBodyDeclaration"
+  | EnumClassBodyDeclaration -> "EnumClassBodyDeclaration"
+  | RefinementMember -> "RefinementMember"
   | Statement -> "Statement"
   | SwitchLabel -> "SwitchLabel"
   | LambdaBody -> "LambdaBody"
@@ -2459,6 +2550,12 @@ let aggregation_of_attribute_specification =
 let aggregation_of_class_body_declaration =
   List.filter (fun x -> List.mem ClassBodyDeclaration x.aggregates) schema
 
+let aggregation_of_enum_class_body_declaration =
+  List.filter (fun x -> List.mem EnumClassBodyDeclaration x.aggregates) schema
+
+let aggregation_of_refinement_member =
+  List.filter (fun x -> List.mem RefinementMember x.aggregates) schema
+
 let aggregation_of_statement =
   List.filter (fun x -> List.mem Statement x.aggregates) schema
 
@@ -2493,6 +2590,8 @@ let aggregation_of = function
   | Parameter -> aggregation_of_parameter
   | AttributeSpecification -> aggregation_of_attribute_specification
   | ClassBodyDeclaration -> aggregation_of_class_body_declaration
+  | EnumClassBodyDeclaration -> aggregation_of_enum_class_body_declaration
+  | RefinementMember -> aggregation_of_refinement_member
   | Statement -> aggregation_of_statement
   | SwitchLabel -> aggregation_of_switch_label
   | LambdaBody -> aggregation_of_lambda_body
@@ -2510,6 +2609,8 @@ let aggregate_type_name = function
   | Parameter -> "parameter"
   | AttributeSpecification -> "attribute_specification"
   | ClassBodyDeclaration -> "class_body_declaration"
+  | EnumClassBodyDeclaration -> "enum_class_body_declaration"
+  | RefinementMember -> "refinement_member"
   | Statement -> "statement"
   | SwitchLabel -> "switch_label"
   | LambdaBody -> "lambda_body"
@@ -2527,6 +2628,8 @@ let aggregate_type_pfx_trim = function
   | Parameter -> ("Param", "")
   | AttributeSpecification -> ("AttrSpec", "")
   | ClassBodyDeclaration -> ("Body", "Declaration")
+  | EnumClassBodyDeclaration -> ("ECBody", "Declaration")
+  | RefinementMember -> ("TypeRefinementMember", "InRefinement$")
   | Statement -> ("Stmt", "Statement$")
   | SwitchLabel -> ("Switch", "Label$")
   | LambdaBody -> ("Lambda", "Expression$")

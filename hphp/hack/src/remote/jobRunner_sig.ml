@@ -26,20 +26,18 @@ module type S = sig
      It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
   val create_command :
     nonce:string ->
+    tenant:string ->
     keys:string list ->
     hash:string ->
     check_id:string ->
-    transport_channel:string option ->
-    file_system_mode:string ->
-    recli_version:string ->
-    max_cas_bytes:int ->
-    max_inline_bytes:int ->
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
     eden:bool ->
-    hulk_lite:bool ->
-    hulk_heavy:bool ->
+    cache_remote_decls:bool ->
+    use_shallow_decls_saved_state:bool ->
+    saved_state_manifold_path:string option ->
+    shallow_decls_manifold_path:string option ->
     command Future.t
 
   val is_alive : status -> bool
@@ -48,8 +46,6 @@ module type S = sig
   val begin_cancel_batch : Types.nonce -> (status list, string) result Future.t
 
   val begin_cancel : Types.job_id -> (status, string) result Future.t
-
-  val begin_heartbeat : Types.job_id -> (status, string) result Future.t
 
   val begin_run : command:command -> (Types.job_id list, string) result Future.t
 

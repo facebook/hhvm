@@ -89,6 +89,8 @@ class ComplexUnion {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public function getName(): string {
     return 'ComplexUnion';
   }
@@ -203,12 +205,12 @@ class ComplexUnion {
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_stringValue('What is the answer?');
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_intValue(42);
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 }

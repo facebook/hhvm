@@ -9,7 +9,7 @@ class X {
 }
 
 class Y extends X {
-  static $foo;
+  public static $foo;
 }
 
 

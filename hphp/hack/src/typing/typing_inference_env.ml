@@ -417,19 +417,18 @@ let get_type env r v =
       ISet.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
     in
     match get_solving_info_opt env v with
-    | Some (TVIType ty) ->
-      begin
-        match deref ty with
-        | (r, Tvar v') ->
-          if ISet.mem v aliases then
-            raise
-            @@ InconsistentTypeVarState
-                 "Two type variables are aliasing each other!";
-          get r v' (ISet.add v aliases)
-        | _ ->
-          let env = shorten_paths () in
-          (env, ty)
-      end
+    | Some (TVIType ty) -> begin
+      match deref ty with
+      | (r, Tvar v') ->
+        if ISet.mem v aliases then
+          raise
+          @@ InconsistentTypeVarState
+               "Two type variables are aliasing each other!";
+        get r v' (ISet.add v aliases)
+      | _ ->
+        let env = shorten_paths () in
+        (env, ty)
+    end
     | None
     | Some (TVIConstraints _) ->
       let env = shorten_paths () in
@@ -905,14 +904,12 @@ module Size = struct
       + type_size_list env d_required
       + type_size_list env d_optional
       + type_size_option ~f:(ty_size env) d_variadic
-    | (_, Thas_member hm) ->
-      1
-      +
-      let { hm_type = ty; hm_name = _; hm_class_id = _; hm_explicit_targs = _ }
-          =
-        hm
-      in
-      ty_size env ty
+    | (_, Thas_member hm) -> 1 + ty_size env hm.hm_type
+    | (_, Thas_type_member htm) ->
+      1 + ty_size env htm.htm_lower + ty_size env htm.htm_upper
+    | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
+    | (_, Tcan_traverse ct) ->
+      1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       1 + ty_size env lty + constraint_type_size env cty
@@ -1186,12 +1183,11 @@ let get_nongraph_subtype_prop env = env.subtype_prop
 
 let is_alias_for_another_var env v =
   match get_solving_info_opt env v with
-  | Some (TVIType ty) ->
-    begin
-      match get_node ty with
-      | Tvar v' when Int.( <> ) v v' -> true
-      | _ -> false
-    end
+  | Some (TVIType ty) -> begin
+    match get_node ty with
+    | Tvar v' when Int.( <> ) v v' -> true
+    | _ -> false
+  end
   | _ -> false
 
 (** Some ty vars in the map will carry no additional information, e.g.

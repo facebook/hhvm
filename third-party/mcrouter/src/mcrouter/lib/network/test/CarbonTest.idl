@@ -1,0 +1,56 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace facebook::memcache::test;
+thrift_namespace facebook.memcache.test.thrift;
+
+struct ManyFields {
+  1: folly::IOBuf buf1;
+  2: folly::IOBuf buf2;
+  3: folly::IOBuf buf3;
+  4: folly::IOBuf buf4;
+  5: folly::IOBuf buf5;
+  6: folly::IOBuf buf6;
+  7: folly::IOBuf buf7;
+  8: folly::IOBuf buf8;
+  9: folly::IOBuf buf9;
+  10: folly::IOBuf buf10;
+  11: folly::IOBuf buf11;
+  12: folly::IOBuf buf12;
+  13: folly::IOBuf buf13;
+  14: folly::IOBuf buf14;
+  15: folly::IOBuf buf15;
+  16: folly::IOBuf buf16;
+  17: folly::IOBuf buf17;
+  18: folly::IOBuf buf18;
+  19: folly::IOBuf buf19;
+  20: folly::IOBuf buf20;
+  21: folly::IOBuf buf21;
+  22: folly::IOBuf buf22;
+  23: folly::IOBuf buf23;
+  24: folly::IOBuf buf24;
+  25: folly::IOBuf buf25;
+  26: folly::IOBuf buf26;
+  27: folly::IOBuf buf27;
+  28: folly::IOBuf buf28;
+  29: folly::IOBuf buf29;
+  30: folly::IOBuf buf30;
+  31: folly::IOBuf buf31;
+  32: folly::IOBuf buf32;
+  33: folly::IOBuf buf33;
+  34: folly::IOBuf buf34;
+  35: folly::IOBuf buf35;
+  36: folly::IOBuf buf36;
+  37: folly::IOBuf buf37;
+  38: folly::IOBuf buf38;
+  39: folly::IOBuf buf39;
+  40: folly::IOBuf buf40;
+};
+
+struct McExpTestRequest {
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
+  3: uint64_t deadlineMs;
+};

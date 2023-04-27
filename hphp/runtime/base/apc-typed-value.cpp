@@ -23,22 +23,36 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct HazardPointer {
+struct HandleHazardPointer {
+  const APCHandle* raw;
+  TYPE_SCAN_IGNORE_ALL;
+};
+struct StringHazardPointer {
   StringData* raw;
   TYPE_SCAN_IGNORE_ALL;
 };
 
-RDS_LOCAL(std::vector<HazardPointer>, s_hazard_pointers);
+RDS_LOCAL(std::vector<HandleHazardPointer>, s_handle_hazard_pointers);
+RDS_LOCAL(std::vector<StringHazardPointer>, s_string_hazard_pointers);
 
 void APCTypedValue::FreeHazardPointers() {
-  if (!UseHazardPointers()) return;
-  for (auto const hp : *s_hazard_pointers) {
+  for (auto const hp : *s_handle_hazard_pointers) {
+    hp.raw->unreferenceNonRoot();
+  }
+  s_handle_hazard_pointers->clear();
+
+  if (!UseStringHazardPointers()) return;
+  for (auto const hp : *s_string_hazard_pointers) {
     DecRefUncountedString(hp.raw);
   }
-  s_hazard_pointers->clear();
+  s_string_hazard_pointers->clear();
 }
 
-bool APCTypedValue::UseHazardPointers() {
+void APCTypedValue::PushHazardPointer(const APCHandle* handle) {
+  s_handle_hazard_pointers->push_back({handle});
+}
+
+bool APCTypedValue::UseStringHazardPointers() {
   return !use_lowptr && !apcExtension::UseUncounted;
 }
 
@@ -200,8 +214,8 @@ TypedValue APCTypedValue::toTypedValue() const {
   TypedValue tv;
   tv.m_type = m_handle.type();
   auto const kind = m_handle.kind();
-  if (UseHazardPointers() && kind == APCKind::UncountedString) {
-    s_hazard_pointers->push_back({m_data.str});
+  if (UseStringHazardPointers() && kind == APCKind::UncountedString) {
+    s_string_hazard_pointers->push_back({m_data.str});
     m_data.str->uncountedIncRef();
     tv.m_data.pstr = m_data.str;
   } else if (kind == APCKind::UncountedBespoke) {

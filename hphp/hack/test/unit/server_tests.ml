@@ -18,10 +18,7 @@ let test_process_data =
     {
       pid = 2758734;
       server_specific_files =
-        {
-          ServerCommandTypes.server_finale_file = "2758734.fin";
-          server_progress_file = "progress.2758734.json";
-        };
+        { ServerCommandTypes.server_finale_file = "2758734.fin" };
       start_t = 0.0;
       in_fd = Unix.stdin;
       out_fds = [("default", Unix.stdout)];
@@ -77,8 +74,8 @@ let test_deferred_decl_should_defer () =
   true
 
 (* In this test, we wish to establish that we enable deferring type checking
-  for files that have undeclared dependencies, UNLESS we've already deferred
-  those files a certain number of times. *)
+   for files that have undeclared dependencies, UNLESS we've already deferred
+   those files a certain number of times. *)
 let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
@@ -91,7 +88,11 @@ let test_process_file_deferring () =
   Decl_counters.set_mode HackEventLogger.PerFileProfilingConfig.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_decls; _ } =
-    Typing_check_service.process_file ctx file ~decl_cap_mb:None
+    Typing_check_service.process_file
+      ctx
+      file
+      ~log_errors:false
+      ~decl_cap_mb:None
   in
   Counters.restore_state prev_counter_state;
 
@@ -129,6 +130,8 @@ let test_process_file_deferring () =
 
   true
 
+let expected_decling_count = 72
+
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
@@ -146,17 +149,24 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
 
-  let expected_decling_count = 65 in
   Asserter.Int_asserter.assert_equals
     expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")
     "There should be this many decling_count for shared_mem provider";
-  Asserter.Int_asserter.assert_equals
-    0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "There should be 0 disk_cat_count for shared_mem provider";
 
-  (* Now try the same with local_memory backend *)
+  (* We'll read Bar.php from disk when we decl-parse it in order to compute the
+     TAST of Foo.php, but we won't read Foo.php from disk to get its AST or
+     decls, since we want to use the contents in the Provider_context entry. *)
+  Asserter.Int_asserter.assert_equals
+    1
+    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    "There should be 1 disk_cat_count for shared_mem provider";
+
+  true
+
+(* This test verifies that the deferral/counting machinery works for
+   ProviderUtils.compute_tast_and_errors_unquarantined, this time with local memory backend. *)
+let test_compute_tast_counting_local_mem () =
   Utils.with_context
     ~enter:(fun () ->
       Provider_backend.set_local_memory_backend_with_defaults_for_test ())
@@ -164,15 +174,14 @@ let test_compute_tast_counting () =
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())
     ~do_:(fun () ->
-      let ctx =
-        Provider_context.empty_for_tool
-          ~popt:ParserOptions.default
-          ~tcopt:TypecheckerOptions.default
-          ~backend:(Provider_backend.get ())
-          ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      let { Common_setup.ctx; foo_path; foo_contents; _ } =
+        Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
       in
       let (ctx, entry) =
-        Provider_context.add_entry_if_missing ~ctx ~path:foo_path
+        Provider_context.add_or_overwrite_entry_contents
+          ~ctx
+          ~path:foo_path
+          ~contents:foo_contents
       in
       let { Tast_provider.Compute_tast_and_errors.telemetry; _ } =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
@@ -300,6 +309,8 @@ let tests =
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);
+    ( "test_compute_tast_counting_local_mem",
+      test_compute_tast_counting_local_mem );
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
     ("test_quarantine", test_quarantine);

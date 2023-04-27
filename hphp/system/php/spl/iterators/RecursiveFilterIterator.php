@@ -37,10 +37,10 @@ abstract class RecursiveFilterIterator extends FilterIterator
    * Return the inner iterator's children contained in a
    * RecursiveFilterIterator.
    *
-   * @return     mixed   Returns a RecursiveFilterIterator containing the
+   * @return     this    Returns a RecursiveFilterIterator containing the
    *                     inner iterator's children.
    */
-  public function getChildren() {
+  public function getChildren(): this {
     return new static($this->getInnerIterator()->getChildren());
   }
 
@@ -51,10 +51,10 @@ abstract class RecursiveFilterIterator extends FilterIterator
    *
    * Check whether the inner iterator's current element has children.
    *
-   * @return     mixed   TRUE if the inner iterator has children, otherwise
+   * @return     bool    TRUE if the inner iterator has children, otherwise
    *                     FALSE
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return $this->getInnerIterator()->hasChildren();
   }
 

@@ -9,10 +9,13 @@
   libancillary
   logging
   marshal_tools
+  hh_server_monitor
   messages
+  monitor_rpc
   process
   process_types
   relative_path
+  server_args
   server_command_types
   server_files
   socket

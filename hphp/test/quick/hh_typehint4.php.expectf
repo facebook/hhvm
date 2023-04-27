@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 to foo() must be of type ?HH\%rvarray|vec%r, stdClass given in %s/quick/hh_typehint4.php on line 8
+Catchable fatal error: Argument 1 to foo() must be of type ?HH\varray, stdClass given in %s/quick/hh_typehint4.php on line 8

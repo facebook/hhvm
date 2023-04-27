@@ -150,6 +150,8 @@ type select_outcome =
   | Select_persistent
   | Select_new of handoff
   | Select_nothing
+  | Select_exception of Exception.t
+  | Not_selecting_hg_updating
 
 exception Client_went_away
 

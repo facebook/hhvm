@@ -34,16 +34,28 @@ namespace {
 
 // `doneOffset` is the relative offset to jump to if the base has no elements.
 // `result` is a TBool that is true if the iterator has more items.
-void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result) {
+void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result,
+                     uint32_t iterId) {
   auto const targetOffset = bcOff(env) + doneOffset;
   auto const target = getBlock(env, targetOffset);
   assertx(target != nullptr);
-  gen(env, JmpZero, target, result);
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, JmpZero, taken, result);
+    },
+    [&] {
+      // Empty iteration- the iterator is dead
+      gen(env, KillIter, IterId{iterId}, fp(env));
+      gen(env, Jmp, target);
+    }
+  );
 }
 
 // `loopOffset` is the relative offset to jump to if the base has more elements.
 // `result` is a TBool that is true if the iterator has more items.
-void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result) {
+void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result,
+                     uint32_t iterId) {
   auto const targetOffset = bcOff(env) + loopOffset;
   auto const target = getBlock(env, targetOffset);
   assertx(target != nullptr);
@@ -61,6 +73,9 @@ void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result) {
   } else {
     gen(env, JmpNZero, target, result);
   }
+
+  // Fallthrough to next block the iterator is dead
+  gen(env, KillIter, IterId{iterId}, fp(env));
 }
 
 // If the iterator base is an empty array-like, this method will generate
@@ -107,7 +122,7 @@ void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
   auto const op = ita.hasKey() ? IterInitK : IterInit;
   auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
-  implIterInitJmp(env, doneOffset, result);
+  implIterInitJmp(env, doneOffset, result, ita.iterId);
 }
 
 void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
@@ -115,7 +130,7 @@ void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
 
   auto const op = ita.hasKey() ? IterNextK : IterNext;
   auto const result = gen(env, op, IterData(ita), fp(env));
-  implIterNextJmp(env, loopOffset, result);
+  implIterNextJmp(env, loopOffset, result, ita.iterId);
 }
 
 void emitLIterInit(IRGS& env, IterArgs ita,
@@ -132,7 +147,7 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
   widenLocalIterBase(env, baseLocalId);
-  implIterInitJmp(env, doneOffset, result);
+  implIterInitJmp(env, doneOffset, result, ita.iterId);
 }
 
 void emitLIterNext(IRGS& env, IterArgs ita,
@@ -151,7 +166,7 @@ void emitLIterNext(IRGS& env, IterArgs ita,
     return gen(env, op, IterData(ita), fp(env));
   }();
   widenLocalIterBase(env, baseLocalId);
-  implIterNextJmp(env, loopOffset, result);
+  implIterNextJmp(env, loopOffset, result, ita.iterId);
 }
 
 void emitIterFree(IRGS& env, int32_t iterId) {

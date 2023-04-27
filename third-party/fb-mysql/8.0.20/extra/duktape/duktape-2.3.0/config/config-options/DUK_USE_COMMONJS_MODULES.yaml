@@ -1,0 +1,12 @@
+define: DUK_USE_COMMONJS_MODULES
+introduced: 1.0.0
+default: true
+tags:
+  - ecmascript
+description: >
+  Enable support for CommonJS modules.  When enabled, the global require()
+  function provides a simple module loader facility which depends on the user
+  providing low level module searching functionality.  When disabled, the
+  global require() function is present but throws an error.
+
+# FIXME: change so that global is missing if disabled?

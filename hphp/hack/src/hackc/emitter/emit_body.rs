@@ -2,35 +2,52 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod emit_statement;
-mod reified_generics_helpers;
-mod try_finally_rewriter;
-
-use ast_scope::{Scope, ScopeItem};
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use bitflags::bitflags;
-use class_expr::ClassExpr;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
+use env::emitter::Emitter;
+use env::ClassExpr;
+use env::Env;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Slice;
+use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    decl_vars,
-    hhas_body::{HhasBody, HhasBodyEnv},
-    hhas_param::HhasParam,
-    hhas_type::{self, HhasTypeInfo},
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamName, Pseudo, TypedValue,
-};
+use hhbc::decl_vars;
+use hhbc::Body;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::IsTypeOp;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::Param;
+use hhbc::TypeInfo;
+use hhbc::TypedValue;
+use hhbc::UpperBound;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
-use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
-use reified_generics_helpers as RGH;
-use stack_limit::StackLimit;
+use oxidized::aast;
+use oxidized::aast_defs::DocComment;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::namespace_env;
+use oxidized::pos::Pos;
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
+
+use super::TypeRefinementInHint;
+use crate::emit_expression;
+use crate::emit_param;
+use crate::emit_statement;
+use crate::generator;
+use crate::reified_generics_helpers as RGH;
 
 static THIS: &str = "$this";
 
@@ -68,7 +85,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     return_value: InstrSeq<'arena>,
     scope: Scope<'_, 'arena>,
     args: Args<'_, 'arena>,
-) -> Result<(HhasBody<'arena>, bool, bool)> {
+) -> Result<(Body<'arena>, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
     let (is_generator, is_pair_generator) = generator::is_function_generator(body);
@@ -121,7 +138,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     env.jump_targets_gen.reset();
 
     // Params are numbered starting from 0, followed by decl_vars.
-    let should_reserve_locals = body_contains_finally(body, emitter.stack_limit);
+    let should_reserve_locals = body_contains_finally(body);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
     local_gen.reset(Local::new(num_locals));
@@ -169,7 +186,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
 fn make_body_instrs<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     body: &[ast::Stmt],
     is_generator: bool,
@@ -179,7 +196,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     flags: Flags,
 ) -> Result<InstrSeq<'arena>> {
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
-        instr::nativeimpl()
+        instr::native_impl()
     } else {
         env.do_function(emitter, body, emit_final_stmts)?
     };
@@ -198,15 +215,8 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         ast_params,
         flags,
     )?;
-    let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::Pseudo(Pseudo::Label(_))) => true,
-        _ => false,
-    };
-    let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entrynop()])
-    } else {
-        InstrSeq::gather(vec![begin_label, header_content])
-    };
+
+    let header = InstrSeq::gather(vec![begin_label, header_content]);
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
@@ -218,7 +228,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
 fn make_header_content<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
@@ -237,7 +247,7 @@ fn make_header_content<'a, 'arena, 'decl>(
         emit_deprecation_info(alloc, &env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
-        InstrSeq::gather(vec![instr::createcont(), instr::popc()])
+        InstrSeq::gather(vec![instr::create_cont(), instr::pop_c()])
     } else {
         instr::empty()
     };
@@ -253,11 +263,11 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     scope: &Scope<'a, 'arena>,
     immediate_tparams: &[ast::Tparam],
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &[ast::Stmt],
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
-    let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
+    let explicit_use_set = &emitter.global_state().explicit_use_set;
 
     let mut decl_vars =
         decl_vars::from_ast(params, body, explicit_use_set).map_err(Error::unrecoverable)?;
@@ -269,7 +279,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
         captured_vars.extend_from_slice(decl_vars.as_slice());
         captured_vars
     } else {
-        match &scope.items[..] {
+        match scope.items() {
             [] | [.., ScopeItem::Class(_), _] => move_this(&mut decl_vars),
             _ => {}
         };
@@ -295,12 +305,9 @@ pub fn emit_return_type_info<'arena>(
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     match ret {
-        None => Ok(HhasTypeInfo::make(
-            Just(Str::new_str(alloc, "")),
-            hhas_type::constraint::Constraint::default(),
-        )),
+        None => Ok(TypeInfo::make(Just("".into()), hhbc::Constraint::default())),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Return,
@@ -318,7 +325,7 @@ fn make_return_type_info<'arena>(
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
@@ -346,7 +353,7 @@ fn make_params<'a, 'arena, 'decl>(
     ast_params: &[ast::FunParam],
     scope: &Scope<'a, 'arena>,
     flags: Flags,
-) -> Result<Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>> {
+) -> Result<Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
@@ -358,19 +365,15 @@ pub fn make_body<'a, 'arena, 'decl>(
     decl_vars: Vec<Str<'arena>>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
-    upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
+    upper_bounds: Vec<UpperBound<'arena>>,
     shadowed_tparams: Vec<String>,
-    mut params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
-    return_type_info: Option<HhasTypeInfo<'arena>>,
+    mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
+    return_type_info: Option<TypeInfo<'arena>>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
-) -> Result<HhasBody<'arena>> {
-    if emitter
-        .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::RELABEL)
-    {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+) -> Result<Body<'arena>> {
+    if emitter.options().compiler_flags.relabel {
+        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -382,19 +385,14 @@ pub fn make_body<'a, 'arena, 'decl>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Just(
-                    (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
-                ),
-                parent_name: ClassExpr::get_parent_class_name(cd)
-                    .as_ref()
-                    .map(|s| Str::new_str(alloc, s))
-                    .into(),
+                class_info: Some((cd.get_kind().into(), cd.get_name_str())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
             })
         } else {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Nothing,
-                parent_name: Nothing,
+                class_info: None,
+                parent_name: None,
             })
         }
     } else {
@@ -404,29 +402,35 @@ pub fn make_body<'a, 'arena, 'decl>(
     // Pretty-print the DV initializer expression as a Hack source code string,
     // to make it available for reflection.
     params.iter_mut().for_each(|(p, default_value)| {
-        p.default_value = Maybe::from(
-            default_value
-                .as_ref()
-                .map(|(l, expr)| {
-                    use print_expr::{Context, ExprEnv};
-                    let ctx = Context::new(emitter);
-                    let expr_env = ExprEnv {
-                        codegen_env: body_env.as_ref(),
-                    };
-                    let mut buf = Vec::new();
-                    print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
-                        .map(|_| Pair(l.clone(), Str::from_vec(alloc, buf)))
-                        .ok()
-                })
-                .flatten(),
-        );
+        p.default_value = Maybe::from(default_value.as_ref().map(|(label, expr)| {
+            use print_expr::Context;
+            use print_expr::ExprEnv;
+            let ctx = Context::new(emitter);
+            let expr_env = ExprEnv {
+                codegen_env: body_env.as_ref(),
+            };
+            let mut buf = Vec::new();
+            let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
+                |e| Str::new_str(alloc, &e.to_string()),
+                |_| Str::from_vec(alloc, buf),
+            );
+            hhbc::DefaultValue {
+                label: *label,
+                expr,
+            }
+        }));
     });
 
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
-    Ok(HhasBody {
-        body_instrs: body_instrs.compact(alloc),
+    let params = Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p));
+    let body_instrs = body_instrs.compact(alloc);
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+        .map_err(error::Error::from_error)?;
+
+    Ok(Body {
+        body_instrs,
         decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter()),
         num_iters,
         is_memoize_wrapper,
@@ -438,16 +442,16 @@ pub fn make_body<'a, 'arena, 'decl>(
                 .into_iter()
                 .map(|s| Str::new_str(alloc, &s)),
         ),
-        params: Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p)),
+        params,
         return_type_info: return_type_info.into(),
-        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
-        env: body_env.into(),
+        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &c.1)).into(),
+        stack_depth,
     })
 }
 
 pub fn has_type_constraint<'a, 'arena>(
     env: &Env<'a, 'arena>,
-    ti: Option<&HhasTypeInfo<'_>>,
+    ti: Option<&TypeInfo<'_>>,
     ast_param: &ast::FunParam,
 ) -> (RGH::ReificationLevel, Option<ast::Hint>) {
     use RGH::ReificationLevel as L;
@@ -465,54 +469,54 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     tparams: &[ast::Tparam],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let mut make_param_instr = |param: &HhasParam<'arena>,
-                                ast_param: &ast::FunParam|
-     -> Result<InstrSeq<'arena>> {
-        let param_name = || ParamName::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
-        if param.is_variadic {
-            Ok(instr::empty())
-        } else {
-            use RGH::ReificationLevel as L;
-            match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
-                (L::Unconstrained, _) => Ok(instr::empty()),
-                (L::Not, _) => Ok(instr::verify_param_type(param_name())),
-                (L::Maybe, Some(h)) => {
-                    if !RGH::happly_decl_has_reified_generics(emitter, &h) {
-                        Ok(instr::verify_param_type(param_name()))
-                    } else {
-                        Ok(InstrSeq::gather(vec![
-                            emit_expression::get_type_structure_for_hint(
-                                emitter,
-                                tparams
-                                    .iter()
-                                    .map(|fp| fp.name.1.as_str())
-                                    .collect::<Vec<_>>()
-                                    .as_slice(),
-                                &IndexSet::new(),
-                                &h,
-                            )?,
-                            instr::verify_param_type_ts(param_name()),
-                        ]))
+    let mut make_param_instr =
+        |param: &Param<'arena>, ast_param: &ast::FunParam| -> Result<InstrSeq<'arena>> {
+            if param.is_variadic {
+                Ok(instr::empty())
+            } else {
+                use RGH::ReificationLevel as L;
+                let param_local = emitter.named_local(param.name);
+                match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
+                    (L::Unconstrained, _) => Ok(instr::empty()),
+                    (L::Not, _) => Ok(instr::empty()),
+                    (L::Maybe, Some(h)) => {
+                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
+                            Ok(instr::empty())
+                        } else {
+                            Ok(InstrSeq::gather(vec![
+                                emit_expression::get_type_structure_for_hint(
+                                    emitter,
+                                    tparams
+                                        .iter()
+                                        .map(|fp| fp.name.1.as_str())
+                                        .collect::<Vec<_>>()
+                                        .as_slice(),
+                                    &IndexSet::new(),
+                                    TypeRefinementInHint::Allowed,
+                                    &h,
+                                )?,
+                                instr::verify_param_type_ts(param_local),
+                            ]))
+                        }
                     }
-                }
-                (L::Definitely, Some(h)) => {
-                    if !RGH::happly_decl_has_reified_generics(emitter, &h) {
-                        Ok(instr::verify_param_type(param_name()))
-                    } else {
-                        let check = instr::istypel(emitter.named_local(param.name), IsTypeOp::Null);
-                        let verify_instr = instr::verify_param_type_ts(param_name());
-                        RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                    (L::Definitely, Some(h)) => {
+                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
+                            Ok(instr::empty())
+                        } else {
+                            let check =
+                                instr::is_type_l(emitter.named_local(param.name), IsTypeOp::Null);
+                            let verify_instr = instr::verify_param_type_ts(param_local);
+                            RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                        }
                     }
+                    _ => Err(Error::unrecoverable("impossible")),
                 }
-                _ => Err(Error::unrecoverable("impossible")),
             }
-        }
-    };
+        };
 
     let ast_params = ast_params
         .iter()
@@ -547,7 +551,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     None => ("".into(), instr::empty(), instr::empty()),
                     Some(c) if c.get_kind() == ast::ClassishKind::Ctrait => (
                         "::".into(),
-                        InstrSeq::gather(vec![instr::selfcls(), instr::classname()]),
+                        InstrSeq::gather(vec![instr::self_cls(), instr::class_name()]),
                         instr::concat(),
                     ),
                     Some(c) => (
@@ -557,7 +561,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     ),
                 };
 
-            let fn_name = match scope.items.last() {
+            let fn_name = match scope.top() {
                 Some(ScopeItem::Function(f)) => strip_id(f.get_name()),
                 Some(ScopeItem::Method(m)) => strip_id(m.get_name()),
                 _ => {
@@ -597,14 +601,14 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 instr::empty()
             } else {
                 InstrSeq::gather(vec![
-                    instr::nulluninit(),
-                    instr::nulluninit(),
+                    instr::null_uninit(),
+                    instr::null_uninit(),
                     trait_instrs,
                     instr::string(alloc, deprecation_string),
                     concat_instruction,
                     instr::int(sampling_rate),
                     instr::int(error_code),
-                    instr::fcallfuncd(
+                    instr::f_call_func_d(
                         FCallArgs::new(
                             FCallArgsFlags::default(),
                             1,
@@ -616,7 +620,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         ),
                         hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
                     ),
-                    instr::popc(),
+                    instr::pop_c(),
                 ])
             }
         }
@@ -626,8 +630,8 @@ pub fn emit_deprecation_info<'a, 'arena>(
 fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
-    return_type_info: &HhasTypeInfo<'_>,
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    return_type_info: &TypeInfo<'_>,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
     default_dropthrough: Option<InstrSeq<'arena>>,
@@ -645,7 +649,7 @@ fn set_emit_statement_state<'arena, 'decl>(
         Some(InstrSeq::gather(vec![
             instr::null(),
             instr::verify_ret_type_c(),
-            instr::retc(),
+            instr::ret_c(),
         ]))
     } else {
         None
@@ -666,23 +670,24 @@ fn set_emit_statement_state<'arena, 'decl>(
 }
 
 fn emit_verify_out<'arena>(
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
 ) -> (usize, InstrSeq<'arena>) {
     let param_instrs: Vec<InstrSeq<'arena>> = params
         .iter()
         .enumerate()
         .filter_map(|(i, (p, _))| {
             if p.is_inout {
+                let local = Local::new(i);
                 Some(InstrSeq::gather(vec![
-                    instr::cgetl(Local::new(i)),
+                    instr::c_get_l(local),
                     match p.type_info.as_ref() {
-                        Just(HhasTypeInfo { user_type, .. })
+                        Just(TypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {
                                 !(t.unsafe_as_str().ends_with("HH\\mixed")
                                     || t.unsafe_as_str().ends_with("HH\\dynamic"))
                             }) =>
                         {
-                            instr::verify_out_type(ParamName::ParamUnnamed(i as isize))
+                            instr::verify_out_type(local)
                         }
                         _ => instr::empty(),
                     },
@@ -703,7 +708,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>> {
+) -> Vec<UpperBound<'arena>> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);
@@ -729,13 +734,10 @@ pub fn emit_generics_upper_bounds<'arena>(
             .collect::<Vec<_>>();
         match &ubs[..] {
             [] => None,
-            _ => Some(
-                (
-                    Str::new_str(alloc, get_tp_name(tparam)),
-                    Slice::fill_iter(alloc, ubs.into_iter()),
-                )
-                    .into(),
-            ),
+            _ => Some(UpperBound {
+                name: Str::new_str(alloc, get_tp_name(tparam)),
+                bounds: Slice::fill_iter(alloc, ubs.into_iter()),
+            }),
         }
     };
     immediate_tparams
@@ -785,16 +787,16 @@ fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
 
 /// Scan through the AST looking to see if the body contains a non-empty
 /// `finally` clause (or a `using` which is morally equivalent).
-fn body_contains_finally(body: &[ast::Stmt], stack_limit: Option<&'_ StackLimit>) -> bool {
-    struct V<'a> {
+fn body_contains_finally(body: &[ast::Stmt]) -> bool {
+    struct V {
         has_finally: bool,
-        stack_limit: Option<&'a StackLimit>,
     }
-    use oxidized::{
-        aast_visitor::{AstParams, Node, Visitor},
-        ast::{Expr_, Stmt_},
-    };
-    impl<'a> Visitor<'a> for V<'_> {
+    use oxidized::aast_visitor::AstParams;
+    use oxidized::aast_visitor::Node;
+    use oxidized::aast_visitor::Visitor;
+    use oxidized::ast::Expr_;
+    use oxidized::ast::Stmt_;
+    impl<'a> Visitor<'a> for V {
         type Params = AstParams<(), ()>;
         fn object(&mut self) -> &mut dyn Visitor<'a, Params = Self::Params> {
             self
@@ -821,21 +823,18 @@ fn body_contains_finally(body: &[ast::Stmt], stack_limit: Option<&'_ StackLimit>
         fn visit_expr_(&mut self, c: &mut (), p: &Expr_) -> Result<(), ()> {
             // It's probably good enough to only check the stack on Expr_ since
             // that's where we can get really deep.
-            self.stack_limit.map(StackLimit::panic_if_exceeded);
-
-            match p {
-                Expr_::Efun(_) | Expr_::Lfun(_) => {
-                    // Don't recurse into lambda bodies.
-                    Ok(())
+            stack_limit::maybe_grow(|| {
+                match p {
+                    Expr_::Efun(_) | Expr_::Lfun(_) => {
+                        // Don't recurse into lambda bodies.
+                        Ok(())
+                    }
+                    _ => p.recurse(c, self.object()),
                 }
-                _ => p.recurse(c, self.object()),
-            }
+            })
         }
     }
-    let mut v = V {
-        has_finally: false,
-        stack_limit,
-    };
+    let mut v = V { has_finally: false };
     let _ = body.recurse(&mut (), &mut v);
     v.has_finally
 }

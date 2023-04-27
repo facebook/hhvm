@@ -2,3 +2,5 @@ File "parse_xhp_format_infinite_loop2.php", line 4, characters 16-16:
 A name is expected here. (Parsing[1002])
 File "parse_xhp_format_infinite_loop2.php", line 5, characters 1-1:
 Encountered unexpected text ``, was expecting a XHP attribute. (Parsing[1002])
+File "parse_xhp_format_infinite_loop2.php", line 3, characters 20-23:
+Unbound name: `:xhp` (an object type) (Naming[2049])

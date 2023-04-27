@@ -11,14 +11,10 @@ type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
-  quickfixes: Quickfix.t list;
+  quickfixes: 'prim_pos Quickfix.t list;
   is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
-
-type severity =
-  | Warning
-  | Error
 
 let make code ?(is_fixmed = false) ?(quickfixes = []) claim reasons =
   { code; claim; reasons; quickfixes; is_fixmed }
@@ -28,17 +24,6 @@ let get_code { code; _ } = code
 let get_pos { claim; _ } = fst claim
 
 let quickfixes { quickfixes; _ } = quickfixes
-
-let get_code_severity code =
-  if
-    code
-    = Error_codes.Init.err_code Error_codes.Init.ForwardCompatibilityNotCurrent
-  then
-    Warning
-  else
-    Error
-
-let get_severity error = get_code_severity (get_code error)
 
 let to_list { claim; reasons; _ } = claim :: reasons
 
@@ -53,6 +38,7 @@ let to_absolute { code; claim; reasons; quickfixes; is_fixmed } =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
+  let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
   { code; claim; reasons; quickfixes; is_fixmed }
 
 let make_absolute code = function
@@ -75,6 +61,7 @@ let to_absolute_for_test
   in
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
+  let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
   { code; claim; reasons; quickfixes; is_fixmed }
 
 let error_kind error_code =

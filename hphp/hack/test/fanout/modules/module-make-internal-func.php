@@ -2,26 +2,27 @@
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// changed-a-decl.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function foo(): void {}
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-function foo(): void {}
+internal function foo(): void {}
 //// base-foo-use.php
 <?hh
 
@@ -37,7 +38,8 @@ function call_foo(): void {
 }
 //// base-foo-use-in-module.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function call_foo_in_module(): void {
   foo();
@@ -45,7 +47,8 @@ function call_foo_in_module(): void {
 
 //// changed-foo-use-in-module.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function call_foo_in_module(): void {
   foo();

@@ -190,12 +190,17 @@ void XboxServer::Restart() {
 void XboxServer::Stop() {
   if (!s_dispatcher) return;
 
-  Lock l(s_dispatchMutex);
-  if (!s_dispatcher) return;
+  JobQueueDispatcher<XboxWorker>* dispatcher = nullptr;
+  {
+    Lock l(s_dispatchMutex);
+    if (!s_dispatcher) return;
 
-  s_dispatcher->stop();
-  delete s_dispatcher;
-  s_dispatcher = nullptr;
+    dispatcher = s_dispatcher;
+    s_dispatcher = nullptr;
+  }
+
+  dispatcher->stop();
+  delete dispatcher;
 }
 
 bool XboxServer::Enabled() {
@@ -284,11 +289,15 @@ Resource XboxServer::TaskStart(const String& msg,
   }
 
   auto hasXbox = RuntimeOption::XboxServerThreadCount > 0;
-  const char* errMsg =
-    (hasXbox ?
-     "Cannot create new Xbox task because the Xbox queue has "
-     "reached maximum capacity" :
-     "Cannot create new Xbox task because the Xbox is not enabled");
+  const char* errMsg;
+  if (hasXbox && !s_dispatcher) {
+    errMsg = "Cannot create Xbox task because Xbox server is shut down";
+  } else if (hasXbox) {
+    errMsg = "Cannot create new Xbox task because the Xbox queue has "
+     "reached maximum capacity";
+  } else {
+     errMsg = "Cannot create new Xbox task because the Xbox is not enabled";
+  }
   if (hasXbox) {
     xboxOverflowCounter->addValue(1);
   }
@@ -320,10 +329,12 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
 }
 
 int XboxServer::GetActiveWorkers() {
+  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
 }
 
 int XboxServer::GetQueuedJobs() {
+  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 

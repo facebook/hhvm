@@ -295,9 +295,9 @@ const Func* vm_decode_func_from_name(
   CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
   auto const moduleName =
     ar ? ar->func()->unit()->moduleName() : (const StringData*)nullptr;
-  auto const callCtx = MethodLookupCallContext(ctx, moduleName);
+  auto const callCtx = MemberLookupContext(ctx, moduleName);
   auto f = lookupMethodCtx(cc, funcName.get(), callCtx, lookupType,
-                           MethodLookupErrorOptions::None);
+                           MethodLookupErrorOptions::NoErrorOnModule);
   if (f && (f->attrs() & AttrStatic)) {
     // If we found a method and its static, null out this_
     this_ = nullptr;
@@ -764,6 +764,10 @@ void throw_implicit_context_exception(std::string s) {
   SystemLib::throwInvalidOperationExceptionObject(s);
 }
 
+void raise_implicit_context_warning(std::string s) {
+  raise_warning(s);
+}
+
 void throw_iterator_not_valid() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Iterator is not valid");
@@ -1020,11 +1024,11 @@ void pause_forever() {
 }
 
 bool is_constructor_name(const char* fn) {
-  auto len = strlen(fn);
+  auto const len = strlen(fn);
   const char construct[] = "__construct";
-  auto clen = sizeof(construct) - 1;
+  auto const clen = sizeof(construct) - 1;
 
-  if (len >= clen && !strcasecmp(fn + len - clen, construct)) {
+  if (len >= clen && !strcmp(fn + len - clen, construct)) {
     if (len == clen || (len > clen + 2 &&
                         fn[len - clen - 1] == ':' &&
                         fn[len - clen - 2] == ':')) {
@@ -1056,22 +1060,18 @@ void raise_bad_type_warning(const char *fmt, ...) {
 
 void raise_expected_array_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
-    if (auto ar = g_context->getStackFrame()) {
-     fn = ar->func()->name()->data();
-    } else {
-     fn = "(unknown)";
-    }
+    fn = fromLeaf([&](const BTFrame& frm) {
+      return frm.func()->name()->data();
+    }, backtrace_detail::true_pred, "(unknown)");
   }
   raise_bad_type_warning("%s expects array(s)", fn);
 }
 
 void raise_expected_array_or_collection_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
-    if (auto ar = g_context->getStackFrame()) {
-      fn = ar->func()->name()->data();
-    } else {
-      fn = "(unknown)";
-    }
+    fn = fromLeaf([&](const BTFrame& frm) {
+      return frm.func()->name()->data();
+    }, backtrace_detail::true_pred, "(unknown)");
   }
   raise_bad_type_warning("%s expects array(s) or collection(s)", fn);
 }

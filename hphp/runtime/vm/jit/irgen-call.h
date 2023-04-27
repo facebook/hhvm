@@ -18,6 +18,12 @@
 #include <cstdint>
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/module.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 namespace HPHP {
@@ -40,7 +46,14 @@ Type callReturnType(const Func* callee);
 Type awaitedCallReturnType(const Func* callee);
 Type callOutType(const Func* callee, uint32_t index);
 
+/*
+ * Emits instructions to check and enforce module boundary violations
+ */
+void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
+
+template <typename T>
+void emitModuleBoundaryCheckKnown(IRGS&, const T* symbol);
 //////////////////////////////////////////////////////////////////////
 
-}}}
 
+}}}

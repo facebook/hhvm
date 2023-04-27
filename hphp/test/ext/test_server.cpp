@@ -16,8 +16,6 @@
 
 #include "hphp/test/ext/test_server.h"
 
-#include "hphp/compiler/option.h"
-
 #include "hphp/util/async-func.h"
 #include "hphp/util/process-exec.h"
 
@@ -33,6 +31,7 @@
 
 #include <sys/types.h>
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sys/param.h>
@@ -181,12 +180,14 @@ void TestServer::RunServer() {
   auto pidFile = std::string("-vPidFile=") + s_pidfile;
   auto repoFile = std::string("-vRepo.Path=") + s_repoFile;
   auto logFile = std::string("-vLog.File=") + s_logFile;
+  auto sourceRoot = std::string("-vServer.SourceRoot=") +
+    (std::filesystem::current_path() / "runtime" / "tmp").native();
 
   const char *argv[] = {
     "__HHVM__", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
     option.c_str(), serverType.c_str(), pidFile.c_str(), repoFile.c_str(),
-    logFile.c_str(),
+    logFile.c_str(), sourceRoot.c_str(),
     nullptr
   };
 

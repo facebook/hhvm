@@ -91,7 +91,9 @@ enum class LocationType : uint8_t {
   APCKey,
   InstanceProperty,
   StaticProperty,
+  TypeConstant,
   Runtime,
+  TypeAlias,
 };
 
 struct LoggingProfileKey {
@@ -113,11 +115,16 @@ struct LoggingProfileKey {
     , locationType(LocationType::Runtime)
   {}
 
-  explicit LoggingProfileKey(const Class* cls, Slot slot, bool isStatic)
+  explicit LoggingProfileKey(const Class* cls, Slot slot, LocationType loc)
     : cls(cls)
     , slot(slot)
-    , locationType(isStatic ? LocationType::StaticProperty
-                            : LocationType::InstanceProperty)
+    , locationType(loc)
+  {}
+
+  explicit LoggingProfileKey(const TypeAlias* ta)
+    : ta(ta)
+    , slot(kInvalidSlot)
+    , locationType(LocationType::TypeAlias)
   {}
 
   bool operator==(const LoggingProfileKey& o) const {
@@ -125,10 +132,11 @@ struct LoggingProfileKey {
   }
 
   bool checkInvariants() const {
-    DEBUG_ONLY auto const prop =
+    DEBUG_ONLY auto const propOrCns =
       locationType == LocationType::InstanceProperty ||
-      locationType == LocationType::StaticProperty;
-    assertx(prop == (slot != kInvalidSlot));
+      locationType == LocationType::StaticProperty ||
+      locationType == LocationType::TypeConstant;
+    assertx(propOrCns == (slot != kInvalidSlot));
     assertx(IMPLIES(
       locationType == LocationType::Runtime,
       runtimeStruct != nullptr));
@@ -148,6 +156,8 @@ struct LoggingProfileKey {
       case LocationType::APCKey:
       case LocationType::Runtime:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
         return std::nullopt;
     }
     always_assert(false);
@@ -167,6 +177,12 @@ struct LoggingProfileKey {
         auto const& prop = cls->staticProperties()[slot];
         return folly::sformat("{}::{}", cls->name(), prop.name);
       }
+      case LocationType::TypeConstant: {
+        auto const& cns = cls->constants()[slot];
+        return folly::sformat("{}::{}", cls->name(), cns.name);
+      }
+      case LocationType::TypeAlias:
+        return folly::sformat("{}", ta->name());
       case LocationType::Runtime:
         return runtimeStruct->toString()->toCppString();
     }
@@ -182,6 +198,8 @@ struct LoggingProfileKey {
       case LocationType::APCKey:
       case LocationType::Runtime:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
         return toString();
     }
     always_assert(false);
@@ -196,9 +214,12 @@ struct LoggingProfileKey {
           return SrcKey::StableHasher()(sk);
         case LocationType::InstanceProperty:
         case LocationType::StaticProperty:
+        case LocationType::TypeConstant:
           return cls->stableHash() ^ slot;
         case LocationType::Runtime:
           return runtimeStruct->stableHash();
+        case LocationType::TypeAlias:
+          return ta->stableHash();
       }
       always_assert(false);
     }();
@@ -210,6 +231,7 @@ struct LoggingProfileKey {
     APCKey ak;
     const Class* cls;
     RuntimeStruct* runtimeStruct;
+    const TypeAlias* ta;
     uintptr_t ptr;
   };
 
@@ -297,6 +319,11 @@ private:
 // The decision we make at each layout-sensitive sink.
 struct SinkLayout {
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
+  double coverage = 0.0;
+};
+
+struct SinkLayouts {
+  std::vector<SinkLayout> layouts;
   bool sideExit = true;
 };
 
@@ -323,19 +350,20 @@ struct SinkProfile {
     std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
     std::atomic<uint64_t> valCounts[kNumValTypes] = {};
 
+    std::atomic<uint64_t> typeStructureCount = 0;
     std::atomic<uint64_t> sampledCount = 0;
     std::atomic<uint64_t> unsampledCount = 0;
     SourceMap sources;
     KeyOrderMap keyOrders;
   };
 
-  SinkLayout getLayout() const;
-  void setLayout(SinkLayout layout);
+  SinkLayouts getLayouts() const;
+  void setLayouts(SinkLayouts layouts);
 
   void update(const ArrayData* ad);
 
   explicit SinkProfile(SinkProfileKey key);
-  SinkProfile(SinkProfileKey key, SinkLayout layout);
+  SinkProfile(SinkProfileKey key, SinkLayouts layouts);
 
   void releaseData() { data.reset(); }
 
@@ -344,7 +372,7 @@ public:
   std::unique_ptr<SinkProfileData> data;
 
 private:
-  std::atomic<SinkLayout> layout = {};
+  folly::Synchronized<SinkLayouts> layouts = {};
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
@@ -353,7 +381,9 @@ private:
 LoggingProfile* getLoggingProfile(SrcKey sk);
 LoggingProfile* getLoggingProfile(APCKey ak);
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
-LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic);
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
+                                  LocationType loc);
+LoggingProfile* getLoggingProfile(const TypeAlias* ta);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.
@@ -370,7 +400,7 @@ void startExportProfiles();
 void eachSource(std::function<void(LoggingProfile& profile)> fn);
 void eachSink(std::function<void(SinkProfile& profile)> fn);
 void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout);
-void deserializeSink(SinkProfileKey key, SinkLayout layout);
+void deserializeSink(SinkProfileKey key, SinkLayouts layout);
 size_t countSources();
 size_t countSinks();
 

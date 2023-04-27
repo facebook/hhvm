@@ -1,0 +1,8 @@
+First section: Value here
+Second section: Other value here
+Third section: NULL
+
+Removing first section
+First section: NULL
+Second section: Other value here
+Third section: NULL

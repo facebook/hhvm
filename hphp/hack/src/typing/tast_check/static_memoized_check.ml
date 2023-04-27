@@ -24,21 +24,18 @@ let unnecessary_memoize_lsb c m =
   match Naming_attributes.mem_pos attr m.m_user_attributes with
   | None -> ()
   | Some pos ->
-    let (pos_class, name_class) = c.c_name in
-    let name_class = Utils.strip_ns name_class in
-    let reason =
-      lazy (pos_class, sprintf "the class `%s` is final" name_class)
-    in
+    let (class_pos, class_name) = c.c_name in
     let suggestion =
       Some
         (sprintf
            "Try using the attribute `%s` instead"
            SN.UserAttributes.uaMemoize)
     in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Unnecessary_attribute { pos; attr; reason; suggestion })
+    Errors.add_error
+      Naming_error.(
+        to_user_error
+        @@ Unnecessary_attribute
+             { pos; attr; class_pos; class_name; suggestion })
 
 let handler =
   object

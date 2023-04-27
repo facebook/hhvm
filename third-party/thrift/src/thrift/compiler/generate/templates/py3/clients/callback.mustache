@@ -1,0 +1,49 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Included from CythonClients.pyx, this file defines the core adapter between the
+C++ async future calls and Python asyncio futures. The C++ classes defined in
+ClientsWrapper.h and ClientsWrapper.cpp take these callbacks and call into them
+from the IO thread. The callbacks examine the result, extract the exception if
+one occurred, and then schedule setting the result on the future to be safely
+executed in the asyncio loop.
+
+}}
+
+{{#program:services}}
+{{#service:supportedFunctions}}
+cdef void {{service:name}}_{{function:name}}_callback(
+    cFollyTry[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}]&& result,
+    PyObject* userdata
+):
+    {{> clients/callback_body}}
+
+
+{{/service:supportedFunctions}}
+{{#service:interactions}}
+{{#service:supportedFunctions}}
+cdef void {{service:parent_service_name}}_{{service:name}}_{{function:name}}_callback(
+    cFollyTry[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}]&& result,
+    PyObject* userdata
+):
+    {{> clients/callback_body}}
+
+
+{{/service:supportedFunctions}}
+{{/service:interactions}}
+{{/program:services}}

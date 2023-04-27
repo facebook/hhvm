@@ -8,7 +8,7 @@
  (name watchman_lib)
  (wrapped false)
  (modules watchmanEventWatcher)
- (libraries watchman_config watchman_utils))
+ (libraries socket watchman_config watchman_utils))
 
 (executable
  (name watcher_bin)
@@ -23,4 +23,4 @@
  (name watchman_client)
  (wrapped false)
  (modules watchmanEventWatcherClient watchmanEventWatcherClient_sig)
- (libraries watchman_config server_utils))
+ (libraries socket watchman_config server_utils))

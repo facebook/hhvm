@@ -23,15 +23,17 @@ val expr_with_pure_coeffects :
 
 val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt
 
-val bind_param :
+val bind_params :
   Typing_env_types.env ->
-  ?immutable:bool ->
   ?can_read_globals:bool ->
-  Typing_defs.locl_ty * Nast.fun_param ->
-  Typing_env_types.env * Tast.fun_param
+  Aast_defs.contexts option ->
+  Typing_defs.locl_ty option list ->
+  Nast.fun_param list ->
+  Typing_env_types.env * Tast.fun_param list
 
 val fun_ :
   ?abstract:bool ->
+  ?native:bool ->
   ?disable:bool ->
   Typing_env_types.env ->
   Typing_env_return_info.t ->
@@ -61,7 +63,8 @@ val call :
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
   ?dynamic_func:dyn_func_kind ->
-  Pos.t ->
+  expr_pos:Pos.t ->
+  recv_pos:Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   (Ast_defs.param_kind * Nast.expr) list ->
@@ -82,9 +85,11 @@ val with_special_coeffects :
 val triple_to_pair :
   Typing_env_types.env * 'a * 'b -> Typing_env_types.env * ('a * 'b)
 
-val function_dynamically_callable :
+val check_function_dynamically_callable :
+  this_class:Decl_provider.Class.t option ->
   Typing_env_types.env ->
+  Aast_defs.sid option ->
   Nast.fun_ ->
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->
-  unit
+  Typing_env_types.env * Tast.fun_param list * Tast.stmt list * Tast.ty

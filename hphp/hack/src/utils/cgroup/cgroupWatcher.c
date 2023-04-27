@@ -40,9 +40,11 @@ static int hwm_kb;
 // How many cgroup readings have we taken since the last reset
 static int num_readings;
 
-// This is the cgroup memory.current file we'll read for the current value,
-// including the leading "/sys/fs/group/" and the trailing "/memory.current"
-static char *path = NULL;
+// These are the cgroup memory.current and memory.swap.current file we'll read
+// for the current value. We'll add them together. The paths
+// include the leading "/sys/fs/group/" and the trailing "/memory.current"
+static char *path1 = NULL;
+static char *path2 = NULL;
 
 // The seconds_at_gb array will be relative to this, e.g. a reading of Xgb
 // would increment the tally kept at seconds_at_gb[X-subtract_kb_for_array/1GiB].
@@ -51,17 +53,20 @@ static int subtract_kb_for_array;
 // 1 or 0 for whether the thread has been launched
 static int thread_is_running = 0;
 
-// Reads the current unsigned long long from the contents of 'path', and returns it /1024.
+// Reads the current unsigned long long from the contents of 'path1+path2', and returns it /1024.
 // If it fails to open the file, -1. If it fails to parse the contents, -2.
 static int get_mem_kb(void) {
-  FILE *file = fopen(path, "r");
-  if (file == NULL) {
+  FILE *file1 = fopen(path1, "r");
+  FILE *file2 = fopen(path2, "r");
+  if (file1 == NULL || file2 == NULL) {
     return -1;
   }
-  unsigned long long mem;
-  int i = fscanf(file, "%llu", &mem);
-  fclose(file);
-  return i == 1 ? mem / 1024 : -2;
+  unsigned long long mem1, mem2;
+  int i1 = fscanf(file1, "%llu", &mem1);
+  int i2 = fscanf(file2, "%llu", &mem2);
+  fclose(file1);
+  fclose(file2);
+  return (i1 == 1 && i2 == 1) ? (mem1 + mem2) / 1024 : -2;
 }
 
 #define UNUSED(x) ((void)(x))
@@ -106,18 +111,22 @@ static void *threadfunc(void *arg) {
   return NULL; // to silence -Werror=return-type "no return statement in function returning non-void"
 }
 
-// This will (1) reset the counters and update [path] so threadfunc will pick up the new value next tick,
-// (2) starts the thread if it's not already running.
+// This will (1) reset the counters and update [path1],[path2] so threadfunc
+// will pick up the new value next tick, (2) starts the thread if it's not already running.
 // Any failures aren't reported here; they're manifest in [cgroup_watcher_get]
-CAMLprim value cgroup_watcher_start(value path_, value subtract_kb_for_array_) {
-  CAMLparam2(path_, subtract_kb_for_array_);
-  const char *cpath = String_val(path_);
+CAMLprim value cgroup_watcher_start(value path1_, value path2_, value subtract_kb_for_array_) {
+  CAMLparam3(path1_, path2_, subtract_kb_for_array_);
+  const char *cpath1 = String_val(path1_);
+  const char *cpath2 = String_val(path2_);
   int csubtract_kb_for_array = Int_val(subtract_kb_for_array_);
   int rc;
   if (pthread_mutex_lock(&lock) == 0) {
-    if (path != NULL) free(path);
-    path = malloc(strlen(cpath) + 1);
-    strcpy(path, cpath);
+    if (path1 != NULL) free(path1);
+    path1 = malloc(strlen(cpath1) + 1);
+    strcpy(path1, cpath1);
+    if (path2 != NULL) free(path2);
+    path2 = malloc(strlen(cpath2) + 1);
+    strcpy(path2, cpath2);
     subtract_kb_for_array = csubtract_kb_for_array;
     hwm_kb = 0;
     num_readings = 0;

@@ -2298,23 +2298,6 @@
 /* */
 /* #undef ZTS */
 
-#ifdef _MSC_VER
-# undef HAVE_HSTRERROR
-# undef HAVE_SYS_PARAM_H
-# undef HAVE_SYS_POLL_H
-# undef HAVE_SYS_RESOURCE_H
-# undef HAVE_SYS_SELECT_H
-# undef HAVE_SYS_SOCKET_H
-# undef HAVE_SYS_STATFS_H
-# undef HAVE_SYS_STATVFS_H
-# undef HAVE_SYS_TIME_H
-# undef HAVE_SYS_UN_H
-# undef HAVE_SYS_UTSNAME_H
-# undef HAVE_SYS_VFS_H
-# undef HAVE_SYS_WAIT_H
-# undef TIME_WITH_SYS_TIME
-#endif
-
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -2436,4 +2419,3 @@ int zend_sprintf(char *buffer, const char *format, ...);
  * End:
  */
 /* #undef PTHREADS */
-

@@ -112,7 +112,7 @@ void readSymbolCntData(CallGraph& cg, std::ifstream& file) {
   while (std::getline(file, line)) {
     std::string caller, top;
     uint64_t count;
-    folly::split(" ", line, caller, top, count);
+    folly::split(' ', line, caller, top, count);
     TargetId idTop = cg.funcToTargetId(top);
     if (idTop == InvalidId) {
       HFTRACE(2, "Target func not found: %s\n", top.c_str());
@@ -174,7 +174,7 @@ std::string getNameWithoutSuffix(std::string str) {
     // if no suffix is found, just add the wildcard
     return str + "*";
   } else {
-    // replace sufix with wildcard
+    // replace suffix with wildcard
     return str.substr(0, suffixStartPosition) + "*";
   }
 }

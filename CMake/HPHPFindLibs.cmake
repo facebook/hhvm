@@ -29,10 +29,10 @@ endif()
 
 # google-glog
 find_package(Glog REQUIRED)
-if (LIBGLOG_STATIC)
+if (GLOG_STATIC)
   add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
 endif()
-include_directories(${LIBGLOG_INCLUDE_DIR})
+include_directories(${GLOG_INCLUDE_DIR})
 
 # inotify checks
 find_package(Libinotify)
@@ -73,17 +73,6 @@ include_directories(${CURL_INCLUDE_DIR})
 if (CURL_STATIC)
   add_definitions("-DCURL_STATICLIB")
 endif()
-
-set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
-CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
-if (HAVE_CURL_MULTI_SELECT)
-  add_definitions("-DHAVE_CURL_MULTI_SELECT")
-endif()
-if (HAVE_CURL_MULTI_WAIT)
-  add_definitions("-DHAVE_CURL_MULTI_WAIT")
-endif()
-set(CMAKE_REQUIRED_LIBRARIES)
 
 # LibXML2 checks
 find_package(LibXml2 REQUIRED)
@@ -183,17 +172,6 @@ endif()
 if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
   add_definitions(-DENABLE_HHPROF=1)
 endif()
-
-# tbb libs
-find_package(TBB REQUIRED)
-if (${TBB_INTERFACE_VERSION} LESS 5005)
-  unset(TBB_FOUND CACHE)
-  unset(TBB_INCLUDE_DIRS CACHE)
-  unset(TBB_LIBRARIES CACHE)
-  message(FATAL_ERROR "TBB is too old, please install at least 3.0(5005), preferably 4.0(6000) or higher")
-endif()
-include_directories(${TBB_INCLUDE_DIRS})
-link_directories(${TBB_LIBRARY_DIRS})
 
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
@@ -299,14 +277,14 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
 
-  # This is required by Homebrew's libc. See
-  # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
-  # for more info.
-  find_package(Libpam)
-  if (PAM_INCLUDE_PATH)
-    include_directories(${PAM_INCLUDE_PATH})
-  endif()
+# This is required by Homebrew's libc. See
+# https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
+# for more info.
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 include_directories(${HPHP_HOME}/hphp)
@@ -360,7 +338,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} ${LIBGLOG_LIBRARY})
+  target_link_libraries(${target} ${VISIBILITY} glog::glog)
   if (LIBJSONC_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBJSONC_LIBRARY})
   endif()
@@ -385,10 +363,10 @@ macro(hphp_link target)
   if (APPLE)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINTL_LIBRARIES})
     target_link_libraries(${target} ${VISIBILITY} ${KERBEROS_LIB})
+  endif()
 
-    if (PAM_LIBRARY)
-      target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
-    endif()
+  if (PAM_LIBRARY)
+    target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
   endif()
 
   if (LIBPTHREAD_LIBRARIES)
@@ -439,9 +417,12 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
   target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
+  target_link_libraries(${target} ${VISIBILITY} package_ffi)
   target_link_libraries(${target} ${VISIBILITY} parser_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
+
+  target_link_libraries(${target} ${VISIBILITY} tbb)
 
   if (NOT MSVC)
     target_link_libraries(${target} ${VISIBILITY} afdt)
@@ -482,7 +463,13 @@ int main() {
   if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
       message(STATUS "-latomic is required to link hhvm")
       find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
-      target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
+      if (ATOMIC_LIBRARY STREQUAL "ATOMIC_LIBRARY-NOTFOUND")
+        # -latomic should be available for gcc even when libatomic.so.1 is not
+        # in the library search path
+        target_link_libraries(${target} ${VISIBILITY} atomic)
+      else()
+        target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
+      endif()
   endif()
   set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 

@@ -1,0 +1,6 @@
+File "requireclass_abstract_01.bad.php", line 6, characters 16-16:
+This class must be final because it uses a trait with a require class constraint. (Typing[4111])
+  File "requireclass_abstract_01.bad.php", line 7, characters 7-7:
+  The trait with a require class constraint is used here
+  File "requireclass_abstract_01.bad.php", line 11, characters 17-17:
+  The require class constraint is here

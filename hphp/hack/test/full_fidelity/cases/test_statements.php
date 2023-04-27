@@ -8,7 +8,7 @@ function foo() {
       }
     else
       return $d;
-  elseif($e)
+  else if($e)
     do {
       while($f)
         throw $g;

@@ -1,4 +1,4 @@
-Log.Level = Verbose
+Log.Level = Info
 Eval {
   JitASize = 2323232
 }

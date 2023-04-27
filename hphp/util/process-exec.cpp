@@ -19,17 +19,11 @@
 #include <sys/types.h>
 #include <cstdlib>
 
-#ifdef _MSC_VER
-#include <lmcons.h>
-#include <ShlObj.h>
-#include <Windows.h>
-#else
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
 #include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
-#endif
 
 #include "hphp/util/logger.h"
 #include "hphp/util/text-color.h"
@@ -69,47 +63,13 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int exec(const char* path, const char* argv[], int* fdin, int* fdout, int* fderr
-#ifdef _MSC_VER
-         , PROCESS_INFORMATION* procInfo
-#endif
-        ) {
+int exec(const char* path, const char* argv[],
+         int* fdin, int* fdout, int* fderr) {
   CPipe pipein, pipeout, pipeerr;
   if (!pipein.open() || !pipeout.open() || !pipeerr.open()) {
     return 0;
   }
 
-#ifdef _MSC_VER
-  STARTUPINFO sInf;
-  ZeroMemory(&sInf, sizeof(sInf));
-  ZeroMemory(procInfo, sizeof(*procInfo));
-  sInf.cb = sizeof(STARTUPINFO);
-  sInf.dwFlags = STARTF_USESTDHANDLES;
-  sInf.hStdInput = (HANDLE)_get_osfhandle(pipein.getOut());
-  sInf.hStdError = (HANDLE)_get_osfhandle(pipeerr.getIn());
-  sInf.hStdOutput = (HANDLE)_get_osfhandle(pipeout.getIn());
-  size_t arglen = 0;
-  for (int i = 0; argv[i]; i++) {
-    arglen += strlen(argv[i]);
-    if (i > 0)
-      arglen++; // Space separator
-  }
-  auto args = (char*)malloc(sizeof(char) * (arglen + 1));
-  for (int i = 0; argv[i]; i++) {
-    if (i > 0)
-      strcat(args, " ");
-    strcat(args, argv[i]);
-  }
-  if (!CreateProcess(path, args, nullptr, nullptr, true,
-    0, nullptr, nullptr, &sInf, procInfo)) {
-    Logger::Error("Unable to CreateProcess: %d %s", errno,
-      folly::errnoStr(errno).c_str());
-    free(args);
-    return 0;
-  }
-  free(args);
-  auto const pid = (int)procInfo->dwProcessId;
-#else
   auto const pid = fork();
   if (pid < 0) {
     Logger::Error("Unable to fork: %d %s", errno,
@@ -134,15 +94,10 @@ int exec(const char* path, const char* argv[], int* fdin, int* fdout, int* fderr
     Logger::Error("Failed to exec `%s'\n", path);
     _Exit(HPHP_EXIT_FAILURE);
   }
-#endif
+
   if (fdout) *fdout = pipeout.detachOut();
   if (fderr) *fderr = pipeerr.detachOut();
   if (fdin)  *fdin  = pipein.detachIn();
-#ifdef _MSC_VER
-  pipein.close();
-  pipeerr.close();
-  pipeout.close();
-#endif
   return pid;
 }
 
@@ -154,12 +109,7 @@ bool exec(const char* path, const char* argv[], const char* in,
           bool color /* = false */) {
 
   int fdin = 0; int fdout = 0; int fderr = 0;
-#ifdef _MSC_VER
-  PROCESS_INFORMATION procInf;
-  auto const pid = exec(path, argv, &fdin, &fdout, &fderr, &procInf);
-#else
   auto const pid = exec(path, argv, &fdin, &fdout, &fderr);
-#endif
   if (pid == 0) return false;
 
   {
@@ -180,24 +130,7 @@ bool exec(const char* path, const char* argv[], const char* in,
     perror("fcntl failed on fderr");
   }
 
-#ifdef _MSC_VER
-  HANDLE fds[2];
-  DWORD handleCount = 0;
-  if (fdout)
-    fds[handleCount++] = (HANDLE)_get_osfhandle(fdout);
-  if (fderr)
-    fds[handleCount++] = (HANDLE)_get_osfhandle(fderr);
-#endif
-
   while (fdout || fderr) {
-#ifdef _MSC_VER
-    DWORD res =
-      WaitForMultipleObjectsEx(handleCount, fds, false, INFINITE, true);
-    if (res == WAIT_IO_COMPLETION)
-      continue;
-
-    DWORD hc = 0;
-#else
     pollfd fds[2];
     int n = 0;
     if (fdout) {
@@ -217,13 +150,8 @@ bool exec(const char* path, const char* argv[], const char* in,
     }
 
     n = 0;
-#endif
     if (fdout) {
-#ifdef _MSC_VER
-      if (res == WAIT_OBJECT_0 + hc++ || res == WAIT_ABANDONED_0 + hc++) {
-#else
       if (fds[n++].revents & (POLLIN | POLLHUP)) {
-#endif
         auto const e = read(fdout, buffer, sizeof buffer);
         if (e <= 0) {
           close(fdout);
@@ -241,11 +169,7 @@ bool exec(const char* path, const char* argv[], const char* in,
     }
 
     if (fderr) {
-#ifdef _MSC_VER
-      if (res == WAIT_OBJECT_0 + hc++ || res == WAIT_ABANDONED_0 + hc++) {
-#else
       if (fds[n++].revents & (POLLIN | POLLHUP)) {
-#endif
         auto const e = read(fderr, buffer, sizeof buffer);
         if (e <= 0) {
           close(fderr);
@@ -265,30 +189,6 @@ bool exec(const char* path, const char* argv[], const char* in,
 
   int status;
   bool ret = false;
-#ifdef _MSC_VER
-  if (WaitForSingleObject(procInf.hProcess, INFINITE) == WAIT_FAILED) {
-    Logger::Error("Failed to wait for `%s'\n", path);
-  }
-  DWORD st;
-  if (GetExitCodeProcess(procInf.hProcess, &st))
-    Logger::Error("Failed to get the process exit code\n");
-  status = (int)st;
-
-  if (status != EXIT_SUCCESS) {
-    Logger::Verbose("Status %d running command: `%s'\n", status, path);
-    if (argv) {
-      while (*argv) {
-        Logger::Verbose("  arg: `%s'\n", *argv);
-        argv++;
-      }
-    }
-  } else {
-    ret = true;
-  }
-
-  CloseHandle(procInf.hProcess);
-  CloseHandle(procInf.hThread);
-#else
   if (waitpid(pid, &status, 0) != pid) {
     Logger::Error("Failed to wait for `%s'\n", path);
   } else if (WIFEXITED(status)) {
@@ -310,7 +210,6 @@ bool exec(const char* path, const char* argv[], const char* in,
       Logger::Verbose("  signaled with %d\n", WTERMSIG(status));
     }
   }
-#endif
   return ret;
 }
 
@@ -324,10 +223,6 @@ void daemonize(const char* stdoutFile /* = "/dev/null" */,
   // Already a daemon.
   if (getppid() == 1) return;
 
-#ifdef _MSC_VER
-  // We are Windows, fear us!
-  umask(0);
-#else
   // Fork off the parent process.
   auto const pid = fork();
   if (pid < 0) {
@@ -348,7 +243,6 @@ void daemonize(const char* stdoutFile /* = "/dev/null" */,
   if (sid < 0) {
     exit(EXIT_FAILURE);
   }
-#endif
 
   // Change the current working directory.  This prevents the current directory
   // from being locked; hence not being able to remove it.

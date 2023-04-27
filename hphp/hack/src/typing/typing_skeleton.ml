@@ -18,9 +18,19 @@ let rec of_decl_ty (ty : decl_ty) : string =
   match get_node ty with
   | Tprim p -> Aast_defs.string_of_tprim p
   | Tmixed
-  | Tany _
-  | Terr ->
+  | Tany _ ->
     "mixed"
+  | Tnewtype (name, tyl, ty) ->
+    let name = Utils.strip_all_ns name in
+    (match tyl with
+    | [] -> name
+    | args ->
+      let args = List.map args ~f:of_decl_ty in
+      Printf.sprintf
+        "%s<%s> %s"
+        name
+        (String.concat ~sep:", " args)
+        (of_decl_ty ty))
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
   | Tthis -> "this"
@@ -51,14 +61,16 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Ttuple args ->
     let args = List.map args ~f:of_decl_ty in
     Printf.sprintf "(%s)" (String.concat ~sep:", " args)
-  | Tshape (kind, fields) ->
+  | Tshape (_, kind, fields) ->
     let fields =
       TShapeMap.fold (fun key ty acc -> of_shape_field key ty :: acc) fields []
     in
     let fields_with_ellipsis =
-      match kind with
-      | Closed_shape -> fields
-      | Open_shape -> fields @ ["..."]
+      if is_nothing kind (* Closed shape *) then
+        fields
+      (* Open shape TODO akenn non-mixed open *)
+      else
+        fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields_with_ellipsis)
   | Tvar _ -> "mixed"
@@ -69,6 +81,11 @@ let rec of_decl_ty (ty : decl_ty) : string =
     Printf.sprintf "vec_or_dict<%s, %s>" (of_decl_ty key_ty) (of_decl_ty val_ty)
   | Tlike ty -> of_decl_ty ty
   | Taccess (ty, (_, name)) -> Printf.sprintf "%s::%s" (of_decl_ty ty) name
+  | Trefinement (ty, rs) ->
+    Printf.sprintf
+      "%s with %s"
+      (of_decl_ty ty)
+      (Class_refinement.to_string of_decl_ty rs)
 
 and of_enforced_ty et : string = of_decl_ty et.et_type
 
@@ -118,33 +135,45 @@ let params_source ~variadic (params : decl_ty fun_params) : string =
   in
   String.concat ~sep:", " explicit_params
 
+let of_implicit_params (impl_params : decl_ty fun_implicit_params) : string =
+  match impl_params.capability with
+  | CapDefaults _ -> ""
+  | CapTy t ->
+    (match get_node t with
+    | Tintersection tys ->
+      let contexts = List.map tys ~f:of_decl_ty in
+      Printf.sprintf "[%s]" (String.concat ~sep:", " contexts)
+    | _ -> "")
+
 let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
-  let (params, return_ty, async_modifier) =
+  let (params, return_ty, async_modifier, capabilities) =
     match ty_ with
     | Tfun ft ->
       ( params_source ~variadic:(get_ft_variadic ft) ft.ft_params,
         of_decl_ty ft.ft_ret.et_type,
-        if is_awaitable ft.ft_ret.et_type then
+        (if is_awaitable ft.ft_ret.et_type then
           "async "
         else
-          "" )
-    | _ -> ("", "mixed", "")
+          ""),
+        of_implicit_params ft.ft_implicit_params )
+    | _ -> ("", "mixed", "", "")
   in
 
   Printf.sprintf
-    "\n%s  %s %s%sfunction %s(%s): %s {}\n\n"
+    "\n%s  %s %s%sfunction %s(%s)%s: %s {}\n"
     (if is_override then
       "  <<__Override>>\n"
     else
       "")
     (Typing_defs.string_of_visibility meth.ce_visibility)
-    async_modifier
     (if is_static then
       "static "
     else
       "")
+    async_modifier
     name
     params
+    capabilities
     return_ty

@@ -1,0 +1,86 @@
+{
+  "refid": "Hash_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Hash.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "folly/Traits.h"
+    },
+    {
+      "refid": "detail_2Hash_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/detail/Hash.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Hash.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/Hash.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/Hash.h",
+  "free_vars": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a4e75eda93efb6b9d67fe1a1e2232e80a",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename Tag"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <code>Hash</code>&lt; Tag &gt;",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr Hash&lt;Tag&gt; apache::thrift::op::hash",
+      "argsstring_html": "",
+      "name_html": "hash",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
+        "line": "37",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Hash.h",
+        "bodystart": "37",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "free_typedefs": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a8d72c791012dab4f41fefcf2fc35b690",
+      "prot": "public",
+      "tparams": [
+        {
+          "type_html": "typename Tag"
+        }
+      ],
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Hash\">detail::Hash</a>&lt;Tag&gt;",
+      "definition_html": "using apache::thrift::op::Hash = typedef detail::Hash&lt;Tag&gt;",
+      "argsstring_html": "",
+      "name_html": "Hash",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
+        "line": "27",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Hash.h",
+        "bodystart": "27",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "free_overloadgroups": []
+}

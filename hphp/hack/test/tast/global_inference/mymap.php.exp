@@ -5,11 +5,10 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\foo");
       fd_fun =
       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((?int), None); f_name = ([4:10-13], "\\foo"); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((?int), None);
         f_params =
         [{ param_annotation = (MyMap<string, int>); param_type_hint = ((MyMap<string, int>), (Some ([4:14-19], (Happly (([4:14-19], "\\MyMap"), []))))); 
            param_is_variadic = false; param_pos = [4:20-22]; param_name = "$m"; 
@@ -37,16 +36,16 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })[(Class
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })[(Class
     { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-12], "\\MyMap");
       c_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:13-15], "Tk"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
         { tp_variance = Invariant; tp_name = ([3:17-19], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+      c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-45]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -79,10 +78,11 @@ Errors:
           m_ret = ((?Tv), (Some ([5:31-34], (Hoption ([5:32-34], (Habstr ("Tv", []))))))); 
           m_external = false; m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None })

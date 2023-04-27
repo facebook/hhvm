@@ -7,18 +7,13 @@
  *
  *)
 
-(* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
-
 type kind =
   | Function
   | Class
   | Method
   | Property
-  | Const
+  | ClassConst
+  | GlobalConst
   | Enum
   | Interface
   | Trait
@@ -27,8 +22,10 @@ type kind =
   | Typeconst
   | Param
   | Typedef
+  | Module
+[@@deriving ord, show]
 
-and modifier =
+type modifier =
   | Final
   | Static
   | Abstract
@@ -37,11 +34,14 @@ and modifier =
   | Protected
   | Async
   | Inout
+  | Internal
+[@@deriving ord, show]
 
-and 'a t = {
+type 'a t = {
   kind: kind;
   name: string;
   full_name: string;
+  class_name: string option;
   id: string option;
   pos: 'a Pos.pos;
   (* covers the span of just the identifier *)

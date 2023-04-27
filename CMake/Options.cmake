@@ -27,11 +27,18 @@ option(ENABLE_TRACE "Enable tracing in release build" OFF)
 option(CPACK_GENERATOR "Enable build of distribution packages using CPack" OFF)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
-if (APPLE)
-  option(ENABLE_MCROUTER "Build the mcrouter library and extension" OFF)
-else()
+
+include(CheckCXXSymbolExists)
+
+# Mcrouter uses Folly's AtomicSharedPtr, which only supports libstdc++
+# See https://github.com/facebook/hhvm/blob/156a77d5a301033200601ddefb4dcaf26eb1ff9c/third-party/folly/src/folly/concurrency/detail/AtomicSharedPtr-detail.h#L28-L34
+check_cxx_symbol_exists(__GLIBCXX__ cstdlib DEFAULT_STDLIB_IS_LIBSTDCXX)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CLANG_FORCE_LIBSTDCXX OR DEFAULT_STDLIB_IS_LIBSTDCXX)
   option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
+else()
+  option(ENABLE_MCROUTER "Build the mcrouter library and extension" OFF)
 endif()
+
 option(ENABLE_PROXYGEN_SERVER "Build the Proxygen HTTP server" ON)
 
 option(ENABLE_SPLIT_DWARF "Reduce linker memory usage by putting debugging information into .dwo files" OFF)
@@ -46,3 +53,4 @@ IF (NOT DEFAULT_CONFIG_DIR)
 ENDIF()
 
 option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)
+option(ENABLE_SYSTEM_LOCALE_ARCHIVE "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc." OFF)

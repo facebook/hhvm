@@ -24,14 +24,17 @@
 
 namespace HPHP {
 
+namespace hackc {
+struct DeclProvider;
+}
+
 namespace Native {
 struct FuncTable;
 }
 
+struct HhvmDeclProvider;
 struct LazyUnitContentsLoader;
 struct SHA1;
-
-void compilers_start();
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered
@@ -50,9 +53,15 @@ struct FfpJSONString {
 using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
 using FfpResult = boost::variant<FfpJSONString, std::string>;
 
+// Parse facts from the given file or code with `options`.
+// if code is empty, load source text from filename first.
+// If expect_sha1 is non-empty, return an error message if
+// the actual sha1 of the source text is different.
 ParseFactsResult extract_facts(const std::string& filename,
                                const std::string& code,
-                               const RepoOptionsFlags& options);
+                               const RepoOptionsFlags& options,
+                               folly::StringPiece expect_sha1);
+
 FfpResult ffp_parse_file(const std::string& contents,
                          const RepoOptionsFlags& options);
 
@@ -81,11 +90,13 @@ struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,
                const Native::FuncTable& nativeFuncs,
+               AutoloadMap* map,
                bool isSystemLib,
                bool forDebuggerEval)
     : m_loader{loader}
     , m_filename{filename}
     , m_nativeFuncs{nativeFuncs}
+    , m_map{map}
     , m_isSystemLib{isSystemLib}
     , m_forDebuggerEval{forDebuggerEval}
   {}
@@ -95,57 +106,29 @@ struct UnitCompiler {
     LazyUnitContentsLoader& loader,
     const char* filename,
     const Native::FuncTable& nativeFuncs,
+    AutoloadMap* map,
     bool isSystemLib,
     bool forDebuggerEval
   );
 
+  virtual const char* getName() const = 0;
+
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
+    HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) = 0;
 
-  virtual const char* getName() const = 0;
+  std::unique_ptr<UnitEmitter> compile(
+    bool& cacheHit,
+    CompileAbortMode = CompileAbortMode::Never);
 
  protected:
   LazyUnitContentsLoader& m_loader;
   const char* m_filename;
   const Native::FuncTable& m_nativeFuncs;
+  AutoloadMap* m_map;
   bool m_isSystemLib;
   bool m_forDebuggerEval;
-};
-
-struct HackcUnitCompiler : public UnitCompiler {
-  using UnitCompiler::UnitCompiler;
-
-  virtual std::unique_ptr<UnitEmitter> compile(
-    bool& cacheHit,
-    CompileAbortMode = CompileAbortMode::Never) override;
-
-  virtual const char* getName() const override { return "HackC"; }
-};
-
-// UnitCompiler which first tries to retrieve the UnitEmitter via the
-// g_unit_emitter_cache_hook. If that fails, delegate to the
-// UnitCompiler produced by the "makeFallback" lambda (this avoids
-// having to create the fallback UnitEmitter until we need it). The
-// lambda will only be called once. Its output is cached afterwards.
-struct CacheUnitCompiler : public UnitCompiler {
-  CacheUnitCompiler(LazyUnitContentsLoader& loader,
-                    const char* filename,
-                    const Native::FuncTable& nativeFuncs,
-                    bool isSystemLib,
-                    bool forDebuggerEval,
-                    std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
-    : UnitCompiler{loader, filename, nativeFuncs, isSystemLib, forDebuggerEval}
-    , m_makeFallback{std::move(makeFallback)} {}
-
-  virtual std::unique_ptr<UnitEmitter> compile(
-    bool& cacheHit,
-    CompileAbortMode = CompileAbortMode::Never) override;
-
-  virtual const char* getName() const override { return "Cache"; }
-private:
-  std::function<std::unique_ptr<UnitCompiler>()> m_makeFallback;
-  std::unique_ptr<UnitCompiler> m_fallback;
 };
 
 using UnitEmitterCacheHook =
@@ -153,11 +136,25 @@ using UnitEmitterCacheHook =
     const char*,
     const SHA1&,
     folly::StringPiece::size_type,
+    HhvmDeclProvider* provider,
     // First parameter is whether ICE UEs are allowed. If not, a
     // nullptr will be returned for ICE UEs instead.
     const std::function<std::unique_ptr<UnitEmitter>(bool)>&,
     const Native::FuncTable&
   );
 extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
+
+// Invoke hackc directly without any caching.
+std::unique_ptr<UnitEmitter> compile_unit(
+  const char* code,
+  const char* filename,
+  const SHA1& sha1,
+  const Native::FuncTable& nativeFuncs,
+  bool isSystemLib,
+  bool forDebuggerEval,
+  const RepoOptionsFlags& options,
+  CompileAbortMode mode,
+  hackc::DeclProvider* provider
+);
 
 }

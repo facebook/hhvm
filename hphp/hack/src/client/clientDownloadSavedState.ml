@@ -9,13 +9,14 @@
 open Hh_prelude
 
 type saved_state_type =
-  | Naming_and_dep_table of { naming_sqlite: bool }
+  | Naming_and_dep_table
   | Naming_table
 
 type env = {
   root: Path.t;
   from: string;
   saved_state_type: saved_state_type;
+  saved_state_manifold_api_key: string option;
   should_save_replay: bool;
   replay_token: string option;
 }
@@ -41,13 +42,13 @@ let changed_files_to_relative_paths_json
   |> List.map ~f:Relative_path.suffix
   |> Hh_json_helpers.Jprint.string_array
 
-let print_load_error (load_error : Saved_state_loader.load_error) : unit =
+let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
   let json =
     Hh_json.JSON_Object
       [
         ( "error",
-          Hh_json.string_ (Saved_state_loader.debug_details_of_error load_error)
-        );
+          Hh_json.string_
+            (Saved_state_loader.LoadError.debug_details_of_error load_error) );
       ]
   in
   Hh_json.json_to_multiline_output stdout json
@@ -60,7 +61,28 @@ let additional_info_of_json
   let open Hh_json_helpers in
   match saved_state_type with
   | Saved_state_loader.Naming_table -> ()
-  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
+  | Saved_state_loader.Shallow_decls -> ()
+  | Saved_state_loader.Naming_and_dep_table_distc ->
+    let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
+    let dirty_files = Jget.obj_exn json "dirty_files" in
+    let master_changes =
+      Jget.string_array_exn dirty_files "master_changes"
+      |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
+      |> Relative_path.Set.of_list
+    in
+    let local_changes =
+      Jget.string_array_exn dirty_files "local_changes"
+      |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
+      |> Relative_path.Set.of_list
+    in
+    Saved_state_loader.Naming_and_dep_table_info.
+      {
+        mergebase_global_rev;
+        dirty_files_promise = Future.of_value { master_changes; local_changes };
+        saved_state_distance = None;
+        saved_state_age = None;
+      }
+  | Saved_state_loader.Naming_and_dep_table ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
     let dirty_files = Jget.obj_exn json "dirty_files" in
     let master_changes =
@@ -133,7 +155,37 @@ let make_replay_token_of_additional_info
     ~(additional_info : additional_info) : Hh_json.json =
   match saved_state_type with
   | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
-  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
+  | Saved_state_loader.Shallow_decls -> Hh_json.JSON_Null
+  | Saved_state_loader.Naming_and_dep_table_distc ->
+    let Saved_state_loader.Naming_and_dep_table_info.
+          {
+            mergebase_global_rev;
+            dirty_files_promise;
+            saved_state_distance = _;
+            saved_state_age = _;
+          } =
+      additional_info
+    in
+    let Saved_state_loader.Naming_and_dep_table_info.
+          { master_changes; local_changes } =
+      Future.get_exn dirty_files_promise
+    in
+    let open Hh_json in
+    JSON_Object
+      [
+        ("mergebase_global_rev", opt_int_to_json mergebase_global_rev);
+        ( "dirty_files",
+          JSON_Object
+            [
+              ( "master_changes",
+                changed_files_to_relative_paths_json
+                @@ Relative_path.Set.elements master_changes );
+              ( "local_changes",
+                changed_files_to_relative_paths_json
+                @@ Relative_path.Set.elements local_changes );
+            ] );
+      ]
+  | Saved_state_loader.Naming_and_dep_table ->
     let Saved_state_loader.Naming_and_dep_table_info.
           {
             mergebase_global_rev;
@@ -231,9 +283,20 @@ let load_saved_state :
     saved_state_type:
       (main_artifacts * additional_info) Saved_state_loader.saved_state_type ->
     ( (main_artifacts, additional_info) Saved_state_loader.load_result,
-      Saved_state_loader.load_error )
+      Saved_state_loader.LoadError.t )
     Lwt_result.t =
  fun ~env ~local_config ~saved_state_type ->
+  let ssopt =
+    {
+      local_config.ServerLocalConfig.saved_state with
+      GlobalOptions.loading =
+        {
+          local_config.ServerLocalConfig.saved_state.GlobalOptions.loading with
+          GlobalOptions.log_saved_state_age_and_distance = false;
+          saved_state_manifold_api_key = env.saved_state_manifold_api_key;
+        };
+    }
+  in
   match env.replay_token with
   | None ->
     let watchman_opts =
@@ -241,12 +304,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.load
-        ~env:
-          {
-            log_saved_state_age_and_distance = false;
-            Saved_state_loader.saved_state_manifold_api_key =
-              local_config.ServerLocalConfig.saved_state_manifold_api_key;
-          }
+        ~ssopt
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
         ~ignore_hh_version:false
@@ -272,12 +330,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
-        ~env:
-          {
-            log_saved_state_age_and_distance = false;
-            Saved_state_loader.saved_state_manifold_api_key =
-              local_config.ServerLocalConfig.saved_state_manifold_api_key;
-          }
+        ~ssopt:ssopt.GlobalOptions.loading
         ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path
@@ -303,10 +356,8 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
     =
   Relative_path.set_path_prefix Relative_path.Root env.root;
   match env.saved_state_type with
-  | Naming_and_dep_table { naming_sqlite } ->
-    let saved_state_type =
-      Saved_state_loader.Naming_and_dep_table { naming_sqlite }
-    in
+  | Naming_and_dep_table ->
+    let saved_state_type = Saved_state_loader.Naming_and_dep_table in
     let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
     (match result with
     | Error load_error ->
@@ -320,8 +371,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
                 Naming_and_dep_table_info.naming_table_path;
                 Naming_and_dep_table_info.naming_sqlite_table_path;
                 dep_table_path;
-                legacy_hot_decls_path;
-                shallow_hot_decls_path;
                 errors_path;
               };
             additional_info;
@@ -352,10 +401,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
               naming_sqlite_table_path |> Path.to_string |> Hh_json.string_ );
             ( "dep_table_path",
               dep_table_path |> Path.to_string |> Hh_json.string_ );
-            ( "legacy_hot_decls_path",
-              legacy_hot_decls_path |> Path.to_string |> Hh_json.string_ );
-            ( "shallow_hot_decls_path",
-              shallow_hot_decls_path |> Path.to_string |> Hh_json.string_ );
             ("errors_path", errors_path |> Path.to_string |> Hh_json.string_);
             ( "replay_token",
               Option.value_map

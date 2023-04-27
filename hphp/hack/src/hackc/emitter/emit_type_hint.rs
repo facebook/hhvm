@@ -2,17 +2,27 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use error::{Error, Result};
-use ffi::{Maybe, Maybe::*, Str};
-use hhbc::hhas_type::{constraint, HhasTypeInfo};
+use std::borrow::Cow;
+
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Str;
+use hhbc::Constraint;
+use hhbc::TypeInfo;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use naming_special_names_rust::{classes, typehints};
-use oxidized::{
-    aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
-    ast_defs::{Id, ShapeFieldName},
-};
-use std::borrow::Cow;
+use naming_special_names_rust::classes;
+use naming_special_names_rust::typehints;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_defs::Hint_::*;
+use oxidized::aast_defs::NastShapeInfo;
+use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::aast_defs::Tprim;
+use oxidized::ast_defs::Id;
+use oxidized::ast_defs::ShapeFieldName;
 
 #[derive(Eq, PartialEq)]
 pub enum Kind {
@@ -106,6 +116,11 @@ pub fn fmt_hint<'arena>(
                 format!("?{}", fmt_hint(alloc, tparams, false, hint)?)
             }
         }
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            fmt_hint(alloc, tparams, strip_tparams, hint)?
+        }
         // No guarantee that this is in the correct order when using map instead of list
         //  TODO: Check whether shape fields need to retain order *)
         Hshape(NastShapeInfo { field_map, .. }) => {
@@ -175,7 +190,7 @@ fn can_be_nullable(hint: &Hint_) -> bool {
             if let Haccess(_, _) = **h {
                 true
             } else {
-                can_be_nullable(&**h)
+                can_be_nullable(h)
             }
         }
         Happly(Id(_, id), _) => {
@@ -192,24 +207,16 @@ fn hint_to_type_constraint<'arena>(
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> Result<constraint::Constraint<'arena>> {
-    use constraint::Constraint;
+) -> Result<Constraint<'arena>> {
     let Hint(_, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
-            Constraint::default()
-        }
-        Haccess(_, _) => Constraint::make_with_raw_str(
-            alloc,
-            "",
+        Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => Constraint::default(),
+        Haccess(_, _) => Constraint::make(
+            Just("".into()),
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,
         ),
-        Hshape(_) => {
-            Constraint::make_with_raw_str(alloc, "HH\\darray", TypeConstraintFlags::ExtendedHint)
-        }
-        Htuple(_) => {
-            Constraint::make_with_raw_str(alloc, "HH\\varray", TypeConstraintFlags::ExtendedHint)
-        }
+        Hshape(_) => Constraint::make(Just("HH\\darray".into()), TypeConstraintFlags::ExtendedHint),
+        Htuple(_) => Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::ExtendedHint),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             alloc,
             kind,
@@ -218,6 +225,7 @@ fn hint_to_type_constraint<'arena>(
             t,
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
+        Hlike(h) => hint_to_type_constraint(alloc, kind, tparams, skipawaitable, h)?,
         Herr | Hany => {
             return Err(Error::unrecoverable(
                 "This should be an error caught in naming",
@@ -277,11 +285,22 @@ fn hint_to_type_constraint<'arena>(
                         _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
                     };
                 }
+                [h] if s == typehints::POISON_MARKER || s == typehints::SUPPORTDYN_MARKER => {
+                    return hint_to_type_constraint(alloc, kind, tparams, false, h);
+                }
+                [_h] if s == typehints::TANY_MARKER => {
+                    return Ok(Constraint::default());
+                }
                 _ => {}
             };
             type_application_helper(alloc, tparams, kind, s)?
         }
         Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?
+        }
         h => type_application_helper(alloc, tparams, kind, hint_to_string(h))?,
     })
 }
@@ -301,11 +320,11 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     skipawaitable: bool,
     hint: &Hint,
     flags: TypeConstraintFlags,
-) -> Result<constraint::Constraint<'arena>> {
+) -> Result<Constraint<'arena>> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, u16::from(&tc.flags)) {
         (Nothing, 0) => tc,
-        _ => constraint::Constraint::make(tc.name, flags | tc.flags),
+        _ => Constraint::make(tc.name, flags | tc.flags),
     })
 }
 
@@ -315,15 +334,14 @@ fn type_application_helper<'arena>(
     tparams: &[&str],
     kind: &Kind,
     name: &str,
-) -> Result<constraint::Constraint<'arena>> {
-    use constraint::Constraint;
+) -> Result<Constraint<'arena>> {
     if tparams.contains(&name) {
         let tc_name = match kind {
-            Kind::Param | Kind::Return | Kind::Property => name,
-            _ => "",
+            Kind::Param | Kind::Return | Kind::Property => Just(Str::new_str(alloc, name)),
+            _ => Just("".into()),
         };
         Ok(Constraint::make(
-            Just(Str::new_str(alloc, tc_name)),
+            tc_name,
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
         ))
     } else {
@@ -350,7 +368,7 @@ fn try_add_nullable(
     flags: TypeConstraintFlags,
 ) -> TypeConstraintFlags {
     let Hint(_, h) = hint;
-    add_nullable(nullable && can_be_nullable(&**h), flags)
+    add_nullable(nullable && can_be_nullable(h), flags)
 }
 
 fn make_type_info<'arena>(
@@ -359,10 +377,10 @@ fn make_type_info<'arena>(
     h: &Hint,
     tc_name: Maybe<Str<'arena>>,
     tc_flags: TypeConstraintFlags,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
-    let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
-    Ok(HhasTypeInfo::make(
+    let type_info_type_constraint = Constraint::make(tc_name, tc_flags);
+    Ok(TypeInfo::make(
         Just(Str::new_str(alloc, &type_info_user_type)),
         type_info_type_constraint,
     ))
@@ -375,7 +393,7 @@ fn param_hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
@@ -419,7 +437,7 @@ pub fn hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };
@@ -457,36 +475,27 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
-    ti: HhasTypeInfo<'arena>,
-) -> HhasTypeInfo<'arena> {
+    ti: TypeInfo<'arena>,
+) -> TypeInfo<'arena> {
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (Nothing, _) => (
             Just(String::from("HH\\void")),
             TypeConstraintFlags::ExtendedHint,
         ),
-        (Just(t), _) => {
-            if t.unsafe_as_str() == "HH\\mixed" || t.unsafe_as_str() == "callable" {
-                (Nothing, TypeConstraintFlags::default())
-            } else {
+        (Just(t), _) => match t.unsafe_as_str() {
+            "HH\\mixed" | "callable" => (Nothing, TypeConstraintFlags::default()),
+            "HH\\void" => {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
-                let name = Just(
-                    string_utils::strip_type_list(
-                        t.unsafe_as_str()
-                            .trim_start_matches('?')
-                            .trim_start_matches('@')
-                            .trim_start_matches('?'),
-                    )
-                    .to_string(),
-                );
                 (
-                    name,
+                    Just("HH\\void".to_string()),
                     get_flags(tparams, TypeConstraintFlags::ExtendedHint, h),
                 )
             }
-        }
+            _ => return ti,
+        },
     };
-    let tc = constraint::Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
-    HhasTypeInfo::make(ti.user_type, tc)
+    let tc = Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
+    TypeInfo::make(ti.user_type, tc)
 }
 
 fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> TypeConstraintFlags {
@@ -495,11 +504,11 @@ fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> Type
             let Hint(_, h) = x;
             TypeConstraintFlags::Nullable
                 | TypeConstraintFlags::DisplayNullable
-                | get_flags(tparams, flags, &**h)
+                | get_flags(tparams, flags, h)
         }
         Hsoft(x) => {
             let Hint(_, h) = x;
-            TypeConstraintFlags::Soft | get_flags(tparams, flags, &**h)
+            TypeConstraintFlags::Soft | get_flags(tparams, flags, h)
         }
         Haccess(_, _) => TypeConstraintFlags::TypeConstant | flags,
         Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => {

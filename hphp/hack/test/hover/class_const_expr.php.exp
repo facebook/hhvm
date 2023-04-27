@@ -1,1 +1,3 @@
-int Foo::BAR
+// Defined in Foo
+const int BAR
+A doc comment.

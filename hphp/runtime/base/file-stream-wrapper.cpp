@@ -25,8 +25,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
-#include <boost/filesystem/operations.hpp>
-
+#include <filesystem>
 #include <memory>
 
 #include <folly/portability/Stdlib.h>
@@ -45,10 +44,9 @@ req::ptr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
     return nullptr;
   }
 
-  String relative =
-    FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
+  String path = File::TranslatePath(filename);
   auto file = req::make<MemFile>();
-  bool ret = file->open(relative, mode);
+  bool ret = file->open(path, mode);
   if (ret) {
     return file;
   }
@@ -178,7 +176,6 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
 
 Optional<std::string> FileStreamWrapper::getxattr(const char* path,
                                                   const char* xattr) {
-#if defined(__linux__)
   std::string buf;
   buf.resize(64);
 
@@ -194,7 +191,6 @@ Optional<std::string> FileStreamWrapper::getxattr(const char* path,
     if (actualSize < 0) break;
     buf.resize(std::max<size_t>(actualSize, buf.size()));
   }
-#endif
   return std::nullopt;
 }
 

@@ -1,24 +1,24 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
+
+new module A {}
 
 //// A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>> class Bing {}
+module A;
 
-class Quxx { <<__Internal>> public function doFlip(): void {} }
+internal class Bing {}
 
-<<__Internal>>
-function foobar(): void {}
+class Quxx { internal function doFlip(): void {} }
+
+internal function foobar(): void {}
 
 trait NonInternalCaller {
   public function test(Quxx $q): void {
-    // All of these lines are Hack errors: they're `internal` to the module we
+    // All of these lines are Hack errors: they're `internal` to the new module we
     // are currently in, but this trait might be included in another module
     // that doesn't have access to these symbols.
     foobar();
@@ -27,9 +27,7 @@ trait NonInternalCaller {
   }
 }
 
-
-<<__Internal>>
-trait InternalCaller {
+internal trait InternalCaller {
   public function test(Quxx $q): void {
     // This trait is internal, so all of these symbols are OK to access.
     foobar();
@@ -41,14 +39,14 @@ trait InternalCaller {
 //// also-A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-trait Quuz {
-  <<__Internal>> public function lol(): void {}
+module A;
+
+internal trait Quuz {
+  internal function lol(): void {}
 }
 
 trait Corge {
   use Quuz;
-  <<__Internal>> public function lol(): void {}
+  internal function lol(): void {}
 }

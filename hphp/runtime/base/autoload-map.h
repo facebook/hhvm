@@ -16,12 +16,13 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/type-string.h"
+
 #include "hphp/util/assertions.h"
 
 namespace folly {
@@ -31,6 +32,7 @@ namespace folly {
 namespace HPHP {
 
 struct Variant;
+struct RepoUnitInfo;
 
 struct AutoloadMap {
 
@@ -41,11 +43,49 @@ struct AutoloadMap {
     RetryAutoloading
   };
 
-  enum class KindOf {
-    Type,
-    Function,
-    Constant,
-    TypeAlias,
+  /**
+   * Keep enum values in sync with `HH\Facts\SymbolKind` in `ext_facts.php`
+   */
+  enum class KindOf : int {
+    Type = 1,
+    Function = 2,
+    Constant = 3,
+    Module = 4,
+    TypeAlias = 5,
+    TypeOrTypeAlias = 6,
+  };
+
+  struct FileResult {
+    String path;
+    const RepoUnitInfo* info;
+
+    FileResult(String path, const RepoUnitInfo* info)
+      : path(path), info(info) {}
+    explicit FileResult(String path): path(path), info(nullptr) {}
+
+    FileResult& operator=(String path) {
+      this->path = path;
+      this->info = nullptr;
+      return *this;
+    }
+  };
+
+  struct Holder {
+    Holder() = default;
+    Holder(AutoloadMap* map, std::function<void()>&& release)
+      : m_map(map)
+      , m_release(std::move(release))
+    {}
+    Holder(Holder&&) = default;
+    Holder& operator=(Holder&&) = default;
+    ~Holder() { if (m_release) m_release(); }
+
+    operator bool() const { return !!m_map; }
+    AutoloadMap* operator->() const { return m_map; }
+    AutoloadMap* get() const { return m_map; }
+  private:
+    AutoloadMap* m_map{nullptr};
+    std::function<void()> m_release{nullptr};
   };
 
   AutoloadMap() = default;
@@ -71,6 +111,13 @@ struct AutoloadMap {
   virtual bool isNative() const noexcept = 0;
 
   /**
+   * Returns a Holder object which wraps a native AutoloadMap in a manner which
+   * is safe to be shared across threads. For non-native or non-shareable maps
+   * returns an empty holder.
+   */
+  virtual Holder getNativeHolder() noexcept { return Holder(); }
+
+  /**
    * Given a symbol and the kind we're looking for, return the absolute path
    * of the file defining that symbol.
    *
@@ -79,36 +126,43 @@ struct AutoloadMap {
    * In general this is only safe to call on request threads because the
    * resulting string (absolute path) may be allocated on the request heap.
    */
-  Optional<String> getFile(KindOf kind, const String& symbol) {
+  Optional<FileResult> getFile(KindOf kind, const String& symbol) {
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
       case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
+      case AutoloadMap::KindOf::Module: return getModuleFile(symbol);
     }
     not_reached();
   }
 
   /**
-   * This overload takes std::string_view and returns folly::fs::path
+   * This overload takes std::string_view and returns std::filesystem::path
    * to avoid request heap allocation.
    */
-  Optional<folly::fs::path> getFile(KindOf kind, std::string_view symbol) {
+  Optional<std::filesystem::path> getFile(KindOf kind, std::string_view symbol) {
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
       case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
+      case AutoloadMap::KindOf::Module: return getModuleFile(symbol);
     }
     not_reached();
   }
 
   Array getSymbols(KindOf kind, const String& path) {
+    always_assert(kind != AutoloadMap::KindOf::TypeOrTypeAlias);
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: not_reached();
       case AutoloadMap::KindOf::Type: return getFileTypes(path);
       case AutoloadMap::KindOf::Function: return getFileFunctions(path);
       case AutoloadMap::KindOf::Constant: return getFileConstants(path);
       case AutoloadMap::KindOf::TypeAlias: return getFileTypeAliases(path);
+      case AutoloadMap::KindOf::Module: return getFileModules(path);
     }
     not_reached();
   }
@@ -123,15 +177,19 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual Optional<String> getTypeFile(const String& typeName) = 0;
-  virtual Optional<String> getFunctionFile(const String& functionName) = 0;
-  virtual Optional<String> getConstantFile(const String& constantName) = 0;
-  virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
+  virtual Optional<FileResult> getTypeOrTypeAliasFile(const String& typeName) = 0;
+  virtual Optional<FileResult> getTypeFile(const String& typeName) = 0;
+  virtual Optional<FileResult> getFunctionFile(const String& functionName) = 0;
+  virtual Optional<FileResult> getConstantFile(const String& constantName) = 0;
+  virtual Optional<FileResult> getTypeAliasFile(const String& aliasName) = 0;
+  virtual Optional<FileResult> getModuleFile(const String& moduleName) = 0;
 
-  virtual Optional<folly::fs::path> getTypeFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getFunctionFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getConstantFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getFunctionFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getConstantFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getModuleFile(std::string_view name) = 0;
 
   /**
    * Map path to symbols
@@ -140,6 +198,7 @@ struct AutoloadMap {
   virtual Array getFileFunctions(const String& path) = 0;
   virtual Array getFileConstants(const String& path) = 0;
   virtual Array getFileTypeAliases(const String& path) = 0;
+  virtual Array getFileModules(const String& path) = 0;
 
   virtual bool canHandleFailure() const = 0;
   virtual Result handleFailure(KindOf kind, const String& className,
@@ -158,6 +217,14 @@ struct FactsStore : public AutoloadMap {
   FactsStore& operator=(const FactsStore&) = default;
   FactsStore& operator=(FactsStore&&) noexcept = default;
   virtual ~FactsStore() override = default;
+
+  /**
+   * Unsubscribe from any watchers, and finish any updates.
+   *
+   * Once you call this function, no new requests can use this FactsStore.
+   * Calls to `ensureUpdated()` will throw exceptions.
+   */
+  virtual void close() = 0;
 
   /**
    * Return the correctly-capitalized name of `type`.
@@ -287,6 +354,7 @@ struct FactsStore : public AutoloadMap {
   virtual Array getAllFunctions() = 0;
   virtual Array getAllConstants() = 0;
   virtual Array getAllTypeAliases() = 0;
+  virtual Array getAllModules() = 0;
 };
 
 } // namespace HPHP

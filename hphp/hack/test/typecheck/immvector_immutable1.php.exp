@@ -1,6 +1,6 @@
-File "immvector_immutable1.php", line 14, characters 10-12:
-Was expecting a return type hint (Typing[4030])
 File "immvector_immutable1.php", line 16, characters 3-12:
 an object of type ImmVector<int> does not allow array append (Typing[4006])
-File "immvector_immutable1.php", line 15, characters 9-29:
-Definition is here
+  File "immvector_immutable1.php", line 15, characters 9-29:
+  Definition is here
+File "immvector_immutable1.php", line 14, characters 10-12:
+Was expecting a return type hint (Typing[4030])

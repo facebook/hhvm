@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/source-location.h"
 
+#include "hphp/util/blob.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include <cstdint>
@@ -30,15 +31,44 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
+struct BlobDecoder;
+struct BlobEncoder;
+struct PackageInfo;
 struct RepoAutoloadMapBuilder;
+struct RepoFileIndex;
 struct RepoGlobalData;
 struct SHA1;
 struct StringData;
+struct string_data_isame;
+struct string_data_same;
 struct UnitEmitter;
 
 namespace Native {
 struct FuncTable;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct RepoUnitInfo {
+  int64_t unitSn;
+  const StringData* path = nullptr;
+  Blob::Bounds emitterLocation;
+  Blob::Bounds symbolsLocation;
+
+  void serde(BlobEncoder& sd) const;
+  void serde(BlobDecoder& sd);
+};
+
+enum class RepoSymbolType {
+  TYPE,
+  FUNC,
+  CONSTANT,
+  TYPE_ALIAS,
+  MODULE
+};
+
+using RepoUnitSymbols =
+  std::vector<std::pair<const StringData*, RepoSymbolType>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +118,9 @@ struct RepoFileBuilder {
   // information into the file. Once successful, the temporary file is
   // renamed to its final name. Once finish() is called, nothing can
   // be done with the RepoFileBuilder except destroy it.
-  void finish(const RepoGlobalData&, const RepoAutoloadMapBuilder&);
+  void finish(const RepoGlobalData&,
+              const RepoAutoloadMapBuilder&,
+              const PackageInfo&);
 
   RepoFileBuilder(const RepoFileBuilder&) = delete;
   RepoFileBuilder(RepoFileBuilder&&) = delete;
@@ -113,6 +145,7 @@ private:
  * don't have a good way to recover from such errors.
  */
 struct RepoFile {
+
   // To support lazy-loading, RepoFile needs to know where to load
   // certain pieces of data. It is the responsibility of the caller to
   // provide such offsets. The offset is abstracted away as a "token"
@@ -149,7 +182,12 @@ struct RepoFile {
    * querying functions are called. It can only be called once, and
    * cannot be called concurrently.
    */
-  static void loadGlobalTables();
+  static void loadGlobalTables(bool loadAutoloadMap = true);
+
+  /*
+   * Retrieves the package info stored in the repo file.
+   */
+  static const PackageInfo& packageInfo();
 
   /*
    * Query functions:
@@ -168,8 +206,8 @@ struct RepoFile {
   // issues). If `lazy` is true, the bytecode and line tables are not
   // loaded with the UnitEmitter and will instead be loaded on demand.
   static std::unique_ptr<UnitEmitter>
-  loadUnitEmitter(const StringData* searchPath,
-                  const StringData* path,
+  loadUnitEmitter(const StringData* path,
+                  const RepoUnitInfo* info,
                   const Native::FuncTable& nativeFuncs,
                   bool lazy);
 
@@ -188,9 +226,6 @@ struct RepoFile {
                               unsigned char* data,
                               size_t len);
 
-  // Map an UnitEmitter's path to its associated SN (returning -1 if
-  // no such UnitEmitter exists).
-  static int64_t findUnitSN(const StringData* path);
   // Map an UnitEmitter's SN to its associated path (returning nullptr
   // if no such UnitEmitter exists).
   static const StringData* findUnitPath(int64_t unitSn);
@@ -199,6 +234,15 @@ struct RepoFile {
   // thing" for RepoFile. We assume the SHA1 matches the SN. This is
   // only provided for compatibility for tc-print.
   static const StringData* findUnitPath(const SHA1&);
+
+  // Get the RepoUnitInfo for a specific key in a specific map.
+  // The map must point to RepoBounds containing the bounds for RepoUnitInfo
+  template <typename Compare>
+  static const RepoUnitInfo* findUnitInfo(const Blob::HashMapIndex<Compare>& map,
+                                          const StringData* key);
+
+  // Get all the symbols for a specific path
+  static const RepoUnitSymbols* findUnitSymbols(const StringData* path);
 
   RepoFile() = delete;
   RepoFile(const RepoFile&) = delete;
@@ -258,9 +302,9 @@ private:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 using StringOrToken = TokenOrPtr<const StringData>;
 using ArrayOrToken = TokenOrPtr<const ArrayData>;
-
-///////////////////////////////////////////////////////////////////////////////
 
 }

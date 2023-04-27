@@ -11,6 +11,8 @@ final class Flobby extends \FlobBase {
 }
 
 trait TFlobby {
+  require extends \FlobBase;
+
   private function asFlobby(): \Flobby {
     throw new \Exception();
   }

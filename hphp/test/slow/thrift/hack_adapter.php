@@ -15,9 +15,17 @@ class ThriftStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class HackStruct {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'str_value',
+      'type' => \TType::STRING,
+    ],
+  ];
+
   public ?string $str_value = null;
 
   public function __construct(?string $str_value = null)[] {
@@ -86,6 +94,7 @@ class OuterStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 // This class is identical to OuterStruct but with all the adapters removed.
@@ -126,6 +135,7 @@ class OuterStructNoAdapter {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function getStruct() {
@@ -153,7 +163,7 @@ function testCompact() {
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v, 20);
   var_dump(md5($p->getTransport()->buff));
   var_dump(thrift_protocol_read_compact($p, 'OuterStruct'));
 

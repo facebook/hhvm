@@ -81,7 +81,7 @@ function openssl_csr_get_subject(mixed $csr,
  * @return mixed - Returns the CSR.
  */
 <<__Native>>
-function openssl_csr_new(?darray $dn,
+function openssl_csr_new(?darray<string, string> $dn,
                          inout mixed $privkey,
                          mixed $configargs = null,
                          mixed $extraattribs = null): mixed;
@@ -233,7 +233,7 @@ function openssl_pkcs7_decrypt(string $infilename,
 function openssl_pkcs7_encrypt(string $infilename,
                                string $outfilename,
                                mixed $recipcerts,
-                               darray $headers,
+                               darray<string, string> $headers,
                                int $flags = 0,
                                int $cipherid = OPENSSL_CIPHER_RC2_40): bool;
 
@@ -380,7 +380,10 @@ function openssl_pkey_get_private(mixed $key,
  */
 function openssl_get_privatekey(mixed $key,
                                 mixed $passphrase = ""): mixed {
-  return openssl_pkey_get_private($key, $passphrase);
+  return openssl_pkey_get_private(
+    $key,
+    HH\FIXME\UNSAFE_CAST<mixed, string>($passphrase),
+  );
 }
 
 /* openssl_get_publickey() extracts the public key from certificate and
@@ -514,7 +517,7 @@ function openssl_seal(string $data,
                       inout mixed $sealed_data,
                       <<__OutOnly>>
                       inout mixed $env_keys,
-                      varray $pub_key_ids,
+                      varray<mixed> $pub_key_ids,
                       string $method,
                       <<__OutOnly>>
                       inout mixed $iv): mixed;
@@ -589,7 +592,7 @@ function openssl_x509_check_private_key(mixed $cert,
 <<__Native>>
 function openssl_x509_checkpurpose(mixed $x509cert,
                                    int $purpose,
-                                   varray $cainfo = varray[],
+                                   varray<string> $cainfo = varray[],
                                    string $untrustedfile = ""): mixed;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename

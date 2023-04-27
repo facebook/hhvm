@@ -136,18 +136,18 @@ void HHVM_METHOD(
   if (ex_msg.isNull()) {
     exceptionMetadata.declaredException_ref() = apache::thrift::PayloadDeclaredExceptionMetadata();
   } else if (ex_msg.isString()) {
-    exceptionMetadataBase.what_utf8_ref() = ex_msg.toString().c_str();
+    exceptionMetadataBase.what_utf8() = ex_msg.toString().c_str();
     apache::thrift::PayloadAppUnknownExceptionMetdata aue;
-    aue.errorClassification_ref().ensure().blame_ref() =
+    aue.errorClassification().ensure().blame() =
         apache::thrift::ErrorBlame::CLIENT;
     exceptionMetadata.appUnknownException_ref() = std::move(aue);
   }
 
-  exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
+  exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
   apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
   apache::thrift::PayloadMetadata payloadMetadata;
   payloadMetadata.exceptionMetadata_ref() = std::move(exceptionMetadataBase);
-  streamPayloadMetadata.payloadMetadata_ref() = std::move(payloadMetadata);
+  streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
   data->sinkBridge_->push(folly::Try<apache::thrift::StreamPayload>(
             folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(
           apache::thrift::StreamPayload(
@@ -290,10 +290,10 @@ Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setFaultToInject, const String& key, const String& value) {
+Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const String& payload) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
-  data->rpcOptions.setFaultToInject(std::string(key.c_str(), key.size()),
-    std::string(value.c_str(), value.size()));
+  data->rpcOptions.setSerializedAuthProofs(
+      apache::thrift::SerializedAuthProofs(folly::IOBuf::copyBuffer(payload.data(), payload.size())));
   return Object(this_);
 }
 
@@ -321,19 +321,6 @@ String HHVM_METHOD(RpcOptions, __toString) {
     }
     result += "\"" + it.first + "\": \"" + it.second + "\"";
   }
-  result += "}; ";
-  result += "faultsToInject: {";
-  first = true;
-  if (const auto& faultsToInject = data->rpcOptions.getFaultsToInject()) {
-    for (const auto& it : *faultsToInject) {
-      if (!first) {
-        result += ", ";
-      } else {
-        first = false;
-      }
-      result += "\"" + it.first + "\": \"" + it.second + "\"";
-    }
-  }
   result += "}";
   result += ")\n";
   return result;
@@ -343,6 +330,9 @@ String HHVM_METHOD(RpcOptions, __toString) {
 
 static struct ThriftExtension final : Extension {
   ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET) {}
+  void loadDecls() override {
+    loadDeclsFrom("thrift");
+  }
   void moduleInit() override {
     HHVM_RC_INT(THRIFT_MARK_LEGACY_ARRAYS, k_THRIFT_MARK_LEGACY_ARRAYS);
 
@@ -351,6 +341,7 @@ static struct ThriftExtension final : Extension {
     HHVM_FE(thrift_protocol_read_binary_struct);
     HHVM_FE(thrift_protocol_set_compact_version);
     HHVM_FE(thrift_protocol_write_compact);
+    HHVM_FE(thrift_protocol_write_compact2);
     HHVM_FE(thrift_protocol_read_compact);
     HHVM_FE(thrift_protocol_read_compact_struct);
 
@@ -365,7 +356,7 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setProcessingTimeout);
     HHVM_ME(RpcOptions, setChunkTimeout);
     HHVM_ME(RpcOptions, setInteractionId);
-    HHVM_ME(RpcOptions, setFaultToInject);
+    HHVM_ME(RpcOptions, setSerializedAuthProofs);
     HHVM_ME(RpcOptions, __toString);
 
     Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());

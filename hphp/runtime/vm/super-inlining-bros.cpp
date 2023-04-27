@@ -227,8 +227,9 @@ private:
       case HeaderKind::RClsMeth:
       case HeaderKind::RFunc:
         // TODO: Handle above trash.
-      case HeaderKind::AwaitAllWH:
       case HeaderKind::AsyncFuncWH:
+      case HeaderKind::AwaitAllWH:
+      case HeaderKind::ConcurrentWH:
       case HeaderKind::NativeData:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::Cpp:
@@ -294,7 +295,6 @@ private:
     check(Attr::IsWeakRefed, "IsWeakRefed");
     check(Attr::HasDynPropArr, "HasDynPropArr");
     check(Attr::UsedMemoCache, "UsedMemoCache");
-    check(Attr::HasUninitProps, "HasUninitProps");
     if (error.size()) {
       throw ScanException(folly::sformat(
           "Unhandled object due to attribute(s) ({})", error));
@@ -1030,8 +1030,9 @@ void makeStatic(std::vector<TypedValue>& roots) {
         case HeaderKind::RClsMeth:
         case HeaderKind::RFunc:
           // TODO: Handle above trash (T29639296)
-        case HeaderKind::AwaitAllWH:
         case HeaderKind::AsyncFuncWH:
+        case HeaderKind::AwaitAllWH:
+        case HeaderKind::ConcurrentWH:
         case HeaderKind::NativeData:
         case HeaderKind::AsyncFuncFrame:
         case HeaderKind::Resource:
@@ -1191,10 +1192,10 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::MemoSet:
     case Op::MemoSetEager:
     case Op::SetImplicitContextByValue:
+    case Op::CreateSpecialImplicitContext:
       return true;
 
     case Op::Nop:
-    case Op::EntryNop:
     case Op::BreakTraceHint:
     case Op::PopC:
     case Op::PopU:
@@ -1235,9 +1236,6 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::Add:
     case Op::Sub:
     case Op::Mul:
-    case Op::AddO:
-    case Op::SubO:
-    case Op::MulO:
     case Op::Div:
     case Op::Mod:
     case Op::Pow:
@@ -1272,8 +1270,8 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ThrowAsTypeStructException:
     case Op::CombineAndResolveTypeStruct:
     case Op::Select:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::JmpZ:
     case Op::JmpNZ:
     case Op::Switch:
@@ -1313,12 +1311,11 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ResolveClass:
     case Op::LazyClass:
     case Op::NewObj:
-    case Op::NewObjR:
     case Op::NewObjD:
-    case Op::NewObjRD:
     case Op::NewObjS:
     case Op::LockObj:
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -1338,6 +1335,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::CheckThis:
     case Op::ChainFaults:
     case Op::OODeclExists:
+    case Op::VerifyImplicitContextState:
     case Op::VerifyOutType:
     case Op::VerifyParamType:
     case Op::VerifyParamTypeTS:
@@ -1348,7 +1346,11 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ParentCls:
     case Op::LateBoundCls:
     case Op::RecordReifiedGeneric:
-    case Op::CheckReifiedGenericMismatch:
+    case Op::CheckClsReifiedGenericMismatch:
+    case Op::ClassHasReifiedGenerics:
+    case Op::GetClsRGProp:
+    case Op::HasReifiedParent:
+    case Op::CheckClsRGSoft:
     case Op::CreateCl:
     case Op::CreateCont:
     case Op::WHResult:
@@ -1925,7 +1927,7 @@ bool checkForKnownInstanceMethod(SrcKey sk) {
   }
 
   auto const ctx = vmfp() ? vmfp()->func()->cls() : nullptr;
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const spec = box->type.clsSpec();
   auto const hint = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
   auto const hinted = !hint->empty()

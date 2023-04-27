@@ -1,10 +1,10 @@
 File "real_return_type.php", line 11, characters 17-20:
-Invalid type hint `real`. Use `float` instead (Parsing[1002])
+No such type `real`, did you mean `float`? (Naming[2123])
 File "real_return_type.php", line 11, characters 17-20:
 Unbound name: `real` (Naming[2049])
 File "real_return_type.php", line 12, characters 10-12:
 Invalid return type (Typing[4110])
-File "real_return_type.php", line 11, characters 17-20:
-Expected `real`
-File "real_return_type.php", line 12, characters 10-12:
-But got `float`
+  File "real_return_type.php", line 11, characters 17-20:
+  Expected `real`
+  File "real_return_type.php", line 12, characters 10-12:
+  But got `float`

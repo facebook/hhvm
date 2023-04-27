@@ -1,7 +1,7 @@
 <?hh
 
 abstract final class TestAsyncMysqlConn {
-  static $conn = null;
+  public static $conn = null;
   public static function testMultiQuery($input) {
     if (self::$conn === null) {
       $conn = (new ReflectionClass(AsyncMysqlConnection::class))

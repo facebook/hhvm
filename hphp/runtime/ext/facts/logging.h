@@ -45,7 +45,7 @@ void enableFactsLogging(
  * written.
  */
 struct AsyncLogWriter : public folly::LogWriter {
-public:
+ public:
   explicit AsyncLogWriter(std::unique_ptr<folly::LogWriter> writer);
   ~AsyncLogWriter() override {
     flush();
@@ -58,7 +58,7 @@ public:
     return m_is_tty;
   }
 
-private:
+ private:
   const bool m_is_tty;
   std::unique_ptr<folly::LogWriter> m_writer;
   std::unique_ptr<folly::Executor> m_exec;

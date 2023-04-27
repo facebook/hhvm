@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_a_error_001(): void {
 echo "*** Testing is_a() : error conditions ***\n";
 
 //Test is_a with one more than the expected number of arguments

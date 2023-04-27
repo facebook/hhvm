@@ -34,7 +34,7 @@ let value_or_not_found err_msg opt = value_exn (DependencyNotFound err_msg) opt
 
 (* -- Pretty-printing constants --------------------------------------------- *)
 
-let __FN_MAKE_DEFAULT__ = "extract_standalone_make_default"
+let __CONST_DEFAULT__ = "EXTRACT_STANDALONE_DEFAULT"
 
 let __FILE_PREFIX__ = "////"
 
@@ -426,6 +426,16 @@ end = struct
       | Aast_defs.(Haccess (hint, _) | Hlike hint | Hsoft hint | Hoption hint)
         ->
         aux acc @@ snd hint
+      | Aast_defs.Hrefinement (hint, members) ->
+        let member_hints = function
+          | Aast_defs.(Rtype (_, TRexact hint) | Rctx (_, CRexact hint)) ->
+            [hint]
+          | Aast_defs.(Rtype (_, TRloose { tr_lower; tr_upper })) ->
+            tr_lower @ tr_upper
+          | Aast_defs.(Rctx (_, CRloose { cr_lower; cr_upper })) ->
+            Option.to_list cr_lower @ Option.to_list cr_upper
+        in
+        auxs acc (hint :: List.concat_map members ~f:member_hints)
       | Aast_defs.Habstr (_, hints)
       | Aast_defs.Hunion hints
       | Aast_defs.Hintersection hints
@@ -594,14 +604,15 @@ end = struct
       @@ Nast_helper.get_class ctx cls_name;
       (match Decl_provider.get_class ctx cls_name with
       | None ->
-        let Typing_defs.{ td_type; td_constraint; _ } =
+        let Typing_defs.{ td_type; td_as_constraint; td_super_constraint; _ } =
           value_or_not_found description
           @@ Decl_provider.get_typedef ctx cls_name
         in
         Option.iter ~f:(add_tydef_attr_deps ctx env)
         @@ Nast_helper.get_typedef ctx cls_name;
         add_dep ctx ~this:None env td_type;
-        Option.iter td_constraint ~f:(add_dep ctx ~this:None env)
+        Option.iter td_as_constraint ~f:(add_dep ctx ~this:None env);
+        Option.iter td_super_constraint ~f:(add_dep ctx ~this:None env)
       | Some cls ->
         let add_dep = add_dep ctx env ~this:(Some cls_name) in
         Typing_deps.Dep.(
@@ -753,16 +764,10 @@ end = struct
     List.iter tparams ~f:(add_tparam_attr_deps ctx env)
 
   and add_fun_attr_deps ctx env fd =
-    let Aast.
-          {
-            f_user_attributes = attrs;
-            f_params = params;
-            f_tparams = tparams;
-            _;
-          } =
+    let Aast.{ f_user_attributes = attrs; f_params = params; _ } =
       fd.Aast.fd_fun
     in
-    add_arg_attr_deps ctx env (attrs, params, tparams)
+    add_arg_attr_deps ctx env (attrs, params, fd.Aast.fd_tparams)
 
   and add_method_attr_deps
       ctx
@@ -908,7 +913,7 @@ end = struct
         (obj : Typing_deps.Dep.dependency Typing_deps.Dep.variant) : unit =
       if Dep.is_relevant target root then do_add_dep ctx env obj
     in
-    Typing_deps.add_dependency_callback "add_dependency" add_dependency;
+    Typing_deps.add_dependency_callback ~name:"add_dependency" add_dependency;
     (* Collect dependencies through side effects of typechecking and remove
      * the target function/method from the set of dependencies to avoid
      * declaring it twice.
@@ -917,7 +922,9 @@ end = struct
       Typing_deps.Dep.(
         match target with
         | Cmd.Function func ->
-          let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
+          let (_
+                : (Tast.def list * Typing_inference_env.t_global_with_pos)
+                  option) =
             Typing_check_job.type_fun ctx filename func
           in
           add_implementation_dependencies ctx env;
@@ -1113,7 +1120,7 @@ end = struct
     else
       Fmt.string ppf param_name
 
-  let pp_fun_param_default ppf _ = Fmt.pf ppf {| = \%s()|} __FN_MAKE_DEFAULT__
+  let pp_fun_param_default ppf _ = Fmt.pf ppf {| = \%s|} __CONST_DEFAULT__
 
   let update_hfun_context (pos, hints) ~name =
     ( pos,
@@ -1144,6 +1151,7 @@ end = struct
         | Hsoft _
         | Hshape _
         | Htuple _
+        | Hrefinement _
         (* places where function types shouldn't appear *)
         | Haccess _
         | Happly _
@@ -1278,7 +1286,7 @@ end = struct
       SGConst { name; line = Pos.line pos; type_; init_val }
 
     let mk_gfun ast =
-      let Aast.{ f_name = (pos, name); _ } = ast.Aast.fd_fun in
+      let (pos, name) = ast.Aast.fd_name in
       SGFun (name, Pos.line pos, ast)
 
     let mk_tydef (Aast.{ t_name = (pos, name); _ } as ast) =
@@ -1308,7 +1316,7 @@ end = struct
     (* -- Global functions -------------------------------------------------- *)
 
     let pp_fun ppf (name, fd) =
-      let Aast.{ f_user_attributes; f_tparams; f_params; f_ret; f_ctxs; _ } =
+      let Aast.{ f_user_attributes; f_params; f_ret; f_ctxs; _ } =
         fd.Aast.fd_fun
       in
       Fmt.(
@@ -1319,7 +1327,7 @@ end = struct
           f_user_attributes
           (strip_ns name)
           pp_tparams
-          f_tparams
+          fd.Aast.fd_tparams
           pp_fun_params
           f_params
           (option pp_contexts)
@@ -1331,8 +1339,10 @@ end = struct
 
     let pp_typedef_visiblity ppf = function
       | Aast_defs.Transparent -> Fmt.string ppf "type"
-      | Aast_defs.Tinternal -> Fmt.string ppf "type"
-      | Aast_defs.Opaque -> Fmt.string ppf "newtype"
+      | Aast_defs.CaseType -> Fmt.string ppf "case type"
+      | Aast_defs.Opaque
+      | Aast_defs.OpaqueModule ->
+        Fmt.string ppf "newtype"
 
     let pp_fixme ppf code = Fmt.pf ppf "/* HH_FIXME[%d] */@." code
 
@@ -1340,12 +1350,20 @@ end = struct
         ppf
         ( nm,
           fixmes,
-          Aast.{ t_tparams; t_constraint; t_vis; t_kind; t_user_attributes; _ }
-        ) =
+          Aast.
+            {
+              t_tparams;
+              t_as_constraint;
+              t_super_constraint;
+              t_vis;
+              t_kind;
+              t_user_attributes;
+              _;
+            } ) =
       Fmt.(
         pf
           ppf
-          {|%a%a%a %s%a%a = %a;|}
+          {|%a%a%a %s%a%a%a = %a;|}
           (list ~sep:cut pp_fixme)
           fixmes
           pp_user_attrs
@@ -1356,7 +1374,9 @@ end = struct
           pp_tparams
           t_tparams
           (option @@ prefix (const string " as ") @@ pp_hint ~is_ctx:false)
-          t_constraint
+          t_as_constraint
+          (option @@ prefix (const string " super ") @@ pp_hint ~is_ctx:false)
+          t_super_constraint
           (pp_hint ~is_ctx:false)
           t_kind)
 
@@ -2164,7 +2184,7 @@ end = struct
       | [] -> k []
       | (ns, next) :: rest ->
         auxs rest ~k:(fun rest' ->
-            aux next ~k:(fun next' -> k @@ (ns, next') :: rest'))
+            aux next ~k:(fun next' -> k @@ ((ns, next') :: rest')))
     in
     aux ~k:Fn.id @@ List.map ~f:(fun dep -> (namespace_of dep, dep)) deps
 end
@@ -2314,8 +2334,8 @@ end = struct
 
   let __DEPS_ON_DEFAULT__ =
     Format.sprintf
-      {|@.function %s()[]: nothing {@.  throw new \Exception();@.}|}
-      __FN_MAKE_DEFAULT__
+      {|@.const nothing %s = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");@.|}
+      __CONST_DEFAULT__
 
   let __DEPS_ON_ANY__ =
     Format.sprintf

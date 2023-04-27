@@ -9,7 +9,7 @@
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_variation_001(): void {
 set_error_handler(test_error_handler<>);
 echo "*** Testing get_class_methods() : usage variations ***\n";
 

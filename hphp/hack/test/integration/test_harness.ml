@@ -13,7 +13,7 @@ module Tempfile = struct
   let mkdtemp () =
     let tmp_dir = Sys_utils.temp_dir_name in
     let tmp_dir = Path.make tmp_dir in
-    let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
+    let name = Random_id.short_string () in
     let tmp_dir = Path.concat tmp_dir name in
     let () = Unix.mkdir (Path.to_string tmp_dir) 0o740 in
     tmp_dir

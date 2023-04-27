@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <utility>
 #include <vector>
 #include <string>
@@ -76,8 +77,8 @@ struct StoreValue {
     assertx(data()->kind() == kind);
     return kind;
   }
-  Variant toLocal() const {
-    return data()->toLocal();
+  Variant toLocal(bool pure) const {
+    return data()->toLocal(pure);
   }
   void set(APCHandle* v, int64_t expireTTL, int64_t maxTTL, int64_t bumpTTL);
   bool expired() const;
@@ -194,7 +195,7 @@ struct ConcurrentTableSharedStore {
    * Retrieve a value from the store.  Returns false if the value wasn't
    * contained in the table (or was expired).
    */
-  bool get(const String& key, Variant& value);
+  bool get(const String& key, Variant& value, bool pure = false);
 
   /*
    * Add a value to the store if no (unexpired) value with this key is already
@@ -205,7 +206,7 @@ struct ConcurrentTableSharedStore {
    * Returns: true if the value was added, including if we've replaced an
    * expired value.
    */
-  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
+  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
 
   /*
    * Set the value for `key' to `val'.  If there was an existing value, it is
@@ -213,7 +214,7 @@ struct ConcurrentTableSharedStore {
    *
    * The requested ttl is limited by the ApcTTLLimit.
    */
-  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
+  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
 
   /*
    * Increment the value for the key `key' by step, iff it is present,
@@ -313,7 +314,7 @@ struct ConcurrentTableSharedStore {
    * Return a list of entries with consideration of memory usage. Roughly one
    * sample every 'bytes' of memory is used.
    */
-  std::vector<EntryInfo> sampleEntriesInfoBySize(uint32_t bytes);
+  std::vector<std::tuple<EntryInfo, uint32_t>> sampleEntriesInfoBySize(uint32_t bytes);
 
   /*
    * Debugging.  Access information about all the entries in this table.
@@ -387,8 +388,8 @@ private:
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, int64_t, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool);
-  bool handlePromoteObj(const String&, APCHandle*, const Variant&);
+  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
+  bool handlePromoteObj(const String&, APCHandle*, const Variant&, bool);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
 

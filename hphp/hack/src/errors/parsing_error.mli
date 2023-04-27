@@ -8,14 +8,20 @@
 
 type t =
   | Fixme_format of Pos.t
+  | Hh_ignore_comment of Pos.t
   | Parsing_error of {
       pos: Pos.t;
       msg: string;
-      quickfixes: Quickfix.t list;
+      quickfixes: Pos.t Quickfix.t list;
     }
   | Xhp_parsing_error of {
       pos: Pos.t;
       msg: string;
+    }
+  | Package_config_error of {
+      pos: Pos.t;
+      msg: string;
+      reasons: Pos_or_decl.t Message.t list;
     }
 
 include

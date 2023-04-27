@@ -4,16 +4,20 @@ module Env = Typing_env
 module ITySet = Internal_type_set
 module Utils = Typing_utils
 
-(** Make tconstty (usually a type variable representing the type constant of
-another type variable v) equal to ty::tconstid (where ty is usually a bound
-of v) *)
+(** Make `tvar` equal to `ty::tconstid`. The locl type `tvar` is a
+type variable that represents the the type constant ::tconstid of
+another variable v. See get_tyvar_type_const below, where such type
+variables are created. *)
 let make_type_const_equal
     env
-    tconstty
+    tvar
     (ty : internal_type)
     tconstid
     ~(on_error : Typing_error.Reasons_callback.t option)
     ~as_tyvar_with_cnstr =
+  let subtype_error =
+    Option.map ~f:Typing_error.Reasons_callback.type_constant_mismatch on_error
+  in
   let rec make_equal env ty =
     match ty with
     | LoclType ty ->
@@ -28,22 +32,38 @@ let make_type_const_equal
           ~allow_abstract_tconst:true
           ~ignore_errors:(Option.is_some as_tyvar_with_cnstr)
       in
-      let error =
-        Option.map
-          ~f:Typing_error.Reasons_callback.type_constant_mismatch
-          on_error
-      in
-      let (env, e2) = Utils.sub_type env tytconst tconstty error in
-      let (env, e3) = Utils.sub_type env tconstty tytconst error in
+      let (env, e2) = Utils.sub_type env tytconst tvar subtype_error in
+      let (env, e3) = Utils.sub_type env tvar tytconst subtype_error in
       (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with
+      | (r, Thas_type_member { htm_id; htm_upper = up_ty; htm_lower = lo_ty })
+        when String.equal htm_id (snd tconstid) ->
+        let (env, e) = Utils.sub_type env up_ty lo_ty on_error in
+        (match e with
+        | Some _ ->
+          let err_opt =
+            Option.map
+              ~f:(fun on_error ->
+                Typing_error.(
+                  apply_reasons
+                    ~on_error
+                    (Secondary.Inexact_tconst_access (Reason.to_pos r, tconstid))))
+              on_error
+          in
+          (env, err_opt)
+        | None ->
+          (* We constrain the upper and lower bounds to be equal
+           * between themselves and with the type variable. *)
+          let (env, e1) = Utils.sub_type env up_ty tvar subtype_error in
+          let (env, e2) = Utils.sub_type env tvar lo_ty subtype_error in
+          (env, Option.merge ~f:Typing_error.both e1 e2))
+      | (_, Thas_type_member _)
       | (_, Thas_member _)
+      | (_, Tcan_index _)
+      | (_, Tcan_traverse _)
       | (_, Tdestructure _) ->
         (env, None)
-        (* This not quite correct but works for now since no constraint type has any
-           type constant. The proper way to do it would be to have Utils.expand_typeconst
-           work on constraint types directly. *)
       | (_, TCunion (lty, cty)) ->
         let (env, e1) = make_equal env (LoclType lty) in
         let (env, e2) = make_equal env (ConstraintType cty) in
@@ -52,8 +72,7 @@ let make_type_const_equal
         let (env, e1) = make_equal env (LoclType lty) in
         let (env, e2) = make_equal env (ConstraintType cty) in
         (* TODO: should we be taking the intersection of the errors? *)
-        ( env,
-          Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2]) ))
+        (env, Option.merge ~f:Typing_error.both e1 e2))
   in
   make_equal env ty
 

@@ -1,14 +1,16 @@
+//// modules.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+new module A {}
+//// test.php
+<?hh
 
-module A {}
+module A;
+
 
 class A {
-  <<__Internal>>
-  private function bad1(): void {}
-  <<__Internal>>
-  protected function bad2(): void {}
-  <<__Internal>>
-  public function good(): void {}
+  private internal function bad1(): void {}
+  protected internal function bad2(): void {}
+  public internal function bad3(): void {}
+  internal function good(): void {}
 }

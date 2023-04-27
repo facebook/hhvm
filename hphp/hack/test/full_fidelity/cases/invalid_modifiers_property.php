@@ -3,5 +3,5 @@
 class C {
   abstract final static private protected public async $x = 1;
 
-  static static $y = 2;
+  static static public $y = 2;
 }

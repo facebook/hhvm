@@ -32,6 +32,15 @@ function thrift_protocol_write_compact(object $transportobj,
                                        bool $oneway = false): void;
 
 <<__Native>>
+function thrift_protocol_write_compact2(object $transportobj,
+                                        string $method_name,
+                                        int $msgtype,
+                                        object $request_struct,
+                                        int $seqid,
+                                        bool $oneway = false,
+                                        int $version = 2): void;
+
+<<__Native>>
 function thrift_protocol_read_compact(object $transportobj,
                                       string $obj_typename,
                                       int $options = 0): mixed;
@@ -47,7 +56,7 @@ class InteractionId {
 }
 
 <<__NativeData("RpcOptions")>>
-final class RpcOptions {
+final class RpcOptions implements IPureStringishObject {
   public function __construct()[]: void {}
 
   <<__Native>>
@@ -81,10 +90,16 @@ final class RpcOptions {
   public function setInteractionId(InteractionId $interaction_id)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setFaultToInject(string $key, string $value)[write_props]: RpcOptions;
+  public function setSerializedAuthProofs(string $serializedTokenData)[write_props]: RpcOptions;
 
   <<__Native>>
   public function __toString()[]: string;
+}
+
+final class ThriftApplicationException extends Exception {
+  public function __construct(?string $message = null)[] {
+    parent::__construct($message);
+  }
 }
 
 <<__NativeData("TClientBufferedStream")>>
@@ -95,14 +110,11 @@ final class TClientBufferedStream {
     (function(?string, ?Exception): TStreamResponse) $streamDecode,
   ): HH\AsyncGenerator<null, TStreamResponse, void> {
     while (true) {
-      $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
       } catch (Exception $ex) {
         $streamDecode(null, $ex);
         break;
-      } finally {
-        $timer->end();
       }
 
       if ($buffer === null && $ex_msg === null) {
@@ -115,10 +127,7 @@ final class TClientBufferedStream {
         }
       }
       if ($ex_msg !== null) {
-        $streamDecode(
-          null,
-          new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
-        );
+        $streamDecode(null, new ThriftApplicationException($ex_msg));
         break;
       }
     }
@@ -133,14 +142,12 @@ final class TClientSink {
   public function __construct(): void {}
 
   public async function genCreditsOrFinalResponseHelper(
-  ): Awaitable<(int, ?string, ?Exception)> {
-    $timer = WallTimeOperation::begin();
-    try {
-      list($credits, $final_response, $exception) =
-        await $this->genCreditsOrFinalResponse();
-    } finally {
-      $timer->end();
-    }
+  ): Awaitable<(?int, ?string, ?Exception)> {
+    list($credits, $final_response, $exception) =
+      HH\FIXME\UNSAFE_CAST<
+        ?(int, ?string, ?string),
+        (?int, ?string, ?string)
+      >(await $this->genCreditsOrFinalResponse());
     if (
       ($credits === null || $credits === 0) &&
       $final_response === null &&
@@ -151,9 +158,7 @@ final class TClientSink {
     return tuple(
       $credits,
       $final_response,
-      $exception !== null
-        ? new TApplicationException($exception, TApplicationException::UNKNOWN)
-        : null,
+      $exception !== null ? new ThriftApplicationException($exception) : null,
     );
   }
 
@@ -169,6 +174,7 @@ final class TClientSink {
       if ($final_response !== null || $exception !== null) {
         break;
       }
+      $credits = HH\FIXME\UNSAFE_CAST<?int, int>($credits);
       if ($credits > 0 && $shouldContinue) {
         try {
           foreach ($payload_generator await as $pld) {

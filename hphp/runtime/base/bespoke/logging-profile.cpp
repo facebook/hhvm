@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -108,6 +109,17 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
     case LocationType::StaticProperty: {
       auto const tv = key.cls->staticProperties()[key.slot].val;
       return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
+    }
+
+    case LocationType::TypeConstant: {
+      auto const tv = key.cls->constants()[key.slot].val;
+      if (!tvIsArrayLike(tv)) return nullptr;
+      return key.cls->resolvedTypeCnsGet(tv.val().parr);
+    }
+
+    case LocationType::TypeAlias: {
+      auto const& ts = key.ta->resolvedTypeStructureRaw();
+      return !ts.isNull() ? ts.get() : nullptr;
     }
 
     case LocationType::SrcKey: {
@@ -362,6 +374,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
+  if (!RO::EvalEmitBespokeMonotypes) return;
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
@@ -409,6 +422,19 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
     tv->m_data.parr = bad;
     assertx(tvIsPlausible(*tv));
   }
+
+  if (key.locationType == LocationType::TypeConstant) {
+    auto const consts = key.cls->constants();
+    auto const tv = const_cast<TypedValueAux*>(&consts[key.slot].val);
+    auto const rawData = reinterpret_cast<intptr_t>(bad);
+    auto const ad = reinterpret_cast<ArrayData*>(rawData | 0x1);
+    tv->m_data.parr = ad;
+  }
+
+  if (key.locationType == LocationType::TypeAlias) {
+    auto const ta = const_cast<TypeAlias*>(key.ta);
+    ta->setResolvedTypeStructure(bad);
+  }
 }
 
 jit::ArrayLayout LoggingProfile::getLayout() const {
@@ -454,19 +480,20 @@ SinkProfile::SinkProfile(SinkProfileKey key)
   assertx(s_profiling.load(std::memory_order_acquire));
 }
 
-SinkProfile::SinkProfile(SinkProfileKey key, SinkLayout layout)
+SinkProfile::SinkProfile(SinkProfileKey key, SinkLayouts layouts)
   : key(key)
-  , layout(layout)
+  , layouts(layouts)
 {
   assertx(!s_profiling.load(std::memory_order_acquire));
 }
 
-SinkLayout SinkProfile::getLayout() const {
-  return layout.load(std::memory_order_acquire);
+SinkLayouts SinkProfile::getLayouts() const {
+  return this->layouts.copy();
 }
 
-void SinkProfile::setLayout(SinkLayout layout) {
-  this->layout.store(layout, std::memory_order_release);
+void SinkProfile::setLayouts(SinkLayouts sls) {
+  assertx(sls.layouts.size() > 0);
+  this->layouts.swap(sls);
 }
 
 void SinkProfile::update(const ArrayData* ad) {
@@ -480,6 +507,12 @@ void SinkProfile::update(const ArrayData* ad) {
   const LoggingArray* lad = nullptr;
   if (!ad->isVanilla()) {
     auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
+    // Update count of bespoke type structures before bailing out
+    if (index == TypeStructure::GetLayoutIndex()) {
+      data->typeStructureCount++;
+      data->sampledCount++;
+      return;
+    }
     if (index != LoggingArray::GetLayoutIndex()) return;
     lad = LoggingArray::As(ad);
   }
@@ -888,9 +921,13 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
                   sk.getSymbol(), sink.sampledCount,
                   sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
-    auto const sl = sink.profile->getLayout();
-    LOG_OR_RETURN(file, "  Selected Layout: {}\n", sl.layout.describe());
-    LOG_OR_RETURN(file, "  Guard: {}\n", sl.sideExit ? "side-exit" : "diamond");
+
+    auto const sls = sink.profile->getLayouts();
+    LOG_OR_RETURN(file, "  Selected Layouts (n={}):\n", sls.layouts.size());
+    for (auto const& sl : sls.layouts) {
+      LOG_OR_RETURN(file, "    Layout (coverage={}): {}\n", sl.coverage, sl.layout.describe());
+    }
+    LOG_OR_RETURN(file, "  Layout Guard: {}\n", sls.sideExit ? "side-exit" : "diamond");
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
@@ -1098,6 +1135,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
     assertx(it->second->key == key);
     return it->second;
   }
+  auto const ad = getStaticArray(key);
+  if (ad && !ad->isVanilla()) return nullptr;
 
   // Hold the read mutex while we're constructing the new profile so that we
   // cannot stop profiling until this mutation is complete.
@@ -1105,7 +1144,6 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<LoggingProfile>(key);
-  auto const ad = getStaticArray(key);
   if (ad) {
     profile->data->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
     profile->data->staticSampledArray = ad->makeSampledStaticArray();
@@ -1122,7 +1160,7 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
       freeStaticArray(profile->data->staticLoggingArray);
     } else {
       MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
-      MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+      MemoryStats::LogAlloc(AllocKind::StaticArray, ad->heapSize());
     }
   }
 
@@ -1149,11 +1187,22 @@ LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct) {
   return newProfile;
 }
 
-LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic) {
-  if (!isStatic && cls->declProperties()[slot].name == s_86reified_prop.get()) {
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
+                                  LocationType loc) {
+  assertx(
+    loc == LocationType::InstanceProperty ||
+    loc == LocationType::StaticProperty ||
+    loc == LocationType::TypeConstant
+  );
+  if (loc == LocationType::InstanceProperty &&
+      cls->declProperties()[slot].name == s_86reified_prop.get()) {
     return nullptr;
   }
-  return getLoggingProfile(LoggingProfileKey(cls, slot, isStatic));
+  return getLoggingProfile(LoggingProfileKey(cls, slot, loc));
+}
+
+LoggingProfile* getLoggingProfile(const TypeAlias* ta) {
+  return getLoggingProfile(LoggingProfileKey(ta));
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey sk) {
@@ -1218,8 +1267,8 @@ void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
   always_assert(s_profileMap.insert({key, profile}).second);
 }
 
-void deserializeSink(SinkProfileKey key, SinkLayout sl) {
-  auto const profile = new SinkProfile(key, sl);
+void deserializeSink(SinkProfileKey key, SinkLayouts sls) {
+  auto const profile = new SinkProfile(key, sls);
   always_assert(s_sinkMap.insert({key, profile}).second);
 }
 

@@ -15,9 +15,7 @@ let get_default_provider_context () =
   let () =
     Relative_path.set_path_prefix Relative_path.Hhi (Path.make_unsafe "hhi")
   in
-  let () =
-    Provider_backend.set_local_memory_backend_with_defaults_for_test ()
-  in
+  Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let hh_parser_options = GlobalOptions.default in
   let provider_backend = Provider_backend.get () in
   Provider_context.empty_for_tool
@@ -25,6 +23,7 @@ let get_default_provider_context () =
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ~package_info:Package.Info.empty
 
 let get_naming_table_and_errors provider_context path is_sqlite =
   let (sqlite_path, marshaled_blob_path) =
@@ -35,12 +34,8 @@ let get_naming_table_and_errors provider_context path is_sqlite =
   in
   let errors_path = path ^ ".err" in
   SaveStateService.load_saved_state
-    ~load_decls:false
-    ~shallow_decls:false
     ~naming_table_fallback_path:sqlite_path
     ~naming_table_path:marshaled_blob_path
-    ~legacy_hot_decls_path:""
-    ~shallow_hot_decls_path:""
     ~errors_path
     provider_context
 
@@ -78,16 +73,12 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
       ~f:(fun path fileinfo1 acc ->
         match Naming_table.get_file_info naming_table2 path with
         | None -> { acc with removed_files = path :: acc.removed_files }
-        | Some fileinfo2 ->
-          begin
-            match FileInfo.diff fileinfo1 fileinfo2 with
-            | None -> acc
-            | Some file_diff ->
-              {
-                acc with
-                changed_files = (path, file_diff) :: acc.changed_files;
-              }
-          end)
+        | Some fileinfo2 -> begin
+          match FileInfo.diff fileinfo1 fileinfo2 with
+          | None -> acc
+          | Some file_diff ->
+            { acc with changed_files = (path, file_diff) :: acc.changed_files }
+        end)
   in
   let diff =
     Naming_table.fold naming_table2 ~init:diff ~f:(fun path _ acc ->

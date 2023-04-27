@@ -3,22 +3,28 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+mod adata_state;
+mod class_expr;
 pub mod emitter; // emitter is public API for mutating state
 mod iterator;
 pub mod jump_targets;
 mod label;
 mod local;
 
-use ast_scope::{Scope, ScopeItem};
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use bitflags::bitflags;
+pub use class_expr::ClassExpr;
 use emitter::Emitter;
-use hhbc::{IterId, Label, Local};
-use ocamlrep::rc::RcOc;
-use oxidized::{ast, namespace_env::Env as NamespaceEnv};
-
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
 pub use iterator::*;
 pub use label::*;
 pub use local::*;
+use ocamlrep::rc::RcOc;
+use oxidized::ast;
+use oxidized::namespace_env::Env as NamespaceEnv;
 
 bitflags! {
     #[derive(Default)]
@@ -82,9 +88,8 @@ impl<'a, 'arena> Env<'a, 'arena> {
     }
 
     pub fn make_class_env(arena: &'arena bumpalo::Bump, class: &'a ast::Class_) -> Env<'a, 'arena> {
-        Env::default(arena, RcOc::clone(&class.namespace)).with_scope(Scope {
-            items: vec![ScopeItem::Class(ast_scope::Class::new_ref(class))],
-        })
+        let scope = Scope::with_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
+        Env::default(arena, RcOc::clone(&class.namespace)).with_scope(scope)
     }
 
     pub fn do_in_loop_body<'decl, R, F>(

@@ -13,11 +13,14 @@ pub mod vec;
 #[macro_use]
 pub mod list;
 
-pub use alist::{AssocList, AssocListMut, SortedAssocList};
-pub use list::List;
-pub use multiset::{MultiSet, MultiSetMut, SortedSet};
-
+pub use alist::AssocList;
+pub use alist::AssocListMut;
+pub use alist::SortedAssocList;
 pub use arena_trait::Arena;
+pub use list::List;
+pub use multiset::MultiSet;
+pub use multiset::MultiSetMut;
+pub use multiset::SortedSet;
 
 #[cfg(test)]
 mod test_list;

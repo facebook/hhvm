@@ -1,0 +1,10 @@
+File "req_class_private1.bad.php", line 14, characters 11-20:
+No static method `forPrivate` in `TDemo` (Typing[4090])
+  File "req_class_private1.bad.php", line 13, characters 26-33:
+  Did you mean `demoFunc` instead?
+  File "req_class_private1.bad.php", line 10, characters 7-11:
+  Declaration of `TDemo` is here
+File "req_class_private1.bad.php", line 14, characters 11-20:
+You cannot access this member (Typing[4112])
+  File "req_class_private1.bad.php", line 7, characters 27-36:
+  This member is private

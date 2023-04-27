@@ -93,12 +93,21 @@ void raise_typehint_error(const std::string& msg) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
+  raise_recoverable_error(msg);
+  raise_error("Error handler tried to recover from typehint violation");
+}
+
+void raise_typehint_error_without_first_frame(const std::string& msg) {
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    VMRegAnchor _;
+    SystemLib::throwTypeErrorObject(msg);
+  }
   raise_recoverable_error_without_first_frame(msg);
   raise_error("Error handler tried to recover from typehint violation");
 }
 
 void raise_reified_typehint_error(const std::string& msg, bool warn) {
-  if (!warn) return raise_typehint_error(msg);
+  if (!warn) return raise_typehint_error_without_first_frame(msg);
   raise_warning_unsampled(msg);
 }
 
@@ -196,12 +205,16 @@ void raise_hackarr_compat_is_operator(const char* source, const char* target) {
   );
 }
 
-void raise_resolve_undefined(const StringData* name, const Class* cls) {
+void raise_resolve_func_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Failure to resolve", name, cls);
 }
 
 void raise_call_to_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Call to", name, cls);
+}
+
+void raise_resolve_class_undefined(const StringData* name) {
+  raise_error("Failure to resolve undefined class %s", name->data());
 }
 
 void raise_recoverable_error(const char *fmt, ...) {
@@ -527,7 +540,7 @@ void raise_message(ErrorMode mode,
 }
 
 void raise_str_to_class_notice(const StringData* name) {
-  if (RuntimeOption::EvalRaiseStrToClsConversionWarning && !name->isStatic()) {
+  if (RuntimeOption::EvalRaiseStrToClsConversionWarning) {
     raise_notice("Implicit string to Class conversion for classname %s",
                  name->data());
   }

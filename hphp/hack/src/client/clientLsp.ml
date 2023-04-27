@@ -17,15 +17,27 @@ open Hh_json_helpers
 type args = {
   from: string;
   config: (string * string) list;
+  ignore_hh_version: bool;
+  naming_table: string option;
   verbose: bool;
 }
+
+type serverless_ide =
+  | Ide_hh_server
+      (** [--config ide_serverless=false --config ide_standalone=false]
+          All IDE requests are handled by RPC to hh_server *)
+  | Ide_serverless
+      (** [--config ide_serverless=true --config ide_standalone=false]
+          Most IDE requests are handled by clientIdeDaemon, some by RPC to hh_server *)
+  | Ide_standalone
+      (** [--config ide_serverless=true --config ide_standalone=true]
+          Most IDE requests handled by clientIdeDaemon, some by shelling-out to hh_server *)
+[@@deriving eq, show { with_path = false }]
 
 type env = {
   args: args;
   init_id: string;
-  use_serverless_ide: bool;
-  use_ffp_autocomplete: bool;
-  use_ranked_autocomplete: bool;
+  serverless_ide: serverless_ide;
 }
 
 (** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
@@ -64,11 +76,9 @@ type hh_server_state =
   | Hh_server_forgot
 [@@deriving eq]
 
-let hh_server_restart_button_text = "Restart hh_server"
-
-let client_ide_restart_button_text = "Restart Hack IDE"
-
 let see_output_hack = " See Output\xE2\x80\xBAHack for details." (* chevron *)
+
+let fix_by_running_hh = "Try running `hh` at the command-line."
 
 type incoming_metadata = {
   timestamp: float;  (** time this message arrived at stdin *)
@@ -96,13 +106,52 @@ type server_conn = {
       (** ones that arrived during current rpc *)
 }
 
+(** This type describes our connection to the errors.bin file, where hh_server writes
+errors discovered during its current typecheck.
+
+Here's an overview of how errors_conn works:
+1. [handle_tick] attempts to update the global mutable [errors_conn] from [SeekingErrors] to [TailingErrors]
+   every (idle) second, by trying to open the errors file.
+2. If the global [errors_conn] is [TailingErrors q], when getting next event for any state,
+   an [Errors_file of read_result] event may be produced if there were new errors (read_result) in q
+  (and not other higher pri events).
+3. handling the [Errors_file] event consists in calling [handle_errors_file_item].
+4. [handle_errors_file_item] takes a [read_result] and updates the diagnostic map [Lost_env.uris_with_standalone_diagnostics],
+   or switches the global mutable [error_conn] from [TrailingErrors] to [SeekingErrors] in case of error or end of file. *)
+type errors_conn =
+  | SeekingErrors of {
+      prev_st_ino: int option;
+          (** The inode of the last errors.bin file we have dealt with, if any --
+          we'll only attempt another seek (hence, update [seek_reason] or switch to [TailingErrors])
+          once we find a new, different errors.bin file. *)
+      seek_reason:
+        ServerProgress.errors_file_error * ServerProgress.ErrorsRead.log_message;
+          (** This contains the latest explanation of why we entered or remain in [SeekingErrors] state.
+          "Latest" in the sense that every time [handle_tick] is unable to open or find a new errors-file,
+          or when [handle_errors_file_item] enters [SeekingErrors] mode, then it will will update [seek_reason].
+          * [ServerProgress.NothingYet] is used at initialization, before anything's yet been tried.
+          * [ServerProgress.NothingYet] is also used when [handle_tick] couldn't open an errors-file.
+          * [ServerProgress.Completed] is used when we were in [TailingErrors], and then [handle_errors_file_item]
+            discovered that the errors-file was complete, and so switched over to [SeekingErrors]
+          * Other cases are used when [handle_tick] calls [ServerProgress.ErrorsRead.openfile]
+            and gets an error. The only possibilities are [ServerProgress.{Killed,Build_id_mismatch}].
+
+          It's a bit naughty of us to report our own "seek reasons" (completed/nothing-yet) through
+          the error codes that properly belong to [ServerProgress.ErrorsRead]. But they fit so well... *)
+    }  (** Haven't yet found a suitable errors.bin, but looking! *)
+  | TailingErrors of {
+      start_time: float;
+      fd: Unix.file_descr;
+      q: ServerProgress.ErrorsRead.read_result Lwt_stream.t;
+    }  (** We are tailing this errors.bin file *)
+
 module Main_env = struct
   type t = {
     conn: server_conn;
-    needs_idle: bool;
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
-    uris_with_diagnostics: UriSet.t;
+    uris_with_server_diagnostics: UriSet.t;
+        (** these are all uris where hh_server has pushed diagnostics, so we
+        know to publish "reset" for them should we lose connection to hh_server *)
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
     hh_server_status: ShowStatusFB.params;
@@ -119,7 +168,6 @@ module In_init_env = struct
     conn: server_conn;
     first_start_time: float;  (** our first attempt to connect *)
     most_recent_start_time: float;  (** for subsequent retries *)
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
@@ -131,38 +179,77 @@ end
 module Lost_env = struct
   type t = {
     p: params;
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
-    lock_file: string;
+    uris_with_standalone_diagnostics: float UriMap.t;
+        (** these are diagnostics which arrived from serverless-ide or shelling out to hh check,
+        each with a timestamp of when they were discovered. The timestamp lets us calculate
+        for instance whether a diagnostic discovered by clientIdeDaemon is more recent
+        than one discovered by hh check. *)
     hh_server_status_diagnostic: PublishDiagnostics.params option;
-        (** Diagnostic messages warning about server not fully running. *)
+        (** Diagnostic messages warning about server not fully running (not used for standalone). *)
+    current_hh_shell: current_hh_shell option;
+        (** If a shell-out to, ex --ide-find-refs is currently underway *)
+    lock_file: string;
   }
 
   and params = {
     explanation: string;
-    new_hh_server_state: hh_server_state;
+    new_hh_server_state: hh_server_state option;
+        (** This is the state as we discern through 'connect' and rpc. We use None to indicate Ide_standalone *)
     start_on_click: bool;
         (** if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool;
         (** reconnect if we receive any LSP request/notification *)
     trigger_on_lock_file: bool;  (** reconnect if lockfile is created *)
   }
+
+  and current_hh_shell = {
+    process:
+      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t;
+    cancellation_token: unit Lwt.u;
+    shellable_type: shellable_type;
+  }
+
+  and shellable_type =
+    | FindRefs of lsp_id * string * ServerCommandTypes.Find_refs.action
+      (* lsp_id, symbol_name, FindRefs action *)
+    | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
+    | Rename of
+        lsp_id
+        * string
+        * int
+        * int
+        * string (* lsp_id, filename, line, col, new_name *)
 end
+
+let get_lsp_id_of_shell_out = function
+  | Lost_env.FindRefs (lsp_id, _, _) -> lsp_id
+  | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
+  | Lost_env.Rename (lsp_id, _, _, _, _) -> lsp_id
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
   | In_init of In_init_env.t
-      (** In_init: we did respond to the initialize request, and now we're
+      (** DEPRECATED: this state isn't used in ide_standalone.
+          In_init: we did respond to the initialize request, and now we're
           waiting for a "Hello" from the server. When that comes we'll
           request a permanent connection from the server, and process the
           file_changes backlog, and switch to Main_loop. *)
   | Main_loop of Main_env.t
-      (** Main_loop: we have a working connection to both server and client. *)
+      (** DEPRECATED: this state isn't used in ide_standalone.
+          Main_loop: we have a working connection to both server and client. *)
   | Lost_server of Lost_env.t
-      (** Lost_server: someone stole the persistent connection from us.
-          We might choose to grab it back if prompted... *)
+      (** Lost_server: this is the main state that we'll be in (after initialize request,
+          before shutdown request) under ide_standalone. TODO(ljw): rename it.
+          DEPRECATED: it's also used for modes other than ide_standalone, modes
+          which do want a connection to hh_server, but either we failed to
+          start hh_server up, or someone stole the persistent connection from us
+          and we might choose to grab it back.
+          We use the optional [Lost_env.params.new_hh_server_state] as a way of storing
+          within Lost_env whether it's being used for ide_standalone (None)
+          or for other deprecated modes (Some). *)
   | Post_shutdown
       (** Post_shutdown: we received a shutdown request from the client, and
           therefore shut down our connection to the server. We can't handle
@@ -196,6 +283,24 @@ type result_telemetry = {
   result_extra_telemetry: Telemetry.t option;
 }
 
+(* --ide-find-refs returns a list of positions, this is a mapping of the response *)
+type ide_shell_out_pos = {
+  filename: string;
+  line: int;
+  char_start: int;
+  char_end: int;
+}
+
+(* --ide-refactor returns a list of patches *)
+type ide_refactor_patch = {
+  filename: string;
+  line: int;
+  char_start: int;
+  char_end: int;
+  patch_type: string;
+  replacement: string;
+}
+
 let initialize_params_ref : Lsp.Initialize.params option ref = ref None
 
 let initialize_params_exc () : Lsp.Initialize.params =
@@ -208,8 +313,8 @@ let get_root_opt () : Path.t option =
   match !initialize_params_ref with
   | None -> None
   | Some initialize_params ->
-    let path = Some (Lsp_helpers.get_root initialize_params) in
-    Some (Wwwroot.get path)
+    let paths = [Lsp_helpers.get_root initialize_params] in
+    Some (Wwwroot.interpret_command_line_root_parameter paths)
 
 (** root only becomes available after the initialize message *)
 let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
@@ -256,6 +361,15 @@ handle_server_message, called as part of the main message loop, whose
 job is to update the Main_env representation of current hh_server status. *)
 let hh_server_state_log : (float * hh_server_state) list ref = ref []
 
+(** The behavior of hh_server is that, if ever it receives an RPC, then it
+expects an IDLE to be sent once the LSP queue is empty and it won't do
+any typechecks until then. This flag is set to true by [rpc], and reset
+to false in the [main] loop after we send the IDLE.
+I'm sorry to store this as a global mutable ref, but it was easier than
+storing it in Main_env and threading Main_env down through everything
+that uses it. *)
+let hh_server_needs_idle : bool ref = ref true
+
 (** hh_server pushes a different form of its state to the monitor e.g.
 "busy typechecking 1/50 files" or "init is slow due to lack of saved state".
 It does this for the sake of clients who don't have a persistent connection;
@@ -269,6 +383,27 @@ of the current hh_server state, and during In_init it's obtained by
 asking the monitor. We store this in a global value so we can access
 it during rpc callbacks, without requiring them to have the state monad. *)
 let latest_hh_server_status : ShowStatusFB.params option ref = ref None
+
+(** hh_server pushes errors to an errors.bin file, which we tail along.
+(Only in ide_standalone mode; we don't do anything in other modes.)
+This variable is where we store our progress in seeking an errors.bin, or tailing
+one we already found. It's updated
+(1) by [handle_tick] which runs every second and may call [try_open_errors_file] to seek errors.bin;
+(2) by [handle_errors_file_item] which tails an errors.bin file. *)
+let latest_hh_server_errors : errors_conn ref =
+  ref
+    (SeekingErrors
+       { prev_st_ino = None; seek_reason = (ServerProgress.NothingYet, "init") })
+
+(** This is the latest state of the progress.json file, updated once a second
+in a background Lwt process [background_status_refresher]. This file is where the
+monitor reports its status like "starting up", and hh_server reports its status
+like "typechecking". If there is no hh_server or monitor, the state is reported
+as "Stopped".
+
+Why do we have this form of status in addition to [latest_hh_server_status]?
+Answer: this form is nicer, and we're going to rip the other one out soon... *)
+let latest_hh_server_progress : ServerProgress.t option ref = ref None
 
 (** Have we already sent a status message over LSP? If so, and our new
 status will be just the same as the previous one, we won't need to send it
@@ -306,24 +441,51 @@ let get_editor_open_files (state : state) :
   | In_init ienv -> Some ienv.In_init_env.editor_open_files
   | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
 
-(** This is the most recent file that was subject of an LSP request
-from the client. There's no guarantee that the file is still open. *)
-let get_most_recent_file (state : state) : documentUri option =
-  match state with
-  | Pre_init
-  | Post_shutdown ->
-    None
-  | Main_loop menv -> menv.Main_env.most_recent_file
-  | In_init ienv -> ienv.In_init_env.most_recent_file
-  | Lost_server lenv -> lenv.Lost_env.most_recent_file
-
+(** The architecture of clientLsp is a single-threaded message loop inside
+[ClientLsp.main]. The loop calls [get_next_event] to wait for the next
+event from a variety of sources, dispatches it according to what kind of event
+it is, and repeats until it finally receives an event that an "exit" lsp notification
+has been received from the client. *)
 type event =
   | Server_hello
+      (** Our connection handshake with hh_server is to open a socket,
+      send an initial connection request over the socket, and eventually it will
+      push a "hello" message once it's ready. This event represents that "hello".
+      It's handled in the main message-loop by [handle_server_hello]. *)
   | Server_message of server_message
+      (** When we have an rpc connection open to hh_server, hh_server might at any time
+      send a "push" message e.g. with error squiggles or status updates. This event
+      represents those pushed messages. Handled by [handle_server_message]. *)
   | Client_message of incoming_metadata * lsp_message
-      (** Client_message stores raw json, and the parsed form of it *)
+      (** The editor e.g. VSCode might send a request or notification LSP message to us
+      at any time. This event represents those LSP messages. The fields store
+      raw json as well as the parsed form of it. Handled by [handle_client_message]. *)
   | Client_ide_notification of ClientIdeMessage.notification
-  | Tick  (** once per second, on idle *)
+      (** Under [--config ide_serverless=true], we spin up a clientIdeDaemon process
+      and communicate its stdin/stdout. This event represents whenever clientIdeDaemon
+      pushes a notification to us, e.g. a progress or status update.
+      Handled by [handle_client_ide_notification]. *)
+  | Errors_file of ServerProgress.ErrorsRead.read_result option
+      (** Under [--config ide_standalone=true], we once a second seek out a new errors.bin
+      file that the server has produced to accumulate errors in the current typecheck.
+      Once we have one, we "tail -f" it until it's finished. This event signals
+      with [Some Ok _] that new errors have been appended to the file in the current typecheck,
+      or [Some Error _] that either the typecheck completed or hh_server failed.
+      The [None] case never arises; it represents a logic bug, an unexpected close
+      of the underlying [Lwt_stream.t]. All handled in [handle_errors_file_item]. *)
+  | Shell_out_hh_feature_complete of
+      ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
+      * Lost_env.shellable_type)
+      (** Under [--config ide_standlone=true], LSP requests for rename or
+      find-refs are accomplished by kicking off an asynchronous shell-out to
+      "hh --refactor" or "hh --ide-find-refs". This event signals that the
+      shell-out has completed and it's now time to process the results.
+      Handled in [handle_shell_out_hh_feature]. *)
+  | Tick
+      (** Once a second, if no other events are pending, we synthesize a Tick
+      event. Handled in [handle_tick]. It does things like send IDE_IDLE if
+      needed to hh_server, see if there's a new errors.bin streaming-error file
+      to tail, and flush HackEventLogger telemetry. *)
 
 let event_to_string (event : event) : string =
   match event with
@@ -339,10 +501,28 @@ let event_to_string (event : event) : string =
       "Client_ide_notification(%s)"
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
+  | Errors_file None -> "Errors_file(anomalous end-of-stream)"
+  | Errors_file (Some (Ok (errors_by_file, _timestamp))) -> begin
+    match Relative_path.Map.choose_opt errors_by_file with
+    | None -> "Errors_file(anomalous empty report)"
+    | Some (file, errors_in_file) ->
+      Printf.sprintf
+        "Errors_file(%d errors in %s, ...)"
+        (List.length errors_in_file)
+        (Relative_path.suffix file)
+  end
+  | Errors_file (Some (Error (e, log_message))) ->
+    Printf.sprintf
+      "Errors_file: %s [%s]"
+      (ServerProgress.show_errors_file_error e)
+      log_message
+  | Shell_out_hh_feature_complete _ -> "Shell_out_hh_feature"
 
 let is_tick (event : event) : bool =
   match event with
   | Tick -> true
+  | Errors_file _
+  | Shell_out_hh_feature_complete _
   | Server_hello
   | Server_message _
   | Client_message _
@@ -355,12 +535,12 @@ let exit_ok () = exit 0
 let exit_fail () = exit 1
 
 (* The following connection exceptions inform the main LSP event loop how to
-respond to an exception: was the exception a connection-related exception
-(one of these) or did it arise during other logic (not one of these)? Can
-we report the exception to the LSP client? Can we continue handling
-further LSP messages or must we quit? If we quit, can we do so immediately
-or must we delay?  --  Separately, they also help us marshal callstacks
-across daemon- and process-boundaries. *)
+   respond to an exception: was the exception a connection-related exception
+   (one of these) or did it arise during other logic (not one of these)? Can
+   we report the exception to the LSP client? Can we continue handling
+   further LSP messages or must we quit? If we quit, can we do so immediately
+   or must we delay?  --  Separately, they also help us marshal callstacks
+   across daemon- and process-boundaries. *)
 
 exception
   Client_fatal_connection_exception of Marshal_tools.remote_exception_data
@@ -462,7 +642,7 @@ let state_to_string (state : state) : string =
   | Pre_init -> "Pre_init"
   | In_init _ienv -> "In_init"
   | Main_loop _menv -> "Main_loop"
-  | Lost_server _lenv -> "Lost_server"
+  | Lost_server _ -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
 
 let hh_server_state_to_string (hh_server_state : hh_server_state) : string =
@@ -517,7 +697,7 @@ let si_kind_to_completion_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Mixed
   | SearchUtils.SI_LocalVariable ->
     Some Completion.Variable
-  | SearchUtils.SI_Property -> Some Completion.Property
+  | SearchUtils.SI_Property -> Some Completion.Field
   | SearchUtils.SI_ClassConstant -> Some Completion.Constant
   | SearchUtils.SI_Interface
   | SearchUtils.SI_Trait ->
@@ -595,6 +775,28 @@ let read_hhconfig_version_and_switch () : string Lwt.t =
   in
   let%lwt hhconfig_version = read_hhconfig_version () in
   Lwt.return (hhconfig_version ^ hack_rc_mode ^ hh_home)
+
+let terminate_if_version_changed_since_start_of_lsp () : unit Lwt.t =
+  let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in
+  let is_ok =
+    String.equal !hhconfig_version_and_switch current_version_and_switch
+  in
+  if is_ok then
+    Lwt.return_unit
+  else
+    (* In these cases we have to terminate our LSP server, and trust
+       VSCode to restart us. Note that we can't do clientStart because that
+       would start our (old) version of hh_server, not the new one! *)
+    let message =
+      ""
+      ^ "Version in hhconfig+switch that spawned the current hh_client: "
+      ^ !hhconfig_version_and_switch
+      ^ "\nVersion in hhconfig+switch currently: "
+      ^ current_version_and_switch
+      ^ "\n"
+    in
+    Lsp_helpers.telemetry_log to_stdout message;
+    exit_fail ()
 
 (** get_uris_with_unsaved_changes is the set of files for which we've
 received didChange but haven't yet received didSave/didOpen. It is purely
@@ -713,21 +915,30 @@ let get_message_source
 
 (** A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
-    (client : Jsonrpc.t option) (ide_service : ClientIdeService.t ref option) :
-    [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
+    (client : Jsonrpc.t option)
+    (ide_service : ClientIdeService.t ref option)
+    (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option) :
+    [ `From_client
+    | `From_ide_service of event
+    | `From_q of ServerProgress.ErrorsRead.read_result option
+    | `No_source
+    ]
+    Lwt.t =
   if Option.value_map client ~default:false ~f:Jsonrpc.has_message then
     Lwt.return `From_client
   else
     let%lwt message_source =
       Lwt.pick
-        [
-          (let%lwt () = Lwt_unix.sleep 1.0 in
-           Lwt.return `No_source);
-          (let%lwt () = wait_until_client_has_data client in
-           Lwt.return `From_client);
-          (let%lwt notification = pop_from_ide_service ide_service in
-           Lwt.return (`From_ide_service notification));
-        ]
+        ([
+           (let%lwt () = Lwt_unix.sleep 1.0 in
+            Lwt.return `No_source);
+           (let%lwt () = wait_until_client_has_data client in
+            Lwt.return `From_client);
+           (let%lwt notification = pop_from_ide_service ide_service in
+            Lwt.return (`From_ide_service notification));
+         ]
+        @ Option.value_map q_opt ~default:[] ~f:(fun q ->
+              [Lwt_stream.get q |> Lwt.map (fun item -> `From_q item)]))
     in
     Lwt.return message_source
 
@@ -760,19 +971,18 @@ from either client or server, we block until that message is completely
 received. Note: if server is None (meaning we haven't yet established
 connection with server) then we'll just block waiting for client. *)
 let get_next_event
-    (state : state)
+    (state : state ref)
     (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) : event Lwt.t =
   let can_use_client =
     match (ide_service, !initialize_params_ref) with
     | (Some ide_service, Some { Initialize.initializationOptions; _ })
-      when initializationOptions.Initialize.delayUntilDoneInit ->
-      begin
-        match ClientIdeService.get_status !ide_service with
-        | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
-          false
-        | ClientIdeService.Status.(Ready | Stopped _) -> true
-      end
+      when initializationOptions.Initialize.delayUntilDoneInit -> begin
+      match ClientIdeService.get_status !ide_service with
+      | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
+        false
+      | ClientIdeService.Status.(Ready | Stopped _) -> true
+    end
     | _ -> true
   in
   let client = Option.some_if can_use_client client in
@@ -785,33 +995,32 @@ let get_next_event
   let from_client (client : Jsonrpc.t) : event Lwt.t =
     let%lwt message = Jsonrpc.get_message client in
     match message with
-    | `Message { Jsonrpc.json; timestamp } ->
-      begin
-        try
-          let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
-          let rnd = Random_id.short_string () in
-          let tracking_id =
-            match message with
-            | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
-            | _ -> rnd
-          in
-          Lwt.return (Client_message ({ tracking_id; timestamp }, message))
-        with
-        | e ->
-          let e = Exception.wrap e in
-          let edata =
-            {
-              Marshal_tools.stack = Exception.get_backtrace_string e;
-              message = Exception.get_ctor_string e;
-            }
-          in
-          raise (Client_recoverable_connection_exception edata)
-      end
+    | `Message { Jsonrpc.json; timestamp } -> begin
+      try
+        let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
+        let rnd = Random_id.short_string () in
+        let tracking_id =
+          match message with
+          | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
+          | _ -> rnd
+        in
+        Lwt.return (Client_message ({ tracking_id; timestamp }, message))
+      with
+      | e ->
+        let e = Exception.wrap e in
+        let edata =
+          {
+            Marshal_tools.stack = Exception.get_backtrace_string e;
+            message = Exception.get_ctor_string e;
+          }
+        in
+        raise (Client_recoverable_connection_exception edata)
+    end
     | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
     | `Recoverable_exception edata ->
       raise (Client_recoverable_connection_exception edata)
   in
-  match state with
+  match !state with
   | Main_loop { Main_env.conn; _ }
   | In_init { In_init_env.conn; _ } ->
     let%lwt message_source = get_message_source conn client ide_service in
@@ -824,15 +1033,31 @@ let get_next_event
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
     | `No_source -> Lwt.return Tick)
+  | Lost_server ({ Lost_env.current_hh_shell = Some sh; _ } as lenv)
+    when not (Lwt.is_sleeping sh.Lost_env.process) ->
+    state := Lost_server { lenv with Lost_env.current_hh_shell = None };
+    let%lwt result = sh.Lost_env.process in
+    Lwt.return
+      (Shell_out_hh_feature_complete (result, sh.Lost_env.shellable_type))
   | Pre_init
   | Lost_server _
   | Post_shutdown ->
-    let%lwt message_source = get_client_message_source client ide_service in
+    (* invariant used by [handle_tick_event]: Errors_file events solely arise
+       in state [Lost_server] in conjunction with [TailingErrors]. *)
+    let q_opt =
+      match (!latest_hh_server_errors, !state) with
+      | (TailingErrors { q; _ }, Lost_server _) -> Some q
+      | _ -> None
+    in
+    let%lwt message_source =
+      get_client_message_source client ide_service q_opt
+    in
     (match message_source with
     | `From_client ->
       let%lwt message = from_client (Option.value_exn client) in
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
+    | `From_q message -> Lwt.return (Errors_file message)
     | `No_source -> Lwt.return Tick)
 
 type powered_by =
@@ -876,12 +1101,7 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
     Lsp_helpers.telemetry_error to_stdout e.message ~extras
 
 (** request_showStatusFB: pops up a dialog *)
-let request_showStatusFB
-    ?(on_result : ShowStatusFB.result -> state -> state Lwt.t =
-      (fun _ state -> Lwt.return state))
-    ?(on_error : Error.t -> state -> state Lwt.t =
-      (fun _ state -> Lwt.return state))
-    (params : ShowStatusFB.params) : unit =
+let request_showStatusFB (params : ShowStatusFB.params) : unit =
   let initialize_params = initialize_params_exc () in
   if not (Lsp_helpers.supports_status initialize_params) then
     ()
@@ -889,7 +1109,7 @@ let request_showStatusFB
     (* We try not to send duplicate statuses.
        That means: if you call request_showStatus but your message is the same as
        what's already up, then you won't be shown, and your callbacks won't be shown. *)
-    let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
+    let msg = params.ShowStatusFB.request.ShowStatusFB.message in
     if String.equal msg !showStatus_outstanding then
       ()
     else (
@@ -898,21 +1118,8 @@ let request_showStatusFB
       let request = ShowStatusRequestFB params in
       to_stdout (print_lsp_request id request);
 
-      let handler (result : lsp_result) (state : state) : state Lwt.t =
-        if String.equal msg !showStatus_outstanding then
-          showStatus_outstanding := "";
-        match result with
-        | ShowStatusResultFB result -> on_result result state
-        | ErrorResult error -> on_error error state
-        | _ ->
-          let error =
-            {
-              Error.code = Error.ParseError;
-              message = "expected ShowStatusResult";
-              data = None;
-            }
-          in
-          on_error error state
+      let handler (_ : lsp_result) (state : state) : state Lwt.t =
+        Lwt.return state
       in
       requests_outstanding :=
         IdMap.add id (request, handler) !requests_outstanding
@@ -972,9 +1179,10 @@ let (_ : 'a -> 'b) = request_showMessage
 
 and (_ : 'c -> 'd) = dismiss_showMessageRequest
 
-(** Dismiss all diagnostics from a state,
-    both the error diagnostics in Main_loop and the hh_server_status
-    diagnostics in In_init and Lost_server. *)
+(** Dismiss all diagnostics from a state:
+    - the error diagnostics in [Main_loop]
+    - the [hh_server_status_diagnostic] in [In_init] and [Lost_server],
+    - the ide_standalone diagnostics in [Lost_server]. *)
 let dismiss_diagnostics (state : state) : state =
   let dismiss_one ~isStatusFB uri =
     let params = { PublishDiagnostics.uri; diagnostics = []; isStatusFB } in
@@ -984,6 +1192,11 @@ let dismiss_diagnostics (state : state) : state =
   let dismiss_status diagnostic =
     dismiss_one ~isStatusFB:true diagnostic.PublishDiagnostics.uri
   in
+  (* Most of the following cases dismiss [hh_server_status_diagnostic]
+     if present. This is a diagnostic ("squiggle") that we synthesize
+     in cases where we don't yet have a connection to hh_server, to indicate
+     why. It's goofy to represent this failure mode through a diagnostic
+     but there aren't many better places to put it. *)
   match state with
   | In_init ienv ->
     let open In_init_env in
@@ -991,12 +1204,28 @@ let dismiss_diagnostics (state : state) : state =
     In_init { ienv with hh_server_status_diagnostic = None }
   | Main_loop menv ->
     let open Main_env in
-    UriSet.iter (dismiss_one ~isStatusFB:false) menv.uris_with_diagnostics;
-    Main_loop { menv with uris_with_diagnostics = UriSet.empty }
+    UriSet.iter
+      (dismiss_one ~isStatusFB:false)
+      menv.uris_with_server_diagnostics;
+    Main_loop { menv with uris_with_server_diagnostics = UriSet.empty }
   | Lost_server lenv ->
     let open Lost_env in
     Option.iter lenv.hh_server_status_diagnostic ~f:dismiss_status;
-    Lost_server { lenv with hh_server_status_diagnostic = None }
+    (* Under [--config ide_standalone=true], we use [Lost_env] as the only
+       state (other than pre-init and post-shutdown). In this case,
+       [uris_with_standalone_diagnostics] are the files-with-squiggles that we've reported
+       to the editor; these came either from clientIdeDaemon or from tailing
+       the errors.bin file in which hh_server accumulates diagnostics for the current
+       typecheck. *)
+    UriMap.iter
+      (fun uri _time -> dismiss_one ~isStatusFB:false uri)
+      lenv.uris_with_standalone_diagnostics;
+    Lost_server
+      {
+        lenv with
+        hh_server_status_diagnostic = None;
+        uris_with_standalone_diagnostics = UriMap.empty;
+      }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
 
@@ -1028,19 +1257,16 @@ let rename_params_to_document_position (params : Lsp.Rename.params) :
       position = params.position;
     }
 
-let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
-    Lsp.range =
-  (* .hhconfig errors are Positions with a filename, but dummy start/end
-   * positions. Handle that case - and Pos.none - specially, as the LSP
-   * specification requires line and character >= 0, and VSCode silently
-   * drops diagnostics that violate the spec in this way *)
-  if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
-    { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
-  else
-    let (line1, col1, line2, col2) = Pos.destruct_range pos in
+let ide_shell_out_pos_to_lsp_location (pos : ide_shell_out_pos) : Lsp.Location.t
+    =
+  Lsp.Location.
     {
-      start = { line = line1 - 1; character = col1 - 1 };
-      end_ = { line = line2 - 1; character = col2 - 1 };
+      uri = path_to_lsp_uri pos.filename ~default_path:pos.filename;
+      range =
+        {
+          start = { line = pos.line - 1; character = pos.char_start - 1 };
+          end_ = { line = pos.line - 1; character = pos.char_end - 1 };
+        };
     }
 
 let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
@@ -1048,7 +1274,7 @@ let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
   Lsp.Location.
     {
       uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
-      range = hack_pos_to_lsp_range ~equal:String.equal pos;
+      range = Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
     }
 
 let ide_range_to_lsp (range : Ide_api_types.range) : Lsp.range =
@@ -1132,15 +1358,9 @@ let hack_errors_to_lsp_diagnostic
                relatedMessage = message;
              })
     in
-    let severity =
-      User_error.(
-        match get_severity error with
-        | Error -> Some PublishDiagnostics.Error
-        | Warning -> Some PublishDiagnostics.Warning)
-    in
     {
       Lsp.PublishDiagnostics.range;
-      severity;
+      severity = Some Lsp.PublishDiagnostics.Error;
       code = PublishDiagnostics.IntCode (User_error.get_code error);
       source = Some "Hack";
       message;
@@ -1157,24 +1377,36 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
+(** Retrieves the content of this file, or raises an LSP [InvalidRequest] exception
+if the file isn't currently open *)
 let get_document_contents
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
-    string option =
+    string =
   match UriMap.find_opt uri editor_open_files with
-  | Some document -> Some document.TextDocumentItem.text
-  | None -> None
+  | Some document -> document.TextDocumentItem.text
+  | None ->
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.InvalidRequest;
+           message = "action on a file not open in LSP server";
+           data = None;
+         })
 
+(** Turns this Lsp uri+line+col into a format suitable for clientIdeDaemon.
+Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
-    ClientIdeMessage.document_location =
+    ClientIdeMessage.document * ClientIdeMessage.location =
   let (file_path, line, column) = lsp_file_position_to_hack params in
   let uri =
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
   let file_path = Path.make file_path in
   let file_contents = get_document_contents editor_open_files uri in
-  { ClientIdeMessage.file_path; file_contents; line; column }
+  ( { ClientIdeMessage.file_path; file_contents },
+    { ClientIdeMessage.line; column } )
 
 (************************************************************************)
 (* Connection and rpc                                                   *)
@@ -1195,7 +1427,6 @@ let start_server ~(env : env) (root : Path.t) : unit =
       no_load = false;
       watchman_debug_logging = false;
       log_inference_constraints = false;
-      ai_mode = None;
       silent = true;
       exit_on_failure = false;
       ignore_hh_version = false;
@@ -1237,14 +1468,9 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       (* only relevant when autostart=true *)
       log_inference_constraints = false;
       (* irrelevant *)
-      log_on_slow_monitor_connect = false;
-      (* Only used when running hh from terminal *)
       remote = false;
-      (* irrelevant *)
-      ai_mode = None;
       (* only relevant when autostart=true *)
-      progress_callback = None;
-      (* we're fast! *)
+      progress_callback = (fun _ -> ());
       do_post_handoff_handshake = false;
       ignore_hh_version = false;
       saved_state_ignore_hhconfig = false;
@@ -1253,7 +1479,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       save_human_readable_64bit_dep_map = None;
       (* priority_pipe delivers good experience for hh_server, but has a bug,
          and doesn't provide benefits in serverless-ide. *)
-      use_priority_pipe = not env.use_serverless_ide;
+      use_priority_pipe = equal_serverless_ide env.serverless_ide Ide_hh_server;
       prechecked = None;
       config = env.args.config;
       custom_hhi_path = None;
@@ -1280,18 +1506,19 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     In_init state waiting for the server hello, or fail to connect and
     leave in a Lost_server state. You might call this from Pre_init or
     Lost_server states, obviously. But you can also call it from In_init state
-    if you want to give up on the prior attempt at connection and try again.   *)
+    if you want to give up on the prior attempt at connection and try again.
+    NOTE: you naturally shouldn't attempt to call this function if Ide_standalone! *)
 let rec connect ~(env : env) (state : state) : state Lwt.t =
+  assert (not (equal_serverless_ide env.serverless_ide Ide_standalone));
   begin
     match state with
-    | In_init { In_init_env.conn; _ } ->
-      begin
-        try
-          Timeout.shutdown_connection conn.ic;
-          Timeout.close_in_noerr conn.ic
-        with
-        | _ -> ()
-      end
+    | In_init { In_init_env.conn; _ } -> begin
+      try
+        Timeout.shutdown_connection conn.ic;
+        Timeout.close_in_noerr conn.ic
+      with
+      | _ -> ()
+    end
     | Pre_init
     | Lost_server _ ->
       ()
@@ -1313,7 +1540,6 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              In_init_env.conn;
              first_start_time = Unix.time ();
              most_recent_start_time = Unix.time ();
-             most_recent_file = get_most_recent_file state;
              editor_open_files =
                Option.value (get_editor_open_files state) ~default:UriMap.empty;
              (* uris_with_unsaved_changes should always be empty here: *)
@@ -1377,7 +1603,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
         ~env
         {
           Lost_env.explanation;
-          new_hh_server_state;
+          new_hh_server_state = Some new_hh_server_state;
           start_on_click = true;
           trigger_on_lock_file = true;
           trigger_on_lsp = false;
@@ -1388,53 +1614,28 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
 and reconnect_from_lost_if_necessary
     ~(env : env) (state : state) (reason : [> `Event of event | `Force_regain ])
     : state Lwt.t =
-  Lost_env.(
-    let should_reconnect =
-      match (state, reason) with
-      | (Lost_server _, `Force_regain) -> true
-      | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
-          `Event (Client_message (_, RequestMessage _)) ) ->
-        true
-      | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
-          `Event Tick ) ->
-        MonitorConnection.server_exists lock_file
-      | (_, _) -> false
-    in
-    if should_reconnect then
-      let%lwt current_version_and_switch =
-        read_hhconfig_version_and_switch ()
-      in
-      let needs_to_terminate =
-        not
-          (String.equal !hhconfig_version_and_switch current_version_and_switch)
-      in
-      if needs_to_terminate then (
-        (* In these cases we have to terminate our LSP server, and trust the    *)
-        (* client to restart us. Note that we can't do clientStart because that *)
-        (* would start our (old) version of hh_server, not the new one!         *)
-        let unsaved = get_uris_with_unsaved_changes state |> UriSet.elements in
-        let unsaved_str =
-          if List.is_empty unsaved then
-            "[None]"
-          else
-            unsaved |> List.map ~f:string_of_uri |> String.concat ~sep:"\n"
-        in
-        let message =
-          "Unsaved files:\n"
-          ^ unsaved_str
-          ^ "\nVersion in hhconfig and switch that spawned the current hh_client: "
-          ^ !hhconfig_version_and_switch
-          ^ "\nVersion in hhconfig and switch currently: "
-          ^ current_version_and_switch
-          ^ "\n"
-        in
-        Lsp_helpers.telemetry_log to_stdout message;
-        exit_fail ()
-      ) else
-        let%lwt state = connect ~env state in
-        Lwt.return state
-    else
-      Lwt.return state)
+  let open Lost_env in
+  let should_reconnect =
+    match (env.serverless_ide, state, reason) with
+    | (Ide_standalone, _, _) -> false
+    | (_, Lost_server _, `Force_regain) -> true
+    | ( _,
+        Lost_server { p = { trigger_on_lsp = true; _ }; _ },
+        `Event (Client_message (_, RequestMessage _)) ) ->
+      true
+    | ( _,
+        Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
+        `Event Tick ) ->
+      MonitorConnection.server_exists lock_file
+    | (_, _, _) -> false
+  in
+  if should_reconnect then
+    let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
+    (* Note: the should_reconnect flag ensures we're not in Ide_standalone, hence we're safe to connect here *)
+    let%lwt state = connect ~env state in
+    Lwt.return state
+  else
+    Lwt.return state
 
 (* do_lost_server: handles the various ways we might lose hh_server. We keep  *)
 (* the LSP server alive, and will (elsewhere) listen for the various triggers *)
@@ -1444,71 +1645,68 @@ and do_lost_server
     ~(env : env)
     ?(allow_immediate_reconnect = true)
     (p : Lost_env.params) : state Lwt.t =
-  Lost_env.(
-    set_hh_server_state p.new_hh_server_state;
+  let open Lost_env in
+  Option.iter p.new_hh_server_state ~f:set_hh_server_state;
 
-    let state = dismiss_diagnostics state in
-    let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
-    let most_recent_file = get_most_recent_file state in
-    let editor_open_files =
-      Option.value (get_editor_open_files state) ~default:UriMap.empty
+  let state = dismiss_diagnostics state in
+  let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+  let editor_open_files =
+    Option.value (get_editor_open_files state) ~default:UriMap.empty
+  in
+  let lock_file = ServerFiles.lock_file (get_root_exn ()) in
+  let reconnect_immediately =
+    allow_immediate_reconnect
+    && p.trigger_on_lock_file
+    && MonitorConnection.server_exists lock_file
+  in
+  if reconnect_immediately then (
+    let lost_state =
+      Lost_server
+        {
+          Lost_env.p;
+          editor_open_files;
+          uris_with_unsaved_changes;
+          uris_with_standalone_diagnostics = UriMap.empty;
+          current_hh_shell = None;
+          lock_file;
+          hh_server_status_diagnostic = None;
+        }
     in
-    let lock_file = ServerFiles.lock_file (get_root_exn ()) in
-    let reconnect_immediately =
-      allow_immediate_reconnect
-      && p.trigger_on_lock_file
-      && MonitorConnection.server_exists lock_file
+    Lsp_helpers.telemetry_log to_stdout "Reconnecting immediately to hh_server";
+    let%lwt new_state =
+      reconnect_from_lost_if_necessary ~env lost_state `Force_regain
     in
-    if reconnect_immediately then (
-      let lost_state =
-        Lost_server
-          {
-            Lost_env.p;
-            most_recent_file;
-            editor_open_files;
-            uris_with_unsaved_changes;
-            lock_file;
-            hh_server_status_diagnostic = None;
-          }
-      in
-      Lsp_helpers.telemetry_log
-        to_stdout
-        "Reconnecting immediately to hh_server";
-      let%lwt new_state =
-        reconnect_from_lost_if_necessary ~env lost_state `Force_regain
-      in
-      Lwt.return new_state
-    ) else
-      Lwt.return
-        (Lost_server
-           {
-             Lost_env.p;
-             most_recent_file;
-             editor_open_files;
-             uris_with_unsaved_changes;
-             lock_file;
-             hh_server_status_diagnostic = None;
-           }))
+    Lwt.return new_state
+  ) else
+    Lwt.return
+      (Lost_server
+         {
+           Lost_env.p;
+           editor_open_files;
+           uris_with_unsaved_changes;
+           uris_with_standalone_diagnostics = UriMap.empty;
+           current_hh_shell = None;
+           lock_file;
+           hh_server_status_diagnostic = None;
+         })
 
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
   In_init_env.(
     let _state = dismiss_diagnostics (In_init ienv) in
+    hh_server_needs_idle := true;
     let menv =
       {
         Main_env.conn = ienv.In_init_env.conn;
-        needs_idle = true;
-        most_recent_file = ienv.most_recent_file;
         editor_open_files = ienv.editor_open_files;
-        uris_with_diagnostics = UriSet.empty;
+        uris_with_server_diagnostics = UriSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
         hh_server_status =
           {
             ShowStatusFB.request =
               {
-                ShowMessageRequest.type_ = MessageType.InfoMessage;
+                ShowStatusFB.type_ = MessageType.InfoMessage;
                 message = "hh_server: ready.";
-                actions = [];
               };
             progress = None;
             total = None;
@@ -1568,7 +1766,10 @@ let run_ide_service
     (initialize_params : Lsp.Initialize.params)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
   let open Lsp.Initialize in
-  let root = Some (Lsp_helpers.get_root initialize_params) |> Wwwroot.get in
+  let root =
+    [Lsp_helpers.get_root initialize_params]
+    |> Wwwroot.interpret_command_line_root_parameter
+  in
   if
     not
       initialize_params.client_capabilities.workspace.didChangeWatchedFiles
@@ -1577,9 +1778,16 @@ let run_ide_service
     log_error "client doesn't support file-watching";
 
   let naming_table_load_info =
-    match initialize_params.initializationOptions.namingTableSavedStatePath with
-    | None -> None
-    | Some path ->
+    match
+      ( initialize_params.initializationOptions.namingTableSavedStatePath,
+        env.args.naming_table )
+    with
+    | (Some _, Some _) ->
+      log_error
+        "naming table path supplied from both LSP initialization param and command line";
+      exit_fail ()
+    | (Some path, _)
+    | (_, Some path) ->
       Some
         {
           ClientIdeMessage.Initialize_from_saved_state.path = Path.make path;
@@ -1587,6 +1795,7 @@ let run_ide_service
             initialize_params.initializationOptions
               .namingTableSavedStateTestDelay;
         }
+    | (None, None) -> None
   in
   let open_files =
     editor_open_files
@@ -1600,8 +1809,8 @@ let run_ide_service
       ide_service
       ~root
       ~naming_table_load_info
-      ~use_ranked_autocomplete:env.use_ranked_autocomplete
       ~config:env.args.config
+      ~ignore_hh_version:env.args.ignore_hh_version
       ~open_files
   in
   log_debug "initialize_from_saved_state.done";
@@ -1625,83 +1834,20 @@ let stop_ide_service
   in
   Lwt.return_unit
 
-let on_status_restart_action
-    ~(env : env)
-    ~(ide_service : ClientIdeService.t ref option)
-    (result : ShowStatusFB.result)
-    (state : state) : state Lwt.t =
-  let open ShowMessageRequest in
-  match (result, state, ide_service) with
-  | (Some { title }, Lost_server _, _)
-    when String.equal title hh_server_restart_button_text ->
-    let root = get_root_exn () in
-    (* Belt-and-braces kill the server. This is in case the server was *)
-    (* stuck in some weird state. It's also what 'hh restart' does. *)
-    if MonitorConnection.server_exists (Path.to_string root) then
-      ClientStop.kill_server root !from;
-
-    (* After that it's safe to try to reconnect! *)
-    start_server ~env root;
-    let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
-    Lwt.return state
-  | (Some { title }, _, Some ide_service)
-    when String.equal title client_ide_restart_button_text ->
-    log "Restarting IDE service";
-
-    (* It's possible that [destroy] takes a while to finish, so make
-       sure to assign the new IDE service to the [ref] before attempting
-       to do an asynchronous operation with the old one. *)
-    let ide_args =
-      {
-        ClientIdeMessage.init_id = env.init_id;
-        verbose_to_stderr = env.args.verbose;
-        verbose_to_file = !verbose_to_file;
-      }
-    in
-    let new_ide_service = ClientIdeService.make ide_args in
-    let old_ide_service = !ide_service in
-    ide_service := new_ide_service;
-    (* Note: the env.verbose passed on init controls verbosity for stderr
-       and is only ever controlled by --verbose command line, stored in env.
-       But verbosity-to-file can be altered dynamically by the user. *)
-    let (promise : unit Lwt.t) =
-      run_ide_service
-        env
-        new_ide_service
-        (initialize_params_exc ())
-        (get_editor_open_files state)
-    in
-    ignore_promise_but_handle_failure
-      promise
-      ~desc:"run-ide-after-restart"
-      ~terminate_on_failure:true;
-    (* Invariant: at all times after InitializeRequest, ide_service has
-       already been sent an "initialize" message. *)
-    let%lwt () =
-      stop_ide_service
-        old_ide_service
-        ~tracking_id:"restart"
-        ~stop_reason:ClientIdeService.Stop_reason.Restarting
-    in
-    Lwt.return state
-  | _ -> Lwt.return state
-
 let get_client_ide_status (ide_service : ClientIdeService.t) :
     ShowStatusFB.params option =
-  let (type_, shortMessage, message, actions, telemetry) =
+  let (type_, shortMessage, message, telemetry) =
     match ClientIdeService.get_status ide_service with
     | ClientIdeService.Status.Initializing ->
       ( MessageType.WarningMessage,
         "Hack: initializing",
-        "Hack IDE: initializing.",
-        [],
+        "hh_client: initializing.",
         None )
     | ClientIdeService.Status.Processing_files p ->
       let open ClientIdeMessage.Processing_files in
       ( MessageType.WarningMessage,
         "Hack",
-        Printf.sprintf "Hack IDE: processing %d files." p.total,
-        [],
+        Printf.sprintf "hh_client: processing %d files." p.total,
         None )
     | ClientIdeService.Status.Rpc requests ->
       let telemetry =
@@ -1709,23 +1855,21 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       in
       ( MessageType.WarningMessage,
         "Hack",
-        "Hack IDE: working...",
-        [],
+        "hh_client: working...",
         Some telemetry )
     | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", [], None)
+      (MessageType.InfoMessage, "Hack: ready", "hh_client: ready.", None)
     | ClientIdeService.Status.Stopped s ->
       let open ClientIdeMessage in
       ( MessageType.ErrorMessage,
         "Hack: " ^ s.short_user_message,
         s.medium_user_message ^ see_output_hack,
-        [{ ShowMessageRequest.title = client_ide_restart_button_text }],
         None )
   in
   Some
     {
       ShowStatusFB.shortMessage = Some shortMessage;
-      request = { ShowMessageRequest.type_; message; actions };
+      request = { ShowStatusFB.type_; message };
       progress = None;
       total = None;
       telemetry;
@@ -1735,7 +1879,6 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
 It normally it gets status quickly, but has a 3s timeout just in case. *)
 let get_hh_server_status (state : state) : ShowStatusFB.params option =
   let open ShowStatusFB in
-  let open ShowMessageRequest in
   match state with
   | Pre_init
   | Post_shutdown ->
@@ -1751,41 +1894,28 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         int_of_float (time -. ienv.first_start_time) |> string_of_int
     in
     (* TODO: better to report time that hh_server has spent initializing *)
-    let (progress, warning) =
-      let open ServerCommandTypes in
+    let progress_message =
       match state with
-      | In_init { In_init_env.conn; _ }
-      | Main_loop { Main_env.conn; _ } ->
-        let server_progress_file =
-          conn.server_specific_files.ServerCommandTypes.server_progress_file
-        in
-        let server_progress =
-          ServerCommandTypesUtils.read_progress_file ~server_progress_file
-        in
-        (server_progress.server_progress, server_progress.server_warning)
-      | _ -> ("connecting", None)
+      | In_init _
+      | Main_loop _ ->
+        let ServerProgress.{ message; _ } = ServerProgress.read () in
+        message
+      | _ -> "connecting"
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
        it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
        or "connecting", if there is no relevant progress to show.
        [warning] comes from the same place, and if present is a human-readable string
        that warns about saved-state-init failure. *)
-    let warning =
-      if Option.is_some warning then
-        " (saved-state not found - will take a while)"
-      else
-        ""
-    in
     let message =
       Printf.sprintf
-        "hh_server initializing%s: %s [%s seconds]"
-        warning
-        progress
+        "hh_server initializing: %s [%s seconds]"
+        progress_message
         delay_in_secs
     in
     Some
       {
-        request = { type_ = MessageType.WarningMessage; message; actions = [] };
+        request = { type_ = MessageType.WarningMessage; message };
         progress = None;
         total = None;
         shortMessage = Some "Hack: initializing";
@@ -1796,16 +1926,16 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
        It's produced in clientLsp.do_server_busy upon receipt of a status
        enum from the server. See comments on hh_server_status for invariants. *)
     Some hh_server_status
+  | Lost_server { Lost_env.p; _ }
+    when Option.is_none p.Lost_env.new_hh_server_state ->
+    (* This is the case of Ide_standalone, when we don't even track server state *)
+    None
   | Lost_server { Lost_env.p; _ } ->
     Some
       {
         shortMessage = Some "Hack: stopped";
         request =
-          {
-            type_ = MessageType.ErrorMessage;
-            message = p.Lost_env.explanation;
-            actions = [{ title = hh_server_restart_button_text }];
-          };
+          { type_ = MessageType.ErrorMessage; message = p.Lost_env.explanation };
         progress = None;
         total = None;
         telemetry = None;
@@ -1816,7 +1946,6 @@ let hh_server_status_to_diagnostic
     (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
     PublishDiagnostics.params option =
   let open ShowStatusFB in
-  let open ShowMessageRequest in
   let open PublishDiagnostics in
   let diagnostic =
     {
@@ -1878,11 +2007,11 @@ let hh_server_status_to_diagnostic
 let publish_hh_server_status_diagnostic
     (state : state) (hh_server_status : ShowStatusFB.params option) : state =
   let uri =
-    match (get_most_recent_file state, get_editor_open_files state) with
-    | (Some uri, Some open_files) when UriMap.mem uri open_files -> Some uri
-    | (_, Some open_files) when not (UriMap.is_empty open_files) ->
-      Some (UriMap.choose open_files |> fst)
-    | (_, _) -> None
+    match get_editor_open_files state with
+    | Some open_files ->
+      (* deterministically pick the first uri, if there is one *)
+      UriMap.keys open_files |> List.rev |> List.hd
+    | _ -> None
   in
   let desired_diagnostic =
     Option.bind hh_server_status ~f:(hh_server_status_to_diagnostic uri)
@@ -1937,7 +2066,7 @@ let publish_hh_server_status_diagnostic
 (** Here are the rules for merging status. They embody the principle that the spinner
 shows if initializing/typechecking is in progress, the error icon shows if error,
 and the status bar word is "Hack" if IDE services are available or "Hack: xyz" if not.
-Note that if Hack IDE is up but hh_server is down, then the hh_server failure message
+Note that if hh_client is up but hh_server is down, then the hh_server failure message
 is conveyed via a publishDiagnostic; it's not conveyed via status.
   [ok] Hack -- if ide_service is up and hh_server is ready
   [spin] Hack -- if ide_service is processing-files or hh_server is initializing/typechecking
@@ -1968,7 +2097,6 @@ let merge_statuses
   | (Some _, None) -> client_ide_status
   | (Some client_ide_status, Some hh_server_status) ->
     let open Lsp.ShowStatusFB in
-    let open Lsp.ShowMessageRequest in
     let request =
       {
         client_ide_status.request with
@@ -1976,8 +2104,6 @@ let merge_statuses
           client_ide_status.request.message
           ^ "\n"
           ^ hh_server_status.request.message;
-        actions =
-          client_ide_status.request.actions @ hh_server_status.request.actions;
       }
     in
     if
@@ -1991,21 +2117,179 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t ref option) :
+(** This function looks at three sources of information (1) hh_server progress.json file,
+(2) whether we're currently tailing an errors.bin file or whether we failed to open one,
+(3) status of clientIdeDaemon. It synthesizes a status message suitable for display
+in the VSCode status bar.
+
+TODO(ljw): This function is duplicative of [merge_statuses] and [get_client_ide_status].
+Once we've switched over to ide_standalone, we should delete the old code, and maybe
+split this function up with two smaller ones. *)
+let merge_statuses_standalone
+    (server : ServerProgress.t)
+    (errors : errors_conn)
+    (ide : ClientIdeService.t) : Lsp.ShowStatusFB.params option =
+  let ( (client_ide_disposition, client_ide_is_initializing),
+        client_ide_message,
+        client_ide_tooltip ) =
+    match ClientIdeService.get_status ide with
+    | ClientIdeService.Status.Initializing ->
+      ( (ServerProgress.DWorking, true),
+        "Hack: initializing",
+        "Hack IDE support is initializing (loading saved state)" )
+    | ClientIdeService.Status.Processing_files p ->
+      ( (ServerProgress.DWorking, false),
+        "Hack: indexing",
+        Printf.sprintf
+          "Hack IDE support is indexing %d files"
+          p.ClientIdeMessage.Processing_files.total )
+    | ClientIdeService.Status.Rpc _ ->
+      ( (ServerProgress.DWorking, false),
+        "Hack",
+        "Hack is working on IDE requests" )
+    | ClientIdeService.Status.Ready ->
+      ((ServerProgress.DReady, false), "Hack", "Hack IDE support is ready")
+    | ClientIdeService.Status.Stopped s ->
+      ( (ServerProgress.DStopped, false),
+        s.ClientIdeMessage.short_user_message,
+        s.ClientIdeMessage.medium_user_message
+        ^ see_output_hack
+        ^ fix_by_running_hh )
+  in
+  let (hh_server_disposition, hh_server_message, hh_server_tooltip) =
+    let open ServerProgress in
+    match (server, errors) with
+    | ({ disposition = DStopped; message; _ }, _) ->
+      ( DStopped,
+        "Hack: hh_server " ^ message,
+        Printf.sprintf "hh_server is %s. %s" message fix_by_running_hh )
+    | ( _,
+        SeekingErrors
+          { seek_reason = (ServerProgress.Build_id_mismatch, log_message); _ }
+      ) ->
+      ( DStopped,
+        "Hack: hh_server wrong version",
+        Printf.sprintf
+          "hh_server is the wrong version [%s]. %s"
+          log_message
+          fix_by_running_hh )
+    | ({ disposition = DWorking; message; _ }, _) ->
+      ( DWorking,
+        (* following is little hack because "Hack: typechecking 1234/5678" is too big to fit
+           in the VSCode status bar. So we shorten this special case. *)
+        (if String.is_substring message ~substring:"typechecking" then
+          message
+        else
+          "Hack: " ^ message),
+        Printf.sprintf "hh_server is busy [%s]" message )
+    | ( { disposition = DReady; _ },
+        SeekingErrors
+          {
+            seek_reason = (ServerProgress.(NothingYet | Killed), log_message);
+            _;
+          } ) ->
+      ( DStopped,
+        "Hack: hh_server stopped",
+        Printf.sprintf
+          "hh_server is stopped. [%s]. %s"
+          log_message
+          fix_by_running_hh )
+    | ( { disposition = DReady; _ },
+        SeekingErrors { seek_reason = (e, log_message); _ } )
+      when not (ServerProgress.is_complete e) ->
+      let e = ServerProgress.show_errors_file_error e in
+      ( DStopped,
+        "Hack: hh_server " ^ e,
+        Printf.sprintf
+          "hh_server error %s [%s]. %s"
+          e
+          log_message
+          fix_by_running_hh )
+    | ({ disposition = DReady; _ }, TailingErrors _) ->
+      (DWorking, "Hack: typechecking", "hh_server is busy [typechecking].")
+    | ({ disposition = DReady; _ }, _) -> (DReady, "Hack", "hh_server is ready")
+  in
+  let (disposition, message) =
+    match
+      (client_ide_disposition, client_ide_is_initializing, hh_server_disposition)
+    with
+    | (ServerProgress.DWorking, true, _) ->
+      (ServerProgress.DWorking, client_ide_message)
+    | (_, _, ServerProgress.DWorking) ->
+      (ServerProgress.DWorking, hh_server_message)
+    | (ServerProgress.DWorking, false, ServerProgress.DStopped) ->
+      (ServerProgress.DWorking, hh_server_message)
+    | (ServerProgress.DWorking, false, _) ->
+      (ServerProgress.DWorking, client_ide_message)
+    | (ServerProgress.DStopped, _, _) ->
+      (ServerProgress.DStopped, client_ide_message)
+    | (_, _, ServerProgress.DStopped) ->
+      (ServerProgress.DStopped, hh_server_message)
+    | (ServerProgress.DReady, _, ServerProgress.DReady) ->
+      (ServerProgress.DReady, "Hack")
+  in
+  let tooltip =
+    Printf.sprintf "%s\n\n%s" client_ide_tooltip hh_server_tooltip
+  in
+  let type_ =
+    match disposition with
+    | ServerProgress.DStopped -> MessageType.ErrorMessage
+    | ServerProgress.DWorking -> MessageType.WarningMessage
+    | ServerProgress.DReady -> MessageType.InfoMessage
+  in
+  Some
+    {
+      ShowStatusFB.shortMessage = Some message;
+      request = { ShowStatusFB.type_; message = tooltip };
+      progress = None;
+      total = None;
+      telemetry = None;
+    }
+
+let refresh_status (env : env) ~(ide_service : ClientIdeService.t ref option) :
     unit =
-  let client_ide_status =
-    match ide_service with
-    | None -> None
-    | Some ide_service -> get_client_ide_status !ide_service
-  in
   let status =
-    merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
+    match (env.serverless_ide, !latest_hh_server_progress) with
+    | (Ide_standalone, Some latest_hh_server_progress) ->
+      merge_statuses_standalone
+        latest_hh_server_progress
+        !latest_hh_server_errors
+        !(Option.value_exn ide_service)
+    | (Ide_standalone, None) ->
+      (* [latest_hh_server_progress] gets set in [background_status_refresher]. The only way it might
+         be None is if we're not using Ide_standalone (impossible to reach here) or if root hasn't yet
+         been set, in which case declining to refresh status is the right thing to do. *)
+      None
+    | _ ->
+      let client_ide_status =
+        match ide_service with
+        | None -> None
+        | Some ide_service -> get_client_ide_status !ide_service
+      in
+      merge_statuses
+        ~hh_server_status:!latest_hh_server_status
+        ~client_ide_status
   in
-  Option.iter
-    status
-    ~f:
-      (request_showStatusFB
-         ~on_result:(on_status_restart_action ~env ~ide_service));
+  Option.iter status ~f:request_showStatusFB;
+  ()
+
+(** This kicks off a permanent process which, once a second, reads progress.json
+and calls [refresh_status]. Because it's an Lwt process, it's able to update
+status even when we're stuck waiting for RPC. *)
+let background_status_refresher
+    (env : env) (ide_service : ClientIdeService.t ref option) : unit =
+  let rec loop () =
+    (* Currently clientLsp does not know root until after the Initialize request.
+       That's a bit of a pain and should be changed to assume current-working-directory.
+       The "initialize" handler both sets root and calls ServerProgress.set_root,
+       and we use the former as a proxy for the latter... *)
+    if Option.is_some (get_root_opt ()) then
+      latest_hh_server_progress := Some (ServerProgress.read ());
+    refresh_status env ~ide_service;
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    loop ()
+  in
+  let _future = loop () in
   ()
 
 let rpc_lock = Lwt_mutex.create ()
@@ -2036,6 +2320,7 @@ let rpc
         let end_time = Unix.gettimeofday () in
         let duration = end_time -. start_time in
         let msg = ServerCommandTypesUtils.debug_describe_t command in
+        hh_server_needs_idle := not (ServerCommandTypes.is_idle_rpc command);
         log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
         | Ok ((), res, tracker) ->
@@ -2065,6 +2350,18 @@ let rpc_with_retry server_conn ref_unblocked_time ~desc command =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       rpc server_conn ref_unblocked_time ~desc command)
 
+let rpc_with_retry_list
+    (server_conn : server_conn)
+    (ref_unblocked_time : float ref)
+    ~(desc : string)
+    (cmd : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t) :
+    'a list Lwt.t =
+  let call_here s =
+    ServerCommandTypes.Done_or_retry.call ~f:(fun () -> Lwt.return s)
+  in
+  let%lwt job_list = rpc server_conn ref_unblocked_time ~desc cmd in
+  List.map job_list ~f:call_here |> Lwt.all
+
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
 let ide_rpc
     (ide_service : ClientIdeService.t ref)
@@ -2072,7 +2369,8 @@ let ide_rpc
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
-  let progress () = refresh_status ~env ~ide_service:(Some ide_service) in
+  let (_ : env) = env in
+  let progress () = refresh_status env ~ide_service:(Some ide_service) in
   let%lwt result =
     ClientIdeService.rpc
       !ide_service
@@ -2084,6 +2382,78 @@ let ide_rpc
   match result with
   | Ok result -> Lwt.return result
   | Error error_data -> raise (Server_nonfatal_exception error_data)
+
+let kickoff_shell_out_and_maybe_cancel
+    (state : state) (shellable_type : Lost_env.shellable_type) : state Lwt.t =
+  let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
+  let compose_shellout_cmd
+      ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
+    let from = Printf.sprintf "clientLsp:%s" from in
+    [|
+      "--from";
+      from;
+      server_cmd;
+      cmd_arg;
+      "--json";
+      "--prefer-stdout";
+      "--autostart-server";
+      "false";
+    |]
+  in
+  match state with
+  | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
+    let open ServerCommandTypes in
+    (* If there's an existing shell process, cancel it *)
+    Option.iter current_hh_shell ~f:(fun sh ->
+        Lwt.wakeup_later sh.Lost_env.cancellation_token ());
+    let (cancel, cancellation_token) = Lwt.wait () in
+    let cmd =
+      begin
+        match shellable_type with
+        | Lost_env.FindRefs (_lsp_id, symbol_name, action) ->
+          let symbol_action_arg =
+            Find_refs.symbol_and_action_to_string_exn symbol_name action
+          in
+          let cmd =
+            compose_shellout_cmd
+              ~from:"find-refs-by-symbol"
+              "--ide-find-refs-by-symbol"
+              symbol_action_arg
+          in
+          cmd
+        | Lost_env.GoToImpl (_, filename, line, col) ->
+          let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
+          let cmd =
+            compose_shellout_cmd
+              ~from:"go-to-impl"
+              "--ide-go-to-impl"
+              file_line_col
+          in
+          cmd
+        | Lost_env.Rename (_, filename, line, col, new_name) ->
+          let file_line_col_symbol =
+            Printf.sprintf "%s:%d:%d:%s" filename line col new_name
+          in
+          let cmd =
+            compose_shellout_cmd
+              ~from:"rename"
+              "--ide-refactor"
+              file_line_col_symbol
+          in
+          cmd
+      end
+    in
+    let process =
+      Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
+    in
+    Lwt.return
+      (Lost_server
+         {
+           lenv with
+           Lost_env.current_hh_shell =
+             Some { Lost_env.process; cancellation_token; shellable_type };
+         })
+  | _ -> Lwt.return state
 
 (************************************************************************)
 (* Protocol                                                             *)
@@ -2133,6 +2503,11 @@ let state_to_rage (state : state) : string =
   let uris_to_string uris =
     List.map uris ~f:(fun (DocumentUri uri) -> uri) |> String.concat ~sep:","
   in
+  let timestamped_uris_to_string uris =
+    List.map uris ~f:(fun (DocumentUri uri, timestamp) ->
+        Printf.sprintf "%s @ %0.2f" uri timestamp)
+    |> String.concat ~sep:","
+  in
   let details =
     match state with
     | Pre_init -> ""
@@ -2146,11 +2521,11 @@ let state_to_rage (state : state) : string =
         ^^ "uris_with_unsaved_changes: %s\n"
         ^^ "hh_server_status.message: %s\n"
         ^^ "hh_server_status.shortMessage: %s\n")
-        menv.needs_idle
+        !hh_server_needs_idle
         (menv.editor_open_files |> UriMap.keys |> uris_to_string)
-        (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
+        (menv.uris_with_server_diagnostics |> UriSet.elements |> uris_to_string)
         (menv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
-        menv.hh_server_status.ShowStatusFB.request.ShowMessageRequest.message
+        menv.hh_server_status.ShowStatusFB.request.ShowStatusFB.message
         (Option.value
            menv.hh_server_status.ShowStatusFB.shortMessage
            ~default:"[absent]")
@@ -2170,6 +2545,7 @@ let state_to_rage (state : state) : string =
       Printf.sprintf
         ("editor_open_files: %s\n"
         ^^ "uris_with_unsaved_changes: %s\n"
+        ^^ "urs_with_standalone_diagnostics: %s\n"
         ^^ "lock_file: %s\n"
         ^^ "explanation: %s\n"
         ^^ "new_hh_server_state: %s\n"
@@ -2178,9 +2554,13 @@ let state_to_rage (state : state) : string =
         ^^ "trigger_on_lock_file: %b\n")
         (lenv.editor_open_files |> UriMap.keys |> uris_to_string)
         (lenv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
+        (lenv.uris_with_standalone_diagnostics
+        |> UriMap.elements
+        |> timestamped_uris_to_string)
         lenv.lock_file
         lenv.p.explanation
-        (lenv.p.new_hh_server_state |> hh_server_state_to_string)
+        (lenv.p.new_hh_server_state
+        |> Option.value_map ~f:hh_server_state_to_string ~default:"no-rpc")
         lenv.p.start_on_click
         lenv.p.trigger_on_lsp
         lenv.p.trigger_on_lock_file
@@ -2285,7 +2665,8 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
     infos
     |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)
     |> List.hd
-    |> Option.map ~f:(hack_pos_to_lsp_range ~equal:Relative_path.equal)
+    |> Option.map
+         ~f:(Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal)
   in
   if List.is_empty contents then
     None
@@ -2308,14 +2689,14 @@ let do_hover_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Hover.params) : Hover.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt infos =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Hover document_location)
+      (ClientIdeMessage.Hover (document, location))
   in
   Lwt.return (do_hover_common infos)
 
@@ -2341,16 +2722,16 @@ let do_typeDefinition_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : TypeDefinition.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt results =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Type_definition document_location)
+      (ClientIdeMessage.Type_definition (document, location))
   in
-  let file = Path.to_string document_location.ClientIdeMessage.file_path in
+  let file = Path.to_string document.ClientIdeMessage.file_path in
   let results =
     List.map results ~f:(fun nast_sid ->
         hack_pos_definition_to_lsp_identifier_location
@@ -2399,21 +2780,20 @@ let do_definition_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : (Definition.result * bool) Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt results =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Definition document_location)
+      (ClientIdeMessage.Definition (document, location))
   in
   let locations =
     List.map results ~f:(fun (_, definition) ->
         hack_symbol_definition_to_lsp_identifier_location
           definition
-          ~default_path:
-            (document_location.ClientIdeMessage.file_path |> Path.to_string))
+          ~default_path:(document.ClientIdeMessage.file_path |> Path.to_string))
   in
   let has_xhp_attribute =
     List.exists results ~f:(fun (occurence, _) ->
@@ -2421,87 +2801,80 @@ let do_definition_local
   in
   Lwt.return (locations, has_xhp_attribute)
 
-let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
+let do_prepareCallHierarchy
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : PrepareCallHierarchy.params) : PrepareCallHierarchy.result Lwt.t =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command =
+    ServerCommandTypes.(
+      PREPARE_CALL_HIERARCHY (LabelledFileName file, line, column))
+  in
+  rpc conn ref_unblocked_time ~desc:"prepare-call-hierarchy" command
+
+let do_callHierarchyIncoming
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : CallHierarchyIncomingCalls.params) :
+    CallHierarchyIncomingCalls.result Lwt.t =
+  let command =
+    ServerCommandTypes.(
+      CALL_HIERARCHY_INCOMING_CALLS params.CallHierarchyCallsRequestParam.item)
+  in
+  let%lwt result_split =
+    rpc_with_retry_list
+      conn
+      ref_unblocked_time
+      ~desc:"call-hierarchy-incoming-calls"
+      command
+  in
+  Lwt.return (Some (List.concat result_split))
+
+let do_callHierarchyOutgoing
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : CallHierarchyOutgoingCalls.params) :
+    CallHierarchyOutgoingCalls.result Lwt.t =
+  let command =
+    ServerCommandTypes.(
+      CALL_HIERARCHY_OUTGOING_CALLS params.CallHierarchyCallsRequestParam.item)
+  in
+  rpc conn ref_unblocked_time ~desc:"call-hierarchy-outgoing-calls" command
 
 let make_ide_completion_response
     (result : AutocompleteTypes.ide_result) (filename : string) :
     Completion.completionList Lwt.t =
   let open AutocompleteTypes in
   let open Completion in
-  (* We use snippets to provide parentheses+arguments when autocompleting     *)
-  (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
-  (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
-  let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
-  let hack_to_itemType (completion : complete_autocomplete_result) :
-      string option =
-    (* TODO: we're using itemType (left column) for function return types, and *)
-    (* the inlineDetail (right column) for variable/field types. Is that good? *)
-    Option.map completion.func_details ~f:(fun details -> details.return_ty)
+
+  let hack_to_insert (completion : autocomplete_item) :
+      TextEdit.t * Completion.insertTextFormat * TextEdit.t list =
+    let additional_edits =
+      List.map completion.res_additional_edits ~f:(fun (text, range) ->
+          TextEdit.{ range = ide_range_to_lsp range; newText = text })
+    in
+    let range = ide_range_to_lsp completion.res_replace_pos in
+    match completion.res_insert_text with
+    | InsertAsSnippet { snippet; fallback } ->
+      if Lsp_helpers.supports_snippets p then
+        (TextEdit.{ range; newText = snippet }, SnippetFormat, additional_edits)
+      else
+        (TextEdit.{ range; newText = fallback }, PlainText, additional_edits)
+    | InsertLiterally text ->
+      (TextEdit.{ range; newText = text }, PlainText, additional_edits)
   in
-  let hack_to_detail (completion : complete_autocomplete_result) : string =
-    (* TODO: retrieve the actual signature including name+modifiers     *)
-    (* For now we just return the type of the completion. In the case   *)
-    (* of functions, their function-types have parentheses around them  *)
-    (* which we want to strip. In other cases like tuples, no strip.    *)
-    match completion.func_details with
-    | None -> completion.res_ty
-    | Some _ ->
-      String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
-  in
-  let hack_to_inline_detail (completion : complete_autocomplete_result) : string
-      =
-    match completion.func_details with
-    | None -> hack_to_detail completion
-    | Some details ->
-      (* "(type1 $param1, ...)" *)
-      let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
-      let params = String.concat ~sep:", " (List.map details.params ~f) in
-      Printf.sprintf "(%s)" params
-    (* Returns a tuple of (insertText, insertTextFormat, textEdits). *)
-  in
-  let hack_to_insert (completion : complete_autocomplete_result) :
-      [ `InsertText of string | `TextEdit of TextEdit.t list ]
-      * Completion.insertTextFormat =
-    match completion.func_details with
-    | Some details
-      when Lsp_helpers.supports_snippets p
-           && (not is_caret_followed_by_lparen)
-           && not
-                (SearchUtils.equal_si_kind
-                   completion.res_kind
-                   SearchUtils.SI_LocalVariable) ->
-      (* "method(${1:arg1}, ...)" but for args we just use param names. *)
-      let f i param =
-        let name = Str.global_replace snippet_re "\\\\\\0" param.param_name in
-        Printf.sprintf "${%i:%s}" (i + 1) name
-      in
-      let params = String.concat ~sep:", " (List.mapi details.params ~f) in
-      ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
-        SnippetFormat )
-    | _ ->
-      ( `TextEdit
-          [
-            TextEdit.
-              {
-                range = ide_range_to_lsp completion.res_replace_pos;
-                newText = completion.res_name;
-              };
-          ],
-        PlainText )
-  in
-  let hack_completion_to_lsp (completion : complete_autocomplete_result) :
+
+  let hack_completion_to_lsp (completion : autocomplete_item) :
       Completion.completionItem =
-    let (insertText, insertTextFormat, textEdits) =
-      match hack_to_insert completion with
-      | (`InsertText text, format) -> (Some text, format, [])
-      | (`TextEdit edits, format) -> (None, format, edits)
+    let (textEdit, insertTextFormat, additionalTextEdits) =
+      hack_to_insert completion
     in
     let pos =
-      if String.equal (Pos.filename completion.res_pos) "" then
-        Pos.set_file filename completion.res_pos
+      if String.equal (Pos.filename completion.res_decl_pos) "" then
+        Pos.set_file filename completion.res_decl_pos
       else
-        completion.res_pos
+        completion.res_decl_pos
     in
     let data =
       let (line, start, _) = Pos.info_pos pos in
@@ -2511,22 +2884,12 @@ let make_ide_completion_response
         | Some base_class -> [("base_class", Hh_json.JSON_String base_class)]
         | None -> []
       in
-      let ranking_detail =
-        match completion.ranking_details with
-        | Some details ->
-          [
-            ("ranking_detail", Hh_json.JSON_String details.detail);
-            ("ranking_source", Hh_json.JSON_Number details.kind);
-          ]
-        | None -> []
-      in
       (* If we do not have a correct file position, skip sending that data *)
       if Int.equal line 0 && Int.equal start 0 then
         Some
           (Hh_json.JSON_Object
              ([("fullname", Hh_json.JSON_String completion.res_fullname)]
-             @ base_class
-             @ ranking_detail))
+             @ base_class))
       else
         Some
           (Hh_json.JSON_Object
@@ -2543,12 +2906,10 @@ let make_ide_completion_response
                 ("line", Hh_json.int_ line);
                 ("char", Hh_json.int_ start);
               ]
-             @ base_class
-             @ ranking_detail))
+             @ base_class))
     in
-    let hack_to_sort_text (completion : complete_autocomplete_result) :
-        string option =
-      let label = completion.res_name in
+    let hack_to_sort_text (completion : autocomplete_item) : string option =
+      let label = completion.res_label in
       let should_downrank label =
         String.length label > 2
         && String.equal (Str.string_before label 2) "__"
@@ -2561,35 +2922,19 @@ let make_ide_completion_response
         Some label
     in
     {
-      label =
-        (completion.res_name
-        ^
-        if
-          SearchUtils.equal_si_kind completion.res_kind SearchUtils.SI_Namespace
-        then
-          "\\"
-        else
-          "");
-      kind =
-        (match completion.ranking_details with
-        | Some _ -> Some Completion.Event
-        | None ->
-          si_kind_to_completion_kind completion.AutocompleteTypes.res_kind);
-      detail = Some (hack_to_detail completion);
-      inlineDetail = Some (hack_to_inline_detail completion);
-      itemType = hack_to_itemType completion;
+      label = completion.res_label;
+      kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
+      detail = Some completion.res_detail;
       documentation =
         Option.map completion.res_documentation ~f:(fun s ->
             MarkedStringsDocumentation [MarkedString s]);
       (* This will be filled in by completionItem/resolve. *)
-      sortText =
-        (match completion.ranking_details with
-        | Some detail -> Some detail.sort_text
-        | None -> hack_to_sort_text completion);
-      filterText = None;
-      insertText;
+      sortText = hack_to_sort_text completion;
+      filterText = completion.res_filter_text;
+      insertText = None;
       insertTextFormat = Some insertTextFormat;
-      textEdits;
+      textEdit = Some textEdit;
+      additionalTextEdits;
       command = None;
       data;
     }
@@ -2600,23 +2945,7 @@ let make_ide_completion_response
       items = List.map result.completions ~f:hack_completion_to_lsp;
     }
 
-let do_completion_ffp
-    (conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (params : Completion.params) : Completion.result Lwt.t =
-  let open Completion in
-  let open TextDocumentIdentifier in
-  let pos =
-    lsp_position_to_ide params.loc.TextDocumentPositionParams.position
-  in
-  let filename =
-    lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
-  in
-  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
-  let%lwt result = rpc conn ref_unblocked_time ~desc:"completion" command in
-  make_ide_completion_response result filename
-
-let do_completion_legacy
+let do_completion
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : Completion.params) : Completion.result Lwt.t =
@@ -2647,7 +2976,9 @@ let do_completion_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Completion.params) : Completion.result Lwt.t =
   let open Completion in
-  let document_location = get_document_location editor_open_files params.loc in
+  let (document, location) =
+    get_document_location editor_open_files params.loc
+  in
   (* Other parameters *)
   let is_manually_invoked =
     match params.context with
@@ -2657,18 +2988,18 @@ let do_completion_local
   (* this is what I want to fix *)
   let request =
     ClientIdeMessage.Completion
-      { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+      (document, location, { ClientIdeMessage.is_manually_invoked })
   in
   let%lwt infos =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
-  let filename =
-    document_location.ClientIdeMessage.file_path |> Path.to_string
-  in
+  let filename = document.ClientIdeMessage.file_path |> Path.to_string in
   let%lwt response = make_ide_completion_response infos filename in
   Lwt.return response
 
 exception NoLocationFound
+
+exception InvalidIdePatchType of string
 
 let docblock_to_markdown (raw_docblock : DocblockService.result) :
     Completion.completionDocumentation option =
@@ -2677,7 +3008,7 @@ let docblock_to_markdown (raw_docblock : DocblockService.result) :
   | docblock ->
     Some
       (Completion.MarkedStringsDocumentation
-         (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
+         (Core.List.fold docblock ~init:[] ~f:(fun acc elt ->
               match elt with
               | DocblockService.Markdown txt -> MarkedString txt :: acc
               | DocblockService.HackSnippet txt ->
@@ -2792,7 +3123,6 @@ let do_resolve_local
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
   if Option.is_some params.Completion.documentation then
@@ -2808,26 +3138,17 @@ let do_resolve_local
         | None -> raise NoLocationFound
         | Some _ as data ->
           let filename = Jget.string_exn data "filename" in
-          let uri = File_url.create filename |> Lsp.uri_of_string in
           let file_path = Path.make filename in
           let line = Jget.int_exn data "line" in
           let column = Jget.int_exn data "char" in
-          let file_contents = get_document_contents editor_open_files uri in
           let ranking_detail = Jget.string_opt data "ranking_detail" in
           let ranking_source = Jget.int_opt data "ranking_source" in
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
           let request =
             ClientIdeMessage.Completion_resolve_location
-              {
-                ClientIdeMessage.Completion_resolve_location.document_location =
-                  {
-                    ClientIdeMessage.file_path;
-                    ClientIdeMessage.file_contents;
-                    ClientIdeMessage.line;
-                    ClientIdeMessage.column;
-                  };
-                kind = resolve_ranking_source kind ranking_source;
-              }
+              ( file_path,
+                { ClientIdeMessage.line; column },
+                resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock =
             ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
@@ -2854,11 +3175,9 @@ let do_resolve_local
         in
         let request =
           ClientIdeMessage.Completion_resolve
-            {
-              ClientIdeMessage.Completion_resolve.symbol = symbolname;
-              kind = resolve_ranking_source kind ranking_source;
-            }
+            (symbolname, resolve_ranking_source kind ranking_source)
         in
+
         let%lwt raw_docblock =
           ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
         in
@@ -2940,7 +3259,8 @@ let rec hack_symbol_tree_to_lsp
     | SymbolDefinition.Class -> SymbolInformation.Class
     | SymbolDefinition.Method -> SymbolInformation.Method
     | SymbolDefinition.Property -> SymbolInformation.Property
-    | SymbolDefinition.Const -> SymbolInformation.Constant
+    | SymbolDefinition.ClassConst -> SymbolInformation.Constant
+    | SymbolDefinition.GlobalConst -> SymbolInformation.Constant
     | SymbolDefinition.Enum -> SymbolInformation.Enum
     | SymbolDefinition.Interface -> SymbolInformation.Interface
     | SymbolDefinition.Trait -> SymbolInformation.Interface
@@ -2953,6 +3273,7 @@ let rec hack_symbol_tree_to_lsp
     (* e.g. top level type alias -- absent from LSP *)
     | SymbolDefinition.Param -> SymbolInformation.Variable
     (* We never return a param from a document-symbol-search *)
+    | SymbolDefinition.Module -> SymbolInformation.Module
   in
   let hack_symbol_to_lsp definition containerName =
     {
@@ -3005,16 +3326,14 @@ let do_documentSymbol_local
   let open DocumentSymbol in
   let open TextDocumentIdentifier in
   let filename = lsp_uri_to_path params.textDocument.uri in
-  let document_location =
+  let document =
     {
       ClientIdeMessage.file_path = Path.make filename;
       file_contents =
         get_document_contents editor_open_files params.textDocument.uri;
-      line = 0;
-      column = 0;
     }
   in
-  let request = ClientIdeMessage.Document_symbol document_location in
+  let request = ClientIdeMessage.Document_symbol document in
   let%lwt outline =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
@@ -3051,6 +3370,85 @@ let do_findReferences
   | Some (_name, positions) ->
     Lwt.return
       (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
+
+let do_findReferences_local
+    (state : state)
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : FindReferences.params)
+    (lsp_id : lsp_id) =
+  let (document, location) =
+    get_document_location editor_open_files params.FindReferences.loc
+  in
+  let%lwt response =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Find_references (document, location))
+  in
+  let state =
+    match response with
+    | Ok None ->
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        lsp_id
+        (FindReferencesResult []);
+      Lwt.return state
+    | Ok (Some (_name, positions)) ->
+      let filename =
+        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+          params.FindReferences.loc.TextDocumentPositionParams.textDocument
+      in
+      let positions =
+        List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        lsp_id
+        (FindReferencesResult positions);
+      Lwt.return state
+    | Error (_symbol_name, action) when ServerFindRefs.is_local action ->
+      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
+      let str =
+        Printf.sprintf
+          "ClientIDEDaemon failed to find-refs for localvar %s"
+          (ServerCommandTypes.Find_refs.show_action action)
+      in
+      log "%s" str;
+      HackEventLogger.invariant_violation_bug str;
+      failwith "ClientIDEDaemon failed to find-refs for a localvar"
+    | Error (symbol_name, action) ->
+      (* ClientIdeMessage.Find_references only supports localvar.
+         Receiving an error with a non-localvar action indicates that we attempted to
+         try and find references for a non-localvar
+      *)
+      let shellable_type = Lost_env.FindRefs (lsp_id, symbol_name, action) in
+      (* If we reach kickoff a shell-out to hh_server, processing that response
+         also invokes respond_jsonrpc
+      *)
+      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+      Lwt.return state
+  in
+  state
+
+let do_goToImplementation_local
+    (state : state) (params : Implementation.params) (lsp_id : lsp_id) :
+    state Lwt.t =
+  let { Ide_api_types.line; column } =
+    lsp_position_to_ide params.TextDocumentPositionParams.position
+  in
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+      params.TextDocumentPositionParams.textDocument
+  in
+  let shellable_type = Lost_env.GoToImpl (lsp_id, filename, line, column) in
+  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  state
 
 let do_goToImplementation
     (conn : server_conn)
@@ -3101,14 +3499,14 @@ let do_highlight_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt ranges =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Document_highlight document_location)
+      (ClientIdeMessage.Document_highlight (document, location))
   in
   Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
 
@@ -3116,7 +3514,7 @@ let format_typeCoverage_result ~(equal : 'a -> 'a -> bool) results counts =
   TypeCoverageFB.(
     let coveredPercent = Coverage_level.get_percent counts in
     let hack_coverage_to_lsp (pos, level) =
-      let range = hack_pos_to_lsp_range ~equal pos in
+      let range = Lsp_helpers.hack_pos_to_lsp_range ~equal pos in
       match level with
       (* We only show diagnostics for completely untypechecked code. *)
       | Ide_api_types.Checked
@@ -3158,31 +3556,28 @@ let do_typeCoverage_localFB
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
   let open TypeCoverageFB in
-  let document_contents =
+  let file_contents =
     get_document_contents
       editor_open_files
       params.textDocument.TextDocumentIdentifier.uri
   in
-  match document_contents with
-  | None -> failwith "Local type coverage failed, file could not be found."
-  | Some file_contents ->
-    let file_path =
-      params.textDocument.TextDocumentIdentifier.uri
-      |> lsp_uri_to_path
-      |> Path.make
-    in
-    let request =
-      ClientIdeMessage.Type_coverage
-        { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
-    in
-    let%lwt result =
-      ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
-    in
-    let (results, counts) = result in
-    let formatted =
-      format_typeCoverage_result ~equal:String.equal results counts
-    in
-    Lwt.return formatted
+  let file_path =
+    params.textDocument.TextDocumentIdentifier.uri
+    |> lsp_uri_to_path
+    |> Path.make
+  in
+  let request =
+    ClientIdeMessage.Type_coverage
+      { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
+  in
+  let%lwt result =
+    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+  in
+  let (results, counts) = result in
+  let formatted =
+    format_typeCoverage_result ~equal:String.equal results counts
+  in
+  Lwt.return formatted
 
 let do_formatting_common
     (uri : Lsp.documentUri)
@@ -3302,7 +3697,7 @@ let do_codeAction_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params) :
-    CodeAction.command_or_action list Lwt.t =
+    (CodeAction.command_or_action list * Path.t * Errors.t option) Lwt.t =
   let file_path =
     Path.make
       (lsp_uri_to_path
@@ -3314,16 +3709,16 @@ let do_codeAction_local
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  let%lwt actions =
+  let%lwt (actions, errors_opt) =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Code_action
-         { ClientIdeMessage.Code_action.file_path; file_contents; range })
+         ({ ClientIdeMessage.file_path; ClientIdeMessage.file_contents }, range))
   in
-  Lwt.return actions
+  Lwt.return (actions, file_path, errors_opt)
 
 let do_codeAction
     (conn : server_conn)
@@ -3354,20 +3749,20 @@ let do_signatureHelp_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt signatures =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Signature_help document_location)
+      (ClientIdeMessage.Signature_help (document, location))
   in
   Lwt.return signatures
 
-let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
+let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
     string * TextEdit.t =
-  let open ServerRefactorTypes in
+  let open ServerRenameTypes in
   let open Pos in
   let text_edit =
     match patch with
@@ -3375,12 +3770,13 @@ let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     | Replace insert_patch ->
       {
         TextEdit.range =
-          hack_pos_to_lsp_range ~equal:String.equal insert_patch.pos;
+          Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal insert_patch.pos;
         newText = insert_patch.text;
       }
     | Remove pos ->
       {
-        TextEdit.range = hack_pos_to_lsp_range ~equal:String.equal pos;
+        TextEdit.range =
+          Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
         newText = "";
       }
   in
@@ -3393,7 +3789,7 @@ let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
   in
   (uri, text_edit)
 
-let patches_to_workspace_edit (patches : ServerRefactorTypes.patch list) :
+let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
     WorkspaceEdit.t =
   let changes = List.map patches ~f:patch_to_workspace_edit_change in
   let changes =
@@ -3414,8 +3810,8 @@ let do_documentRename
   let open Rename in
   let new_name = params.newName in
   let command =
-    ServerCommandTypes.IDE_REFACTOR
-      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
+    ServerCommandTypes.IDE_RENAME
+      { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name }
   in
   let%lwt patches =
     rpc_with_retry conn ref_unblocked_time ~desc:"rename" command
@@ -3429,6 +3825,58 @@ let do_documentRename
            { Error.code = Error.InvalidRequest; message; data = None })
   in
   Lwt.return (patches_to_workspace_edit patches)
+
+let do_documentRename_local
+    (state : state)
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : Rename.params)
+    (lsp_id : lsp_id) : state Lwt.t =
+  let document_position = rename_params_to_document_position params in
+  let (document, location) =
+    get_document_location editor_open_files document_position
+  in
+  let new_name = params.Rename.newName in
+  let%lwt response =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Rename (document, location, new_name))
+  in
+  let state =
+    match response with
+    | Ok None ->
+      let patches = patches_to_workspace_edit [] in
+      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
+      Lwt.return state
+    | Ok (Some patch_list) ->
+      let patches = patches_to_workspace_edit patch_list in
+      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
+      Lwt.return state
+    | Error action when ServerFindRefs.is_local action ->
+      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
+      let str =
+        Printf.sprintf
+          "ClientIDEDaemon failed to rename for localvar %s"
+          (ServerCommandTypes.Find_refs.show_action action)
+      in
+      log "%s" str;
+      failwith "ClientIDEDaemon failed to rename for a localvar"
+    | Error _action ->
+      (* clientIdeDaemon returns errors if we try to rename a non-localvar *)
+      let (filename, line, col) = lsp_file_position_to_hack document_position in
+      let shellable_type =
+        Lost_env.Rename (lsp_id, filename, line, col, new_name)
+      in
+      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+      Lwt.return state
+  in
+  state
 
 (** This updates Main_env.hh_server_status according to the status message
 we just received from hh_server. See comments on hh_server_status for
@@ -3471,7 +3919,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     let hh_server_status =
       {
         ShowStatusFB.shortMessage = Some shortMessage;
-        request = { ShowMessageRequest.type_; message; actions = [] };
+        request = { ShowStatusFB.type_; message };
         total = None;
         progress = None;
         telemetry = None;
@@ -3498,10 +3946,15 @@ let fix_empty_paths_in_error_map errors_per_file =
   match SMap.find_opt "" errors_per_file with
   | None -> errors_per_file
   | Some errors ->
+    HackEventLogger.invariant_violation_bug "missing path for diagnostics";
+    Hh_logger.log
+      "missing path for diagnostics %s"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     SMap.remove "" errors_per_file
     |> SMap.add ~combine:( @ ) default_path errors
 
-let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
+let update_uris_with_server_diagnostics
+    uris_with_server_diagnostics errors_per_file =
   let default_path = get_root_exn () |> Path.to_string in
   let is_error_free _uri errors = List.is_empty errors in
   (* reports_without/reports_with are maps of filename->ErrorList. *)
@@ -3518,14 +3971,14 @@ let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
   let uris_with =
     List.map files_with ~f:(path_to_lsp_uri ~default_path) |> UriSet.of_list
   in
-  (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
-  UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
+  (* this is "(uris_with_server_diagnostics \ uris_without) U uris_with" *)
+  UriSet.union (UriSet.diff uris_with_server_diagnostics uris_without) uris_with
 
-(** Send notifications for all reported diagnostics.
-    Returns an updated "uris_with_diagnostics" set of all files for which
+(** Send notifications for all server reported diagnostics.
+    Returns an updated "uris_with_server_diagnostics" set of all files for which
     our client currently has non-empty diagnostic reports. *)
-let do_diagnostics
-    (uris_with_diagnostics : UriSet.t)
+let do_server_diagnostics
+    (uris_with_server_diagnostics : UriSet.t)
     (errors_per_file : Errors.finalized_error list SMap.t)
     ~(is_truncated : int option) : UriSet.t =
   let errors_per_file = fix_empty_paths_in_error_map errors_per_file in
@@ -3536,7 +3989,472 @@ let do_diagnostics
   in
   SMap.iter send_diagnostic_notification errors_per_file;
   warn_truncated_diagnostic_list is_truncated;
-  update_uris_with_diagnostics uris_with_diagnostics errors_per_file
+  update_uris_with_server_diagnostics
+    uris_with_server_diagnostics
+    errors_per_file
+
+(** Used to publish clientIdeDaemon errors in [ide_standalone] mode. *)
+let publish_errors_if_standalone
+    (env : env) (state : state) (file_path : Path.t) (errors : Errors.t) : state
+    =
+  match (env.serverless_ide, state) with
+  | ((Ide_hh_server | Ide_serverless), _) -> state
+  | (Ide_standalone, Pre_init) ->
+    failwith "how we got errors before initialize?"
+  | (Ide_standalone, (In_init _ | Main_loop _)) ->
+    failwith "how Ide_standalone is in an hh_server state?"
+  | (Ide_standalone, Post_shutdown) -> state (* no-op *)
+  | (Ide_standalone, Lost_server lenv) ->
+    let file_path = Path.to_string file_path in
+    let uri = path_to_lsp_uri file_path ~default_path:file_path in
+    let errors_by_file =
+      errors
+      |> Errors.drop_fixmed_errors_in_files
+      |> Errors.as_map
+      |> Relative_path.Map.elements
+    in
+    let uris = lenv.Lost_env.uris_with_standalone_diagnostics in
+    let (uris_with_standalone_diagnostics, errors_in_file) =
+      match errors_by_file with
+      | [] -> (UriMap.remove uri uris, [])
+      | [(file, e)] when String.equal (Relative_path.to_absolute file) file_path
+        ->
+        ( UriMap.add uri (Unix.gettimeofday ()) uris,
+          List.map ~f:User_error.to_absolute e )
+      | _ ->
+        failwith "why we got errors for anything other than the expected file?"
+    in
+    let params = hack_errors_to_lsp_diagnostic file_path errors_in_file in
+    let notification = PublishDiagnosticsNotification params in
+    notify_jsonrpc ~powered_by:Serverless_ide notification;
+    let new_state =
+      Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics }
+    in
+    new_state
+
+(** When the errors-file gets new items or is closed, this function updates diagnostics as necessary,
+and switches from TailingErrors to SeekingErrors if it's closed.
+Principles: (1) don't touch open files, since they are governed solely by clientIdeDaemon;
+(2) only update an existing diagnostic if the scrape's start_time is newer than it,
+since these will have come recently from clientIdeDaemon, to which we grant primacy. *)
+let handle_errors_file_item
+    ~(state : state ref) (item : ServerProgress.ErrorsRead.read_result option) :
+    result_telemetry option Lwt.t =
+  (* a small helper, to send the actual lsp message *)
+  let publish params =
+    notify_jsonrpc ~powered_by:Hh_server (PublishDiagnosticsNotification params)
+  in
+  (* a small helper, to construct empty diagnostic params *)
+  let empty_diagnostics uri =
+    Lsp.PublishDiagnostics.{ uri; diagnostics = []; isStatusFB = false }
+  in
+
+  (* We must be in this state, else how could we have gotten an item from the errors-file q?
+     See code in [get_next_event]. *)
+  let (lenv, fd, start_time) =
+    match (!state, !latest_hh_server_errors) with
+    | (Lost_server lenv, TailingErrors { fd; start_time; _ }) ->
+      (lenv, fd, start_time)
+    | _ -> failwith "unexpected state when processing handle_errors_file_item"
+  in
+
+  match item with
+  | None ->
+    (* We must have an item, because the errors-stream always ends with a sentinel, and we stop tailing upon the sentinel. *)
+    log "Errors-file: unexpected end of stream";
+    HackEventLogger.invariant_violation_bug
+      "errors-file unexpected end of stream";
+    latest_hh_server_errors :=
+      SeekingErrors
+        {
+          prev_st_ino = None;
+          seek_reason = (ServerProgress.NothingYet, "eof-error");
+        };
+    Lwt.return_none
+  | Some (Error (end_sentinel, log_message)) ->
+    (* Close the errors-file, and switch to "seeking mode" for the next errors-file to come along. *)
+    let stat = Unix.fstat fd in
+    Unix.close fd;
+    latest_hh_server_errors :=
+      SeekingErrors
+        {
+          prev_st_ino = Some stat.Unix.st_ino;
+          seek_reason = (end_sentinel, log_message);
+        };
+    begin
+      match end_sentinel with
+      | ServerProgress.NothingYet
+      | ServerProgress.Build_id_mismatch ->
+        failwith
+          ("not possible out of q: "
+          ^ ServerProgress.show_errors_file_error end_sentinel
+          ^ " "
+          ^ log_message)
+      | ServerProgress.Stopped
+      | ServerProgress.Killed ->
+        (* At this point we'd like to erase all the squiggles that came from hh_server.
+           All we'll do is leave the errors for now, and then a subsequent [try_open_errors_file]
+           will determine that we've transitioned from an ok state (like we leave it in right now)
+           to an error state, and it takes that opportunity to erase all squiggles. *)
+        ()
+      | ServerProgress.Restarted _ ->
+        (* If the typecheck restarted, we'll just leave all existing errors as they are.
+           We have no evidence upon which to add or erase anything.
+           It will all be fixed in the next typecheck to complete. *)
+        ()
+      | ServerProgress.Complete _telemetry ->
+        (* If the typecheck completed, then we can erase all diagnostics (from closed-files)
+           that were reported prior to the start of the typecheck. Why only from closed-files? ...
+           because diagnostics for open files are produced by clientIdeDaemon instead, and
+           our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
+        let uris_with_standalone_diagnostics =
+          lenv.Lost_env.uris_with_standalone_diagnostics
+          |> UriMap.filter_map (fun uri existing_time ->
+                 if
+                   UriMap.mem uri lenv.Lost_env.editor_open_files
+                   || Float.(existing_time > start_time)
+                 then begin
+                   Some existing_time
+                 end else begin
+                   publish (empty_diagnostics uri);
+                   None
+                 end)
+        in
+        state :=
+          Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
+        ()
+    end;
+    Lwt.return_none
+  | Some (Ok (errors, timestamp)) ->
+    (* If the php file is closed and has no diagnostics newer than start_time, replace or add.
+
+       Why only for closed files? well, if the file is currently open in the IDE, then
+       clientIdeDaemon-generated diagnostics (1) reflect unsaved changes which the errors-file
+       doesn't, (2) is more up-to-date than the errors-file, or at least no older.
+
+       Why only newer than start time? There are a lot of scenarios but all boil down to this
+       simple rule. (1) Existing diagnostics might have come from a previous errors-file, and hence
+       are older than the start of the current errors-file, and should be replaced. (2) Existing
+       diagnostics might have come from a file still open in the editor, discussed above.
+       (3) Existing diagnostics might have come from a file that was open in the editor but
+       got closed before the current errors-file started, and hence the errors-file is more up-to-date.
+       (4) Existing diagnostics might have come from a file that was open in the editor but
+       got closed after the current errors-file started; hence the latest we received from
+       clientIdeDaemon is more up to date. (5) Existing diagnostics might have come from
+       the current errors-file, per the comment in ServerProgress.mli: 'Currently we make
+       one report for all "duplicate name" errors across the project if any, followed by
+       one report per batch that had errors. This means that a file might be mentioned
+       twice, once in a "duplicate name" report, once later. This will change in future
+       so that each file is reported only once.'. The behavior right now is that clientLsp
+       will only show the "duplicate name" errors for a file, suppressing future errors
+       that came from parsing+typechecking. It's not ideal, but it will change shortly,
+       and is an acceptable compromise for sake of code cleanliness. *)
+    let uris_with_standalone_diagnostics =
+      Relative_path.Map.fold
+        errors
+        ~init:lenv.Lost_env.uris_with_standalone_diagnostics
+        ~f:(fun path file_errors acc ->
+          let path = Relative_path.to_absolute path in
+          let uri = path_to_lsp_uri path ~default_path:path in
+          if UriMap.mem uri lenv.Lost_env.editor_open_files then
+            acc
+          else
+            match UriMap.find_opt uri acc with
+            | Some existing_timestamp
+              when Float.(existing_timestamp > start_time) ->
+              acc
+            | _ ->
+              publish (hack_errors_to_lsp_diagnostic path file_errors);
+              UriMap.add uri timestamp acc)
+    in
+    state := Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
+    Lwt.return_none
+
+(** If we're in [errors_conn = SeekingErrors], then this function will try to open the
+current errors-file. If success then we'll set [latest_hh_server_errors] to [TailingErrors].
+If failure then we'll set it to [SeekingErrors], which includes error explanation for why
+the attempt failed. We'll also clear out all squiggles.
+
+If the failure was due to a version mismatch, we also take the opportunity
+to check: has the version changed under our feet since we ourselves started?
+If it has, then we exit with an error code (so that VSCode will relaunch
+the correct version of lsp afterwards). If it hasn't, then we continue,
+and the version mismatch must necessarily indicate that hh_server is the
+wrong version.
+
+If we're in [errors_conn = TrailingErrors] already, this function is a no-op. *)
+let try_open_errors_file ~(state : state ref) : unit Lwt.t =
+  match !latest_hh_server_errors with
+  | TailingErrors _ -> Lwt.return_unit
+  | SeekingErrors { prev_st_ino; seek_reason } ->
+    let errors_file_path = ServerFiles.errors_file_path (get_root_exn ()) in
+    (* 1. can we open the file? *)
+    let result =
+      try
+        Ok (Unix.openfile errors_file_path [Unix.O_RDONLY; Unix.O_NONBLOCK] 0)
+      with
+      | Unix.Unix_error (Unix.ENOENT, _, _) ->
+        Error
+          (SeekingErrors
+             {
+               prev_st_ino;
+               seek_reason = (ServerProgress.NothingYet, "absent");
+             })
+      | exn ->
+        Error
+          (SeekingErrors
+             {
+               prev_st_ino;
+               seek_reason = (ServerProgress.NothingYet, Exn.to_string exn);
+             })
+    in
+    (* 2. is it different from the previous time we looked? *)
+    let result =
+      match (prev_st_ino, result) with
+      | (Some st_ino, Ok fd) when st_ino = (Unix.fstat fd).Unix.st_ino ->
+        Unix.close fd;
+        Error (SeekingErrors { prev_st_ino; seek_reason })
+      | _ -> result
+    in
+    (* 3. can we [ServerProgress.ErrorsRead.openfile] on it? *)
+    let%lwt errors_conn =
+      match result with
+      | Error errors_conn -> Lwt.return errors_conn
+      | Ok fd -> begin
+        match ServerProgress.ErrorsRead.openfile fd with
+        | Error (e, log_message) ->
+          let prev_st_ino = Some (Unix.fstat fd).Unix.st_ino in
+          Unix.close fd;
+          log
+            "Errors-file: failed to open. %s [%s]"
+            (ServerProgress.show_errors_file_error e)
+            log_message;
+          let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
+          Lwt.return
+            (SeekingErrors { prev_st_ino; seek_reason = (e, log_message) })
+        | Ok { ServerProgress.ErrorsRead.timestamp; pid; _ } ->
+          log
+            "Errors-file: opened and tailing the check from %s"
+            (Utils.timestring timestamp);
+          let q = ServerProgressLwt.watch_errors_file ~pid fd in
+          Lwt.return (TailingErrors { fd; start_time = timestamp; q })
+      end
+    in
+
+    (* If we've transitioned to failure, then we'll have to erase all outstanding squiggles.
+       It'd be nice to leave the ones produced by clientIdeDaemon.
+       But that's too much book-keeping to be worth complicating the code for an edge case,
+       so in the words of c3po "shut them all down. hurry!" *)
+    let is_ok conn =
+      match conn with
+      | TailingErrors _ -> true
+      | SeekingErrors { seek_reason = (ServerProgress.Complete _, _); _ } ->
+        true
+      | SeekingErrors
+          {
+            seek_reason =
+              ( ServerProgress.(
+                  ( NothingYet | Restarted _ | Stopped | Killed
+                  | Build_id_mismatch )),
+                _ );
+            _;
+          } ->
+        false
+    in
+    let has_transitioned_to_failure =
+      is_ok !latest_hh_server_errors && not (is_ok errors_conn)
+    in
+    if has_transitioned_to_failure then state := dismiss_diagnostics !state;
+
+    latest_hh_server_errors := errors_conn;
+    Lwt.return_unit
+
+let respond_jsonrpc_for_shell
+    (shellable_type : Lost_env.shellable_type) (stdout : string) :
+    (int * Telemetry.t) option =
+  let parse_lsp_locations stdout : (Lsp.Location.t list, unit) result =
+    let json = Yojson.Safe.from_string stdout in
+    match json with
+    | `List positions ->
+      let lsp_locations =
+        List.map positions ~f:(fun pos ->
+            let open Yojson.Basic.Util in
+            let pos_json = Yojson.Safe.to_basic pos in
+            let filename = pos_json |> member "filename" |> to_string in
+            let line = pos_json |> member "line" |> to_int in
+            let char_start = pos_json |> member "char_start" |> to_int in
+            let char_end = pos_json |> member "char_end" |> to_int in
+            let pos = { filename; line; char_start; char_end } in
+            ide_shell_out_pos_to_lsp_location pos)
+      in
+      Ok lsp_locations
+    | _ -> Error ()
+  in
+  let parse_patch_list stdout =
+    let json = Yojson.Safe.from_string stdout in
+    match json with
+    | `List positions ->
+      let patch_locations =
+        List.map positions ~f:(fun pos ->
+            let open Yojson.Basic.Util in
+            let lst_json = Yojson.Safe.to_basic pos in
+            let filename = lst_json |> member "filename" |> to_string in
+            let patches = lst_json |> member "patches" |> to_list in
+            let patches =
+              List.map
+                ~f:(fun x ->
+                  let char_start = x |> member "col_start" |> to_int in
+                  let char_end = x |> member "col_end" |> to_int in
+                  let line = x |> member "line" |> to_int in
+                  let patch_type = x |> member "patch_type" |> to_string in
+                  let replacement = x |> member "replacement" |> to_string in
+                  {
+                    filename;
+                    char_start;
+                    char_end;
+                    line;
+                    patch_type;
+                    replacement;
+                  })
+                patches
+            in
+            patches)
+      in
+      let locations = List.concat patch_locations in
+      let patch_to_workspace_edit_change patch =
+        let ide_shell_out_pos =
+          {
+            filename = patch.filename;
+            char_start = patch.char_start;
+            char_end = patch.char_end + 1;
+            (* This end is inclusive for range replacement *)
+            line = patch.line;
+          }
+        in
+        let (uri, text_edit) =
+          match patch.patch_type with
+          | "insert"
+          | "replace" ->
+            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+            ( File_url.create patch.filename,
+              {
+                TextEdit.range = loc.Lsp.Location.range;
+                newText = patch.replacement;
+              } )
+          | "remove" ->
+            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+            ( File_url.create patch.filename,
+              { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
+          | e -> raise (InvalidIdePatchType e)
+        in
+        (uri, text_edit)
+      in
+      let changes = List.map ~f:patch_to_workspace_edit_change locations in
+      let changes =
+        List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
+            let current_edits =
+              Option.value ~default:[] (SMap.find_opt uri acc)
+            in
+            let new_edits = text_edit :: current_edits in
+            SMap.add uri new_edits acc)
+      in
+      Ok { WorkspaceEdit.changes }
+    | _ -> Error ()
+  in
+
+  let lsp_id = get_lsp_id_of_shell_out shellable_type in
+  match shellable_type with
+  | Lost_env.FindRefs _ -> begin
+    match parse_lsp_locations stdout with
+    | Ok lsp_locations ->
+      let _ =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (FindReferencesResult lsp_locations)
+      in
+      Some (List.length lsp_locations, Telemetry.create ())
+    | Error _ -> None
+  end
+  | Lost_env.GoToImpl _ -> begin
+    match parse_lsp_locations stdout with
+    | Ok lsp_locations ->
+      let _ =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (ImplementationResult lsp_locations)
+      in
+      Some (List.length lsp_locations, Telemetry.create ())
+    | Error _ -> None
+  end
+  | Lost_env.Rename _ -> begin
+    match parse_patch_list stdout with
+    | Ok result ->
+      let _ =
+        respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
+      in
+      let result_count =
+        SMap.fold
+          (fun _file changes tot -> tot + List.length changes)
+          result.WorkspaceEdit.changes
+          0
+      in
+      let result_extra_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_
+             ~key:"files"
+             ~value:(SMap.cardinal result.WorkspaceEdit.changes)
+      in
+
+      Some (result_count, result_extra_telemetry)
+    | Error _ -> None
+  end
+
+let handle_shell_out_hh_feature
+    (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
+    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
+  let telemetry =
+    match result with
+    | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
+      match respond_jsonrpc_for_shell shellable_type stdout with
+      | Some (length, telemetry) ->
+        Some
+          {
+            result_count = length;
+            result_extra_telemetry =
+              Some
+                (telemetry
+                |> Telemetry.float_
+                     ~key:"duration"
+                     ~value:(end_time -. start_time));
+          }
+      | None ->
+        Some
+          {
+            result_count = 0;
+            result_extra_telemetry =
+              Some
+                (Telemetry.create ()
+                |> Telemetry.float_
+                     ~key:"duration"
+                     ~value:(end_time -. start_time));
+          }
+    end
+    | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
+      Some
+        {
+          result_count = 0;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.float_ ~key:"duration" ~value:(end_time -. start_time)
+              |> Telemetry.string_
+                   ~key:"exn"
+                   ~value:(Lwt_utils.Process_failure.to_string e));
+        }
+  in
+  Lwt.return telemetry
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -3564,6 +4482,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           definitionProvider = true;
           typeDefinitionProvider = true;
           referencesProvider = true;
+          callHierarchyProvider = true;
           documentHighlightProvider = true;
           documentSymbolProvider = true;
           workspaceSymbolProvider = true;
@@ -3605,12 +4524,6 @@ let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   Lsp.RegisterCapabilityRequest
     { RegisterCapability.registrations = [registration] }
 
-let handle_idle_if_necessary (state : state) (event : event) : state =
-  match state with
-  | Main_loop menv when not (is_tick event) ->
-    Main_loop { menv with Main_env.needs_idle = true }
-  | _ -> state
-
 let track_open_and_recent_files (state : state) (event : event) : state =
   (* We'll keep track of which files are opened by the editor. *)
   let prev_opened_files =
@@ -3650,23 +4563,10 @@ let track_open_and_recent_files (state : state) (event : event) : state =
     | _ -> prev_opened_files
   in
   (* We'll track which was the most recent file to have an event *)
-  let most_recent_file =
-    match event with
-    | Client_message (_metadata, message) ->
-      let uri = Lsp_fmt.get_uri_opt message in
-      if Option.is_some uri then
-        uri
-      else
-        get_most_recent_file state
-    | _ -> get_most_recent_file state
-  in
   match state with
-  | Main_loop menv ->
-    Main_loop { menv with Main_env.editor_open_files; most_recent_file }
-  | In_init ienv ->
-    In_init { ienv with In_init_env.editor_open_files; most_recent_file }
-  | Lost_server lenv ->
-    Lost_server { lenv with Lost_env.editor_open_files; most_recent_file }
+  | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files }
+  | In_init ienv -> In_init { ienv with In_init_env.editor_open_files }
+  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
   | _ -> state
 
 let track_edits_if_necessary (state : state) (event : event) : state =
@@ -3712,8 +4612,9 @@ let get_filename_in_message_for_logging (message : lsp_message) :
 let get_message_kind_and_method_for_logging (message : lsp_message) :
     string * string =
   match message with
-  | ResponseMessage (_, _) -> ("Response", "[response]")
-  | RequestMessage (_, r) -> ("Request", Lsp_fmt.request_name_to_string r)
+  | ResponseMessage (_id, result) ->
+    ("Response", Lsp.lsp_result_to_log_string result)
+  | RequestMessage (_id, r) -> ("Request", Lsp_fmt.request_name_to_string r)
   | NotificationMessage n ->
     ("Notification", Lsp_fmt.notification_name_to_string n)
 
@@ -3722,21 +4623,15 @@ let log_response_if_necessary
     (event : event)
     (result_telemetry_opt : result_telemetry option)
     (unblocked_time : float) : unit =
+  let (result_count, result_extra_telemetry) =
+    match result_telemetry_opt with
+    | None -> (None, None)
+    | Some { result_count; result_extra_telemetry } ->
+      (Some result_count, result_extra_telemetry)
+  in
   match event with
-  | Client_message (metadata, message) ->
+  | Client_message ({ timestamp; tracking_id }, message) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
-    let t = Unix.gettimeofday () in
-    log_debug
-      "lsp-message [%s] queue time [%0.3f] execution time [%0.3f]"
-      method_
-      (unblocked_time -. metadata.timestamp)
-      (t -. unblocked_time);
-    let (result_count, result_extra_telemetry) =
-      match result_telemetry_opt with
-      | None -> (None, None)
-      | Some { result_count; result_extra_telemetry } ->
-        (Some result_count, result_extra_telemetry)
-    in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
       ~method_
@@ -3744,13 +4639,24 @@ let log_response_if_necessary
       ~path_opt:(get_filename_in_message_for_logging message)
       ~result_count
       ~result_extra_telemetry
-      ~tracking_id:metadata.tracking_id
-      ~start_queue_time:metadata.timestamp
+      ~tracking_id
+      ~start_queue_time:timestamp
       ~start_hh_server_state:
-        (get_older_hh_server_state metadata.timestamp
-        |> hh_server_state_to_string)
+        (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:env.use_serverless_ide
+      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
+  | Shell_out_hh_feature_complete (result, _) ->
+    let command_line =
+      match result with
+      | Ok Lwt_utils.Process_success.{ command_line; _ }
+      | Error Lwt_utils.Process_failure.{ command_line; _ } ->
+        command_line
+    in
+    HackEventLogger.client_lsp_shellout
+      ~root:(get_root_opt ())
+      ~command_line
+      ~result_count
+      ~result_extra_telemetry
   | _ -> ()
 
 type error_source =
@@ -3803,7 +4709,7 @@ let hack_log_error
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state
       ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:env.use_serverless_ide
+      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
       ~message:e.Error.message
       ~data_opt:e.Error.data
       ~source
@@ -3887,7 +4793,7 @@ let cancel_if_has_pending_cancel_request
 
 (** send DidOpen/Close/Change/Save to hh_server and ide_service as needed *)
 let handle_editor_buffer_message
-    ~(state : state)
+    ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref option)
     ~(env : env)
     ~(metadata : incoming_metadata)
@@ -3900,7 +4806,7 @@ let handle_editor_buffer_message
   (* send to hh_server as necessary *)
   let (hh_server_promise : unit Lwt.t) =
     let open Main_env in
-    match (state, message) with
+    match (!state, message) with
     (* textDocument/didOpen notification *)
     | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
       let%lwt () = do_didOpen menv.conn ref_hh_unblocked_time params in
@@ -3922,7 +4828,7 @@ let handle_editor_buffer_message
   (* send to ide_service as necessary *)
   (* For now 'ide_service_promise' is immediately fulfilled, but in future it will
      be fulfilled only when the ide_service has finished processing the message. *)
-  let (ide_service_promise : unit Lwt.t) =
+  let (ide_service_promise : state Lwt.t) =
     match (ide_service, message) with
     | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
       let file_path =
@@ -3931,7 +4837,7 @@ let handle_editor_buffer_message
       let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
       (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
          never to let is miss a DidOpen. *)
-      let%lwt () =
+      let%lwt errors =
         ide_rpc
           ide_service
           ~env
@@ -3939,26 +4845,40 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
       in
-      Lwt.return_unit
+      let new_state =
+        publish_errors_if_standalone env !state file_path errors
+      in
+      Lwt.return new_state
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
-      let file_path =
-        uri_to_path
-          params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      let uri =
+        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
       in
-      let%lwt () =
-        ide_rpc
-          ide_service
-          ~env
-          ~tracking_id:metadata.tracking_id
-          ~ref_unblocked_time:ref_ide_unblocked_time
-          ClientIdeMessage.(Ide_file_changed { Ide_file_changed.file_path })
+      let file_path = uri_to_path uri in
+      let editor_open_files =
+        match get_editor_open_files !state with
+        | Some files -> files
+        | None -> UriMap.empty
       in
-      Lwt.return_unit
+      begin
+        let file_contents = get_document_contents editor_open_files uri in
+        let%lwt errors =
+          ide_rpc
+            ide_service
+            ~env
+            ~tracking_id:metadata.tracking_id
+            ~ref_unblocked_time:ref_ide_unblocked_time
+            ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
+        in
+        let new_state =
+          publish_errors_if_standalone env !state file_path errors
+        in
+        Lwt.return new_state
+      end
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
       let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
       in
-      let%lwt () =
+      let%lwt errors =
         ide_rpc
           ide_service
           ~env
@@ -3966,11 +4886,14 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_closed file_path)
       in
-      Lwt.return_unit
+      let new_state =
+        publish_errors_if_standalone env !state file_path errors
+      in
+      Lwt.return new_state
     | _ ->
       (* Don't handle other events for now. When we show typechecking errors for
          the open file, we'll start handling them. *)
-      Lwt.return_unit
+      Lwt.return !state
   in
 
   (* Our asynchrony deal is (1) we want to kick off notifications to
@@ -3978,25 +4901,27 @@ let handle_editor_buffer_message
      both are done, (3) an exception in one shouldn't jeapordize the other,
      (4) our failure model only allows us to record at most one exception
      so we'll pick one arbitrarily. *)
-  let%lwt (hh_server_e : Exception.t option) =
+  let%lwt (hh_server_result : (unit, Exception.t) result) =
     try%lwt
       let%lwt () = hh_server_promise in
-      Lwt.return_none
+      Lwt.return_ok ()
     with
-    | e -> Lwt.return_some (Exception.wrap e)
-  and (ide_service_e : Exception.t option) =
+    | e -> Lwt.return_error (Exception.wrap e)
+  and (ide_service_result : (state, Exception.t) result) =
     try%lwt
-      let%lwt () = ide_service_promise in
-      Lwt.return_none
+      let%lwt new_state = ide_service_promise in
+      Lwt.return_ok new_state
     with
-    | e -> Lwt.return_some (Exception.wrap e)
+    | e -> Lwt.return_error (Exception.wrap e)
   in
   ref_unblocked_time := Float.max !ref_hh_unblocked_time !ref_ide_unblocked_time;
-  match (hh_server_e, ide_service_e) with
-  | (_, Some e)
-  | (Some e, _) ->
+  match (hh_server_result, ide_service_result) with
+  | (Ok (), Ok new_state) ->
+    state := new_state;
+    Lwt.return_unit
+  | (Error e, _)
+  | (_, Error e) ->
     Exception.reraise e
-  | _ -> Lwt.return_unit
 
 let set_verbose_to_file
     ~(ide_service : ClientIdeService.t ref option)
@@ -4127,7 +5052,13 @@ let handle_client_message
          [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
       let root = get_root_exn () in
       Relative_path.set_path_prefix Relative_path.Root root;
+      ServerProgress.set_root root;
       set_up_hh_logger_for_client_lsp root;
+      Hh_logger.log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
+      Hh_logger.log "LSP Init id: %s" env.init_id;
+      Hh_logger.log
+        "Serverless IDE: %s"
+        (show_serverless_ide env.serverless_ide);
 
       (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
          unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
@@ -4147,23 +5078,47 @@ let handle_client_message
         ServerArgs.default_options ~root:(Path.to_string root)
       in
       let server_args = ServerArgs.set_config server_args env.args.config in
-      let local_config =
-        snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
-      in
+      let local_config = snd @@ ServerConfig.load ~silent:true server_args in
       ref_local_config := Some local_config;
       HackEventLogger.set_rollout_flags
         (ServerLocalConfig.to_rollout_flags local_config);
       HackEventLogger.set_rollout_group
         local_config.ServerLocalConfig.rollout_group;
-      HackEventLogger.set_machine_class
-        local_config.ServerLocalConfig.machine_class;
 
       let%lwt version = read_hhconfig_version () in
       HackEventLogger.set_hhconfig_version
         (Some (String_utils.lstrip version "^"));
       let%lwt version_and_switch = read_hhconfig_version_and_switch () in
       hhconfig_version_and_switch := version_and_switch;
-      let%lwt new_state = connect ~env !state in
+      let%lwt new_state =
+        match env.serverless_ide with
+        | Ide_standalone ->
+          let p =
+            {
+              Lost_env.explanation = "No persistent connection to hh_server";
+              new_hh_server_state = None;
+              start_on_click = false;
+              trigger_on_lsp = false;
+              trigger_on_lock_file = false;
+            }
+          in
+          let new_state =
+            Lost_server
+              {
+                Lost_env.p;
+                editor_open_files = UriMap.empty;
+                uris_with_unsaved_changes = UriSet.empty;
+                uris_with_standalone_diagnostics = UriMap.empty;
+                current_hh_shell = None;
+                lock_file = ServerFiles.lock_file (get_root_exn ());
+                hh_server_status_diagnostic = None;
+              }
+          in
+          Lwt.return new_state
+        | Ide_serverless
+        | Ide_hh_server ->
+          connect ~env !state
+      in
       state := new_state;
       (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
          verbose here, since the command-line argument --verbose trumps initialization params. *)
@@ -4271,13 +5226,7 @@ let handle_client_message
         RequestMessage (id, CompletionItemResolveRequest params) ) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_resolve_local
-          ide_service
-          env
-          tracking_id
-          ref_unblocked_time
-          editor_open_files
-          params
+        do_resolve_local ide_service env tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -4416,6 +5365,47 @@ let handle_client_message
         (TypeDefinitionResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
+    (* textDocument/references request *)
+    | (_, Some ide_service, RequestMessage (id, FindReferencesRequest params))
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      let%lwt new_state =
+        do_findReferences_local
+          !state
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+          id
+      in
+      state := new_state;
+      Lwt.return_none
+    (* textDocument/implementation request *)
+    | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      let%lwt new_state = do_goToImplementation_local !state params id in
+      state := new_state;
+      Lwt.return_none
+    (* textDocument/rename request *)
+    | (_, Some ide_service, RequestMessage (id, RenameRequest params))
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      let%lwt new_state =
+        do_documentRename_local
+          !state
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+          id
+      in
+      state := new_state;
+      Lwt.return_none
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, Some ide_service, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -4438,7 +5428,7 @@ let handle_client_message
     (* textDocument/codeAction request *)
     | (_, Some ide_service, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
+      let%lwt (result, file_path, errors_opt) =
         do_codeAction_local
           ide_service
           env
@@ -4448,6 +5438,12 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CodeActionResult result);
+      begin
+        match errors_opt with
+        | None -> ()
+        | Some errors ->
+          state := publish_errors_if_standalone env !state file_path errors
+      end;
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/codeAction request, when not in serverless IDE mode *)
@@ -4502,7 +5498,7 @@ let handle_client_message
           | DidCloseNotification _ | DidSaveNotification _ ) ) ->
       let%lwt () =
         handle_editor_buffer_message
-          ~state:!state
+          ~state
           ~ide_service
           ~env
           ~metadata
@@ -4539,7 +5535,14 @@ let handle_client_message
         | None -> 0
         | Some { Hover.contents; _ } -> List.length contents
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      let pos = params.Lsp.TextDocumentPositionParams.position in
+      let result_extra_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"line" ~value:pos.line
+        |> Telemetry.int_ ~key:"character" ~value:pos.character
+      in
+      Lwt.return_some
+        { result_count; result_extra_telemetry = Some result_extra_telemetry }
     (* textDocument/typeDefinition request *)
     | (Main_loop menv, _, RequestMessage (id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -4562,14 +5565,65 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry }
+    (*textDocument/prepareCallHierarchy request*)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, PrepareCallHierarchyRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_prepareCallHierarchy menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (PrepareCallHierarchyResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
+    (* callHierarchy/incomingCalls request *)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, CallHierarchyIncomingCallsRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_callHierarchyIncoming menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (CallHierarchyIncomingCallsResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
+    (* callHierarchy/outgoingCalls request *)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, CallHierarchyOutgoingCallsRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_callHierarchyOutgoing menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (CallHierarchyOutgoingCallsResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
     (* textDocument/completion request *)
     | (Main_loop menv, _, RequestMessage (id, CompletionRequest params)) ->
-      let do_completion =
-        if env.use_ffp_autocomplete then
-          do_completion_ffp
-        else
-          do_completion_legacy
-      in
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_completion menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (CompletionResult result);
@@ -4686,11 +5740,16 @@ let handle_client_message
 
       (* We deny all other requests. This is the only response that won't       *)
       (* produce logs/warnings on most clients...                               *)
+      let message_str =
+        match lenv.p.new_hh_server_state with
+        | None -> "[Not implemented for ide_standalone]"
+        | Some hh_server_state -> hh_server_state_to_string hh_server_state
+      in
       raise
         (Error.LspException
            {
              Error.code = Error.RequestCancelled;
-             message = lenv.p.new_hh_server_state |> hh_server_state_to_string;
+             message = message_str;
              data =
                Some
                  (Hh_json.JSON_Object
@@ -4717,10 +5776,13 @@ let handle_server_message
     | ( Main_loop menv,
         { push = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated }; _ } )
       ->
-      let uris_with_diagnostics =
-        do_diagnostics menv.Main_env.uris_with_diagnostics errors ~is_truncated
+      let uris_with_server_diagnostics =
+        do_server_diagnostics
+          menv.Main_env.uris_with_server_diagnostics
+          errors
+          ~is_truncated
       in
-      state := Main_loop { menv with Main_env.uris_with_diagnostics };
+      state := Main_loop { menv with Main_env.uris_with_server_diagnostics };
       Lwt.return_unit
     (* any server diagnostics that come after we've shut down *)
     | (_, { push = ServerCommandTypes.DIAGNOSTIC _; _ }) -> Lwt.return_unit
@@ -4733,7 +5795,7 @@ let handle_server_message
           !state
           {
             Lost_env.explanation = "hh_server is active in another window.";
-            new_hh_server_state = Hh_server_stolen;
+            new_hh_server_state = Some Hh_server_stolen;
             start_on_click = false;
             trigger_on_lock_file = false;
             trigger_on_lsp = true;
@@ -4864,7 +5926,14 @@ let handle_client_ide_notification
       to_stdout
       "[client-ide] Done processing file changes";
     Lwt.return_none
+  | ClientIdeMessage.Full_index_fallback ->
+    Lsp_helpers.telemetry_log
+      to_stdout
+      "[client-ide] Falling back to full index naming table build";
+    Lwt.return_none
 
+(** Called once a second but only when there are no pending messages from client,
+hh_server, or clientIdeDaemon. *)
 let handle_tick
     ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :
     result_telemetry option Lwt.t =
@@ -4885,6 +5954,7 @@ let handle_tick
           Lwt.return_unit
         else
           (* terminate + retry the connection *)
+          (* Note: In_init isn't reachable under Ide_standalone, hence we're safe to call connect here *)
           let%lwt new_state = connect ~env !state in
           state := new_state;
           Lwt.return_unit
@@ -4894,25 +5964,30 @@ let handle_tick
     | Main_loop menv ->
       let open Main_env in
       let%lwt () =
-        if menv.needs_idle then begin
+        if !hh_server_needs_idle then
           (* If we're connected to a server and have no more messages in the queue, *)
           (* then we must let the server know we're idle, so it will be free to     *)
           (* handle command-line requests.                                          *)
-          state := Main_loop { menv with needs_idle = false };
           let%lwt () =
             rpc
               menv.conn
               ref_unblocked_time
-              ~desc:"idle"
+              ~desc:"ide_idle"
               ServerCommandTypes.IDE_IDLE
           in
           Lwt.return_unit
-        end else
+        else
           Lwt.return_unit
       in
       Lwt.return_unit
-    (* idle tick. No-op. *)
-    | _ -> Lwt.return_unit
+    (* idle tick. Poll for a new errors.bin file if needed. *)
+    | _ ->
+      let%lwt () =
+        match env.serverless_ide with
+        | Ide_standalone -> try_open_errors_file ~state
+        | _ -> Lwt.return_unit
+      in
+      Lwt.return_unit
   in
   let (promise : unit Lwt.t) = EventLoggerLwt.flush () in
   ignore_promise_but_handle_failure
@@ -4934,20 +6009,20 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
     ServerLocalConfig.load
       ~silent:true
       ~current_version:(Config_file.parse_version None)
+      ~current_rolled_out_flag_idx:Int.min_value
+      ~deactivate_saved_state_rollout:false
       (Config_file.of_list args.config)
   in
-  let env =
-    {
-      args;
-      init_id;
-      use_ffp_autocomplete =
-        versionless_local_config.ServerLocalConfig.ide_ffp_autocomplete;
-      use_ranked_autocomplete =
-        versionless_local_config.ServerLocalConfig.ide_ranked_autocomplete;
-      use_serverless_ide =
-        versionless_local_config.ServerLocalConfig.ide_serverless;
-    }
+  let serverless_ide =
+    match
+      ( versionless_local_config.ServerLocalConfig.ide_standalone,
+        versionless_local_config.ServerLocalConfig.ide_serverless )
+    with
+    | (true, _) -> Ide_standalone
+    | (false, true) -> Ide_serverless
+    | (false, false) -> Ide_hh_server
   in
+  let env = { args; init_id; serverless_ide } in
 
   if env.args.verbose then begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
@@ -4960,9 +6035,14 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
      to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
      Why are they different? because we should write to stderr under a test harness,
      but we should never write to stderr when invoked by VSCode - it's not even guaranteed
-     to drain the stderr pipe. *)
+     to drain the stderr pipe.
+     WARNING: we can't log yet, since until we've received "initialize" request,
+     we don't yet know which path to log to. *)
   let ide_service =
-    if env.use_serverless_ide then
+    match env.serverless_ide with
+    | Ide_hh_server -> None
+    | Ide_serverless
+    | Ide_standalone ->
       Some
         (ref
            (ClientIdeService.make
@@ -4971,9 +6051,14 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
                 verbose_to_stderr = env.args.verbose;
                 verbose_to_file = env.args.verbose;
               }))
-    else
-      None
   in
+  (* We have two different techniques for refreshing status: ide_standalone
+     refreshes status once a second, so we kick off the once-a-second background
+     refreshing process here; other modes refresh every event and are handled
+     later, in the event loop.
+     TODO(ljw): delete the "other modes" status refresh once we switch over. *)
+  if versionless_local_config.ServerLocalConfig.ide_standalone then
+    background_status_refresher env ide_service;
 
   let client = Jsonrpc.make_t () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
@@ -4993,14 +6078,11 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | None -> Lwt.return_unit
       in
       deferred_action := None;
-      let%lwt event = get_next_event !state client ide_service in
+      let%lwt event = get_next_event state client ide_service in
       if not (is_tick event) then
         log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
-
-      (* maybe set a flag to indicate that we'll need to send an idle message *)
-      state := handle_idle_if_necessary !state event;
 
       (* if we're in a lost-server state, some triggers cause us to reconnect *)
       let%lwt new_state =
@@ -5018,10 +6100,13 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       update_hh_server_state_if_necessary event;
 
       (* update status immediately if warranted *)
-      if not (is_pre_init !state || is_post_shutdown !state) then begin
+      if
+        (not (is_pre_init !state || is_post_shutdown !state))
+        && not versionless_local_config.ServerLocalConfig.ide_standalone
+      then begin
         state :=
           publish_hh_server_status_diagnostic !state !latest_hh_server_status;
-        refresh_status ~env ~ide_service
+        refresh_status env ~ide_service
       end;
 
       (* this is the main handler for each message*)
@@ -5040,6 +6125,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           handle_client_ide_notification ~notification
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
+        | Errors_file result -> handle_errors_file_item ~state result
+        | Shell_out_hh_feature_complete (result, shellable_type) ->
+          handle_shell_out_hh_feature result shellable_type
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
@@ -5134,7 +6222,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
                   !state
                   {
                     Lost_env.explanation;
-                    new_hh_server_state = Hh_server_stopped;
+                    new_hh_server_state = Some Hh_server_stopped;
                     start_on_click = true;
                     trigger_on_lock_file;
                     trigger_on_lsp = false;

@@ -50,7 +50,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function static_compare() {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $nv = null;
   $tv = true;
   $bv = false;
@@ -61,9 +61,9 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   $ov = new StrObj('Foo::bar');
   $va = varray[Foo::class, 'bar'];
   $da = darray[0 => Foo::class, 1 => 'bar'];
-  $cp = class_meth(Foo::class, 'bar');
-  $ep = fun('bar');
-  $lp = class_meth(Foo::class, 'baz');
+  $cp = Foo::bar<>;
+  $ep = bar<>;
+  $lp = Foo::baz<>;
   $qp = CLS('Foo');
 
   $xx = varray[$cm]; $nx = varray[$nv]; $tx = varray[$tv]; $bx = varray[$bv];
@@ -418,7 +418,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $nv = LV(null);
   $tv = LV(true);
   $bv = LV(false);
@@ -429,9 +429,9 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   $ov = LV(new StrObj('Foo::bar'));
   $va = LV(varray[Foo::class, 'bar']);
   $da = LV(darray[0 => Foo::class, 1 => 'bar']);
-  $cp = LV(class_meth(Foo::class, 'bar'));
-  $ep = LV(fun('bar'));
-  $lp = LV(class_meth(Foo::class, 'baz'));
+  $cp = LV(Foo::bar<>);
+  $ep = LV(bar<>);
+  $lp = LV(Foo::baz<>);
   $qp = LV(CLS('Foo'));
 
   $xx = WRAPA($cm); $nx = WRAPA($nv); $tx = WRAPA($tv); $bx = WRAPA($bv);

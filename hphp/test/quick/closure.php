@@ -28,6 +28,4 @@ function main() {
   var_dump($use_by_val);
   $debuginfo = $c->__debugInfo();
   var_dump(is_darray($debuginfo));
-  var_dump(is_darray($debuginfo['static']));
-  var_dump(is_darray($debuginfo['parameter']));
 }

@@ -94,7 +94,7 @@ constexpr LayoutIndex getEmptyLayoutIndex() {
 
 Layout::LayoutSet getEmptyParentLayouts() {
   Layout::LayoutSet result;
-#define DT(name, value) {                            \
+#define DT(name, value, ...) {                       \
     auto const type = KindOf##name;                  \
     if (type != KindOfUninit) {                      \
       result.insert(MonotypeVecLayout::Index(type)); \
@@ -826,7 +826,7 @@ void MonotypeVec::InitializeLayouts() {
   new TopMonotypeVecLayout();
 
   // Create all the potentially internal concrete layouts first
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type == dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeVecLayout(type);                                     \
@@ -835,7 +835,7 @@ void MonotypeVec::InitializeLayouts() {
   DATATYPES
 #undef DT
 
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type != dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeVecLayout(type);                                     \

@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-17], "\\TestKeyset"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+      c_vars = [];
       c_methods =
       [{ m_span = [4:3-45]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -20,23 +20,23 @@
          m_ret = ((void), (Some ([4:38-42], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\f");
        fd_fun =
        { f_span = [7:1-36]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:29-33], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:29-33], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<int>); param_type_hint = ((keyset<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\keyset"), [([7:19-22], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$f"; 
@@ -46,17 +46,16 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-21], "\\call_keyset");
        fd_fun =
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_name = ([9:10-21], "\\call_keyset"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([10:3-17], (Happly (([10:3-9], "\\HH\\keyset"), [([10:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [10:18-20]; param_name = "$f"; 
@@ -74,8 +73,9 @@
              ([15:3-27],
               (Expr
                  ((TestKeyset), [15:3-26],
-                  (Binop ((Eq None), ((TestKeyset), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestKeyset), [15:10-26], (New (((TestKeyset), [15:14-24], (CI ([15:14-24], "\\TestKeyset"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestKeyset), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestKeyset), [15:10-26], (New (((TestKeyset), [15:14-24], (CI ([15:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -87,18 +87,16 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-26], "\\call_keyset_cast");
        fd_fun =
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
-         f_name = ([21:10-26], "\\call_keyset_cast"); f_tparams = []; 
-         f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [22:18-20]; param_name = "$f"; 
@@ -125,8 +123,9 @@
              ([27:3-27],
               (Expr
                  ((TestKeyset), [27:3-26],
-                  (Binop ((Eq None), ((TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestKeyset), [27:10-26], (New (((TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestKeyset), [27:10-26], (New (((TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))) }))));
              ([30:3-66],
               (Expr
                  ((void), [30:3-65],
@@ -147,4 +146,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

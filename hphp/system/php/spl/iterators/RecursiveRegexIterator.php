@@ -72,10 +72,10 @@ class RecursiveRegexIterator extends RegexIterator
    * Returns whether an iterator can be obtained for the current entry. This
    * iterator can be obtained via RecursiveRegexIterator::getChildren().
    *
-   * @return     mixed   Returns TRUE if an iterator can be obtained for the
+   * @return     bool    Returns TRUE if an iterator can be obtained for the
    *                     current entry, otherwise returns FALSE.
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return $this->getInnerIterator()->hasChildren();
   }
 }

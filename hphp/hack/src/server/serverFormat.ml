@@ -90,7 +90,7 @@ let expand_range_to_whole_rows content (range : File_content.range) :
     File_content.range * int * int =
   File_content.(
     (* It's easy to expand the start of the range if necessary, but to expand *)
-    (* the end of the range requres more work... *)
+    (* the end of the range requires more work... *)
     let range = { range with st = { range.st with column = 1 } } in
     let (from0, to0) = get_offsets content (range.st, range.ed) in
     if range.ed.column = 1 || to0 = String.length content then

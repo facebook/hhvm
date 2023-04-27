@@ -1,0 +1,4 @@
+function foo(): void
+This function does stuff.
+
+More doc info here.

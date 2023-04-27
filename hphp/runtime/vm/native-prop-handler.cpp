@@ -18,8 +18,8 @@
 
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
-typedef std::unordered_map
-  <const StringData*, NativePropHandler> NativePropHandlerMap;
+using NativePropHandlerMap = std::unordered_map
+  <const StringData*, NativePropHandler>;
 
 static NativePropHandlerMap s_nativePropHandlerMap;
 

@@ -2,17 +2,17 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 class A {
-  <<__Internal>>
-  public function f(): void {}
+  internal function f(): void {}
 }
 
 //// main.php

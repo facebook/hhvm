@@ -228,8 +228,9 @@ pub fn escaped_bytes(s: &[u8]) -> Cow<'_, [u8]> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn parse_digit_tests() {

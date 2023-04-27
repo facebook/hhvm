@@ -28,9 +28,7 @@
 #include <algorithm>
 #include <cmath>
 
-#ifndef _MSC_VER
 #include <monetary.h>
-#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -1366,50 +1364,26 @@ String string_escape_shell_arg(const char *str) {
   String ret(safe_address(l, 4, 3), ReserveString); /* worst case */
   cmd = ret.mutableData();
 
-#ifdef _MSC_VER
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
 
   for (x = 0; x < l; x++) {
     switch (str[x]) {
-#ifdef _MSC_VER
-    case '"':
-    case '%':
-    case '!':
-      cmd[y++] = ' ';
-      break;
-#else
     case '\'':
       cmd[y++] = '\'';
       cmd[y++] = '\\';
       cmd[y++] = '\'';
-#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];
     }
   }
-#ifdef _MSC_VER
-  if (y > 0 && '\\' == cmd[y - 1]) {
-    int k = 0, n = y - 1;
-    for (; n >= 0 && '\\' == cmd[n]; n--, k++);
-    if (k % 2) {
-      cmd[y++] = '\\';
-    }
-  }
-
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
   ret.setSize(y);
   return ret;
 }
 
 String string_escape_shell_cmd(const char *str) {
-  register int x, y, l;
+  int x, y, l;
   char *cmd;
   char *p = nullptr;
 
@@ -1419,7 +1393,6 @@ String string_escape_shell_cmd(const char *str) {
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
-#ifndef _MSC_VER
     case '"':
     case '\'':
       if (!p && (p = (char *)memchr(str + x + 1, str[x], l - x - 1))) {
@@ -1431,16 +1404,6 @@ String string_escape_shell_cmd(const char *str) {
       }
       cmd[y++] = str[x];
       break;
-#else
-    /* % is Windows specific for environmental variables, ^%PATH% will
-    output PATH while ^%PATH^% will not. escapeshellcmd->val will
-    escape all % and !.
-    */
-    case '%':
-    case '!':
-    case '"':
-    case '\'':
-#endif
     case '#': /* This is character-set independent */
     case '&':
     case ';':
@@ -1462,11 +1425,7 @@ String string_escape_shell_cmd(const char *str) {
     case '\\':
     case '\x0A': /* excluding these two */
     case '\xFF':
-#ifdef _MSC_VER
-      cmd[y++] = '^';
-#else
       cmd[y++] = '\\';
-#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];
@@ -1887,7 +1846,7 @@ char _codes[26] = { 1,16,4,16,9,2,4,16,9,2,0,2,2,2,1,4,0,2,4,4,1,0,0,0,8,0};
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
 /* Look at the next letter in the word */
 #define Next_Letter ((char)toupper(word[w_idx+1]))
@@ -2033,7 +1992,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
 
     /* THOUGHT:  It would be nice if, rather than having things like...
      * well, SCI.  For SCI you encode the S, then have to remember
-     * to skip the C.  So the phonome SCI invades both S and C.  It would
+     * to skip the C.  So the phoneme SCI invades both S and C.  It would
      * be better, IMHO, to skip the C from the S part of the encoding.
      * Hell, I'm trying it.
      */

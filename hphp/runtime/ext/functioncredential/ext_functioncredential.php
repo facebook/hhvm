@@ -18,7 +18,7 @@ final class FunctionCredential {
   <<__Native>>
   public final function getFilename()[]: string;
 
-  public final function __debugInfo(): darray {
+  public final function __debugInfo(): darray<string, ?string> {
     return darray[
       'class_name' => $this->getClassName(),
       'function_name' => $this->getFunctionName(),

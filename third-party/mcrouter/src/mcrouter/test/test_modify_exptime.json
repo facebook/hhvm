@@ -1,0 +1,34 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "localhost:12345" ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "a": {
+        "type": "ModifyExptimeRoute",
+        "target": "Pool|A",
+        "exptime": -1
+      },
+      "b": {
+        "type": "ModifyExptimeRoute",
+        "target": "Pool|A",
+        "exptime": 0
+      },
+      "c": {
+        "type": "ModifyExptimeRoute",
+        "target": "Pool|A",
+        "action": "set",
+        "exptime": 2
+      },
+      "d": {
+        "type": "ModifyExptimeRoute",
+        "target": "Pool|A",
+        "action": "min",
+        "exptime": 2
+      }
+    }
+  }
+}

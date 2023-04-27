@@ -7,22 +7,33 @@
  *)
 
 open Hh_prelude
-module Fact_id = Symbol_fact_id
+
+let is_enum_or_enum_class = function
+  | Ast_defs.Cenum
+  | Ast_defs.Cenum_class _ ->
+    true
+  | Ast_defs.(Cinterface | Cclass _ | Ctrait) -> false
 
 let get_context_from_hint ctx h =
   let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; ctx } in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
-  Typing_print.full_decl tcopt (Decl_hint.context_hint decl_env h)
+  Typing_print.full_decl ~msg:false tcopt (Decl_hint.context_hint decl_env h)
 
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; ctx } in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
-  Typing_print.full_decl tcopt (Decl_hint.hint decl_env h)
+  Typing_print.full_decl ~msg:false tcopt (Decl_hint.hint decl_env h)
+
+let get_type_from_hint_strip_ns ctx h =
+  let mode = FileInfo.Mhhi in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
+  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+  Typing_print.full_strip_ns_decl ~msg:false env (Decl_hint.hint decl_env h)
 
 (* Replace any codepoints that are not valid UTF-8 with
-the unrepresentable character. *)
+   the unrepresentable character. *)
 let check_utf8 str =
   let b = Buffer.create (String.length str) in
   let replace_malformed () _index = function
@@ -87,27 +98,6 @@ let split_name (s : string) : (string * string) option =
     else
       Some (parent_namespace, name)
 
-let add_xref target_json target_id ref_pos xrefs =
-  let filepath = Relative_path.to_absolute (Pos.filename ref_pos) in
-  SMap.update
-    filepath
-    (fun file_map ->
-      let new_ref = (target_json, [ref_pos]) in
-      match file_map with
-      | None -> Some (Fact_id.Map.singleton target_id new_ref)
-      | Some map ->
-        let updated_xref_map =
-          Fact_id.Map.update
-            target_id
-            (fun target_tuple ->
-              match target_tuple with
-              | None -> Some new_ref
-              | Some (json, refs) -> Some (json, ref_pos :: refs))
-            map
-        in
-        Some updated_xref_map)
-    xrefs
-
 let ast_expr_to_json source_text (_, pos, _) =
   Hh_json.JSON_String (strip_nested_quotes (source_at_span source_text pos))
 
@@ -146,3 +136,80 @@ let namespace_ast_to_pos_id ns_ast st =
     | _ -> raise Ast_error
   in
   tokens_to_pos_id st ~hd ~tl
+
+type pos = {
+  start: int;
+  length: int;
+}
+[@@deriving ord]
+
+(* Pretty-printer for hints. Also generate
+   xrefs.  TODO: This covers most of the types but needs
+   to be extended OR move the xrefs generartion logic
+   to Typing_print.full_strip_ns_decl *)
+let string_of_type ctx (t : Aast.hint) =
+  let queue = Queue.create () in
+  let cur = ref 0 in
+  let xrefs = ref [] in
+  let enqueue ?annot str =
+    let length = String.length str in
+    let pos = { start = !cur; length } in
+    Queue.enqueue queue str;
+    cur := !cur + length;
+    Option.iter annot ~f:(fun file_pos -> xrefs := (file_pos, pos) :: !xrefs)
+  in
+  let rec parse t =
+    let open Aast in
+    match snd t with
+    | Hoption t ->
+      enqueue "?";
+      parse t
+    | Hlike t ->
+      enqueue "~";
+      parse t
+    | Hsoft t ->
+      enqueue "@";
+      parse t
+    | Happly ((file_pos, cn), hs) ->
+      enqueue ~annot:file_pos (Typing_print.strip_ns cn);
+      parse_list ("<", ">") hs
+    | Htuple hs -> parse_list ("(", ")") hs
+    | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
+    | Haccess (h, sids) ->
+      parse h;
+      List.iter sids ~f:(fun (file_pos, sid) ->
+          enqueue "::";
+          enqueue ~annot:file_pos sid)
+    | _ ->
+      (* fall back on old pretty printer - without xrefs - for things
+         not implemented yet *)
+      enqueue (get_type_from_hint_strip_ns ctx t)
+  and parse_list (op, cl) = function
+    | [] -> ()
+    | [h] ->
+      enqueue op;
+      parse h;
+      enqueue cl
+    | h :: hs ->
+      enqueue op;
+      parse h;
+      List.iter hs ~f:(fun h ->
+          enqueue ", ";
+          parse h);
+      enqueue cl
+  in
+  parse t;
+  let toks = Queue.to_list queue in
+  (String.concat toks, !xrefs)
+
+let hint_to_string_and_symbols ctx h =
+  let ty_pp_ref = get_type_from_hint_strip_ns ctx h in
+  let (ty_pp, xrefs) = string_of_type ctx h in
+  match String.equal ty_pp ty_pp_ref with
+  | true -> (ty_pp, xrefs)
+  | false ->
+    (* This is triggered only for very large (truncated) types.
+       We use ty_pp_ref in that case since it guarantees an
+       upper bound on the size of types. *)
+    Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref;
+    (ty_pp_ref, [])

@@ -6,12 +6,13 @@
  *)
 
 type stats = {
-  total: int;
+  memory_current: int;
       (** cgroup/memory.current - the total physical memory for the cgroup *)
-  total_swap: int;
-      (** cgroup/memory.swap.current - the total amount of anonymous memory paged out to swap.
-      Note that anon, file, and shmem are disjoint. If you add in the memory that the kernel uses,
-      they should sum roughly to `total` *)
+  memory_swap_current: int;
+      (** cgroup/memory.swap.current - the total amount of anonymous memory paged out to swap. *)
+  total: int;
+      (** sum of [memory_current] plus [memory_swap_current] - this is the best
+      measure we have about total memory burden. *)
   anon: int;
       (** cgroup/memory.stat:anon - the amount of physical anonymous memory not used for shared memory *)
   shmem: int;

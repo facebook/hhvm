@@ -44,6 +44,7 @@ val apply_rules_with_index_value_ty_mismatches :
 
 val apply_rules_with_array_index_value_ty_mismatches :
   ?ignore_type_structure:bool ->
+  ?preserve_supportdyn:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   (Typing_env_types.env ->

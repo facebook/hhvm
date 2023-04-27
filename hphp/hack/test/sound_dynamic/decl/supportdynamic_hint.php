@@ -1,3 +1,3 @@
 <?hh
 
-function f(supportdynamic $s): void {}
+function f(supportdyn<nonnull> $s): void {}

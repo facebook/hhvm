@@ -79,7 +79,7 @@ namespace {
  */
 ArgGroup propArgs(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
-  auto args = argGroup(env, inst).immPtr(inst->marker().func()->cls());
+  auto args = argGroup(env, inst).immPtr(inst->marker().func());
   if (base->isA(TObj)) return args.ssa(0);
   return args.typedValue(0);
 }

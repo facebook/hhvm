@@ -306,15 +306,6 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Note that MSVC's rand is actually thread-safe to begin with
-// so no changes are actually needed to make it so.
-// For APPLE and MSFT configurations the rand() would be kept as thread local
-// For Linux the RadomBuf structure is beeing moved to RDS
-#ifdef __APPLE__
-static bool s_rand_is_seeded = false;
-#elif defined(_MSC_VER)
-static __thread bool s_rand_is_seeded = false; // For now keep as thread local
-#else
 struct RandomBuf {
   random_data data;
   char        buf[128];
@@ -325,23 +316,14 @@ struct RandomBuf {
 };
 
 RDS_LOCAL(RandomBuf, rl_state);
-#endif
 
 static void randinit(uint32_t seed) {
-#ifdef __APPLE__
-  s_rand_is_seeded = true;
-  srandom(seed);
-#elif defined(_MSC_VER)
-  s_rand_is_seeded = true;
-  srand(seed);
-#else
   if (rl_state->state == RandomBuf::Uninit) {
     initstate_r(seed, rl_state->buf, sizeof rl_state->buf, &rl_state->data);
   } else {
     srandom_r(seed, &rl_state->data);
   }
   rl_state->state = RandomBuf::RequestInit;
-#endif
 }
 
 void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
@@ -350,7 +332,7 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
     return;
   }
   if (seed.isNumeric(true)) {
-    randinit(seed.toInt32());
+    randinit((int)seed.toInt64());
   } else {
     raise_warning("srand() expects parameter 1 to be long");
   }
@@ -359,24 +341,14 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
                       const Variant& max /* = uninit_variant */) {
-#if defined(__APPLE__) || defined(_MSC_VER)
-  if (!s_rand_is_seeded) {
-#else
   if (rl_state->state != RandomBuf::RequestInit) {
-#endif
     randinit(math_generate_seed());
   }
 
   int64_t number;
-#ifdef __APPLE__
-  number = random();
-#elif defined(_MSC_VER)
-  number = rand();
-#else
   int32_t numberIn;
   random_r(&rl_state->data, &numberIn);
   number = numberIn;
-#endif
   int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
   if (min != 0 || int_max != RAND_MAX) {
     RAND_RANGE(number, min, int_max, RAND_MAX);
@@ -392,7 +364,7 @@ void HHVM_FUNCTION(mt_srand,
     return math_mt_srand(math_generate_seed());
   }
   if (seed.isNumeric(true)) {
-    math_mt_srand(seed.toInt32());
+    math_mt_srand((int)seed.toInt64());
   } else {
     raise_warning("mt_srand() expects parameter 1 to be long");
   }
@@ -420,11 +392,9 @@ Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::requestInitMath() {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (rl_state->state == RandomBuf::RequestInit) {
     rl_state->state = RandomBuf::Uninit;
   }
-#endif
 }
 
 void StandardExtension::initMath() {

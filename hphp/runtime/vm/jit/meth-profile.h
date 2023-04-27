@@ -81,7 +81,7 @@ struct MethProfile {
    * If `cls' is not provided (when it's not known statically), we peek in `ar'
    * for the class context.
    */
-  void reportMeth(const Class* cls, const Func* meth);
+  void reportMeth(const Class* cls, const Func* meth, const Func* callerFunc);
 
   /*
    * Aggregate two MethProfiles.

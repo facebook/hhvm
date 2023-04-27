@@ -1,0 +1,21 @@
+{
+  "pools": {
+    "main": {
+      "servers": [ "127.0.0.1:12345" ]
+    },
+    "shadow": {
+      "servers": [ "127.0.0.1:12346" ]
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "main",
+    "shadows": [
+      {
+        "target": "PoolRoute|shadow",
+        "index_range": [0, 1],
+        "key_fraction_range": [0.0, 1.0]
+      }
+    ]
+  }
+}

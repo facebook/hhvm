@@ -98,7 +98,8 @@ int64_t Timer::stop() {
 
 Timer::CounterVec Timer::Counters() {
   CounterVec ret;
-  for (auto& pair : s_names) {
+  ret.reserve(std::size(s_names));
+  for (const auto& pair : s_names) {
     ret.emplace_back(pair.str, s_counters[pair.name]);
   }
   return ret;

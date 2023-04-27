@@ -1,5 +1,5 @@
 File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
-`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
+You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
 File "bad_inout_use_lvalue5.php", line 6, characters 5-22:

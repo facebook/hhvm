@@ -5,27 +5,33 @@
 
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
-use ffi::{Maybe, Slice, Str};
-use hhbc::{
-    hhas_coeffects::HhasCoeffects,
-    hhas_constant::HhasConstant,
-    hhas_function::{HhasFunction, HhasFunctionFlags},
-    hhas_pos::HhasSpan,
-    TypedValue,
-};
+use ffi::Maybe;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::Coeffects;
+use hhbc::Constant;
+use hhbc::Function;
+use hhbc::FunctionFlags;
+use hhbc::Span;
+use hhbc::TypedValue;
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use oxidized::ast;
+
+use crate::emit_body;
+use crate::emit_expression;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     constant: &'a ast::Gconst,
     init: Option<InstrSeq<'arena>>,
-) -> Result<Option<HhasFunction<'arena>>> {
+) -> Result<Option<Function<'arena>>> {
     let alloc = env.arena;
     let const_name = hhbc::ConstName::from_ast_name(alloc, &constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_name.unsafe_as_str());
@@ -49,7 +55,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             None => instr::empty(),
             Some(_) => instr::verify_ret_type_c(),
         };
-        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::retc()]);
+        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::ret_c()]);
         let body = emit_body::make_body(
             alloc,
             e,
@@ -64,13 +70,13 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             None, /* doc_comment */
             Some(env),
         )?;
-        Ok(HhasFunction {
+        Ok(Function {
             attributes: Slice::empty(),
             name: original_name,
             body,
-            span: HhasSpan::from_pos(&constant.span),
-            coeffects: HhasCoeffects::default(),
-            flags: HhasFunctionFlags::empty(),
+            span: Span::from_pos(&constant.span),
+            coeffects: Coeffects::default(),
+            flags: FunctionFlags::empty(),
             attrs: Attr::AttrNoInjection,
         })
     })
@@ -81,7 +87,7 @@ fn emit_constant<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     constant: &'a ast::Gconst,
-) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
+) -> Result<(Constant<'arena>, Option<Function<'arena>>)> {
     let (c, init) = from_ast(e, env, &constant.name, false, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, init)?;
     Ok((c, f))
@@ -91,7 +97,7 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     defs: &'a [ast::Def],
-) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'arena>>)> {
+) -> Result<(Vec<Constant<'arena>>, Vec<Function<'arena>>)> {
     let const_tuples = defs
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))
@@ -106,7 +112,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     id: &'a ast::Id,
     is_abstract: bool,
     expr: Option<&ast::Expr>,
-) -> Result<(HhasConstant<'arena>, Option<InstrSeq<'arena>>)> {
+) -> Result<(Constant<'arena>, Option<InstrSeq<'arena>>)> {
     let alloc = env.arena;
     let (value, initializer_instrs) = match expr {
         None => (None, None),
@@ -118,7 +124,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             ),
         },
     };
-    let constant = HhasConstant {
+    let constant = Constant {
         name: hhbc::ConstName::from_ast_name(alloc, id.name()),
         value: Maybe::from(value),
         is_abstract,

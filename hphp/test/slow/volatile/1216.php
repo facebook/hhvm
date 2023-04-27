@@ -58,7 +58,7 @@ if (class_exists($a)) {
 if (function_exists('function_exists')) {
   echo "yes\n";
 }
-if (class_exists('exception')) {
+if (class_exists('Exception')) {
   echo "yes\n";
 }
 }

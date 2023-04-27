@@ -17,8 +17,9 @@
             )))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:7-8], "X");
@@ -47,8 +48,8 @@
          ];
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:14-22]), (Tprim Tarraykey));
-               te_constraint = None; te_includes = [] })
-       }));
+               te_constraint = None; te_includes = [] });
+       sc_docs_url = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -62,8 +63,9 @@
              [(Rhint ([8:6-7]), (Tapply (([8:6-7], "\\B"), [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false;
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([9:3-4], "X");
@@ -84,8 +86,8 @@
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([8:8-11]), (Tprim Tint));
                 te_constraint = (Some (Rhint ([8:15-23]), (Tprim Tarraykey)));
-                te_includes = [] })
-        }));
+                te_includes = [] });
+        sc_docs_url = None }));
   ("\\I",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
@@ -109,7 +111,8 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([17:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false;
         sc_consts =
@@ -130,7 +133,5 @@
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }))
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

@@ -8,13 +8,29 @@
  *)
 
 open Hh_prelude
-open String_utils
 open Sys_utils
 open Typing_env_types
 module Inf = Typing_inference_env
 module Cls = Decl_provider.Class
-module PS = Full_fidelity_positioned_syntax
-module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
+
+(*****************************************************************************)
+(* Profiling utilities *)
+(*****************************************************************************)
+
+let mean samples =
+  List.fold ~init:0.0 ~f:( +. ) samples /. Float.of_int (List.length samples)
+
+let standard_deviation mean samples =
+  let sosq =
+    List.fold
+      ~init:0.0
+      ~f:(fun acc sample ->
+        let diff = sample -. mean in
+        (diff *. diff) +. acc)
+      samples
+  in
+  let sosqm = sosq /. Float.of_int (List.length samples) in
+  Float.sqrt sosqm
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -26,31 +42,38 @@ type mode =
   | Coverage
   | Cst_search
   | Dump_symbol_info
+  | Glean_index of string
+  | Glean_sym_hash
   | Dump_inheritance
   | Errors
   | Lint
+  | Lint_json
   | Dump_deps
   | Dump_dep_hashes
+  | Get_some_file_deps of int
   | Identify_symbol of int * int
+  | Ide_code_actions
   | Find_local of int * int
   | Get_member of string
   | Outline
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
-  | Type
   | Check_tast
-  | Rewrite
+  | RewriteGlobalInference
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
   | Shallow_class_diff
-  | Linearization
   | Go_to_impl of int * int
   | Dump_glean_deps
   | Hover of (int * int) option
   | Apply_quickfixes
   | Shape_analysis of string
+  | Refactor_sound_dynamic of string * string * string
+  | RemoveDeadUnsafeCasts
+  | CountImpreciseTypes
+  | SDT_analysis of string
 
 type options = {
   files: string list;
@@ -65,9 +88,10 @@ type options = {
   verbosity: int;
   should_print_position: bool;
   custom_hhi_path: string option;
-  profile_type_check_twice: bool;
+  profile_type_check_multi: int option;
   memtrace: string option;
   pessimise_builtins: bool;
+  rust_provider_backend: bool;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -87,27 +111,13 @@ let magic_builtins =
     ( "hh_single_type_check_magic.hhi",
       "<?hh\n"
       ^ "namespace {\n"
-      ^ "function hh_show<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_expect<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_show_env():void {}\n"
-      ^ "function hh_log_level(string $key, int $level):void {}\n"
-      ^ "function hh_force_solve():void {}"
-      ^ "function hh_time(string $command, string $tag = '_'):void {}\n"
-      ^ "}\n" );
-  |]
-
-let pessimised_magic_builtins =
-  [|
-    ( "hh_single_type_check_magic.hhi",
-      "<?hh\n"
-      ^ "namespace {\n"
-      ^ "function hh_show<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_expect<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_expect_equivalent<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_show_env():void {}\n"
-      ^ "function hh_log_level(string $key, int $level):void {}\n"
-      ^ "function hh_force_solve():void {}"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_show_env()[]:void {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_force_solve()[]:void {}"
+      ^ "<<__NoAutoDynamic>> function hh_time(string $command, string $tag = '_'):void {}\n"
       ^ "}\n" );
   |]
 
@@ -125,7 +135,8 @@ let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
     | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Errors.to_string e)
+    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
+    | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
   let absolute_errors = User_error.to_absolute l in
@@ -142,9 +153,9 @@ let write_error_list format errors oc max_errors =
     match
       Errors.format_summary
         format
-        errors
-        (List.length dropped_errors)
-        max_errors
+        ~displayed_count:(List.length errors)
+        ~dropped_count:(Some (List.length dropped_errors))
+        ~max_errors
     with
     | Some summary -> Out_channel.output_string oc summary
     | None -> ()
@@ -163,9 +174,9 @@ let print_error_list format errors max_errors =
     match
       Errors.format_summary
         format
-        errors
-        (List.length dropped_errors)
-        max_errors
+        ~displayed_count:(List.length errors)
+        ~dropped_count:(Some (List.length dropped_errors))
+        ~max_errors
     with
     | Some summary -> Out_channel.output_string stderr summary
     | None -> ()
@@ -192,8 +203,6 @@ let parse_options () =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
-  let line = ref 0 in
-  let log_key = ref "" in
   let log_levels = ref SMap.empty in
   let max_errors = ref None in
   let batch_mode = ref false in
@@ -207,6 +216,7 @@ let parse_options () =
     set_mode (Ifc (!ifc_mode, lattice)) ();
     batch_mode := true
   in
+  let config_overrides = ref [] in
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
@@ -218,9 +228,11 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
   let set_float_ x f = x := f in
-  let shallow_class_decl = ref false in
+  let rust_elab = ref true in
+  let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
+  let skip_check_under_dynamic = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
@@ -229,7 +241,6 @@ let parse_options () =
   let strict_contexts = ref true in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
-  let complex_coercion = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
@@ -260,30 +271,28 @@ let parse_options () =
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
-  let disable_hh_ignore_error = ref false in
-  let enable_systemlib_annotations = ref false in
+  let disable_hh_ignore_error = ref 0 in
+  let is_systemlib = ref false in
   let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref None in
-  let allowed_fixme_codes_partial = ref None in
-  let codes_not_raised_partial = ref None in
   let allowed_decl_fixme_codes = ref None in
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
-  let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-  let disallow_inst_meth = ref false in
-  let use_direct_decl_parser = ref true in
+  let always_pessimise_return = ref false in
+  let consider_type_const_enforceable = ref false in
   let disable_enum_classes = ref false in
-  let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
-  let enable_strict_const_semantics = ref false in
+  let enable_strict_const_semantics = ref 0 in
+  let strict_wellformedness = ref 0 in
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
   let strict_value_equality = ref false in
+  let expression_tree_virtualize_functions = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -297,28 +306,22 @@ let parse_options () =
   let type_printer_fuel =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
-  let profile_type_check_twice = ref false in
+  let profile_type_check_multi = ref None in
   let profile_top_level_definitions =
     ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
   let memtrace = ref None in
-  let enable_global_write_check = ref [] in
-  let enable_global_write_check_functions = ref SSet.empty in
-  let set_enable_global_write_check_functions s =
-    let json_obj = Hh_json.json_of_file s in
-    let add_function f =
-      match f with
-      | Hh_json.JSON_String str ->
-        enable_global_write_check_functions :=
-          SSet.add str !enable_global_write_check_functions
-      | _ -> ()
-    in
-    match json_obj with
-    | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
-    | _ -> enable_global_write_check_functions := SSet.empty
-  in
+  let enable_global_access_check = ref false in
+  let packages_config_path = ref None in
+  let allow_all_files_for_module_declarations = ref true in
+  let loop_iteration_upper_bound = ref None in
+  let substitution_mutation = ref false in
+  let tast_under_dynamic = ref false in
   let options =
     [
+      ( "--config",
+        Arg.String (fun s -> config_overrides := s :: !config_overrides),
+        "<option=value> Set one hhconfig option; can be used multiple times" );
       ( "--no-print-position",
         Arg.Unit (fun _ -> print_position := false),
         " Don't print positions while printing TASTs and NASTs" );
@@ -339,6 +342,22 @@ let parse_options () =
           (fun mode ->
             batch_mode := true;
             set_mode (Shape_analysis mode) ()),
+        " Run the shape analysis" );
+      ( "--refactor-sound-dynamic",
+        (let refactor_analysis_mode = ref "" in
+         let refactor_mode = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) refactor_analysis_mode);
+             Arg.String (( := ) refactor_mode);
+             Arg.String
+               (fun x ->
+                 batch_mode := true;
+                 set_mode
+                   (Refactor_sound_dynamic
+                      (!refactor_analysis_mode, !refactor_mode, x))
+                   ());
+           ]),
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -369,6 +388,12 @@ let parse_options () =
       ( "--dump-symbol-info",
         Arg.Unit (set_mode Dump_symbol_info),
         " Dump all symbol information" );
+      ( "--glean-index",
+        Arg.String (fun output_dir -> set_mode (Glean_index output_dir) ()),
+        " Run indexer and output json in provided dir" );
+      ( "--glean-sym-hash",
+        Arg.Unit (set_mode Glean_sym_hash),
+        " Print symbols hashes used by incremental indexer" );
       ( "--error-format",
         Arg.String
           (fun s ->
@@ -376,9 +401,12 @@ let parse_options () =
             | "raw" -> error_format := Errors.Raw
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
+            | "plain" -> error_format := Errors.Plain
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
+        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+      );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
+      ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");
       ( "--no-builtins",
         Arg.Set no_builtins,
         " Don't use builtins (e.g. ConstSet); implied by --root" );
@@ -395,20 +423,30 @@ let parse_options () =
       ( "--dump-inheritance",
         Arg.Unit (set_mode Dump_inheritance),
         " Print inheritance" );
+      ( "--get-some-file-deps",
+        Arg.Int (fun depth -> set_mode (Get_some_file_deps depth) ()),
+        " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
+      );
+      ( "--ide-code-actions",
+        Arg.Unit (set_mode Ide_code_actions),
+        " Apply a code action to the given file, where the code action is indicated with position markers (see tests)"
+      );
       ( "--identify-symbol",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int
-              (fun column -> set_mode (Identify_symbol (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int
+               (fun column -> set_mode (Identify_symbol (!line, column)) ());
+           ]),
         "<pos> Show info about symbol at given line and column" );
       ( "--find-local",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
+           ]),
         "<pos> Find all usages of local at given line and column" );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
@@ -416,16 +454,13 @@ let parse_options () =
       ("--outline", Arg.Unit (set_mode Outline), " Print file outline");
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
-      ( "--type",
-        Arg.Unit (set_mode Type),
-        " Extract types from the typed AST and print one per line as JSON" );
       ("--tast-check", Arg.Unit (set_mode Check_tast), " Typecheck the tast");
       ( "--stripped-tast",
         Arg.Unit (set_mode Dump_stripped_tast),
         " Print out the typed AST, stripped of type information."
         ^ " This can be compared against the named AST to look for holes." );
       ( "--rewrite",
-        Arg.Unit (set_mode Rewrite),
+        Arg.Unit (set_mode RewriteGlobalInference),
         " Rewrite the file after inferring types using global inference"
         ^ " (requires --global-inference)." );
       ( "--global-inference",
@@ -439,25 +474,29 @@ let parse_options () =
         " List of type hint to be ignored and inferred again using global inference."
       );
       ( "--find-refs",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
+           ]),
         "<pos> Find all usages of a symbol at given line and column" );
       ( "--go-to-impl",
         Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
-          ],
+          (let line = ref 0 in
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
+           ]),
         "<pos> Find all implementations of a symbol at given line and column" );
       ( "--highlight-refs",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int
+               (fun column -> set_mode (Highlight_refs (!line, column)) ());
+           ]),
         "<pos> Highlight all usages of a symbol at given line and column" );
       ( "--decl-compare",
         Arg.Unit (set_mode Decl_compare),
@@ -476,9 +515,6 @@ let parse_options () =
             set_mode (Get_member class_and_member_id) ()),
         " Given ClassName::MemberName, fetch the decl of members with that name and print them."
       );
-      ( "--mro",
-        Arg.Unit (set_mode Linearization),
-        " Grabs the linearization of all classes in a file." );
       ( "--log-inference-constraints",
         Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba." );
@@ -486,12 +522,13 @@ let parse_options () =
         Arg.Int (fun secs -> timeout := Some secs),
         " Timeout in seconds for checking a function or a class." );
       ( "--hh-log-level",
-        Arg.Tuple
-          [
-            Arg.String (fun x -> log_key := x);
-            Arg.Int
-              (fun level -> log_levels := SMap.add !log_key level !log_levels);
-          ],
+        (let log_key = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) log_key);
+             Arg.Int
+               (fun level -> log_levels := SMap.add !log_key level !log_levels);
+           ]),
         " Set the log level for a key" );
       ( "--batch-files",
         Arg.Set batch_mode,
@@ -510,15 +547,23 @@ let parse_options () =
         Arg.Unit (set_bool disallow_byref_calls),
         " Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
       );
-      ( "--shallow-class-decl",
-        Arg.Set shallow_class_decl,
-        " Look up class members lazily from shallow declarations" );
+      ( "--rust-elab",
+        Arg.Set rust_elab,
+        " Use the Rust implementation of naming elaboration and NAST checks" );
+      ( "--rust-provider-backend",
+        Arg.Set rust_provider_backend,
+        " Use the Rust implementation of Provider_backend (including decl-folding)"
+      );
       ( "--skip-hierarchy-checks",
         Arg.Set skip_hierarchy_checks,
         " Do not apply checks on class hierarchy (override, implements, etc)" );
       ( "--skip-tast-checks",
         Arg.Set skip_tast_checks,
         " Do not apply checks using TAST visitors" );
+      ( "--skip-check-under-dynamic",
+        Arg.Set skip_check_under_dynamic,
+        " Do not apply second check to functions and methods under dynamic assumptions"
+      );
       ( "--union-intersection-type-hints",
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
@@ -533,17 +578,43 @@ let parse_options () =
         Arg.Set_float simple_pessimize,
         " At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
       );
-      ( "--complex-coercion",
-        Arg.Set complex_coercion,
-        " Allows complex coercions that involve like types" );
       ( "--like-types-all",
         Arg.Unit
           (fun () ->
             set_bool_ like_type_hints ();
             set_bool_ like_casts ();
-            set_float_ simple_pessimize 1.0;
-            set_bool_ complex_coercion ()),
+            set_float_ simple_pessimize 1.0),
         " Enables all like types features" );
+      ( "--naive-implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ always_pessimise_return ();
+            set_bool_ consider_type_const_enforceable ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables naive implicit pessimisation" );
+      ( "--implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables implicit pessimisation" );
+      ( "--explicit-pess",
+        Arg.String
+          (fun dir ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ();
+            custom_hhi_path := Some dir),
+        " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
+      );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         " Load the symbol index from this file" );
@@ -619,11 +690,12 @@ let parse_options () =
         Arg.Int (fun v -> verbosity := v),
         " Verbosity as an integer." );
       ( "--disable-hh-ignore-error",
-        Arg.Set disable_hh_ignore_error,
-        " Treat HH_IGNORE_ERROR comments as normal comments" );
-      ( "--enable-systemlib-annotations",
-        Arg.Set enable_systemlib_annotations,
-        " Enable systemlib annotations" );
+        Arg.Int (( := ) disable_hh_ignore_error),
+        " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
+      );
+      ( "--is-systemlib",
+        Arg.Set is_systemlib,
+        " Enable systemlib annotations and other internal-only features" );
       ( "--enable-higher-kinded-types",
         Arg.Set enable_higher_kinded_types,
         " Enable support for higher-kinded types" );
@@ -631,15 +703,6 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         " List of fixmes that are allowed in strict mode." );
-      ( "--allowed-fixme-codes-partial",
-        Arg.String
-          (fun s ->
-            allowed_fixme_codes_partial := Some (comma_string_to_iset s)),
-        " List of fixmes that are allowed in partial mode." );
-      ( "--codes-not-raised-partial",
-        Arg.String
-          (fun s -> codes_not_raised_partial := Some (comma_string_to_iset s)),
-        " List of error codes that are not raised in partial mode." );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
@@ -655,21 +718,15 @@ let parse_options () =
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
         " Enforce sound dynamic types.  Experimental." );
-      ( "--disallow-fun-and-cls-meth-pseudo-funcs",
-        Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        " Disable parsing of fun() and class_meth()." );
-      ( "--disallow-inst-meth",
-        Arg.Set disallow_inst_meth,
-        " Disable parsing of inst_meth()." );
-      ( "--no-direct-decl-parser",
-        Arg.Clear use_direct_decl_parser,
-        " Produce decls from ASTs instead of using the direct decl parser" );
+      ( "--always-pessimise-return",
+        Arg.Set always_pessimise_return,
+        " Consider all return types unenforceable." );
+      ( "--consider-type-const-enforceable",
+        Arg.Set consider_type_const_enforceable,
+        " Consider type constants to potentially be enforceable." );
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         " Disable the enum classes extension." );
-      ( "--enable-enum-supertyping",
-        Arg.Set enable_enum_supertyping,
-        " Enable the enum supertyping extension." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
@@ -690,18 +747,22 @@ let parse_options () =
         " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
       );
       ( "--enable-strict-const-semantics",
-        Arg.Set enable_strict_const_semantics,
+        Arg.Int (fun x -> enable_strict_const_semantics := x),
         " Raise an error when a concrete constants is overridden or multiply defined"
       );
+      ( "--strict-wellformedness",
+        Arg.Int (fun x -> strict_wellformedness := x),
+        " Re-introduce missing well-formedness checks in AST positions" );
       ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         " Controls whether meth_caller can be used on non-public methods" );
       ( "--hover",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Hover (Some (!line, column))) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (fun x -> line := x);
+             Arg.Int (fun column -> set_mode (Hover (Some (!line, column))) ());
+           ]),
         "<pos> Display hover tooltip" );
       ( "--hover-at-caret",
         Arg.Unit (fun () -> set_mode (Hover None) ()),
@@ -723,7 +784,7 @@ let parse_options () =
         " Require all __Sealed arguments to be subclasses" );
       ( "--everything-sdt",
         Arg.Set everything_sdt,
-        " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
+        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
       );
       ( "--pessimise-builtins",
         Arg.Set pessimise_builtins,
@@ -741,8 +802,11 @@ let parse_options () =
         " Raise an error for class constants missing types; 1 for abstract constants, 2 for all "
       );
       ( "--profile-type-check-twice",
-        Arg.Set profile_type_check_twice,
+        Arg.Unit (fun () -> profile_type_check_multi := Some 1),
         " Typecheck the file twice" );
+      ( "--profile-type-check-multi",
+        Arg.Int (fun n -> profile_type_check_multi := Some n),
+        " Typecheck the files n times extra (!)" );
       ( "--profile-top-level-definitions",
         Arg.Set profile_top_level_definitions,
         " Profile typechecking of top-level definitions" );
@@ -754,15 +818,39 @@ let parse_options () =
         " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
         ^ string_of_int
             (TypecheckerOptions.type_printer_fuel GlobalOptions.default) );
-      ( "--enable-global-write-check",
+      ( "--enable-global-access-check",
+        Arg.Set enable_global_access_check,
+        " Run global access checker to check global writes and reads" );
+      ( "--overwrite-loop-iteration-upper-bound",
+        Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
+        " Sets the maximum number of iterations that will be used to typecheck loops"
+      );
+      ( "--expression-tree-virtualize-functions",
+        Arg.Set expression_tree_virtualize_functions,
+        " Enables function virtualization in Expression Trees" );
+      ( "--substitution-mutation",
+        Arg.Set substitution_mutation,
+        " Applies substitution mutation to applicable entities and typechecks them"
+      );
+      ( "--remove-dead-unsafe-casts",
+        Arg.Unit (fun () -> set_mode RemoveDeadUnsafeCasts ()),
+        " Removes dead unsafe casts from a file" );
+      ( "--count-imprecise-types",
+        Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
+        " Counts the number of mixed, dynamic, and nonnull types in a file" );
+      ( "--tast-under-dynamic",
+        Arg.Set tast_under_dynamic,
+        " Produce variations of definitions as they are checked under dynamic assumptions"
+      );
+      ( "--sdt-analysis",
         Arg.String
-          (fun s -> enable_global_write_check := String_utils.split ',' s),
-        " Run global write checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
-      );
-      ( "--enable-global-write-check-functions",
-        Arg.String set_enable_global_write_check_functions,
-        " Run global write checker on functions listed in the given JSON file"
-      );
+          (fun command ->
+            batch_mode := true;
+            set_mode (SDT_analysis command) ()),
+        " Analyses to support Sound Dynamic rollout" );
+      ( "--packages-config-path",
+        Arg.String (fun s -> packages_config_path := Some s),
+        " Config file for a list of package definitions" );
     ]
   in
 
@@ -783,7 +871,7 @@ let parse_options () =
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
   let fns =
     match (!fn_ref, !mode) with
-    | ([], (Get_member _ | Type)) -> []
+    | ([], Get_member _) -> []
     | ([], _) -> die usage
     | (x, _) -> x
   in
@@ -792,6 +880,17 @@ let parse_options () =
     | Ifc _ -> true
     | _ -> false
   in
+
+  (match !mode with
+  | Get_some_file_deps _ ->
+    if Option.is_none !naming_table then
+      raise (Arg.Bad "--get-some-file-deps requires --naming-table");
+    if Option.is_none !root then
+      raise (Arg.Bad "--get-some-file-deps requires --root")
+  | _ -> ());
+
+  if Option.is_some !naming_table && Option.is_none !root then
+    failwith "--naming-table needs --root";
 
   (* --root implies certain things... *)
   let root =
@@ -827,8 +926,9 @@ let parse_options () =
       Path.make root
   in
 
-  let tcopt =
-    GlobalOptions.make
+  let tcopt : GlobalOptions.t =
+    GlobalOptions.set
+      ~tco_saved_state:GlobalOptions.default_saved_state
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
@@ -837,13 +937,8 @@ let parse_options () =
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~allowed_fixme_codes_partial:
-        (Option.value !allowed_fixme_codes_partial ~default:ISet.empty)
-      ~codes_not_raised_partial:
-        (Option.value !codes_not_raised_partial ~default:ISet.empty)
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics
-      ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_like_type_hints:!like_type_hints
@@ -853,7 +948,6 @@ let parse_options () =
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
-      ~tco_complex_coercion:!complex_coercion
       ~log_levels:!log_levels
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
@@ -882,7 +976,7 @@ let parse_options () =
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
-      ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
+      ~tco_is_systemlib:!is_systemlib
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
@@ -890,20 +984,14 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
-      ~po_disallow_fun_and_cls_meth_pseudo_funcs:
-        !disallow_fun_and_cls_meth_pseudo_funcs
-      ~po_disallow_inst_meth:!disallow_inst_meth
+      ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_ifc_enabled:
         (if is_ifc_mode then
           ["/"]
         else
           [])
-      ~tco_global_write_check_enabled:!enable_global_write_check
-      ~tco_global_write_check_functions_enabled:
-        !enable_global_write_check_functions
-      ~tco_use_direct_decl_parser:!use_direct_decl_parser
+      ~tco_global_access_check_enabled:!enable_global_access_check
       ~po_enable_enum_classes:(not !disable_enum_classes)
-      ~po_enable_enum_supertyping:!enable_enum_supertyping
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
@@ -911,6 +999,7 @@ let parse_options () =
       ~tco_math_new_code:!math_new_code
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_enable_strict_const_semantics:!enable_strict_const_semantics
+      ~tco_strict_wellformedness:!strict_wellformedness
       ~tco_meth_caller_only_public_visibility:
         !meth_caller_only_public_visibility
       ~tco_require_extends_implements_ancestors:
@@ -923,16 +1012,33 @@ let parse_options () =
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
       ~tco_profile_top_level_definitions:!profile_top_level_definitions
-      ()
+      ~tco_allow_all_files_for_module_declarations:
+        !allow_all_files_for_module_declarations
+      ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
+      ~tco_expression_tree_virtualize_functions:
+        !expression_tree_virtualize_functions
+      ~tco_substitution_mutation:!substitution_mutation
+      ~tco_tast_under_dynamic:!tast_under_dynamic
+      ~tco_rust_elab:!rust_elab
+      GlobalOptions.default
   in
+
+  let tcopt =
+    let config =
+      List.fold
+        (List.rev !config_overrides)
+        ~init:(Config_file_common.empty ())
+        ~f:(fun config setting ->
+          let c = Config_file_common.parse_contents setting in
+          Config_file_common.apply_overrides ~from:None ~config ~overrides:c)
+    in
+    ServerConfig.load_config config tcopt
+  in
+
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial tcopt;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason tcopt;
+    TypecheckerOptions.report_pos_from_reason tcopt;
 
   let tco_experimental_features =
     tcopt.GlobalOptions.tco_experimental_features
@@ -940,7 +1046,7 @@ let parse_options () =
   let tco_experimental_features =
     if !forbid_nullable_cast then
       SSet.add
-        GlobalOptions.tco_experimental_forbid_nullable_cast
+        TypecheckerOptions.experimental_forbid_nullable_cast
         tco_experimental_features
     else
       tco_experimental_features
@@ -948,7 +1054,7 @@ let parse_options () =
   let tco_experimental_features =
     if is_ifc_mode then
       SSet.add
-        GlobalOptions.tco_experimental_infer_flows
+        TypecheckerOptions.experimental_infer_flows
         tco_experimental_features
     else
       tco_experimental_features
@@ -956,7 +1062,7 @@ let parse_options () =
   let tco_experimental_features =
     if !disallow_static_memoized then
       SSet.add
-        GlobalOptions.tco_experimental_disallow_static_memoized
+        TypecheckerOptions.experimental_disallow_static_memoized
         tco_experimental_features
     else
       tco_experimental_features
@@ -964,7 +1070,23 @@ let parse_options () =
   let tco_experimental_features =
     if !enable_supportdyn_hint then
       SSet.add
-        GlobalOptions.tco_experimental_supportdynamic_type_hint
+        TypecheckerOptions.experimental_supportdynamic_type_hint
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !always_pessimise_return then
+      SSet.add
+        TypecheckerOptions.experimental_always_pessimise_return
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !consider_type_const_enforceable then
+      SSet.add
+        TypecheckerOptions.experimental_consider_type_const_enforceable
         tco_experimental_features
     else
       tco_experimental_features
@@ -984,13 +1106,24 @@ let parse_options () =
       verbosity = !verbosity;
       should_print_position = !print_position;
       custom_hhi_path = !custom_hhi_path;
-      profile_type_check_twice = !profile_type_check_twice;
+      profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
       pessimise_builtins = !pessimise_builtins;
+      rust_provider_backend = !rust_provider_backend;
     },
     root,
     !naming_table,
-    !sharedmem_config )
+    (if !rust_provider_backend then
+      SharedMem.
+        {
+          !sharedmem_config with
+          shm_use_sharded_hashtbl = true;
+          shm_cache_size =
+            max !sharedmem_config.shm_cache_size (2 * 1024 * 1024 * 1024);
+        }
+    else
+      !sharedmem_config),
+    !packages_config_path )
 
 (* Make readable test output *)
 let replace_color input =
@@ -1108,7 +1241,7 @@ let solve_global_inference_env
   Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
 
 let global_inference_merge_and_solve
-    ~verbosity ?(error_format = Errors.Raw) ?max_errors ctx gienvs =
+    ~verbosity ?(error_format = Errors.Plain) ?max_errors ctx gienvs =
   print_global_inference_envs ctx ~verbosity gienvs;
   let gienv = merge_global_inference_envs_opt ctx gienvs in
   print_merged_global_inference_env ~verbosity gienv error_format max_errors;
@@ -1124,8 +1257,9 @@ let print_elapsed fn desc ~start_time =
     desc
     elapsed_ms
 
-let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
-  if profile_type_check_twice then
+let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
+  let profiling = Option.is_some profile_type_check_multi in
+  if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         let start_time = Unix.gettimeofday () in
         let _ = Typing_check_utils.type_file ctx fn fileinfo in
@@ -1137,17 +1271,49 @@ let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
           ~sampling_rate:Memtrace.default_sampling_rate
           ~filename)
   in
-  let errors =
-    Relative_path.Map.fold
-      files_info
-      ~f:(fun fn fileinfo errors ->
-        let start_time = Unix.gettimeofday () in
-        let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
-        if profile_type_check_twice then
-          print_elapsed fn "second typecheck" ~start_time;
-        errors @ Errors.get_sorted_error_list new_errors)
-      ~init:errors
+  let add_timing fn timings closure =
+    let start_cpu = Sys.time () in
+    let result = Lazy.force closure in
+    let elapsed_cpu_time = Sys.time () -. start_cpu in
+    let add_sample = function
+      | Some samples -> Some (elapsed_cpu_time :: samples)
+      | None -> Some [elapsed_cpu_time]
+    in
+    let timings = Relative_path.Map.update fn add_sample timings in
+    (result, timings)
   in
+  let rec go n timings =
+    let (errors, timings) =
+      Relative_path.Map.fold
+        files_info
+        ~f:(fun fn fileinfo (errors, timings) ->
+          let ((_, new_errors), timings) =
+            add_timing fn timings
+            @@ lazy (Typing_check_utils.type_file ctx fn fileinfo)
+          in
+          (errors @ Errors.get_sorted_error_list new_errors, timings))
+        ~init:(errors, timings)
+    in
+    if n > 1 then
+      go (n - 1) timings
+    else
+      (errors, timings)
+  in
+  let n_of_times_to_typecheck =
+    max 1 (Option.value ~default:1 profile_type_check_multi)
+  in
+  let timings = Relative_path.Map.empty in
+  let (errors, timings) = go n_of_times_to_typecheck timings in
+  let print_elapsed_cpu_time fn samples =
+    let mean = mean samples in
+    Printf.printf
+      "%s: %d typechecks - %f ± %f (s)\n"
+      (Relative_path.to_absolute fn |> Filename.basename)
+      n_of_times_to_typecheck
+      mean
+      (standard_deviation mean samples)
+  in
+  if profiling then Relative_path.Map.iter timings ~f:print_elapsed_cpu_time;
   Option.iter tracer ~f:Memtrace.stop_tracing;
   errors
 
@@ -1166,10 +1332,8 @@ let create_nasts ctx files_info =
 The only side-effect it has is on the global errors list. *)
 let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
-      let tcopt = Provider_context.get_tcopt ctx in
-      (* Get parse errors. Hold on to the AST, since we'll convert it to
-         fileinfo below if direct decl is disabled. *)
-      let parsed_file =
+      (* Get parse errors. *)
+      let () =
         Errors.run_in_context fn Errors.Parsing (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
@@ -1183,27 +1347,11 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast })
+            ())
       in
-      if TypecheckerOptions.use_direct_decl_parser tcopt then
-        match Direct_decl_utils.direct_decl_parse ctx fn with
-        | None -> failwith "no file contents"
-        | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls
-      else
-        let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
-        (* If the feature is turned on, deregister functions with attribute
-           __PHPStdLib. This does it for all functions, not just hhi files *)
-        let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
-        {
-          FileInfo.file_mode;
-          funs;
-          classes;
-          typedefs;
-          consts;
-          modules;
-          comments = Some comments;
-          hash = None;
-        })
+      match Direct_decl_utils.direct_decl_parse ctx fn with
+      | None -> failwith "no file contents"
+      | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
 
 (** This function is used for gathering naming and parsing errors,
 and the side-effect of updating the global reverse naming table (and
@@ -1258,7 +1406,9 @@ let test_shallow_class_diff popt filename =
         ( Utils.strip_ns cid,
           match old_and_new with
           | (Some c1, Some c2) -> Shallow_class_diff.diff_class c1 c2
-          | _ -> ClassDiff.Major_change ))
+          | (None, None) -> ClassDiff.(Major_change MajorChange.Unknown)
+          | (None, Some _) -> ClassDiff.(Major_change MajorChange.Added)
+          | (Some _, None) -> ClassDiff.(Major_change MajorChange.Removed) ))
   in
   List.iter diffs ~f:(fun (cid, diff) ->
       Format.printf "%s: %a@." cid ClassDiff.pp diff)
@@ -1273,7 +1423,7 @@ let add_newline contents =
      - no header or shebang (e.g. .hack file): prepend
   *)
   let after_shebang =
-    if string_starts_with contents "#!" then
+    if String.is_prefix contents ~prefix:"#!" then
       String.index_exn contents '\n' + 1
     else
       0
@@ -1360,8 +1510,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
         builtins
         ~f:
           begin
-            fun k _ acc ->
-            Relative_path.Map.remove acc k
+            (fun k _ acc -> Relative_path.Map.remove acc k)
           end
         ~init:files_info
     in
@@ -1377,7 +1526,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
         ~f:
           begin
             fun _ names1 names2 ->
-            FileInfo.(merge_names (simplify names1) names2)
+              FileInfo.(merge_names (simplify names1) names2)
           end
         ~init:FileInfo.empty_names
     in
@@ -1397,7 +1546,6 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
       None
       get_classes
       ~bucket_size:1
-      ~previously_oldified_defs:FileInfo.empty_names
       ~defs
       ~collect_garbage:false;
 
@@ -1479,6 +1627,39 @@ let hover_at_caret_pos (src : string) : int * int =
   | None ->
     failwith "Could not find any occurrence of ^ hover-at-caret in source code"
 
+(* Given source code containing the patterns [start_marker] and [end_marker], calculate the range between the markers *)
+let find_ide_range src : Ide_api_types.range =
+  let start_marker = "/*range-start*/" in
+  let end_marker = "/*range-end*/" in
+  let lines = String.split_lines src in
+  let find_line marker =
+    List.findi lines ~f:(fun _ line ->
+        String.is_substring line ~substring:marker)
+  in
+  let find_marker marker after_or_before =
+    let (line_zero_indexed, start_line_src) =
+      find_line marker
+      |> Option.value_exn
+           ~message:(Format.sprintf "couldn't find marker %s" marker)
+    in
+    let line = line_zero_indexed + 1 in
+    let column =
+      let marker_start =
+        Str.search_forward (Str.regexp_string marker) start_line_src 0
+      in
+      let column_adjustment =
+        match after_or_before with
+        | `After -> String.length marker + 1
+        | `Before -> 1
+      in
+      marker_start + column_adjustment
+    in
+    Ide_api_types.{ line; column }
+  in
+  let st = find_marker start_marker `After in
+  let ed = find_marker end_marker `Before in
+  Ide_api_types.{ st; ed }
+
 (**
  * Compute TASTs for some files, then expand all type variables.
  *)
@@ -1505,6 +1686,18 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   in
   let tasts = Relative_path.Map.map tasts ~f:(Tast_expand.expand_program ctx) in
   (errors, tasts, gi_solved)
+
+let decl_parse_typecheck_and_then ~verbosity ctx files_contents f =
+  let (parse_errors, files_info) = parse_name_and_decl ctx files_contents in
+  let parse_errors = Errors.get_sorted_error_list parse_errors in
+  let (errors, _tasts, _gi_solved) =
+    compute_tasts_expand_types ctx ~verbosity files_info files_contents
+  in
+  let errors = parse_errors @ Errors.get_sorted_error_list errors in
+  if List.is_empty errors then
+    f files_info
+  else
+    print_errors_if_present errors
 
 let print_nasts ~should_print_position nasts filenames =
   List.iter filenames ~f:(fun filename ->
@@ -1584,65 +1777,182 @@ let dump_debug_glean_deps
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
   | None -> Printf.printf "No dependencies\n"
 
-let dump_dep_hashes (nast : Nast.program) : unit =
-  let process_variant x =
-    let open Typing_deps in
-    let dep = Dep.make x in
-    Printf.printf "%s %s\n" (Dep.to_hex_string dep) (Dep.variant_to_string x)
+let handle_constraint_mode
+    ~do_
+    name
+    opts
+    ctx
+    error_format
+    ~iter_over_files
+    ~profile_type_check_multi
+    ~memtrace =
+  (* Process a single typechecked file *)
+  let process_file path info =
+    match info.FileInfo.file_mode with
+    | Some FileInfo.Mstrict ->
+      let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+      let { Tast_provider.Compute_tast.tast; _ } =
+        Tast_provider.compute_tast_unquarantined ~ctx ~entry
+      in
+      do_ opts ctx tast
+    | _ ->
+      (* We are not interested in partial files and there is nothing in HHI
+         files to analyse *)
+      ()
   in
-  let handler =
-    let open Typing_deps.Dep in
-    let open Aast in
+  let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+  (* Process a multifile that is not typechecked *)
+  let process_multifile filename =
+    Printf.printf
+      "=== %s analysis results for %s\n%!"
+      name
+      (Relative_path.to_absolute filename);
+    let files_contents = Multifile.file_to_files filename in
+    let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+    let error_list = Errors.get_sorted_error_list parse_errors in
+    let check_errors =
+      check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
+    in
+    if not (List.is_empty check_errors) then
+      print_errors check_errors
+    else
+      Relative_path.Map.iter file_info ~f:process_file
+  in
+  let process_multifile filename =
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        process_multifile filename)
+  in
+  iter_over_files process_multifile
+
+let scrape_class_names (ast : Nast.program) : SSet.t =
+  let names = ref SSet.empty in
+  let visitor =
     object
-      inherit [_] Aast.iter as super
+      (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
+      inherit [_] Aast.iter
 
-      method! on_fun_ env x =
-        process_variant @@ Fun (snd x.f_name);
-        super#on_fun_ env x
-
-      method! on_method_ cls x =
-        process_variant
-        @@
-        if x.m_static then
-          SMethod (Option.value_exn cls, snd x.m_name)
-        else
-          Method (Option.value_exn cls, snd x.m_name);
-        super#on_method_ cls x
-
-      method! on_class_ _cls x =
-        process_variant @@ Type (snd x.c_name);
-        process_variant @@ Constructor (snd x.c_name);
-        process_variant @@ Extends (snd x.c_name);
-        process_variant @@ AllMembers (snd x.c_name);
-        super#on_class_ (Some (snd x.c_name)) x
-
-      method! on_class_const cls x =
-        process_variant @@ Const (Option.value_exn cls, snd x.cc_id);
-        super#on_class_const cls x
-
-      method! on_class_typeconst_def cls x =
-        process_variant @@ Const (Option.value_exn cls, snd x.c_tconst_name);
-        super#on_class_typeconst_def cls x
-
-      method! on_class_var cls x =
-        process_variant
-        @@
-        if x.cv_is_static then
-          SProp (Option.value_exn cls, snd x.cv_id)
-        else
-          Prop (Option.value_exn cls, snd x.cv_id);
-        super#on_class_var cls x
-
-      method! on_typedef _cls x =
-        process_variant @@ Type (snd x.t_name);
-        super#on_typedef (Some (snd x.t_name)) x
-
-      method! on_gconst cls x =
-        process_variant @@ GConst (snd x.cst_name);
-        super#on_gconst cls x
+      method! on_class_name _ (_p, id) = names := SSet.add id !names
     end
   in
-  handler#on_program None nast
+  visitor#on_program () ast;
+  !names
+
+(** Scrape names in file and return the files where those names are defined. *)
+let get_some_file_dependencies ctx (file : Relative_path.t) :
+    Relative_path.Set.t =
+  let open Hh_prelude in
+  let nast = Ast_provider.get_ast ctx ~full:true file in
+  let names =
+    Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
+    (* TODO: scape other defs too *)
+  in
+  SSet.fold
+    (fun class_name files ->
+      match Naming_provider.get_class_path ctx class_name with
+      | None -> files
+      | Some file -> Relative_path.Set.add files file)
+    names
+    Relative_path.Set.empty
+
+(** Recursively scrape names in files and return the
+  files where those names are defined. *)
+let traverse_file_dependencies ctx (files : Relative_path.t list) ~(depth : int)
+    : Relative_path.Set.t =
+  let rec traverse
+      (files : Relative_path.Set.t)
+      depth
+      (visited : Relative_path.Set.t)
+      (results : Relative_path.Set.t) =
+    if Int.( <= ) depth 0 then
+      Relative_path.Set.union files results
+    else
+      let (next_files, visited, results) =
+        Relative_path.Set.fold
+          files
+          ~init:(Relative_path.Set.empty, visited, results)
+          ~f:(fun file (next_files, visited, results) ->
+            if Relative_path.Set.mem visited file then
+              (next_files, visited, results)
+            else
+              let visited = Relative_path.Set.add visited file in
+              let dependencies = get_some_file_dependencies ctx file in
+              let next_files =
+                Relative_path.Set.union dependencies next_files
+              in
+              let results = Relative_path.Set.add results file in
+              (next_files, visited, results))
+      in
+      traverse next_files (depth - 1) visited results
+  in
+  traverse
+    (Relative_path.Set.of_list files)
+    depth
+    Relative_path.Set.empty
+    Relative_path.Set.empty
+
+let apply_patches files_contents patches =
+  if List.length patches <= 0 then
+    print_endline "No patches"
+  else
+    ServerRenameTypes.apply_patches_to_file_contents files_contents patches
+    |> Multifile.print_files_as_multifile
+
+(** Used for testing code that generates patches. *)
+let codemod
+    ~verbosity
+    ~files_info
+    ~files_contents
+    ctx
+    (get_patches :
+      files_info:FileInfo.t Relative_path.Map.t -> ServerRenameTypes.patch list)
+    =
+  let decl_parse_typecheck_and_then =
+    decl_parse_typecheck_and_then ~verbosity ctx
+  in
+  let backend = Provider_context.get_backend ctx in
+  (* Because we repeatedly apply the codemod, positions change. So we need to
+     re-parse, decl, and typecheck the file to generated accurate patches as
+     well as amend the patched test files in memory. This involves
+     invalidating a number of shared heaps and providing in memory
+     replacements after patching files. *)
+  let invalidate_heaps_and_update_files files_info files_contents =
+    let paths_to_purge =
+      Relative_path.Map.keys files_contents |> Relative_path.Set.of_list
+    in
+    (* Purge the file, then provide its replacement, otherwise the
+       replacement is dropped on the floor. *)
+    File_provider.remove_batch paths_to_purge;
+    Relative_path.Map.iter
+      ~f:File_provider.provide_file_for_tests
+      files_contents;
+    Ast_provider.remove_batch paths_to_purge;
+    Relative_path.Map.iter
+      ~f:(fun path file_info ->
+        (* Don't invalidate builtins, otherwise, we can't find them. *)
+        if not (Relative_path.prefix path |> Relative_path.is_hhi) then
+          Naming_global.remove_decls_using_file_info backend file_info)
+      files_info
+  in
+  let rec go files_info files_contents =
+    invalidate_heaps_and_update_files files_info files_contents;
+    decl_parse_typecheck_and_then files_contents @@ fun files_info ->
+    let patches = get_patches ~files_info in
+    let files_contents =
+      ServerRenameTypes.apply_patches_to_file_contents files_contents patches
+    in
+    if List.is_empty patches then
+      Multifile.print_files_as_multifile files_contents
+    else
+      go files_info files_contents
+  in
+  go files_info files_contents;
+
+  (* Typecheck after the codemod is fully applied to confirm that what we
+     produce is not garbage. *)
+  Printf.printf
+    "\nTypechecking after the codemod... (no output after this is good news)\n";
+  invalidate_heaps_and_update_files files_info files_contents;
+  decl_parse_typecheck_and_then files_contents ignore
 
 let handle_mode
     mode
@@ -1659,7 +1969,7 @@ let handle_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity =
   let expect_single_file () : Relative_path.t =
@@ -1669,48 +1979,52 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
+  | Refactor_sound_dynamic (analysis_mode, refactor_mode, element_name) ->
+    let opts =
+      match
+        ( Refactor_sd_options.parse_analysis_mode analysis_mode,
+          Refactor_sd_options.parse_refactor_mode refactor_mode )
+      with
+      | (Some analysis_mode, Some refactor_mode) ->
+        Refactor_sd_options.mk ~analysis_mode ~refactor_mode
+      | (None, _) -> die "invalid refactor_sd analysis mode"
+      | (_, None) -> die "invalid refactor_sd refactor mode"
+    in
+    handle_constraint_mode
+      ~do_:(Refactor_sd.do_ element_name)
+      "Sound Dynamic"
+      opts
+      ctx
+      error_format
+      ~iter_over_files
+      ~profile_type_check_multi
+      ~memtrace
+  | SDT_analysis command ->
+    handle_constraint_mode
+      ~do_:(Sdt_analysis.do_ ~command ~on_bad_command:die ~verbosity)
+      "SDT"
+      ()
+      ctx
+      error_format
+      ~iter_over_files
+      ~profile_type_check_multi
+      ~memtrace
   | Shape_analysis mode ->
     let opts =
-      match Shape_analysis_options.parse mode with
-      | Some options -> options
+      match Shape_analysis_options.parse_mode mode with
+      | Some (command, mode) ->
+        Shape_analysis_options.mk ~command ~mode ~verbosity
       | None -> die "invalid shape analysis mode"
     in
-    (* Process a single typechecked file *)
-    let process_file path info =
-      match info.FileInfo.file_mode with
-      | Some FileInfo.Mstrict ->
-        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
-        Shape_analysis.do_ opts ctx tast
-      | _ ->
-        (* We are not interested in partial files and there is nothing in HHI
-           files to analyse *)
-        ()
-    in
-    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
-    (* Process a multifile that is not typechecked *)
-    let process_multifile filename =
-      Printf.printf
-        "=== Shape analysis results for %s\n%!"
-        (Relative_path.to_absolute filename);
-      let files_contents = Multifile.file_to_files filename in
-      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
-      let error_list = Errors.get_sorted_error_list parse_errors in
-      let check_errors =
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
-      in
-      if not (List.is_empty check_errors) then
-        print_errors check_errors
-      else
-        Relative_path.Map.iter file_info ~f:process_file
-    in
-    let process_multifile filename =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          process_multifile filename)
-    in
-    iter_over_files process_multifile
+    handle_constraint_mode
+      ~do_:Shape_analysis.do_
+      "Shape"
+      opts
+      ctx
+      error_format
+      ~iter_over_files
+      ~profile_type_check_multi
+      ~memtrace
   | Ifc (mode, lattice) ->
     (* Timing mode is same as check except we print out the time it takes to
        analyse the file. *)
@@ -1741,7 +2055,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let check_errors =
         let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
+        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -1815,6 +2129,19 @@ let handle_mode
           in
           print_endline (Hh_json.json_to_multiline result_json)
         | None -> ())
+  | Glean_index out_dir ->
+    if
+      (not (Disk.is_directory out_dir))
+      || Array.length (Sys.readdir out_dir) > 0
+    then (
+      Printf.printf "%s should be an empty dir\n" out_dir;
+      exit 1
+    ) else
+      Symbol_entrypoint.index_files ctx ~out_dir ~files:filenames
+  | Glean_sym_hash ->
+    List.iter
+      (Symbol_entrypoint.sym_hashes ctx ~files:filenames)
+      ~f:(fun (path, hash) -> Printf.printf "%s %s\n" path (Md5.to_hex hash))
   | Lint ->
     let lint_errors =
       Relative_path.Map.fold
@@ -1830,7 +2157,7 @@ let handle_mode
           ~compare:
             begin
               fun x y ->
-              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
+                Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
             end
           lint_errors
       in
@@ -1839,6 +2166,27 @@ let handle_mode
       exit 2
     ) else
       Printf.printf "No lint errors\n"
+  | Lint_json ->
+    let json_errors =
+      Relative_path.Map.fold
+        files_contents
+        ~init:[]
+        ~f:(fun fn content json_errors ->
+          json_errors
+          @ fst (Lints_core.do_ (fun () -> Linting_main.lint ctx fn content)))
+    in
+    let json_errors =
+      List.sort
+        ~compare:
+          begin
+            fun x y ->
+              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
+          end
+        json_errors
+    in
+    let json_errors = List.map ~f:Lints_core.to_absolute json_errors in
+    ServerLintTypes.output_json ~pretty:true stdout json_errors;
+    exit 2
   | Dump_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
@@ -1846,11 +2194,16 @@ let handle_mode
   | Dump_dep_hashes ->
     iter_over_files (fun _ ->
         let nasts = create_nasts ctx files_info in
-        Relative_path.Map.iter nasts ~f:(fun _ nast -> dump_dep_hashes nast))
+        Relative_path.Map.iter nasts ~f:(fun _ nast ->
+            Dep_hash_to_symbol.dump nast))
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps
+  | Get_some_file_deps depth ->
+    let file_deps = traverse_file_dependencies ctx filenames ~depth in
+    Relative_path.Set.iter file_deps ~f:(fun file ->
+        Printf.printf "%s\n" (Relative_path.to_absolute file))
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
     let naming_table = Naming_table.create files_info in
@@ -1913,6 +2266,29 @@ let handle_mode
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
+  | Ide_code_actions ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let src = Provider_context.read_file_contents_exn entry in
+    let range = find_ide_range src in
+    let commands_or_actions =
+      CodeActionsService.go
+        ~ctx
+        ~entry
+        ~path:(Relative_path.to_absolute path)
+        ~range
+    in
+    let hermeticize_paths =
+      Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""
+    in
+    if List.is_empty commands_or_actions then
+      Format.printf "No commands or actions found\n"
+    else
+      commands_or_actions
+      |> Lsp_fmt.print_codeActionResult
+      |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
+      |> hermeticize_paths
+      |> Format.printf "%s\n"
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =
@@ -1929,7 +2305,9 @@ let handle_mode
         in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
-    let nasts = create_nasts ctx files_info in
+    let (errors, nasts) = Errors.do_ (fun () -> create_nasts ctx files_info) in
+    print_errors_if_present (Errors.get_sorted_error_list errors);
+
     print_nasts
       ~should_print_position
       nasts
@@ -1970,7 +2348,7 @@ let handle_mode
         let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
         Printf.printf "%s\n" (Nast.show_program nast))
-  | Rewrite ->
+  | RewriteGlobalInference ->
     let (errors, _tasts, gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents
     in
@@ -1982,31 +2360,20 @@ let handle_mode
         ^ " inference is turend off (use --global-inference)");
       exit 1
     | Some gi_solved ->
-      let patches =
-        ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
-      in
-      if List.length patches <= 0 then
-        print_endline "No patches"
-      else
-        (* simple key-map: convert Relative_path.Map.t into an SMap.t
-         * without changing the values *)
-        let file_contents =
-          Relative_path.Map.fold
-            files_contents
-            ~f:(fun fn -> SMap.add (Relative_path.suffix fn))
-            ~init:SMap.empty
-        in
-        let patched =
-          ServerRefactorTypes.apply_patches_to_file_contents
-            file_contents
-            patches
-        in
-        let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
-        SMap.iter
-          (fun fn new_contents ->
-            if print_filename then Printf.printf "//// %s\n" fn;
-            Out_channel.output_string stdout new_contents)
-          patched)
+      ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
+      |> apply_patches files_contents)
+  | RemoveDeadUnsafeCasts ->
+    let ctx =
+      Provider_context.map_tcopt ctx ~f:(fun tcopt ->
+          GlobalOptions.{ tcopt with tco_populate_dead_unsafe_cast_heap = true })
+    in
+    let get_patches ~files_info =
+      Remove_dead_unsafe_casts.get_patches
+        ~is_test:true
+        ~files_info
+        ~fold:Relative_path.Map.fold
+    in
+    codemod ~verbosity ~files_info ~files_contents ctx get_patches
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in
@@ -2120,7 +2487,7 @@ let handle_mode
                   ctx
                   (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
-                  ~profile_type_check_twice
+                  ~profile_type_check_multi
                   ~memtrace
               in
               write_error_list error_format errors oc max_errors)
@@ -2156,36 +2523,10 @@ let handle_mode
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
-      check_file ctx parse_errors files_info ~profile_type_check_twice ~memtrace
+      check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
-  | Type ->
-    let path_stream =
-      match filenames with
-      | [] ->
-        Stream.from (fun _ ->
-            try
-              Some
-                (let path = Caml.input_line Caml.stdin |> String.strip in
-                 Relative_path.(create Dummy path))
-            with
-            | End_of_file -> None)
-      | filenames -> Stream.of_list filenames
-    in
-    let process path =
-      let (errors, tasts, _gi_solved) =
-        compute_tasts_expand_types ctx ~verbosity files_info files_contents
-      in
-      let errors = Errors.get_error_list errors in
-      if (not (List.is_empty parse_errors)) || not (List.is_empty errors) then begin
-        List.iter ~f:(print_error error_format) (parse_errors @ errors);
-        exit 2
-      end else
-        let tast = Relative_path.Map.find tasts path in
-        Typing_preorder_ser.encode_tys_as_stdout_lines tast
-    in
-    Stream.iter process path_stream
   | Decl_compare ->
     let filename = expect_single_file () in
     (* Might raise because of Option.value_exn *)
@@ -2297,96 +2638,6 @@ let handle_mode
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())
-  | Linearization ->
-    if not (List.is_empty parse_errors) then (
-      print_error error_format (List.hd_exn parse_errors);
-      exit 2
-    );
-    let files_info =
-      Relative_path.Map.fold
-        builtins
-        ~f:
-          begin
-            fun k _ acc ->
-            Relative_path.Map.remove acc k
-          end
-        ~init:files_info
-    in
-    Relative_path.Map.iter files_info ~f:(fun _file info ->
-        let { FileInfo.classes; _ } = info in
-        let is_first = ref true in
-        List.iter classes ~f:(fun (_, classname, _) ->
-            if not !is_first then Printf.printf "\n";
-            is_first := false;
-            let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =
-              Decl_linearize.get_linearizations ctx classname
-            in
-            let display mro =
-              let name = Utils.strip_ns mro.Decl_defs.mro_name in
-              let env =
-                Typing_env_types.empty ctx Relative_path.default ~droot:None
-              in
-              let targs =
-                List.map
-                  mro.Decl_defs.mro_type_args
-                  ~f:(Typing_print.full_strip_ns_decl env)
-              in
-              let targs =
-                if List.is_empty targs then
-                  ""
-                else
-                  "<" ^ String.concat ~sep:", " targs ^ ">"
-              in
-              Decl_defs.(
-                let modifiers =
-                  [
-                    (if Option.is_some mro.mro_required_at then
-                      Some "requirement"
-                    else if
-                    is_set mro_via_req_extends mro.mro_flags
-                    || is_set mro_via_req_impl mro.mro_flags
-                   then
-                      Some "synthesized"
-                    else
-                      None);
-                    (if is_set mro_xhp_attrs_only mro.mro_flags then
-                      Some "xhp_attrs_only"
-                    else
-                      None);
-                    (if is_set mro_consts_only mro.mro_flags then
-                      Some "consts_only"
-                    else
-                      None);
-                    (if is_set mro_copy_private_members mro.mro_flags then
-                      Some "copy_private_members"
-                    else
-                      None);
-                    (if is_set mro_passthrough_abstract_typeconst mro.mro_flags
-                    then
-                      Some "PAT"
-                    else
-                      None);
-                    Option.map mro.mro_trait_reuse ~f:(fun c ->
-                        "trait reuse via " ^ c);
-                  ]
-                  |> List.filter_map ~f:(fun x -> x)
-                  |> String.concat ~sep:", "
-                in
-                Printf.sprintf
-                  "%s%s%s"
-                  name
-                  targs
-                  (if String.equal modifiers "" then
-                    ""
-                  else
-                    Printf.sprintf " (%s)" modifiers))
-            in
-            let member_linearization = List.map lin_members ~f:display in
-            let ancestor_linearization = List.map lin_ancestors ~f:display in
-            Printf.printf "Member Linearization %s:\n" classname;
-            List.iter member_linearization ~f:(Printf.printf "  %s\n");
-            Printf.printf "Ancestor Linearization %s:\n" classname;
-            List.iter ancestor_linearization ~f:(Printf.printf "  %s\n")))
   | Hover pos_given ->
     let filename = expect_single_file () in
     let (ctx, entry) =
@@ -2417,10 +2668,13 @@ let handle_mode
       compute_tasts ~drop_fixmed:false ctx files_info files_contents
     in
     let src = Relative_path.Map.find files_contents path in
+
     let quickfixes =
       Errors.get_error_list ~drop_fixmed:false errors
-      |> List.map ~f:User_error.quickfixes
-      |> List.concat
+      |> List.map ~f:(fun e ->
+             (* If an error has multiple possible quickfixes, take the first. *)
+             List.hd (User_error.quickfixes e))
+      |> List.filter_opt
     in
 
     let cst = Ast_provider.compute_cst ~ctx ~entry in
@@ -2442,6 +2696,25 @@ let handle_mode
 
     (* Print the source code after applying all these quickfixes. *)
     Printf.printf "\n%s" (Quickfix.apply_all src classish_starts quickfixes)
+  | CountImpreciseTypes ->
+    let (errors, tasts, _gi_solved) =
+      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    in
+    if not @@ Errors.is_empty errors then (
+      print_errors error_format errors max_errors;
+      Printf.printf
+        "Did not count imprecise types because there are typing errors.";
+      exit 2
+    ) else
+      let tasts = Relative_path.Map.values tasts in
+      let results =
+        List.map ~f:(Count_imprecise_types.count ctx) tasts
+        |> List.fold
+             ~f:(SMap.union ~combine:(fun id _ -> failwith ("Clash at " ^ id)))
+             ~init:SMap.empty
+      in
+      let json = Count_imprecise_types.json_of_results results in
+      Printf.printf "%s" (Hh_json.json_to_string json)
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -2461,13 +2734,15 @@ let decl_and_run_mode
       verbosity;
       should_print_position;
       custom_hhi_path;
-      profile_type_check_twice;
+      profile_type_check_multi;
       memtrace;
-      pessimise_builtins;
+      pessimise_builtins = _;
+      rust_provider_backend;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
-    (naming_table_path : string option) : unit =
+    (naming_table_path : string option)
+    (packages_config_path : string option) : unit =
   Ident.track_names := true;
   let builtins =
     if no_builtins then
@@ -2484,12 +2759,6 @@ let decl_and_run_mode
         extra_builtins
         |> List.fold ~f:add_file_content ~init:[]
         |> Array.of_list
-      in
-      let magic_builtins =
-        if pessimise_builtins then
-          pessimised_magic_builtins
-        else
-          magic_builtins
       in
       let magic_builtins = Array.append magic_builtins extra_builtins in
       let hhi_builtins =
@@ -2530,10 +2799,12 @@ let decl_and_run_mode
   in
   let files =
     if use_canonical_filenames () then
-      files
-      |> List.map ~f:Sys_utils.realpath
-      |> List.map ~f:(fun s -> Option.value_exn s)
-      |> List.map ~f:Relative_path.create_detect_prefix
+      let canonicalize_path path =
+        match Sys_utils.realpath path with
+        | Some path -> Relative_path.create_detect_prefix path
+        | None -> failwith ("Couldn't resolve realpath of " ^ path)
+      in
+      files |> List.map ~f:canonicalize_path
     else
       files |> List.map ~f:(Relative_path.create Relative_path.Dummy)
   in
@@ -2551,8 +2822,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in
@@ -2581,7 +2851,7 @@ let decl_and_run_mode
         HashSet.add set root;
         Hashtbl.set dbg_deps ~key:obj ~data:set
     in
-    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
+    Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
   let dbg_glean_deps = HashSet.create () in
   (match mode with
@@ -2592,14 +2862,31 @@ let decl_and_run_mode
     let get_debug_trace dep_right dep_left =
       HashSet.add dbg_glean_deps (dep_left, dep_right)
     in
-    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
+    Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
-  let ctx =
-    Provider_context.empty_for_test
-      ~popt
-      ~tcopt
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+  let package_info =
+    match packages_config_path with
+    | None -> Package.Info.empty
+    | Some path ->
+      let (_errors, info) = Package.Info.initialize path in
+      info
   in
+  let ctx =
+    if rust_provider_backend then (
+      Provider_backend.set_rust_backend popt;
+      Provider_context.empty_for_tool
+        ~popt
+        ~tcopt
+        ~backend:(Provider_backend.get ())
+        ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+        ~package_info
+    ) else
+      Provider_context.empty_for_test
+        ~popt
+        ~tcopt
+        ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+  in
+
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.
      This function returns the forward naming table. *)
@@ -2642,7 +2929,7 @@ let decl_and_run_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity
 
@@ -2650,10 +2937,13 @@ let main_hack
     ({ tcopt; _ } as opts)
     (root : Path.t)
     (naming_table : string option)
-    (sharedmem_config : SharedMem.config) : unit =
+    (sharedmem_config : SharedMem.config)
+    (packages_config_path : string option) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
+  ServerProgress.disable ();
+  Measure.push_global ();
 
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
@@ -2670,7 +2960,7 @@ let main_hack
     Relative_path.set_path_prefix Relative_path.Root root;
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-    decl_and_run_mode opts tcopt hhi_root naming_table;
+    decl_and_run_mode opts tcopt hhi_root naming_table packages_config_path;
     TypingLogger.flush_buffers ()
   in
   match opts.custom_hhi_path with
@@ -2687,5 +2977,13 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, root, naming_table, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options root naming_table sharedmem_config
+  let (options, root, naming_table, sharedmem_config, packages_config_path) =
+    parse_options ()
+  in
+  Unix.handle_unix_error
+    main_hack
+    options
+    root
+    naming_table
+    sharedmem_config
+    packages_config_path

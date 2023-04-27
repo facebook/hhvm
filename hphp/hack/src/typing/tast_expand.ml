@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-module MakeType = Typing_make_type
 
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
@@ -39,8 +38,8 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tnewtype (n, tyl, ty)) ->
         mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
-      | (p, Tshape (shape_kind, fields)) ->
-        mk (p, Tshape (shape_kind, TShapeMap.map exp_sft fields))
+      | (p, Tshape (shape_origin, shape_kind, fields)) ->
+        mk (p, Tshape (shape_origin, shape_kind, TShapeMap.map exp_sft fields))
       | (p, Tvec_or_dict (ty1, ty2)) ->
         mk (p, Tvec_or_dict (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->
@@ -54,7 +53,6 @@ let expand_ty ?var_hook ?pos env ty =
             Errors.add_typing_error
               Typing_error.(primary @@ Primary.Unresolved_tyvar pos);
           mk (p, Tvar v))
-      | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety
       | (_, Tunapplied_alias _) -> ety
@@ -70,10 +68,12 @@ let expand_ty ?var_hook ?pos env ty =
         ft_params;
         ft_implicit_params;
         ft_ifc_decl;
+        ft_cross_package;
       } =
     {
       ft_flags;
       ft_ifc_decl;
+      ft_cross_package;
       ft_tparams = List.map ~f:exp_tparam ft_tparams;
       ft_where_constraints =
         List.map ~f:exp_where_constraint ft_where_constraints;

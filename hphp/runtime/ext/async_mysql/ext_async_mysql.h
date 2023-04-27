@@ -149,6 +149,7 @@ struct AsyncMysqlResult {
 
   void sweep() { m_op.reset(); }
 
+  bool sslSessionReused();
   String getSslCertCn();
   String getSslCertSan();
   String getSslCertExtensions();
@@ -254,13 +255,13 @@ struct AsyncMysqlQueryResult : AsyncMysqlResult {
   ~AsyncMysqlQueryResult() override {}
   void sweep();
   void
-  create(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+  create(std::shared_ptr<am::FetchOperation> op, db::ClientPerfStats values,
          am::QueryResult query_result, bool noIndexUsed);
   Object buildRows(bool as_maps, bool typed_values);
   Array buildTypedVecMaps();
   static Class* getClass();
   static Object
-  newInstance(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+  newInstance(std::shared_ptr<am::FetchOperation> op, db::ClientPerfStats values,
               am::QueryResult query_result, bool noIndexUsed);
 
   std::unique_ptr<am::QueryResult> m_query_result;

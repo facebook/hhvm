@@ -27,7 +27,7 @@ open Prim_defs
 type mode =
   | Mhhi  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
-[@@deriving eq, show, enum]
+[@@deriving eq, show, enum, ord, sexp_of]
 
 let is_strict = function
   | Mstrict -> true
@@ -75,6 +75,8 @@ type pos =
  *)
 type id = pos * string * Int64.t option [@@deriving eq, show]
 
+let id_name (_, x, _) = x
+
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
@@ -85,6 +87,8 @@ let pp_hash_type fmt hash =
   match hash with
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (Int64.to_string hash)
+
+(* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::FileInfo] *)
 
 (** The record produced by the parsing phase. *)
 type t = {
@@ -130,6 +134,7 @@ type names = {
   n_consts: SSet.t;
   n_modules: SSet.t;
 }
+[@@deriving show]
 
 (** The simplified record stored in saved-state.*)
 type saved_names = {
@@ -255,12 +260,20 @@ let merge_names t_names1 t_names2 =
     n_modules = SSet.union n_modules t_names2.n_modules;
   }
 
-let to_string fast =
-  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.funs in
-  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.classes in
-  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.typedefs in
-  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.consts in
-  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.modules in
+let to_string defs_per_file =
+  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.funs in
+  let classes =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.classes
+  in
+  let typedefs =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.typedefs
+  in
+  let consts =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.consts
+  in
+  let modules =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.modules
+  in
   [
     ("funs", funs);
     ("classes", classes);

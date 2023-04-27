@@ -2,9 +2,20 @@
  (name global_options)
  (wrapped false)
  (modules globalOptions)
- (libraries collections utils_find)
+ (libraries
+  collections
+  saved_state_rollouts
+  utils_find)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+  (name saved_state_rollouts)
+  (wrapped false)
+  (modules saved_state_rollouts)
+  (libraries utils_core)
+  (preprocess
+    (pps ppx_deriving.std)))
 
 (executable
  (name discover)
@@ -72,6 +83,7 @@
  (name typechecker_options)
  (wrapped false)
  (modules typecheckerOptions)
- (libraries global_options)
+ (libraries
+  global_options)
  (preprocess
   (pps ppx_deriving.std)))

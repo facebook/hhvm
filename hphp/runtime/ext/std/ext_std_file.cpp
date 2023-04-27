@@ -57,24 +57,19 @@
 
 #include <sys/types.h>
 
-#ifndef _MSC_VER
 #include <glob.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
-# include <sys/mount.h>
-#else
-# include <sys/vfs.h>
-#endif
+#include <sys/vfs.h>
 #include <utime.h>
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
-#endif
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
+
+#include <filesystem>
 #include <vector>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   auto f = dyn_cast_or_null<File>(handle);              \
@@ -119,8 +114,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST(dest, func, path)                     \
-  boost::system::error_code ec;                           \
+#define CHECK_FS(dest, func, path)                        \
+  std::error_code ec;                                     \
   dest = func(path.toCppString(), ec);                    \
   if (ec) {                                               \
     raise_warning(                                        \
@@ -131,8 +126,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST_SILENT(dest, func, path)              \
-  boost::system::error_code ec;                           \
+#define CHECK_FS_SILENT(dest, func, path)                 \
+  std::error_code ec;                                     \
   dest = func(path.toCppString(), ec);                    \
   if (ec) {                                               \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
@@ -141,8 +136,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST_ASSIGN(func, path, arg)               \
-  boost::system::error_code ec;                           \
+#define CHECK_FS_ASSIGN(func, path, arg)                  \
+  std::error_code ec;                                     \
   func(path.toCppString(), arg, ec);                      \
   if (ec) {                                               \
     raise_warning(                                        \
@@ -216,7 +211,7 @@ static int statSyscall(
       }
       return ::stat(fullpath.data(), buf);
     }
-    std::string realpath = StatCache::realpath(fullpath.data());
+    std::string realpath = realpathLibc(fullpath.data());
     // realpath will return an empty string for nonexistent files
     if (realpath.empty()) {
       return ENOENT;
@@ -277,10 +272,8 @@ Array stat_impl(struct stat *stat_sb) {
   ret.append((int64_t)stat_sb->st_atime);
   ret.append((int64_t)stat_sb->st_mtime);
   ret.append((int64_t)stat_sb->st_ctime);
-#ifndef _MSC_VER
   ret.append((int64_t)stat_sb->st_blksize);
   ret.append((int64_t)stat_sb->st_blocks);
-#endif
   ret.set(s_dev,     (int64_t)stat_sb->st_dev);
   ret.set(s_ino,     (int64_t)stat_sb->st_ino);
   ret.set(s_mode,    (int64_t)stat_sb->st_mode);
@@ -292,10 +285,8 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_atime,   (int64_t)stat_sb->st_atime);
   ret.set(s_mtime,   (int64_t)stat_sb->st_mtime);
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
-#ifndef _MSC_VER
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
-#endif
   return ret.toArray();
 }
 
@@ -348,8 +339,9 @@ bool HHVM_FUNCTION(fclose,
 Variant HHVM_FUNCTION(pclose,
                       const Variant& handle) {
   CHECK_HANDLE(handle.toResource(), f);
-  CHECK_ERROR(f->close());
-  return *s_pcloseRet;
+  int pclose_ret = 0;
+  CHECK_ERROR(f->close(&pclose_ret));
+  return pclose_ret;
 }
 
 Variant HHVM_FUNCTION(fseek,
@@ -802,29 +794,6 @@ Variant HHVM_FUNCTION(readfile,
   return ret;
 }
 
-bool HHVM_FUNCTION(move_uploaded_file,
-                   const String& filename,
-                   const String& destination) {
-  Transport *transport = g_context->getTransport();
-  if (!transport || !transport->isUploadedFile(filename)) {
-    return false;
-  }
-
-  CHECK_PATH_FALSE(destination, 2);
-
-  if (HHVM_FN(rename)(filename, destination)) {
-    return true;
-  }
-
-  // If rename didn't work, fall back to copy followed by unlink
-  if (!HHVM_FN(copy)(filename, destination)) {
-    return false;
-  }
-  HHVM_FN(unlink)(filename);
-
-  return true;
-}
-
 namespace {
 
 String resolve_parse_ini_filename(const String& filename) {
@@ -951,10 +920,8 @@ Variant HHVM_FUNCTION(filesize,
     return false;
   }
   if (StaticContentCache::TheFileCache) {
-    int64_t size =
-      StaticContentCache::TheFileCache->fileSize(filename.data(),
-        filename.data()[0] != '/');
-    if (size >= 0) return size;
+    auto sizeRes = StaticContentCache::TheFileCache->fileSize(filename.data());
+    if (sizeRes) return *sizeRes;
   }
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
@@ -1129,9 +1096,9 @@ bool HHVM_FUNCTION(is_executable,
   */
 }
 
-static VFileType lookupVirtualFile(const String& filename) {
+static VirtualFileSystem::FileType lookupVirtualFile(const String& filename) {
   if (filename.empty() || !StaticContentCache::TheFileCache) {
-    return VFileType::NotFound;
+    return VirtualFileSystem::FileType::NOT_FOUND;
   }
 
   String cwd;
@@ -1146,10 +1113,15 @@ static VFileType lookupVirtualFile(const String& filename) {
   }
 
   if (!isRelative || !root.compare(cwd.data())) {
-    return StaticContentCache::TheFileCache->getFileType(filename.data());
+    if (StaticContentCache::TheFileCache->exists(filename.toCppString())) {
+      if (StaticContentCache::TheFileCache->dirExists(filename.toCppString())) {
+        return VirtualFileSystem::FileType::DIRECTORY;
+      }
+      return VirtualFileSystem::FileType::REGULAR_FILE;
+    }
   }
 
-  return VFileType::NotFound;
+  return VirtualFileSystem::FileType::NOT_FOUND;
 }
 
 bool HHVM_FUNCTION(is_file,
@@ -1159,8 +1131,8 @@ bool HHVM_FUNCTION(is_file,
     return false;
   }
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VFileType::NotFound) {
-    return vtype == VFileType::PlainFile;
+  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
+    return vtype == VirtualFileSystem::FileType::REGULAR_FILE;
   }
 
   struct stat sb;
@@ -1175,8 +1147,8 @@ bool HHVM_FUNCTION(is_dir,
     return false;
   }
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VFileType::NotFound) {
-    return vtype == VFileType::Directory;
+  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
+    return vtype == VirtualFileSystem::FileType::DIRECTORY;
   }
 
   struct stat sb;
@@ -1205,7 +1177,7 @@ bool HHVM_FUNCTION(file_exists,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VFileType::NotFound) {
+  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
     return true;
   }
 
@@ -1289,7 +1261,7 @@ Variant HHVM_FUNCTION(realpath,
     return false;
   }
   if (StaticContentCache::TheFileCache &&
-      StaticContentCache::TheFileCache->exists(translated.data(), false)) {
+      StaticContentCache::TheFileCache->exists(translated.data())) {
     return translated;
   }
   // Zend doesn't support streams in realpath
@@ -1381,7 +1353,7 @@ Variant HHVM_FUNCTION(disk_free_space,
   CHECK_PATH(directory, 1);
   fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_BOOST(sb, fs::space, translated);
+  CHECK_FS(sb, fs::space, translated);
   return (double)sb.free;
 }
 
@@ -1396,7 +1368,7 @@ Variant HHVM_FUNCTION(disk_total_space,
   CHECK_PATH(directory, 1);
   fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_BOOST(sb, fs::space, translated);
+  CHECK_FS(sb, fs::space, translated);
   return (double)sb.capacity;
 }
 
@@ -1459,7 +1431,7 @@ static bool do_chown(const String& filename,
     }
     uid = pw->pw_uid;
   } else {
-    uid = user.toInt32();
+    uid = (int)user.toInt64();
   }
 
   if (islChown) {
@@ -1540,7 +1512,7 @@ static bool do_chgrp(const String& filename,
     }
     gid = gr->gr_gid;
   } else {
-    gid = group.toInt32();
+    gid = (int)group.toInt64();
   }
 
   if (islChgrp) {
@@ -1602,10 +1574,6 @@ bool HHVM_FUNCTION(touch,
     fclose(f);
   }
 
-#ifdef _MSC_VER
-  CHECK_BOOST_ASSIGN(fs::last_write_time, translated, mtime);
-  // Windows doesn't have an access time to set.
-#else
   if (mtime == 0 && atime == 0) {
     // It is important to pass nullptr so that the OS sets mtime and atime
     // to the current time with maximum precision (more precise then seconds)
@@ -1616,7 +1584,6 @@ bool HHVM_FUNCTION(touch,
     newtime.modtime = mtime;
     CHECK_SYSTEM(utime(translated.data(), &newtime));
   }
-#endif
 
   return true;
 }
@@ -1677,7 +1644,7 @@ int64_t HHVM_FUNCTION(umask,
   if (mask.isNull()) {
     umask(oldumask);
   } else {
-    umask(mask.toInt32());
+    umask((int)mask.toInt64());
   }
   return oldumask;
 }
@@ -1691,13 +1658,36 @@ bool HHVM_FUNCTION(unlink, const String& filename,
   return true;
 }
 
+bool HHVM_FUNCTION(move_uploaded_file,
+                   const String& filename,
+                   const String& destination) {
+  Transport *transport = g_context->getTransport();
+  if (!transport || !transport->isUploadedFile(filename)) {
+    return false;
+  }
+
+  CHECK_PATH_FALSE(destination, 2);
+
+  if (HHVM_FN(rename)(filename, destination, uninit_null())) {
+    return true;
+  }
+
+  // If rename didn't work, fall back to copy followed by unlink
+  if (!HHVM_FN(copy)(filename, destination, uninit_null())) {
+    return false;
+  }
+  HHVM_FN(unlink)(filename, uninit_null());
+
+  return true;
+}
+
 bool HHVM_FUNCTION(link,
                    const String& target,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_BOOST_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
-                     File::TranslatePath(link).toCppString());
+  CHECK_FS_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
+                  File::TranslatePath(link).toCppString());
   return true;
 }
 
@@ -1707,12 +1697,12 @@ bool HHVM_FUNCTION(symlink,
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
   if (HHVM_FN(is_dir)(target)) {
-    CHECK_BOOST_ASSIGN(fs::create_directory_symlink,
-                       File::TranslatePathKeepRelative(target),
+    CHECK_FS_ASSIGN(fs::create_directory_symlink,
+                    File::TranslatePathKeepRelative(target),
                        File::TranslatePath(link).toCppString());
   } else {
-    CHECK_BOOST_ASSIGN(fs::create_symlink,
-                       File::TranslatePathKeepRelative(target),
+    CHECK_FS_ASSIGN(fs::create_symlink,
+                    File::TranslatePathKeepRelative(target),
                        File::TranslatePath(link).toCppString());
   }
   return true;
@@ -1829,7 +1819,7 @@ Variant HHVM_FUNCTION(glob,
       basedir_limit = true;
       continue;
     }
-    /* we need to do this everytime since GLOB_ONLYDIR does not guarantee that
+    /* we need to do this every time since GLOB_ONLYDIR does not guarantee that
      * all directories will be filtered. GNU libc documentation states the
      * following:
      * If the information about the type of the file is easily available
@@ -2011,19 +2001,6 @@ bool StringAscending(const String& s1, const String& s2) {
 
 }
 
-Variant HHVM_FUNCTION(dir,
-                      const String& directory) {
-  CHECK_PATH(directory, 1);
-  Variant dir = HHVM_FN(opendir)(directory);
-  if (same(dir, false)) {
-    return false;
-  }
-  auto d = SystemLib::AllocDirectoryObject();
-  d->setProp(nullptr, s_path.get(), directory.asTypedValue());
-  d->setProp(nullptr, s_handle.get(), *dir.asTypedValue());
-  return d;
-}
-
 Variant HHVM_FUNCTION(opendir, const String& path,
                       const Variant& /*context*/ /* = null */) {
   CHECK_PATH(path, 1);
@@ -2035,6 +2012,20 @@ Variant HHVM_FUNCTION(opendir, const String& path,
   }
   s_directory_data->defaultDirectory = p;
   return Variant(p);
+}
+
+Variant HHVM_FUNCTION(dir,
+                      const String& directory) {
+  CHECK_PATH(directory, 1);
+  Variant dir = HHVM_FN(opendir)(directory, uninit_null());
+  if (same(dir, false)) {
+    return false;
+  }
+  auto d = SystemLib::AllocDirectoryObject();
+  // public properties
+  d->setProp(nullctx, s_path.get(), directory.asTypedValue());
+  d->setProp(nullctx, s_handle.get(), *dir.asTypedValue());
+  return d;
 }
 
 Variant HHVM_FUNCTION(readdir,

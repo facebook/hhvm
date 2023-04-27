@@ -1,10 +1,10 @@
 File "new_trait.php", line 6, characters 7-8:
-Can't use `new` on `classname<Foo>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-File "new_trait.php", line 5, characters 22-24:
-This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
-File "new_trait.php", line 6, characters 7-8:
 This would be an object of type Foo which must be instantiable (Typing[4002])
-File "new_trait.php", line 5, characters 22-24:
-`Foo` is uninstantiable
-File "new_trait.php", line 3, characters 7-9:
-Declaration is here
+  File "new_trait.php", line 5, characters 22-24:
+  `Foo` is uninstantiable
+  File "new_trait.php", line 3, characters 7-9:
+  Declaration is here
+File "new_trait.php", line 6, characters 7-8:
+Can't use `new` on `classname<Foo>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
+  File "new_trait.php", line 5, characters 22-24:
+  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

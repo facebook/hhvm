@@ -103,7 +103,6 @@ let rec truthiness env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Terr
   | Tdynamic
   | Tvar _ ->
     Unknown
@@ -141,12 +140,11 @@ let rec truthiness env ty =
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
-  | Tunion tyl ->
-    begin
-      match List.map tyl ~f:(truthiness env) with
-      | [] -> Unknown
-      | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
-    end
+  | Tunion tyl -> begin
+    match List.map tyl ~f:(truthiness env) with
+    | [] -> Unknown
+    | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
+  end
   | Tintersection tyl ->
     List.map tyl ~f:(truthiness env)
     |> List.fold ~init:Possibly_falsy ~f:intersect_truthiness
@@ -159,20 +157,20 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (Closed_shape, fields) when Int.equal 0 (TShapeMap.cardinal fields)
-    ->
-    Always_falsy
-  | Tshape (_, fields) ->
-    let has_non_optional_fields =
-      TShapeMap.fold
-        (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
-        fields
-        false
-    in
-    if has_non_optional_fields then
-      Always_truthy
+  | Tshape (_, shape_kind, fields) ->
+    if is_nothing shape_kind && TShapeMap.is_empty fields then
+      Always_falsy
     else
-      Possibly_falsy
+      let has_non_optional_fields =
+        TShapeMap.fold
+          (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
+          fields
+          false
+      in
+      if has_non_optional_fields then
+        Always_truthy
+      else
+        Possibly_falsy
   | Ttuple [] -> Always_falsy
   | Ttuple (_ :: _) ->
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
@@ -246,7 +244,6 @@ let rec find_sketchy_types env acc ty =
   | Tany _
   | Tnonnull
   | Tdynamic
-  | Terr
   | Tprim _
   | Tfun _
   | Ttuple _

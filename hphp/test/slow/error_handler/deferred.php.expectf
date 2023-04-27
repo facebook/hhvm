@@ -4,7 +4,7 @@ vec(0) {
 vec(0) {
 }
 vec(1) {
-  dict(5) {
+  dict(6) {
     ["error-num"]=>
     int(8)
     ["error-string"]=>
@@ -50,6 +50,8 @@ vec(1) {
         string(4) "main"
       }
     }
+    ["error-implicit-context-blame"]=>
+    NULL
   }
 }
 vec(0) {

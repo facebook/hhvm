@@ -204,11 +204,6 @@ enum class BareThisOp : uint8_t {
   INCDEC_OP(PostInc)  \
   INCDEC_OP(PreDec)   \
   INCDEC_OP(PostDec)  \
-                      \
-  INCDEC_OP(PreIncO)  \
-  INCDEC_OP(PostIncO) \
-  INCDEC_OP(PreDecO)  \
-  INCDEC_OP(PostDecO) \
 
 enum class IncDecOp : uint8_t {
 #define INCDEC_OP(incDecOp) incDecOp,
@@ -232,9 +227,6 @@ enum class IncDecOp : uint8_t {
   SETOP_OP(XorEqual,    OpBitXor) \
   SETOP_OP(SlEqual,     OpShl) \
   SETOP_OP(SrEqual,     OpShr)  \
-  SETOP_OP(PlusEqualO,  OpAddO) \
-  SETOP_OP(MinusEqualO, OpSubO) \
-  SETOP_OP(MulEqualO,   OpMulO) \
 
 enum class SetOpOp : uint8_t {
 #define SETOP_OP(setOpOp, bcOp) setOpOp,

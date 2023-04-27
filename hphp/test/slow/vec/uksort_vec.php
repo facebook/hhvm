@@ -1,17 +1,21 @@
 <?hh
 
-function main() {
-  $v = vec[1, 2, 3];
+function test(bool $throw) {
+  $v = __hhvm_intrinsics\launder_value(vec[1, 2, 3]);
   var_dump($v);
   uksort(inout $v, ($p1, $p2) ==> {
-      return $p1 <=> $p2;
-    });
+    if ($throw) throw new Exception("boom\n");
+    return $p1 <=> $p2;
+  });
   var_dump($v);
-  return $v;
 }
 
-
 <<__EntryPoint>>
-function main_uksort_vec() {
-var_dump(main());
+function main() {
+  test(false);
+  try {
+    test(true);
+  } catch (Exception $e) {
+    echo $e->getMessage();
+  }
 }

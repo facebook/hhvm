@@ -118,7 +118,9 @@ bool canDCE(const IRInstruction& inst) {
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
-  case HasReifiedGenerics:
+  case FuncHasReifiedGenerics:
+  case ClassHasReifiedGenerics:
+  case HasReifiedParent:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -163,10 +165,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdTVFromRDS:
   case ConvFuncPrologueFlagsToARFlags:
   case DefConst:
-  case DefFuncPrologueCallee:
-  case DefFuncPrologueCtx:
-  case DefFuncPrologueFlags:
-  case DefFuncPrologueNumArgs:
   case Conjure:
   case LdClsInitData:
   case LookupClsRDS:
@@ -177,6 +175,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdIfaceMethod:
   case LdPropAddr:
   case LdObjClass:
+  case LdObjInvoke:
   case LdClsName:
   case LdLazyClsName:
   case LdLazyCls:
@@ -198,6 +197,7 @@ bool canDCE(const IRInstruction& inst) {
   case NewCol:
   case NewPair:
   case NewRFunc:
+  case NewClsMeth:
   case NewRClsMeth:
   case LdRetVal:
   case Mov:
@@ -283,11 +283,18 @@ bool canDCE(const IRInstruction& inst) {
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
+  case LdClsCtxCns:
   case AllocInitROM:
   case VoidPtrAsDataType:
   case CopyArray:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case LdImplicitContext:
+  case LdImplicitContextMemoKey:
+  case CallViolatesModuleBoundary:
+  case CreateSpecialImplicitContext:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -346,9 +353,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckNonNull:
   case DivDbl:
   case DivInt:
-  case AddIntO:
   case AddOffset:
-  case SubIntO:
   case MulIntO:
 
   case GtObj:
@@ -414,13 +419,10 @@ bool canDCE(const IRInstruction& inst) {
   case LdInitPropAddr:
   case LdObjMethodD:
   case LdObjMethodS:
-  case LdObjInvoke:
   case LdFunc:
   case LdFuncCached:
   case LookupFuncCached:
   case AllocObj:
-  case AllocObjReified:
-  case NewClsMeth:
   case FuncCred:
   case InitProps:
   case PropTypeRedefineCheck:
@@ -455,7 +457,6 @@ bool canDCE(const IRInstruction& inst) {
   case GenericRetDecRefs:
   case StClsInitElem:
   case StImplicitContext:
-  case StImplicitContextWH:
   case StMem:
   case StMemMeta:
   case StIterBase:
@@ -484,19 +485,29 @@ bool canDCE(const IRInstruction& inst) {
   case ReleaseShallow:
   case DecReleaseCheck:
   case DefFP:
-  case DefFuncEntryFP:
   case DefFrameRelSP:
   case DefRegSP:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
+  case DefFuncEntryFP:
+  case DefFuncEntryPrevFP:
   case InitFrame:
+  case EnterFrame:
   case Count:
-  case VerifyParamCls:
+  case VerifyParam:
   case VerifyParamCallable:
+  case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
   case VerifyProp:
@@ -521,8 +532,12 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
+  case RaiseModuleBoundaryViolation:
+  case RaiseModulePropertyViolation:
+  case RaiseImplicitContextStateInvalid:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
+  case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
@@ -536,7 +551,7 @@ bool canDCE(const IRInstruction& inst) {
   case StClosureArg:
   case CreateGen:
   case CreateAGen:
-  case CreateAAWH:
+  case CreateCCWH:
   case CreateAFWH:
   case CreateAGWH:
   case AFWHPrepareChild:
@@ -633,10 +648,13 @@ bool canDCE(const IRInstruction& inst) {
   case ProfileMethod:
   case ProfileSubClsCns:
   case ProfileGlobal:
+  case ProfileCoeffectFunParam:
   case CheckVecBounds:
   case BespokeElem:
   case BespokeEscalateToVanilla:
   case BespokeGetThrow:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
@@ -675,6 +693,7 @@ bool canDCE(const IRInstruction& inst) {
   case FinishMemberOp:
   case BeginInlining:
   case EndInlining:
+  case EnterInlineFrame:
   case SetOpTV:
   case OutlineSetOp:
   case ConjureUse:
@@ -718,6 +737,9 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictSlot:
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
+  case LdCoeffectFunParamNaive:
+  case DeserializeLazyProp:
+  case GetClsRGProp:
     return false;
 
   case IsTypeStruct:
@@ -767,14 +789,14 @@ private:
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
-typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef StateVector<SSATmp, uint32_t> UseCounts;
+using DceState = StateVector<IRInstruction, DceFlags>;
+using UseCounts = StateVector<SSATmp, uint32_t>;
 // Set of live DefLabel operands (keyed by DefLabel and index)
-typedef jit::fast_set<std::pair<IRInstruction*, size_t>> DefLabelLiveness;
+using DefLabelLiveness = jit::fast_set<std::pair<IRInstruction*, size_t>>;
 // Worklist is instruction to process. If the instruction is a
 // DefLabel, the second item is the index of the operand (DefLabel is
 // treated separately for each operand).
-typedef jit::vector<std::pair<IRInstruction*, size_t>> WorkList;
+using WorkList = jit::vector<std::pair<IRInstruction*, size_t>>;
 
 void removeDeadInstructions(IRUnit& unit,
                             const DceState& state,
@@ -789,6 +811,9 @@ void removeDeadInstructions(IRUnit& unit,
           // Don't attempt to remove a Jmp feeding a DefLabel. It will
           // be dealt with below.
           if (inst.is(Jmp) && inst.numSrcs() > 0) return false;
+
+          // DecReleaseCheck will be dealt with below.
+          if (inst.is(DecReleaseCheck)) return false;
 
           ONTRACE(
             4,
@@ -849,6 +874,11 @@ void removeDeadInstructions(IRUnit& unit,
               }
             }
           }
+        }
+
+        if (back.is(DecReleaseCheck) && state[&back].isDead()) {
+          block->erase(block->backIter());
+          block->push_back(unit.gen(Jmp, bcctx, next));
         }
       }
 
@@ -1205,6 +1235,14 @@ void killInstrAdjustRC(
   IRInstruction* inst,
   jit::vector<IRInstruction*>& decs
 ) {
+  auto const insertDecRef = [&] (auto before, auto src) {
+    auto const blk = before->block();
+    auto const ins = unit.gen(DecRef, before->bcctx(), DecRefData{}, src);
+    blk->insert(blk->iteratorTo(before), ins);
+    FTRACE(3, "Inserting {} before {} for {}\n",
+           ins->toString(), before->toString(), inst->toString());
+    state[ins].setLive();
+  };
   auto anyRemaining = false;
   if (inst->consumesReferences()) {
     // ConsumesReference inputs that are definitely not moved can
@@ -1218,19 +1256,25 @@ void killInstrAdjustRC(
           anyRemaining = true;
           continue;
         }
-        auto const blk = inst->block();
-        auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
-        blk->insert(blk->iteratorTo(inst), ins);
-        FTRACE(3, "Inserting {} to replace {}\n",
-               ins->toString(), inst->toString());
-        state[ins].setLive();
+        insertDecRef(inst, src);
       }
     }
   }
   for (auto dec : decs) {
     auto replaced = dec->src(0) != inst->dst();
     auto srcIx = 0;
-    if (anyRemaining) {
+    if (dec->is(DecReleaseCheck)) {
+      if (inst->is(ConstructClosure) && inst->src(0)->type().maybe(TCounted)) {
+        assertx(!replaced);
+        assertx(anyRemaining);
+        assertx(inst->mayMoveReference(0));
+
+        // While the closure is going to be released via ReleaseShallow it will
+        // still be responsible for releasing the captured context.
+        insertDecRef(dec, inst->src(0));
+      }
+    } else if (anyRemaining) {
+      assertx(dec->is(DecRef));
       // The remaining inputs might be moved, so may need to survive
       // until this instruction is decreffed
       for (auto src : inst->srcs()) {
@@ -1242,12 +1286,7 @@ void killInstrAdjustRC(
             replaced = true;
             state[dec].setLive();
           } else {
-            auto const blk = dec->block();
-            auto const ins = unit.gen(DecRef, dec->bcctx(), DecRefData{}, src);
-            blk->insert(blk->iteratorTo(dec), ins);
-            FTRACE(3, "Inserting {} before {} for {}\n",
-                   ins->toString(), dec->toString(), inst->toString());
-            state[ins].setLive();
+            insertDecRef(dec, src);
           }
         }
       }
@@ -1280,7 +1319,7 @@ void fullDCE(IRUnit& unit) {
     return mandatoryDCE(unit);
   }
 
-  Timer dceTimer(Timer::optimize_dce);
+  Timer dceTimer(Timer::optimize_dce, unit.logEntry().get_pointer());
 
   // kill unreachable code and remove any traces that are now empty
   auto const blocks = prepareBlocks(unit);
@@ -1318,11 +1357,11 @@ void fullDCE(IRUnit& unit) {
 
       if (srcInst->producesReference() && canDCE(*srcInst)) {
         ++uses[src];
-        if (inst->is(DecRef)) {
+        if (inst->is(DecRef, DecReleaseCheck)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
-                     StClosureArg)) {
+        if (inst->is(InitVecElem, InitDictElem, InitStructElem,
+                     InitStructPositions, ReleaseShallow, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

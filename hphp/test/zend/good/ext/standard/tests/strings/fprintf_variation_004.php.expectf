@@ -1,7 +1,7 @@
 *** Testing fprintf() for chars ***
 
-%r\x00%r
-%r\x00%r
+%h{00}
+%h{00}
 C
 %s
 c

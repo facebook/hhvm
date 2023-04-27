@@ -26,7 +26,7 @@
   "symbol_types":[
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":3,"char_end":4},
-      "type":"(function({suggest:mixed} $x): _)",
+      "type":"(function({suggest:mixed} $x): nothing)",
       "ident":0
     },
     {
@@ -36,7 +36,7 @@
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":13,"char_start":5,"char_end":6},
-      "type":"_",
+      "type":"nothing",
       "ident":0
     },
     {
@@ -56,17 +56,17 @@
         "char_start":12,
         "char_end":13
       },
-      "type":"_",
+      "type":"nothing",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":16,"char_start":3,"char_end":4},
-      "type":"(function({suggest:mixed} $x): _)",
+      "type":"(function({suggest:mixed} $x): nothing)",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":17,"char_start":3,"char_end":4},
-      "type":"(function({suggest:mixed} $x): _)",
+      "type":"(function({suggest:mixed} $x): nothing)",
       "ident":0
     }
   ]

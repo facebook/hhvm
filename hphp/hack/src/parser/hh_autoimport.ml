@@ -22,6 +22,7 @@ let types =
     "AwaitAllWaitHandle";
     "classname";
     "Collection";
+    "ConcurrentWaitHandle";
     "ConditionWaitHandle";
     "Container";
     "darray";
@@ -52,7 +53,6 @@ let types =
     "SleepWaitHandle";
     "StaticWaitHandle";
     "supportdyn";
-    "supportdynamic";
     "Traversable";
     "typename";
     "TypeStructure";
@@ -102,11 +102,11 @@ let funcs =
     "meth_caller";
     "objprof_get_data";
     "objprof_get_paths";
-    "objprof_get_strings";
     "server_warmup_status";
     "thread_mark_stack";
     "thread_memory_stats";
     "type_structure";
+    "type_structure_for_alias";
     "varray";
     "vec";
     "xenon_get_data";

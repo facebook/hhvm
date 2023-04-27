@@ -1,0 +1,24 @@
+inside with 1
+NULL
+inside with 2
+NULL
+inside with 3
+NULL
+inside with 4
+NULL
+inside with 1
+vec(2) {
+  vec(1) {
+    string(22) "soft_ic_inaccessible_1"
+  }
+  vec(0) {
+  }
+}
+inside with 2
+vec(2) {
+  vec(1) {
+    string(22) "soft_ic_inaccessible_1"
+  }
+  vec(0) {
+  }
+}

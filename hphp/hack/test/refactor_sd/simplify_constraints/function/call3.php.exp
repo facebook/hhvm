@@ -1,0 +1,7 @@
+=== Sound Dynamic analysis results for call3.php
+Summary for \f:
+No upcast
+Summary for \g:
+No upcast
+Summary for \h:
+Upcast exists at [11:8-26]

@@ -82,7 +82,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     false,
     ReadonlyOp::Any
   );
-  assertx(!lookup.tc->isCheckable());
+  assertx(lookup.tc->isInt());
   auto const sprop = lookup.propPtr;
   assertx(sprop);
 
@@ -105,7 +105,9 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   // $throwable->trace = $trace
   auto const traceSlot = rootCls->lookupDeclProp(s_trace.get());
   assertx(traceSlot != kInvalidSlot);
-  assertx(!rootCls->declPropTypeConstraint(traceSlot).isCheckable());
+  assertx(rootCls->declPropTypeConstraint(traceSlot).isVec());
+  // `DebugBacktrace` unconditionally returns a `Vec`, so we shouldn't need to
+  // check that it's such before assigning it into `$trace`.
   gen(env, StMem, propAddr(traceSlot), trace);
 
   // Populate $throwable->{file,line}
@@ -320,15 +322,28 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
-  auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto cls = Class::defClosure(preCls, false);
-  assertx(cls);
+void emitCreateCl(IRGS& env, uint32_t numParams, const StringData* name) {
+  auto const preCls = curFunc(env)->unit()->lookupPreClass(name);
+  assertx(preCls);
+  assertx(preCls->attrs() & AttrIsClosureClass);
+  auto const templateCls = Class::defClosure(preCls, false);
+  assertx(templateCls);
 
-  cls = cls->rescope(const_cast<Class*>(curClass(env)));
+  auto const cls = templateCls->rescope(const_cast<Class*>(curClass(env)));
+
   assertx(!cls->needInitialization());
+  // In repo mode, rescoping should always use the template class
+  // (except if we're in a trait).
+  assertx(
+    IMPLIES(
+      RO::RepoAuthoritative &&
+        !(curFunc(env)->preClass() &&
+          curFunc(env)->preClass()->attrs() & AttrTrait),
+      cls == templateCls
+    )
+  );
 
-  auto const func = cls->getCachedInvoke();
+  auto const func = cls->getRegularInvoke();
 
   auto const live_ctx = [&] {
     if (func->isStatic()) return ldCtxCls(env);
@@ -389,7 +404,20 @@ void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewVec(IRGS& env, uint32_t numArgs) {
+  if (numArgs == 0) {
+    push(env, cns(env, ArrayData::CreateVec()));
+    return;
+  }
+
+  jit::vector<RepoAuthType> types(numArgs, RepoAuthType(RepoAuthType::Tag::InitCell));
   auto const array = gen(env, AllocVec, VanillaVecData { numArgs });
+
+  auto genAssert = [&]() {
+    using A = RepoAuthType::Array;
+    auto rat = A::tuple(A::Empty::No, types);
+    gen(env, AssertType, Type::Vec(rat), array);
+  };
+
   if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
     gen(
       env,
@@ -403,19 +431,22 @@ void emitNewVec(IRGS& env, uint32_t numArgs) {
     );
     discard(env, numArgs);
     push(env, array);
+    genAssert();
     return;
   }
 
   for (int i = 0; i < numArgs; ++i) {
+    auto src = popC(env, DataTypeGeneric);
     gen(
       env,
       InitVecElem,
       IndexData { static_cast<uint32_t>(numArgs - i - 1) },
       array,
-      popC(env, DataTypeGeneric)
+      src
     );
   }
   push(env, array);
+  genAssert();
 }
 
 void emitNewStructDict(IRGS& env, const ImmVector& immVec) {
@@ -467,7 +498,7 @@ void emitAddElemC(IRGS& env) {
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
   push(env, gen(env, DictSet, arr, key, val));
-  decRef(env, key, DecRefProfileId::Default);
+  decRef(env, key);
 }
 
 void emitAddNewElemC(IRGS& env) {
@@ -480,7 +511,7 @@ void emitAddNewElemC(IRGS& env) {
   auto const arr = popC(env);
   auto const op = arr->isA(TVec) ? AddNewElemVec : AddNewElemKeyset;
   push(env, gen(env, op, arr, val));
-  decRef(env, val, DecRefProfileId::Default);
+  decRef(env, val);
 }
 
 void emitNewCol(IRGS& env, CollectionType type) {
@@ -513,18 +544,55 @@ void emitColFromArray(IRGS& env, CollectionType type) {
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 
-void emitCheckReifiedGenericMismatch(IRGS& env) {
+void emitCheckClsReifiedGenericMismatch(IRGS& env) {
   auto const cls = curClass(env);
   if (!cls) {
     // no static context class, so this will raise an error
     interpOne(env);
     return;
   }
-  auto const reified = popC(env);
+  auto const reified = topC(env);
   if (!reified->isA(TVec)) {
-    PUNT(CheckReifiedGenericMismatch-InvalidTS);
+    PUNT(CheckClsReifiedGenericMismatch-InvalidTS);
   }
-  gen(env, CheckClsReifiedGenericMismatch, ClassData{cls}, reified);
+  gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), reified);
+  popDecRef(env);
+}
+
+void emitClassHasReifiedGenerics(IRGS& env) {
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  auto const result = gen(env, ClassHasReifiedGenerics, cls);
+  popDecRef(env);
+  push(env, result);
+}
+
+void emitGetClsRGProp(IRGS& env) {
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  auto const thiz = checkAndLoadThis(env);
+  auto const result = gen(env, GetClsRGProp, cls, thiz);
+  popDecRef(env);
+  push(env, result);
+}
+
+void emitHasReifiedParent(IRGS& env) {
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  auto const result = gen(env, HasReifiedParent, cls);
+  popDecRef(env);
+  push(env, result);
+}
+
+void emitCheckClsRGSoft(IRGS& env) {
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  gen(env, CheckClsRGSoft, cls);
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////

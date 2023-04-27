@@ -12,10 +12,10 @@ break cls2::pubCls()
 Breakpoint 4 set upon entering cls2::pubCls()
 But won't break until class cls2 has been loaded.
 break list
-  1%r\x09%rALWAYS    on line 7 of %s/break2.php (unbound)
-  2%r\x09%rALWAYS    upon entering foo2() (unbound)
-  3%r\x09%rALWAYS    upon entering cls2::pubObj() (unbound)
-  4%r\x09%rALWAYS    upon entering cls2::pubCls() (unbound)
+  1%tALWAYS    on line 7 of %s/break2.php (unbound)
+  2%tALWAYS    upon entering foo2() (unbound)
+  3%tALWAYS    upon entering cls2::pubObj() (unbound)
+  4%tALWAYS    upon entering cls2::pubCls() (unbound)
 run
 break2.php loaded
 Program %s/break2.php exited normally.
@@ -26,10 +26,10 @@ Breakpoint 2 reached at foo2() on line 6 of %s/break2.php
    7   error_log($y);
 
 break list
-  1%r\x09%rALWAYS    on line 7 of %s/break2.php
-  2%r\x09%rALWAYS    upon entering foo2()
-  3%r\x09%rALWAYS    upon entering cls2::pubObj()
-  4%r\x09%rALWAYS    upon entering cls2::pubCls()
+  1%tALWAYS    on line 7 of %s/break2.php
+  2%tALWAYS    upon entering foo2()
+  3%tALWAYS    upon entering cls2::pubObj()
+  4%tALWAYS    upon entering cls2::pubCls()
 continue
 Breakpoint 1 reached at foo2() on line 7 of %s/break2.php
    6   $y = $x.'_suffix';

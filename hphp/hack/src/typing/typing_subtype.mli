@@ -7,21 +7,9 @@ open Typing_env_types
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type_for_coercion : env -> locl_ty -> locl_ty -> bool
-
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-(** If the optional [coerce] argument indicates whether subtyping should allow
- * coercion to or from dynamic. For coercion to dynamic, types that implement
- * dynamic are considered sub-types of dynamic. For coercion from dynamic,
- * dynamic is treated as a sub-type of all types.
-*)
-val is_sub_type_for_union :
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  locl_ty ->
-  locl_ty ->
-  bool
+val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 
 (** Determines whether the types are definitely disjoint, or whether they might
     overlap. *)
@@ -102,6 +90,7 @@ val simplify_subtype_i :
 
 val subtype_funs :
   check_return:bool ->
+  for_override:bool ->
   on_error:Typing_error.Reasons_callback.t option ->
   Reason.t ->
   locl_fun_type ->
@@ -109,3 +98,5 @@ val subtype_funs :
   locl_fun_type ->
   env ->
   env * Typing_error.t option
+
+val can_traverse_to_iface : can_traverse -> locl_ty

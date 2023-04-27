@@ -1,0 +1,64 @@
+{
+  "macros": {
+    "policy": {
+      "type": "macroDef",
+      "params": [ "cluster" ],
+      "result": {
+        "type": "PrefixPolicyRoute",
+        "default_policy": "PoolRoute|%cluster%.wildcard",
+        "operation_policies": {
+          "delete": {
+            "type": "AllSyncRoute",
+            "name": "all-sync",
+            "children": [
+              "PoolRoute|A.wildcard",
+              "PoolRoute|B.wildcard",
+              "PoolRoute|C.wildcard",
+              "PoolRoute|D.wildcard"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "pools": {
+    "A.wildcard": {
+      "protocol": "ascii",
+      "keep_routing_prefix": false,
+      "servers": [ "localhost:12345" ]
+    },
+    "B.wildcard": {
+      "protocol": "ascii",
+      "keep_routing_prefix": true,
+      "servers": [ "localhost:12346" ]
+    },
+    "C.wildcard": {
+      "protocol": "ascii",
+      "keep_routing_prefix": true,
+      "servers": [ "localhost:12347" ]
+    },
+    "D.wildcard": {
+      "protocol": "ascii",
+      "keep_routing_prefix": true,
+      "servers": [ "localhost:12348" ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [ "/a/a/" ],
+      "route": "@policy(A)"
+    },
+    {
+      "aliases": [ "/b/b/" ],
+      "route": "@policy(B)"
+    },
+    {
+      "aliases": [ "/c/c/" ],
+      "route": "@policy(C)"
+    },
+    {
+      "aliases": [ "/d/d/" ],
+      "route": "@policy(D)"
+    }
+  ]
+}

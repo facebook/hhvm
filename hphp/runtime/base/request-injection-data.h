@@ -32,13 +32,6 @@
 #include <string>
 #include <vector>
 
-#ifdef __APPLE__
-# include <dispatch/dispatch.h>
-#elif defined(_MSC_VER)
-# include <agents.h>
-# include <ppltasks.h>
-#endif
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -50,11 +43,7 @@ struct RequestInjectionData;
 struct RequestTimer {
   friend struct RequestInjectionData;
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-  RequestTimer(RequestInjectionData*);
-#else
   RequestTimer(RequestInjectionData*, clockid_t);
-#endif
 
   ~RequestTimer();
 
@@ -66,13 +55,6 @@ private:
   RequestInjectionData* m_reqInjectionData;
   int m_timeoutSeconds{0};
 
-#if defined(__APPLE__)
-  void cancelTimerSource();
-  dispatch_source_t m_timerSource{nullptr};
-  dispatch_group_t m_timerGroup;
-#elif defined(_MSC_VER)
-  concurrency::task_completion_event<void>* m_tce{nullptr};
-#else
   clockid_t m_clockType;
   timer_t m_timerId;
   TYPE_SCAN_IGNORE_FIELD(m_timerId); // timer_t is void*
@@ -82,7 +64,6 @@ private:
 
   /* Set true when we activate a timer, cleared when the signal handler runs. */
   std::atomic<bool> m_timerActive{false};
-#endif
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -117,15 +98,9 @@ struct RequestInjectionData {
   };
 
   RequestInjectionData()
-#if defined(__APPLE__) || defined(_MSC_VER)
-    : m_timer(this)
-    , m_cpuTimer(this)
-    , m_userTimeoutTimer(this)
-#else
     : m_timer(this, CLOCK_REALTIME)
     , m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID)
     , m_userTimeoutTimer(this, CLOCK_REALTIME)
-#endif
     {}
 
   ~RequestInjectionData() = default;

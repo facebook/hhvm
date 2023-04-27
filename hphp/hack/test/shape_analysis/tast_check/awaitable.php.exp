@@ -1,0 +1,4 @@
+=== Shape analysis results for awaitable.php
+Summary for \f:
+[5:10-16] : dynamic
+(ParamLike (([3:21-51], "\\f"), Return)) : dynamic

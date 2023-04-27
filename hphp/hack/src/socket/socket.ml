@@ -39,8 +39,8 @@ let unix_socket sock_name =
     Exit.exit Exit_status.Socket_error
 
 (* So the sockaddr_un structure puts a strict limit on the length of a socket
-  * address. This appears to be 104 chars on mac os x and 108 chars on my
-  * centos box. *)
+   * address. This appears to be 104 chars on mac os x and 108 chars on my
+   * centos box. *)
 let max_addr_length = 103
 
 let min_name_length = 17

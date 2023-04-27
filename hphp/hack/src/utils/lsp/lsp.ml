@@ -258,6 +258,23 @@ module SymbolInformation = struct
   }
 end
 
+(* Represents an item in the Call Hieararchy *)
+module CallHierarchyItem = struct
+  type t = {
+    name: string;
+    kind: SymbolInformation.symbolKind;
+    detail: string option;
+    uri: documentUri;
+    range: range;
+    selectionRange: range;
+  }
+end
+
+(*Represents a parameter for a CallHierarchyIncomingCallsRequest or CallHierarchyOutgoingCallsRequest *)
+module CallHierarchyCallsRequestParam = struct
+  type t = { item: CallHierarchyItem.t }
+end
+
 (* For showing messages (not diagnostics) in the user interface. *)
 module MessageType = struct
   type t =
@@ -477,6 +494,7 @@ module Initialize = struct
     definitionProvider: bool;
     typeDefinitionProvider: bool;
     referencesProvider: bool;
+    callHierarchyProvider: bool;
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;
     (* ie. document outline *)
@@ -857,10 +875,6 @@ module Completion = struct
     (* tells editor which icon to use *)
     detail: string option;
     (* human-readable string like type/symbol info *)
-    inlineDetail: string option;
-    (* nuclide-specific, right column *)
-    itemType: string option;
-    (* nuclide-specific, left column *)
     documentation: completionDocumentation option;
     (* human-readable doc-comment *)
     sortText: string option;
@@ -870,8 +884,8 @@ module Completion = struct
     insertText: string option;
     (* used for inserting; if absent, uses label *)
     insertTextFormat: insertTextFormat option;
-    textEdits: TextEdit.t list;
-    (* wire: split into hd and tl *)
+    textEdit: TextEdit.t option;
+    additionalTextEdits: TextEdit.t list;
     command: Command.t option;
     (* if present, is executed after completion *)
     data: Hh_json.json option;
@@ -919,6 +933,35 @@ module FindReferences = struct
     includeDeclaration: bool;
     (* include declaration of current symbol *)
     includeIndirectReferences: bool;
+  }
+end
+
+module PrepareCallHierarchy = struct
+  type params = TextDocumentPositionParams.t
+
+  type result = CallHierarchyItem.t list option
+end
+
+module CallHierarchyIncomingCalls = struct
+  type params = CallHierarchyCallsRequestParam.t
+
+  type result = callHierarchyIncomingCall list option
+
+  and callHierarchyIncomingCall = {
+    from: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
+end
+
+module CallHierarchyOutgoingCalls = struct
+  type params = CallHierarchyCallsRequestParam.t
+
+  type result = callHierarchyOutgoingCall list option
+
+  and callHierarchyOutgoingCall = {
+    (* The name should just be "to", but "to" is a reserved keyword in OCaml*)
+    call_to: CallHierarchyItem.t;
+    fromRanges: range list;
   }
 end
 
@@ -1101,14 +1144,19 @@ end
 module ShowStatusFB = struct
   type params = showStatusParams
 
-  and result = ShowMessageRequest.messageActionItem option
+  and result = unit
 
   and showStatusParams = {
-    request: ShowMessageRequest.showMessageRequestParams;
+    request: showStatusRequestParams;
     progress: int option;
     total: int option;
     shortMessage: string option;
     telemetry: Hh_json.json option;
+  }
+
+  and showStatusRequestParams = {
+    type_: MessageType.t;
+    message: string;
   }
 end
 
@@ -1198,6 +1246,9 @@ type lsp_request =
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
+  | PrepareCallHierarchyRequest of PrepareCallHierarchy.params
+  | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
+  | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
   | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
@@ -1229,6 +1280,9 @@ type lsp_result =
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
+  | PrepareCallHierarchyResult of PrepareCallHierarchy.result
+  | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
+  | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
   | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
@@ -1302,3 +1356,38 @@ end
 
 module UriSet = Set.Make (UriKey)
 module UriMap = WrappedMap.Make (UriKey)
+
+let lsp_result_to_log_string = function
+  | InitializeResult _ -> "InitializeResult"
+  | ShutdownResult -> "ShutdownResult"
+  | CodeLensResolveResult _ -> "CodeLensResolveResult"
+  | HoverResult _ -> "HoverResult"
+  | DefinitionResult _ -> "DefinitionResult"
+  | TypeDefinitionResult _ -> "TypeDefinitionResult"
+  | ImplementationResult _ -> "ImplementationResult"
+  | CodeActionResult _ -> "CodeActionResult"
+  | CompletionResult _ -> "CompletionResult"
+  | CompletionItemResolveResult _ -> "CompletionItemResolveResult"
+  | WorkspaceSymbolResult _ -> "WorkspaceSymbolResult"
+  | DocumentSymbolResult _ -> "DocumentSymbolResult"
+  | FindReferencesResult _ -> "FindReferencesResult"
+  | PrepareCallHierarchyResult _ -> "PrepareCallHierarchyResult"
+  | CallHierarchyIncomingCallsResult _ -> "CallHierarchyIncomingCallsResult"
+  | CallHierarchyOutgoingCallsResult _ -> "CallHierarchyOutgoingCallsResult"
+  | DocumentHighlightResult _ -> "DocumentHighlightResult"
+  | TypeCoverageResultFB _ -> "TypeCoverageResultFB"
+  | DocumentFormattingResult _ -> "DocumentFormattingResult"
+  | DocumentRangeFormattingResult _ -> "DocumentRangeFormattingResult"
+  | DocumentOnTypeFormattingResult _ -> "DocumentOnTypeFormattingResult"
+  | ShowMessageRequestResult _ -> "ShowMessageRequestResult"
+  | ShowStatusResultFB _ -> "ShowStatusResultFB"
+  | RageResultFB _ -> "RageResultFB"
+  | RenameResult _ -> "RenameResult"
+  | DocumentCodeLensResult _ -> "DocumentCodeLensResult"
+  | SignatureHelpResult _ -> "SignatureHelpResult"
+  | HackTestStartServerResultFB -> "HackTestStartServerResultFB"
+  | HackTestStopServerResultFB -> "HackTestStopServerResultFB"
+  | HackTestShutdownServerlessResultFB -> "HackTestShutdownServerlessResultFB"
+  | RegisterCapabilityRequestResult -> "RegisterCapabilityRequestResult"
+  | WillSaveWaitUntilResult _ -> "WillSaveWaitUntilResult"
+  | ErrorResult _ -> "ErrorResult"

@@ -139,10 +139,6 @@ struct Unit {
 namespace folly {
 using namespace HPHP;
 
-template <typename T> struct DynamicConverter<HPHP::Optional<T>> {
-  static HPHP::Optional<T> convert(const dynamic& opt);
-};
-
 template <> struct DynamicConverter<jit::Opcode> {
   static jit::Opcode convert(const dynamic&);
 };
@@ -185,10 +181,6 @@ template <> struct DynamicConverter<printir::InliningDecision> {
 
 template <> struct DynamicConverter<printir::Unit> {
   static printir::Unit convert(const dynamic&);
-};
-
-template <typename T> struct DynamicConstructor<HPHP::Optional<T>> {
-  static dynamic construct(const HPHP::Optional<T>& opt);
 };
 
 template <> struct DynamicConstructor<jit::Opcode> {

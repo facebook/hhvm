@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Reordered_argument_collections
-include Sys
+include Stdlib.Sys
 
 module S = struct
   type t = string [@@deriving show]

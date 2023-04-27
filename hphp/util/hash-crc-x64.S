@@ -1,6 +1,6 @@
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__) && !defined(NO_HWCRC) && !defined(_MSC_VER)
+#if defined(__x86_64__) && !defined(NO_HWCRC)
 
 .file	"hphp/util/hash-crc-x64.S"
 

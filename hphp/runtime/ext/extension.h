@@ -26,6 +26,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,11 +46,12 @@ namespace HPHP {
  */
 
 #define NO_EXTENSION_VERSION_YET "\0"
+#define NO_ONCALL_YET "\0"
 
-#define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
-  static class name ## Extension final : public Extension {   \
-  public:                                               \
-    name ## Extension() : Extension(#name, #v) {}       \
+#define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)                      \
+  static class name ## Extension final : public Extension {               \
+  public:                                                                 \
+    name ## Extension() : Extension(#name, #v, NO_ONCALL_YET) {}          \
   } s_ ## name ## _extension
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,10 +68,14 @@ struct Extension : IDebuggable {
                                const std::string &name,
                                const Native::FuncTable& nativeFuncs);
 public:
-  explicit Extension(const char* name, const char* version = "");
+  explicit Extension(const char name[],
+                     const char version[]= NO_EXTENSION_VERSION_YET,
+                     const char oncall[] = NO_ONCALL_YET);
   ~Extension() override {}
 
-  const char* getVersion() const { return m_version.c_str(); }
+  const char* getName() const { return m_name; }
+  const char* getVersion() const { return m_version; }
+  const char* getOncall() const { return m_oncall; }
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
@@ -82,6 +88,24 @@ public:
   virtual void threadShutdown();
   virtual void requestInit();
   virtual void requestShutdown();
+
+  // Override this function when your extension calls anything other than:
+  //
+  //  loadSystemlib();
+  //
+  // ... in `moduleInit`. This will load the decls for any symbols declared in
+  // the PHP file for this module. Examples of when overriding this function is
+  // required:
+  // - ext_asio, which calls `loadSystemlib` twice with different arguments
+  // - ext_collections*, which calls `loadSystemlib` for each collection kind
+  // - ext_datetime, which happens to use a different name for the extension
+  //   versus the binary section
+  virtual void loadDecls();
+  // Load the source contained in the binary section corresponding to [name],
+  // parse it's decls, then store them in `s_builtin_symbols`. This is generally
+  // going to be given the same string as whatever `loadSystemlib` takes, and
+  // by default will be passed *just* the extension name.
+  void loadDeclsFrom(std::string_view name);
 
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const;
@@ -102,10 +126,6 @@ public:
     m_dsoName = name;
   }
 
-  const std::string& getName() const {
-    return m_name;
-  }
-
   void registerNativeFunc(const StringData* name,
                           const Native::NativeFunctionInfo&);
 
@@ -119,8 +139,9 @@ public:
   }
 
 private:
-  std::string m_name;
-  std::string m_version;
+  const char* m_name;
+  const char* m_version;
+  const char* m_oncall;
   std::string m_dsoName;
   std::vector<StringData*> m_functions;
   Native::FuncTable m_nativeFuncs;

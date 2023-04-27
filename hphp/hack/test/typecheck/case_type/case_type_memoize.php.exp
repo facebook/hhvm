@@ -1,0 +1,4 @@
+File "case_type_memoize.php", line 14, characters 16-17:
+Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
+  File "case_type_memoize.php", line 8, characters 30-30:
+  This is an object of type C

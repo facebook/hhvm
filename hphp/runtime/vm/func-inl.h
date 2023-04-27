@@ -53,8 +53,7 @@ inline Func::ParamInfo::ParamInfo()
 
 template<class SerDe>
 inline void Func::ParamInfo::serde(SerDe& sd) {
-  sd(builtinType)
-    (funcletOff)
+  sd(funcletOff)
     (defaultValue)
     (phpCode)
     (typeConstraint)
@@ -70,6 +69,10 @@ inline bool Func::ParamInfo::hasDefaultValue() const {
 
 inline bool Func::ParamInfo::hasScalarDefaultValue() const {
   return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
+}
+
+inline bool Func::ParamInfo::hasTrivialDefaultValue() const {
+  return hasScalarDefaultValue() && typeConstraint.alwaysPasses(&defaultValue);
 }
 
 inline bool Func::ParamInfo::isInOut() const {
@@ -98,6 +101,10 @@ inline bool Func::ParamInfo::isTakenAsTypedValue() const {
 
 inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
   flags |= 1 << static_cast<int32_t>(flag);
+}
+
+inline MaybeDataType Func::ParamInfo::builtinType() const {
+  return isVariadic() ? KindOfVec : typeConstraint.asSystemlibType();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,18 +214,18 @@ inline void invalidFuncConversion(const char* type) {
   ));
 }
 
-inline NamedEntity* Func::getNamedEntity() {
+inline NamedFunc* Func::getNamedFunc() {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);
+  return *reinterpret_cast<LowPtr<NamedFunc>*>(&m_namedFunc);
 }
 
-inline const NamedEntity* Func::getNamedEntity() const {
+inline const NamedFunc* Func::getNamedFunc() const {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
+  return *reinterpret_cast<const LowPtr<const NamedFunc>*>(&m_namedFunc);
 }
 
-inline void Func::setNamedEntity(const NamedEntity* e) {
-  *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
+inline void Func::setNamedFunc(const NamedFunc* e) {
+  *reinterpret_cast<LowPtr<const NamedFunc>*>(&m_namedFunc) = e;
 }
 
 inline const StringData* Func::methCallerClsName() const {
@@ -348,11 +355,6 @@ inline void Func::setCtiEntry(Offset base, uint32_t size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
-
-inline MaybeDataType Func::hniReturnType() const {
-  auto const ex = extShared();
-  return ex ? ex->m_hniReturnType : std::nullopt;
-}
 
 inline RepoAuthType Func::repoReturnType() const {
   return shared()->m_repoReturnType;
@@ -527,6 +529,20 @@ inline bool Func::isPublic() const {
   return m_attrs & AttrPublic;
 }
 
+inline bool Func::isInternal() const {
+  return m_attrs & AttrInternal;
+}
+
+inline const StringData* Func::moduleName() const {
+  if (RO::EvalModuleLevelTraits) {
+    auto const ex = extShared();
+    if (ex && ex->m_originalModuleName) {
+      return ex->m_originalModuleName;
+    }
+  }
+  return unit()->moduleName();
+}
+
 inline bool Func::isStatic() const {
   return m_attrs & AttrStatic;
 }
@@ -555,8 +571,31 @@ inline bool Func::isMemoizeWrapperLSB() const {
   return shared()->m_allFlags.m_isMemoizeWrapperLSB;
 }
 
-inline bool Func::isPolicyShardedMemoize() const {
-  return shared()->m_allFlags.m_isPolicyShardedMemoize;
+inline Func::MemoizeICType Func::memoizeICType() const {
+  assertx(isMemoizeWrapper());
+  return shared()->m_allFlags.m_memoizeICType;
+}
+
+inline bool Func::isNoICMemoize() const {
+  return memoizeICType() == MemoizeICType::NoIC;
+}
+
+inline bool Func::isKeyedByImplicitContextMemoize() const {
+  return memoizeICType() == MemoizeICType::KeyedByIC;
+}
+
+inline bool Func::isMakeICInaccessibleMemoize() const {
+  return memoizeICType() == MemoizeICType::MakeICInaccessible;
+}
+
+inline bool Func::isSoftMakeICInaccessibleMemoize() const {
+  return memoizeICType() == MemoizeICType::SoftMakeICInaccessible;
+}
+
+inline uint32_t Func::softMakeICInaccessibleSampleRate() const {
+  assertx(isSoftMakeICInaccessibleMemoize());
+  auto const ex = extShared();
+  return ex ? ex->m_softMakeICInaccessibleSampleRate : 1;
 }
 
 inline bool Func::isMemoizeImpl() const {
@@ -571,8 +610,7 @@ inline const StringData* Func::memoizeImplName() const {
 inline size_t Func::numKeysForMemoize() const {
   return numParams()
          + (hasReifiedGenerics() ? 1 : 0)
-         + (RO::EvalEnableImplicitContext &&
-            (shared()->m_allFlags.m_isPolicyShardedMemoize) ? 1 : 0);
+         + (isKeyedByImplicitContextMemoize() ? 1 : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+File "docs_url_bad_type.php", line 3, characters 3-8:
+`__Docs` URLs must be a string literal (Parsing[1002])

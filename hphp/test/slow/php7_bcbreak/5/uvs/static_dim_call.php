@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  static $bar = darray['baz' => myfunc<>];
+  public static $bar = darray['baz' => myfunc<>];
 }
 
 function myfunc() {

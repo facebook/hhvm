@@ -1,8 +1,8 @@
 File "interface_constructor.php--file2.php", line 2, characters 20-22:
-Some members in class `A` are incompatible with those declared in type `Foo` (Typing[4056])
-  File "interface_constructor.php--file1.php", line 13, characters 19-29:
-  The constructor is not implemented
-File "interface_constructor.php--file2.php", line 2, characters 20-22:
 This interface is not properly implemented (Typing[4054])
   File "interface_constructor.php--file1.php", line 13, characters 19-29:
   Method `__construct` does not have an implementation
+File "interface_constructor.php--file2.php", line 2, characters 20-22:
+Some members in class `A` are incompatible with those declared in type `Foo` (Typing[4056])
+  File "interface_constructor.php--file1.php", line 13, characters 19-29:
+  The constructor is not implemented

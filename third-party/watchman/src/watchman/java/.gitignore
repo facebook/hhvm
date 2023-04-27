@@ -1,0 +1,4 @@
+# Ignore files used by the Buck build system
+/.buckd/
+/buck-cache/
+/buck-out/

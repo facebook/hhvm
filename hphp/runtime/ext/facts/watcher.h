@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
@@ -23,7 +24,6 @@
 #include <folly/Executor.h>
 #include <folly/Unit.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
@@ -38,7 +38,7 @@ namespace Facts {
  */
 struct Watcher {
   struct ResultFile {
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
     bool m_exists{false};
     Optional<std::string> m_hash;
 
@@ -78,7 +78,9 @@ struct Watcher {
    * Subscribe to the filesystem. Whenever the filesystem changes, this Watcher
    * will send a Results object describing the change to the given callback.
    */
-  virtual void subscribe(std::function<void(Results&&)> callback) = 0;
+  virtual void subscribe(
+      const Clock& lastClock,
+      std::function<void(Results&&)> callback) = 0;
 };
 
 } // namespace Facts

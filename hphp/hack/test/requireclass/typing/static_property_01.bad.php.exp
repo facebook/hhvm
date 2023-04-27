@@ -1,0 +1,4 @@
+File "static_property_01.bad.php", line 9, characters 42-43:
+No class variable `$x` in `C` (Typing[4090])
+  File "static_property_01.bad.php", line 12, characters 13-13:
+  Declaration of `C` is here

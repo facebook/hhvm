@@ -25,6 +25,6 @@ function test1(
   $f5 upcast dynamic;
   ($x ==> $x) upcast dynamic;
   ((dynamic $d) ==> $d->foo()) upcast dynamic;
-  fun('foo') upcast dynamic;
-  expectFun(fun('foo'));
+  foo<> upcast dynamic;
+  expectFun(foo<>);
 }

@@ -26,6 +26,7 @@ struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1") {}
   void moduleInit() override;
   void requestInit() override;
+  void loadDecls() override;
 
 private:
   void initFunctions();
@@ -34,6 +35,7 @@ private:
   void initResumableWaitHandle();
   void initAsyncGenerator();
   void initAwaitAllWaitHandle();
+  void initConcurrentWaitHandle();
   void initConditionWaitHandle();
   void initSleepWaitHandle();
   void initRescheduleWaitHandle();

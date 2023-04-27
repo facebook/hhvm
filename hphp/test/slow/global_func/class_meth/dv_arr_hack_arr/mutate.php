@@ -7,7 +7,7 @@ class C {
 
 <<__EntryPoint>>
 function main() {
-  $m = HH\class_meth(C::class, 'func1');
+  $m = C::func1<>;
   var_dump(!($m ?? false));
   var_dump(isset($m), isset($m[1]), isset($m[2]), isset($m['s']));
   var_dump($m[0], $m[1]);

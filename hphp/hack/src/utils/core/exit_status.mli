@@ -8,10 +8,10 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type t =
   | No_error
@@ -32,6 +32,11 @@ type t =
   | Lost_parent_monitor
   | Server_got_eof_from_monitor
   | Interrupted
+      (** hh_client installs a SIGINT handler which raises [Exit_with Interrupted].
+       Also, MonitorMain installs SIGINT, SIGQUIT, SIGTERM, SIGHUP handlers which
+       call [Exit.exit Interrupted]. *)
+  | Client_broken_pipe
+      (** hh_client code tried to write to stdout, but was thwarted by Sys_error("Broken pipe") *)
   | Worker_oomed
   | Worker_busy
   | Worker_not_found_exception
@@ -50,6 +55,11 @@ type t =
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
+  | Package_config_changed
+  | Typecheck_restarted
+      (** an exit status of hh_client check, e.g. because files-on-disk changed *)
+  | Typecheck_abandoned
+      (** an exit status of hh_client check, e.g. because the server was killed mid-check *)
   | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server

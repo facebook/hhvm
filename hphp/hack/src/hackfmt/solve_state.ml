@@ -166,8 +166,7 @@ let make env chunk_group rbm =
   let (nesting_set, _) =
     List.fold_left
       chunks
-      ~init:
-        (ISet.empty, ISet.empty)
+      ~init:(ISet.empty, ISet.empty)
         (* We only care about the first occurance of each nesting id *)
       ~f:(fun (nset, idset) c ->
         let nid = Chunk.get_nesting_id c in

@@ -31,35 +31,36 @@ let check_implements
     | None -> "this expression"
     (* this case should never execute *)
   in
-  let enable_systemlib_annotations =
-    TypecheckerOptions.enable_systemlib_annotations (Typing_env.get_tcopt env)
+  let is_systemlib =
+    TypecheckerOptions.is_systemlib (Typing_env.get_tcopt env)
   in
-  if String_utils.string_starts_with attr_name "__" then
+  if String.is_prefix attr_name ~prefix:"__" then
     (* Check against builtins *)
     let check_attr map =
       match SMap.find_opt attr_name map with
-      | Some (intfs, _docs) ->
+      | Some attr_info ->
         let check_locations =
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)
         in
         if
           check_locations
-          && (not @@ List.mem intfs attr_interface ~equal:String.equal)
+          && not
+             @@ List.mem
+                  attr_info.SN.UserAttributes.contexts
+                  attr_interface
+                  ~equal:String.equal
         then
-          Errors.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Wrong_expression_kind_builtin_attribute
-                   { expr_kind; pos = attr_pos; attr_name });
+          Errors.add_nast_check_error
+            (Nast_check_error.Wrong_expression_kind_builtin_attribute
+               { expr_kind; pos = attr_pos; attr_name });
         true
       | None -> false
     in
     let () =
       if
         check_attr SN.UserAttributes.as_map
-        || enable_systemlib_annotations
-           && check_attr SN.UserAttributes.systemlib_map
+        || (is_systemlib && check_attr SN.UserAttributes.systemlib_map)
       then
         ()
       else
@@ -67,8 +68,11 @@ let check_implements
           let bindings = SMap.bindings SN.UserAttributes.as_map in
           let filtered_bindings =
             List.filter
-              ~f:(fun (_, (list, _)) ->
-                List.mem list attr_interface ~equal:String.equal)
+              ~f:(fun (_, attr_info) ->
+                List.mem
+                  attr_info.SN.UserAttributes.contexts
+                  attr_interface
+                  ~equal:String.equal)
               bindings
           in
           List.map ~f:fst filtered_bindings
@@ -81,9 +85,11 @@ let check_implements
             (fun name -> name)
         in
 
-        Errors.add_naming_error
-        @@ Naming_error.Unbound_attribute_name
-             { pos = attr_pos; attr_name; closest_attr_name }
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Unbound_attribute_name
+                 { pos = attr_pos; attr_name; closest_attr_name })
     in
 
     env
@@ -127,9 +133,11 @@ let check_implements
       ) else
         check_new_object attr_pos env attr_cid params
     | _ ->
-      Errors.add_naming_error
-      @@ Naming_error.Unbound_attribute_name
-           { pos = attr_pos; attr_name; closest_attr_name = None };
+      Errors.add_error
+        Naming_error.(
+          to_user_error
+          @@ Unbound_attribute_name
+               { pos = attr_pos; attr_name; closest_attr_name = None });
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

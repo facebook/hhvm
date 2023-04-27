@@ -2,15 +2,18 @@ aast_defs::Tprim
 aast::Tprim
 decl_defs::CollectionStyle
 decl_defs::ConsistentKind
-decl_defs::LinearizationKind
 decl_defs::SourceType
 decl_defs::XhpAttr
 ident::Ident
 lazy::Lazy
 method_flags::MethodFlags
 prop_flags::PropFlags
+saved_state_rollouts::Flag
+saved_state_rollouts::FlagName
+saved_state_rollouts::SavedStateRollouts
 shallow_decl_defs::Visibility
 tany_sentinel::TanySentinel
+tast::CheckStatus
 tast::FunTastInfo
 typing_cont_key::TypingContKey
 typing_defs_core::CollectionStyle
@@ -18,7 +21,6 @@ typing_defs_core::ConsistentKind
 typing_defs_core::DependentType
 typing_defs_core::DestructureKind
 typing_defs_core::Enforcement
-typing_defs_core::Exact
 typing_defs_core::FunTparamsKind
 typing_defs_core::ParamMode
 typing_defs_core::ParamMutability
@@ -32,7 +34,6 @@ typing_defs::ClassConstKind
 typing_defs::CollectionStyle
 typing_defs::ConsistentKind
 typing_defs::DestructureKind
-typing_defs::Exact
 typing_defs::FunTparamsKind
 typing_defs::ParamMode
 typing_defs::ParamMutability

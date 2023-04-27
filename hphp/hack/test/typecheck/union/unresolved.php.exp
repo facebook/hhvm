@@ -11,6 +11,6 @@ File "unresolved.php", line 44, characters 3-13:
 File "unresolved.php", line 51, characters 3-13:
   nonnull
 File "unresolved.php", line 54, characters 3-13:
-  (_ | int | string)
+  (int | string | _)
 File "unresolved.php", line 5, characters 48-51:
 Was expecting a type hint (Typing[4032])

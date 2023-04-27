@@ -1,0 +1,2 @@
+version=3
+https://cdn.mysql.com/Downloads/MySQL-@MYSQL_BASE_VERSION@//mysql-([\d.]+).tar.gz

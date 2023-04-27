@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/constant.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-file.h"
@@ -68,7 +69,8 @@ struct UnitEmitter {
 
   explicit UnitEmitter(const SHA1& sha1,
                        const SHA1& bcSha1,
-                       const Native::FuncTable&);
+                       const Native::FuncTable&,
+                       const PackageInfo&);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
@@ -79,7 +81,6 @@ struct UnitEmitter {
    */
   std::unique_ptr<Unit> create() const;
 
-  template<typename SerDe> void serdeMetaData(SerDe&);
   template<typename SerDe> void serde(SerDe&, bool lazy);
 
   /*
@@ -147,7 +148,6 @@ struct UnitEmitter {
    */
   static const ArrayData* loadLitarrayFromRepo(int64_t unitSn,
                                                RepoFile::Token token,
-                                               const StringData* filepath,
                                                bool makeStatic);
   static const StringData* loadLitstrFromRepo(int64_t unitSn,
                                               RepoFile::Token token,
@@ -194,16 +194,9 @@ struct UnitEmitter {
   size_t numPreClasses() const;
 
   /*
-   * The PreClassEmitter for `preClassId'.
+   * All PreClassEmitters in the Unit.
    */
-  const PreClassEmitter* pce(Id preClassId) const;
-  PreClassEmitter* pce(Id preClassId);
-
-  /*
-   * The id for the pre-class named clsName, or -1 if
-   * there is no such pre-class
-   */
-  Id pceId(folly::StringPiece clsName);
+  folly::Range<PreClassEmitter* const*> preclasses() const;
 
   /*
    * Create a new PreClassEmitter and add it to all the PCE data structures.
@@ -259,6 +252,11 @@ struct UnitEmitter {
    */
   bool isASystemLib() const;
 
+  /*
+   * Use StructuredLog to record decl related information about this unit.
+   */
+  void logDeclInfo() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // EntryPoint.
 
@@ -268,8 +266,15 @@ struct UnitEmitter {
 
   Id getEntryPointId() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // EntryPoint.
+
+  const PackageInfo& getPackageInfo() const;
+
 private:
   void calculateEntryPointId();
+
+  static const ArrayData* loadLitarrayFromPtr(const char*, size_t);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -282,7 +287,14 @@ public:
   bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
+
+  // A list of dependencies queried by the frontend while compiling
+  // this unit.
+  std::vector<DeclDep> m_deps;
+
+  // A list of symbols which will be required by this unit at runtime.
   SymbolRefs m_symbol_refs;
+
   /*
    * name=>NativeFuncInfo for native funcs in this unit
    */
@@ -292,6 +304,17 @@ public:
   FatalOp m_fatalOp;
   std::string m_fatalMsg;
   const StringData* m_moduleName{nullptr};
+  PackageInfo m_packageInfo;
+
+  /*
+   * HackC may report a list of referenced symbols which either could not be
+   * looked up or did not exist while compiling the unit.
+   *
+   * These are initialized when either StressShallowDeclDeps or
+   * StressFoldedDeclDeps is true during compilation.
+   */
+  std::vector<const StringData*> m_missingSyms;
+  std::vector<const StringData*> m_errorSyms;
 
 private:
   SHA1 m_sha1;
@@ -347,6 +370,25 @@ private:
   Id m_entryPointId{kInvalidId};
 
   bool m_entryPointIdCalculated{false};
+
+  // When deserializing, used to provide the location of raw array
+  // data to lookupArray.
+  const char* m_litarrayBuffer{nullptr};
+  size_t m_litarrayBufferSize{0};
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+// UnitEmitter's serde implementation does not serialize all of the
+// UnitEmitter's data (it is sometimes stored elsewhere). This is a
+// wrapper around a UnitEmitter allowing for complete stand-alone
+// serializating and deserializing.
+struct UnitEmitterSerdeWrapper {
+  UnitEmitterSerdeWrapper() = default;
+  /* implicit */ UnitEmitterSerdeWrapper(std::unique_ptr<UnitEmitter> ue)
+      : m_ue{std::move(ue)} {}
+  std::unique_ptr<UnitEmitter> m_ue;
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

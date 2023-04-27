@@ -3,13 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::{AllocError, Allocator, Layout};
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
 use std::ptr::NonNull;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
 /// An allocator that can allocate chunks from a file.
 pub struct FileAlloc {
-    file_start: *mut libc::c_void,
+    file_start: usize,
     file_size: usize,
     next_free_byte: AtomicUsize,
 }
@@ -22,7 +25,7 @@ impl FileAlloc {
     /// - `next_free_byte` is a locked `u64` indicating the next free byte
     pub fn new(file_start: *mut libc::c_void, file_size: usize, next_free_byte: usize) -> Self {
         Self {
-            file_start,
+            file_start: file_start as usize,
             file_size,
             next_free_byte: AtomicUsize::new(next_free_byte),
         }

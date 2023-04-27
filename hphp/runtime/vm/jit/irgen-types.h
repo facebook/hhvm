@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -37,6 +38,10 @@ namespace irgen {
 struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
+
+void verifyParamType(IRGS& env, const Func* callee, int32_t id,
+                     BCSPRelOffset offset, SSATmp* prologueCtx);
+
 void verifyPropType(IRGS& env,
                     SSATmp* cls,
                     const HPHP::TypeConstraint* tc,

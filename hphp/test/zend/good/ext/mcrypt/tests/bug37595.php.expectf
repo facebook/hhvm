@@ -1,9 +1,9 @@
 string(8) "12345678"
-string(16) "123456789%r\x00\x00\x00\x00\x00\x00\x00%r"
-string(8) "%r\x00%r1234567"
+string(16) "123456789%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}"
+string(8) "%h{00}1234567"
 
 Warning: An empty string was passed in %s/bug37595.php on line 31
 bool(false)
 string(16) "1234567812345678"
-string(24) "12345678123456789%r\x00\x00\x00\x00\x00\x00\x00%r"
+string(24) "12345678123456789%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}"
 Done

@@ -4,7 +4,7 @@ class A {
 }
 class B {
   public $data;
-  public function setData(A $result = null) {
+  public function setData(?A $result = null) {
     $this->data = $result;
   }
 }

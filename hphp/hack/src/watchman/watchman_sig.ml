@@ -160,6 +160,8 @@ module type S = sig
     watchman_instance ->
     (watchman_instance * pushed_changes list) result
 
+  val get_clock : watchman_instance -> clock
+
   val conn_of_instance : watchman_instance -> conn option
 
   val close : env -> unit result

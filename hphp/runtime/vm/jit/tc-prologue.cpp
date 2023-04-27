@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -71,12 +72,12 @@ void PrologueTranslator::computeKind() {
   }
 }
 
-int PrologueTranslator::paramIndex() const {
+uint32_t PrologueTranslator::paramIndex() const {
   return paramIndexHelper(func, nPassed);
 }
 
-int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
-  int const numParams = f->numNonVariadicParams();
+uint32_t PrologueTranslator::paramIndexHelper(const Func* f, uint32_t passed) {
+  auto const numParams = f->numNonVariadicParams();
   return passed <= numParams ? passed : numParams + 1;
 }
 
@@ -104,7 +105,7 @@ void PrologueTranslator::resetCached() {
 }
 
 void PrologueTranslator::setCachedForProcessFail() {
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed,
         tc::ustubs().fcallHelperNoTranslateThunk);
   func->setPrologue(paramIndex(), tc::ustubs().fcallHelperNoTranslateThunk);
@@ -149,6 +150,7 @@ void PrologueTranslator::gen() {
 
   irgen::emitFuncPrologue(env, func, nPassed, transId);
   irgen::sealUnit(env);
+  optimize(*unit, kind);
 
   printUnit(2, *unit, "After initial prologue generation");
 
@@ -170,8 +172,9 @@ void PrologueTranslator::publishMetaImpl() {
 
   auto const& loc = transMeta->range.loc();
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-              loc.coldStart(), loc.coldSize(), loc.frozenStart(),
-              loc.frozenSize(), std::move(annotations)};
+              loc.coldCodeStart(), loc.coldCodeSize(),
+              loc.frozenCodeStart(), loc.frozenCodeSize(),
+              std::move(annotations)};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -196,7 +199,7 @@ void PrologueTranslator::publishCodeImpl() {
 
   const auto start = entry();
   assertx(start);
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed, start);
   func->setPrologue(paramIndex(), start);
 

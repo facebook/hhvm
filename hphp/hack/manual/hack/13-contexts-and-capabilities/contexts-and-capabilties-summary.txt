@@ -1,0 +1,1 @@
+Specifying capabilities and permissions for functions.

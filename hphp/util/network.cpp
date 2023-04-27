@@ -15,11 +15,9 @@
 */
 #include "hphp/util/network.h"
 
-#ifndef _MSC_VER
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <sys/utsname.h>
-#endif
 
 #include <folly/IPAddress.h>
 #include <folly/String.h>
@@ -27,7 +25,6 @@
 
 namespace HPHP {
 
-#ifndef _MSC_VER
 ///////////////////////////////////////////////////////////////////////////////
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
@@ -43,25 +40,11 @@ struct ResolverLibInitializer {
   }
 };
 static ResolverLibInitializer _resolver_lib_initializer;
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
-#if defined(__APPLE__) || defined(_MSC_VER)
-  // NOTE: on windows gethostbyname is "thread safe"
-  // the hostent is allocated once per thread by winsock2
-  // and cleaned up by winsock when the thread ends
-  struct hostent *hp = gethostbyname(address);
-
-  if (!hp) {
-    return false;
-  }
-
-  result.hostbuf = *hp;
-  return true;
-#else
   struct hostent *hp;
   int res;
 
@@ -73,7 +56,6 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
     result.tmphstbuf = (char*)realloc(result.tmphstbuf, hstbuflen);
   }
   return !res && hp;
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,18 +71,9 @@ std::string GetPrimaryIPImpl(int af) {
     }
   };
 
-#ifdef _MSC_VER
-  char* nodename = nullptr;
-  char nodenamebuf[65];
-  if (gethostname(nodenamebuf, 65) < 0)
-    nodename = "localhost";
-  else
-    nodename = nodenamebuf;
-#else
   struct utsname buf;
   uname((struct utsname *)&buf);
   const char* nodename = buf.nodename;
-#endif
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = af;

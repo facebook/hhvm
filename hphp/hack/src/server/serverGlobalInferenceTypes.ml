@@ -17,5 +17,5 @@ type result =
   | RMerge of unit
   | RSolve of unit
   | RExport of unit
-  | RRewrite of ServerRefactorTypes.patch list
+  | RRewrite of ServerRenameTypes.patch list
   | RError of string

@@ -55,7 +55,11 @@ let initial_locals entry = CMap.add Typing_continuations.Next entry CMap.empty
 
 let get_cont_option = CMap.find_opt
 
-let all_continuations = Typing_continuations.Map.keys
+let all_continuations : t -> C.t list = Typing_continuations.Map.keys
+
+(** Continuations used to typecheck the `finally` block. *)
+let continuations_for_finally =
+  [C.Break; C.Continue; C.Catch; C.Exit; C.Finally]
 
 (* Update an entry if it exists *)
 let update_cont_entry name m f =

@@ -105,6 +105,8 @@ function autoload_function_to_path(string $function): ?string;
 <<__Native>>
 function autoload_constant_to_path(string $constant): ?string;
 <<__Native>>
+function autoload_module_to_path(string $module): ?string;
+<<__Native>>
 function autoload_type_alias_to_path(string $type_alias): ?string;
 
 /**
@@ -122,6 +124,8 @@ function autoload_path_to_types(string $path): vec<classname<mixed>>;
 function autoload_path_to_functions(string $path): vec<string>;
 <<__Native>>
 function autoload_path_to_constants(string $path): vec<string>;
+<<__Native>>
+function autoload_path_to_modules(string $path): vec<string>;
 <<__Native>>
 function autoload_path_to_type_aliases(string $path): vec<string>;
 
@@ -251,32 +255,12 @@ function dynamic_fun_force(string $name)[]: mixed;
 <<__Native>>
 function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
 
-// class-like
-interface ClassLikeAttribute {}
-interface ClassAttribute extends ClassLikeAttribute {}
-interface ClassConstantAttribute {}
-interface EnumAttribute extends ClassLikeAttribute {}
-interface EnumClassAttribute extends ClassLikeAttribute {}
-
-interface TypeAliasAttribute {}
-
-// function-like
-interface FunctionAttribute {}
-interface MethodAttribute {}
-
-interface LambdaAttribute {}
-
-// properties
-interface PropertyAttribute {}
-interface InstancePropertyAttribute extends PropertyAttribute {}
-interface StaticPropertyAttribute extends PropertyAttribute {}
-
-interface ParameterAttribute {}
-interface FileAttribute {}
-
-interface TypeParameterAttribute {}
-
-interface TypeConstantAttribute {}
+/**
+ * Creates a LazyClass pointer from input $classname. It does not eagerly
+ * verify that the $classname is in fact a valid class.
+ */
+<<__Native>>
+function classname_from_string_unsafe(string $classname)[]: mixed;
 
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files
@@ -356,77 +340,6 @@ function clear_all_coverage_data(): void {
   }
 }
 
-namespace ImplicitContext\_Private {
-
-<<__NativeData("ImplicitContext")>>
-final class ImplicitContextData {}
-
-/**
- * Returns the implicit context keyed by $key or null if such doesn't exist
- */
-<<__Native>>
-function get_implicit_context(string $key)[zoned]: mixed;
-
-/**
- * Sets implicit context $context keyed by $key.
- * Returns the previous implicit context.
- */
-<<__Native>>
-function set_implicit_context(
-  string $key,
-  mixed $context,
-)[zoned]: object /* ImplicitContextData */;
-
-/*
- * Returns the currently implicit context hash or emptry string if
- * no implicit context is set
- */
-<<__Native>>
-function get_implicit_context_memo_key()[zoned]: string;
-
-} // namespace ImplicitContext\_Private
-
-abstract class ImplicitContext {
-  abstract const type T as nonnull;
-
-  protected static async function setAsync<Tout>(
-    this::T $context,
-    (function (): Awaitable<Tout>) $f
-  )[zoned]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
-    );
-    try {
-      $result = $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
-
-  protected static function set<Tout>(
-    this::T $context,
-    (function (): Tout) $f
-  )[zoned]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
-    );
-    try {
-      return $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
-
-  protected static function get()[zoned]: this::T {
-    return ImplicitContext\_Private\get_implicit_context(static::class);
-  }
-}
-
 /**
  * Return a vector of lines known to be executable in $file. WARNING: there is
  * no guarantee that these lines will be seen when running code-coverage mode.
@@ -468,10 +381,24 @@ function enable_function_coverage(): void;
 function collect_function_coverage(): dict<string, string>;
 
 /**
- * Return the options for the given root, stored in .hhvmconfig.hdf.
+ * Return all package information from PACKAGES.toml
  */
 <<__Native>>
-function root_options(string $repo): dict<string, mixed>;
+function get_all_packages(
+): dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+
+/**
+ * Return all deploment information from PACKAGES.toml
+ */
+<<__Native>>
+function get_all_deployments(
+): dict<string, shape('packages' => vec<string>, 'domains' => vec<string>)>;
+
+/*
+ * Returns whether a package named $name exist in the current deployment.
+ */
+<<__Native>>
+function package_exists(string $name): bool;
 
 } // HH
 
@@ -487,7 +414,6 @@ interface IMemoizeParam extends \HH\IMemoizeParam {
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
-  <<__Pure>>
   public function getInstanceKey(): string;
 }
 }
@@ -562,84 +488,64 @@ namespace HH\ReifiedGenerics {
 
 }
 
-namespace HH\Coeffects {
+namespace HH\TypeStructure {
 
-  /**
-   * Creates an unsafe way to call a function by providing defaults coeffects.
-   * EXTREMELY UNSAFE. USE WITH CAUTION.
-   */
-  function backdoor<Tout>(
-    (function()[defaults]: Tout) $fn
-  )[/* 86backdoor */]: Tout {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
-    try {
-      return $fn();
-    } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
+<<__Native>>
+function get_kind(dict<string, mixed> $ts): int;
 
-  /**
-   * Creates an unsafe way to call a function by providing defaults coeffects.
-   * EXTREMELY UNSAFE. USE WITH CAUTION.
-   */
-  async function backdoor_async<Tout>(
-    (function()[defaults]: Awaitable<Tout>) $fn
-  )[/* 86backdoor */]: Awaitable<Tout> {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
-    try {
-      $result = $fn();
-    } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
+<<__Native>>
+function get_nullable(dict<string, mixed> $ts): bool;
 
-  namespace _Private {
+<<__Native>>
+function get_soft(dict<string, mixed> $ts): bool;
 
-  /**
-   * The internal entry point for zoned_with functions
-   */
-  <<__Native>>
-  function enter_zoned_with<Tout, Tpolicy>(
-    (function()[zoned_with<Tpolicy>]: Tout) $f
-  )[zoned]: mixed /* Tout */;
+<<__Native>>
+function get_like(dict<string, mixed> $ts): bool;
 
-  } // namespace _Private
+<<__Native>>
+function get_opaque(dict<string, mixed> $ts): bool;
 
-  /**
-   * The public entry point for zoned_with functions
-   */
-  function enter_zoned_with<Tout, Tcontext as ImplicitContext, Tval>(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Tout) $f,
-  )[zoned]: Tout where Tval = Tcontext::T {
-    return $cls::set(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
+<<__Native>>
+function get_optional_shape_field(dict<string, mixed> $ts): bool;
 
-  /**
-   * The public entry point for async zoned_with functions
-   */
-  async function enter_zoned_with_async<
-    Tout,
-    Tcontext as ImplicitContext,
-    Tval
-  >(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Awaitable<Tout>) $f,
-  )[zoned]: Awaitable<Tout> where Tval = Tcontext::T {
-    return await $cls::setAsync(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
+<<__Native>>
+function get_alias(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_typevars(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_typevar_types(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_fields(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_allows_unknown_fields(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_elem_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_param_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_return_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_variadic_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_name(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_generic_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_classname(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_exact(dict<string, mixed> $ts): bool;
 
 }
 
@@ -677,35 +583,9 @@ function reflection_class_is_interface(
     mixed $class,
 )[]: bool;
 
-/**
- * List of ids declared for create_opaque_value.
- * Please do not reuse an existing or deprecated id for your new
- * feature.
- */
-enum OpaqueValueId : int {
-  EnumClassLabel = 0;
+
 }
 
-<<__Native, __NoInjection>>
-function create_opaque_value_internal(int $id, mixed $val)[]: resource;
-
-/**
- * Create an OpaqueValue resource wrapping $val with $id.
- *
- * The value must be memoizable to ensure that equivalent values are only
- * allocated once and will always compare as equal.
- */
-<<__Memoize, __NoInjection>>
-function create_opaque_value(int $id, mixed $val)[]: mixed {
-  return create_opaque_value_internal($id, $val);
-}
-
-/**
- * Returns the value used to construct $res in a call to create_opaque_value,
- * if $res is not an opaque value resource or $id does not match the id used
- * to construct it throw an exception.
- */
-<<__Native, __NoInjection>>
-function unwrap_opaque_value(int $id, resource $res)[]: mixed;
-
+namespace HH\FIXME {
+  type TANY_MARKER<T> = T;
 }

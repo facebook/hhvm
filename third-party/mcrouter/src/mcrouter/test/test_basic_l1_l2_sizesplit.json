@@ -1,0 +1,17 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "localhost:12345:caret" ]
+    },
+    "B": {
+      "servers": [ "localhost:12346:caret" ]
+    }
+  },
+  "route": {
+    "type": "L1L2SizeSplitRoute",
+    "l1": "PoolRoute|A",
+    "l2": "PoolRoute|B",
+    "threshold": 8,
+    "both_full_set": false
+  }
+}

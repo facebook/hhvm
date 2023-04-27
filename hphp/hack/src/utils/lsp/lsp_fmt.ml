@@ -18,18 +18,17 @@ open Hh_json_helpers
 
 let parse_id (json : json) : lsp_id =
   match json with
-  | JSON_Number s ->
-    begin
-      try NumberId (int_of_string s) with
-      | Failure _ ->
-        raise
-          (Error.LspException
-             {
-               Error.code = Error.ParseError;
-               message = "float ids not allowed: " ^ s;
-               data = None;
-             })
-    end
+  | JSON_Number s -> begin
+    try NumberId (int_of_string s) with
+    | Failure _ ->
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.ParseError;
+             message = "float ids not allowed: " ^ s;
+             data = None;
+           })
+  end
   | JSON_String s -> StringId s
   | _ ->
     raise
@@ -463,18 +462,17 @@ let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =
     let parse_code = function
       | None -> NoCode
       | Some (JSON_String s) -> StringCode s
-      | Some (JSON_Number s) ->
-        begin
-          try IntCode (int_of_string s) with
-          | Failure _ ->
-            raise
-              (Error.LspException
-                 {
-                   Error.code = Error.ParseError;
-                   message = "Diagnostic code expected to be an int: " ^ s;
-                   data = None;
-                 })
-        end
+      | Some (JSON_Number s) -> begin
+        try IntCode (int_of_string s) with
+        | Failure _ ->
+          raise
+            (Error.LspException
+               {
+                 Error.code = Error.ParseError;
+                 message = "Diagnostic code expected to be an int: " ^ s;
+                 data = None;
+               })
+      end
       | _ ->
         raise
           (Error.LspException
@@ -574,7 +572,8 @@ let print_telemetryNotification
   (* LSP allows "any" for the format of telemetry notifications. It's up to us! *)
   JSON_Object
     (("type", int_ (MessageType.to_enum r.LogMessage.type_))
-     :: ("message", JSON_String r.LogMessage.message) :: extras)
+    :: ("message", JSON_String r.LogMessage.message)
+    :: extras)
 
 (************************************************************************)
 
@@ -613,18 +612,11 @@ let parse_result_showMessageRequest (result : json option) :
 (************************************************************************)
 
 let print_showStatus (r : ShowStatusFB.showStatusParams) : json =
-  let print_action (action : ShowMessageRequest.messageActionItem) : json =
-    JSON_Object [("title", JSON_String action.ShowMessageRequest.title)]
-  in
   let rr = r.ShowStatusFB.request in
   Jprint.object_opt
     [
-      ("type", Some (int_ (MessageType.to_enum rr.ShowMessageRequest.type_)));
-      ( "actions",
-        Some
-          (JSON_Array (List.map rr.ShowMessageRequest.actions ~f:print_action))
-      );
-      ("message", Some (JSON_String rr.ShowMessageRequest.message));
+      ("type", Some (int_ (MessageType.to_enum rr.ShowStatusFB.type_)));
+      ("message", Some (JSON_String rr.ShowStatusFB.message));
       ("shortMessage", Option.map r.ShowStatusFB.shortMessage ~f:string_);
       ("telemetry", r.ShowStatusFB.telemetry);
       ( "progress",
@@ -662,9 +654,9 @@ let print_hover (r : Hover.result) : json =
 
 let parse_completionItem (params : json option) : CompletionItemResolve.params =
   Completion.(
-    let textEdits =
-      Jget.obj_opt params "textEdit"
-      :: Jget.array_d params "additionalTextEdits" ~default:[]
+    let textEdit = Jget.obj_opt params "textEdit" |> parse_textEdit in
+    let additionalTextEdits =
+      Jget.array_d params "additionalTextEdits" ~default:[]
       |> List.filter_map ~f:parse_textEdit
     in
     let command =
@@ -682,8 +674,6 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
       kind =
         Option.bind (Jget.int_opt params "kind") ~f:completionItemKind_of_enum;
       detail = Jget.string_opt params "detail";
-      inlineDetail = Jget.string_opt params "inlineDetail";
-      itemType = Jget.string_opt params "itemType";
       documentation;
       sortText = Jget.string_opt params "sortText";
       filterText = Jget.string_opt params "filterText";
@@ -692,7 +682,8 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
         Option.bind
           (Jget.int_opt params "insertTextFormat")
           ~f:insertTextFormat_of_enum;
-      textEdits;
+      textEdit;
+      additionalTextEdits;
       command;
       data = Jget.obj_opt params "data";
     })
@@ -711,8 +702,6 @@ let print_completionItem (item : Completion.completionItem) : json =
           Option.map item.kind ~f:(fun x ->
               int_ @@ completionItemKind_to_enum x) );
         ("detail", Option.map item.detail ~f:string_);
-        ("inlineDetail", Option.map item.inlineDetail ~f:string_);
-        ("itemType", Option.map item.itemType ~f:string_);
         ( "documentation",
           match item.documentation with
           | None -> None
@@ -733,13 +722,11 @@ let print_completionItem (item : Completion.completionItem) : json =
         ( "insertTextFormat",
           Option.map item.insertTextFormat ~f:(fun x ->
               int_ @@ insertTextFormat_to_enum x) );
-        ("textEdit", Option.map (List.hd item.textEdits) ~f:print_textEdit);
+        ("textEdit", Option.map item.textEdit ~f:print_textEdit);
         ( "additionalTextEdits",
-          match List.tl item.textEdits with
-          | None
-          | Some [] ->
-            None
-          | Some l -> Some (print_textEdits l) );
+          match item.additionalTextEdits with
+          | [] -> None
+          | text_edits -> Some (print_textEdits text_edits) );
         ("command", Option.map item.command ~f:print_command);
         ("data", item.data);
       ])
@@ -806,6 +793,89 @@ let parse_findReferences (params : json option) : FindReferences.params =
           Jget.bool_d context "includeIndirectReferences" ~default:false;
       };
   }
+
+(************************************************************************)
+
+let parse_callItem (params : json option) : CallHierarchyItem.t =
+  let rangeObj = Jget.obj_exn params "range" in
+  let selectionRangeObj = Jget.obj_exn params "selectionRange" in
+  let open CallHierarchyItem in
+  {
+    name = Jget.string_exn params "name";
+    kind =
+      (match
+         Jget.int_exn params "kind" |> SymbolInformation.symbolKind_of_enum
+       with
+      | None -> raise (Jget.Parse "invalid symbol kind")
+      | Some s -> s);
+    detail = Jget.string_opt params "detail";
+    uri = Jget.string_exn params "uri" |> uri_of_string;
+    range = parse_range_exn rangeObj;
+    selectionRange = parse_range_exn selectionRangeObj;
+  }
+
+(************************************************************************)
+let print_callItem (item : CallHierarchyItem.t) : json =
+  let open CallHierarchyItem in
+  let kindJSON = SymbolInformation.symbolKind_to_enum item.kind |> int_ in
+  Jprint.object_opt
+    [
+      ("name", Some (JSON_String item.name));
+      ("kind", Some kindJSON);
+      ("detail", Option.map item.detail ~f:string_);
+      ("uri", Some (JSON_String (string_of_uri item.uri)));
+      ("range", Some (print_range item.range));
+      ("selectionRange", Some (print_range item.selectionRange));
+    ]
+
+(************************************************************************)
+
+let parse_callHierarchyCalls (params : json option) :
+    CallHierarchyCallsRequestParam.t =
+  let json_item = Jget.obj_opt params "item" in
+  let parsed_item = parse_callItem json_item in
+  let open CallHierarchyCallsRequestParam in
+  { item = parsed_item }
+
+(************************************************************************)
+
+let print_PrepareCallHierarchyResult (r : PrepareCallHierarchy.result) : json =
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_callItem list
+
+(************************************************************************)
+let print_CallHierarchyIncomingCallsResult
+    (r : CallHierarchyIncomingCalls.result) : json =
+  let open CallHierarchyIncomingCalls in
+  let print_CallHierarchyIncomingCall
+      (call : CallHierarchyIncomingCalls.callHierarchyIncomingCall) : json =
+    JSON_Object
+      [
+        ("from", print_callItem call.from);
+        ("fromRanges", array_ print_range call.fromRanges);
+      ]
+  in
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_CallHierarchyIncomingCall list
+
+(************************************************************************)
+
+let print_CallHierarchyOutgoingCallsResult
+    (r : CallHierarchyOutgoingCalls.result) : json =
+  let open CallHierarchyOutgoingCalls in
+  let print_CallHierarchyOutgoingCall
+      (call : CallHierarchyOutgoingCalls.callHierarchyOutgoingCall) : json =
+    JSON_Object
+      [
+        ("to", print_callItem call.call_to);
+        ("fromRanges", array_ print_range call.fromRanges);
+      ]
+  in
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_CallHierarchyOutgoingCall list
 
 (************************************************************************)
 
@@ -1180,7 +1250,8 @@ let print_error (e : Error.t) : json =
   in
   let entries =
     ("code", int_ (Error.code_to_enum e.Error.code))
-    :: ("message", string_ e.Error.message) :: data
+    :: ("message", string_ e.Error.message)
+    :: data
   in
   JSON_Object entries
 
@@ -1228,6 +1299,13 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DocumentSymbol.textDocument.uri
   | RequestMessage (_, FindReferencesRequest p) ->
     Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, PrepareCallHierarchyRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  (*Implement for CallHierarchy*)
+  | RequestMessage (_, CallHierarchyIncomingCallsRequest p) ->
+    Some p.CallHierarchyCallsRequestParam.item.CallHierarchyItem.uri
+  | RequestMessage (_, CallHierarchyOutgoingCallsRequest p) ->
+    Some p.CallHierarchyCallsRequestParam.item.CallHierarchyItem.uri
   | RequestMessage (_, ImplementationRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentHighlightRequest p) ->
@@ -1253,12 +1331,11 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DidSave.textDocument.uri
   | NotificationMessage (DidChangeNotification p) ->
     Some p.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-  | NotificationMessage (DidChangeWatchedFilesNotification p) ->
-    begin
-      match p.DidChangeWatchedFiles.changes with
-      | [] -> None
-      | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
-    end
+  | NotificationMessage (DidChangeWatchedFilesNotification p) -> begin
+    match p.DidChangeWatchedFiles.changes with
+    | [] -> None
+    | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
+  end
   | RequestMessage (_, HackTestStartServerRequestFB)
   | RequestMessage (_, HackTestStopServerRequestFB)
   | RequestMessage (_, HackTestShutdownServerlessRequestFB)
@@ -1305,6 +1382,9 @@ let request_name_to_string (request : lsp_request) : string =
   | WorkspaceSymbolRequest _ -> "workspace/symbol"
   | DocumentSymbolRequest _ -> "textDocument/documentSymbol"
   | FindReferencesRequest _ -> "textDocument/references"
+  | PrepareCallHierarchyRequest _ -> "textDocument/prepareCallHierarchy"
+  | CallHierarchyIncomingCallsRequest _ -> "callHierarchy/incomingCalls"
+  | CallHierarchyOutgoingCallsRequest _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightRequest _ -> "textDocument/documentHighlight"
   | TypeCoverageRequestFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingRequest _ -> "textDocument/formatting"
@@ -1337,6 +1417,9 @@ let result_name_to_string (result : lsp_result) : string =
   | WorkspaceSymbolResult _ -> "workspace/symbol"
   | DocumentSymbolResult _ -> "textDocument/documentSymbol"
   | FindReferencesResult _ -> "textDocument/references"
+  | PrepareCallHierarchyResult _ -> "textDocument/prepareCallHierarchy"
+  | CallHierarchyIncomingCallsResult _ -> "callHierarchy/incomingCalls"
+  | CallHierarchyOutgoingCallsResult _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightResult _ -> "textDocument/documentHighlight"
   | TypeCoverageResultFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingResult _ -> "textDocument/formatting"
@@ -1425,6 +1508,12 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     DocumentSymbolRequest (parse_documentSymbol params)
   | "textDocument/references" ->
     FindReferencesRequest (parse_findReferences params)
+  | "textDocument/prepareCallHierarchy" ->
+    PrepareCallHierarchyRequest (parse_textDocumentPositionParams params)
+  | "callHierarchy/incomingCalls" ->
+    CallHierarchyIncomingCallsRequest (parse_callHierarchyCalls params)
+  | "callHierarchy/outgoingCalls" ->
+    CallHierarchyOutgoingCallsRequest (parse_callHierarchyCalls params)
   | "textDocument/rename" -> RenameRequest (parse_documentRename params)
   | "textDocument/documentHighlight" ->
     DocumentHighlightRequest (parse_documentHighlight params)
@@ -1482,10 +1571,8 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   match request with
   | ShowMessageRequestRequest _ ->
     ShowMessageRequestResult (parse_result_showMessageRequest (Some result))
-  | ShowStatusRequestFB _ ->
-    ShowStatusResultFB (parse_result_showMessageRequest (Some result))
+  | ShowStatusRequestFB _ -> ShowStatusResultFB ()
   | RegisterCapabilityRequest _ -> RegisterCapabilityRequestResult
-  (* shares result type *)
   | InitializeRequest _
   | ShutdownRequest
   | CodeLensResolveRequest _
@@ -1499,6 +1586,9 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | WorkspaceSymbolRequest _
   | DocumentSymbolRequest _
   | FindReferencesRequest _
+  | PrepareCallHierarchyRequest _
+  | CallHierarchyIncomingCallsRequest _
+  | CallHierarchyOutgoingCallsRequest _
   | DocumentHighlightRequest _
   | TypeCoverageRequestFB _
   | DocumentFormattingRequest _
@@ -1569,6 +1659,9 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | WorkspaceSymbolRequest _
     | DocumentSymbolRequest _
     | FindReferencesRequest _
+    | PrepareCallHierarchyRequest _
+    | CallHierarchyIncomingCallsRequest _
+    | CallHierarchyOutgoingCallsRequest _
     | DocumentHighlightRequest _
     | TypeCoverageRequestFB _
     | DocumentFormattingRequest _
@@ -1610,6 +1703,11 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | WorkspaceSymbolResult r -> print_workspaceSymbol r
     | DocumentSymbolResult r -> print_documentSymbol r
     | FindReferencesResult r -> print_locations r
+    | PrepareCallHierarchyResult r -> print_PrepareCallHierarchyResult r
+    | CallHierarchyIncomingCallsResult r ->
+      print_CallHierarchyIncomingCallsResult r
+    | CallHierarchyOutgoingCallsResult r ->
+      print_CallHierarchyOutgoingCallsResult r
     | DocumentHighlightResult r -> print_documentHighlight r
     | TypeCoverageResultFB r -> print_typeCoverage r
     | DocumentFormattingResult r -> print_documentFormatting r

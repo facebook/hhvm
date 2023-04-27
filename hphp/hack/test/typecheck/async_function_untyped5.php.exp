@@ -6,3 +6,9 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   Expected `Awaitable<_>` (result of an `async` function)
   File "async_function_untyped5.php", line 8, characters 24-26:
   But got `int`
+File "async_function_untyped5.php", line 8, characters 19-19:
+The method `f` is not compatible with the overridden method (Typing[4341])
+  File "async_function_untyped5.php", line 8, characters 19-19:
+  You cannot override this method with a non-async method
+  File "async_function_untyped5.php", line 4, characters 25-25:
+  It was declared as async

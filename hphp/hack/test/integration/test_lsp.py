@@ -10,20 +10,26 @@ import os
 import re
 import unittest
 import urllib.parse
-from typing import Iterable, List, Mapping, Tuple
+from typing import Iterable, List, Mapping, Optional, Tuple
 
 import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import LspTestSpec, NoResponse, line
+from lsptestspec import line, LspTestSpec, NoResponse
 from test_case import TestCase
-from utils import Json, JsonObject, interpolate_variables
+from utils import interpolate_variables, Json, JsonObject
 
 
 class LspTestDriver(common_tests.CommonTestDriver):
     def write_load_config(
-        self, use_serverless_ide: bool = False, use_saved_state: bool = False
+        self,
+        use_serverless_ide: bool = False,
+        use_saved_state: bool = False,
+        use_standalone_ide: bool = False,
     ) -> None:
+        assert (
+            use_serverless_ide or not use_standalone_ide
+        ), "use_standalone_ide requires use_serverless_ide"
         # Will use the .hhconfig already in the repo directory
         # As for hh.conf, we'll write it explicitly each test.
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
@@ -43,9 +49,12 @@ lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
 ide_serverless = {use_serverless_ide}
+ide_standalone = {use_standalone_ide}
+produce_streaming_errors = {use_standalone_ide}
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                     use_serverless_ide=str(use_serverless_ide).lower(),
+                    use_standalone_ide=str(use_standalone_ide).lower(),
                 )
             )
 
@@ -182,6 +191,7 @@ class TestLsp(TestCase[LspTestDriver]):
         expected: Json,
         wait_for_server: bool,
         use_serverless_ide: bool,
+        lsp_args: List[str],
     ) -> None:
         if wait_for_server:
             assert not use_serverless_ide, (
@@ -202,7 +212,9 @@ class TestLsp(TestCase[LspTestDriver]):
         elif use_serverless_ide:
             self.test_driver.stop_hh_server()
 
-        with LspCommandProcessor.create(self.test_driver.test_env) as lsp:
+        with LspCommandProcessor.create(
+            self.test_driver.test_env, lsp_args, self.test_driver.repo_dir
+        ) as lsp:
             observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)
@@ -251,10 +263,15 @@ class TestLsp(TestCase[LspTestDriver]):
             raise unittest.SkipTest("Hack server could not be launched")
         self.assertEqual(output.strip(), "No errors!")
 
-    def prepare_serverless_ide_environment(self) -> Mapping[str, str]:
+    def prepare_serverless_ide_environment(
+        self,
+        use_standalone_ide: bool = False,
+    ) -> Mapping[str, str]:
         self.maxDiff = None
         self.test_driver.write_load_config(
-            use_serverless_ide=True, use_saved_state=False
+            use_serverless_ide=True,
+            use_saved_state=False,
+            use_standalone_ide=use_standalone_ide,
         )
         naming_table_saved_state_path = (
             self.test_driver.write_naming_table_saved_state()
@@ -268,13 +285,31 @@ class TestLsp(TestCase[LspTestDriver]):
         wait_for_server: bool = True,
         use_serverless_ide: bool = False,
     ) -> None:
+        self.load_and_run_lsp_with_config(
+            test_name=test_name,
+            variables=variables,
+            wait_for_server=wait_for_server,
+            use_serverless_ide=use_serverless_ide,
+        )
+
+    def load_and_run_lsp_with_config(
+        self,
+        test_name: str,
+        variables: Mapping[str, str],
+        wait_for_server: bool = True,
+        use_serverless_ide: bool = False,
+        lsp_args: Optional[List[str]] = None,
+    ) -> None:
         test, expected = self.load_test_data(test_name, variables)
+        if lsp_args is None:
+            lsp_args = []
         self.run_lsp_test(
             test_name=test_name,
             test=test,
             expected=expected,
             wait_for_server=wait_for_server,
             use_serverless_ide=use_serverless_ide,
+            lsp_args=lsp_args,
         )
 
     def run_spec(
@@ -283,6 +318,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables: Mapping[str, str],
         wait_for_server: bool,
         use_serverless_ide: bool,
+        fall_back_to_full_index: bool = True,
     ) -> None:
         if wait_for_server:
             # wait until hh_server is ready before starting lsp
@@ -290,8 +326,13 @@ class TestLsp(TestCase[LspTestDriver]):
         elif use_serverless_ide:
             self.test_driver.stop_hh_server()
 
+        lsp_args = (
+            []
+            if fall_back_to_full_index
+            else ["--config", "ide_fall_back_to_full_index=false"]
+        )
         with LspCommandProcessor.create(
-            self.test_driver.test_env
+            self.test_driver.test_env, lsp_args
         ) as lsp_command_processor:
             (observed_transcript, error_details) = spec.run(
                 lsp_command_processor=lsp_command_processor, variables=variables
@@ -358,6 +399,160 @@ class TestLsp(TestCase[LspTestDriver]):
             "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
         )
 
+    def test_optional_param_completion(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("optional_param_completion.php"))
+        self.test_driver.stop_hh_server()
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("optional_param_completion"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(int $x, int $y = _): void",
+                            "sortText": "doStuff",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                # We don't want to require the user to provide optional arguments, so
+                                # only insert $x, not $y.
+                                "newText": "doStuff(${1:\\$x})",
+                            },
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/optional_param_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletion",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_all_optional_params_completion(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("all_optional_params_completion.php"))
+        self.test_driver.stop_hh_server()
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("all_optional_params_completion"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(int $x = _, int $y = _): void",
+                            "sortText": "doStuff",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                "newText": "doStuff()",
+                            },
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/all_optional_params_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletionOptional",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_serverless_ide_completion(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
@@ -406,7 +601,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -427,7 +621,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -479,7 +672,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -500,7 +692,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -552,7 +743,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -560,7 +750,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -568,7 +758,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -576,7 +765,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -584,7 +773,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -592,7 +780,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:enum-attribute",
+                                "newText": "xhp:enum-attribute>$0</xhp:enum-attribute>",
                             },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
@@ -600,7 +788,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -608,7 +795,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:generic",
+                                "newText": "xhp:generic>$0</xhp:generic>",
                             },
                             "data": {"fullname": ":xhp:generic"},
                         },
@@ -647,7 +834,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -655,7 +841,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -663,7 +849,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -671,7 +856,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -710,7 +895,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -718,7 +902,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -726,7 +910,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -734,7 +917,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -771,9 +954,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -793,9 +975,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -846,9 +1027,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -868,9 +1048,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -923,7 +1102,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -939,7 +1117,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -955,7 +1132,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -971,7 +1147,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1018,7 +1193,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1034,7 +1208,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1059,8 +1232,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1069,8 +1240,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1113,7 +1282,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1121,7 +1289,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -1129,7 +1297,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1137,7 +1304,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -1153,7 +1320,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "insertText": "ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1162,7 +1328,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1202,9 +1367,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1224,9 +1388,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1277,9 +1440,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1299,9 +1461,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1354,7 +1515,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_function",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_function",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1378,8 +1538,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertText": "test_function",
                     "insertTextFormat": 1,
                     "data": {
@@ -1392,8 +1550,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "documentation": {
                         "kind": "markdown",
                         "value": "test_function docblock.",
@@ -1466,7 +1622,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1488,7 +1643,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Bard",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Bard",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1510,7 +1664,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Alonso",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Alonso",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1532,16 +1685,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "isValid",
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 46,
-                                "char": 32,
+                                "line": 48,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1549,16 +1706,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getValues",
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertText": "getValues()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues()",
+                            },
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 33,
-                                "char": 32,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1566,16 +1727,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getNames",
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertText": "getNames()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames()",
+                            },
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 41,
-                                "char": 32,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1583,16 +1748,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "coerce",
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 52,
-                                "char": 32,
+                                "line": 54,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1600,16 +1769,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assertAll",
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll(${1:\\$values})",
+                            },
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 64,
-                                "char": 32,
+                                "line": 66,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1617,16 +1790,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assert",
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 58,
-                                "char": 32,
+                                "line": 60,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1658,8 +1835,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "isValid",
                     "kind": 2,
                     "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1670,16 +1845,14 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 46,
-                        "char": 32,
+                        "line": 48,
+                        "char": 34,
                     },
                 },
                 result={
                     "label": "isValid",
                     "kind": 2,
                     "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
                     "documentation": {
                         "kind": "markdown",
                         "value": "Returns whether or not the value is defined as a constant.",
@@ -1694,8 +1867,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 46,
-                        "char": 32,
+                        "line": 48,
+                        "char": 34,
                     },
                 },
                 powered_by="serverless_ide",
@@ -1742,7 +1915,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_func",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_func",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1789,11 +1961,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "interfaceDocBlockMethod",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "interfaceDocBlockMethod",
-                            "insertText": "interfaceDocBlockMethod()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 34},
+                                    "end": {"line": 3, "character": 41},
+                                },
+                                "newText": "interfaceDocBlockMethod()",
+                            },
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",
                                 "filename": "${root_path}/completion.php",
@@ -1814,8 +1990,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1834,8 +2008,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1883,7 +2055,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1905,11 +2076,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_do_not_use",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "test_do_not_use()",
+                            },
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1922,11 +2097,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getName",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "getName",
-                            "insertText": "getName()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getName()",
+                            },
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1939,11 +2118,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getAttributes_DO_NOT_USE",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getAttributes_DO_NOT_USE()",
+                            },
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1956,11 +2139,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "__getLoader",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "__getLoader()",
+                            },
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2003,9 +2190,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "$mylambda",
                             "kind": 6,
-                            "detail": "local variable",
-                            "inlineDetail": "(int $n)",
-                            "itemType": "int",
+                            "detail": "(function(int $n): int)",
                             "sortText": "$mylambda",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2033,9 +2218,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2053,9 +2236,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2104,7 +2285,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "MyEnum::TYPE_C",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_C",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2123,32 +2303,9 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "MyEnum::TYPE_A",
-                            "kind": 13,
-                            "detail": "enum",
-                            "inlineDetail": "enum",
-                            "sortText": "MyEnum::TYPE_A",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 36},
-                                    "end": {"line": 3, "character": 36},
-                                },
-                                "newText": "MyEnum::TYPE_A",
-                            },
-                            "data": {
-                                "fullname": "MyEnum::TYPE_A",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 13,
-                                "char": 14,
-                                "base_class": "\\MyEnum",
-                            },
-                        },
-                        {
                             "label": "MyEnum::TYPE_B",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_B",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2160,6 +2317,27 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "MyEnum::TYPE_B",
+                                "filename": "${root_path}/xhp_class_definitions.php",
+                                "line": 13,
+                                "char": 14,
+                                "base_class": "\\MyEnum",
+                            },
+                        },
+                        {
+                            "label": "MyEnum::TYPE_A",
+                            "kind": 13,
+                            "detail": "enum",
+                            "sortText": "MyEnum::TYPE_A",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_A",
+                            },
+                            "data": {
+                                "fullname": "MyEnum::TYPE_A",
                                 "filename": "${root_path}/xhp_class_definitions.php",
                                 "line": 13,
                                 "char": 14,
@@ -2201,10 +2379,9 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "string",
                             "kind": 25,
                             "detail": "builtin",
-                            "inlineDetail": "builtin",
                             "documentation": {
                                 "kind": "markdown",
-                                "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                                "value": "A sequence of characters.",
                             },
                             "sortText": "string",
                             "insertTextFormat": 1,
@@ -2221,7 +2398,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "StringBuffer",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "StringBuffer",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2237,7 +2413,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Stringish",
                             "kind": 8,
                             "detail": "interface",
-                            "inlineDetail": "interface",
                             "sortText": "Stringish",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2253,7 +2428,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "StringishObject",
                             "kind": 8,
                             "detail": "interface",
-                            "inlineDetail": "interface",
                             "sortText": "StringishObject",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2278,9 +2452,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2292,9 +2465,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2359,7 +2531,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2367,7 +2538,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -2375,7 +2546,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2383,7 +2553,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -2391,7 +2561,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2399,7 +2568,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:enum-attribute",
+                                "newText": "xhp:enum-attribute>$0</xhp:enum-attribute>",
                             },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
@@ -2407,7 +2576,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2415,7 +2583,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:generic",
+                                "newText": "xhp:generic>$0</xhp:generic>",
                             },
                             "data": {"fullname": ":xhp:generic"},
                         },
@@ -2454,7 +2622,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2462,7 +2629,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -2470,7 +2637,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2478,7 +2644,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -2517,7 +2683,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2525,7 +2690,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -2533,7 +2698,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2541,7 +2705,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -2578,9 +2742,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2600,9 +2763,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2653,9 +2815,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2675,9 +2836,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2730,7 +2890,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2746,7 +2905,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2762,7 +2920,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2778,7 +2935,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2825,7 +2981,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2841,7 +2996,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2866,8 +3020,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -2876,8 +3028,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -2917,9 +3067,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2939,9 +3088,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2992,9 +3140,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3014,9 +3161,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3069,7 +3215,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_function",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_function",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3093,8 +3238,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertText": "test_function",
                     "insertTextFormat": 1,
                     "data": {
@@ -3107,8 +3250,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "documentation": {
                         "kind": "markdown",
                         "value": "test_function docblock.",
@@ -3181,7 +3322,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3203,7 +3343,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Bard",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Bard",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3225,7 +3364,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Alonso",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Alonso",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3247,16 +3385,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "isValid",
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 46,
-                                "char": 32,
+                                "line": 48,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3264,16 +3406,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getValues",
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertText": "getValues()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues()",
+                            },
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 33,
-                                "char": 32,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3281,16 +3427,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getNames",
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertText": "getNames()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames()",
+                            },
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 41,
-                                "char": 32,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3298,16 +3448,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "coerce",
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 52,
-                                "char": 32,
+                                "line": 54,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3315,16 +3469,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assertAll",
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll(${1:\\$values})",
+                            },
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 64,
-                                "char": 32,
+                                "line": 66,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3332,16 +3490,20 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assert",
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 58,
-                                "char": 32,
+                                "line": 60,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -3407,7 +3569,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3429,11 +3590,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_do_not_use",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "test_do_not_use()",
+                            },
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3446,11 +3611,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getName",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "getName",
-                            "insertText": "getName()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getName()",
+                            },
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3463,11 +3632,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getAttributes_DO_NOT_USE",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getAttributes_DO_NOT_USE()",
+                            },
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3480,11 +3653,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "__getLoader",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "__getLoader()",
+                            },
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3742,7 +3919,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3750,19 +3927,19 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=[
                     {
-                        "uri": "file://${root_path}/override.php",
+                        "uri": "${php_file_uri}",
                         "range": {
-                            "start": {"line": 7, "character": 18},
-                            "end": {"line": 7, "character": 21},
+                            "start": {"line": 3, "character": 18},
+                            "end": {"line": 3, "character": 21},
                         },
-                        "title": "MyTrait::foo",
+                        "title": "MyParent::foo",
                     }
                 ],
                 powered_by="serverless_ide",
             )
             .request(
                 line=line(),
-                comment="find overridden static method. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden static method. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4411,7 +4588,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {"language": "hack", "value": "THE_ANSWER"},
                         "A comment describing THE_ANSWER",
-                        "int THE_ANSWER = 42",
                     ],
                     "range": {
                         "start": {"line": 15, "character": 9},
@@ -4427,17 +4603,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 3, "character": 1},
-                },
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                comment="hover over a keyword",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 2, "character": 1},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -4525,7 +4690,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4545,7 +4710,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?MyEnum enum-attribute"}
+                        {
+                            "language": "hack",
+                            "value": "attribute ?MyEnum enum-attribute",
+                        }
                     ],
                     "range": {
                         "start": {"line": 62, "character": 33},
@@ -4564,7 +4732,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?ID<EntSomething> id"}
+                        {"language": "hack", "value": "attribute ?ID<EntSomething> id"}
                     ],
                     "range": {
                         "start": {"line": 63, "character": 15},
@@ -4599,7 +4767,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4715,12 +4883,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4757,12 +4924,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4777,10 +4943,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_formatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
@@ -4827,10 +4989,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_rangeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
@@ -4878,10 +5036,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("ontypeformatting.php"))
 
@@ -5379,7 +5533,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
@@ -5400,7 +5554,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
@@ -5590,6 +5744,54 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("rename.php")
         self.load_and_run("rename", variables)
 
+    def test_rename_in_interface(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("rename_in_interface.php")
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("rename_in_interface"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/rename",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 19},
+                    "newName": "previouslyCalledSomeMethod",
+                },
+                result={
+                    "changes": {
+                        "${php_file_uri}": [
+                            {
+                                "range": {
+                                    "start": {"line": 3, "character": 18},
+                                    "end": {"line": 3, "character": 28},
+                                },
+                                "newText": "previouslyCalledSomeMethod",
+                            },
+                        ]
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
     def test_references(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("references.php")
@@ -5733,7 +5935,7 @@ function call_method(ClassWithFooBar $mc): void {
                                     },
                                 ],
                             }
-                        ],
+                        ]
                     },
                 },
                 result=[
@@ -5754,7 +5956,32 @@ function call_method(ClassWithFooBar $mc): void {
                                 ]
                             }
                         },
-                    }
+                    },
+                    {
+                        "title": "Extract into variable",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "edit": {
+                            "changes": {
+                                "${root_path}/code_action_missing_method.php": [
+                                    {
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 2},
+                                        },
+                                        "newText": "$placeholder0 = foobaz;\n  ",
+                                    },
+                                    {
+                                        "range": {
+                                            "start": {"line": 7, "character": 7},
+                                            "end": {"line": 7, "character": 13},
+                                        },
+                                        "newText": "$placeholder0",
+                                    },
+                                ]
+                            }
+                        },
+                    },
                 ],
                 powered_by="serverless_ide",
             )
@@ -5847,8 +6074,10 @@ function __hh_loop_forever_foo(): int {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): int"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): int",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -5877,8 +6106,10 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): string"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): string",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -6135,8 +6366,7 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6145,8 +6375,7 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6155,16 +6384,14 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
                     "type": 3,
                 },
@@ -6194,52 +6421,6 @@ function unsaved_bar(): string { return "hello"; }
             .request(
                 line=line(),
                 comment="hover after file_open will succeed",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 26, "character": 20},
-                },
-                result={
-                    "contents": [
-                        {"language": "hack", "value": "string"},
-                        {"language": "hack", "value": "Parameter: $s"},
-                    ]
-                },
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                method="$test/shutdownServerlessIde",
-                params={},
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [
-                        {"title": "Restart Hack IDE"},
-                        {"title": "Restart hh_server"},
-                    ],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: stopped.",
-                    "shortMessage": "Hack: failed",
-                    "type": 1,
-                },
-                result={"title": "Restart Hack IDE"},
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
-            .request(
-                line=line(),
-                comment="hover after restart will succeed",
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -6293,18 +6474,18 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${php_file_uri}",
+                        "uri": "${unsaved2_file_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "${php_file}",
+                        "text": "${unsaved2_file}",
                     }
                 },
             )
             .wait_for_notification(
-                comment="After didOpen(file1), the hh_server_status diagnostic should appear in file1",
+                comment="After didOpen(file2), the hh_server_status diagnostic should appear in file1",
                 method="textDocument/publishDiagnostics",
                 params={
-                    "uri": "${php_file_uri}",
+                    "uri": "${unsaved2_file_uri}",
                     "diagnostics": [
                         {
                             "range": {
@@ -6325,49 +6506,15 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${unsaved2_file_uri}",
+                        "uri": "${php_file_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "${unsaved2_file}",
+                        "text": "${php_file}",
                     }
                 },
             )
             .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should disappear from file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [],
-                    "isStatusFB": True,
-                },
-            )
-            .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should reappear in file2",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${unsaved2_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 0, "character": 0},
-                                "end": {"line": 0, "character": 1},
-                            },
-                            "severity": 1,
-                            "source": "hh_server",
-                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        }
-                    ],
-                    "isStatusFB": True,
-                },
-            )
-            .notification(
-                method="textDocument/didClose",
-                params={"textDocument": {"uri": "${unsaved2_file_uri}"}},
-            )
-            .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should disappear from file2",
+                comment="After didOpen(file1), the hh_server_status diagnostic should disappear from file2",
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${unsaved2_file_uri}",
@@ -6376,7 +6523,7 @@ function unsaved_bar(): string { return "hello"; }
                 },
             )
             .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should reappear in file1",
+                comment="After didOpen(file1), the hh_server_status diagnostic should reappear in file1",
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${php_file_uri}",
@@ -6405,6 +6552,40 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                    "isStatusFB": True,
+                },
+            )
+            .wait_for_notification(
+                comment="After didClose(file1), the hh_server_status diagnostic should reappear in file2",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${unsaved2_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 0, "character": 0},
+                                "end": {"line": 0, "character": 1},
+                            },
+                            "severity": 1,
+                            "source": "hh_server",
+                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                    "isStatusFB": True,
+                },
+            )
+            .notification(
+                method="textDocument/didClose",
+                params={"textDocument": {"uri": "${unsaved2_file_uri}"}},
+            )
+            .wait_for_notification(
+                comment="After didClose(file2), the hh_server_status diagnostic should disappear from file2",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${unsaved2_file_uri}",
                     "diagnostics": [],
                     "isStatusFB": True,
                 },
@@ -6756,7 +6937,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 params={
                     "shortMessage": "Hack: stopped",
                     "message": "hh_server: stopped.",
-                    "actions": [{"title": "Restart hh_server"}],
                     "type": 1,
                 },
                 result=NoResponse(),
@@ -6783,12 +6963,11 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "type": 2,
                     "shortMessage": "Hack: initializing",
                     "message": "hh_server initializing: processing [<test> seconds]",
-                    "actions": [],
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
-                params={"actions": [], "message": "hh_server: ready.", "type": 3},
+                params={"message": "hh_server: ready.", "type": 3},
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
@@ -6812,8 +6991,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6822,8 +7000,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6832,17 +7009,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
-                    "actions": [{"title": "Restart hh_server"}],
                     "type": 3,
                 },
                 result=NoResponse(),
@@ -6852,99 +7027,218 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_serverless_ide_status_restart(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+    def test_standalone_status(self) -> None:
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_status_restart"),
+                LspTestSpec("test_standalone_status"),
                 use_serverless_ide=True,
                 supports_status=True,
             )
             .ignore_requests(
-                comment="Ignore initializing messages since they're racy",
+                comment="Ignore all status requests not explicitly waited for in the test",
                 method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Another form of initializing to ignore",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server: ready.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Another form of initializing to ignore before we've even heard the first peep from hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack: ready",
-                },
+                params=None,
             )
             .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
                 method="window/showStatus",
                 params={
-                    "actions": [],
-                    "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack: ready",
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .start_hh_server("Restart HH Server")
+            .wait_for_server_request(
+                comment="standalone status when hh_server transitions to starting up",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is ready",
+                    "shortMessage": "Hack",
                     "type": 3,
                 },
                 result=NoResponse(),
             )
-            .request(
-                line=line(),
-                method="$test/shutdownServerlessIde",
-                params={},
-                result=None,
-                powered_by="serverless_ide",
-            )
+            .stop_hh_server("Shutdown HH Server")
             .wait_for_server_request(
+                comment="standalone status when hh_server transitions to stopped",
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: ready.",
-                    "shortMessage": "Hack: failed",
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                     "type": 1,
-                },
-                result={"title": "Restart Hack IDE"},
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [],
-                    "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
                 },
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_serverless_ide_failed_to_load_saved_state(self) -> None:
+    def test_standalone_errors(self) -> None:
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        errors_b_uri = self.repo_file_uri("errors_b.php")
+        variables.update({"errors_a_uri": errors_a_uri, "errors_b_uri": errors_b_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_standalone_status"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return 1 }\n",
+                notify=False,
+            )
+            .write_to_disk(
+                comment="create file errors_b.php",
+                uri="${errors_b_uri}",
+                contents="<?hh\nfunction bbb(): int { return 2 }\n",
+                notify=False,
+            )
+            .notification(
+                comment="actually open something that's different from what was on disk (with extra newline)",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\n\n\n\nfunction aaa(): int { return 1 }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_a.php from serverless",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 31},
+                                "end": {"line": 4, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_b.php from errors.bin",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_b_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - a",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_a_uri}", "diagnostics": []},
+            )
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - b",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_b_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_falls_back_to_full_index(self) -> None:
+        # Test recovery behavior when we fail to load a naming table, but we're
+        # permitted to fall back to the full index naming table build.
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        assert "naming_table_saved_state_path" in variables
+        variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_falls_back_to_full_index"),
+                use_serverless_ide=True,
+                supports_status=True,
+                supports_init=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .wait_for_notification(
+                comment="This log should appear whenever we fall back to a full index.",
+                method="telemetry/event",
+                params={
+                    "type": 4,
+                    "message": "[client-ide] Falling back to full index naming table build",
+                },
+            )
+            .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(
+            spec,
+            variables,
+            # We don't need hh_server here
+            wait_for_server=False,
+            use_serverless_ide=True,
+        )
+
+    def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
+        # This test examines the failure behavior when the naming table is
+        # non-existent and we are *not* falling back to full index.
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
@@ -6962,8 +7256,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
+                    "message": "hh_client: initializing.\nhh_server initializing: processing [<test> seconds]",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6972,8 +7265,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server: ready.",
+                    "message": "hh_client: initializing.\nhh_server: ready.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6982,8 +7274,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6992,8 +7283,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 1,
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.",
+                    "message": "hh_client has failed. See Output›Hack for details.",
                     "shortMessage": "Hack: failed",
                 },
             )
@@ -7001,14 +7291,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.\nMore details: http://dummy/HH_TEST_MODE",
+                    "message": "hh_client has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: ready.",
+                    "message": "hh_client has failed. See Output›Hack for details.\nhh_server: ready.",
                     "shortMessage": "Hack: failed",
                     "type": 1,
                 },
@@ -7017,7 +7306,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+        # By setting `fall_back_to_full_index` to `False`, the IDE will give up once it fails to load a saved state instead of attempting the naming table build.
+        self.run_spec(
+            spec,
+            variables,
+            wait_for_server=True,
+            use_serverless_ide=True,
+            fall_back_to_full_index=False,
+        )
 
     def test_workspace_symbol(self) -> None:
         self.prepare_server_environment()
@@ -7297,7 +7593,7 @@ function main(): int {
                     "position": {"line": 2, "character": 13},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [{"language": "hack", "value": "nothing"}],
                     "range": {
                         "start": {"line": 2, "character": 11},
                         "end": {"line": 2, "character": 14},
@@ -7534,8 +7830,7 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -7544,18 +7839,16 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
             .ignore_requests(
-                comment="another racy initialization, if HackIDE is done before hh_server has yet sent status",
+                comment="another racy initialization, if hh_client is done before hh_server has yet sent status",
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
@@ -7615,8 +7908,7 @@ function aaa(): string {
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
                     "type": 3,
                 },

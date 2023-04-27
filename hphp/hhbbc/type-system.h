@@ -168,7 +168,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
-namespace HPHP::HHBBC {
+namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace HHBBC {
 
 struct Type;
 
@@ -177,8 +181,8 @@ struct Type;
   DT(Int, int64_t, ival)                                        \
   DT(Dbl, double, dval)                                         \
   DT(ArrLikeVal, SArray, aval)                                  \
-  DT(Obj, DObj, dobj)                                           \
-  DT(WaitHandle, DWaitHandle, dwh)                              \
+  DT(Obj, DCls, dobj)                                           \
+  DT(WaitHandle, copy_ptr<DWaitHandle>, dwh)                    \
   DT(Cls, DCls, dcls)                                           \
   DT(LazyCls, SString, lazyclsval)                              \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
@@ -197,63 +201,338 @@ enum class DataTag : uint8_t {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Information about a class type.  The class is either exact or a
- * subtype of the supplied class.
+ * Information about a class type. The class is either exactly the
+ * supplied class, a subtype of the supplied class, or an intersection
+ * of classes it is a subtype of.
+ *
+ * The intersection case is needed to maintain monotonicity when
+ * performing unions or intersections involving intersections. We want
+ * to maintain the invariant that if a <= A, and b <= B, then
+ * union_of(a, b) <= union_of(A, B) (the same applies for
+ * intersection_of). Another way to state this is that refining a type
+ * anywhere should never result in a worse type anywhere else.
+ *
+ * When unioning/intersecting an interface with anything else, there's
+ * not necessarily a single result class which guarantees
+ * monotonicity. In one of those cases, we instead produce a list of
+ * classes which the result is a subtype of.
+ *
+ * In addition, we want the intersection representation to uniquely
+ * identify a class, so we impose a certain canonical form. No class
+ * in the list can be a subtype of another (if so, the "larger" class
+ * is redundant and should be dropped). Every class "could be" every
+ * other class. If not, the intersection is empty and the type is
+ * actually Bottom. Finally, the list is kept sorted. The ordering is
+ * fixed but arbitrary and we try to ensure that "smaller" classes
+ * come first.
+ *
+ * The intersection always have 2 or more elements (any less should be
+ * Bottom, Exact or Sub instead). The intersection can only ever
+ * contain resolved classes or unresolved classes, never a mix
+ * (unioning a resolved class with an unresolved class results in
+ * TObj/TCls, and intersecting a resolved class with an unresolved
+ * class results in TBottom).
  */
 struct DCls {
-  enum Tag : uint16_t { Exact, Sub };
+  using IsectSet = std::vector<res::Class>;
 
-  DCls(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
-  {}
+  DCls() : DCls{PtrTag::Exact, nullptr} {}
 
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
+  static DCls MakeExact(res::Class cls, bool nonReg) {
+    return DCls{
+      nonReg ? PtrTag::ExactNonReg : PtrTag::Exact,
+      (void*)cls.toOpaque()
+    };
+  }
+  static DCls MakeSub(res::Class cls, bool nonReg) {
+    return DCls{
+      nonReg ? PtrTag::SubNonReg : PtrTag::Sub,
+      (void*)cls.toOpaque()
+    };
+  }
+  static DCls MakeIsect(IsectSet isect, bool nonReg) {
+    auto w = new IsectWrapper{std::move(isect)};
+    return DCls{nonReg ? PtrTag::IsectNonReg : PtrTag::Isect, (void*)w};
+  }
+
+  // Need to implement these manually so we do proper ref-counting on
+  // the IsectWrapper (if available).
+  DCls(const DCls& o) : val{o.val}
+  { if (isIsect()) rawIsect()->acquire(); }
+  DCls(DCls&& o) noexcept : val{std::move(o.val)}
+  { o.val.set(PtrTag::Exact, nullptr); }
+
+  DCls& operator=(const DCls& o) {
+    if (this == &o) return *this;
+    auto const i = isIsect() ? rawIsect() : nullptr;
+    if (o.isIsect()) o.rawIsect()->acquire();
+    val = o.val;
+    if (i) i->release();
+    return *this;
+  }
+  DCls& operator=(DCls&& o) { val.swap(o.val); return *this; }
+
+  ~DCls() { if (isIsect()) rawIsect()->release(); }
+
+  bool isExact() const {
+    return
+      val.tag() == PtrTag::Exact ||
+      val.tag() == PtrTag::ExactCtx ||
+      val.tag() == PtrTag::ExactNonReg ||
+      val.tag() == PtrTag::ExactCtxNonReg;
+  }
+
+  bool isSub() const {
+    return
+      val.tag() == PtrTag::Sub ||
+      val.tag() == PtrTag::SubCtx ||
+      val.tag() == PtrTag::SubNonReg ||
+      val.tag() == PtrTag::SubCtxNonReg;
+  }
+
+  bool isIsect() const { return tagIsIsect(val.tag()); }
+
+  bool containsNonRegular() const {
+    switch (val.tag()) {
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
+        return false;
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return true;
+    }
+    not_reached();
+  }
+
+  // Obtain the res::Class this DCls represents. Only valid if
+  // !isSect(), as that cannot be completely represented by any single
+  // res::Class.
+  res::Class cls() const {
+    assertx(!isIsect());
+    assertx(val.ptr());
+    return res::Class::fromOpaque((uintptr_t)val.ptr());
+  }
+
+  // Obtain a res::Class which is a super-type of what this DCls
+  // represents. That is, it may be larger than the "actual"
+  // class. For non-intersections, this is just cls(). For
+  // intersections, it's one of the classes in the intersection (any
+  // of them is valid, as we're a subclass of all of them). We use the
+  // first class in the list, which in canonical order is the
+  // smallest.
+  res::Class smallestCls() const {
+    return isIsect() ? isect().front() : cls();
+  }
+
+  const IsectSet& isect() const { return rawIsect()->isects; }
+
+  bool isCtx() const {
+    switch (val.tag()) {
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return true;
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+        return false;
+    }
+    not_reached();
+  }
+
+  void setCtx(bool ctx) {
+    val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
+  }
+
+  void setCls(res::Class cls) {
+    assertx(!isIsect());
+    val.set(val.tag(), (void*)cls.toOpaque());
+  }
+
+  bool same(const DCls& o, bool checkCtx = true) const {
+    if (checkCtx) {
+      if (val.tag() != o.val.tag()) return false;
+    } else {
+      if (removeCtx(val.tag()) != removeCtx(o.val.tag())) return false;
+    }
+
+    if (!isIsect()) return cls().same(o.cls());
+    auto const& isect1 = isect();
+    auto const& isect2 = o.isect();
+    if (&isect1 == &isect2) return true;
+    if (isect1.size() != isect2.size()) return false;
+
+    return std::equal(
+      begin(isect1), end(isect1),
+      begin(isect2), end(isect2),
+      [] (res::Class c1, res::Class c2) { return c1.same(c2); }
+    );
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      auto const tag = sd.template make<decltype(val.tag())>();
+      if (tagIsIsect(tag)) {
+        auto i = sd.template make<IsectSet>();
+        val.set(tag, new IsectWrapper{std::move(i)});
+      } else {
+        auto c = sd.template make<res::Class>();
+        val.set(tag, (void*)c.toOpaque());
+      }
+    } else {
+      sd(val.tag());
+      isIsect() ? sd(isect()) : sd(cls());
+    }
+  }
+
+private:
+  // To keep size down, we encode everything into a single
+  // pointer. The tag encodes whether isCtx() is true, and the type of
+  // pointer. The pointer will either be a res::Class (in opaque
+  // encoding), or to an IsectWrapper.
+  enum class PtrTag : uint8_t {
+    Exact,
+    ExactCtx,
+    ExactNonReg,
+    ExactCtxNonReg,
+    Sub,
+    SubCtx,
+    SubNonReg,
+    SubCtxNonReg,
+    Isect,
+    IsectCtx,
+    IsectNonReg,
+    IsectCtxNonReg
+  };
+  CompactTaggedPtr<void, PtrTag> val;
+
+  DCls(PtrTag t, void* p) : val{t, p} {}
+
+  static bool tagIsIsect(PtrTag t) {
+    return
+      t == PtrTag::Isect ||
+      t == PtrTag::IsectCtx ||
+      t == PtrTag::IsectNonReg ||
+      t == PtrTag::IsectCtxNonReg;
+  }
+
+  static PtrTag addCtx(PtrTag t) {
+    switch (t) {
+      case PtrTag::Exact:       return PtrTag::ExactCtx;
+      case PtrTag::Sub:         return PtrTag::SubCtx;
+      case PtrTag::Isect:       return PtrTag::IsectCtx;
+      case PtrTag::ExactNonReg: return PtrTag::ExactCtxNonReg;
+      case PtrTag::SubNonReg:   return PtrTag::SubCtxNonReg;
+      case PtrTag::IsectNonReg: return PtrTag::IsectCtxNonReg;
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return t;
+    }
+    not_reached();
+  }
+
+  static PtrTag removeCtx(PtrTag t) {
+    switch (t) {
+      case PtrTag::ExactCtx:       return PtrTag::Exact;
+      case PtrTag::SubCtx:         return PtrTag::Sub;
+      case PtrTag::IsectCtx:       return PtrTag::Isect;
+      case PtrTag::ExactCtxNonReg: return PtrTag::ExactNonReg;
+      case PtrTag::SubCtxNonReg:   return PtrTag::SubNonReg;
+      case PtrTag::IsectCtxNonReg: return PtrTag::IsectNonReg;
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+        return t;
+    }
+    not_reached();
+  }
+
+  // We ref-count the IsectSet, so multiple copies of a DCls can share
+  // it. This is basically copy_ptr, but we can't use that easily with
+  // our CompactTaggedPtr representation.
+  struct IsectWrapper {
+    IsectSet isects;
+    std::atomic<uint32_t> refcount{1};
+    void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
+    void release() {
+      if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
+        delete this;
+      }
+    }
+  };
+
+  IsectWrapper* rawIsect() const {
+    assertx(isIsect());
+    assertx(val.ptr());
+    return (IsectWrapper*)val.ptr();
+  }
 };
 
-/*
- * Information about a specific object type.  The class is either
- * exact or a subtype of the supplied class.
- *
- * If the class is known to be a wait handle, DWaitHandle will be used
- * instead.
- */
-struct DObj {
-  enum Tag : uint16_t { Exact, Sub };
-
-  DObj(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
-  {}
-
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
-};
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Information about a wait handle (sub-class of HH\\Awaitable) carry a
  * type that awaiting the wait handle will produce.
  */
-struct DWaitHandle {
-  DWaitHandle(res::Class cls, copy_ptr<Type> inner)
+template <typename T = Type>
+struct DWaitHandleT {
+  DWaitHandleT() = default;
+  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
+  // it around lets us demote to a DCls without having the Index
+  // available.
+  DWaitHandleT(DCls cls, T inner)
     : cls{std::move(cls)}
     , inner{std::move(inner)} {}
-  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
-  // it around lets us demote to a DObj without having the Index
-  // available.
-  res::Class cls;
-  copy_ptr<Type> inner;
+  DCls cls;
+  T inner;
+
+  // We do not explicitly serialize cls, since it's always the wait
+  // handle class.
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(inner);
+    if constexpr (SerDe::deserializing) {
+      cls = DCls::MakeSub(res::Class::unresolvedWaitHandle(), false);
+    } else {
+      assertx(!cls.containsNonRegular());
+      assertx(cls.isSub());
+      assertx(!cls.isCtx());
+      assertx(
+        cls.cls().name()->isame(
+          res::Class::unresolvedWaitHandle().name()
+        )
+      );
+    }
+  }
 };
+using DWaitHandle = DWaitHandleT<>;
 
 struct DArrLikePacked;
 struct DArrLikePackedN;
 struct DArrLikeMap;
 struct DArrLikeMapN;
-struct ArrKey;
 struct IterTypes;
+struct COWer;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -267,72 +546,6 @@ enum class LegacyMark : uint8_t {
   Marked,   // definitely mark
   Unmarked, // definitely unmarked
   Unknown   // either
-};
-
-// Bag of state for tracking HAM related metadata (array provenance
-// and legacy marking).
-struct HAMSandwich {
-  // No state. Used for types which don't have any HAM relevance
-  // (ints, keysets, etc).
-  static const HAMSandwich None;
-  // Unmarked legacy mark, but no array-provenance. Used for types
-  // which don't care about array-provenance (vec, dict, etc).
-  static const HAMSandwich Unmarked;
-
-  // Create the appropriate HAMSandwich for the given static array.
-  static HAMSandwich FromSArr(SArray);
-
-  // Create the most general HAMSandwich allowed for the given type.
-  static HAMSandwich TopForBits(trep b) {
-    using HPHP::HHBBC::couldBe;
-    return HAMSandwich {
-      couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
-    };
-  }
-
-  // Return a new HAMSandwich refined based on the given type. For
-  // example, if the given type no longer contains Vec or Dict, we
-  // need to drop any marking information.
-  HAMSandwich project(trep) const;
-
-  // Return the legacy mark information in this HAMSandwich. If the
-  // given type does not require legacy mark information, Unmarked is
-  // always returned.
-  LegacyMark legacyMark(trep) const;
-
-  // Return true if this is the "bottom" HAMSandwich type. That is,
-  // the result of intersecting together incompatible ones.
-  bool isBottom(trep b) const;
-
-  // Check if the intersection between this and another HAMSandwich is
-  // non-empty.
-  bool couldBe(HAMSandwich) const;
-  // Check if this HAMSandwich is completely contained with another.
-  bool subtypeOf(HAMSandwich) const;
-
-  bool operator==(HAMSandwich) const;
-  bool operator!=(HAMSandwich o) const { return !(*this == o); }
-
-  // Union together or intersect two HAMSandwiches.
-  HAMSandwich operator|(HAMSandwich) const;
-  HAMSandwich& operator|=(HAMSandwich o) { return *this = *this | o; }
-
-  HAMSandwich operator&(HAMSandwich) const;
-  HAMSandwich& operator&=(HAMSandwich o) { return *this = *this & o; }
-
-  // Testing:
-
-  void setLegacyMarkForTesting(LegacyMark m) { m_mark = m; }
-
-  bool checkInvariants(trep) const;
-
-private:
-  // Legacy marks are only tracked for Vec and Dict.
-  static constexpr trep kMarkBits = BVec | BDict;
-
-  explicit HAMSandwich(LegacyMark mark) : m_mark{mark} {}
-
-  LegacyMark m_mark;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -355,14 +568,16 @@ enum class Promotion {
 
 struct Type {
   Type() : Type{BBottom} {}
-  explicit Type(trep t) : Type{t, HAMSandwich::TopForBits(t)} {}
-  Type(trep t, HAMSandwich h) : m_bits{t}, m_dataTag{DataTag::None}, m_ham{h} {
+  explicit Type(trep t) : Type{t, topLegacyMarkForBits(t)} {}
+  Type(trep t, LegacyMark m)
+    : m_bits{t}
+    , m_dataTag{DataTag::None}
+    , m_legacyMark{m} {
     assertx(checkInvariants());
   }
 
   Type(const Type& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -371,7 +586,6 @@ struct Type {
 
   Type(Type&& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(o.checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -382,9 +596,39 @@ struct Type {
   Type& operator=(Type&&) noexcept;
 
   ~Type() {
-    assertx(checkInvariants());
     if (LIKELY(m_dataTag == DataTag::None)) return;
     destroyData();
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    ScopedStringDataIndexer _;
+    if constexpr (SerDe::deserializing) {
+      if (UNLIKELY(m_dataTag != DataTag::None)) destroyData();
+      sd(m_raw);
+      switch (m_dataTag) {
+        case DataTag::None: break;
+        #define DT(tag_name,type,name)            \
+          case DataTag::tag_name: {               \
+            type t;                               \
+            sd(t);                                \
+            new (&m_data.name) type{std::move(t)};\
+            break;                                \
+          }
+        DATATAGS
+        #undef DT
+      }
+      assertx(checkInvariants());
+    } else {
+      assertx(checkInvariants());
+      sd(m_raw);
+      switch (m_dataTag) {
+        case DataTag::None: break;
+        #define DT(tag_name,type,name) \
+          case DataTag::tag_name: sd(m_data.name); break;
+        DATATAGS
+        #undef DT
+      }
+    }
   }
 
   /*
@@ -461,11 +705,20 @@ struct Type {
     bool hasValue;
   };
 
+  static LegacyMark topLegacyMarkForBits(trep b) {
+    return HPHP::HHBBC::couldBe(b, kLegacyMarkBits)
+      ? LegacyMark::Unknown : LegacyMark::Bottom;
+  }
+
+  // Legacy marks are only tracked for Vec and Dict.
+  static constexpr trep kLegacyMarkBits = BVec | BDict;
+
 private:
   friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
   friend CompactVector<LSString> get_string_keys(const Type& t);
   friend Type wait_handle(const Index&, Type);
+  friend Type wait_handle_unresolved(Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type&);
   friend bool is_specialized_array_like_arrval(const Type&);
@@ -489,15 +742,15 @@ private:
   friend Type lazyclsval(SString);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
-  friend Type subCls(res::Class);
-  friend Type clsExact(res::Class);
-  friend Type packed_impl(trep, HAMSandwich, std::vector<Type>);
-  friend Type packedn_impl(trep, HAMSandwich, Type);
-  friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
-  friend Type mapn_impl(trep, HAMSandwich, Type, Type);
-  friend DObj dobj_of(const Type&);
+  friend Type subCls(res::Class, bool);
+  friend Type clsExact(res::Class, bool);
+  friend Type packed_impl(trep, LegacyMark, std::vector<Type>);
+  friend Type packedn_impl(trep, LegacyMark, Type);
+  friend Type map_impl(trep, LegacyMark, MapElems, Type, Type);
+  friend Type mapn_impl(trep, LegacyMark, Type, Type);
+  friend const DCls& dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
-  friend DCls dcls_of(Type);
+  friend const DCls& dcls_of(const Type&);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
   friend int64_t ival_of(const Type&);
@@ -532,6 +785,8 @@ private:
   friend std::pair<Type, Type> split_string(Type);
   friend std::pair<Type, Type> split_lazycls(Type);
 
+  friend Type promote_classish(Type);
+
   friend std::string show(const Type&);
   friend std::pair<Type,bool> array_like_elem_impl(const Type&, const Type&);
   friend std::pair<Type,bool> array_like_set_impl(Type,
@@ -558,7 +813,6 @@ private:
   friend Type some_dict_empty();
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
-  friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
   friend Type loosen_string_staticness(Type);
   friend Type loosen_array_staticness(Type);
@@ -576,12 +830,29 @@ private:
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
   friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
+  friend Type toobj(const Type&);
+  friend Type objcls(const Type&);
+
+  friend struct WaitHandleCOWer;
+  friend struct ArrLikePackedNCOWer;
+  friend struct ArrLikePackedCOWer;
+  friend struct ArrLikeMapNCOWer;
+  friend struct ArrLikeMapCOWer;
+
+  friend Type resolve_classes(const Index&, Type);
+  friend void resolve_classes_impl(const Index&, const Type&, COWer&);
+
+
+  // These have to be defined here but are not meant to be used
+  // outside of type-system.cpp
+  friend Type isectObjInternal(DCls::IsectSet);
+  friend Type isectClsInternal(DCls::IsectSet, bool);
 
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
 
-  friend Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
-  friend Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
+  friend Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
+  friend Type make_cls_for_testing(trep, res::Class, bool, bool, bool, bool);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
                                          Optional<LegacyMark>);
@@ -634,11 +905,19 @@ private:
     struct {
       uint64_t m_bits : kTRepBitsStored;
       DataTag m_dataTag;
+      LegacyMark m_legacyMark;
     };
     uint64_t m_raw;
   };
-  HAMSandwich m_ham;
   Data m_data;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct TypeHasher {
+  size_t operator()(const Type& t) const {
+    return t.hash();
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -651,6 +930,7 @@ struct MapElem {
   Type val;
   TriBool keyStaticness;
 
+  MapElem() = default;
   MapElem(Type val, TriBool keyStaticness)
     : val{std::move(val)}, keyStaticness{keyStaticness} {}
 
@@ -678,23 +958,31 @@ struct MapElem {
   static MapElem CStrKey(Type val) {
     return MapElem{std::move(val), TriBool::No};
   }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(val)(keyStaticness);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
 
 struct DArrLikePacked {
+  DArrLikePacked() = default;
   explicit DArrLikePacked(std::vector<Type> elems)
     : elems(std::move(elems)) {}
-
   std::vector<Type> elems;
+  template <typename SerDe> void serde(SerDe& sd) { sd(elems); }
 };
 
 struct DArrLikePackedN {
+  DArrLikePackedN() = default;
   explicit DArrLikePackedN(Type t) : type(std::move(t)) {}
   Type type;
+  template <typename SerDe> void serde(SerDe& sd) { sd(type); }
 };
 
 struct DArrLikeMap {
+  DArrLikeMap() = default;
   explicit DArrLikeMap(MapElems map, Type optKey, Type optVal)
     : map(std::move(map))
     , optKey(std::move(optKey))
@@ -707,17 +995,22 @@ struct DArrLikeMap {
   // none.
   Type optKey;
   Type optVal;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(map)(optKey)(optVal);
+  }
 };
 
 // DArrLikePackedN and DArrLikeMapN do not need the LegacyMark because they
 // cannot be converted to a TypedValue
 struct DArrLikeMapN {
+  DArrLikeMapN() = default;
   explicit DArrLikeMapN(Type key, Type val)
     : key(std::move(key))
     , val(std::move(val))
   {}
   Type key;
   Type val;
+  template <typename SerDe> void serde(SerDe& sd) { sd(key)(val); }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -734,9 +1027,15 @@ HHBBC_TYPE_PREDEFINED(X)
 Type wait_handle(const Index&, Type t);
 
 /*
+ * Like wait_handle, but does not resolve the wait handle class (so
+ * does not require an Index).
+ */
+Type wait_handle_unresolved(Type t);
+
+/*
  * Return T from a WaitH<T>.
  *
- * Pre: is_specialized_handle(t);
+ * Pre: is_specialized_wait_handle(t);
  */
 Type wait_handle_inner(const Type& t);
 
@@ -784,8 +1083,8 @@ Type some_keyset_empty();
  */
 Type subObj(res::Class);
 Type objExact(res::Class);
-Type subCls(res::Class);
-Type clsExact(res::Class);
+Type subCls(res::Class, bool nonReg = true);
+Type clsExact(res::Class, bool nonReg = true);
 
 /*
  * vec types with known size.
@@ -971,6 +1270,13 @@ Type remove_keyset(Type);
 Type remove_bits(Type, trep);
 
 /*
+ * If the type might contain TCls or TLazyCls, remove it, and add
+ * TSStr instead. Any lazy class/class specialization is preserved and
+ * translated into a string specialization.
+ */
+Type promote_classish(Type);
+
+/*
  * Returns the best known instantiation of a class type.
  *
  * Pre: t.subypeOf(TCls)
@@ -1052,18 +1358,18 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t);
 Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
 
 /*
- * Return the DObj structure for a strict subtype of TObj or TOptObj.
+ * Return the DCls structure for a strict subtype of TObj or TOptObj.
  *
  * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(const Type& t);
+const DCls& dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
  *
  * Pre: is_specialized_cls(t)
  */
-DCls dcls_of(Type t);
+const DCls& dcls_of(const Type& t);
 
 /*
  * Return the SString for a strict subtype of TStr.
@@ -1161,13 +1467,6 @@ Type widening_union(const Type& a, const Type& b);
 Type widen_type(Type t);
 
 /*
- * Check if the first type is more refined than the second type for
- * the purposes of use in the Index. This is basically moreRefined()
- * plus some additional rules for interfaces.
- */
-bool more_refined_for_index(const Type&, const Type&);
-
-/*
  * Returns what we know about the emptiness of the type.
  */
 Emptiness emptiness(const Type&);
@@ -1185,21 +1484,6 @@ bool could_have_magic_bool_conversion(const Type&);
  * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
-
-/*
- * The HHBBC type system is not monotonic. However, we want types stored in
- * the index to become monotonically more refined. We call this helper before
- * updating function return types to help maintain that invariant. A function
- * return type should never be an object with some known interface.
- *
- * The monotonicity requirement on our types is that given a, b, A, and B
- * such that A <= a and B <= b, we must have union_of(A, B) <= union_of(a, b)
- * and intersection_of(A, B) <= intersection_of(a, b).
- *
- * The union_of case can fail if a and b are some interface and A and B are
- * concrete, unrelated classes that implement that interface.
- */
-Type loosen_interfaces(Type);
 
 /*
  * Discard any countedness information about the type. Force any type
@@ -1287,8 +1571,7 @@ Type loosen_to_datatype(Type t);
 Type remove_uninit(Type t);
 
 /*
- * If t is not a TCell, returns TInitCell. Otherwise, if t contains
- * TUninit, return union_of(remove_uninit(t), TInitCell).
+ * If t contains TUninit, return union_of(remove_uninit(t), TInitNull).
  */
 Type to_cell(Type t);
 
@@ -1304,6 +1587,15 @@ Type add_nonemptiness(Type t);
  */
 Type assert_emptiness(Type);
 Type assert_nonemptiness(Type);
+
+/*
+ * Convert any unresolved classes/objects within the type (including
+ * nested types) into their resolved equivalents (using the provided
+ * Index). Some classes/objects will always be unresolved and will
+ * remain so. If any class/object resolves into a non-existent type,
+ * it will be removed from the type (which may produce a Bottom).
+ */
+Type resolve_classes(const Index&, Type);
 
 /*
  * If t is definitely an array with a known size, return
@@ -1424,6 +1716,18 @@ Type adjust_type_for_prop(const Index& index,
                           const php::Class& propCls,
                           const TypeConstraint* tc,
                           const Type& ty);
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DWaitHandle);
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePacked);
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePackedN);
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMap);
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMapN);
 
 //////////////////////////////////////////////////////////////////////
 

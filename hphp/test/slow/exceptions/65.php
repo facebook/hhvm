@@ -1,6 +1,6 @@
 <?hh
 function handle() {
- throw new exception;
+ throw new Exception;
  }
 function foo($a,$b=null) {
  return $a;

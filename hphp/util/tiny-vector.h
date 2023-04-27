@@ -55,9 +55,6 @@ struct is_nothrow_swappable {
  *      sequence (although you can modify elements anywhere in the
  *      sequence).
  *
- *    - There is no non-const iterator support, and we have forward
- *      iterators only.
- *
  *    - The elements must be nothrow move constructible and nothrow swappable.
  *
  * Currently, does not invalidate pointers or references to elements
@@ -139,6 +136,7 @@ struct TinyVector {
   using AT = alloc_traits<Allocator>;
   using AllocPtr = typename AT::pointer;
 
+  struct iterator;
   struct const_iterator;
 
   TinyVector() = default;
@@ -210,6 +208,9 @@ struct TinyVector {
     using std::swap;
     swap(m_impl.m_data, o.m_impl.m_data);
   }
+
+  iterator begin() { return iterator(this, 0); }
+  iterator end() { return iterator(this); }
 
   const_iterator begin() const { return const_iterator(this, 0); }
   const_iterator end()   const { return const_iterator(this); }
@@ -295,6 +296,11 @@ struct TinyVector {
   const T& front() const {
     assert(!empty());
     return (*this)[0];
+  }
+
+  void resize(size_t sz) {
+    while (sz > size()) emplace_back();
+    while (sz < size()) pop_back();
   }
 
   void reserve(size_t sz) {
@@ -414,10 +420,64 @@ template<typename T,
          size_t InternalSize,
          size_t MinHeapCapacity,
          typename Allocator>
+struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::iterator
+  : boost::iterator_facade<iterator,
+                           T,
+                           boost::random_access_traversal_tag>
+{
+  explicit iterator(TinyVector* p, uint32_t idx)
+    : m_p(p)
+    , m_idx(idx)
+  {}
+
+  explicit iterator(TinyVector* p)
+    : m_p(p)
+    , m_idx(m_p->size())
+  {}
+
+private:
+  friend class boost::iterator_core_access;
+
+  using size_type = uint32_t;
+
+  void increment() {
+    ++m_idx;
+  }
+
+  void decrement() {
+    --m_idx;
+  }
+
+  void advance(int n) {
+    m_idx += n;
+  }
+
+  int distance_to(const iterator& o) const {
+    return o.m_idx - m_idx;
+  }
+
+  bool equal(const iterator& o) const {
+    assert(m_p == o.m_p);
+    return m_idx == o.m_idx;
+  }
+
+  T& dereference() const {
+    return (*m_p)[m_idx];
+  }
+
+private:
+  TinyVector* m_p;
+  size_type m_idx;
+};
+
+template<typename T,
+         size_t InternalSize,
+         size_t MinHeapCapacity,
+         typename Allocator>
 struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::const_iterator
   : boost::iterator_facade<const_iterator,
                            const T,
-                           boost::forward_traversal_tag>
+                           boost::random_access_traversal_tag>
 {
   explicit const_iterator(const TinyVector* p, uint32_t idx)
     : m_p(p)
@@ -432,8 +492,22 @@ struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::const_iterator
 private:
   friend class boost::iterator_core_access;
 
+  using size_type = uint32_t;
+
   void increment() {
     ++m_idx;
+  }
+
+  void decrement() {
+    --m_idx;
+  }
+
+  void advance(int n) {
+    m_idx += n;
+  }
+
+  int distance_to(const const_iterator& o) const {
+    return o.m_idx - m_idx;
   }
 
   bool equal(const const_iterator& o) const {
@@ -447,7 +521,7 @@ private:
 
 private:
   const TinyVector* m_p;
-  uint32_t m_idx;
+  size_type m_idx;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -465,4 +539,3 @@ void swap(TinyVector<T, InternalSize, MinHeapCapacity, Allocator>& v1,
 //////////////////////////////////////////////////////////////////////
 
 }
-

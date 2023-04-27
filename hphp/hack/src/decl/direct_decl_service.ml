@@ -19,15 +19,15 @@ let parse
     acc
   else
     let start_parse_time = Unix.gettimeofday () in
-    match Direct_decl_utils.direct_decl_parse ctx fn with
+    match
+      if cache_decls then
+        Direct_decl_utils.direct_decl_parse_and_cache ctx fn
+      else
+        Direct_decl_utils.direct_decl_parse ctx fn
+    with
     | None -> acc
     | Some parsed_file ->
       let end_parse_time = Unix.gettimeofday () in
-      if cache_decls then
-        Direct_decl_utils.cache_decls
-          ctx
-          fn
-          parsed_file.Direct_decl_utils.pfh_decls;
       let fileinfo = Direct_decl_utils.decls_to_fileinfo fn parsed_file in
       if trace then
         Hh_logger.log
@@ -41,12 +41,13 @@ let go
     (ctx : Provider_context.t)
     ~(trace : bool)
     ~(cache_decls : bool)
+    ?(worker_call : MultiWorker.call_wrapper = MultiWorker.wrapper)
     (workers : MultiWorker.worker list option)
     ~(ide_files : Relative_path.Set.t)
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
   let acc =
-    MultiWorker.call
+    worker_call.MultiWorker.f
       workers
       ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
       ~neutral:Relative_path.Map.empty

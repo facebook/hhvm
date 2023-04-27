@@ -3,21 +3,39 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{IterGen, LabelGen, LocalGen};
-use adata_state::AdataState;
-use decl_provider::{DeclProvider, Result};
-use ffi::{Slice, Str};
+use std::borrow::Cow;
+use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
+use std::sync::Arc;
+
+use decl_provider::DeclProvider;
+use decl_provider::MemoProvider;
+use ffi::Slice;
+use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::{
-    hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
-    ClassName, ConstName, FunctionName, Local,
-};
+use hhbc::ClassName;
+use hhbc::ConstName;
+use hhbc::FunctionName;
+use hhbc::IncludePath;
+use hhbc::IncludePathSet;
+use hhbc::Local;
+use hhbc::SymbolRefs;
 use options::Options;
-use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
-use stack_limit::StackLimit;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
+use print_expr::HhasBodyEnv;
+use relative_path::RelativePath;
 use statement_state::StatementState;
-use std::collections::BTreeSet;
+
+use crate::adata_state::AdataState;
+use crate::ClassExpr;
+use crate::IterGen;
+use crate::LabelGen;
+use crate::LocalGen;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
@@ -33,11 +51,13 @@ pub struct Emitter<'arena, 'decl> {
     iterator: IterGen,
     named_locals: IndexSet<Str<'arena>>,
 
+    pub filepath: RelativePath,
+
     pub for_debugger_eval: bool,
 
     pub alloc: &'arena bumpalo::Bump,
 
-    pub adata_state_: Option<AdataState<'arena>>,
+    pub adata_state: Option<AdataState<'arena>>,
     pub statement_state_: Option<StatementState<'arena>>,
     symbol_refs_state: SymbolRefsState<'arena>,
 
@@ -49,10 +69,7 @@ pub struct Emitter<'arena, 'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-
-    /// For checking elastic_stack and restarting if necessary.
-    pub stack_limit: Option<&'decl StackLimit>,
+    pub decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -61,41 +78,32 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         systemlib: bool,
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-        stack_limit: Option<&'decl StackLimit>,
+        decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
+        filepath: RelativePath,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
-            decl_provider,
+            decl_provider: decl_provider
+                .map(|p| Arc::new(MemoProvider::new(p)) as Arc<dyn DeclProvider<'decl> + 'decl>),
             alloc,
 
-            label_gen: Default::default(),
-            local_gen: Default::default(),
+            label_gen: LabelGen::new(),
+            local_gen: LocalGen::new(),
             iterator: Default::default(),
             named_locals: Default::default(),
+            filepath,
 
-            adata_state_: None,
+            adata_state: None,
             statement_state_: None,
             symbol_refs_state: Default::default(),
             global_state_: None,
-
-            stack_limit,
         }
-    }
-
-    pub fn decl_provider(&self) -> Option<&'decl dyn DeclProvider<'decl>> {
-        self.decl_provider
     }
 
     pub fn options(&self) -> &Options {
         &self.opts
-    }
-
-    /// Destruct the emitter but salvage its options (for use in emitting fatal program).
-    pub fn into_options(self) -> Options {
-        self.opts
     }
 
     pub fn iterator(&self) -> &IterGen {
@@ -167,39 +175,42 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         self.systemlib
     }
 
-    pub fn emit_adata_state(&self) -> &AdataState<'arena> {
-        self.adata_state_.as_ref().expect("uninit'd adata_state")
+    pub fn adata_state(&self) -> &AdataState<'arena> {
+        self.adata_state.as_ref().expect("uninit'd adata_state")
     }
-    pub fn emit_adata_state_mut(&mut self) -> &mut AdataState<'arena> {
-        self.adata_state_.get_or_insert_with(Default::default)
+    pub fn adata_state_mut(&mut self) -> &mut AdataState<'arena> {
+        self.adata_state.get_or_insert_with(Default::default)
     }
 
-    pub fn emit_statement_state(&self) -> &StatementState<'arena> {
+    pub fn statement_state(&self) -> &StatementState<'arena> {
         self.statement_state_
             .as_ref()
             .expect("uninit'd statement_state")
     }
-    pub fn emit_statement_state_mut(&mut self) -> &mut StatementState<'arena> {
+    pub fn statement_state_mut(&mut self) -> &mut StatementState<'arena> {
         self.statement_state_
             .get_or_insert_with(StatementState::init)
     }
 
-    pub fn emit_global_state(&self) -> &GlobalState<'arena> {
+    pub fn global_state(&self) -> &GlobalState<'arena> {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
-    pub fn emit_global_state_mut(&mut self) -> &mut GlobalState<'arena> {
+    pub fn global_state_mut(&mut self) -> &mut GlobalState<'arena> {
         self.global_state_.get_or_insert_with(GlobalState::init)
     }
 
-    pub fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>> {
-        match self.decl_provider {
-            Some(provider) => provider.get_decl(kind, sym),
-            None => Err(decl_provider::Error::NotFound),
-        }
-    }
-
     pub fn add_include_ref(&mut self, inc: IncludePath<'arena>) {
-        self.symbol_refs_state.includes.insert(inc);
+        match inc {
+            IncludePath::SearchPathRelative(p)
+            | IncludePath::DocRootRelative(p)
+            | IncludePath::Absolute(p) => {
+                let path = Path::new(OsStr::from_bytes(&p));
+                if path.exists() {
+                    self.symbol_refs_state.includes.insert(inc);
+                }
+            }
+            IncludePath::IncludeRootRelative(_, _) => {}
+        };
     }
 
     pub fn add_constant_ref(&mut self, s: ConstName<'arena>) {
@@ -220,9 +231,44 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn finish_symbol_refs(&mut self) -> HhasSymbolRefs<'arena> {
+    pub fn finish_symbol_refs(&mut self) -> SymbolRefs<'arena> {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas(self.alloc)
+    }
+}
+
+impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> {
+    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str> {
+        let class_expr = match env {
+            None => ClassExpr::expr_to_class_expr_(
+                self,
+                true,
+                true,
+                None,
+                None,
+                ast::Expr(
+                    (),
+                    Pos::NONE,
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
+                ),
+            ),
+            Some(body_env) => ClassExpr::expr_to_class_expr_(
+                self,
+                true,
+                true,
+                body_env.class_info.as_ref().map(|(k, s)| (k.clone(), *s)),
+                body_env.parent_name.clone().map(|s| s.to_owned()),
+                ast::Expr(
+                    (),
+                    Pos::NONE,
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
+                ),
+            ),
+        };
+        match class_expr {
+            ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
+            _ => Cow::Borrowed(id),
+        }
     }
 }
 
@@ -235,8 +281,8 @@ struct SymbolRefsState<'arena> {
 }
 
 impl<'arena> SymbolRefsState<'arena> {
-    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> HhasSymbolRefs<'arena> {
-        HhasSymbolRefs {
+    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> SymbolRefs<'arena> {
+        SymbolRefs {
             includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
             constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
             functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),

@@ -58,8 +58,20 @@ struct SymbolRep : boost::static_visitor<std::string> {
     return k.clsName->data() + std::string("::") + k.cnsName->data();
   }
 
-  std::string operator()(StaticMethod k)  const { return k.name->data(); }
-  std::string operator()(StaticMethodF k) const { return k.name->data(); }
+  std::string operator()(StaticMethod k) const {
+    return folly::to<std::string>(
+        k.clsName->toCppString(), "::",
+        k.methName->toCppString(), ":",
+        k.ctxName->toCppString()
+    );
+  }
+  std::string operator()(StaticMethodF k) const {
+    return folly::to<std::string>(
+        k.clsName->toCppString(), "::",
+        k.methName->toCppString(), ":",
+        k.ctxName->toCppString()
+    );
+  }
 
   std::string operator()(Profile k) const {
     return folly::format(
@@ -149,8 +161,12 @@ struct SymbolEq : boost::static_visitor<bool> {
       std::is_same<T,StaticMethodF>::value,
     bool
   >::type operator()(const T& t1, const T& t2) const {
-    assertx(t1.name->isStatic() && t2.name->isStatic());
-    return t1.name->isame(t2.name);
+    assertx(t1.clsName->isStatic() && t2.clsName->isStatic());
+    assertx(t1.methName->isStatic() && t2.methName->isStatic());
+    assertx(t1.ctxName->isStatic() && t2.ctxName->isStatic());
+    return t1.clsName->isame(t2.clsName) &&
+           t1.methName == t2.methName &&
+           t1.ctxName->isame(t2.ctxName);
   }
 
   bool operator()(SPropCache k1, SPropCache k2) const {
@@ -217,8 +233,16 @@ struct SymbolHash : boost::static_visitor<size_t> {
     );
   }
 
-  size_t operator()(StaticMethod k)  const { return k.name->hash(); }
-  size_t operator()(StaticMethodF k) const { return k.name->hash(); }
+  size_t operator()(StaticMethod k)  const {
+    return folly::hash::hash_combine(
+      k.clsName->hash(), k.methName->hash(), k.ctxName->hash()
+    );
+  }
+  size_t operator()(StaticMethodF k)  const {
+    return folly::hash::hash_combine(
+      k.clsName->hash(), k.methName->hash(), k.ctxName->hash()
+    );
+  }
 
   size_t operator()(SPropCache k) const {
     return folly::hash::hash_combine(

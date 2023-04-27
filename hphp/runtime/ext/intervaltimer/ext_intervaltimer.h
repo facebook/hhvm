@@ -68,12 +68,5 @@ private:
   int m_count{0};   // # of times hit since last surprise check
 };
 
-void HHVM_METHOD(IntervalTimer, __construct,
-                 double interval,
-                 double initial,
-                 const Variant& callback);
-void HHVM_METHOD(IntervalTimer, start);
-void HHVM_METHOD(IntervalTimer, stop);
-
 ///////////////////////////////////////////////////////////////////////////////
 }

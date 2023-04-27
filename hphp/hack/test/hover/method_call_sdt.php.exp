@@ -1,0 +1,3 @@
+// Defined in FooParent
+<<__SupportDynamicType>>
+public function bar(): void

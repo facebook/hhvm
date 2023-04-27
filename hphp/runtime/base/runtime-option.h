@@ -16,9 +16,6 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
-
 #include <unordered_map>
 #include <algorithm>
 #include <vector>
@@ -30,6 +27,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
@@ -38,7 +36,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
-#include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs"
+#include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,6 +76,13 @@ enum class RepoMode {
   ReadWrite = 2,
 };
 
+namespace hackc {
+  struct NativeEnv;
+  struct HhbcFlags;
+  struct ParserFlags;
+  struct DeclParserConfig;
+}
+
 /*
  * The bare RepoOptions information that the parser cares about.
  */
@@ -101,8 +106,17 @@ struct RepoOptionsFlags {
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           EnableEnumClasses,                true)           \
-  H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
-  H(bool,           DisallowInstMeth,                 false)          \
+  H(bool,           StressShallowDeclDeps,            false)          \
+  H(bool,           StressFoldedDeclDeps,             false)          \
+  /* Allow omission of some `readonly` annotations based on           \
+   * nonlocal inference powered by decl directed bytecode             \
+   */                                                                 \
+  H(bool,           ReadonlyNonlocalInference,        false)          \
+  /* Emit specialized bytecodes when we an infer a typehint does not  \
+   * contain a reified generic bytecode, powered by decl directed     \
+   * bytecode                                                         \
+   */                                                                 \
+  H(bool,           OptimizeReifiedParamChecks,       false)
   /**/
 
   /**/
@@ -113,14 +127,14 @@ struct RepoOptionsFlags {
   N(StringVector,   IndexedMethodAttributes,                      {}) \
   /**/
 
+  const PackageInfo& packageInfo() const { return m_packageInfo; }
   const SHA1& cacheKeySha1() const { return m_sha1; }
 
-  std::uint32_t getCompilerFlags() const;
   ParserEnv getParserEnvironment() const;
-  std::uint32_t getFactsFlags() const;
-  std::uint32_t getDeclFlags() const;
-  std::uint32_t getParserFlags() const;
-  std::string getAliasedNamespacesConfig() const;
+  void initDeclConfig(hackc::DeclParserConfig&) const;
+  void initHhbcFlags(hackc::HhbcFlags&) const;
+  void initParserFlags(hackc::ParserFlags&) const;
+  void initAliasedNamespaces(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
   std::string trustedDBPath() const { return TrustedDBPath; }
@@ -133,17 +147,8 @@ struct RepoOptionsFlags {
     return IndexedMethodAttributes;
   }
 
-  // Getters for the parser options we pass to HackC for extracting facts
-  bool allowNewAttributeSyntax() const {
-    return AllowNewAttributeSyntax;
-  }
-  bool enableXHPClassModifier() const {
-    return EnableXHPClassModifier;
-  }
-  bool disableXHPElementMangling() const {
-    return DisableXHPElementMangling;
-  }
-
+  // NB: Everything serialized here affects the cache for RE. Do not
+  // put anything unnecessary or that changes spuriously.
   template <typename SerDe> void serde(SerDe& sd) {
     #define N(t, n, ...) sd(n);
     #define P(t, n, ...) sd(n);
@@ -155,7 +160,9 @@ struct RepoOptionsFlags {
     #undef P
     #undef H
     #undef E
+    sd(m_packageInfo);
     sd(m_sha1);
+    sd(m_factsCacheBreaker);
   }
 
   template <typename SerDe>
@@ -164,6 +171,8 @@ struct RepoOptionsFlags {
     sd(f);
     return f;
   }
+
+  const std::string& getFactsCacheBreaker() const { return m_factsCacheBreaker;}
 
 private:
   RepoOptionsFlags() = default;
@@ -179,9 +188,27 @@ private:
   #undef H
   #undef E
 
+  PackageInfo m_packageInfo;
+
   SHA1 m_sha1;
+  std::string m_factsCacheBreaker;
 
   friend struct RepoOptions;
+};
+
+namespace Stream {
+struct Wrapper;
+}
+
+struct RepoOptionStats {
+  RepoOptionStats() = default;
+  RepoOptionStats(const std::string&, Stream::Wrapper*);
+  bool missing() const {
+    return !m_configStat.has_value() && !m_packageStat.has_value();
+  }
+
+  Optional<struct stat> m_configStat;
+  Optional<struct stat> m_packageStat;
 };
 
 /*
@@ -192,10 +219,11 @@ struct RepoOptions {
   RepoOptions(RepoOptions&&) = default;
 
   const RepoOptionsFlags& flags() const { return m_flags; }
+  const PackageInfo& packageInfo() const { return flags().packageInfo(); }
   const std::string& path() const { return m_path; }
-  std::string toJSON() const;
-  const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
-  const struct stat& stat() const { return m_stat; }
+  const RepoOptionStats& stat() const { return m_stat; }
+
+  const std::filesystem::path& dir() const { return m_repo; }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -207,7 +235,7 @@ struct RepoOptions {
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
 
-  static const RepoOptions& forFile(const char* path);
+  static const RepoOptions& forFile(const std::string& path);
 private:
   RepoOptions() = default;
   RepoOptions(const char* str, const char* file);
@@ -220,9 +248,9 @@ private:
   RepoOptionsFlags m_flags;
 
   std::string m_path;
-  struct stat m_stat;
+  RepoOptionStats m_stat;
 
-  folly::dynamic m_cachedDynamic;
+  std::filesystem::path m_repo;
 
   static bool s_init;
   static RepoOptions s_defaults;
@@ -260,7 +288,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static Optional<folly::fs::path> GetHomePath(
+  static Optional<std::filesystem::path> GetHomePath(
     const folly::StringPiece user);
 
   static std::string GetDefaultUser();
@@ -271,7 +299,7 @@ struct RuntimeOption {
    *
    * Return true on success and false on failure.
    */
-  static bool ReadPerUserSettings(const folly::fs::path& confFileName,
+  static bool ReadPerUserSettings(const std::filesystem::path& confFileName,
                                   IniSettingMap& ini, Hdf& config);
 
   static std::string getTraceOutputFile();
@@ -347,7 +375,6 @@ struct RuntimeOption {
   static bool AlwaysDecodePostDataDefault;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
-  static bool ServerStatCache;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;
@@ -456,6 +483,10 @@ struct RuntimeOption {
   // -1 for no limit.
   static int64_t RequestBodyReadLimit;
 
+  // Allow POST requests containing NonBlockingPost header to start execution
+  // without waiting for the entire POST body.
+  static bool AllowNonBlockingPosts;
+
   static bool EnableSSL;
   static int SSLPort;
   static int SSLPortFd;
@@ -522,10 +553,14 @@ struct RuntimeOption {
    *   RuntimeOption::IncludeRoots["$LIB_ROOT"] = "lib";
    */
   static std::map<std::string, std::string> IncludeRoots;
-  static std::map<std::string, std::string> AutoloadRoots;
 
   static bool AutoloadEnabled;
+  static int AutoloadUserlandDisabled;
+  static int AutoloadUserlandDisabledSampleRate;
+  static bool AutoloadEnableExternFactExtractor;
   static std::string AutoloadDBPath;
+  static bool AutoloadDBCanCreate;
+  static std::string AutoloadUpdateSuppressionPath;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;
@@ -659,12 +694,12 @@ struct RuntimeOption {
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
   static int CheckCLIClientCommands;
-  static int CheckIntOverflow;
   static HackStrictOption StrictArrayFillKeys;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static uint32_t EvalInitialStaticStringTableSize;
-  static uint32_t EvalInitialNamedEntityTableSize;
+  static uint32_t EvalInitialTypeTableSize;
+  static uint32_t EvalInitialFuncTableSize;
   static JitSerdesMode EvalJitSerdesMode;
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
@@ -750,7 +785,6 @@ struct RuntimeOption {
   F(bool, DisassemblerDocComments,     true)                            \
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
-  F(bool, FatalOnParserOptionMismatch, true)                            \
   F(bool, WarnOnSkipFrameLookup,       true)                            \
   /*                                                                    \
    *  0 - Code coverage cannot be enabled through request param         \
@@ -759,7 +793,6 @@ struct RuntimeOption {
    */                                                                   \
   F(uint32_t, EnableCodeCoverage,      0)                               \
   F(bool, EnableFuncCoverage,          false)                           \
-  F(bool, ExtractFactsFromDecls,       true)                            \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
   /* Whether to log extern compiler performance */                      \
@@ -771,8 +804,11 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
-  /* enable decls in compilation */                                     \
-  F(bool, EnableDecl, false)                                     \
+  /* enable decl-directed bytecode compilation */                       \
+  F(bool, EnableDecl, false)                                            \
+  F(uint32_t, LogDeclDeps, 0)                                           \
+  F(uint32_t, LogDeclErrors, 0)                                         \
+  F(bool, LogAllDeclTearing, false)                                     \
   /* When using embedded data, extract it to the ExtractPath or the
    * ExtractFallback. */                                                \
   F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \
@@ -782,15 +818,15 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
-  /* Equivalent to setting the --test-compression HHBBC-only flag. */   \
-  F(bool, HHBBCTestCompression,        false)                           \
   /* Threshold number of units to log to hhvm_whole_program table.
      systemlib has around 200 units, so use a larger default to avoid
      logging for unit tests. */                                         \
   F(uint32_t, HHBBCMinUnitsToLog,      1000)                            \
-  F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
+  F(uint32_t, IsameCollisionSampleRate, 1)                              \
+  /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
+  F(uint32_t, LogIsameCollisions, 0)                                    \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.
@@ -805,7 +841,7 @@ struct RuntimeOption {
         returns something other than boolean false, the runtime will throw a
         fatal error.
   */                                                                    \
-  F(int32_t, CheckPropTypeHints,       1)                               \
+  F(int32_t, CheckPropTypeHints,       3)                               \
   /* Enables enforcing upper-bounds for generic types
      1 => warning, 2 => error
   */                                                                    \
@@ -832,10 +868,12 @@ struct RuntimeOption {
    * 2 - Do not do implicit coercion
    */                                                                   \
   F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
-  F(bool, EnableImplicitContext,       false)                           \
+  F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
+  F(bool, MemInfoCheckCgroup2,         true)                            \
   F(bool, AllowScopeBinding,           false)                           \
-  F(bool, TranslateHackC,              false)                           \
+  F(bool, TranslateHackC,              true)                            \
+  F(bool, VerifyTranslateHackC,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -904,6 +942,7 @@ struct RuntimeOption {
   F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool,     JitLayoutExtTSP,         true)                            \
   F(bool,     JitLayoutExtTSPForPrologues, false)                       \
+  F(double,   JitLayoutExtTSPMaxMergeDensityRatio, 25)                  \
   F(double,   JitLayoutMaxMergeRatio,  1000000)                         \
   F(bool,     JitLayoutPruneCatchArcs, true)                            \
   F(uint32_t, GdbSyncChunks,           128)                             \
@@ -927,12 +966,11 @@ struct RuntimeOption {
   F(bool, JitForceVMRegSync,           false)                           \
   /* Log the profile used to optimize array-like gets and sets. */      \
   F(bool, LogArrayAccessProfile,      false)                            \
-  /* Log the profile used to target iterator specialization. */         \
-  F(bool, LogArrayIterProfile,        false)                            \
   /* We use PGO to target specialization for "foreach" iterator loops.  \
    * We specialize if the chosen specialization covers this fraction    \
    * of profiled loops. If the value is > 1.0, we won't specialize. */  \
   F(double, ArrayIterSpecializationRate, 0.99)                          \
+  F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
@@ -940,9 +978,9 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
   F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
   F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 10500)                         \
-  F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
-  F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
+  F(uint32_t, HHIRInliningVasmCostLimit, 80000)                         \
+  F(uint32_t, HHIRInliningMinVasmCostLimit, 6500)                       \
+  F(uint32_t, HHIRInliningMaxVasmCostLimit, 30000)                      \
   F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
   F(uint32_t, HHIRInliningMaxDepth,    5)                               \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
@@ -954,6 +992,7 @@ struct RuntimeOption {
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, false)                        \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
+  F(bool,     HHIRInliningAssertMemoryEffects, true)                    \
   F(bool, HHIRAlwaysInterpIgnoreHint,  !debug)                          \
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
@@ -981,6 +1020,7 @@ struct RuntimeOption {
   F(double, HHIRExitArrayProfileThreshold, 0.98)                        \
   F(double, HHIROffsetExitArrayProfileThreshold, 0.98)                  \
   F(double, HHIRIsTypeStructProfileThreshold, 0.95)                     \
+  F(uint32_t, HHIRTypeProfileMinSamples, 10)                            \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -1010,9 +1050,8 @@ struct RuntimeOption {
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(double,   JitPGOMinBlockCountPercent, 0.25)                         \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
-  F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
-  F(double,   JitPGOCalledFuncCheckThreshold, 50)                       \
+  F(double,   JitPGOCalledFuncCheckThreshold, 25)                       \
   F(double,   JitPGOCalledFuncExitThreshold,  99.9)                     \
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(bool,     JitPGOOptCodeCallGraph,  true)                            \
@@ -1041,10 +1080,13 @@ struct RuntimeOption {
   F(uint32_t, DumpRegion,              0)                               \
   F(bool,     DumpCallTargets,         false)                           \
   F(bool,     DumpLayoutCFG,           false)                           \
+  F(bool,     DumpHHIRInLoops,         false)                           \
   F(bool,     DumpVBC,                 false)                           \
   F(bool,     DumpArrAccProf,          false)                           \
+  F(bool,     DumpCoeffectFunParamProf,false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
+  F(bool, DumpJitProfileStats,         false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(bool, NewTHPHotText,               false)                           \
   F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
@@ -1052,17 +1094,17 @@ struct RuntimeOption {
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \
-  F(uint32_t, Num1GPagesForSlabs,      0)                               \
-  F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(uint32_t, Num1GPagesForReqHeap,    0)                               \
   F(uint32_t, Num2MPagesForReqHeap,    0)                               \
   F(uint32_t, NumReservedSlabs,        0)                               \
+  F(uint32_t, NumReservedMBForSlabs,   0)                               \
   F(uint32_t, Num1GPagesForA0,         0)                               \
   F(uint32_t, Num2MPagesForA0,         0)                               \
   F(bool, BigAllocUseLocalArena,       true)                            \
   F(bool, JsonParserUseLocalArena,     true)                            \
   F(bool, XmlParserUseLocalArena,      true)                            \
-  F(bool, LowStaticArrays,             true)                            \
+  F(bool, LowStaticArrays,             (!use_lowptr ||                  \
+                                        !ServerExecutionMode()))        \
   F(bool, RecycleAProf,                true)                            \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
@@ -1070,6 +1112,7 @@ struct RuntimeOption {
   F(bool, EagerGC,                     eagerGcDefault())                \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
+  F(bool, SanitizeReqHeap,             false)                           \
   F(bool, HeapAllocSampleNativeStack,  false)                           \
   F(bool, LogKilledRequests,           true)                            \
   F(uint32_t, GCSampleRate,            0)                               \
@@ -1097,6 +1140,7 @@ struct RuntimeOption {
   F(bool, JitSerdesModeForceOff,       false)                           \
   F(bool, JitDesUnitPreload,           false)                           \
   F(std::set<std::string>, JitSerdesDebugFunctions, {})                 \
+  F(std::set<std::string>, JitFuncBlockList, {})                        \
   F(uint32_t, JitSerializeOptProfSeconds, ServerExecutionMode() ? 300 : 0)\
   F(uint32_t, JitSerializeOptProfRequests, 0)                           \
   F(bool, JitSerializeOptProfRestart,  true)                            \
@@ -1130,12 +1174,6 @@ struct RuntimeOption {
   F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableCompactBacktrace, true)                                 \
   F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
-  /* Use 1G pages for jemalloc metadata. */                             \
-  F(bool, EnableArenaMetadata1GPage, false)                             \
-  /* Use 1G pages for jemalloc metadata (NUMA arenas if applicable). */ \
-  F(bool, EnableNumaArenaMetadata1GPage, false)                         \
-  /* Reserved space on 1G pages for jemalloc metadata (arena0). */      \
-  F(uint64_t, ArenaMetadataReservedSize, 216 << 20)                     \
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(bool, LogServerRestartStats, false)                                 \
@@ -1168,17 +1206,20 @@ struct RuntimeOption {
   /* Should we use structs? If so, how big can they get? Due to how we  \
    * represent structs, we can't make any with more than 255 keys. */   \
   F(bool, EmitBespokeStructDicts, true)                                 \
-  F(uint8_t, BespokeStructDictMaxNumKeys, 245)                          \
+  /* Do not use! Use StructLayout::maxNumKeys instead */                \
+  F(uint16_t, BespokeStructDictMaxNumKeys, 2048)                        \
   F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \
-  F(uint8_t, BespokeStructDictMinKeys, 4)                               \
-  F(double, BespokeStructDictMaxSizeRatio, 256.0)                       \
+  F(uint8_t, BespokeStructDictMinKeys, 128)                             \
+  F(double, BespokeStructDictMaxSizeRatio, 2.0)                         \
   /* What is the maximum number of keys to track in key order           \
    * profiles? */                                                       \
-  F(uint64_t, BespokeMaxTrackedKeys, 245)                               \
+  F(uint64_t, BespokeMaxTrackedKeys, 2048)                              \
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
-  F(int64_t, ObjProfMaxNesting, 5000)                                   \
+  F(int64_t, ObjProfMaxNesting, 2000)                                   \
+  /* Should we use type structures? */                                  \
+  F(bool, EmitBespokeTypeStructures, false)                             \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \
@@ -1191,19 +1232,25 @@ struct RuntimeOption {
    *                                                                    \
    * We can generate code for a bespoke sink in three ways:             \
    *  1. We can do "top codegen" that handles any array layout.         \
-   *  2. We can specialize on a layout and fall back to top codegen.    \
-   *  3. We can specialize on a layout and side-exit on guard failure.  \
+   *  2. We can specialize layouts and fall back to top codegen.        \
+   *  3. We can specialize layouts and side-exit on guard failure.      \
    *                                                                    \
    * We use a couple heuristics to choose between these options. If we  \
    * see one layout that covers `SideExitThreshold` percent cases, and  \
    * we saw at most `SideExitMaxSources` sources reach this sink, with  \
    * at least `SideExitMinSampleCount` samples each, we'll side-exit.   \
    *                                                                    \
-   * Else, if one layout covers `SpecializationThreshold` percent, we   \
-   * will specialize and fall back to top codegen. Otherwise, we'll do  \
-   * top codegen. */                                                    \
+   * Else, if multiple layouts cover SpecializationThreshold and at at  \
+   * least one of them covers SpecializationMinThreshold we will        \
+   * specialize to both layouts and fall back to top codegen. If one    \
+   * layout covers `SpecializationThreshold` percent, we will           \
+   * specialize and fall back to top codegen. Otherwise, we'll do top   \
+   * codegen. */                                                        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
   F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
+  F(double, BespokeArraySinkIteratorSpecializationThreshold, 92.0)      \
+  F(double, BespokeArraySinkSpecializationMinThreshold, 85.0)           \
+  F(double, BespokeArraySinkMultiLayoutThreshold, 0.999)                \
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
@@ -1242,11 +1289,6 @@ struct RuntimeOption {
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, true)                                    \
   F(bool, FoldLazyClassKeys, true)                                      \
-  /* EmitClassPointers:
-   * 0 => convert Foo::class to string "Foo"
-   * 1 => convert Foo::class to class pointer
-   * 2 => convert Foo::class to lazy class */                           \
-  F(int32_t, EmitClassPointers, 2)                                      \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \
@@ -1255,6 +1297,9 @@ struct RuntimeOption {
   F(bool, ClassAsStringVarExport, false)                                \
   /* When this flag is on, gettype for
    * classes and lazy classes outputs string. */                        \
+  F(bool, ClassAsStringPrintR, false)                                   \
+  /* When this flag is on, print_r for
+   * classes and lazy classes outputs a string. */                      \
   F(bool, ClassAsStringGetType, true)                                   \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
@@ -1320,12 +1365,10 @@ struct RuntimeOption {
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
-   * Enforce top level and method level internal keyword                \
-   * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Throw exception                                                \
+   * Describes the active deployment for selecting the set of packages  \
+   * Value is only read in repo authoritative or cli mode.              \
    */                                                                   \
-  F(uint64_t, EnforceModules, 0)                                        \
+  F(std::string, ActiveDeployment, "")                                  \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \
@@ -1342,9 +1385,6 @@ struct RuntimeOption {
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \
   F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
-  F(bool, UnixServerQuarantineApc, false)                               \
-  F(bool, UnixServerQuarantineUnits, false)                             \
-  F(bool, UnixServerVerifyExeAccess, false)                             \
   F(bool, UnixServerFailWhenBusy, false)                                \
   F(std::vector<std::string>, UnixServerAllowedUsers,                   \
                                             std::vector<std::string>()) \
@@ -1374,7 +1414,7 @@ struct RuntimeOption {
   F(bool, UseXedAssembler, false)                                       \
   /* Record the first N units loaded via StructuredLog::log()        */ \
   F(uint64_t, RecordFirstUnits, 0)                                      \
-  /* More aggresively reuse already compiled units based on SHA1     */ \
+  /* More aggressively reuse already compiled units based on SHA1    */ \
   F(bool, CheckUnitSHA1, true)                                          \
   F(bool, ReuseUnitsByHash, false)                                      \
   F(bool, UseEdenFS, true)                                              \
@@ -1427,17 +1467,25 @@ struct RuntimeOption {
   F(int32_t, RequestTearingSkewMicros, 1500)                            \
   F(bool,    SampleRequestTearingForce, true)                           \
   F(bool, EnableAbstractContextConstants, true)                         \
-  F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
-  /* 0 nothing, 1 notice, 2 error */                                    \
-  F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
-  F(string, TaintConfigurationPath, std::string(""))                    \
-  F(string, TaintConfigurationJson, std::string(""))                    \
-  F(string, TaintOutputDirectory, std::string(""))                      \
-  F(bool, TaintLogRequestURLs, false)                                   \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
+  F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \
+  F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \
+  F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
+  F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
+  F(uint32_t, StartOptionLogRate, 0)                                    \
+  F(std::string, StartOptionLogCache, "/tmp/hhvm-options-%{user}-%{hash}")\
+  F(uint64_t, StartOptionLogWindow, 86400)                              \
+  F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
+  F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
+  F(bool, RecordReplay, false)                                          \
+  F(uint64_t, RecordSampleRate, 0)                                      \
+  F(string, RecordDir, std::string(""))                                 \
+  F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
+  F(bool, IncludeReopOptionsInFactsCacheBreaker, true)                  \
+  F(bool, ModuleLevelTraits, false)                                     \
   /* */
 
 private:
@@ -1458,8 +1506,6 @@ public:
 
   // Repo (hhvm bytecode repository) options
   static std::string RepoPath;
-  static int64_t RepoLocalReadaheadRate;
-  static bool RepoLocalReadaheadConcurrent;
   static bool RepoLitstrLazyLoad;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
@@ -1521,7 +1567,7 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static int64_t PregBacktraceLimit;
+  static int64_t PregBacktrackLimit;
   static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
 

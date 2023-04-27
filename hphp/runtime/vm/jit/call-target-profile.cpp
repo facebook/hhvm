@@ -125,35 +125,38 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
   }
 }
 
-const Func* CallTargetProfile::choose(double& probability) const {
-  if (!m_init) {
-    probability = 0;
-    return nullptr;
-  }
+jit::vector<CallTargetProfile::Choice>
+CallTargetProfile::choose() const {
+  jit::vector<Choice> choices;
+  if (!m_init) return choices;
 
   assertx(!m_entries[0].funcId.isInvalid());
 
   FTRACE(3, "CallTargetProfile::choose(): {}\n", *this);
 
-  size_t bestIdx = 0;
-  uint64_t total = m_untracked + m_entries[0].count;
+  uint64_t total = m_untracked;
 
-  for (size_t i = 1; i < kMaxEntries ; i++) {
+  for (size_t i = 0; i < kMaxEntries ; i++) {
     auto const& entry = m_entries[i];
-    if (entry.funcId.isInvalid()) break;
+    if (entry.funcId.isInvalid()) continue;
     total += entry.count;
-    if (entry.count > m_entries[bestIdx].count) {
-      bestIdx = i;
-    }
+    choices.push_back({Func::fromFuncId(entry.funcId), double(entry.count)});
   }
 
-  auto const& best = m_entries[bestIdx];
-  auto bestFunc = Func::fromFuncId(best.funcId);
-  probability = (double)best.count / total;
-  FTRACE(2, "CallTargetProfile::choose(): best funcId {} ({}), "
-         "probability = {:.2}\n",
-         best.funcId, bestFunc->fullName(), probability);
-  return bestFunc;
+  std::sort(choices.begin(), choices.end(),
+            [&] (const Choice& c1, const Choice& c2) {
+              return c1.probability > c2.probability;
+            });
+
+  FTRACE(2, "CallTargetProfile::choose():\n");
+  for (size_t i = 0; i < choices.size(); i++) {
+    choices[i].probability /= total;
+    FTRACE(2, "  - funcId = {} ({}): probability = {:.3f}\n",
+           choices[i].func->getFuncId(), choices[i].func->fullName(),
+           choices[i].probability);
+  }
+
+  return choices;
 }
 
 std::string CallTargetProfile::toString() const {

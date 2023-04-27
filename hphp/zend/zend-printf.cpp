@@ -129,7 +129,7 @@ namespace HPHP {
 
 static char * __cvt(double value, int ndigit, int *decpt, int *sign,
                     int fmode, int pad) {
-  register char *s = nullptr;
+  char *s = nullptr;
   char *p, *rve, c;
   size_t siz;
 
@@ -356,14 +356,14 @@ char *php_gcvt(double value, int ndigit, char dec_point,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register uint64_t num, register int nbits,
-                      char format, char *buf_end, register int *len)
+char * ap_php_conv_p2(uint64_t num, int nbits, char format, char *buf_end,
+                      int *len)
 {
-  register int mask = (1 << nbits) - 1;
-  register char *p = buf_end;
+  int mask = (1 << nbits) - 1;
+  char *p = buf_end;
   static char low_digits[] = "0123456789abcdef";
   static char upper_digits[] = "0123456789ABCDEF";
-  register char *digits = (format == 'X') ? upper_digits : low_digits;
+  char *digits = (format == 'X') ? upper_digits : low_digits;
 
   do {
     *--p = digits[num & mask];
@@ -387,11 +387,10 @@ char * ap_php_conv_p2(register uint64_t num, register int nbits,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
-                      register int * is_negative, char *buf_end,
-                      register int *len) {
-  register char *p = buf_end;
-  register uint64_t magnitude;
+char * ap_php_conv_10(int64_t num, bool is_unsigned, int *is_negative,
+                      char *buf_end, int *len) {
+  char *p = buf_end;
+  uint64_t magnitude;
 
   if (is_unsigned) {
     magnitude = (uint64_t) num;
@@ -420,7 +419,7 @@ char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
    * We use a do-while loop so that we write at least 1 digit
    */
   do {
-    register uint64_t new_magnitude = magnitude / 10;
+    uint64_t new_magnitude = magnitude / 10;
 
     *--p = (char)(magnitude - new_magnitude * 10 + '0');
     magnitude = new_magnitude;
@@ -438,11 +437,10 @@ char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
  * The sign is returned in the is_negative argument (and is not placed
  * in buf).
  */
-char * php_conv_fp(register char format, register double num,
-                   bool add_dp, int precision, char dec_point,
-                   int *is_negative, char *buf, int *len) {
-  register char *s = buf;
-  register char *p, *p_orig;
+char * php_conv_fp(char format, double num, bool add_dp, int precision,
+                   char dec_point, int *is_negative, char *buf, int *len) {
+  char *s = buf;
+  char *p, *p_orig;
   int decimal_point;
 
   if (precision >= NDIG - 1) {
@@ -557,11 +555,11 @@ inline static void appendsimplestring(char **buffer, int *pos, int *size,
  */
 static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
 {
-  register char *s = nullptr;
+  char *s = nullptr;
   char *q;
   int s_len;
 
-  register int min_width = 0;
+  int min_width = 0;
   int precision = 0;
   enum {
     LEFT, RIGHT

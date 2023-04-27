@@ -1,6 +1,6 @@
 File "hh_log_level_example.php", line 4, characters 23-25:
 Invalid argument (Typing[4110])
-  File "hh_single_type_check_magic.hhi", line 7, characters 36-38:
+  File "hh_single_type_check_magic.hhi", line 7, characters 56-58:
   Expected `int`
   File "hh_log_level_example.php", line 4, characters 23-25:
   But got `string`

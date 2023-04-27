@@ -28,13 +28,21 @@ let typed_linters =
     Linter_sketchy_null_check.handler;
     Linter_truthiness_test.handler;
     Linter_redundant_generics.handler;
-    Linter_infer_variance.handler;
     Linter_as_invalid_type.handler;
     Linter_class_overrides_trait.handler;
     Linter_expr_tree_types.handler;
     Linter_nullsafe_not_needed.handler;
     Linter_duplicate_properties.handler;
     Linter_loose_unsafe_cast.handler;
+    Linter_redundant_cast.handler;
+    Linter_xhp_attr_value.handler;
+    Linter_pointless_booleans.handler;
+    Linter_comparing_booleans.handler;
+    Linter_unconditional_recursion.handler;
+    Linter_branches_return_same_value.handler;
+    Linter_internal_class.handler;
+    Linter_async_lambda.handler;
+    Linter_cast_non_primitive.handler;
   ]
   @ Linting_service.typed_linters
 
@@ -51,7 +59,6 @@ let parse_and_lint fn content ctx =
     Errors.ignore_ (fun () ->
         Full_fidelity_ast.defensive_program
           ~elaborate_namespaces:true
-          ~fail_open:false
           (Provider_context.get_tcopt ctx)
           fn
           content)
@@ -102,6 +109,18 @@ let lint ctx fn content =
         lint_nast ctx fn parser_return;
 
         (* Get Typed AST and run TAST linters *)
+        let ctx =
+          Provider_context.map_tcopt
+            ~f:(fun tcopt ->
+              (* Sound type-based linters require agreement between TAST
+                 definition under dynamic and normal assumptions. So we apply
+                 the linter with the dynamic definitions produced. *)
+              if TypecheckerOptions.enable_sound_dynamic tcopt then
+                GlobalOptions.{ tcopt with tco_tast_under_dynamic = true }
+              else
+                tcopt)
+            ctx
+        in
         let (tast, _) = Typing_check_utils.type_file ctx fn fi in
         lint_tast ctx tast);
   Typing_deps.trace := orig_trace

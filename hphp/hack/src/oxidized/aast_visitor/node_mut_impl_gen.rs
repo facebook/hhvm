@@ -1,9 +1,9 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<46965f5bced108d55a65b79595546933>>
+// @generated SignedSource<<556c0677de8f3aab3bddf284be70ef7c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,13 +13,11 @@
 use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor_mut::VisitorMut;
-use crate::{
-    aast::{self, *},
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    doc_comment::{self, *},
-    *,
-};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::*;
 impl<P: Params> NodeMut<P> for Abstraction {
     fn accept<'node>(
         &'node mut self,
@@ -92,6 +90,40 @@ impl<P: Params> NodeMut<P> for AsExpr<P::Ex, P::En> {
         }
     }
 }
+impl<P: Params> NodeMut<P> for Binop<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_binop(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.bop.accept(c, v)?;
+        self.lhs.accept(c, v)?;
+        self.rhs.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for Block<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_block(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Bop {
     fn accept<'node>(
         &'node mut self,
@@ -134,42 +166,21 @@ impl<P: Params> NodeMut<P> for Bop {
         }
     }
 }
-impl<P: Params> NodeMut<P> for CaField<P::Ex, P::En> {
+impl<P: Params> NodeMut<P> for CaptureLid<P::Ex> {
     fn accept<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        v.visit_ca_field(c, self)
+        v.visit_capture_lid(c, self)
     }
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        self.type_.accept(c, v)?;
-        self.id.accept(c, v)?;
-        self.value.accept(c, v)?;
-        self.required.accept(c, v)
-    }
-}
-impl<P: Params> NodeMut<P> for CaType {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_ca_type(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            CaType::CAHint(a0) => a0.accept(c, v),
-            CaType::CAEnum(a0) => a0.accept(c, v),
-        }
+        v.visit_ex(c, &mut self.0)?;
+        self.1.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for Case<P::Ex, P::En> {
@@ -225,25 +236,6 @@ impl<P: Params> NodeMut<P> for ClassAbstractTypeconst {
         self.default.accept(c, v)
     }
 }
-impl<P: Params> NodeMut<P> for ClassAttr<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_attr(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ClassAttr::CAName(a0) => a0.accept(c, v),
-            ClassAttr::CAField(a0) => a0.accept(c, v),
-        }
-    }
-}
 impl<P: Params> NodeMut<P> for ClassConcreteTypeconst {
     fn accept<'node>(
         &'node mut self,
@@ -277,6 +269,7 @@ impl<P: Params> NodeMut<P> for ClassConst<P::Ex, P::En> {
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
         self.kind.accept(c, v)?;
+        self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }
@@ -356,6 +349,23 @@ impl<P: Params> NodeMut<P> for ClassId_<P::Ex, P::En> {
             ClassId_::CIexpr(a0) => a0.accept(c, v),
             ClassId_::CI(a0) => a0.accept(c, v),
         }
+    }
+}
+impl<P: Params> NodeMut<P> for ClassReq {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_req(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassTypeconst {
@@ -450,8 +460,6 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::En> {
         self.tparams.accept(c, v)?;
         self.extends.accept(c, v)?;
         self.uses.accept(c, v)?;
-        self.use_as_alias.accept(c, v)?;
-        self.insteadof_alias.accept(c, v)?;
         self.xhp_attr_uses.accept(c, v)?;
         self.xhp_category.accept(c, v)?;
         self.reqs.accept(c, v)?;
@@ -461,16 +469,17 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::En> {
         self.typeconsts.accept(c, v)?;
         self.vars.accept(c, v)?;
         self.methods.accept(c, v)?;
-        self.attributes.accept(c, v)?;
         self.xhp_children.accept(c, v)?;
         self.xhp_attrs.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
+        self.docs_url.accept(c, v)?;
         self.enum_.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         self.emit_id.accept(c, v)?;
-        self.internal.accept(c, v)
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassishKind {
@@ -554,6 +563,42 @@ impl<P: Params> NodeMut<P> for Contexts {
         self.1.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for CtxRefinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            CtxRefinement::CRexact(a0) => a0.accept(c, v),
+            CtxRefinement::CRloose(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for CtxRefinementBounds {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement_bounds(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.lower.accept(c, v)?;
+        self.upper.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -587,6 +632,7 @@ impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
             Def::SetNamespaceEnv(a0) => a0.accept(c, v),
             Def::FileAttributes(a0) => a0.accept(c, v),
             Def::Module(a0) => a0.accept(c, v),
+            Def::SetModule(a0) => a0.accept(c, v),
         }
     }
 }
@@ -607,20 +653,22 @@ impl<P: Params> NodeMut<P> for DefaultCase<P::Ex, P::En> {
         self.1.accept(c, v)
     }
 }
-impl<P: Params> NodeMut<P> for DocComment {
+impl<P: Params> NodeMut<P> for Efun<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        v.visit_doc_comment(c, self)
+        v.visit_efun(c, self)
     }
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        self.0.accept(c, v)
+        self.fun.accept(c, v)?;
+        self.use_.accept(c, v)?;
+        self.closure_class_name.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for EmitId {
@@ -733,7 +781,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper2<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
+            a: &'node mut Box<((Pos, VcKind), Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -743,7 +791,11 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)>,
+            a: &'node mut Box<(
+                (Pos, KvcKind),
+                Option<(Targ<Ex>, Targ<Ex>)>,
+                Vec<Field<Ex, En>>,
+            )>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -844,16 +896,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper13<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(ast_defs::Bop, Expr<Ex, En>, Expr<Ex, En>)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)?;
-            a.2.accept(c, v)
-        }
-        #[inline]
-        fn helper14<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -863,7 +905,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper15<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper14<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Option<Expr<Ex, En>>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -873,7 +915,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper16<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper15<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Hint)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -882,7 +924,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper17<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper16<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Hint, bool)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -892,7 +934,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper18<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper17<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Hint)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -901,7 +943,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper19<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper18<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(
                 ClassId<Ex, En>,
                 Vec<Targ<Ex>>,
@@ -919,25 +961,16 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             v.visit_ex(c, &mut a.4)
         }
         #[inline]
+        fn helper19<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+            a: &'node mut Box<(Fun_<Ex, En>, Vec<CaptureLid<Ex>>)>,
+            c: &mut P::Context,
+            v: &mut dyn VisitorMut<'node, Params = P>,
+        ) -> Result<(), P::Error> {
+            a.0.accept(c, v)?;
+            a.1.accept(c, v)
+        }
+        #[inline]
         fn helper20<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Fun_<Ex, En>, Vec<Lid>)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper21<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Fun_<Ex, En>, Vec<Lid>)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper22<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(ClassName, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -947,7 +980,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper23<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper21<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(ImportFlavor, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -956,7 +989,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper24<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper22<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(ClassName, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -966,16 +999,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper25<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Expr<Ex, En>, Pstring)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper26<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper23<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(ClassName, Pstring)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -984,16 +1008,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper27<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(ClassId<Ex, En>, Pstring)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper28<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper24<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -1003,7 +1018,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper29<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper25<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Option<ClassName>, String)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -1012,7 +1027,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper30<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper26<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Ex, Ex, HoleSource)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -1033,6 +1048,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             Expr_::True => Ok(()),
             Expr_::False => Ok(()),
             Expr_::Omitted => Ok(()),
+            Expr_::Invalid(a0) => a0.accept(c, v),
             Expr_::Id(a0) => a0.accept(c, v),
             Expr_::Lvar(a0) => a0.accept(c, v),
             Expr_::Dollardollar(a0) => a0.accept(c, v),
@@ -1055,28 +1071,26 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             Expr_::List(a0) => a0.accept(c, v),
             Expr_::Cast(a) => helper11(a, c, v),
             Expr_::Unop(a) => helper12(a, c, v),
-            Expr_::Binop(a) => helper13(a, c, v),
-            Expr_::Pipe(a) => helper14(a, c, v),
-            Expr_::Eif(a) => helper15(a, c, v),
-            Expr_::Is(a) => helper16(a, c, v),
-            Expr_::As(a) => helper17(a, c, v),
-            Expr_::Upcast(a) => helper18(a, c, v),
-            Expr_::New(a) => helper19(a, c, v),
-            Expr_::Efun(a) => helper20(a, c, v),
-            Expr_::Lfun(a) => helper21(a, c, v),
-            Expr_::Xml(a) => helper22(a, c, v),
-            Expr_::Import(a) => helper23(a, c, v),
-            Expr_::Collection(a) => helper24(a, c, v),
+            Expr_::Binop(a0) => a0.accept(c, v),
+            Expr_::Pipe(a) => helper13(a, c, v),
+            Expr_::Eif(a) => helper14(a, c, v),
+            Expr_::Is(a) => helper15(a, c, v),
+            Expr_::As(a) => helper16(a, c, v),
+            Expr_::Upcast(a) => helper17(a, c, v),
+            Expr_::New(a) => helper18(a, c, v),
+            Expr_::Efun(a0) => a0.accept(c, v),
+            Expr_::Lfun(a) => helper19(a, c, v),
+            Expr_::Xml(a) => helper20(a, c, v),
+            Expr_::Import(a) => helper21(a, c, v),
+            Expr_::Collection(a) => helper22(a, c, v),
             Expr_::ExpressionTree(a0) => a0.accept(c, v),
             Expr_::Lplaceholder(a0) => a0.accept(c, v),
-            Expr_::FunId(a0) => a0.accept(c, v),
-            Expr_::MethodId(a) => helper25(a, c, v),
-            Expr_::MethodCaller(a) => helper26(a, c, v),
-            Expr_::SmethodId(a) => helper27(a, c, v),
-            Expr_::Pair(a) => helper28(a, c, v),
+            Expr_::MethodCaller(a) => helper23(a, c, v),
+            Expr_::Pair(a) => helper24(a, c, v),
             Expr_::ETSplice(a0) => a0.accept(c, v),
-            Expr_::EnumClassLabel(a) => helper29(a, c, v),
-            Expr_::Hole(a) => helper30(a, c, v),
+            Expr_::EnumClassLabel(a) => helper25(a, c, v),
+            Expr_::Hole(a) => helper26(a, c, v),
+            Expr_::Package(a0) => a0.accept(c, v),
         }
     }
 }
@@ -1135,6 +1149,22 @@ impl<P: Params> NodeMut<P> for FileAttribute<P::Ex, P::En> {
         self.namespace.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for FinallyBlock<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_finally_block(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1151,8 +1181,12 @@ impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
         self.namespace.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
         self.mode.accept(c, v)?;
+        self.name.accept(c, v)?;
         self.fun.accept(c, v)?;
-        self.internal.accept(c, v)
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)?;
+        self.tparams.accept(c, v)?;
+        self.where_constraints.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for FunKind {
@@ -1219,9 +1253,6 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {
         v.visit_en(c, &mut self.annotation)?;
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
-        self.name.accept(c, v)?;
-        self.tparams.accept(c, v)?;
-        self.where_constraints.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.unsafe_ctxs.accept(c, v)?;
@@ -1377,6 +1408,10 @@ impl<P: Params> NodeMut<P> for Hint_ {
                 a1.accept(c, v)
             }
             Hint_::Hsoft(a0) => a0.accept(c, v),
+            Hint_::Hrefinement(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
             Hint_::Hany => Ok(()),
             Hint_::Herr => Ok(()),
             Hint_::Hmixed => Ok(()),
@@ -1416,6 +1451,7 @@ impl<P: Params> NodeMut<P> for HoleSource {
         match self {
             HoleSource::Typing => Ok(()),
             HoleSource::UnsafeCast(a0) => a0.accept(c, v),
+            HoleSource::UnsafeNonnullCast => Ok(()),
             HoleSource::EnforcedCast(a0) => a0.accept(c, v),
         }
     }
@@ -1458,24 +1494,6 @@ impl<P: Params> NodeMut<P> for ImportFlavor {
         }
     }
 }
-impl<P: Params> NodeMut<P> for InsteadofAlias {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_insteadof_alias(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.0.accept(c, v)?;
-        self.1.accept(c, v)?;
-        self.2.accept(c, v)
-    }
-}
 impl<P: Params> NodeMut<P> for KvcKind {
     fn accept<'node>(
         &'node mut self,
@@ -1511,6 +1529,26 @@ impl<P: Params> NodeMut<P> for Lid {
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for MdNameKind {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_md_name_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            MdNameKind::MDNameGlobal(a0) => a0.accept(c, v),
+            MdNameKind::MDNamePrefix(a0) => a0.accept(c, v),
+            MdNameKind::MDNameExact(a0) => a0.accept(c, v),
+        }
     }
 }
 impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
@@ -1564,8 +1602,12 @@ impl<P: Params> NodeMut<P> for ModuleDef<P::Ex, P::En> {
         v.visit_en(c, &mut self.annotation)?;
         self.name.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
+        self.file_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
-        self.mode.accept(c, v)
+        self.mode.accept(c, v)?;
+        self.doc_comment.accept(c, v)?;
+        self.exports.accept(c, v)?;
+        self.imports.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for NastShapeInfo {
@@ -1695,6 +1737,31 @@ impl<P: Params> NodeMut<P> for ReadonlyKind {
     ) -> Result<(), P::Error> {
         match self {
             ReadonlyKind::Readonly => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for Refinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Refinement::Rctx(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
+            Refinement::Rtype(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
         }
     }
 }
@@ -1884,7 +1951,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)>,
+            a: &'node mut Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -2007,6 +2074,42 @@ impl<P: Params> NodeMut<P> for TypeHint<P::Ex> {
         self.1.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for TypeRefinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_type_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            TypeRefinement::TRexact(a0) => a0.accept(c, v),
+            TypeRefinement::TRloose(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for TypeRefinementBounds {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_type_refinement_bounds(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.lower.accept(c, v)?;
+        self.upper.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -2023,7 +2126,8 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
         v.visit_en(c, &mut self.annotation)?;
         self.name.accept(c, v)?;
         self.tparams.accept(c, v)?;
-        self.constraint.accept(c, v)?;
+        self.as_constraint.accept(c, v)?;
+        self.super_constraint.accept(c, v)?;
         self.kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
@@ -2032,7 +2136,10 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
         self.emit_id.accept(c, v)?;
-        self.is_ctx.accept(c, v)
+        self.is_ctx.accept(c, v)?;
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)?;
+        self.docs_url.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for TypedefVisibility {
@@ -2051,7 +2158,8 @@ impl<P: Params> NodeMut<P> for TypedefVisibility {
         match self {
             TypedefVisibility::Transparent => Ok(()),
             TypedefVisibility::Opaque => Ok(()),
-            TypedefVisibility::Tinternal => Ok(()),
+            TypedefVisibility::OpaqueModule => Ok(()),
+            TypedefVisibility::CaseType => Ok(()),
         }
     }
 }
@@ -2081,46 +2189,6 @@ impl<P: Params> NodeMut<P> for Uop {
         }
     }
 }
-impl<P: Params> NodeMut<P> for UseAsAlias {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_use_as_alias(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.0.accept(c, v)?;
-        self.1.accept(c, v)?;
-        self.2.accept(c, v)?;
-        self.3.accept(c, v)
-    }
-}
-impl<P: Params> NodeMut<P> for UseAsVisibility {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_use_as_visibility(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            UseAsVisibility::UseAsPublic => Ok(()),
-            UseAsVisibility::UseAsPrivate => Ok(()),
-            UseAsVisibility::UseAsProtected => Ok(()),
-            UseAsVisibility::UseAsFinal => Ok(()),
-        }
-    }
-}
 impl<P: Params> NodeMut<P> for UserAttribute<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -2136,6 +2204,22 @@ impl<P: Params> NodeMut<P> for UserAttribute<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.name.accept(c, v)?;
         self.params.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for UserAttributes<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_user_attributes(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for UsingStmt<P::Ex, P::En> {

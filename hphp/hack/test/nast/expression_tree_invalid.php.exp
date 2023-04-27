@@ -3,11 +3,10 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
-        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -21,31 +20,32 @@
                      ((), [5:14-20],
                       (Call (
                          ((), [5:14-20],
-                          (Efun (
-                             { f_span = [5:14-20]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([5:14-20], ";anonymous"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([5:14-20],
-                                   (Return
-                                      (Some ((), [5:14-20],
-                                             (Call (
-                                                ((), [5:14-20],
-                                                 (Obj_get (
-                                                    ((), [5:14-15], (Call (((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))), [], [], None))),
-                                                    ((), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method))),
-                                                [],
-                                                [(Pnormal,
-                                                  ((), [5:19-20], (Call (((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))), [], [], None))))],
-                                                None))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
+                          (Efun
+                             { ef_fun =
+                               { f_span = [5:14-20]; f_readonly_this = None; 
+                                 f_annotation = (); f_readonly_ret = None; 
+                                 f_ret = ((), None); f_params = []; f_ctxs = None; 
+                                 f_unsafe_ctxs = None;
+                                 f_body =
+                                 { fb_ast =
+                                   [([5:14-20],
+                                     (Return
+                                        (Some ((), [5:14-20],
+                                               (Call (
+                                                  ((), [5:14-20],
+                                                   (Obj_get (
+                                                      ((), [5:14-15], (Call (((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))), [], [], None))),
+                                                      ((), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method))),
+                                                  [],
+                                                  [(Pnormal,
+                                                    ((), [5:19-20], (Call (((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))), [], [], None))))
+                                                    ],
+                                                  None))))))
+                                     ]
+                                   };
+                                 f_fun_kind = FSync; f_user_attributes = []; 
+                                 f_external = false; f_doc_comment = None };
+                               ef_use = []; ef_closure_class_name = None })),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [5:3-13],
@@ -62,16 +62,15 @@
                            (Pnormal,
                             ((), [5:3-13],
                              (Shape
-                                [((SFlit_str ([5:3-13], "splices")), ((), [5:3-13], (KeyValCollection (Dict, None, []))));
-                                  ((SFlit_str ([5:3-13], "functions")), ((), [5:3-13], (ValCollection (Vec, None, []))));
-                                  ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (Vec, None, []))))])));
+                                [((SFlit_str ([5:3-13], "splices")), ((), [5:3-13], (KeyValCollection (([5:3-13], Dict), None, []))));
+                                  ((SFlit_str ([5:3-13], "functions")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))));
+                                  ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))))])));
                            (Pnormal,
                             ((), [5:14-20],
                              (Lfun (
                                 { f_span = [5:14-20]; f_readonly_this = None; 
                                   f_annotation = (); f_readonly_ret = None; 
-                                  f_ret = ((), None); f_name = ([5:14-20], ";anonymous"); 
-                                  f_tparams = []; f_where_constraints = [];
+                                  f_ret = ((), None);
                                   f_params =
                                   [{ param_annotation = (); param_type_hint = ((), (Some ([5:3-13], (Happly (([5:3-13], "\\ExampleDsl"), []))))); 
                                      param_is_variadic = false; param_pos = [5:3-13]; 
@@ -141,5 +140,5 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

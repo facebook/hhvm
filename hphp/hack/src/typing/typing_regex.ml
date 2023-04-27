@@ -43,7 +43,7 @@ let rec keys_aux p top names_numbers acc =
       (number - 1)
       t
       (TSFlit_str (Pos_or_decl.of_raw_pos p, name)
-       :: (int_keys p top number [] @ acc))
+      :: (int_keys p top number [] @ acc))
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
@@ -91,7 +91,7 @@ let type_match p s ~flags =
   let shape_map =
     TShapeMap.add (TSFlit_int (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
   in
-  mk (Reason.Rregex p, Tshape (Closed_shape, shape_map))
+  MakeType.closed_shape (Reason.Rregex p) shape_map
 
 let get_global_options s =
   List.fold_left (String.to_list_rev s) ~init:[] ~f:(fun acc x ->

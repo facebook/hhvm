@@ -1,0 +1,51 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [
+        "127.0.0.1:11710",
+        "127.0.0.1:11711"
+      ]
+    },
+    "foo-shadow": {
+      "servers": [ "127.0.0.1:11712" ]
+    },
+    "bar-shadow": {
+      "servers": [ "127.0.0.1:11722" ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "f": {
+        "type": "AllSyncRoute",
+        "children": {
+          "type": "ShadowRoute",
+          "children": "Pool|foo",
+          "shadows": [
+            {
+              "target": "PoolRoute|foo-shadow",
+              "index_range": [0, 2],
+              "key_fraction_range": [0.0, 0.1]
+            },
+            {
+              "target": "PoolRoute|bar-shadow",
+              "index_range": [0, 2],
+              "key_fraction_range": [0.0, 0.1]
+            }
+          ]
+        }
+      }
+    },
+    "wildcard": {
+      "type": "PoolRoute",
+      "pool": "foo",
+      "shadows": [
+        {
+          "target": "PoolRoute|foo-shadow",
+          "index_range": [0, 2],
+          "key_fraction_range": [0.0, 1.0]
+        }
+      ]
+    }
+  }
+}

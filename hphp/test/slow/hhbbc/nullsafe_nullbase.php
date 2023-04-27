@@ -1,6 +1,6 @@
 <?hh
 
-function err() { throw new exception; }
+function err() { throw new Exception; }
 
 class somecls {
  public function x(inout $k) {}
@@ -9,7 +9,7 @@ class somecls {
 function foo(somecls $z) {
  try {
  $z->x(inout $y?->z);
- } catch (exception $e) {
+ } catch (Exception $e) {
  set_error_handler(null);
  var_dump($y);
  }

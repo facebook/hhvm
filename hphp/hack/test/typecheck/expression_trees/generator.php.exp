@@ -1,0 +1,14 @@
+File "generator.php", line 6, characters 14-32:
+Expression trees only support simple lambdas, without features like `async`, generators or capabilities. (Parsing[1002])
+File "generator.php", line 6, characters 23-29:
+Unsupported expression tree syntax. (Parsing[1002])
+File "generator.php", line 6, characters 23-29:
+Internal error: Return type is not a generator (Other[0000])
+File "generator.php", line 6, characters 14-32:
+You cannot return a value in a generator (a generator is a function that uses `yield`) (NastCheck[3019])
+File "generator.php", line 6, characters 14-32:
+Invalid return type (Typing[4110])
+  File "generator.php", line 6, characters 14-32:
+  Expected `Generator<_, _, _>` (result of function containing a `yield`)
+  File "expr_tree.hhi", line 46, characters 38-48:
+  But got `ExampleVoid`

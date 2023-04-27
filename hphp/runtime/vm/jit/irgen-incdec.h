@@ -47,16 +47,12 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
   Opcode opc;
   if (src->isA(TDbl)) {
     opc = isInc(op) ? AddDbl : SubDbl;
-  } else if (!isIncDecO(op)) {
-    opc = isInc(op) ? AddInt : SubInt;
   } else {
-    opc = isInc(op) ? AddIntO : SubIntO;
+    opc = isInc(op) ? AddInt : SubInt;
   }
 
   auto const one = src->isA(TInt) ? cns(env, 1) : cns(env, 1.0);
-  auto const result = opc == AddIntO || opc == SubIntO
-    ? gen(env, opc, makeExitSlow(env), src, one)
-    : gen(env, opc, src, one);
+  auto const result = gen(env, opc, src, one);
 
   return result;
 }

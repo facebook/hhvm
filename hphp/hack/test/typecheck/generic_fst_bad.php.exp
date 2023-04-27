@@ -1,0 +1,6 @@
+File "generic_fst_bad.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+  File "generic_fst_bad.php", line 4, characters 35-36:
+  Expected `T2`
+  File "generic_fst_bad.php", line 4, characters 21-22:
+  But got `T1`

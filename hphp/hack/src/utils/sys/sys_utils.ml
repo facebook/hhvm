@@ -18,6 +18,10 @@ external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
+external open_tmpfile :
+  rd:bool -> wr:bool -> dir:string -> file_perm:int -> Unix.file_descr
+  = "hh_open_tmpfile"
+
 let get_env name =
   try Some (Sys.getenv name) with
   | Caml.Not_found -> None
@@ -127,6 +131,7 @@ let cat = Disk.cat
 
 let cat_or_failed file =
   try Some (Disk.cat file) with
+  | TestDisk.No_such_file_or_directory _
   | Sys_error _
   | Failure _ ->
     None
@@ -156,6 +161,14 @@ let exec_read cmd =
   let result = In_channel.input_line ic in
   assert (Poly.(Unix.close_process_in ic = Unix.WEXITED 0));
   result
+
+let exec_try_read cmd =
+  let ic = Unix.open_process_in cmd in
+  let out = In_channel.input_line ic in
+  let status = Unix.close_process_in ic in
+  match (out, status) with
+  | (Some _, Unix.WEXITED 0) -> out
+  | _ -> None
 
 let exec_read_lines ?(reverse = false) cmd =
   let ic = Unix.open_process_in cmd in
@@ -189,7 +202,7 @@ let rec collect_paths path_predicate path =
 
 let parse_path_list (paths : string list) : string list =
   List.concat_map paths ~f:(fun path ->
-      if String_utils.string_starts_with path "@" then
+      if String.is_prefix path ~prefix:"@" then
         let path = String_utils.lstrip path "@" in
         cat path |> split_lines
       else
@@ -210,16 +223,6 @@ let logname_impl () =
   match getenv_user () with
   | Some user -> user
   | None ->
-    (* If this function is generally useful, it can be lifted to toplevel
-         in this file, but this is the only place we need it for now. *)
-    let exec_try_read cmd =
-      let ic = Unix.open_process_in cmd in
-      let out = In_channel.input_line ic in
-      let status = Unix.close_process_in ic in
-      match (out, status) with
-      | (Some _, Unix.WEXITED 0) -> out
-      | _ -> None
-    in
     (try Utils.unsafe_opt (exec_try_read "logname") with
     | Invalid_argument _ ->
       (try Utils.unsafe_opt (exec_try_read "id -un") with
@@ -235,7 +238,7 @@ let get_primary_owner () =
   if not (Disk.file_exists owners_file) then
     logged_in_user
   else
-    let lines = Core_kernel.String.split_lines (Disk.cat owners_file) in
+    let lines = Core.String.split_lines (Disk.cat owners_file) in
     if List.mem lines logged_in_user ~equal:String.( = ) then
       logged_in_user
     else
@@ -288,16 +291,15 @@ let expanduser path =
     (Str.regexp "^~\\([^/]*\\)")
     begin
       fun s ->
-      match Str.matched_group 1 s with
-      | "" ->
-        begin
+        match Str.matched_group 1 s with
+        | "" -> begin
           match getenv_home () with
           | None -> (Unix.getpwuid (Unix.getuid ())).Unix.pw_dir
           | Some home -> home
         end
-      | unixname ->
-        (try (Unix.getpwnam unixname).Unix.pw_dir with
-        | Caml.Not_found -> Str.matched_string s)
+        | unixname ->
+          (try (Unix.getpwnam unixname).Unix.pw_dir with
+          | Caml.Not_found -> Str.matched_string s)
     end
     path
 
@@ -316,9 +318,9 @@ let executable_path : unit -> string =
         ~f:
           begin
             fun acc p ->
-            match acc with
-            | Some _ -> acc
-            | None -> realpath (expanduser (Filename.concat p path))
+              match acc with
+              | Some _ -> acc
+              | None -> realpath (expanduser (Filename.concat p path))
           end
         ~init:None
     in
@@ -529,54 +531,29 @@ let signal =
     fun _ _ ->
   ()
 
-external get_total_ram : unit -> int = "hh_sysinfo_totalram"
+type sysinfo = {
+  uptime: int;
+  totalram: int;
+  freeram: int;
+  sharedram: int;
+  bufferram: int;
+  totalswap: int;
+  freeswap: int;
+  totalhigh: int;
+  freehigh: int;
+}
 
-external uptime : unit -> int = "hh_sysinfo_uptime"
+external sysinfo : unit -> sysinfo option = "hh_sysinfo"
 
-external nproc : unit -> int = "nproc"
+external nprocs : unit -> int = "hh_nproc"
 
-let ncores_linux_only cpuinfo =
-  (* How do cores and processors work?
-     There are S sockets, each with an L2 cache.
-     Each socket has C cores, sharing the L2 cache. These are true units of concurrent execution.
-     Each core has H hyperthreads, which share silicon and hence interleave.
-     This makes for S*C*H processors in total reported by nproc.
-     This function merely returns S*C. *)
-  (* Implementation strategy: read /proc/cpuinfo (which is linux-specific), which has a
-     load of entries for each processor. Each processor has an entry for 'physical id' which is
-     a unique identifier for which socket it's on, followed by "cpu cores" which is how many cores that
-     socket has. We'll gather up how many cpu cores each socket has. *)
-  let colon_re = Str.regexp_string ":" in
-  let lines = cpuinfo |> split_lines in
-  let current_socket_id = ref None in
-  let current_cores = ref None in
-  let sockets = ref SMap.empty in
-  let push () =
-    match !current_socket_id with
-    | None -> ()
-    | Some socket_id ->
-      sockets := SMap.add socket_id (Option.value_exn !current_cores) !sockets;
-      current_socket_id := None;
-      current_cores := None
-  in
-  List.iter lines ~f:(fun line ->
-      match Str.split colon_re line with
-      | [key; value] ->
-        let (key, value) = (String.strip key, String.strip value) in
-        if String.equal key "physical id" then begin
-          push ();
-          current_socket_id := Some value
-        end else if String.equal key "cpu cores" then
-          current_cores := Some (int_of_string value)
-        else
-          ()
-      | _ -> ());
-  push ();
-  SMap.fold (fun _physical_id cores total -> total + cores) !sockets 0
+let nbr_procs = nprocs ()
 
-let total_ram = get_total_ram ()
+let total_ram =
+  Option.value_map (sysinfo ()) ~default:0 ~f:(fun si -> si.totalram)
 
-let nbr_procs = nproc ()
+let uptime () =
+  Option.value_map (sysinfo ()) ~default:0 ~f:(fun si -> si.uptime)
 
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
   = "hh_set_priorities"
@@ -593,7 +570,7 @@ let lstat path =
      '/' (or a '\', whatever) *)
   Unix.lstat
   @@
-  if Sys.win32 && String_utils.string_ends_with path Filename.dir_sep then
+  if Sys.win32 && String.is_suffix path ~suffix:Filename.dir_sep then
     String.sub path ~pos:0 ~len:(String.length path - 1)
   else
     path
@@ -651,6 +628,12 @@ type processor_info = {
 
 external processor_info : unit -> processor_info = "hh_processor_info"
 
+let string_of_fd (fd : Unix.file_descr) : string = string_of_int (Obj.magic fd)
+
+let show_inode (fd : Unix.file_descr) : string =
+  let stat = Unix.fstat fd in
+  Printf.sprintf "inode#%d:%d" stat.Unix.st_dev stat.Unix.st_ino
+
 let rec select_non_intr read write exn timeout =
   let start_time = Unix.gettimeofday () in
   try Unix.select read write exn timeout with
@@ -676,7 +659,7 @@ let rec select_non_intr read write exn timeout =
        *)
       "["
       ^ List.fold_left
-          ~f:(fun init fd -> init ^ string_of_int (Obj.magic fd) ^ ", ")
+          ~f:(fun init fd -> init ^ string_of_fd fd ^ ", ")
           ~init:""
           fdl
       ^ "]"
@@ -690,6 +673,34 @@ let rec select_non_intr read write exn timeout =
         timeout
     in
     raise (Unix.Unix_error (Unix.EINVAL, fun_name, fun_params))
+
+let rec restart_on_EINTR f x =
+  try f x with
+  | Unix.Unix_error (Unix.EINTR, _, _) -> restart_on_EINTR f x
+
+let write_non_intr (fd : Unix.file_descr) (buf : bytes) (pos : int) (len : int)
+    : unit =
+  let pos = ref pos in
+  while !pos < len do
+    (* must use Unix.single_write, not Unix.write, because the latter does arbitrarily
+       many OS calls and we don't know which one got the EINTR *)
+    let n = restart_on_EINTR (Unix.single_write fd buf !pos) (len - !pos) in
+    pos := !pos + n
+  done
+
+let read_non_intr (fd : Unix.file_descr) (len : int) : bytes option =
+  let buf = Bytes.create len in
+  let pos = ref 0 in
+  let is_eof = ref false in
+  while !pos < len && not !is_eof do
+    let n = restart_on_EINTR (Unix.read fd buf !pos) (len - !pos) in
+    pos := !pos + n;
+    if n = 0 then is_eof := true
+  done;
+  if !is_eof then
+    None
+  else
+    Some buf
 
 let rec waitpid_non_intr flags pid =
   try Unix.waitpid flags pid with
@@ -759,7 +770,69 @@ module For_test = struct
   let find_oom_in_dmesg_output = find_oom_in_dmesg_output
 end
 
+let atomically_create_and_init_file
+    (path : string)
+    ~(rd : bool)
+    ~(wr : bool)
+    (file_perm : Unix.file_perm)
+    ~(init : Unix.file_descr -> unit) : Unix.file_descr option =
+  if not Sys.unix then
+    failwith "O_TMPFILE, linkat and /proc/fd all require linux";
+  (* There's no way to pass O_TMPFILE to Unix.openfile. So, we need our own version... *)
+  let fd = open_tmpfile ~rd ~wr ~dir:(Filename.dirname path) ~file_perm in
+  try
+    init fd;
+
+    (* If the user's callback worked, we can proceed to atomically move the file into place.
+       If this fails due to pre-existing, then we'll return None.
+       Implementation of Unix.link is at
+       https://github.com/ocaml/ocaml/blob/trunk/otherlibs/unix/link_unix.c.
+       The ~follow:true flag makes it do
+       linkat(AT_FDCWD, "/proc/self/fd/<fd>", AT_FDCWD, filename, AT_SYMLINK_FOLLOW) *)
+
+    (* Here is documentation from "man 2 open": https://man7.org/linux/man-pages/man2/open.2.html
+       Note that it only exists on linux (since 2013) and not on other unix platforms.
+
+       O_TMPFILE must be specified with one of O_RDWR or O_WRONLY and, optionally, O_EXCL. If O_EXCL
+       is not specified, then linkat(2) can be used to link the temporary file into the filesystem,
+       making it permanent, using code like the following:
+         char path[PATH_MAX];
+         fd = open("/path/to/dir", O_TMPFILE | O_RDWR, S_IRUSR | S_IWUSR);
+         /* File I/O on 'fd'... */
+         snprintf(path, PATH_MAX,  "/proc/self/fd/%d", fd);
+         linkat(AT_FDCWD, path, AT_FDCWD, "/path/for/file", AT_SYMLINK_FOLLOW);
+
+       There are two main use cases for O_TMPFILE:
+
+       * Improved tmpfile(3) functionality: race-free creation of temporary files that (1) are
+       automatically deleted when closed; (2) can never be reached via any pathname; (3) are not
+       subject to symlink attacks; and (4) do not require the caller to devise unique names.
+       *  Creating a file that is initially invisible, which is then populated with data and adjusted to
+       have appropriate filesystem attributes (fchown(2), fchmod(2), fsetxattr(2), etc.) before being
+       atomically linked into the filesystem in a fully formed state (using linkat(2) as described above)
+    *)
+    begin
+      try
+        Unix.link
+          ~follow:true
+          (Printf.sprintf "/proc/self/fd/%s" (string_of_fd fd))
+          path;
+        Some fd
+      with
+      | Unix.Unix_error (Unix.EEXIST, _, _) ->
+        Unix.close fd;
+        None
+    end
+  with
+  | exn ->
+    let e = Exception.wrap exn in
+    Unix.close fd;
+    Exception.reraise e
+
 let protected_read_exn (filename : string) : string =
+  (* TODO(ljw): this function is vulnerable to EINTR. Although we only hit it about once a month. *)
+  (* TODO(ljw): we should use atomic-create for this! *)
+
   (* We can't use the standard Disk.cat because we need to read from an existing (locked)
      fd for the file; not open the file a second time and read from that. *)
   let cat_from_fd (fd : Unix.file_descr) : string =

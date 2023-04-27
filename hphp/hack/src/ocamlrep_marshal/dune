@@ -1,0 +1,16 @@
+(data_only_dirs cargo)
+
+(library
+ (name ocamlrep_marshal_ffi)
+ (modules ocamlrep_marshal_ffi)
+ (wrapped false)
+ (c_library_flags -lpthread)
+ (foreign_archives ocamlrep_marshal_ffi_bindings))
+
+(rule
+  (targets libocamlrep_marshal_ffi_bindings.a)
+  (deps
+   (source_tree %{workspace_root}/hack/src))
+  (locks cargo)
+  (action
+   (run %{workspace_root}/hack/scripts/invoke_cargo.sh ocamlrep_marshal_ffi_bindings ocamlrep_marshal_ffi_bindings)))

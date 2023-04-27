@@ -5,10 +5,10 @@ Invalid return type (Typing[4110])
   File "throw_yield.php", line 4, characters 17-20:
   Expected `void`
   File "throw_yield.php", line 4, characters 17-20:
-  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+  But got `Generator<_, _, _>` (result of function containing a `yield`)
 File "throw_yield.php", line 5, characters 9-15:
 Invalid exception (Typing[4110])
   File "throw_yield.php", line 5, characters 9-15:
   Expected `Throwable` because it is used as an exception
   File "throw_yield.php", line 5, characters 9-15:
-  But got `?[unresolved]` (`$generator->send()` can always send a `null` back to a `yield`)
+  But got `?_` (`$generator->send()` can always send a `null` back to a `yield`)

@@ -1,0 +1,62 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensureAndPatchByKey",
+  "compoundname_html": "apache::thrift::op::detail::MapPatch::ensureAndPatchByKey",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1ae5c069329e219c0ebd70da221c0fc719",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename K",
+          "defval_html": "typename T::key_type"
+        }
+      ],
+      "type_html": "FOLLY_NODISCARD VP &amp;",
+      "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+      "argsstring_html": "(K &amp;&amp;key)",
+      "name_html": "ensureAndPatchByKey",
+      "param": [
+        {
+          "type_html": "K &amp;&amp;",
+          "declname_html": "key"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "414",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "414",
+        "bodyend": "416"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename K = typename T::key_type&gt;\nFOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+        "simple_raw": "template <typename K = typename T::key_type>\nFOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+        "detailed_html": "template &lt;typename K = typename T::key_type&gt;\ninline FOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+        "detailed_raw": "template <typename K = typename T::key_type>\ninline FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+        "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+        "original_argsstring_html": "(K &amp;&amp;key)"
+      },
+      "description": {
+        "brief_html": "<p>Ensures that key exists and patches the entry. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+      "compoundname_html": "apache::thrift::op::detail::MapPatch::ensureAndPatchByKey"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+  "minprot": "public",
+  "displayname_html": "ensureAndPatchByKey",
+  "brief_html": "<p>Ensures that key exists and patches the entry. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey"
+}

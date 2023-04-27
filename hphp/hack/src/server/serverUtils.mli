@@ -56,3 +56,9 @@ val make_next :
   indexer:(unit -> string list) ->
   extra_roots:Path.t list ->
   Relative_path.t list Bucket.next
+
+(** If the components of this if statement look like they were
+    desugared from an invariant() call, return the equivalent
+    invariant() expression. *)
+val resugar_invariant_call :
+  Tast_env.env -> Tast.expr -> Tast.block -> Tast.expr option

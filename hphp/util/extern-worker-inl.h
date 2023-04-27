@@ -26,10 +26,8 @@
 #include <folly/Conv.h>
 #include <folly/container/Foreach.h>
 #include <folly/gen/Base.h>
-#include <folly/portability/Filesystem.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <tuple>
 #include <type_traits>
 
@@ -45,56 +43,63 @@ Job<C>::Job() : detail::JobBase{C::name()} {}
 // expects, then invoke the function with those types.
 
 template <typename C>
-void Job<C>::init(const folly::fs::path& root) const {
+void Job<C>::init(detail::ISource& source) const {
   using namespace detail;
   using Args = typename Params<decltype(C::init)>::type;
 
-  // For each expected input, load the file, and deserialize it into
+  // For each expected input, load it, and deserialize it into
   // the appropriate type. Return the types as a tuple, which can then
   // std::apply to C::init, passing the inputs.
+  size_t DEBUG_ONLY nextIdx = 0;
   std::apply(
     C::init,
     typesToValues<Args>(
       [&] (size_t idx, auto tag) {
-        return deserialize<typename decltype(tag)::Type>(
-          root / folly::to<std::string>(idx)
-        );
+        assertx(idx == nextIdx++);
+        return deserialize<typename decltype(tag)::Type>(source);
       }
     )
   );
+  source.initDone();
 
   using Ret = typename Return<decltype(C::init)>::type;
   static_assert(std::is_void_v<Ret>, "init() must return void");
 }
 
 template <typename C>
-void Job<C>::fini() const {
-  using Ret = typename detail::Return<decltype(C::fini)>::type;
-  static_assert(std::is_void_v<Ret>, "fini() must return void");
-  // fini() is easy since it doesn't receive nor return anything.
-  C::fini();
+void Job<C>::fini(detail::ISink& sink) const {
+  using namespace detail;
+
+  sink.startFini();
+  using Ret = typename Return<decltype(C::fini)>::type;
+  if constexpr (std::is_void_v<Ret>) {
+    C::fini();
+  } else {
+    auto const v = C::fini();
+    time("writing fini outputs", [&] { return serialize(v, sink); });
+  }
 }
 
 template <typename C>
-void Job<C>::run(const folly::fs::path& inputRoot,
-                 const folly::fs::path& outputRoot) const {
+void Job<C>::run(detail::ISource& source, detail::ISink& sink) const {
   using namespace detail;
 
-  // For each expected input, load the file, and deserialize it into
-  // the appropriate type, turning all of the types into a tuple.
+  // For each expected input, load it, and deserialize it into the
+  // appropriate type, turning all of the types into a tuple.
   using Args = typename Params<decltype(C::run)>::type;
+  size_t DEBUG_ONLY nextIdx = 0;
   auto inputs = time(
     "loading inputs",
     [&] {
       return typesToValues<Args>(
         [&] (size_t idx, auto tag) {
-          return deserialize<typename decltype(tag)::Type>(
-            inputRoot / folly::to<std::string>(idx)
-          );
+          assertx(idx == nextIdx++);
+          return deserialize<typename decltype(tag)::Type>(source);
         }
       );
     }
   );
+  source.nextInput();
 
   // Apply the tuple to C::run, passing the types as parameters.
   auto outputs = time(
@@ -105,8 +110,9 @@ void Job<C>::run(const folly::fs::path& inputRoot,
   using Ret = typename Return<decltype(C::run)>::type;
   static_assert(!std::is_void_v<Ret>, "run() must return something");
 
-  // Serialize the outputs into the output directory.
-  time("writing outputs", [&] { return serialize(outputs, 0, outputRoot); });
+  // Serialize the outputs
+  time("writing outputs", [&] { return serialize(outputs, sink); });
+  sink.nextOutput();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -115,81 +121,99 @@ namespace detail {
 
 //////////////////////////////////////////////////////////////////////
 
-// Given a file path, load the contents of the file, deserialize them
-// into the type T, and return it.
+// Turn a blob into a specific (non-marker) type
 template <typename T>
-T JobBase::deserialize(const folly::fs::path& path) {
+T JobBase::deserializeBlob(std::string blob) {
   using namespace detail;
+  static_assert(!IsMarker<T>::value, "Special markers cannot be nested");
   if constexpr (std::is_same<T, std::string>::value) {
     // A std::string is always stored as itself (this lets us store
-    // files as their contents without having to encode them).
-    return readFile(path);
-  } else if constexpr (IsVariadic<T>::value) {
+    // files directly as their contents without having to encode
+    // them).
+    return blob;
+  } else {
+    // For most types, the data is encoded using BlobEncoder, so undo
+    // that.
+    BlobDecoder decoder{blob.data(), blob.size()};
+    return decoder.makeWhole<T>();
+  }
+}
+
+// Deserialize the given input source into the type T and return
+// it. The type might include markers, which might trigger
+// sub-deserializations.
+template <typename T>
+T JobBase::deserialize(ISource& source) {
+  using namespace detail;
+  static_assert(!IsMulti<T>::value, "Multi can only be used as return type");
+
+  if constexpr (IsVariadic<T>::value) {
     static_assert(!IsMarker<typename T::Type>::value,
                   "Special markers cannot be nested");
-    // Variadic<T> is actually a directory, not a file. Recurse into
-    // it, and do the deserialization for every file within it.
+    auto const blobs = source.variadic();
     T out;
-    for (size_t i = 0;; ++i) {
-      auto const valPath = path / folly::to<std::string>(i);
-      // A break in the numbering means the end of the vector.
-      if (!folly::fs::exists(valPath)) break;
-      out.vals.emplace_back(deserialize<typename T::Type>(valPath));
+    out.vals.reserve(blobs.size());
+    for (auto const& blob : blobs) {
+      out.vals.emplace_back(deserializeBlob<typename T::Type>(blob));
     }
     return out;
   } else if constexpr (IsOpt<T>::value) {
     static_assert(!IsMarker<typename T::Type>::value,
                   "Special markers cannot be nested");
-    // Opt<T> is like T, except the file may not exist (so is nullopt
+    // Opt<T> is like T, except the data may not exist (so is nullopt
     // otherwise).
     T out;
-    if (folly::fs::exists(path)) {
-      out.val.emplace(deserialize<typename T::Type>(path));
+    if (auto const blob = source.optBlob()) {
+      out.val.emplace(deserializeBlob<typename T::Type>(*blob));
     }
     return out;
   } else {
-    // For most types, the data is encoded using BlobEncoder, so undo
-    // that.
-    static_assert(!IsMulti<T>::value, "Multi can only be used as return type");
-    auto const data = readFile(path);
-    BlobDecoder decoder{data.data(), data.size()};
-    return decoder.makeWhole<T>();
+    return deserializeBlob<T>(source.blob());
   }
 }
 
-// Given a value, an index of that value (its positive in the output
-// values), and an output root, serialize the value, and write its
-// contents to the appropriate file.
+// Serialize the given (non-marker) value into a blob
 template <typename T>
-void JobBase::serialize(const T& v,
-                        size_t idx,
-                        const folly::fs::path& root) {
+std::string JobBase::serializeBlob(const T& v) {
   using namespace detail;
+  static_assert(!IsMarker<T>::value,
+                "Special markers cannot be nested");
   if constexpr (std::is_same<T, std::string>::value) {
-    // std::string isn't serialized, but written as itself as
-    // root/idx.
-    return writeFile(root / folly::to<std::string>(idx), v.data(), v.size());
-  } else if constexpr (IsVariadic<T>::value) {
-    // For Variadic<T>, we create a directory root/idx, and under it,
-    // write a file for every element in the vector.
+    // std::string always encodes to itself
+    return v;
+  } else {
+    BlobEncoder encoder;
+    encoder(v);
+    return std::string{(const char*)encoder.data(), encoder.size()};
+  }
+}
+
+// Serialize the given value into a blob and write it out to the given
+// output sink. The value's type might be a marker, which can trigger
+// sub-serializations.
+template <typename T>
+void JobBase::serialize(const T& v, ISink& sink) {
+  using namespace detail;
+  if constexpr (IsVariadic<T>::value) {
     static_assert(!IsMarker<typename T::Type>::value,
                   "Special markers cannot be nested");
-    auto const path = root / folly::to<std::string>(idx);
-    folly::fs::create_directory(path, root);
-    for (size_t i = 0; i < v.vals.size(); ++i) {
-      serialize(v.vals[i], i, path);
-    }
+    using namespace folly::gen;
+    auto const blobs = from(v.vals)
+      | map([&] (const typename T::Type& t) { return serializeBlob(t); })
+      | as<std::vector>();
+    sink.variadic(blobs);
   } else if constexpr (IsOpt<T>::value) {
     // Opt<T> is like T, except nothing is written if the value isn't
     // present.
     static_assert(!IsMarker<typename T::Type>::value,
                   "Special markers cannot be nested");
-    if (!v.val.has_value()) return;
-    serialize(*v.val, idx, root);
+    sink.optBlob(
+      v.val.has_value() ? serializeBlob(*v.val) : Optional<std::string>{}
+    );
   } else if constexpr (IsMulti<T>::value) {
     // Treat Multi as equivalent to std::tuple (IE, write each element
-    // to a separate file).
-    assertx(idx == 0);
+    // separately).
+    size_t DEBUG_ONLY nextTupleIdx = 0;
     for_each(
       v.vals,
       [&] (auto const& elem, size_t tupleIdx) {
@@ -199,18 +223,12 @@ void JobBase::serialize(const T& v,
           >::value,
          "Multi cannot be nested"
         );
-        serialize(elem, tupleIdx, root);
+        assertx(tupleIdx == nextTupleIdx++);
+        serialize(elem, sink);
       }
     );
   } else {
-    // Most types are just encoded with BlobEncoder and written as
-    // root/idx
-    BlobEncoder encoder;
-    encoder(v);
-    writeFile(
-      root / folly::to<std::string>(idx),
-      (const char*)encoder.data(), encoder.size()
-    );
+    sink.blob(serializeBlob(v));
   }
 }
 
@@ -220,20 +238,45 @@ void JobBase::serialize(const T& v,
 
 //////////////////////////////////////////////////////////////////////
 
-inline RefId::RefId(std::string id, size_t size)
-  : m_id{std::move(id)}, m_size{size}
+inline RefId::RefId(std::string id, size_t size, size_t extra)
+  : m_id{std::move(id)}, m_size{size}, m_extra{extra}
 {}
 
 inline bool RefId::operator==(const RefId& o) const {
-  return std::tie(m_id, m_size) == std::tie(o.m_id, o.m_size);
+  return
+    std::tie(m_id, m_extra, m_size) ==
+    std::tie(o.m_id, o.m_extra, o.m_size);
 }
 
 inline bool RefId::operator!=(const RefId& o) const {
   return !(*this == o);
 }
 
+inline bool RefId::operator<(const RefId& o) const {
+  return
+    std::tie(m_id, m_extra, m_size) <
+    std::tie(o.m_id, o.m_extra, o.m_size);
+}
+
+inline bool RefId::operator<=(const RefId& o) const {
+  return
+    std::tie(m_id, m_extra, m_size) <=
+    std::tie(o.m_id, o.m_extra, o.m_size);
+}
+
+inline size_t RefId::hash() const {
+  return folly::hash::hash_combine(m_id, m_size, m_extra);
+}
+
 inline std::string RefId::toString() const {
-  return folly::sformat("{}:{}", m_id, m_size);
+  // Don't print out the extra field if it's zero, to avoid clutter
+  // for implementations which don't use it. The id might contain
+  // binary data, so escape it before printing.
+  if (m_extra) {
+    return folly::sformat("{}:{}:{}", folly::humanify(m_id), m_extra, m_size);
+  } else {
+    return folly::sformat("{}:{}", folly::humanify(m_id), m_size);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -281,67 +324,146 @@ inline std::string RequestId::toString() const {
   return folly::to<std::string>(m_id);
 }
 
+inline RequestId::Clock::duration RequestId::elapsed() const {
+  return m_timer->elapsed();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline const std::string& Client::implName() const {
   return m_impl->name();
 }
 
+inline std::string Client::session() const {
+  return m_impl->session();
+}
+
 inline bool Client::usingSubprocess() const {
-  return m_impl->isSubprocess();
+  return m_impl->isSubprocess() || m_impl->isDisabled();
+}
+
+inline bool Client::supportsOptimistic() const {
+  return m_impl->supportsOptimistic() && !m_impl->isDisabled();
+}
+
+inline bool Client::fellback() const {
+  return m_fallbackImpl.present();
+}
+
+// Run the given callable, retrying if Throttle is thrown, until the
+// configured retry limit is reached.
+template <typename T, typename F>
+coro::Task<T> Client::tryWithThrottling(const F& f) {
+  HPHP_CORO_RETURN(
+    HPHP_CORO_AWAIT(
+      Impl::tryWithThrottling<T>(
+        m_options.m_throttleRetries,
+        m_options.m_throttleBaseWait,
+        m_stats->throttles,
+        f
+      )
+    )
+  );
 }
 
 // Run the given callable F with the normal implementation. If it
 // throws an Error, set didFallback to true, and attempt to re-run F
 // with the fallback implementation.
 template <typename T, typename F>
-coro::Task<T> Client::tryWithFallback(F f, bool& didFallback) {
+coro::Task<T> Client::tryWithFallback(const F& f,
+                                      bool& didFallback,
+                                      bool optimistic) {
   // If we're forcing fallbacks, or if the main implementation has
   // disabled itself, go straight to the fallback case.
+  Optional<std::string> errorMsg;
   if (!m_forceFallback && !m_impl->isDisabled()) {
     try {
       // Attempt the normal implementation.
       didFallback = false;
-      HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f(*m_impl, false)));
+      HPHP_CORO_RETURN(
+        HPHP_CORO_AWAIT(
+          tryWithThrottling<T>(
+            [&] { return f(*m_impl, false); }
+          )
+        )
+      );
+    } catch (const WorkerError& exn) {
+      // If the worker failed, we'll retry with fallback even if we're
+      // using optimistic mode.
+      if (m_impl->isSubprocess()) throw;
+      if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
+      errorMsg.emplace(exn.what());
     } catch (const Error& exn) {
       // It failed. If the main implementation *is* the subprocess
       // implementation, there's no point in trying again. Just
       // rethrow the error. Likewise, if Options has determined we
       // shouldn't use the subprocess implementaiton, rethrow the
       // error.
+      if (optimistic) throw;
       if (m_impl->isSubprocess()) throw;
       if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
-      // Check this again. The implementation could have disabled
-      // itself while using it above, and in that case, its the
-      // implementation's responsibility to print something to the
-      // log.
-      if (!m_impl->isDisabled()) {
-        Logger::FError(
-          "Error: \"{}\". Attempting to retry with local fallback...",
-          exn.what()
-        );
-      }
+      errorMsg.emplace(exn.what());
     }
   }
-  // Fallback case. Make a fallback implementation if we haven't
-  // already (LockFreeLazy will ensure this), and call it. If it
-  // throws, nothing to be done, it will be propagated to the caller.
+
+  // Fallback case:
   didFallback = true;
+  HPHP_CORO_SAFE_POINT;
+  // Avoid thundering herd of fallbacks which all fail in the same way
+  // as the original (this is common if the workers are crashing due
+  // to a bug). m_fallbackSem controls the number of allowed
+  // concurrent fallbacks. If the fallback finishes successfully,
+  // we'll signal the semaphore twice (once if we throw). This means
+  // that successful fallbacks will allow for more fallbacks to be run
+  // in parallel. If things keep failing, we'll only run one at a
+  // time.
+  HPHP_CORO_AWAIT(m_fallbackSem.wait());
+  SCOPE_EXIT { m_fallbackSem.signal(); };
+  SCOPE_SUCCESS { m_fallbackSem.signal(); };
+  HPHP_CORO_SAFE_POINT;
+
+  // Check this again. The implementation could have disabled
+  // itself while using it above, and in that case, its the
+  // implementation's responsibility to print something to the
+  // log.
+  if (errorMsg && !m_impl->isDisabled()) {
+    Logger::FError(
+      "Error: \"{}\". Attempting to retry with local fallback...",
+      *errorMsg
+    );
+  }
+
+  // Make a fallback implementation if we haven't already
+  // (LockFreeLazy will ensure this), and call it. If it throws,
+  // nothing to be done, it will be propagated to the caller.
   auto& fallback = *m_fallbackImpl.get([this] { return makeFallbackImpl(); });
-  HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f(fallback, true)));
+  auto ret = HPHP_CORO_AWAIT(f(fallback, true));
+  HPHP_CORO_SAFE_POINT;
+  HPHP_CORO_MOVE_RETURN(ret);
 }
 
 template <typename T>
 coro::Task<T> Client::load(Ref<T> r) {
   RequestId requestId{"load blob"};
 
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
+
   // Get the appropriate implementation (it could have been created by
   // a fallback implementation), and forward the request to it.
   auto& impl = r.m_fromFallback ? *m_fallbackImpl.rawGet() : *m_impl;
-  auto result = HPHP_CORO_AWAIT(impl.load(requestId, IdVec{std::move(r.m_id)}));
+  auto result = HPHP_CORO_AWAIT(tryWithThrottling<BlobVec>(
+    [&] { return impl.load(requestId, IdVec{r.m_id}); }
+  ));
   assertx(result.size() == 1);
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
+  ++m_stats->downloads;
+  m_stats->bytesDownloaded += result[0].size();
   HPHP_CORO_RETURN(unblobify<T>(std::move(result[0])));
 }
 
@@ -352,6 +474,12 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), sizeof...(Ts) + 1);
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Retrieve the ids from the Refs, and split them into a set from
   // the main implementation, and a set from the fallback
@@ -386,8 +514,13 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -432,10 +565,13 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
 
       FTRACE(4, "{} blob #{} is {} bytes\n",
              requestId.tracePrefix(), idx, blob.size());
+      m_stats->bytesDownloaded += blob.size();
       // Turn it into the value.
       return unblobify<typename decltype(tag)::Type>(std::move(blob));
     }
   );
+
+  m_stats->downloads += (sizeof...(Ts) + 1);
   HPHP_CORO_MOVE_RETURN(ret);
 }
 
@@ -446,6 +582,12 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), rs.size());
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Retrieve the RefId from the refs and split them into the ones
   // which come from the main implementation and the fallback
@@ -467,8 +609,13 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -498,12 +645,14 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
     }();
     FTRACE(4, "{} blob #{} is {} bytes\n",
            requestId.tracePrefix(), out.size(), blob.size());
+    m_stats->bytesDownloaded += blob.size();
     out.emplace_back(unblobify<T>(std::move(blob)));
   }
   assertx(out.size() == rs.size());
   assertx(mainIdx == mainBlobs.size());
   assertx(fallbackIdx == fallbackBlobs.size());
 
+  m_stats->downloads += rs.size();
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -519,6 +668,12 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), rs.size() * tupleSize);
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // This is a hybrid of the variadic case and the vector case:
 
@@ -554,8 +709,13 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -600,6 +760,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 
           FTRACE(4, "{} blob #{} is {} bytes\n",
                  requestId.tracePrefix(), idx, blob.size());
+          m_stats->bytesDownloaded += blob.size();
           return unblobify<typename decltype(tag)::Type>(std::move(blob));
         }
       )
@@ -607,6 +768,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   }
   assertx(out.size() == rs.size());
 
+  m_stats->downloads += (rs.size() * tupleSize);
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -616,15 +778,29 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 // appropriate types.
 
 template <typename T>
-coro::Task<Ref<T>> Client::store(T t) {
+coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
+
+  ++m_stats->blobs;
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) ++m_stats->blobFallbacks;
       auto blob = blobify(t);
       FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
-      return i.store(requestId, {}, BlobVec{std::move(blob)}, nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        BlobVec{std::move(blob)},
+        optimistic
+      );
     },
     wasFallback
   ));
@@ -635,16 +811,27 @@ coro::Task<Ref<T>> Client::store(T t) {
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
+                                                             T t,
+                                                             Ts... ts) {
   using namespace detail;
   RequestId requestId{"store blobs"};
 
   FTRACE(2, "{} storing {} blobs\n",
          requestId.tracePrefix(), sizeof...(Ts) + 1);
 
+  m_stats->blobs += (sizeof...(Ts) + 1);
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats->blobFallbacks += (sizeof...(Ts) + 1);
       BlobVec blobs{{ blobify(t), blobify(ts)... }};
       ONTRACE(4, [&] {
         for (auto const& b : blobs) {
@@ -652,7 +839,12 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
                  requestId.tracePrefix(), b.size());
         }
       }());
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic
+      );
     },
     wasFallback
   ));
@@ -671,17 +863,54 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
 }
 
 template <typename T>
-coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
+coro::Task<Ref<T>> Client::store(T t) {
+  return storeImpl(false, std::move(t));
+}
+
+template <typename T, typename... Ts>
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t,
+                                                         Ts... ts) {
+  return storeImpl(false, std::move(t), std::move(ts)...);
+}
+
+template <typename T>
+coro::Task<Ref<T>> Client::storeOptimistically(T t) {
+  return storeImpl(true, std::move(t));
+}
+
+template <typename T, typename... Ts>
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
+Client::storeOptimistically(T t,
+                            Ts... ts) {
+  return storeImpl(true, std::move(t), std::move(ts)...);
+}
+
+template <typename T>
+coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
+                                                   bool optimistic) {
   using namespace folly::gen;
 
   RequestId requestId{"store blobs"};
 
-  FTRACE(2, "{} storing {} blobs\n",
-         requestId.tracePrefix(), ts.size());
+  FTRACE(
+    2, "{} storing {} blobs{}\n",
+    requestId.tracePrefix(),
+    ts.size(),
+    optimistic ? " (optimistically)" : ""
+  );
+
+  m_stats->blobs += ts.size();
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats->blobFallbacks += ts.size();
       auto blobs = from(ts)
         | mapped([&] (const T& t) {
             auto blob = blobify(t);
@@ -691,7 +920,12 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
           })
         | as<std::vector>();
       assertx(blobs.size() == ts.size());
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic
+      );
     },
     wasFallback
   ));
@@ -706,7 +940,8 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
 
 template <typename T, typename... Ts>
 coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
-Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
+Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
+                        bool optimistic) {
   using namespace folly::gen;
   using namespace detail;
 
@@ -715,12 +950,25 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
   using OutTuple = std::tuple<T, Ts...>;
   auto constexpr tupleSize = std::tuple_size<OutTuple>{};
 
-  FTRACE(2, "{} storing {} blobs\n",
-         requestId.tracePrefix(), ts.size() * tupleSize);
+  FTRACE(
+    2, "{} storing {} blobs{}\n",
+    requestId.tracePrefix(),
+    ts.size() * tupleSize,
+    optimistic ? " (optimistically)" : ""
+  );
+
+  m_stats->blobs += (ts.size() * tupleSize);
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats->blobFallbacks += (ts.size() * tupleSize);
       // Map each tuple to a vector of RefIds, then concat all of the
       // vectors together to get one flat list.
       auto blobs = from(ts)
@@ -741,7 +989,12 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
         | concat
         | as<std::vector>();
       assertx(blobs.size() == ts.size() * tupleSize);
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic
+      );
     },
     wasFallback
   ));
@@ -768,11 +1021,11 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
   HPHP_CORO_MOVE_RETURN(out);
 }
 
-template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
+template <typename C> coro::Task<typename Job<C>::ExecT>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
-             bool* cached) {
+             Client::ExecMetadata metadata) {
   using namespace folly::gen;
   using namespace detail;
 
@@ -780,6 +1033,14 @@ Client::exec(const Job<C>& job,
   FTRACE(2, "{} executing \"{}\" ({} runs)\n",
          requestId.tracePrefix(), job.name(),
          inputs.size());
+
+  m_stats->execWorkItems += inputs.size();
+  ++m_stats->execCalls;
+  SCOPE_EXIT {
+    m_stats->execLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Return true if a Ref (or some container of them allowed as
   // inputs) came from the fallback implementation. If so, we'll force
@@ -846,7 +1107,11 @@ Client::exec(const Job<C>& job,
     // Otherwise load just those from the non-fallback implementation
     // (if this fails, there's nothing we can do).
     auto const DEBUG_ONLY size = ids.size();
-    auto blobs = HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(ids)));
+    auto blobs = HPHP_CORO_AWAIT(
+      tryWithThrottling<BlobVec>(
+        [&] { return m_impl->load(requestId, ids); }
+      )
+    );
     assertx(blobs.size() == size);
 
     // Then store them with the fallback implementation.
@@ -855,8 +1120,7 @@ Client::exec(const Job<C>& job,
         requestId,
         {},
         std::move(blobs),
-        nullptr,
-        nullptr
+        false
       )
     );
     assertx(stores.size() == size);
@@ -948,19 +1212,18 @@ Client::exec(const Job<C>& job,
     return v;
   };
 
-  using RetT = typename Job<C>::ReturnT;
-
   // OutputType is similar to RefVals, but for outputs. Since there's
   // no RefId (yet) for the outputs, we can use a simple enum to
   // describe the output format.
-  auto const outputTypes = [&] () -> folly::Range<const OutputType*> {
+  auto const makeOutputTypes = [&] (auto tag) -> folly::Range<const OutputType*> {
+    using T = typename decltype(tag)::Type;
     // For the common cases, we can just use a pointer to a static
     // OutputType.
-    if constexpr (IsVector<RetT>::value) {
+    if constexpr (IsVector<T>::value) {
       return s_vecOutputType;
-    } else if constexpr (IsOptional<RetT>::value) {
+    } else if constexpr (IsOptional<T>::value) {
       return s_optOutputType;
-    } else if constexpr (IsTuple<RetT>::value) {
+    } else if constexpr (IsTuple<T>::value) {
       // Tuple output types are still static, but they're calculated
       // at compile time for each instantiation of the job.
       return std::apply(
@@ -968,25 +1231,36 @@ Client::exec(const Job<C>& job,
           static std::array<OutputType, sizeof...(v)> a{std::move(v)...};
           return a;
         },
-        typesToValues<RetT>(
+        typesToValues<T>(
           [] (size_t, auto tag) {
-            using T = typename decltype(tag)::Type;
-            if constexpr (IsVector<T>::value) {
+            using T2 = typename decltype(tag)::Type;
+            if constexpr (IsVector<T2>::value) {
               return OutputType::Vec;
-            } else if constexpr (IsOptional<T>::value) {
+            } else if constexpr (IsOptional<T2>::value) {
               return OutputType::Opt;
             } else {
-              static_assert(IsRef<T>::value);
+              static_assert(IsRef<T2>::value);
               return OutputType::Val;
             }
           }
         )
       );
     } else {
-      static_assert(IsRef<RetT>::value);
+      static_assert(IsRef<T>::value);
       return s_valOutputType;
     }
-  }();
+  };
+
+  using RetT = typename Job<C>::ReturnT;
+  using FiniT = typename Job<C>::FiniT;
+
+  constexpr bool hasFini =
+    !std::is_void_v<typename Return<decltype(C::fini)>::type>;
+
+  auto outputTypes = makeOutputTypes(Tag<RetT>{});
+  auto finiTypes = hasFini
+    ? HPHP::make_optional(makeOutputTypes(Tag<FiniT>{}))
+    : std::nullopt;
 
   // Execute the job using the appropriate executor, receiving the
   // outputs as RefVals (with the format prescribed by the
@@ -994,6 +1268,7 @@ Client::exec(const Job<C>& job,
   auto outputs = HPHP_CORO_AWAIT(coro::invoke(
     [&] () -> coro::Task<std::vector<RefValVec>> {
       if (useFallback) {
+        ++m_stats->execFallbacks;
         auto configRefVals = toRefVals(config);
         auto inputsRefVals = from(inputs)
           | mapped(toRefVals)
@@ -1006,7 +1281,8 @@ Client::exec(const Job<C>& job,
               std::move(configRefVals),
               std::move(inputsRefVals),
               outputTypes,
-              cached
+              finiTypes.get_pointer(),
+              metadata
             )
           )
         );
@@ -1021,7 +1297,10 @@ Client::exec(const Job<C>& job,
                 // If we've failed and we're now trying the fallback,
                 // we need to make all of the inputs be from the
                 // fallback executor.
-                if (fallback) HPHP_CORO_AWAIT(makeAllFallback());
+                if (fallback) {
+                  ++m_stats->execFallbacks;
+                  HPHP_CORO_AWAIT(makeAllFallback());
+                }
                 // Note we calculate the RefVals here within the
                 // lambda. This lets us move them into the exec call
                 // (so we don't need to copy in the common case where
@@ -1036,21 +1315,26 @@ Client::exec(const Job<C>& job,
                   std::move(configRefVals),
                   std::move(inputsRefVals),
                   outputTypes,
-                  cached
+                  finiTypes.get_pointer(),
+                  metadata
                 )));
               },
-              useFallback
+              useFallback,
+              // Disable fallback if we're using optimistic
+              // stores. It's expected we'll get an exception thrown
+              // if everything isn't uploaded and we don't want to
+              // fallback in that case.
+              metadata.optimistic
             )
           )
         );
       }
     }
   ));
-  assertx(outputs.size() == inputs.size());
 
   // Map a RefVal for a particular output into a Ref<T>, where T is
   // the type corresponding to their output.
-  auto const toRetTSingle = [&] (RefVal&& v, auto tag)
+  auto const toRefSingle = [&] (RefVal&& v, auto tag)
     -> typename decltype(tag)::Type {
     using T = typename decltype(tag)::Type;
     if constexpr (IsVector<T>::value) {
@@ -1082,33 +1366,56 @@ Client::exec(const Job<C>& job,
   // The return type for the job can either be a single type, or a
   // tuple. This takes all the RefVals corresponding to the output and
   // maps them to that return type as appropriate.
-  auto const toRetT = [&] (RefValVec&& v) -> RetT {
-    if constexpr (IsVector<RetT>::value ||
-                  IsOptional<RetT>::value ||
-                  IsRef<RetT>::value) {
+  auto const toRef = [&] (RefValVec&& v, auto tag) {
+    using T = typename decltype(tag)::Type;
+    if constexpr (IsVector<T>::value ||
+                  IsOptional<T>::value ||
+                  IsRef<T>::value) {
       // Non-tuple. There should be only one output RefVal.
       assertx(v.size() == 1);
-      return toRetTSingle(std::move(v[0]), Tag<RetT>{});
+      return toRefSingle(std::move(v[0]), Tag<T>{});
     } else {
       // Otherwise there should be enough RefVals for the tuple
       // size. Build the tuple from converting the components.
-      static_assert(IsTuple<RetT>::value);
-      assertx(v.size() == std::tuple_size<RetT>{});
-      return typesToValues<RetT>(
+      static_assert(IsTuple<T>::value);
+      assertx(v.size() == std::tuple_size<T>{});
+      return typesToValues<T>(
         [&] (size_t idx, auto tag) {
           assertx(idx < v.size());
-          return toRetTSingle(std::move(v[idx]), tag);
+          return toRefSingle(std::move(v[idx]), tag);
         }
       );
     }
   };
 
-  // Map over the outputs for each input set, and map them to Refs.
-  auto out = from(outputs)
-    | move
-    | mapped(toRetT)
-    | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  auto const toRetT = [&] (RefValVec&& v) {
+    return toRef(std::move(v), Tag<RetT>{});
+  };
+
+  if (metadata.optimistic && supportsOptimistic()) {
+    ++m_stats->optimisticExecs;
+  }
+
+  if constexpr (hasFini) {
+    assertx(outputs.size() == inputs.size() + 1);
+    // Map over the outputs for each input set, and map them to Refs.
+    auto out = inputs.empty()
+      ? std::vector<typename ReturnRefs<C>::type>{}
+      : seq(size_t{0}, inputs.size() - 1)
+          | mapped([&] (size_t i) { return toRetT(std::move(outputs[i])); } )
+          | as<std::vector>();
+    auto fini = toRef(std::move(outputs.back()), Tag<FiniT>{});
+    HPHP_CORO_RETURN(std::make_tuple(std::move(out), std::move(fini)));
+  } else {
+    assertx(outputs.size() == inputs.size());
+
+    // Map over the outputs for each input set, and map them to Refs.
+    auto out = from(outputs)
+      | move
+      | mapped(toRetT)
+      | as<std::vector>();
+    HPHP_CORO_MOVE_RETURN(out);
+  }
 }
 
 // Turn the given blob into a value of type T.
@@ -1124,13 +1431,13 @@ template <typename T> T Client::unblobify(std::string&& blob) {
 }
 
 // Turn the given value into a blob.
-template <typename T> std::string Client::blobify(T&& t) {
+template <typename T> std::string Client::blobify(const T& t) {
   using BaseT =
     typename std::remove_cv<typename std::remove_reference<T>::type>::type;
   static_assert(!detail::IsMarker<BaseT>::value,
                 "Special markers cannot be blobified");
   if constexpr (std::is_same<BaseT, std::string>::value) {
-    return std::forward<T>(t);
+    return t;
   } else {
     BlobEncoder encoder;
     encoder(t);
@@ -1138,6 +1445,39 @@ template <typename T> std::string Client::blobify(T&& t) {
     // "attach" the BlobEncoder's buffer into the std::string without
     // copying.
     return std::string{(const char*)encoder.data(), encoder.size()};
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Run the given callable. If it throws Throttle, sleep for some
+// amount of time, then retry. Repeat the process until the max number
+// of retries is reached. Each retry will sleep longer.
+template <typename T, typename F>
+coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
+                                              std::chrono::milliseconds wait,
+                                              std::atomic<size_t>& throttles,
+                                              const F& f) {
+  try {
+    // If no retries, just run it normally
+    if (retries == 0) {
+      HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+    }
+    for (size_t i = 0; i < retries-1; ++i) {
+      try {
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+      } catch (const detail::Throttle&) {
+        ++throttles;
+        throttleSleep(i, wait);
+      }
+    }
+    // The last retry will just let whatever throws escape, since we
+    // won't rerun.
+    HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+  } catch (const detail::Throttle& exn) {
+    // Don't let a Throttle escape from here. Convert it to a normal
+    // Error. This keeps us from getting nested throttles.
+    throw Error{exn.what()};
   }
 }
 

@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+  "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+  "functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1ada01d004da19baa77b91d9fce5861768",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "template std::unique_ptr&lt; folly::IOBuf &gt;",
+      "definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+      "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "const folly::IOBuf &amp;",
+          "declname_html": "buf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "line": "676",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "simple_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "detailed_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "detailed_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "original_definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+        "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+      },
+      "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "namespace_html": "apache::thrift::protocol"
+    }
+  ],
+  "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39",
+  "namespace_html": "apache::thrift::protocol",
+  "minprot": "public",
+  "displayname_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39",
+  "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39"
+}

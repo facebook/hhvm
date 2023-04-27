@@ -107,6 +107,7 @@ struct
     | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
     | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
     | Rtype_variable p -> Rtype_variable (pos p)
+    | Rtype_variable_error p -> Rtype_variable_error (pos p)
     | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
     | Rglobal_type_variable_generics (p, t, s) ->
       Rglobal_type_variable_generics (pos_or_decl p, t, s)
@@ -115,6 +116,7 @@ struct
       Rcstr_on_generics (pos_or_decl p, positioned_id sid)
     | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
     | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
+    | Rshape_literal p -> Rshape_literal (pos p)
     | Renforceable p -> Renforceable (pos_or_decl p)
     | Rdestructure p -> Rdestructure (pos p)
     | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)
@@ -132,13 +134,17 @@ struct
       Rdynamic_partial_enforcement (pos_or_decl p, cn, reason r)
     | Rrigid_tvar_escape (p, v, w, r) ->
       Rrigid_tvar_escape (pos p, v, w, reason r)
+    | Ropaque_type_from_module (p, m, r) ->
+      Ropaque_type_from_module (pos_or_decl p, m, reason r)
+    | Rmissing_class p -> Rmissing_class (pos p)
+    | Rinvalid -> Rinvalid
 
   let rec ty t =
     let (p, x) = deref t in
     mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
+    | (Tany _ | Tthis | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)
@@ -150,8 +156,18 @@ struct
     | Tfun ft -> Tfun (fun_type ft)
     | Tapply (sid, xl) -> Tapply (positioned_id sid, List.map xl ~f:ty)
     | Taccess (root_ty, id) -> Taccess (ty root_ty, positioned_id id)
-    | Tshape (shape_kind, fdm) ->
-      Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
+    | Trefinement (root_ty, rs) ->
+      let rs = Class_refinement.map ty rs in
+      Trefinement (ty root_ty, rs)
+    | Tshape (_, shape_kind, fdm) ->
+      Tshape
+        ( Missing_origin,
+          shape_kind,
+          ShapeFieldMap.map_and_rekey fdm shape_field_name ty )
+    | Tnewtype (name, tyl, bound) ->
+      let tyl = List.map tyl ~f:ty in
+      let bound = ty bound in
+      Tnewtype (name, tyl, bound)
 
   and ty_opt x = Option.map x ~f:ty
 
@@ -258,6 +274,7 @@ struct
       dc_sealed_whitelist = dc.dc_sealed_whitelist;
       dc_xhp_attr_deps = dc.dc_xhp_attr_deps;
       dc_xhp_enum_values = dc.dc_xhp_enum_values;
+      dc_xhp_marked_empty = dc.dc_xhp_marked_empty;
       dc_req_ancestors = List.map dc.dc_req_ancestors ~f:requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
       dc_req_class_ancestors = List.map dc.dc_req_class_ancestors ~f:requirement;
@@ -268,7 +285,7 @@ struct
         SMap.map
           begin
             fun ({ sc_subst; _ } as sc) ->
-            { sc with sc_subst = SMap.map ty sc_subst }
+              { sc with sc_subst = SMap.map ty sc_subst }
           end
           dc.dc_substs;
       dc_consts = SMap.map class_const dc.dc_consts;
@@ -282,6 +299,7 @@ struct
       dc_support_dynamic_type = dc.dc_support_dynamic_type;
       dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = [];
+      dc_docs_url = dc.dc_docs_url;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
@@ -299,10 +317,13 @@ struct
       td_pos = pos_or_decl tdef.td_pos;
       td_vis = tdef.td_vis;
       td_tparams = List.map tdef.td_tparams ~f:type_param;
-      td_constraint = ty_opt tdef.td_constraint;
+      td_as_constraint = ty_opt tdef.td_as_constraint;
+      td_super_constraint = ty_opt tdef.td_super_constraint;
       td_type = ty tdef.td_type;
       td_is_ctx = tdef.td_is_ctx;
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;
+      td_internal = tdef.td_internal;
+      td_docs_url = tdef.td_docs_url;
     }
 
   and shallow_class sc =
@@ -323,6 +344,7 @@ struct
       sc_uses = List.map sc.sc_uses ~f:ty;
       sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ~f:ty;
       sc_xhp_enum_values = sc.sc_xhp_enum_values;
+      sc_xhp_marked_empty = sc.sc_xhp_marked_empty;
       sc_req_extends = List.map sc.sc_req_extends ~f:ty;
       sc_req_implements = List.map sc.sc_req_implements ~f:ty;
       sc_req_class = List.map sc.sc_req_class ~f:ty;
@@ -337,6 +359,7 @@ struct
       sc_methods = List.map sc.sc_methods ~f:shallow_method;
       sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
+      sc_docs_url = sc.sc_docs_url;
     }
 
   and shallow_class_const scc =
@@ -361,7 +384,7 @@ struct
     {
       sp_name = positioned_id sp.sp_name;
       sp_xhp_attr = sp.sp_xhp_attr;
-      sp_type = Option.map sp.sp_type ~f:ty;
+      sp_type = ty sp.sp_type;
       sp_visibility = sp.sp_visibility;
       sp_flags = sp.sp_flags;
     }

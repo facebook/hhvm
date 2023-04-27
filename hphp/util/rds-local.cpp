@@ -67,7 +67,7 @@ void init() {
 
 void fini(bool inrds) {
   // This may be called twice on threads that create a malloced rdslocal area,
-  // and then initialize a full RDS segment.  As the RDS segment is detroyed
+  // and then initialize a full RDS segment.  As the RDS segment is destroyed
   // Fini is called, and it is called again from the context that created the
   // malloced area.
   if (!detail::rl_hotSection.rdslocal_base) return;

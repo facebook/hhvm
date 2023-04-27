@@ -177,6 +177,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::ImmSet:
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       // Object kinds. None of these have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
       break;
@@ -247,19 +248,19 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// mark ambigous pointers in the range [start,start+len). If the start or
+// mark ambiguous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
-  constexpr uintptr_t M{7}; // word size - 1
-  auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
-  auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-  cscanned_ += uintptr_t(e) - uintptr_t(s);
-  for (; s < e; s++) {
+  if (len < sizeof(uintptr_t)) return;
+  cscanned_ += len - sizeof(uintptr_t) + 1;
+  auto s = (char*)start;
+  auto const e = s + len - sizeof(uintptr_t);
+  for (; s <= e; ++s) {
     checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
-      (void*)(uintptr_t(*s) & (-1ULL >> 16))
+      (void*)(*(uintptr_t*)s & (-1ULL >> 16))
     );
   }
 }
@@ -476,9 +477,9 @@ NEVER_INLINE void Collector::sweep() {
     if (type == KindOfObject) {
       auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
-        // Its important we invalidate the pointer stored in the weakref, and
+        // It's important we invalidate the pointer stored in the weakref, and
         // not the start of the allocation.  In the case of objects with
-        // native datas, the start of allocation may not be the start of the
+        // native data, the start of allocation may not be the start of the
         // ObjectData*.
         WeakRefData::invalidateWeakRef(uintptr_t(wr_data->pointee.m_data.pobj));
         mm.reinitFree();

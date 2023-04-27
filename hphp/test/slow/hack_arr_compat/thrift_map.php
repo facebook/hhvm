@@ -66,6 +66,8 @@ class Mappish {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct {
@@ -82,6 +84,8 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function test() {

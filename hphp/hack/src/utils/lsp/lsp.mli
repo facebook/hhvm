@@ -171,6 +171,21 @@ module SymbolInformation : sig
   }
 end
 
+module CallHierarchyItem : sig
+  type t = {
+    name: string;
+    kind: SymbolInformation.symbolKind;
+    detail: string option;
+    uri: documentUri;
+    range: range;
+    selectionRange: range;
+  }
+end
+
+module CallHierarchyCallsRequestParam : sig
+  type t = { item: CallHierarchyItem.t }
+end
+
 module MessageType : sig
   type t =
     | ErrorMessage [@value 1]
@@ -319,6 +334,7 @@ module Initialize : sig
     definitionProvider: bool;
     typeDefinitionProvider: bool;
     referencesProvider: bool;
+    callHierarchyProvider: bool;
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;
     workspaceSymbolProvider: bool;
@@ -626,10 +642,6 @@ module Completion : sig
     (* tells editor which icon to use *)
     detail: string option;
     (* human-readable string like type/symbol info *)
-    inlineDetail: string option;
-    (* nuclide-specific, right column *)
-    itemType: string option;
-    (* nuclide-specific, left column *)
     documentation: completionDocumentation option;
     (* human-readable doc-comment *)
     sortText: string option;
@@ -639,7 +651,8 @@ module Completion : sig
     insertText: string option;
     (* used for inserting; if absent, uses label *)
     insertTextFormat: insertTextFormat option;
-    textEdits: TextEdit.t list;
+    textEdit: TextEdit.t option;
+    additionalTextEdits: TextEdit.t list;
     (* wire: split into hd and tl *)
     command: Command.t option;
     (* if present, is executed after completion *)
@@ -682,6 +695,35 @@ module FindReferences : sig
   and referenceContext = {
     includeDeclaration: bool;
     includeIndirectReferences: bool;
+  }
+end
+
+module PrepareCallHierarchy : sig
+  type params = TextDocumentPositionParams.t
+
+  type result = CallHierarchyItem.t list option
+end
+
+module CallHierarchyIncomingCalls : sig
+  type params = CallHierarchyCallsRequestParam.t
+
+  type result = callHierarchyIncomingCall list option
+
+  and callHierarchyIncomingCall = {
+    from: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
+end
+
+module CallHierarchyOutgoingCalls : sig
+  type params = CallHierarchyCallsRequestParam.t
+
+  type result = callHierarchyOutgoingCall list option
+
+  and callHierarchyOutgoingCall = {
+    (* The name should just be "to", but "to" is a reserved keyword in OCaml*)
+    call_to: CallHierarchyItem.t;
+    fromRanges: range list;
   }
 end
 
@@ -848,7 +890,7 @@ end
 module ShowStatusFB : sig
   type params = showStatusParams
 
-  and result = ShowMessageRequest.messageActionItem option
+  and result = unit
 
   (** the showStatus LSP request will be handled by our VSCode extension.
   It's a facebook-specific extension to the LSP spec. How it's rendered
@@ -856,11 +898,16 @@ module ShowStatusFB : sig
   in the tooltip. The [telemetry] field isn't displayed to the user, but might
   be useful to someone debugging an LSP transcript. *)
   and showStatusParams = {
-    request: ShowMessageRequest.showMessageRequestParams;
+    request: showStatusRequestParams;
     progress: int option;
     total: int option;
     shortMessage: string option;
     telemetry: Hh_json.json option;
+  }
+
+  and showStatusRequestParams = {
+    type_: MessageType.t;
+    message: string;
   }
 end
 
@@ -925,6 +972,9 @@ type lsp_request =
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
+  | PrepareCallHierarchyRequest of PrepareCallHierarchy.params
+  | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
+  | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
   | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
@@ -956,6 +1006,9 @@ type lsp_result =
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
+  | PrepareCallHierarchyResult of PrepareCallHierarchy.result
+  | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
+  | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
   | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
@@ -1034,3 +1087,5 @@ end
 module UriMap : sig
   include module type of WrappedMap.Make (UriKey)
 end
+
+val lsp_result_to_log_string : lsp_result -> string

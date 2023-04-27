@@ -109,20 +109,15 @@ allowed_fixme_codes_strict = 4336
 allowed_decl_fixme_codes = 4336
 "
 
-let load_config hhconfig_filename =
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
+let load_config () =
   let options = ServerArgs.default_options ~root in
-  let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
-  in
+  let (custom_config, _) = ServerConfig.load ~silent:false options in
   custom_config
 
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let custom_config = load_config hhconfig_filename in
+  let custom_config = load_config () in
   let env = Test.setup_server ~custom_config () in
   let env = Test.connect_persistent_client env in
 

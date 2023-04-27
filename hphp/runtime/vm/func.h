@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/low-ptr.h"
 
@@ -45,7 +46,7 @@ namespace HPHP {
 
 struct ActRec;
 struct Class;
-struct NamedEntity;
+struct NamedFunc;
 struct PreClass;
 struct StringData;
 struct StructuredLogEntry;
@@ -93,11 +94,6 @@ struct EHEnt {
 
   template<class SerDe> void serde(SerDe& sd);
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <typename T, size_t Expected, size_t Actual = sizeof(T)>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
@@ -148,6 +144,7 @@ struct Func final {
 
     bool hasDefaultValue() const;
     bool hasScalarDefaultValue() const;
+    bool hasTrivialDefaultValue() const;
     bool isInOut() const;
     bool isReadonly() const;
     bool isVariadic() const;
@@ -155,11 +152,10 @@ struct Func final {
     bool isTakenAsVariant() const;
     bool isTakenAsTypedValue() const;
     void setFlag(Flags flag);
+    MaybeDataType builtinType() const;
 
     template<class SerDe> void serde(SerDe& sd);
 
-    // Typehint for builtins.
-    MaybeDataType builtinType{std::nullopt};
     // Flags as defined by the Flags enum.
     uint8_t flags{0};
     // DV initializer funclet offset.
@@ -355,8 +351,8 @@ public:
    *
    * @requires: shared()->m_preClass == nullptr
    */
-  NamedEntity* getNamedEntity();
-  const NamedEntity* getNamedEntity() const;
+  NamedFunc* getNamedFunc();
+  const NamedFunc* getNamedFunc() const;
 
   /**
    * meth_caller
@@ -404,6 +400,14 @@ public:
   Offset bclen() const;
 
   /*
+  * Get a hash of the bytecode of this function. Note that this performs an
+  * order dependent hash of the actual bytes of the bytecode.
+  */
+  uint64_t bcHash() const {
+    return folly::hash::hash_range(entry(), at(bclen()));
+  }
+
+  /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
    * the function's bytecode stream.
    */
@@ -428,12 +432,9 @@ public:
   bool isDVEntry(Offset offset) const;
 
   /*
-   * Number of params required when entering at the given offset.
-   *
-   * Return -1 if an invalid offset is provided.
+   * Has a DV func entry that is non-scalar or requires a runtime type check.
    */
-  int getEntryNumParams(Offset offset) const;
-  int getDVEntryNumParams(Offset offset) const;
+  bool hasNonTrivialDVFuncEntry() const;
 
   /*
    * Get the correct entrypoint (whether the main entry or a DV funclet) when
@@ -451,24 +452,6 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
-
-  /*
-   * CPP builtin's return type. Returns std::nullopt if function is not a CPP
-   * builtin.
-   *
-   * There are a number of caveats regarding this value:
-   *
-   *    - If the return type is std::nullopt, the return is a Variant.
-   *
-   *    - If the return type is a string, array-like, object, ref, or resource
-   *      type, null may also be returned.
-   *
-   *    - Likewise, if the function is marked AttrParamCoerceModeNull, null
-   *      might also be returned.
-   *
-   *    - This list of caveats may be incorrect and/or incomplete.
-   */
-  MaybeDataType hniReturnType() const;
 
   /*
    * Return type inferred by HHBBC's static analysis. TGen if no data is
@@ -679,6 +662,16 @@ public:
   bool isAbstract() const;
 
   /*
+   * Is this function declared as internal to its module?
+   */
+  bool isInternal() const;
+
+  /*
+   * What module does this function belong to?
+   */
+  const StringData* moduleName() const;
+
+  /*
    * Whether a function is called non-statically. Generally this means
    * isStatic(), but eg static closures are still called with a valid
    * this pointer.
@@ -712,7 +705,33 @@ public:
    */
   bool isMemoizeWrapperLSB() const;
 
-  bool isPolicyShardedMemoize() const;
+  /*
+   * What kind of memoized function is this?
+   * NB: MemoizeICType must be a unsigned char in order to enable
+   * struct bit packing.
+   */
+  enum MemoizeICType : unsigned char {
+    NoIC = 0,
+    KeyedByIC = 1,
+    MakeICInaccessible = 2,
+    SoftMakeICInaccessible = 3,
+  };
+
+  MemoizeICType memoizeICType() const;
+
+  bool isNoICMemoize() const;
+
+  bool isKeyedByImplicitContextMemoize() const;
+
+  bool isMakeICInaccessibleMemoize() const;
+
+  bool isSoftMakeICInaccessibleMemoize() const;
+
+  /*
+   * What rate should we sample soft make IC inaccessible memoized function?
+   * Requires: isSoftMakeICInaccessibleMemoize()
+   */
+  uint32_t softMakeICInaccessibleSampleRate() const;
 
   /*
    * Is this string the name of a memoize implementation.
@@ -782,7 +801,7 @@ public:
    * The nativeFuncPtr is a type-punned function pointer to the unerlying
    * function which takes the actual argument types, and does the actual work.
    *
-   * These are the functions with names prefixed by f_ or t_.
+   * These are the functions with names prefixed by f_.
    *
    * All C++ builtins have NativeFunctions, with the ironic exception of HNI
    * functions declared with NeedsActRec.
@@ -1038,14 +1057,6 @@ public:
   // JIT data.
 
   /*
-   * Get the RDS handle for the function with this function's name.
-   *
-   * We can burn these into the TC even when functions are not persistent,
-   * since only a single name-to-function mapping will exist per request.
-   */
-  rds::Handle funcHandle() const;
-
-  /*
    * Get, set and reset the function body code pointer.
    */
   jit::TCA getFuncEntry() const;
@@ -1244,21 +1255,28 @@ public:
 
   /*
    * Look up the defined Func in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
+   * mapped to the NamedFunc `ne'.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
-  static Func* lookup(const NamedEntity* ne);
+  static Func* lookup(const NamedFunc* ne);
   static Func* lookup(const StringData* name);
 
   /*
    * Look up, or autoload and define, the Func in this request with name `name',
-   * or with the name mapped to the NamedEntity `ne'.
+   * or with the name mapped to the NamedFunc `ne'.
    *
-   * @requires: NamedEntity::get(name) == ne
+   * @requires: NamedFunc::get(name) == ne
    */
-  static Func* load(const NamedEntity* ne, const StringData* name);
+  static Func* load(const NamedFunc* ne, const StringData* name);
   static Func* load(const StringData* name);
+
+  /*
+   * Same as Func::load but also checks for module boundary violations
+   */
+  static Func* resolve(const NamedFunc* ne, const StringData* name,
+                       const Func* callerFunc);
+  static Func* resolve(const StringData* name, const Func* callerFunc);
 
   /*
    * Lookup the builtin in this request with name `name', or nullptr if none
@@ -1315,20 +1333,20 @@ private:
      */
     union Flags {
       struct {
-        bool m_isClosureBody : true;
-        bool m_isAsync : true;
-        bool m_isGenerator : true;
-        bool m_isPairGenerator : true;
-        bool m_isGenerated : true;
-        bool m_hasExtendedSharedData : true;
-        bool m_returnByValue : true; // only for builtins
-        bool m_isMemoizeWrapper : true;
-        bool m_isMemoizeWrapperLSB : true;
-        bool m_isPolicyShardedMemoize : true;
-        bool m_isPhpLeafFn : true;
-        bool m_hasReifiedGenerics : true;
-        bool m_hasParamsWithMultiUBs : true;
-        bool m_hasReturnWithMultiUBs : true;
+        bool m_isClosureBody : 1;
+        bool m_isAsync : 1;
+        bool m_isGenerator : 1;
+        bool m_isPairGenerator : 1;
+        bool m_isGenerated : 1;
+        bool m_hasExtendedSharedData : 1;
+        bool m_returnByValue : 1; // only for builtins
+        bool m_isMemoizeWrapper : 1;
+        bool m_isMemoizeWrapperLSB : 1;
+        MemoizeICType m_memoizeICType : 2;
+        bool m_isPhpLeafFn : 1;
+        bool m_hasReifiedGenerics : 1;
+        bool m_hasParamsWithMultiUBs : 1;
+        bool m_hasReturnWithMultiUBs : 1;
       };
       uint16_t m_allFlags;
     };
@@ -1402,12 +1420,13 @@ private:
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
-    MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
+    uint32_t m_softMakeICInaccessibleSampleRate;
     LowStringPtr m_docComment;
+    LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 312>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 296 : 328>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1467,7 +1486,7 @@ private:
   void initPrologues(int numParams);
   void setFullName(int numParams);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-  void setNamedEntity(const NamedEntity*);
+  void setNamedFunc(const NamedFunc*);
 
   PC loadBytecode();
 
@@ -1716,7 +1735,7 @@ private:
   UnionWrapper m_u{nullptr};
   union {
     Slot m_methodSlot{0};
-    LowPtr<const NamedEntity>::storage_type m_namedEntity;
+    LowPtr<const NamedFunc>::storage_type m_namedFunc;
   };
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;
@@ -1815,13 +1834,6 @@ inline tracing::Props traceProps(const Func* f) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
-
-/*
- * Report capacity of RepoAuthoritative mode bytecode arena.
- *
- * Returns 0 if !RuntimeOption::RepoAuthoritative.
- */
-size_t hhbc_arena_capacity();
 
 unsigned char* allocateBCRegion(const unsigned char* bc, size_t bclen);
 void freeBCRegion(const unsigned char* bc, size_t bclen);

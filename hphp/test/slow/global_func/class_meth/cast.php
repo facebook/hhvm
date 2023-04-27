@@ -14,7 +14,7 @@ function wrap($fun) {
 
 <<__EntryPoint>>
 function main(): void {
-  $x = LV(HH\class_meth(A::class, 'meth'));
+  $x = LV(A::meth<>);
 
   wrap(() ==> var_dump((string)$x));
   wrap(() ==> var_dump((bool)$x));

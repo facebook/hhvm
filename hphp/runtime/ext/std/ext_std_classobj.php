@@ -35,7 +35,7 @@ function get_class_constants(string $class_name)[]: darray<string, mixed>;
  *   specified by class_name. In case of an error, it returns NULL.
  */
 <<__Native>>
-function get_class_methods(readonly mixed $class_name)[]: ?varray;
+function get_class_methods(readonly mixed $class_name)[]: ?varray<string>;
 
 /**
  * Get the default properties of the class
@@ -222,6 +222,17 @@ function trait_exists(string $traitname,
 function enum_exists(string $enumname,
                       bool $autoload = true)[]: bool;
 
+/**
+ * Checks if the module exists
+ *
+ * @param string $modulename -
+ * @param bool $autoload -
+ *
+ * @return bool - Returns TRUE if module exists, FALSE if not
+ */
+<<__Native>>
+function module_exists(string $modulename,
+                       bool $autoload = true)[]: bool;
 }
 
 namespace HH {

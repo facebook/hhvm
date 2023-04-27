@@ -16,10 +16,6 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-# error AFDT is not currently supported for MSVC!
-#endif
-
 #include <sys/socket.h>
 #include <vector>
 #include <string>

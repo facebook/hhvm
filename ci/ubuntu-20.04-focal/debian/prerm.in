@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e 
+
+if [ -f /etc/init.d/hhvm ]; then
+	/etc/init.d/hhvm stop
+fi
+
+if [ -f /usr/sbin/update-alternatives ]; then
+  UPDATE_ALTERNATIVES=/usr/sbin/update-alternatives
+fi
+if [ -f /usr/bin/update-alternatives ]; then
+  UPDATE_ALTERNATIVES=/usr/bin/update-alternatives
+fi
+if [ ! -z "$UPDATE_ALTERNATIVES" ]; then
+  "$UPDATE_ALTERNATIVES" --remove hhvm __PKGROOT__/bin/hhvm
+fi

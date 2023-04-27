@@ -230,6 +230,8 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
                     : profile->logEvent(ArrayOp::APCInitInt, val(k).num, v);
     });
     auto const lad = LoggingArray::MakeUncounted(vad, profile, hasApcTv);
+    profile->logEntryTypes(lad->entryTypes, lad->entryTypes);
+    profile->logKeyOrders(lad->keyOrder);
     env.logging.push_back(lad->profile->data.get());
     return lad;
   }

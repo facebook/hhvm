@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod assertion_utils;
 
+pub use assertion_utils::*;
 use hhvm_hhbc_defs_ffi::ffi::FatalOp;
 use oxidized::ast_defs::Pos;
 use thiserror::Error;
-
-pub use assertion_utils::*;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -43,6 +42,10 @@ impl Error {
 
     pub fn into_kind(self) -> ErrorKind {
         *self.0
+    }
+
+    pub fn from_error(e: impl std::error::Error) -> Self {
+        Self::unrecoverable(e.to_string())
     }
 }
 

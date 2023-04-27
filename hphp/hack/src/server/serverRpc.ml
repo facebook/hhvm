@@ -12,8 +12,10 @@ open ServerEnv
 open ServerCommandTypes
 open Utils
 
-let remove_dead_fixme_warning =
-  "hh_server was started without '--no-load', which is required when removing dead fixmes.\n"
+let remove_dead_warning name =
+  "hh_server was started without '--no-load', which is required when removing dead "
+  ^ name
+  ^ "s.\n"
   ^ "Please run 'hh_client restart --no-load' to restart it."
 
 let take_max_errors error_list max_errors =
@@ -70,30 +72,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)
-  | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (errors, dep_edges) =
-      ServerStatusSingleRemoteExecution.go file_name ctx
-    in
-    (env, (errors, dep_edges))
-  | STATUS_REMOTE_EXECUTION { max_errors; _ } ->
-    (* let ctx = Provider_utils.ctx_from_server_env env in *)
-    let errors = ServerStatusRemoteExecution.go env in
-    let (error_list, dropped_count) = take_max_errors errors max_errors in
-    (env, (error_list, dropped_count))
-  | STATUS_MULTI_REMOTE_EXECUTION _fns ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let errors = env.errorl in
-    let (errors, dep_edges) = ServerStatusMultiRemoteExecution.go errors ctx in
-    (* Set pause mode to prevent watchman from triggering a full recheck *)
-    let env =
-      {
-        env with
-        full_recheck_on_file_changes =
-          Paused { paused_recheck_id = env.init_env.recheck_id };
-      }
-    in
-    (env, (errors, dep_edges))
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) = single_ctx env path file_input in
@@ -112,6 +90,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, result)
   | INFER_TYPE_BATCH positions ->
     (env, ServerInferTypeBatch.go genv.workers positions env)
+  | IS_SUBTYPE stdin -> (env, ServerIsSubtype.check genv.workers stdin env)
   | TAST_HOLES (file_input, hole_filter) ->
     let path =
       match file_input with
@@ -124,6 +103,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ServerCollectTastHoles.go_ctx ~ctx ~entry ~hole_filter)
     in
     (env, result)
+  | TAST_HOLES_BATCH files ->
+    (env, ServerTastHolesBatch.go genv.workers files env)
   | INFER_TYPE_ERROR (file_input, line, column) ->
     let path =
       match file_input with
@@ -157,8 +138,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let autocomplete_context =
       {
         AutocompleteTypes.is_manually_invoked = false;
-        is_xhp_classname = false;
-        is_instance_member = false;
         is_after_single_colon = false;
         is_after_double_right_angle_bracket = false;
         is_after_open_square_bracket = false;
@@ -216,6 +195,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~entry
         ~sienv
         ~autocomplete_context
+        ~naming_table:env.naming_table
     in
     (env, result.With_complete_flag.value)
   | IDENTIFY_SYMBOL arg ->
@@ -306,6 +286,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             map_env
               ~f:(ServerFindRefs.to_ide name)
               (ServerFindRefs.go ctx action include_defs genv env)))
+  | IDE_FIND_REFS_BY_SYMBOL (find_refs_action, name) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
+        let include_defs = false in
+        map_env
+          ~f:(ServerFindRefs.to_ide name)
+          (ServerFindRefs.go ctx find_refs_action include_defs genv env))
   | IDE_GO_TO_IMPL (labelled_file, line, column) ->
     Done_or_retry.(
       let (path, file_input) =
@@ -327,33 +315,46 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (env, ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column))
     in
     r
-  | REFACTOR refactor_action ->
+  | RENAME rename_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        ServerRefactor.go ctx refactor_action genv env)
-  | IDE_REFACTOR
-      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
+        ServerRename.go ctx rename_action genv env)
+  | RENAME_CHECK_SD rename_action ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    ServerRename.go_sound_dynamic ctx rename_action genv env
+  | IDE_RENAME
+      { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         match
-          ServerRefactor.go_ide ctx (filename, line, char) new_name genv env
+          ServerRename.go_ide ctx (filename, line, char) new_name genv env
         with
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
+  | CODEMOD_SDT codemod_line ->
+    let patches = Sdt_analysis.patches_of_codemod_line codemod_line in
+    (env, patches)
   | REMOVE_DEAD_FIXMES codes ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response
         (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
-      (env, `Ok (ServerRefactor.get_fixme_patches codes env))
+      (env, `Ok (ServerRename.get_fixme_patches codes env))
     ) else
-      (env, `Error remove_dead_fixme_warning)
+      (env, `Error (remove_dead_warning "fixme"))
+  | REMOVE_DEAD_UNSAFE_CASTS ->
+    if genv.ServerEnv.options |> ServerArgs.no_load then (
+      HackEventLogger.check_response
+        (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
+      (env, `Ok (ServerRename.get_dead_unsafe_cast_patches env))
+    ) else
+      (env, `Error (remove_dead_warning "unsafe cast"))
   | REWRITE_LAMBDA_PARAMETERS files ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_lambda_parameter_rewrite_patches ctx files)
+    (env, ServerRename.get_lambda_parameter_rewrite_patches ctx files)
   | REWRITE_TYPE_PARAMS_TYPE files ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_type_params_type_rewrite_patches ctx files)
+    (env, ServerRename.get_type_params_type_rewrite_patches ctx files)
   | DUMP_SYMBOL_INFO file_list ->
     (env, SymbolInfoService.go genv.workers file_list env)
   | IN_MEMORY_DEP_TABLE_SIZE ->
@@ -363,10 +364,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, SaveStateService.go_naming env.naming_table filename)
   | SAVE_STATE (filename, gen_saved_ignore_type_errors) ->
     if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
-      let save_decls =
-        genv.local_config.ServerLocalConfig.store_decls_in_saved_state
-      in
-      (env, SaveStateService.go ~save_decls genv env filename)
+      (env, SaveStateService.go genv env filename)
     else
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->
@@ -392,7 +390,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       { Lsp.DocumentFormatting.tabSize = 2; insertSpaces = true }
     in
     (env, ServerFormat.go ~content from to_ legacy_format_options)
-  | AI_QUERY _ -> (env, "Ai_query is deprecated")
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
   | OPEN_FILE (path, contents) ->
     let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
@@ -421,38 +418,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ~sienv:env.ServerEnv.local_symbol_table
             ~is_manually_invoked
             ~line:pos.File_content.line
-            ~column:pos.File_content.column)
+            ~column:pos.File_content.column
+            ~naming_table:env.naming_table)
     in
     (env, results)
-  | IDE_FFP_AUTOCOMPLETE (path, pos) ->
-    let pos = pos |> Ide_api_types.ide_pos_to_fc in
-    let contents =
-      ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
-    in
-    let offset = File_content.get_offset contents pos in
-    (* will raise if out of bounds *)
-    let char_at_pos = File_content.get_char contents offset in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix path)
-        ~contents
-    in
-    let result =
-      FfpAutocompleteService.auto_complete
-        ctx
-        entry
-        pos
-        ~filter_by_token:false
-        ~sienv:env.ServerEnv.local_symbol_table
-    in
-    ( env,
-      {
-        AutocompleteTypes.completions = result;
-        char_at_pos;
-        is_complete = true;
-      } )
   | CODE_ACTIONS (path, range) ->
     let (ctx, entry) = single_ctx_path env path in
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
@@ -465,33 +434,36 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       |> FileOutline.outline env.popt )
   | IDE_IDLE -> ({ env with ide_idle = true }, ())
   | RAGE -> (env, ServerRage.go genv env)
-  | CST_SEARCH { sort_results; input; files_to_search } ->
-    begin
-      try
-        (env, CstSearchService.go genv env ~sort_results ~files_to_search input)
-      with
-      | MultiThreadedCall.Coalesced_failures failures ->
-        let failures =
-          failures
-          |> List.map ~f:WorkerController.failure_to_string
-          |> String.concat ~sep:"\n"
-        in
-        ( env,
-          Error
-            (Printf.sprintf
-               "Worker failures - check the logs for more details:\n%s\n"
-               failures) )
-      | exn ->
-        let e = Exception.wrap exn in
-        (env, Error (Exception.to_string e))
-    end
+  | CST_SEARCH { sort_results; input; files_to_search } -> begin
+    try
+      (env, CstSearchService.go genv env ~sort_results ~files_to_search input)
+    with
+    | MultiThreadedCall.Coalesced_failures failures ->
+      let failures =
+        failures
+        |> List.map ~f:WorkerController.failure_to_string
+        |> String.concat ~sep:"\n"
+      in
+      ( env,
+        Error
+          (Printf.sprintf
+             "Worker failures - check the logs for more details:\n%s\n"
+             failures) )
+    | exn ->
+      let e = Exception.wrap exn in
+      (env, Error (Exception.to_string e))
+  end
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
-  | GEN_HOT_CLASSES threshold ->
-    (env, ServerHotClasses.go genv.workers env threshold)
   | GEN_PREFETCH_DIR dir ->
     (* TODO(bobren) remove dir entirely from saved state job invocation *)
     let _ = dir in
     (env, ServerGenPrefetchDir.go env genv genv.workers)
+  | GEN_REMOTE_DECLS_FULL ->
+    (env, ServerGenRemoteDecls.go env genv genv.workers ~incremental:false)
+  | GEN_REMOTE_DECLS_INCREMENTAL ->
+    (env, ServerGenRemoteDecls.go env genv genv.workers ~incremental:true)
+  | GEN_SHALLOW_DECLS_DIR dir ->
+    (env, ServerGenShallowDeclsToDir.go env genv genv.workers dir)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
@@ -518,9 +490,23 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let (ctx, entry) = single_ctx env path file_input in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
-  | BIGCODE path ->
-    let (ctx, entry) = single_ctx_path env path in
-    let result = ServerBigCode.go_ctx ~ctx ~entry in
+  | PREPARE_CALL_HIERARCHY (labelled_file, line, column) ->
+    let (path, file_input) =
+      ServerCommandTypesUtils.extract_labelled_file labelled_file
+    in
+    let (ctx, entry) = single_ctx env path file_input in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        ( env,
+          ServerPrepareCallHierarchy.go_quarantined ~ctx ~entry ~line ~column ))
+  | CALL_HIERARCHY_INCOMING_CALLS call_item ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let result =
+      ServerCallHierarchyIncomingCalls.go call_item ~ctx ~genv ~env
+    in
+    (env, result)
+  | CALL_HIERARCHY_OUTGOING_CALLS call_item ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let result = ServerCallHierarchyOutgoingCalls.go call_item ~ctx in
     (env, result)
   | VERBOSE verbose ->
     if verbose then
@@ -546,3 +532,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (* We are getting files in the reverse order*)
     let files = List.rev files in
     (env, ServerGlobalInference.execute ctx submode files)
+  | DEPS_OUT_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerDepsOutBatch.go ctx positions)
+  | DEPS_IN_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)

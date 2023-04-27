@@ -1,0 +1,73 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is a top level C++ file that generates an implementation of the C++ clients
+interface. Each client method adds a callback to run in the C++ EventBase IO
+thread that will pass data to the cython callback.
+
+}}
+{{> common/auto_generated_c}}
+
+#include <{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrapper.h>
+
+{{#program:cppNamespaces}}namespace {{value}} {
+{{/program:cppNamespaces}}
+
+
+{{#program:services}}
+{{#service:supportedFunctions}}
+folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
+{{service:name}}ClientWrapper::{{function:cppName}}(
+    apache::thrift::RpcOptions& rpcOptions{{#function:args}},
+    {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}}) {
+  auto* client = static_cast<::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:cpp_name}}AsyncClient*>(async_client_.get());
+  {{> clients/clients_wrapper.cpp_func_body}}
+
+}
+
+{{/service:supportedFunctions}}
+{{#service:interactions}}
+
+folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
+{{service:parent_service_name}}ClientWrapper::create{{service:name}}() {
+  return folly::via(
+      channel_->getEventBase(),
+      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{service:parent_service_cpp_name}}AsyncClient::{{service:name}}>((({{service:parent_service_cpp_name}}AsyncClient*)async_client_.get())->create{{service:name}}()));
+        return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<{{service:name}}InteractionWrapper>(std::move(interaction_client), channel_));
+      }
+  );
+}
+
+{{/service:interactions}}
+{{#service:interactions}}
+{{#service:supportedFunctions}}
+folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
+{{service:parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cppName}}(
+    apache::thrift::RpcOptions& rpcOptions{{#function:args}},
+    {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}}) {
+  auto* client = static_cast<::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:parent_service_cpp_name}}AsyncClient::{{service:name}}*>(async_client_.get());
+  {{> clients/clients_wrapper.cpp_func_body}}
+
+}
+
+{{/service:supportedFunctions}}
+{{/service:interactions}}
+{{/program:services}}{{!
+}}{{#program:cppNamespaces}}} // namespace {{value}}
+{{/program:cppNamespaces}}

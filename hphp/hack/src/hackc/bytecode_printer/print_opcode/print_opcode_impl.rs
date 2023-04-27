@@ -3,14 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
-use std::collections::HashSet;
-use syn::{
-    spanned::Spanned, DeriveInput, Error, Lit, LitByteStr, LitStr, Meta, MetaList, MetaNameValue,
-    NestedMeta, Result,
-};
+use hash::HashSet;
+use hhbc_gen::ImmType;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
+use syn::spanned::Spanned;
+use syn::DeriveInput;
+use syn::Error;
+use syn::Lit;
+use syn::LitByteStr;
+use syn::LitStr;
+use syn::Meta;
+use syn::MetaList;
+use syn::MetaNameValue;
+use syn::NestedMeta;
+use syn::Result;
 
 // ----------------------------------------------------------------------------
 
@@ -53,7 +65,8 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
 
         if is_override {
             let override_call = {
-                use convert_case::{Case, Casing};
+                use convert_case::Case;
+                use convert_case::Casing;
                 let name = opcode.name.to_case(Case::Snake);
                 Ident::new(&format!("print_{}", name), Span::call_site())
             };
@@ -203,7 +216,8 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::BA => quote!(self.print_label(w, #name)?;),
         ImmType::BA2 => quote!(self.print_label2(w, #name)?;),
         ImmType::BLA => quote!(self.print_branch_labels(w, #name.as_ref())?;),
-        ImmType::DA => quote!(print_double(w, *#name)?;),
+        ImmType::DA => quote!(print_float(w, *#name)?;),
+        ImmType::DUMMY => TokenStream::new(),
         ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
         ImmType::IA => quote!(print_iterator_id(w, #name)?;),
@@ -216,7 +230,8 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::NA => panic!("NA is not expected"),
         ImmType::NLA => quote!(self.print_local(w, #name)?;),
         ImmType::OA(ty) | ImmType::OAL(ty) => {
-            use convert_case::{Case, Casing};
+            use convert_case::Case;
+            use convert_case::Casing;
             let handler = Ident::new(
                 &format!("print_{}", ty.to_case(Case::Snake)),
                 Span::call_site(),
@@ -237,6 +252,7 @@ fn convert_call_arg(name: &str, imm: &ImmType) -> TokenStream {
         | ImmType::BA
         | ImmType::BA2
         | ImmType::DA
+        | ImmType::DUMMY
         | ImmType::FCA
         | ImmType::I64A
         | ImmType::IA
@@ -267,10 +283,11 @@ pub trait PrintOpcodeTypes {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
+
+    use super::*;
 
     #[test]
     fn test_basic() {
@@ -342,7 +359,7 @@ mod tests {
                             }
                             Opcode::TestDA(dbl1) => {
                                 w.write_all(b"TestDA ")?;
-                                print_double(w, *dbl1)?;
+                                print_float(w, *dbl1)?;
                             }
                             Opcode::TestFCA(fca) => {
                                 w.write_all(b"TestFCA ")?;

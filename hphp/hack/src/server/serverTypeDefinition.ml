@@ -16,19 +16,23 @@ let go_common
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
   let env_and_ty =
-    ServerInferType.human_friendly_type_at_pos ctx tast line column
+    ServerInferType.human_friendly_type_at_pos
+      ~under_dynamic:false
+      ctx
+      tast
+      line
+      column
   in
   match env_and_ty with
   | None -> []
   | Some (env, ty) ->
     let rec handle_type acc ty =
       match get_node ty with
-      | Tclass ((_, str), _, _) ->
-        begin
-          match Naming_global.GEnv.type_pos ctx str with
-          | None -> acc
-          | Some pos -> (pos, str) :: acc
-        end
+      | Tclass ((_, str), _, _) -> begin
+        match Naming_global.GEnv.type_pos ctx str with
+        | None -> acc
+        | Some pos -> (pos, str) :: acc
+      end
       | Toption ty' -> handle_type acc ty'
       | Tunion ty_lst ->
         List.fold ty_lst ~init:acc ~f:(fun a y -> handle_type a y)

@@ -44,7 +44,7 @@ struct PlainFile : File {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) override;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
   String read() override;
@@ -66,8 +66,6 @@ protected:
   char *m_buffer;       // For setbuffer.  Needed to reduce mmap
                         // contention due to how glibc allocates memory
                         // for buffered io.
-
-  bool closeImpl();
 };
 
 /**
@@ -77,7 +75,7 @@ struct BuiltinFile : PlainFile {
   explicit BuiltinFile(FILE *stream);
   explicit BuiltinFile(int fd);
   ~BuiltinFile() override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   void sweep() override;
 };
 static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),

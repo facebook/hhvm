@@ -23,8 +23,8 @@
 namespace HPHP {
 namespace Facts {
 
-std::shared_ptr<folly::ThreadFactory>
-make_thread_factory(folly::StringPiece name) {
+std::shared_ptr<folly::ThreadFactory> make_thread_factory(
+    folly::StringPiece name) {
   return std::make_shared<folly::InitThreadFactory>(
       std::make_shared<folly::NamedThreadFactory>(name),
       []() { hphp_thread_init(); },

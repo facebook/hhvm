@@ -38,7 +38,7 @@ struct BZ2File : File {
   virtual ~BZ2File();
 
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   int64_t errnu();
   String errstr();
   Array error();
@@ -52,7 +52,6 @@ private:
   // BZFILE is a typedef to void.
   TYPE_SCAN_IGNORE_FIELD(m_bzFile);
   req::ptr<PlainFile> m_innerFile;
-  bool closeImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

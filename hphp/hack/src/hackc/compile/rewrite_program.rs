@@ -3,22 +3,32 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+
 use env::emitter::Emitter;
-use error::{Error, Result};
-use hack_macro::hack_stmt;
+use error::Error;
+use error::Result;
+use hack_macros::hack_stmt;
 use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
-use oxidized::{
-    ast,
-    ast::{Def, FunDef, FunKind, Fun_, FuncBody, Id, Pos, Stmt, Stmt_, TypeHint, UserAttribute},
-    file_info::Mode,
-    local_id, namespace_env,
-    relative_path::{Prefix, RelativePath},
-};
+use oxidized::ast;
+use oxidized::ast::Def;
+use oxidized::ast::FunDef;
+use oxidized::ast::FunKind;
+use oxidized::ast::Fun_;
+use oxidized::ast::FuncBody;
+use oxidized::ast::Id;
+use oxidized::ast::Pos;
+use oxidized::ast::Stmt;
+use oxidized::ast::Stmt_;
+use oxidized::ast::TypeHint;
+use oxidized::ast::UserAttribute;
+use oxidized::file_info::Mode;
+use oxidized::local_id;
+use oxidized::namespace_env;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use rewrite_xml::rewrite_xml;
-use stack_limit::StackLimit;
-use std::path::PathBuf;
 
 fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     /*
@@ -50,7 +60,6 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
     namespace_env: RcOc<namespace_env::Env>,
-    stack_limit: &'decl StackLimit,
 ) -> Result<()> {
     let for_debugger_eval =
         emitter.for_debugger_eval && debugger_eval_should_modify(prog.as_slice())?;
@@ -67,11 +76,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         }
     }
 
-    if emitter
-        .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::CONSTANT_FOLDING)
-    {
+    if emitter.options().compiler_flags.constant_folding {
         constant_folder::fold_program(prog, emitter)
             .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
     }
@@ -80,9 +85,16 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         extract_debugger_main(&namespace_env, &mut prog.0).map_err(Error::unrecoverable)?;
     }
 
-    prog.0 = flatten_ns(prog.0.drain(..));
+    // TODO: wind through flags.disable_toplevel_elaboration?
+    // This `flatten_ns` is not currently needed because unless
+    // `--disable-toplevel-elaboration` is set, we already do this while
+    // parsing.  We may want to move that functionality into elab and remove
+    // this flattening (and remove it from the parser?)
+    if true {
+        prog.0 = flatten_ns(prog.0.drain(..));
+    }
 
-    closure_convert::convert_toplevel_prog(emitter, &mut prog.0, namespace_env, stack_limit)?;
+    closure_convert::convert_toplevel_prog(emitter, &mut prog.0, namespace_env)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
 
@@ -112,8 +124,8 @@ fn extract_debugger_main(
         } else {
             stmts
         };
-    let p = Pos::make_none;
-    let mut unsets: Vec<_> = vars
+    let p = || Pos::NONE;
+    let mut unsets: ast::Block = vars
         .iter()
         .map(|name| {
             let name = local_id::make_unscoped(name);
@@ -126,8 +138,8 @@ fn extract_debugger_main(
             let name = local_id::make_unscoped(name);
             hack_stmt!(
                 pos = p(),
-                r#"if (\__systemlib\__debugger_is_uninit(#{lvar(clone(name))})) {
-                       #{lvar(name)} = new __uninitSentinel();
+                r#"if (\__SystemLib\__debugger_is_uninit(#{lvar(clone(name))})) {
+                        #{lvar(name)} = new __uninitSentinel();
                      }
                 "#
             )
@@ -166,18 +178,15 @@ fn extract_debugger_main(
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
         readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
         ret: TypeHint((), None),
-        name: Id(Pos::make_none(), "include".into()),
-        tparams: vec![],
-        where_constraints: vec![],
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
         body: FuncBody { fb_ast: body },
         fun_kind: FunKind::FSync,
-        user_attributes: vec![UserAttribute {
-            name: Id(Pos::make_none(), "__DebuggerMain".into()),
+        user_attributes: ast::UserAttributes(vec![UserAttribute {
+            name: Id(Pos::NONE, "__DebuggerMain".into()),
             params: vec![],
-        }],
+        }]),
         external: false,
         doc_comment: None,
     };
@@ -185,9 +194,13 @@ fn extract_debugger_main(
         namespace: RcOc::clone(empty_namespace),
         file_attributes: vec![],
         mode: Mode::Mstrict,
+        name: Id(Pos::NONE, "include".into()),
         fun: f,
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,
+        module: None,
+        tparams: vec![],
+        where_constraints: vec![],
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

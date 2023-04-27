@@ -102,13 +102,13 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
         a_length = get_policy ~prefix:"len" lump renv;
       }
   | T.Tclass ((_, name), _, targs) when String.equal name Decl.awaitable_id ->
-    begin
-      match targs with
-      (* NOTE: Strip Awaitable out of the type since it has no affect on
-         information flow *)
-      | [inner_ty] -> ty inner_ty
-      | _ -> fail "Awaitable needs one type parameter"
-    end
+  begin
+    match targs with
+    (* NOTE: Strip Awaitable out of the type since it has no affect on
+       information flow *)
+    | [inner_ty] -> ty inner_ty
+    | _ -> fail "Awaitable needs one type parameter"
+  end
   | T.Tclass ((_, name), _, _) -> class_ty ?lump renv name
   | T.Tvar id -> ty (expand_var renv id)
   | T.Tfun fun_ty ->
@@ -124,7 +124,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Toption t ->
     let tnull = Tnull (get_policy ?prefix lump renv) in
     Tunion [tnull; ty t]
-  | T.Tshape (kind, fields) ->
+  | T.Tshape (_, kind, fields) ->
     let lift sft =
       {
         sft_optional = sft.T.sft_optional;
@@ -133,21 +133,15 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
       }
     in
     let sh_kind =
-      match kind with
-      | Type.Open_shape ->
-        let pself = get_policy ?prefix lump renv in
-        let plump = get_policy ?prefix lump renv in
-        let pnull = get_policy ?prefix lump renv in
-        let tnull = Tnull pnull in
-        let tmixed = Tunion [tnull; Tnonnull (pself, plump)] in
-        Open_shape tmixed
-      | Type.Closed_shape -> Closed_shape
+      if T.is_nothing kind then
+        Closed_shape
+      else
+        Open_shape (ty kind)
     in
     Tshape { sh_kind; sh_fields = Typing_defs.TShapeMap.map lift fields }
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tany _sentinel -> fail "Tany"
-  | T.Terr -> fail "Terr"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Taccess (_locl_ty, _ids) -> fail "Taccess"
   | T.Tunapplied_alias _ -> fail "Tunapplied_alias"

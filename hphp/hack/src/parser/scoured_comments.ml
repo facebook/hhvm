@@ -15,6 +15,7 @@ type t = {
   sc_fixmes: fixmes;
   sc_misuses: fixmes;
   sc_error_pos: Pos.t list;
+  sc_bad_ignore_pos: Pos.t list;
 }
 [@@deriving show, eq]
 

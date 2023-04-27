@@ -3,12 +3,12 @@
 class A {
   public static $arr = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 
   const arr2 = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 }
 

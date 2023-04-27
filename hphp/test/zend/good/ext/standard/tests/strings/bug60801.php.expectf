@@ -1,7 +1,0 @@
-string(2) "ar"
-string(3) "%r\x00%rar"
-string(4) "b%r\x00%rar"
-string(3) "bar"
-string(1) "%r\x00%r"
-bool(false)
-bool(false)

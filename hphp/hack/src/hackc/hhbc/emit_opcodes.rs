@@ -3,14 +3,28 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Punct, Spacing, Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{punctuated::Punctuated, token, ItemEnum, Lifetime, Result, Variant};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
+use proc_macro2::Ident;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
+use syn::punctuated::Punctuated;
+use syn::token;
+use syn::ItemEnum;
+use syn::Lifetime;
+use syn::Result;
+use syn::Variant;
 
 pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
-    let mut item_enum = syn::parse2::<ItemEnum>(input)?;
-    let generics = &item_enum.generics;
+    let mut enum_def = syn::parse2::<ItemEnum>(input)?;
+    let generics = &enum_def.generics;
 
     let lifetime = &generics.lifetimes().next().unwrap().lifetime;
 
@@ -45,15 +59,103 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         }
 
         let variant = syn::parse2::<Variant>(quote!(#(#body)*))?;
-        item_enum.variants.push(variant);
+        enum_def.variants.push(variant);
     }
 
     // Silliness to match rustfmt...
-    if !item_enum.variants.trailing_punct() {
-        item_enum.variants.push_punct(Default::default());
+    if !enum_def.variants.trailing_punct() {
+        enum_def.variants.push_punct(Default::default());
     }
 
-    Ok(quote!(#item_enum))
+    let (impl_generics, impl_types, impl_where) = enum_def.generics.split_for_impl();
+
+    let enum_impl = {
+        let enum_name = &enum_def.ident;
+        let mut variant_names_matches = Vec::new();
+        let mut variant_index_matches = Vec::new();
+        let mut num_inputs_matches = Vec::new();
+        let mut num_outputs_matches = Vec::new();
+        for (idx, opcode) in opcodes.iter().enumerate() {
+            let name = Ident::new(opcode.name, Span::call_site());
+            let name_str = &opcode.name;
+            let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
+            let ignore_args = if opcode.immediates.is_empty() {
+                Default::default()
+            } else if is_struct {
+                quote!({ .. })
+            } else {
+                quote!((..))
+            };
+            variant_names_matches.push(quote!(#enum_name :: #name #ignore_args => #name_str,));
+            variant_index_matches.push(quote!(#enum_name :: #name #ignore_args => #idx,));
+
+            let num_inputs = match opcode.inputs {
+                Inputs::NOV => quote!(#enum_name :: #name #ignore_args => 0),
+                Inputs::Fixed(ref inputs) => {
+                    let n = inputs.len();
+                    quote!(#enum_name :: #name #ignore_args => #n)
+                }
+                Inputs::FCall { inp, .. } => {
+                    quote!(#enum_name :: #name (fca, ..) => NUM_ACT_REC_CELLS + fca.num_inputs() + fca.num_inouts() + #inp as usize)
+                }
+                Inputs::CMany | Inputs::CUMany => {
+                    quote!(#enum_name :: #name (n, ..) => *n as usize)
+                }
+                Inputs::SMany => {
+                    quote!(#enum_name :: #name (n, ..) => n.len())
+                }
+                Inputs::MFinal => {
+                    quote!(#enum_name :: #name (n, ..) => *n as usize)
+                }
+                Inputs::CMFinal(m) => {
+                    quote!(#enum_name :: #name (n, ..) => *n as usize + #m as usize)
+                }
+            };
+            num_inputs_matches.push(num_inputs);
+
+            let num_outputs = match opcode.outputs {
+                Outputs::NOV => quote!(#enum_name :: #name #ignore_args => 0),
+                Outputs::Fixed(ref outputs) => {
+                    let n = outputs.len();
+                    quote!(#enum_name :: #name #ignore_args => #n)
+                }
+                Outputs::FCall => quote!(#enum_name :: #name #ignore_args => 0),
+            };
+            num_outputs_matches.push(num_outputs);
+        }
+        quote!(
+            impl #impl_generics #enum_name #impl_types #impl_where {
+                pub fn variant_name(&self) -> &'static str {
+                    match self {
+                        #(#variant_names_matches)*
+                    }
+                }
+
+                pub fn variant_index(&self) -> usize {
+                    match self {
+                        #(#variant_index_matches)*
+                    }
+                }
+
+                pub fn num_inputs(&self) -> usize {
+                    match self {
+                        #(#num_inputs_matches),*,
+                    }
+                }
+
+                pub fn num_outputs(&self) -> usize {
+                    match self {
+                        #(#num_outputs_matches),*,
+                    }
+                }
+            }
+        )
+    };
+
+    Ok(quote!(
+        #enum_def
+        #enum_impl
+    ))
 }
 
 pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
@@ -71,7 +173,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
     let (impl_generics, impl_types, impl_where) = item_enum.generics.split_for_impl();
 
     let mut with_targets_ref: Vec<TokenStream> = Vec::new();
-    let mut with_targets_mut: Vec<TokenStream> = Vec::new();
     let mut without_targets: Punctuated<TokenStream, token::Or> = Punctuated::new();
 
     for opcode in opcodes {
@@ -85,6 +186,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 ImmType::ARR(subty) => is_label_type(subty),
                 ImmType::AA
                 | ImmType::DA
+                | ImmType::DUMMY
                 | ImmType::I64A
                 | ImmType::IA
                 | ImmType::ILA
@@ -154,8 +256,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 if i == idx {
                     match_parts.push(imm_name.to_token_stream());
                     let result_ref = compute_label(opcode.name, &imm_name, imm_ty, true);
-                    let result_mut = compute_label(opcode.name, &imm_name, imm_ty, false);
-                    let old = result.replace((result_ref, result_mut));
+                    let old = result.replace(result_ref);
                     if old.is_some() {
                         panic!("Unable to build targets for opcode with multiple labels");
                     }
@@ -166,14 +267,12 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 }
             }
 
-            let (result_ref, result_mut) = result.unwrap();
+            let result_ref = result.unwrap();
 
             if is_struct {
                 with_targets_ref.push(quote!(#variant_name { #match_parts } => #result_ref, ));
-                with_targets_mut.push(quote!(#variant_name { #match_parts } => #result_mut, ));
             } else {
                 with_targets_ref.push(quote!(#variant_name ( #match_parts ) => #result_ref, ));
-                with_targets_mut.push(quote!(#variant_name ( #match_parts ) => #result_mut, ));
             }
         } else {
             // Non-label opcodes.
@@ -195,13 +294,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                     #without_targets => &[],
                 }
             }
-
-            fn targets_mut(&mut self) -> &mut [Label] {
-                match self {
-                    #(#with_targets_mut)*
-                    #without_targets => &mut [],
-                }
-            }
         }),
     )
 }
@@ -211,12 +303,13 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::AA => quote!(AdataId<#lifetime>),
         ImmType::ARR(sub) => {
             let sub_ty = convert_imm_type(sub, lifetime);
-            quote!(BumpSliceMut<#lifetime, #sub_ty>)
+            quote!(Slice<#lifetime, #sub_ty>)
         }
         ImmType::BA => quote!(Label),
         ImmType::BA2 => quote!([Label; 2]),
-        ImmType::BLA => quote!(BumpSliceMut<#lifetime, Label>),
-        ImmType::DA => quote!(f64),
+        ImmType::BLA => quote!(Slice<#lifetime, Label>),
+        ImmType::DA => quote!(FloatBits),
+        ImmType::DUMMY => quote!(Dummy),
         ImmType::FCA => quote!(FCallArgs<#lifetime>),
         ImmType::I64A => quote!(i64),
         ImmType::IA => quote!(IterId),
@@ -238,23 +331,29 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         }
         ImmType::RATA => quote!(RepoAuthType<#lifetime>),
         ImmType::SA => quote!(Str<#lifetime>),
-        ImmType::SLA => quote!(BumpSliceMut<#lifetime, SwitchLabel>),
+        ImmType::SLA => quote!(Slice<#lifetime, SwitchLabel>),
         ImmType::VSA => quote!(Slice<#lifetime, Str<#lifetime>>),
     }
 }
 
 /// Build construction helpers for InstrSeq.  Each line in the input is either
-/// (a) a list of opcodes and an empty block (like `A | B => {}` which means to
-/// generate helpers for those opcodes with default snake-case names or (b) a
-/// single opcode and a single name (like `A => my_a`) which means to generate a
-/// helper for that opcode with the given name.
+///   (a) a list of opcodes and the keyword 'default':
+///           `A | B => default`
+///       which means to generate helpers for those opcodes with default snake-case names
+///   (b) a single opcode and a single name:
+///           `A => my_a`
+///       which means to generate a helper for that opcode with the given name.
+///   (c) a list of opcodes and an empty block:
+///           `A | B => {}`
+///       which means to skip generating helpers for those opcodes.
 ///
 /// The parameters to the function are based on the expected immediates for the
 /// opcode.
 ///
 ///     define_instr_seq_helpers! {
-///       MyA | MyB => {}
-///       C => myc
+///       MyA | MyB => default
+///       MyC => myc
+///       MyD => {}
 ///     }
 ///
 /// Expands into:
@@ -272,13 +371,19 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
 ///     }
 ///
 pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
-    use convert_case as _;
-    use convert_case::{Case, Casing};
+    // Foo => bar
+    // Foo | Bar | Baz => default
+    // Foo | Bar | Baz => {}
+
+    use std::collections::HashMap;
+
+    use convert_case::Case;
+    use convert_case::Casing;
     use proc_macro2::TokenTree;
-    use syn::{
-        parse::{ParseStream, Parser},
-        Error, Token,
-    };
+    use syn::parse::ParseStream;
+    use syn::parse::Parser;
+    use syn::Error;
+    use syn::Token;
 
     #[derive(Debug)]
     struct Helper<'a> {
@@ -287,7 +392,11 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
         opcode_data: &'a OpcodeData,
     }
 
+    let mut opcodes: HashMap<&str, &OpcodeData> =
+        opcodes.iter().map(|data| (data.name, data)).collect();
+
     // Foo => bar
+    // Foo | Bar | Baz => default
     // Foo | Bar | Baz => {}
 
     let macro_input = |input: ParseStream<'_>| -> Result<Vec<Helper<'_>>> {
@@ -302,19 +411,20 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                         input,
                     )?;
 
-                names
-                    .into_iter()
-                    .map(|name| {
-                        let opcode_data = opcodes
-                            .iter()
-                            .find(|opcode_data| name == opcode_data.name)
-                            .ok_or_else(|| {
-                                Error::new(name.span(), format!("Unknown opcode '{}'", name))
-                            })?;
-                        Ok((name, opcode_data))
-                    })
-                    .collect::<Result<_>>()
-            }?;
+                let mut opcode_names: Vec<(Ident, &OpcodeData)> = Vec::new();
+                for name in names {
+                    if let Some(opcode_data) = opcodes.remove(name.to_string().as_str()) {
+                        opcode_names.push((name, opcode_data));
+                    } else {
+                        return Err(Error::new(
+                            name.span(),
+                            format!("Unknown opcode '{}'", name),
+                        ));
+                    }
+                }
+
+                opcode_names
+            };
 
             let _arrow: Token![=>] = input.parse()?;
 
@@ -358,17 +468,14 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                     let stream = grp.stream();
                     let mut iter = stream.into_iter();
                     if let Some(tt) = iter.next() {
-                        return Err(Error::new(tt.span(), "Body of default must be empty"));
+                        return Err(Error::new(tt.span(), "Block must be empty"));
                     }
 
-                    for (opcode_name, opcode_data) in opcode_names {
-                        let fn_name =
-                            Ident::new(&opcode_data.name.to_case(Case::Snake), opcode_name.span());
-                        helpers.push(Helper {
-                            opcode_name,
-                            fn_name,
-                            opcode_data,
-                        });
+                    // do nothing
+
+                    // allow an unnecessary comma
+                    if input.peek(Token![,]) {
+                        input.parse::<Token![,]>()?;
                     }
                 }
                 TokenTree::Punct(_) | TokenTree::Literal(_) => {
@@ -381,12 +488,12 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
             let span = opcode_name.span();
             let msg = if same_as_default.is_empty() {
                 format!(
-                    "Opcode '{}' was given an alias which is the same name it would have gotten with default - use default ({{}}) instead.",
+                    "Opcode '{}' was given an alias which is the same name it would have gotten with default - please omit it instead.",
                     opcode_name,
                 )
             } else {
                 format!(
-                    "Opcodes {} were given aliases which are the same name they would have gotten with default - use default ({{}}) instead.",
+                    "Opcodes {} were given aliases which are the same name they would have gotten with default - please omit it instead.",
                     std::iter::once(opcode_name)
                         .chain(same_as_default.into_iter())
                         .map(|s| format!("'{}'", s))
@@ -395,10 +502,21 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                 )
             };
 
-            Err(Error::new(span, msg))
-        } else {
-            Ok(helpers)
+            return Err(Error::new(span, msg));
         }
+
+        for opcode_data in opcodes.values() {
+            let opcode_name = Ident::new(opcode_data.name, Span::call_site());
+            let fn_name = Ident::new(&opcode_data.name.to_case(Case::Snake), opcode_name.span());
+            helpers.push(Helper {
+                opcode_name,
+                fn_name,
+                opcode_data,
+            });
+        }
+
+        helpers.sort_by(|a, b| a.fn_name.cmp(&b.fn_name));
+        Ok(helpers)
     };
 
     let input: Vec<Helper<'_>> = macro_input.parse2(input)?;
@@ -454,10 +572,11 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
+
+    use super::*;
 
     #[test]
     fn test_basic() {
@@ -478,11 +597,11 @@ mod tests {
                     TestAsStruct { str1: Str<'a>, str2: Str<'a> },
                     // --------------------
                     TestAA(AdataId<'a>),
-                    TestARR(BumpSliceMut<'a, Str<'a>>),
+                    TestARR(Slice<'a, Str<'a>>),
                     TestBA(Label),
                     TestBA2([Label; 2]),
-                    TestBLA(BumpSliceMut<'a, Label>),
-                    TestDA(f64),
+                    TestBLA(Slice<'a, Label>),
+                    TestDA(FloatBits),
                     TestFCA(FCallArgs<'a>),
                     TestI64A(i64),
                     TestIA(IterId),
@@ -497,8 +616,134 @@ mod tests {
                     TestOAL(OaSubType<'a>),
                     TestRATA(RepoAuthType<'a>),
                     TestSA(Str<'a>),
-                    TestSLA(BumpSliceMut<'a, SwitchLabel>),
+                    TestSLA(Slice<'a, SwitchLabel>),
                     TestVSA(Slice<'a, Str<'a>>),
+                }
+                impl<'a> MyOps<'a> {
+                    pub fn variant_name(&self) -> &'static str {
+                        match self {
+                            MyOps::TestZeroImm => "TestZeroImm",
+                            MyOps::TestOneImm(..) => "TestOneImm",
+                            MyOps::TestTwoImm(..) => "TestTwoImm",
+                            MyOps::TestThreeImm(..) => "TestThreeImm",
+                            MyOps::TestAsStruct { .. } => "TestAsStruct",
+                            MyOps::TestAA(..) => "TestAA",
+                            MyOps::TestARR(..) => "TestARR",
+                            MyOps::TestBA(..) => "TestBA",
+                            MyOps::TestBA2(..) => "TestBA2",
+                            MyOps::TestBLA(..) => "TestBLA",
+                            MyOps::TestDA(..) => "TestDA",
+                            MyOps::TestFCA(..) => "TestFCA",
+                            MyOps::TestI64A(..) => "TestI64A",
+                            MyOps::TestIA(..) => "TestIA",
+                            MyOps::TestILA(..) => "TestILA",
+                            MyOps::TestITA(..) => "TestITA",
+                            MyOps::TestIVA(..) => "TestIVA",
+                            MyOps::TestKA(..) => "TestKA",
+                            MyOps::TestLA(..) => "TestLA",
+                            MyOps::TestLAR(..) => "TestLAR",
+                            MyOps::TestNLA(..) => "TestNLA",
+                            MyOps::TestOA(..) => "TestOA",
+                            MyOps::TestOAL(..) => "TestOAL",
+                            MyOps::TestRATA(..) => "TestRATA",
+                            MyOps::TestSA(..) => "TestSA",
+                            MyOps::TestSLA(..) => "TestSLA",
+                            MyOps::TestVSA(..) => "TestVSA",
+                        }
+                    }
+                    pub fn variant_index(&self) -> usize {
+                        match self {
+                            MyOps::TestZeroImm => 0usize,
+                            MyOps::TestOneImm(..) => 1usize,
+                            MyOps::TestTwoImm(..) => 2usize,
+                            MyOps::TestThreeImm(..) => 3usize,
+                            MyOps::TestAsStruct { .. } => 4usize,
+                            MyOps::TestAA(..) => 5usize,
+                            MyOps::TestARR(..) => 6usize,
+                            MyOps::TestBA(..) => 7usize,
+                            MyOps::TestBA2(..) => 8usize,
+                            MyOps::TestBLA(..) => 9usize,
+                            MyOps::TestDA(..) => 10usize,
+                            MyOps::TestFCA(..) => 11usize,
+                            MyOps::TestI64A(..) => 12usize,
+                            MyOps::TestIA(..) => 13usize,
+                            MyOps::TestILA(..) => 14usize,
+                            MyOps::TestITA(..) => 15usize,
+                            MyOps::TestIVA(..) => 16usize,
+                            MyOps::TestKA(..) => 17usize,
+                            MyOps::TestLA(..) => 18usize,
+                            MyOps::TestLAR(..) => 19usize,
+                            MyOps::TestNLA(..) => 20usize,
+                            MyOps::TestOA(..) => 21usize,
+                            MyOps::TestOAL(..) => 22usize,
+                            MyOps::TestRATA(..) => 23usize,
+                            MyOps::TestSA(..) => 24usize,
+                            MyOps::TestSLA(..) => 25usize,
+                            MyOps::TestVSA(..) => 26usize,
+                        }
+                    }
+                    pub fn num_inputs(&self) -> usize {
+                        match self {
+                            MyOps::TestZeroImm => 0,
+                            MyOps::TestOneImm(..) => 0,
+                            MyOps::TestTwoImm(..) => 0,
+                            MyOps::TestThreeImm(..) => 0,
+                            MyOps::TestAsStruct { .. } => 0,
+                            MyOps::TestAA(..) => 0,
+                            MyOps::TestARR(..) => 0,
+                            MyOps::TestBA(..) => 0,
+                            MyOps::TestBA2(..) => 0,
+                            MyOps::TestBLA(..) => 0,
+                            MyOps::TestDA(..) => 0,
+                            MyOps::TestFCA(..) => 0,
+                            MyOps::TestI64A(..) => 0,
+                            MyOps::TestIA(..) => 0,
+                            MyOps::TestILA(..) => 0,
+                            MyOps::TestITA(..) => 0,
+                            MyOps::TestIVA(..) => 0,
+                            MyOps::TestKA(..) => 0,
+                            MyOps::TestLA(..) => 0,
+                            MyOps::TestLAR(..) => 0,
+                            MyOps::TestNLA(..) => 0,
+                            MyOps::TestOA(..) => 0,
+                            MyOps::TestOAL(..) => 0,
+                            MyOps::TestRATA(..) => 0,
+                            MyOps::TestSA(..) => 0,
+                            MyOps::TestSLA(..) => 0,
+                            MyOps::TestVSA(..) => 0,
+                        }
+                    }
+                    pub fn num_outputs(&self) -> usize {
+                        match self {
+                            MyOps::TestZeroImm => 0,
+                            MyOps::TestOneImm(..) => 0,
+                            MyOps::TestTwoImm(..) => 0,
+                            MyOps::TestThreeImm(..) => 0,
+                            MyOps::TestAsStruct { .. } => 0,
+                            MyOps::TestAA(..) => 0,
+                            MyOps::TestARR(..) => 0,
+                            MyOps::TestBA(..) => 0,
+                            MyOps::TestBA2(..) => 0,
+                            MyOps::TestBLA(..) => 0,
+                            MyOps::TestDA(..) => 0,
+                            MyOps::TestFCA(..) => 0,
+                            MyOps::TestI64A(..) => 0,
+                            MyOps::TestIA(..) => 0,
+                            MyOps::TestILA(..) => 0,
+                            MyOps::TestITA(..) => 0,
+                            MyOps::TestIVA(..) => 0,
+                            MyOps::TestKA(..) => 0,
+                            MyOps::TestLA(..) => 0,
+                            MyOps::TestLAR(..) => 0,
+                            MyOps::TestNLA(..) => 0,
+                            MyOps::TestOA(..) => 0,
+                            MyOps::TestOAL(..) => 0,
+                            MyOps::TestRATA(..) => 0,
+                            MyOps::TestSA(..) => 0,
+                            MyOps::TestSLA(..) => 0,
+                            MyOps::TestVSA(..) => 0,
+                        }
+                    }
                 }
             ),
         );
@@ -511,11 +756,23 @@ mod tests {
                 quote!(
                     TestOneImm => test_oneimm,
                     TestTwoImm => test_twoimm,
-                    TestZeroImm | TestAsStruct | TestAA | TestLAR => {}
+                    TestBLA | TestFCA | TestARR | TestDA | TestBA2 | TestBA |
+                    TestIA | TestITA | TestNLA | TestOAL | TestLA | TestRATA |
+                    TestSLA | TestILA | TestIVA | TestKA | TestI64A | TestSA |
+                    TestOA | TestVSA | TestThreeImm => {}
                 ),
                 &opcode_test_data::test_opcodes(),
             ),
             quote!(
+                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAA(arr1)))
+                }
+                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
+                }
+                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
+                }
                 pub fn test_oneimm<'a>(str1: Str<'a>) -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestOneImm(str1)))
                 }
@@ -524,15 +781,6 @@ mod tests {
                 }
                 pub fn test_zero_imm<'a>() -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestZeroImm))
-                }
-                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
-                }
-                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestAA(arr1)))
-                }
-                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
                 }
             ),
         );

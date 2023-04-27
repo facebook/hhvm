@@ -18,8 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include <fstream>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <sys/types.h>
 
@@ -41,7 +40,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-namespace fs = boost::filesystem;
 
 bool FileUtil::mkdir(const std::string &path, int mode /* = 0777 */) {
   if (path.empty()) {
@@ -176,7 +174,7 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
     for (std::set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
       Logger::Info("sync: deleting %s", iter->c_str());
-      fs::remove_all(*iter);
+      std::filesystem::remove_all(*iter);
     }
   }
 
@@ -232,11 +230,7 @@ int FileUtil::copy(const char *srcfile, const char *dstfile) {
 }
 
 static int force_sync(int fd) {
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(_MSC_VER)
-  return fsync(fd);
-#else
   return fdatasync(fd);
-#endif
 }
 
 int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
@@ -258,11 +252,6 @@ int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
   SCOPE_EXIT { close(dstFd); };
-
-#if defined(__APPLE__)
-  fcntl(srcFd, F_NOCACHE, 1);
-  fcntl(dstFd, F_NOCACHE, 1);
-#endif
 
   while (1) {
     char buf[1 << 20];
@@ -505,7 +494,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   String ret(maxlen-1, ReserveString);
   char *path = ret.mutableData();
 
-#ifndef _MSC_VER
   if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading
      * '/'s to a single leading '/' from the addpath,
@@ -516,7 +504,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
     path[0] = '/';
     pathlen = 1;
   }
-#endif
 
   while (*addpath) {
     /* Parse each segment, find the closing '/'
@@ -580,15 +567,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   // If there are null bytes in the path, treat it as the empty string
   if (addpath != pathend) pathlen = 0;
 
-#ifdef _MSC_VER
-  // Need to normalize to Windows directory separators, as the underlying
-  // system calls don't like unix path separators.
-  for (int i = 0; i < pathlen; i++) {
-    if (path[i] == '/') {
-      path[i] = '\\';
-    }
-  }
-#endif
   ret.setSize(pathlen);
   return ret;
 }

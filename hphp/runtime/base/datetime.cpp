@@ -619,18 +619,14 @@ void DateTime::toTm(struct tm &ta) const {
   ta.tm_yday = doy();
   if (utc()) {
     ta.tm_isdst = 0;
-#ifndef _MSC_VER
     ta.tm_gmtoff = 0;
     ta.tm_zone = "GMT";
-#endif
   } else {
     timelib_time_offset *offset =
       timelib_get_time_zone_info(m_time->sse, m_time->tz_info);
     ta.tm_isdst = offset->is_dst;
-#ifndef _MSC_VER
     ta.tm_gmtoff = offset->offset;
     ta.tm_zone = offset->abbr;
-#endif
     timelib_time_offset_dtor(offset);
   }
 }
@@ -850,17 +846,13 @@ String DateTime::stdcFormat(const String& format) const {
   ta.tm_yday = doy();
   if (utc()) {
     ta.tm_isdst = 0;
-#ifndef _MSC_VER
     ta.tm_gmtoff = 0;
     ta.tm_zone = "GMT";
-#endif
   } else {
     offset = timelib_get_time_zone_info(m_time->sse, m_time->tz_info);
     ta.tm_isdst = offset->is_dst;
-#ifndef _MSC_VER
     ta.tm_gmtoff = offset->offset;
     ta.tm_zone = offset->abbr;
-#endif
   }
 
   if ((ta.tm_sec < 0 || ta.tm_sec > 60) ||

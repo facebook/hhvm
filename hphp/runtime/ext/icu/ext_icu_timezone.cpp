@@ -44,7 +44,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
   String tzstr;
 
   if (arg.isNull()) {
-    tzstr = f_date_default_timezone_get();
+    tzstr = HHVM_FN(date_default_timezone_get)();
   } else if (arg.isObject()) {
     auto objarg = arg.toObject();
     auto cls = objarg->getVMClass();

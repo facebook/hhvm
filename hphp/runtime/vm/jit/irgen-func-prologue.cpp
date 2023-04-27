@@ -34,10 +34,12 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -60,7 +62,7 @@ enum class StackCheck {
   Combine // can be delayed and combined with surprise flags check
 };
 
-StackCheck stack_check_kind(const Func* func, uint32_t argc) {
+StackCheck stack_check_kind(const Func* func) {
   if (func->isPhpLeafFn() &&
       func->maxStackCells() < RO::EvalStackCheckLeafPadding) {
     return StackCheck::None;
@@ -89,7 +91,7 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
 
-  return func->numLocals() < safeFromSEGV + argc
+  return func->numLocals() < safeFromSEGV + func->numRequiredParams()
     ? StackCheck::Combine
     : StackCheck::Early;
 }
@@ -103,7 +105,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
   if (!callee->hasReifiedGenerics()) {
     // FIXME: leaks memory if generics were given but not expected nor pushed.
     if (pushed) {
-      popDecRef(env, DecRefProfileId::Default);
+      popDecRef(env);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }
@@ -190,13 +192,17 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       env.irb->exceptionStackBoundary();
     }
   );
+
+  // FIXME: ifThenElse() doesn't save/restore marker and stack boundary.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 /*
  * Check for too few or too many arguments and trim extra args.
  */
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
-                                   uint32_t argc) {
+                                   uint32_t& argc) {
   if (argc < callee->numRequiredParams()) {
     gen(env, ThrowMissingArg, FuncArgData { callee, argc });
   }
@@ -204,6 +210,7 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
   if (argc > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(argc == callee->numNonVariadicParams() + 1);
+    --argc;
 
     // Pop unpack args, skipping generics (we already know their type).
     auto const generics = callee->hasReifiedGenerics()
@@ -219,6 +226,21 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
     // will use them to report the correct number and also take care of decref.
     auto const unpackArgsArr = gen(env, AssertType, TVec, unpackArgs);
     gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsArr);
+  }
+}
+
+void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
+                                  uint32_t argc, SSATmp* prologueCtx) {
+  // Builtins use a separate non-standard mechanism.
+  if (callee->isCPPBuiltin()) return;
+
+  auto const numArgs = std::min(argc, callee->numNonVariadicParams());
+  auto const firstArgIdx = argc - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+  for (auto i = 0; i < numArgs; ++i) {
+    auto const offset = BCSPRelOffset { safe_cast<int32_t>(firstArgIdx - i) };
+    auto const irsproData = IRSPRelOffsetData { offsetFromIRSP(env, offset ) };
+    gen(env, AssertStk, TInitCell, irsproData, sp(env));
+    verifyParamType(env, callee, i, offset, prologueCtx);
   }
 }
 
@@ -372,20 +394,21 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   }
 }
 
-void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
+void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
                       SSATmp* prologueFlags, SSATmp* prologueCtx) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, prologueFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
+  emitCalleeArgumentTypeChecks(env, callee, argc, prologueCtx);
   emitCalleeDynamicCallChecks(env, callee, prologueFlags);
   emitCalleeCoeffectChecks(env, callee, prologueFlags, nullptr, false,
                            argc, prologueCtx);
   emitCalleeRecordFuncCoverage(env, callee);
 
   // Emit early stack overflow check if necessary.
-  if (stack_check_kind(callee, argc) == StackCheck::Early) {
+  if (stack_check_kind(callee) == StackCheck::Early) {
     gen(env, CheckStackOverflow, sp(env));
   }
 }
@@ -393,6 +416,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
 } // namespace
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
+  assertx(argc <= callee->numParams());
   if (argc == callee->numParams()) return;
 
   // Generics and coeffects are already initialized
@@ -422,10 +446,6 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
     assertx(callee->hasVariadicCaptureParam());
     push(env, cns(env, ArrayData::CreateVec()));
     ++argc;
-  } else if (argc > callee->numParams()) {
-    // Extra arguments already popped by emitCalleeArgumentArityChecks().
-    assertx(!callee->hasVariadicCaptureParam());
-    --argc;
   }
 
   assertx(argc == callee->numParams());
@@ -440,30 +460,31 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
 namespace {
 
-void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
+void emitSpillFrame(IRGS& env, const Func* callee,
                     SSATmp* prologueFlags, SSATmp* prologueCtx) {
   auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
   auto const calleeId = cns(env, callee->getFuncId().toInt());
 
   gen(env, InitFrame, FuncData { callee },
       sp(env), arFlags, prologueCtx, calleeId);
+  gen(env, ExitPrologue);
 }
 
-void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
-  gen(env, ExitPrologue);
-
+void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
+                     SSATmp* callerFP) {
   // Emit the bindjmp for the function body.
-  auto const entryOffset = callee->getEntryForNumArgs(argc);
+  auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   gen(
     env,
     ReqBindJmp,
     ReqBindJmpData {
-      SrcKey { callee, entryOffset, SrcKey::FuncEntryTag {} },
+      SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} },
       SBInvOffset { 0 },
-      spOffBCFromIRSP(env)
+      spOffBCFromIRSP(env),
+      false /* popFrame */
     },
     sp(env),
-    fp(env)
+    callerFP
   );
 }
 
@@ -517,11 +538,58 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
-  emitSpillFrame(env, callee, argc, prologueFlags, prologueCtx);
-  emitJmpFuncBody(env, callee, argc);
+  emitSpillFrame(env, callee, prologueFlags, prologueCtx);
+  emitJmpFuncBody(env, callee, argc, fp(env));
 }
 
 namespace {
+
+void emitInitScalarDefaultParamLocal(IRGS& env, const Func* callee,
+                                     uint32_t param) {
+  auto const dv = callee->params()[param].defaultValue;
+  gen(env, StLoc, LocalId{param}, fp(env), cns(env, dv));
+}
+
+void emitInitLocalRange(IRGS& env, const Func* callee,
+                        uint32_t from, uint32_t to) {
+  assertx(from <= to);
+  /*
+   * Maximum number of local initializations to unroll.
+   *
+   * The actual crossover point in terms of code size is 6 (just like for the
+   * params init unroll limit); 9 was determined by experiment to be the
+   * optimal point in certain benchmarks.
+   *
+   * We don't limit the count in optimized translations, as we expect these
+   * stores to be elided.
+   */
+  auto constexpr kMaxLocalsInitUnroll = 9;
+
+  assertx(from <= to);
+
+  // Set all remaining uninitialized locals to Uninit.
+  if (env.context.kind == TransKind::Optimize ||
+      to - from <= kMaxLocalsInitUnroll) {
+    for (auto i = from; i < to; ++i) {
+      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
+    }
+  } else {
+    auto const range = LocalIdRange{from, to};
+    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
+  }
+}
+
+void emitInitDefaultParamLocals(IRGS& env, const Func* callee, uint32_t argc) {
+  assertx(argc <= callee->numNonVariadicParams());
+
+  // We are done. If there were variadics, they were already initialized.
+  if (argc == callee->numNonVariadicParams()) return;
+
+  // Set locals of parameters with default values to Uninit. In optimized
+  // translations, these locals will be overwritten later, so these stores
+  // will be optimized away.
+  emitInitLocalRange(env, callee, argc, callee->numNonVariadicParams());
+}
 
 /*
  * Unpack closure use variables into locals.
@@ -549,73 +617,87 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
   auto const numUses = callee->numClosureUseLocals();
   auto const cls = callee->implCls();
 
-  for (auto i = 0; i < numUses; ++i) {
-    auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
+  auto const getProp = [&](auto index) {
+    assertx(index < numUses);
+    auto const slot = index + (cls->hasClosureCoeffectsProp() ? 1 : 0);
     auto const type =
       typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
     auto const addr = ldPropAddr(env, closure, nullptr, cls, slot, type);
-    auto const prop = gen(env, LdMem, type, addr);
-    gen(env, IncRef, prop);
-    gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
-  }
+    return gen(env, LdMem, type, addr);
+  };
 
-  decRef(env, closure, DecRefProfileId::Default);
+  // Move props and skip incref when closure refcount is 1 and going to be
+  // released.
+  ifThenElse(
+    env,
+    [&](Block* taken){
+      gen(env, DecReleaseCheck, taken, closure);
+    },
+    [&] { // Next: closure RC goes to 0
+      for (auto i = 0; i < numUses; ++i) {
+        auto const prop = getProp(i);
+        gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+      }
+      gen(env, ReleaseShallow, closure);
+    },
+    [&] { // Taken: closure RC != 0
+      for (auto i = 0; i < numUses; ++i) {
+        auto const prop = getProp(i);
+        gen(env, IncRef, prop);
+        gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+      }
+    }
+  );
 }
 
 /*
  * Set non-input locals to Uninit.
  */
 void emitInitRegularLocals(IRGS& env, const Func* callee) {
-  /*
-   * Maximum number of local initializations to unroll.
-   *
-   * The actual crossover point in terms of code size is 6 (just like for the
-   * params init unroll limit); 9 was determined by experiment to be the
-   * optimal point in certain benchmarks.
-   *
-   * We don't limit the count in optimized translations, as we expect these
-   * stores to be elided.
-   */
-  auto constexpr kMaxLocalsInitUnroll = 9;
-
-  auto const firstRegularLocal = callee->firstRegularLocalId();
-  auto const numLocals = callee->numLocals();
-  assertx(firstRegularLocal <= numLocals);
-
-  // Set all remaining uninitialized locals to Uninit.
-  if (env.context.kind == TransKind::Optimize ||
-      numLocals - firstRegularLocal <= kMaxLocalsInitUnroll) {
-    for (auto i = firstRegularLocal; i < numLocals; ++i) {
-      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
-    }
-  } else {
-    auto const range = LocalIdRange{firstRegularLocal, (uint32_t)numLocals};
-    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
-  }
+  emitInitLocalRange(
+    env, callee, callee->firstRegularLocalId(), callee->numLocals());
 }
 
-void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
+void emitSurpriseCheck(IRGS& env, const Func* callee) {
   if (isInlining(env)) return;
 
-  // Check surprise flags in the same place as the interpreter: after setting
-  // up the callee's frame but before executing any of its code.
-  if (stack_check_kind(callee, argc) == StackCheck::Combine) {
-    gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
+  // Check surprise flags in the same place as the interpreter: after func entry
+  // and DV initializers, right before entering the main body.
+  if (stack_check_kind(callee) == StackCheck::Combine) {
+    gen(env, CheckSurpriseAndStack, FuncData { callee }, fp(env));
   } else {
-    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
+    gen(env, CheckSurpriseFlagsEnter, FuncData { callee }, fp(env));
   }
 }
 
+}
+
+void emitEnter(IRGS& env, Offset relOffset) {
+  emitSurpriseCheck(env, curFunc(env));
+
+  jmpImpl(env, bcOff(env) + relOffset);
 }
 
 void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
   auto const callee = curFunc(env);
-  auto const argc = callee->getEntryNumParams(curSrcKey(env).entryOffset());
 
+  if (curSrcKey(env).trivialDVFuncEntry()) {
+    assertx(!isInlining(env));
+    auto const param = curSrcKey(env).numEntryArgs();
+    emitInitScalarDefaultParamLocal(env, callee, param);
+    emitJmpFuncBody(env, callee, param + 1, env.funcEntryPrevFP);
+    return;
+  }
+
+  emitInitDefaultParamLocals(env, callee, curSrcKey(env).numEntryArgs());
   emitInitClosureLocals(env, callee);
   emitInitRegularLocals(env, callee);
-  emitSurpriseCheck(env, callee, argc);
+
+  // DV initializers delay the function call event hook until the Enter opcode.
+  if (curSrcKey(env).numEntryArgs() < callee->numNonVariadicParams()) return;
+
+  emitSurpriseCheck(env, callee);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

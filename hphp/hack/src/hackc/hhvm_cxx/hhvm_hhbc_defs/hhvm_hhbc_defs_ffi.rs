@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::{BitAnd, BitOr, BitOrAssign};
+use std::ops::BitAnd;
+use std::ops::BitOr;
+use std::ops::BitOrAssign;
 
 #[allow(unreachable_patterns)]
 #[cxx::bridge(namespace = "HPHP")]
@@ -12,7 +14,7 @@ pub mod ffi {
     // these enum variants that they match the definition in
     // fcall-args-flags.h.
     #[repr(u16)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum FCallArgsFlags {
         // This maps to a non-class enum in C++ so the variant names are chosen
         // to avoid naming collisions.
@@ -33,7 +35,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum IsTypeOp {
         Null,
         Bool,
@@ -56,7 +58,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum FatalOp {
         Runtime,
         Parse,
@@ -64,14 +66,14 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum InitPropOp {
         Static,
         NonStatic,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum SpecialClsRef {
         SelfCls,
         LateBoundCls,
@@ -79,7 +81,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum MOpMode {
         None,
         Warn,
@@ -89,7 +91,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum QueryMOp {
         CGet,
         CGetQuiet,
@@ -98,21 +100,21 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum TypeStructResolveOp {
         Resolve,
         DontResolve,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum IsLogAsDynamicCallOp {
         LogAsDynamicCall,
         DontLogAsDynamicCall,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum ReadonlyOp {
         Any,
         Readonly,
@@ -122,42 +124,42 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum SetRangeOp {
         Forward,
         Reverse,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum ContCheckOp {
         IgnoreStarted,
         CheckStarted,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum SwitchKind {
         Unbounded,
         Bounded,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum ObjMethodOp {
         NullThrows,
         NullSafe,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum SilenceOp {
         Start,
         End,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum BareThisOp {
         Notice,
         NoNotice,
@@ -165,32 +167,28 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum IncDecOp {
         PreInc,
         PostInc,
         PreDec,
         PostDec,
-        PreIncO,
-        PostIncO,
-        PreDecO,
-        PostDecO,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum CollectionType {
-        Vector = 0x11,
-        Map = 0x12,
-        Set = 0x13,
-        Pair = 0x14,
-        ImmVector = 0x15,
-        ImmMap = 0x16,
-        ImmSet = 0x17,
+        Vector = 0x12,
+        Map = 0x13,
+        Set = 0x14,
+        Pair = 0x15,
+        ImmVector = 0x16,
+        ImmMap = 0x17,
+        ImmSet = 0x18,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum SetOpOp {
         PlusEqual,
         MinusEqual,
@@ -204,13 +202,10 @@ pub mod ffi {
         XorEqual,
         SlEqual,
         SrEqual,
-        PlusEqualO,
-        MinusEqualO,
-        MulEqualO,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum OODeclExistsOp {
         Class,
         Interface,

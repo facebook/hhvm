@@ -7,7 +7,7 @@
 
 class C {}
 interface I {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_classes_basic_001(): void {
 echo "*** Testing get_declared_classes() : basic functionality ***\n";
 
 // Zero arguments

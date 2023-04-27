@@ -138,6 +138,7 @@ module Primary : sig
           reason:
             [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
+    [@@deriving show]
   end
 
   module Enum : sig
@@ -181,7 +182,10 @@ module Primary : sig
       | Enum_class_label_unknown of {
           pos: Pos.t;
           label_name: string;
-          class_name: string;
+          enum_name: string;
+          decl_pos: Pos_or_decl.t;
+          most_similar: (string * Pos_or_decl.t) option;
+          ty_pos: Pos_or_decl.t option;
         }
       | Enum_class_label_as_expr of Pos.t
       | Enum_class_label_member_mismatch of {
@@ -205,7 +209,7 @@ module Primary : sig
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
-      | Enum_supertyping_reserved_syntax of Pos.t
+    [@@deriving show]
   end
 
   module Expr_tree : sig
@@ -222,6 +226,7 @@ module Primary : sig
           member_name: string;
           class_name: string;
         }
+    [@@deriving show]
   end
 
   module Readonly : sig
@@ -252,6 +257,7 @@ module Primary : sig
           decl_pos: Pos_or_decl.t;
           suggestion: string;
         }
+    [@@deriving show]
   end
 
   module Ifc : sig
@@ -280,6 +286,7 @@ module Primary : sig
           pos: Pos.t;
           msg: string;
         }
+    [@@deriving show]
   end
 
   module Coeffect : sig
@@ -300,6 +307,7 @@ module Primary : sig
           required: string Lazy.t;
           suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
+    [@@deriving show]
   end
 
   module Wellformedness : sig
@@ -325,10 +333,11 @@ module Primary : sig
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           is_async: bool;
-          pos: Pos.t;
-          hint_pos: Pos.t option;
+          hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
+      | Invalid_class_refinement of { pos: Pos.t }
+    [@@deriving show]
   end
 
   module Modules : sig
@@ -347,6 +356,47 @@ module Primary : sig
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
+      | Module_missing_import of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module: string;
+          target_module_opt: string option;
+        }
+      | Module_missing_export of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          target_module: string;
+        }
+      | Module_cross_pkg_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
+      | Module_cross_pkg_call of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+        }
+      | Module_soft_included_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
+    [@@deriving show]
   end
 
   module Xhp : sig
@@ -365,6 +415,7 @@ module Primary : sig
           attr: string;
           ty_reason_msg: Pos_or_decl.t Message.t list Lazy.t;
         }
+    [@@deriving show]
   end
 
   (** Specific error information readily transformable into a user error *)
@@ -454,6 +505,24 @@ module Primary : sig
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Req_class_not_final of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+      }
+    | Incompatible_reqs of {
+        pos: Pos.t;
+        req_name: string;
+        req_class_pos: Pos_or_decl.t;
+        req_extends_pos: Pos_or_decl.t;
+      }
+    | Trait_not_used of {
+        pos: Pos.t;
+        trait_name: string;
+        req_class_pos: Pos_or_decl.t;
+        class_pos: Pos_or_decl.t;
+        class_name: string;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;
@@ -484,6 +553,11 @@ module Primary : sig
     | Typeconst_concrete_concrete_override of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
+      }
+    | Constant_multiple_concrete_conflict of {
+        pos: Pos.t;
+        name: string;
+        definitions: (Pos_or_decl.t * string option) list;
       }
     | Invalid_memoized_param of {
         pos: Pos.t;
@@ -567,23 +641,7 @@ module Primary : sig
         pos: Pos.t;
         member_name: string;
         decl_pos: Pos_or_decl.t;
-        quickfixes: Quickfix.t list;
-      }
-    | Attribute_too_many_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_too_few_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_not_exact_number_of_args of {
-        pos: Pos.t;
-        name: string;
-        actual: int;
-        expected: int;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Kind_mismatch of {
         pos: Pos.t;
@@ -604,6 +662,7 @@ module Primary : sig
         kind: [ `method_ | `property ];
         name: string;
         is_nullable: bool;
+        ty_reasons: (Pos_or_decl.t * string) list Lazy.t;
       }
     | Unresolved_tyvar_projection of {
         pos: Pos.t;
@@ -711,6 +770,11 @@ module Primary : sig
         trait_name: string;
         meth_pos: Pos_or_decl.t;
       }
+    | Should_not_be_override of {
+        pos: Pos.t;
+        class_id: string;
+        id: string;
+      }
     | Generic_at_runtime of {
         pos: Pos.t;
         prefix: string;
@@ -744,10 +808,6 @@ module Primary : sig
         left: Pos_or_decl.t Message.t list Lazy.t;
         right: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Attribute_param_type of {
-        pos: Pos.t;
-        x: string;
-      }
     | Deprecated_use of {
         pos: Pos.t;
         decl_pos_opt: Pos_or_decl.t option;
@@ -768,7 +828,10 @@ module Primary : sig
       }
     | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
-    | Illegal_type_structure of Pos.t
+    | Illegal_type_structure of {
+        pos: Pos.t;
+        msg: string;
+      }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {
         pos: Pos.t;
@@ -777,11 +840,6 @@ module Primary : sig
         attr_class_pos: Pos_or_decl.t;
         attr_class_name: string;
         intf_name: string;
-      }
-    | Wrong_expression_kind_builtin_attribute of {
-        pos: Pos.t;
-        attr_name: string;
-        expr_kind: string;
       }
     | Ambiguous_object_access of {
         pos: Pos.t;
@@ -815,10 +873,6 @@ module Primary : sig
         name: string;
         others: Pos_or_decl.t list;
       }
-    | Tparam_non_shadowing_reuse of {
-        pos: Pos.t;
-        tparam_name: string;
-      }
     | Reified_function_reference of Pos.t
     | Class_meth_abstract_call of {
         pos: Pos.t;
@@ -846,12 +900,6 @@ module Primary : sig
         class_name: string;
         meth_name: string;
         decl_pos: Pos_or_decl.t;
-      }
-    | Unnecessary_attribute of {
-        pos: Pos.t;
-        attr: string;
-        reason: Pos.t Message.t Lazy.t;
-        suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {
         pos: Pos.t;
@@ -927,7 +975,8 @@ module Primary : sig
         trace1: Pos_or_decl.t Message.t list Lazy.t;
         trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Generic_property_import_via_diamond of {
+    | Property_import_via_diamond of {
+        generic: bool;
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;
@@ -1155,9 +1204,10 @@ module Primary : sig
         pos: Pos.t;
         is_final: bool;
         decl_pos: Pos_or_decl.t;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Abstract_member_in_concrete_class of {
         pos: Pos.t;
@@ -1226,18 +1276,6 @@ module Primary : sig
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Static_redeclared_as_dynamic of {
-        pos: Pos.t;
-        static_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
-    | Dynamic_redeclared_as_static of {
-        pos: Pos.t;
-        dyn_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
     | Unknown_object_member of {
         pos: Pos.t;
         member_name: string;
@@ -1255,8 +1293,6 @@ module Primary : sig
         pos: Pos.t;
         null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Option_mixed of Pos.t
-    | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;
@@ -1282,7 +1318,8 @@ module Primary : sig
         tyconst_names: string list;
       }
     | Array_get_with_optional_field of {
-        pos: Pos.t;
+        recv_pos: Pos.t;
+        field_pos: Pos.t;
         field_name: string;
         decl_pos: Pos_or_decl.t;
       }
@@ -1308,7 +1345,7 @@ module Primary : sig
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos.t;
@@ -1336,6 +1373,14 @@ module Primary : sig
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
       }
+    | Static_instance_intersection of {
+        class_pos: Pos.t;
+        instance_pos: Pos_or_decl.t Lazy.t;
+        static_pos: Pos_or_decl.t Lazy.t;
+        member_name: string;
+        kind: [ `meth | `prop ];
+      }
+  [@@deriving show]
 
   val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
 end
@@ -1343,7 +1388,8 @@ end
 module Secondary : sig
   (** Specific error information which needs to be given a primary position from
        the AST being typed to be transformable into a user error.
-       This can be done via applying a [Reason_callback.t] using [apply_reasons].
+       This can be done via applying a [Reasons_callback.t] using
+       [apply_reasons].
   *)
   type t =
     | Of_error of Error.t
@@ -1361,7 +1407,7 @@ module Secondary : sig
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -1441,6 +1487,7 @@ module Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
+        shape_lit_pos: Pos.t option;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -1490,6 +1537,7 @@ module Secondary : sig
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -1510,6 +1558,10 @@ module Secondary : sig
         parent_is_const: bool;
       }
     | Override_final of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Override_async of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
@@ -1593,21 +1645,33 @@ module Secondary : sig
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
-      }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_refinement of Pos_or_decl.t
+    | Missing_class_constant of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
+      }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
+  [@@deriving show]
 end
 
 module Callback : sig
   (** A mechanism to apply transformations to primary errors *)
-  type t
-
+  type t [@@deriving show]
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Ignore any arguments and always return the given base error *)
@@ -1679,7 +1743,7 @@ end
 
 module Reasons_callback : sig
   (** A mechanism to apply transformations to secondary errors *)
-  type t
+  type t [@@deriving show]
 
   (** Evaluate the `Reasons_callback.t` to a `(Pos.t,Pos_or_decl.t) User_error.t`
       for use in error reporting.
@@ -1696,7 +1760,7 @@ module Reasons_callback : sig
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
@@ -1707,7 +1771,7 @@ module Reasons_callback : sig
       migrated *)
   val from_on_error :
     (?code:int ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     Pos_or_decl.t Message.t list ->
     unit) ->
     t
@@ -1794,6 +1858,12 @@ module Reasons_callback : sig
   *)
   val prepend_on_apply : t -> Secondary.t -> t
 
+  (** Creates a callback that ignores the secondary reasons that are passed
+      when it is applied and then proceeds with the callback it wraps. This
+      construct is only helpful if the wrapped callback contains enough
+      context to generate a usable error message. *)
+  val drop_reasons_on_apply : t -> t
+
   (* Applying the `Reasons_callback.t` `(assert_in_current_decl code ctx) err`
      will evaluate the `Secondary.t` `err` then use the head of the list of
      reasons as claim in the resulting error, given the position for that
@@ -1803,6 +1873,14 @@ module Reasons_callback : sig
   (* -- Specific callbacks -------------------------------------------------- *)
 
   val unify_error_at : Pos.t -> t
+
+  val expr_tree_splice_error :
+    Pos.t ->
+    expr_pos:Pos_or_decl.t ->
+    contextual_reasons:Pos_or_decl.t Message.t list Lazy.t option ->
+    dsl_opt:string option ->
+    docs_url:string option Lazy.t ->
+    t
 
   val bad_enum_decl : Pos.t -> t
 
@@ -1816,6 +1894,8 @@ module Reasons_callback : sig
 
   val bad_decl_override :
     name:string -> parent_pos:Pos.t -> parent_name:string -> t
+
+  val invalid_class_refinement : Pos.t -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
@@ -1847,7 +1927,7 @@ module Reasons_callback : sig
     Pos_or_decl.ctx -> t
 end
 
-type t = Error.t
+type t = Error.t [@@deriving show]
 
 (** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
      and `Secondary.t` error is encountered, respectively. *)

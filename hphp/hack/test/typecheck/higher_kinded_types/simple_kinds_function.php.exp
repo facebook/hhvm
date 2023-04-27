@@ -1,7 +1,3 @@
-File "simple_kinds_function.php", line 9, characters 14-18:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "simple_kinds_function.php", line 4, characters 7-11:
-  Definition is here
 File "simple_kinds_function.php", line 11, characters 3-7:
 Expected 2 type parameters (Typing[4029])
   File "simple_kinds_function.php", line 6, characters 10-14:
@@ -9,6 +5,10 @@ Expected 2 type parameters (Typing[4029])
 File "simple_kinds_function.php", line 13, characters 3-7:
 Expected 2 type parameters (Typing[4029])
   File "simple_kinds_function.php", line 6, characters 10-14:
+  Definition is here
+File "simple_kinds_function.php", line 9, characters 14-18:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "simple_kinds_function.php", line 4, characters 7-11:
   Definition is here
 File "simple_kinds_function.php", line 13, characters 14-18:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])

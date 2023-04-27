@@ -29,7 +29,7 @@ extern "C" {
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-typedef std::shared_ptr<timelib_rel_time> DateIntervalPtr;
+using DateIntervalPtr = std::shared_ptr<timelib_rel_time>;
 
 /**
  * Handles all date interval related functions.

@@ -1,3 +1,5 @@
 <?hh
 
-module Baz {
+<<file: __EnableUnstableFeatures('modules')>>
+
+new module Baz {

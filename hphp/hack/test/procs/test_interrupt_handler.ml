@@ -39,7 +39,7 @@ let test_interrupt_handler () =
       env = (0, 0) (* counting number of times interrupt handlers ran *);
     }
   in
-  let ((), (x, y), cancelled) =
+  let ((), (x, y), unfinished_and_reason) =
     MultiWorker.call_with_interrupt
       workers
       ~job:do_work
@@ -52,7 +52,7 @@ let test_interrupt_handler () =
   let (_ : int * Unix.process_status) = Unix.waitpid [] interrupter_pid2 in
   assert (x = 3);
   assert (y = 4);
-  assert (cancelled = []);
+  assert (Option.is_none unfinished_and_reason);
   true
 
 let () =

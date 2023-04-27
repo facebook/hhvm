@@ -99,6 +99,11 @@ module GEnv = struct
       let (p, _) = get_const_full_pos ctx (pos, name) in
       Some p
     | None -> None
+
+  let module_pos ctx name =
+    match Naming_provider.get_module_pos ctx name with
+    | Some pos -> Some (fst @@ get_module_full_pos ctx (pos, name))
+    | None -> None
 end
 
 (** Given name-and-position [id], compared to the [canonical_id] name-and-position,
@@ -146,16 +151,16 @@ let should_report_duplicate
         (FileInfo.show_pos p)
     in
     HackEventLogger.invariant_violation_bug
-      ~desc
+      desc
       ~path:(FileInfo.get_pos_filename p)
-      ~pos:""
-      (Telemetry.create ()
-      |> Telemetry.string_ ~key:"name" ~value:name
-      |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
-      |> Telemetry.string_
-           ~key:"canonical_path"
-           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
-      |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
+      ~telemetry:
+        (Telemetry.create ()
+        |> Telemetry.string_ ~key:"name" ~value:name
+        |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
+        |> Telemetry.string_
+             ~key:"canonical_path"
+             ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
+        |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
   in
   (* Detect anomaly where we're given a file-only [id] *)
   begin
@@ -208,7 +213,8 @@ module Env = struct
       || SN.Typehints.is_reserved_global_name x
     then (
       let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
-      Errors.add_naming_error @@ Naming_error.Name_is_reserved { pos; name };
+      Errors.add_error
+        Naming_error.(to_user_error @@ Name_is_reserved { pos; name });
       false
     ) else
       true
@@ -245,20 +251,21 @@ module Env = struct
       let pc = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, canonical, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, canonical, None)
+        then
           let (pos, name) = GEnv.get_fun_full_pos ctx (p, name) in
           let (prev_pos, prev_name) =
             GEnv.get_fun_full_pos ctx (pc, canonical)
           in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { pos; name; prev_pos; prev_name }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound { pos; name; prev_pos; prev_name })
       end;
       current_file_symbols_acc
     | None ->
@@ -283,20 +290,21 @@ module Env = struct
         in
         begin
           if
-          should_report_duplicate
-            ctx
-            fi
-            current_file_symbols_acc
-            ~id
-            ~canonical_id:(pc, canonical, None)
-         then
+            should_report_duplicate
+              ctx
+              fi
+              current_file_symbols_acc
+              ~id
+              ~canonical_id:(pc, canonical, None)
+          then
             let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
             let (prev_pos, prev_name) =
               GEnv.get_type_full_pos ctx (pc, canonical)
             in
-            Errors.add_naming_error
-            @@ Naming_error.Error_name_already_bound
-                 { pos; prev_pos; name; prev_name }
+            Errors.add_error
+              Naming_error.(
+                to_user_error
+                @@ Error_name_already_bound { pos; prev_pos; name; prev_name })
         end;
         current_file_symbols_acc
       | None ->
@@ -314,18 +322,20 @@ module Env = struct
     | Some pc ->
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, name, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, name, None)
+        then
           let (pos, name) = GEnv.get_const_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_const_full_pos ctx (pc, name) in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { name; prev_name = name; pos; prev_pos }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound
+                   { name; prev_name = name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->
@@ -350,18 +360,20 @@ module Env = struct
     | Some pc ->
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, name, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, name, None)
+        then
           let (pos, name) = GEnv.get_module_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_module_full_pos ctx (pc, name) in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { name; prev_name = name; pos; prev_pos }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound
+                   { name; prev_name = name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->
@@ -378,6 +390,16 @@ let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_fun_batch backend funs;
   Naming_provider.remove_const_batch backend consts;
   Naming_provider.remove_module_batch backend modules
+
+let remove_decls_using_file_info backend file_info =
+  let open FileInfo in
+  remove_decls
+    ~backend
+    ~funs:(List.map ~f:id_name file_info.funs)
+    ~classes:(List.map ~f:id_name file_info.classes)
+    ~typedefs:(List.map ~f:id_name file_info.typedefs)
+    ~consts:(List.map ~f:id_name file_info.consts)
+    ~modules:(List.map ~f:id_name file_info.modules)
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -453,11 +475,11 @@ let add_files_to_rename failed defl defs_in_env =
     ~f:
       begin
         fun failed (_, def, _) ->
-        match defs_in_env def with
-        | None -> failed
-        | Some previous_definition_position ->
-          let filename = Pos.filename previous_definition_position in
-          Relative_path.Set.add failed filename
+          match defs_in_env def with
+          | None -> failed
+          | Some previous_definition_position ->
+            let filename = Pos.filename previous_definition_position in
+            Relative_path.Set.add failed filename
       end
     ~init:failed
     defl
@@ -529,5 +551,8 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
     in
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.consts (GEnv.gconst_pos ctx)
+    in
+    let failed =
+      add_files_to_rename failed fileinfo.FileInfo.modules (GEnv.module_pos ctx)
     in
     (errors, failed)

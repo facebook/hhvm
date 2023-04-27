@@ -403,12 +403,12 @@ ArrayData* VanillaVec::MakeUninitializedVec(uint32_t size) {
   return ad;
 }
 
-ArrayData* VanillaVec::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
+ArrayData* VanillaVec::MakeVecFromAPC(const APCArray* apc, bool pure, bool isLegacy) {
   assertx(apc->isPacked());
   auto const apcSize = apc->size();
   VecInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.append(apc->getPackedVal(i)->toLocal());
+    init.append(apc->getPackedVal(i)->toLocal(pure));
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);

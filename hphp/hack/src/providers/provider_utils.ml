@@ -11,11 +11,21 @@ let invalidate_tast_cache_of_entries (entries : Provider_context.entries) : unit
     =
   Relative_path.Map.iter entries ~f:(fun _path entry ->
       entry.Provider_context.tast <- None;
-      entry.Provider_context.naming_and_typing_errors <- None)
+      entry.Provider_context.all_errors <- None)
 
 let invalidate_local_decl_caches_for_file
     (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
     unit =
+  let {
+    Provider_backend.shallow_decl_cache;
+    folded_class_cache;
+    decl_cache;
+    reverse_naming_table_delta = _;
+    fixmes = _;
+    naming_db_path_ref = _;
+  } =
+    local_memory
+  in
   let open FileInfo in
   let open Provider_backend in
   (* Consideration: would it have been better to decl-diff, detect
@@ -26,39 +36,34 @@ let invalidate_local_decl_caches_for_file
   (* Shallow decl cache: we only need clear the ones affected *)
   List.iter file_info.classes ~f:(fun (_, name, _) ->
       Shallow_decl_cache.remove
-        local_memory.shallow_decl_cache
+        shallow_decl_cache
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
 
-  (* Decl and linearization cache: we don't track fine-grained
-     dependencies, and therefore we should be evicting everything.
+  (* Decl cache: we don't track fine-grained dependencies, and therefore we
+     should be evicting everything.
 
-     It might be possible to do decl-diffing on shallow-decls and if
-     they're unchanged, then avoid invalidating the folded decls and
-     linearizations. That would be better in the case of just one
-     disk file change notification, but worse in the case of 5000
-     since it'd require getting shallow-decls on all of them just
+     It might be possible to do decl-diffing on shallow-decls and if they're
+     unchanged, then avoid invalidating the folded decls. That would be better
+     in the case of just one disk file change notification, but worse in the
+     case of 5000 since it'd require getting shallow-decls on all of them just
      to compare, even if they weren't actually needed.
 
-     I tried evicting everything but it was far too slow. That will
-     need to be fixed. But for now, let's settle for evicting
-     decls and linearizations which we know are affected. This way
-     at least the user has a fallback of opening relevant files in the
-     IDE to get their relevant decls+linearizations correct. *)
+     I tried evicting everything but it was far too slow. That will need to be
+     fixed. But for now, let's settle for evicting decls which we know are
+     affected. This way at least the user has a fallback of opening relevant
+     files in the IDE to get their relevant decls correct. *)
   let open Provider_backend.Decl_cache_entry in
   List.iter file_info.consts ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
+      Decl_cache.remove decl_cache ~key:(Gconst_decl name));
   List.iter file_info.funs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
+      Decl_cache.remove decl_cache ~key:(Fun_decl name));
   List.iter file_info.typedefs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
+      Decl_cache.remove decl_cache ~key:(Typedef_decl name));
   List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl name));
-  (* Linearizations are only keyed by class names *)
-  let open Provider_backend.Linearization_cache_entry in
-  List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Linearization_cache.remove
-        local_memory.linearization_cache
-        ~key:(Linearization name));
+      Decl_cache.remove decl_cache ~key:(Class_decl name);
+      Folded_class_cache.remove
+        folded_class_cache
+        ~key:(Folded_class_cache_entry.Folded_class_decl name));
   ()
 
 let invalidate_local_decl_caches_for_entries
@@ -91,6 +96,7 @@ let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
     ~tcopt:env.ServerEnv.tcopt
     ~backend:(Provider_backend.get ())
     ~deps_mode:env.ServerEnv.deps_mode
+    ~package_info:env.ServerEnv.package_info
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
@@ -107,10 +113,19 @@ let respect_but_quarantine_unsaved_changes
         Ast_provider.local_changes_push_sharedmem_stack ();
         Decl_provider.local_changes_push_sharedmem_stack ();
         Shallow_classes_provider.local_changes_push_sharedmem_stack ();
-        Linearization_provider.local_changes_push_sharedmem_stack ();
         File_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
         Naming_provider.local_changes_push_sharedmem_stack ();
+        SharedMem.set_allow_hashtable_writes_by_current_process false
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.push_local_changes backend;
+
+        Ast_provider.local_changes_push_sharedmem_stack ();
+        (* Shallow classes are stored in Rust when we're using
+           Rust_provider_backend, but member filters are not, so we still need
+           to push/pop the sharedmem stack for member filters. *)
+        Shallow_classes_provider.local_changes_push_sharedmem_stack ();
+        Fixme_provider.local_changes_push_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
         Relative_path.Map.iter
@@ -144,10 +159,17 @@ let respect_but_quarantine_unsaved_changes
         Ast_provider.local_changes_pop_sharedmem_stack ();
         Decl_provider.local_changes_pop_sharedmem_stack ();
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
-        Linearization_provider.local_changes_pop_sharedmem_stack ();
         File_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
         Naming_provider.local_changes_pop_sharedmem_stack ();
+        SharedMem.set_allow_hashtable_writes_by_current_process true;
+        SharedMem.invalidate_local_caches ()
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.pop_local_changes backend;
+
+        Ast_provider.local_changes_pop_sharedmem_stack ();
+        Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
+        Fixme_provider.local_changes_pop_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process true;
         SharedMem.invalidate_local_caches ()
       | Provider_backend.Local_memory local ->

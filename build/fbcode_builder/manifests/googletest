@@ -1,0 +1,23 @@
+[manifest]
+name = googletest
+
+[download]
+url = https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz
+sha256 = 81964fe578e9bd7c94dfdb09c8e4d6e6759e19967e397dbea48d1c10e45d0df2
+
+[build]
+builder = cmake
+subdir = googletest-release-1.12.1
+
+[cmake.defines]
+# Everything else defaults to the shared runtime, so tell gtest that
+# it should not use its choice of the static runtime
+gtest_force_shared_crt=ON
+
+[cmake.defines.os=windows]
+BUILD_SHARED_LIBS=ON
+
+# 18.04 googletest is too old
+[debs.not(all(distro=ubuntu,distro_vers="18.04"))]
+libgtest-dev
+libgmock-dev

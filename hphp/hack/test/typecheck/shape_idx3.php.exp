@@ -6,9 +6,9 @@ File "shape_idx3.php", line 16, characters 3-36:
   arraykey
 File "shape_idx3.php", line 17, characters 3-36:
   arraykey
-File "shape_idx3.php", line 21, characters 10-34:
-Invalid return type (Typing[4110])
-File "shape_idx3.php", line 13, characters 4-6:
-Expected `int`
-File "shape_idx3.php", line 11, characters 3-10:
-But got `arraykey`
+File "shape_idx3.php", line 21, characters 32-33:
+Invalid argument (Typing[4110])
+  File "shape_idx3.php", line 13, characters 4-6:
+  Expected `int`
+  File "shape_idx3.php", line 11, characters 3-10:
+  But got `arraykey`

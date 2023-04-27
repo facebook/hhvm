@@ -236,7 +236,6 @@ dynamic getIRInstruction(const IRInstruction& inst,
   if (!sk.valid()) {
     markerObj = dynamic(nullptr);
   } else {
-    sk.func()->prettyPrint(mStr, Func::PrintOpts().noBytecode());
     mStr << std::string(kIndent, ' ')
          << inst.marker().show()
          << std::endl
@@ -653,6 +652,7 @@ void disasmRange(std::ostream& os,
                  uint64_t adjust,
                  bool useColor) {
   assertx(begin <= end);
+  if (!dumpIREnabled(kind, kDisasmLevel)) return;
   int const indent = kIndent + 4;
   bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
   char const* colorStr = useColor ? color(ANSI_COLOR_BROWN) : "";
@@ -710,10 +710,6 @@ void printIRInstruction(std::ostream& os,
          << color(ANSI_COLOR_END)
          << std::endl;
     } else {
-      auto func = newMarker.func();
-      if (!curMarker.hasFunc() || func != curMarker.func()) {
-        func->prettyPrint(mStr, Func::PrintOpts().noBytecode());
-      }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()
            << std::endl
@@ -763,7 +759,7 @@ void printIRInstruction(std::ostream& os,
 
 void print(std::ostream& os, const Block* block, TransKind kind,
            const AsmInfo* asmInfo, const GuardConstraints* guards,
-           BCMarker* markerPtr) {
+           BCMarker* markerPtr, const LoopInfo* loopInfo) {
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
@@ -787,6 +783,19 @@ void print(std::ostream& os, const Block* block, TransKind kind,
     os << ')';
   }
   os << "\n";
+
+  auto const getLoopStats = [&]() {
+    int loopPreheaderCount = 0;
+    auto blocks = loopInfo->loopPreheaders.find(block->id());
+    if (blocks == loopInfo->loopPreheaders.end()) return;
+    for (auto& block : blocks->second) {
+      loopPreheaderCount += block->profCount();
+    }
+    auto avgLoopIterations = loopPreheaderCount == 0
+      ? 0 : (block->profCount() - loopPreheaderCount) / loopPreheaderCount;
+    os << "[avgLoopIterations=" << avgLoopIterations << "]\n";
+  };
+  if (loopInfo) getLoopStats();
 
   if (block->empty()) {
     os << std::string(kIndent, ' ') << "empty block\n";
@@ -956,23 +965,30 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
 
   if (dumpIREnabled(kind, kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
-  // Print the block CFG above the actual code.
-
   auto const retreating_edges = findRetreatingEdges(unit);
+  // Find blocks in loops
+  auto const loopInfo = findBlocksInLoops(unit, retreating_edges);
+  auto const isBlockInLoop = [&](Block* b) {
+    auto const it = loopInfo.blocks.find(b->id());
+    return it != loopInfo.blocks.end();
+  };
+
+  // Print the block CFG above the actual code.
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies) {
+    if (dotBodies || (RuntimeOption::EvalDumpHHIRInLoops && isBlockInLoop(block))) {
       if (block->hint() != Block::Hint::Unlikely &&
           block->hint() != Block::Hint::Unused) {
         // Include the IR in the body of the node
         std::ostringstream out;
-        print(out, block, kind, asmInfo, guards, &curMarker);
+        print(out, block, kind, asmInfo, guards, &curMarker, &loopInfo);
         auto bodyRaw = out.str();
         std::string body;
         body.reserve(bodyRaw.size() * 1.25);
         for (auto c : bodyRaw) {
-          if (c == '\n')      body += "\\n";
+          // The marker '\l' means left-justify linebreak.
+          if (c == '\n')      body += "\\l";
           else if (c == '"')  body += "\\\"";
           else if (c == '\\') body += "\\\\";
           else                body += c;

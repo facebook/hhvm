@@ -15,22 +15,22 @@ class C {
     $f($a);
   }
   static public function getCallable() {
-    return class_meth(self::class, 'private_meth');
+    return self::private_meth<>;
   }
   static public function mth() {
     return 1;
   }
 }
 <<__EntryPoint>> function main(): void {
-$m = class_meth(C::class, 'mth');
+$m = C::mth<>;
 var_dump($m());
 
-$pub = class_meth(C::class, 'getCallable');
+$pub = C::getCallable<>;
 C::caller($pub(), 'created in C');
 
-$tr = class_meth(C::class, 'trait_meth');
+$tr = C::trait_meth<>;
 var_dump($tr());
 
-$pri = class_meth(C::class, 'private_meth');
+$pri = C::private_meth<>;
 C::caller($pri, 'created outside');
 }

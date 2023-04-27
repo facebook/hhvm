@@ -1,0 +1,8 @@
+File "file_attributes_modules.php--file2.php", line 3, characters 31-41:
+Unbound name: `NonExistent` (an object type) (Naming[2049])
+File "file_attributes_modules.php--file2.php", line 3, characters 21-22:
+Invalid argument (Typing[4110])
+  File "file_attributes_modules.php--file1.php", line 8, characters 33-38:
+  Expected `string`
+  File "file_attributes_modules.php--file2.php", line 3, characters 21-22:
+  But got `int`

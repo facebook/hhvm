@@ -44,13 +44,13 @@ build-hack$(2):
 
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
 endef
 
 # Define rules for normal build / debug build

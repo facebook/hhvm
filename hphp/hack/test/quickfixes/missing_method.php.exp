@@ -1,14 +1,16 @@
-Add stub method `IFoo::bar`
+Add stubs for missing interface methods
 
 <?hh
 
 interface IFoo {
   public function bar(): void;
+  public function baz(): void;
 }
 
 class Foo implements IFoo {
   public function bar(): void {}
 
+  public function baz(): void {}
 
   public function otherMethod(): void {}
 }

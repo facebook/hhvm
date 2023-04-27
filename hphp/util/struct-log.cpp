@@ -62,7 +62,7 @@ void StructuredLogEntry::setVec(folly::StringPiece key,
 void StructuredLogEntry::setStackTrace(folly::StringPiece key,
                                        const StackTrace& st) {
   std::vector<folly::StringPiece> stackFrames;
-  folly::split("\n", st.toString(), stackFrames);
+  folly::split('\n', st.toString(), stackFrames);
   for (auto& frame : stackFrames) {
     const char* p = frame.begin();
     while (*p == '#' || *p == ' ' || (*p >= '0' && *p <= '9')) ++p;

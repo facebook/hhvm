@@ -16,10 +16,10 @@ $str = '<?xml version="1.0" '
 .       ' xmlns:xsd="http://www.w3.org/2001/XMLSchema"'
 .       ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
 .       ' xmlns:si="http://soapinterop.org/xsd"><SOAP-ENV:Body>'
-.       '<ns1:Add xmlns:ns1="http://testuri.org">'
+.       '<ns1:add xmlns:ns1="http://testuri.org">'
 .       '<x xsi:type="xsd:hexBinary">16</x>'
 .       '<y xsi:type="xsd:hexBinary">21</y>'
-.       '</ns1:Add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';
-$server->addFunction('Add');
+.       '</ns1:add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';
+$server->addFunction('add');
 $server->handle($str);
 }

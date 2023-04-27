@@ -51,7 +51,6 @@ punch_dough(
    */
 );
 
-
 brush_with(
   $cooking_oil,
   $generousness,

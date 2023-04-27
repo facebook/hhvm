@@ -17,7 +17,6 @@
 #include "hphp/util/interval-set.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
 
 #include <gtest/gtest.h>
 #include <initializer_list>

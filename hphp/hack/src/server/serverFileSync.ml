@@ -14,11 +14,15 @@ open ServerEnv
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
 
-let get_file_content_from_disk path =
+let get_file_content_from_disk_rel (path : Relative_path.t) : string option =
   let f () = Sys_utils.cat (Relative_path.to_absolute path) in
   Option.try_with f
 
-(** Get file content from File_provider or from disk. *)
+let get_file_content_from_disk (path : string) : string =
+  match try_relativize_path path with
+  | None -> ""
+  | Some path -> get_file_content_from_disk_rel path |> Option.value ~default:""
+
 let get_file_content = function
   | ServerCommandTypes.FileContent s -> s
   | ServerCommandTypes.FileName path ->
@@ -27,14 +31,19 @@ let get_file_content = function
           match File_provider.get path with
           | Some (File_provider.Ide f) -> Some f
           | Some (File_provider.Disk c) -> Some c
-          | None -> get_file_content_from_disk path)
+          | None -> get_file_content_from_disk_rel path)
     (* In case of errors, proceed with empty file contents *)
     |> Option.value ~default:""
 
-let open_file ~predeclare env path content =
+let open_file
+    ~(predeclare : bool)
+    (env : ServerEnv.env)
+    (path : string)
+    (content : string) : ServerEnv.env =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
-  let new_env =
-    try_relativize_path path >>= fun path ->
+  match try_relativize_path path with
+  | None -> env
+  | Some path ->
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
      * which makes incremental mode perform better. *)
@@ -66,18 +75,16 @@ let open_file ~predeclare env path content =
       Relative_path.Set.add env.disk_needs_parsing path
     in
     let last_command_time = Unix.gettimeofday () in
-    Some
-      {
-        env with
-        editor_open_files;
-        ide_needs_parsing;
-        last_command_time;
-        disk_needs_parsing;
-      }
-  in
-  Option.value new_env ~default:env
+    {
+      env with
+      editor_open_files;
+      ide_needs_parsing;
+      last_command_time;
+      disk_needs_parsing;
+    }
 
-let close_relative_path env path =
+let close_relative_path (env : ServerEnv.env) (path : Relative_path.t) :
+    ServerEnv.env =
   let editor_open_files = Relative_path.Set.remove env.editor_open_files path in
   let contents =
     match File_provider.get_unsafe path with
@@ -85,12 +92,7 @@ let close_relative_path env path =
     | _ -> assert false
   in
   File_provider.remove_batch (Relative_path.Set.singleton path);
-  let new_contents =
-    File_provider.get_contents
-      ~writeback_disk_contents_in_shmem_provider:
-        (TypecheckerOptions.enable_disk_heap env.tcopt)
-      path
-  in
+  let new_contents = File_provider.get_contents path in
   let ide_needs_parsing =
     match new_contents with
     | Some c when String.equal c contents -> env.ide_needs_parsing
@@ -107,7 +109,7 @@ let close_relative_path env path =
     disk_needs_parsing;
   }
 
-let close_file env path =
+let close_file (env : ServerEnv.env) (path : string) : ServerEnv.env =
   let new_env = try_relativize_path path >>| close_relative_path env in
   Option.value new_env ~default:env
 
@@ -134,11 +136,10 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     let edited_file_content =
       match File_content.edit_file file_content edits with
       | Ok new_content -> new_content
-      | Error (reason, _stack) ->
-        Hh_logger.log "%s" reason;
-
-        (* TODO: do not crash, but surface this to the client somehow *)
-        assert false
+      | Error (reason, e) ->
+        Hh_logger.log "SERVER_FILE_EDITED_ERROR - %s" reason;
+        HackEventLogger.server_file_edited_error e ~reason;
+        Exception.reraise e
     in
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
@@ -176,22 +177,18 @@ let get_unsaved_changes env =
     ~init:Relative_path.Map.empty
     ~f:(fun path acc ->
       match File_provider.get path with
-      | Some (File_provider.Ide ide_contents) ->
-        begin
-          match get_file_content_from_disk path with
-          | Some disk_contents
-            when not (String.equal ide_contents disk_contents) ->
-            Relative_path.Map.add
-              acc
-              ~key:path
-              ~data:(ide_contents, disk_contents)
-          | Some _ -> acc
-          | None ->
-            (* If one creates a new file, then there will not be corresponding
-               * disk contents, and we should consider there to be unsaved changes in
-               * the editor. *)
-            Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
-        end
+      | Some (File_provider.Ide ide_contents) -> begin
+        match get_file_content_from_disk_rel path with
+        | Some disk_contents when not (String.equal ide_contents disk_contents)
+          ->
+          Relative_path.Map.add acc ~key:path ~data:(ide_contents, disk_contents)
+        | Some _ -> acc
+        | None ->
+          (* If one creates a new file, then there will not be corresponding
+             * disk contents, and we should consider there to be unsaved changes in
+             * the editor. *)
+          Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
+      end
       | _ -> acc)
 
 let has_unsaved_changes env =

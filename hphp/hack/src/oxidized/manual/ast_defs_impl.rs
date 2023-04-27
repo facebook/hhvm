@@ -6,6 +6,7 @@
 use bstr::BStr;
 
 use crate::ast_defs::*;
+use crate::naming_error;
 use crate::pos::Pos;
 
 impl ShapeFieldName {
@@ -41,11 +42,39 @@ impl Id {
     }
 }
 
+#[allow(clippy::derivable_impls)]
+impl Default for Id {
+    fn default() -> Self {
+        Id(Default::default(), Default::default())
+    }
+}
+
 impl Bop {
     pub fn is_any_eq(&self) -> bool {
         match self {
             Self::Eq(_) => true,
             _ => false,
+        }
+    }
+}
+
+impl Variance {
+    pub fn negate(&self) -> Self {
+        match self {
+            Variance::Covariant => Variance::Contravariant,
+            Variance::Contravariant => Variance::Covariant,
+            Variance::Invariant => Variance::Invariant,
+        }
+    }
+}
+
+impl From<Visibility> for naming_error::Visibility {
+    fn from(val: Visibility) -> Self {
+        match val {
+            Visibility::Internal => naming_error::Visibility::Vinternal,
+            Visibility::Private => naming_error::Visibility::Vprivate,
+            Visibility::Protected => naming_error::Visibility::Vprotected,
+            Visibility::Public => naming_error::Visibility::Vprivate,
         }
     }
 }

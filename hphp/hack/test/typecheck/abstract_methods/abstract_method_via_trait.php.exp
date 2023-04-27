@@ -1,0 +1,8 @@
+File "abstract_method_via_trait.php", line 18, characters 7-9:
+This class must be declared `abstract`, or provide an implementation for the abstract method `foo` (Typing[4047])
+  File "abstract_method_via_trait.php", line 19, characters 7-13:
+  `Bar` uses `THasFoo`
+  File "abstract_method_via_trait.php", line 9, characters 26-32:
+  `THasFoo` uses `IHasFoo`
+  File "abstract_method_via_trait.php", line 4, characters 19-21:
+  The method is defined here

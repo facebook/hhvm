@@ -3,13 +3,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{
-    node::Node, node_mut::NodeMut, type_params::Params, visitor::Visitor, visitor_mut::VisitorMut,
-};
-use crate::pos::Pos;
+use std::collections::BTreeMap;
+
 use itertools::Either;
 use ocamlrep::rc::RcOc;
-use std::collections::BTreeMap;
+
+use super::node::Node;
+use super::node_mut::NodeMut;
+use super::type_params::Params;
+use super::visitor::Visitor;
+use super::visitor_mut::VisitorMut;
+use crate::pos::Pos;
 
 macro_rules! leaf_node {
     ($ty:ty) => {

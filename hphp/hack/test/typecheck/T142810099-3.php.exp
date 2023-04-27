@@ -1,0 +1,16 @@
+File "T142810099-3.php", line 20, characters 17-19:
+Invalid argument (Typing[4110])
+  File "T142810099-3.php", line 16, characters 15-17:
+  Expected `int`
+  File "T142810099-3.php", line 18, characters 15-22:
+  But got `arraykey`
+  File "T142810099-3.php", line 18, characters 15-22:
+  This type argument to `C` must match exactly (it is invariant)
+File "T142810099-3.php", line 21, characters 29-31:
+Invalid argument (Typing[4110])
+  File "T142810099-3.php", line 17, characters 15-20:
+  Expected `string`
+  File "T142810099-3.php", line 18, characters 15-22:
+  But got `arraykey`
+  File "T142810099-3.php", line 18, characters 15-22:
+  This type argument to `C` must match exactly (it is invariant)

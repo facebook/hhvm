@@ -1,0 +1,764 @@
+==== array_merge(vec, vec) ====
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+}
+==== array_merge(vec, dict) ====
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [2]=>
+  int(3)
+}
+==== array_merge(vec, keyset) ====
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [2]=>
+  int(5)
+}
+==== array_merge(vec, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(vec, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, vec) ====
+dict(3) {
+  [0]=>
+  string(1) "2"
+  [1]=>
+  int(3)
+  [2]=>
+  int(1)
+}
+==== array_merge(dict, dict) ====
+dict(5) {
+  [0]=>
+  string(1) "2"
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(dict, keyset) ====
+dict(5) {
+  [0]=>
+  string(1) "2"
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(dict, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(dict, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, vec) ====
+dict(3) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+  [2]=>
+  int(1)
+}
+==== array_merge(keyset, dict) ====
+dict(5) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(keyset, keyset) ====
+dict(5) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(keyset, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(keyset, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, vec) ====
+dict(2) {
+  [0]=>
+  int(6)
+  [1]=>
+  int(1)
+}
+==== array_merge(Vector, dict) ====
+dict(4) {
+  [0]=>
+  int(6)
+  [1]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [2]=>
+  int(3)
+}
+==== array_merge(Vector, keyset) ====
+dict(4) {
+  [0]=>
+  int(6)
+  [1]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [2]=>
+  int(5)
+}
+==== array_merge(Vector, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Vector, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, vec) ====
+dict(3) {
+  [0]=>
+  string(1) "7"
+  [1]=>
+  int(8)
+  [2]=>
+  int(1)
+}
+==== array_merge(Map, dict) ====
+dict(5) {
+  [0]=>
+  string(1) "7"
+  [1]=>
+  int(8)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(Map, keyset) ====
+dict(5) {
+  [0]=>
+  string(1) "7"
+  [1]=>
+  int(8)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(Map, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Map, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, vec) ====
+dict(3) {
+  [0]=>
+  string(1) "9"
+  [1]=>
+  int(10)
+  [2]=>
+  int(1)
+}
+==== array_merge(Set, dict) ====
+dict(5) {
+  [0]=>
+  string(1) "9"
+  [1]=>
+  int(10)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(Set, keyset) ====
+dict(5) {
+  [0]=>
+  string(1) "9"
+  [1]=>
+  int(10)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(Set, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Set, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, vec) ====
+dict(2) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(1)
+}
+==== array_merge(ImmVector, dict) ====
+dict(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [2]=>
+  int(3)
+}
+==== array_merge(ImmVector, keyset) ====
+dict(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [2]=>
+  int(5)
+}
+==== array_merge(ImmVector, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmVector, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, vec) ====
+dict(3) {
+  [0]=>
+  string(2) "12"
+  [1]=>
+  int(13)
+  [2]=>
+  int(1)
+}
+==== array_merge(ImmMap, dict) ====
+dict(5) {
+  [0]=>
+  string(2) "12"
+  [1]=>
+  int(13)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(ImmMap, keyset) ====
+dict(5) {
+  [0]=>
+  string(2) "12"
+  [1]=>
+  int(13)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(ImmMap, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmMap, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, vec) ====
+dict(3) {
+  [0]=>
+  string(2) "14"
+  [1]=>
+  int(15)
+  [2]=>
+  int(1)
+}
+==== array_merge(ImmSet, dict) ====
+dict(5) {
+  [0]=>
+  string(2) "14"
+  [1]=>
+  int(15)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(ImmSet, keyset) ====
+dict(5) {
+  [0]=>
+  string(2) "14"
+  [1]=>
+  int(15)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(ImmSet, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(ImmSet, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, vec) ====
+dict(3) {
+  [0]=>
+  int(16)
+  [1]=>
+  int(17)
+  [2]=>
+  int(1)
+}
+==== array_merge(Pair, dict) ====
+dict(5) {
+  [0]=>
+  int(16)
+  [1]=>
+  int(17)
+  [2]=>
+  int(2)
+  ["2"]=>
+  string(1) "2"
+  [3]=>
+  int(3)
+}
+==== array_merge(Pair, keyset) ====
+dict(5) {
+  [0]=>
+  int(16)
+  [1]=>
+  int(17)
+  [2]=>
+  int(4)
+  ["4"]=>
+  string(1) "4"
+  [3]=>
+  int(5)
+}
+==== array_merge(Pair, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(Pair, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(class_meth, vec) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, dict) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, keyset) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, Vector) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, Map) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, Set) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, ImmVector) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, ImmMap) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, ImmSet) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, Pair) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, class_meth) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(class_meth, false) ====
+string(31) "Cannot convert clsmeth to array"
+==== array_merge(false, vec) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, dict) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, keyset) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, Vector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, Map) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, Set) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, ImmVector) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, ImmMap) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, ImmSet) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, Pair) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, class_meth) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL
+==== array_merge(false, false) ====
+
+Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
+NULL

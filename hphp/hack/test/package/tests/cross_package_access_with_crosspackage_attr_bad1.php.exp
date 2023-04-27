@@ -1,0 +1,10 @@
+Naming[2049] Unbound name: pkg5 (a package) [1]
+
+cross_package_access_with_crosspackage_attr_bad1.php--a.php:5:20
+    3 | module a;
+    4 | class A {
+[1] 5 |   <<__CrossPackage("pkg5")>>
+    6 |   public function test() : void {
+    7 |   }
+
+1 error found.

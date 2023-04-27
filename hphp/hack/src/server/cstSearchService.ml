@@ -232,16 +232,15 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
     let syntax_list =
       Syntax.(
         match node.syntax with
-        | SyntaxList syntax_list ->
-          begin
-            match max_length with
-            | None -> Some syntax_list
-            | Some max_length ->
-              if List.length syntax_list <= max_length then
-                Some syntax_list
-              else
-                None
-          end
+        | SyntaxList syntax_list -> begin
+          match max_length with
+          | None -> Some syntax_list
+          | Some max_length ->
+            if List.length syntax_list <= max_length then
+              Some syntax_list
+            else
+              None
+        end
         | _ -> None)
     in
     begin
@@ -584,7 +583,7 @@ let go
         !num_files_searched - !last_printed_num_files_searched >= 10000
         || is_bucket_empty
       then (
-        ServerProgress.send_progress
+        ServerProgress.write
           "CST search: searched %d files..."
           !num_files_searched;
         last_printed_num_files_searched := !num_files_searched

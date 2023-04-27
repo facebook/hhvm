@@ -2,7 +2,7 @@ name: \FOO, kind: global_const, span: line 6, characters 3-5, is_declaration: fa
 definition:
  FOO
    kind: const
-   id: class_const::FOO
+   id: global_const::FOO
    position: line 3, characters 7-9
    span: line 3, character 7 - line 3, character 20
    modifiers: 

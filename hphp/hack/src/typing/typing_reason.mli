@@ -133,6 +133,7 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rtype_variable_error : Pos.t -> locl_phase t_
   | Rglobal_type_variable_generics :
       Pos_or_decl.t * string * string
       -> 'phase t_
@@ -140,6 +141,7 @@ type _ t_ =
   | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
+  | Rshape_literal : Pos.t -> locl_phase t_
   | Renforceable : Pos_or_decl.t -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
@@ -159,6 +161,11 @@ type _ t_ =
   | Rrigid_tvar_escape :
       Pos.t * string * string * locl_phase t_
       -> locl_phase t_
+  | Ropaque_type_from_module :
+      Pos_or_decl.t * string * locl_phase t_
+      -> locl_phase t_
+  | Rmissing_class : Pos.t -> locl_phase t_
+  | Rinvalid : 'phase t_
 
 type t = locl_phase t_
 

@@ -1,0 +1,69 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "localhost:5001",
+                   "localhost:5002",
+                   "localhost:5003",
+                   "localhost:5004",
+                   "localhost:5005",
+                   "localhost:5006",
+                   "localhost:5007",
+                   "localhost:5008",
+                   "localhost:5009",
+                   "localhost:5010",
+                   "localhost:5011",
+                   "localhost:5012",
+                   "localhost:5013",
+                   "localhost:5014",
+                   "localhost:5015",
+                   "localhost:5016",
+                   "localhost:5017",
+                   "localhost:5018",
+                   "localhost:5019",
+                   "localhost:5020",
+                   "localhost:5021",
+                   "localhost:5022",
+                   "localhost:5023"]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": ["PoolRoute|A",
+                 "Pool|A"
+                ],
+    "failover_policy": {
+      "type": "DeterministicOrderPolicy",
+      "max_tries": 12,
+      "max_error_tries": 3,
+      "hash": {
+        "hash_func": "WeightedCh3",
+        "weights": [
+          0.7,
+          0.65,
+          1.0,
+          0.8,
+          0.5,
+          0.7,
+          0.65,
+          1.0,
+          0.8,
+          0.7,
+          0.65,
+          1.0,
+          0.8,
+          0.5,
+          0.75,
+          0.5,
+          0.75,
+          0.7,
+          0.65,
+          1.0,
+          0.5,
+          0.75,
+          0.55,
+          0.81
+        ]
+      }
+    }
+  }
+}

@@ -43,10 +43,7 @@ hphp_fast_string_set Option::PackageExcludeStaticPatterns;
 
 bool Option::CachePHPFile = false;
 
-hphp_fast_string_imap<std::string> Option::AutoloadClassMap;
-hphp_fast_string_imap<std::string> Option::AutoloadFuncMap;
-hphp_fast_string_map<std::string> Option::AutoloadConstMap;
-std::string Option::AutoloadRoot;
+bool Option::ConstFoldFileBC = false;
 
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
@@ -61,13 +58,27 @@ const int Option::kDefaultParserDirGroupSizeLimit = 50000;
 int Option::ParserGroupSize = kDefaultParserGroupSize;
 int Option::ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
 bool Option::ParserAsyncCleanup = true;
+bool Option::ParserOptimisticStore = true;
+
+bool Option::ForceEnableSymbolRefs = false;
 
 std::string Option::ExternWorkerUseCase;
+std::string Option::ExternWorkerFeaturesFile;
 bool Option::ExternWorkerForceSubprocess = false;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
+bool Option::ExternWorkerUseRichClient = true;
+bool Option::ExternWorkerUseZippyRichClient = false;
+bool Option::ExternWorkerUseP2P = false;
+int Option::ExternWorkerCasConnectionCount = 16;
+int Option::ExternWorkerEngineConnectionCount = 6;
+int Option::ExternWorkerAcConnectionCount = 16;
+bool Option::ExternWorkerVerboseLogging = false;
 std::string Option::ExternWorkerWorkingDir;
+
+int Option::ExternWorkerThrottleRetries = -1;
+int Option::ExternWorkerThrottleBaseWaitMSecs = -1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -86,7 +97,6 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
-  LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
 
   Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
   Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
@@ -128,17 +138,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                  RuntimeOption::RepoDebugInfo);
   }
 
-  {
-    // AutoloadMap
-    // not using Bind here because those maps are enormous and cause performance
-    // problems when showing up later
-    AutoloadClassMap = Config::GetIFastMap(ini, config, "AutoloadMap.class");
-    AutoloadFuncMap = Config::GetIFastMap(ini, config, "AutoloadMap.function");
-    AutoloadConstMap = Config::GetFastMap(ini, config, "AutoloadMap.constant");
-    AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
-  }
-
- Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
+  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
 
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
@@ -177,9 +177,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   {
     // Hack
-    Config::Bind(RuntimeOption::CheckIntOverflow, ini, config,
-                 "Hack.Lang.CheckIntOverflow",
-                 RuntimeOption::CheckIntOverflow);
     Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys",
                  RuntimeOption::StrictArrayFillKeys);
@@ -192,6 +189,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
+
+  Config::Bind(ForceEnableSymbolRefs, ini, config,
+               "ForceEnableSymbolRefs", false);
 
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
@@ -207,11 +207,18 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
   }
 
+  Config::Bind(ConstFoldFileBC, ini, config,
+               "ConstFoldFileBC", ConstFoldFileBC);
+
   Config::Bind(ParserAsyncCleanup, ini, config,
                "ParserAsyncCleanup", ParserAsyncCleanup);
+  Config::Bind(ParserOptimisticStore, ini, config,
+               "ParserOptimisticStore", ParserOptimisticStore);
 
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);
+  Config::Bind(ExternWorkerFeaturesFile, ini, config,
+               "ExternWorker.FeaturesFile", ExternWorkerFeaturesFile);
   // Kill switch for extern-worker. Disable all implementations except
   // the builtin one.
   Config::Bind(ExternWorkerForceSubprocess, ini, config,
@@ -224,6 +231,31 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerCleanup);
   Config::Bind(ExternWorkerWorkingDir, ini, config, "ExternWorker.WorkingDir",
                ExternWorkerWorkingDir);
+  Config::Bind(ExternWorkerUseRichClient, ini, config,
+               "ExternWorker.UseRichClient", ExternWorkerUseRichClient);
+  Config::Bind(ExternWorkerUseZippyRichClient, ini, config,
+               "ExternWorker.UseZippyRichClient",
+               ExternWorkerUseZippyRichClient);
+  Config::Bind(ExternWorkerUseP2P, ini, config, "ExternWorker.UseP2P",
+               ExternWorkerUseP2P);
+  Config::Bind(ExternWorkerCasConnectionCount, ini, config,
+               "ExternWorker.CasConnectionCount",
+               ExternWorkerCasConnectionCount);
+  Config::Bind(ExternWorkerEngineConnectionCount, ini, config,
+               "ExternWorker.EngineConnectionCount",
+               ExternWorkerEngineConnectionCount);
+  Config::Bind(ExternWorkerAcConnectionCount, ini, config,
+               "ExternWorker.AcConnectionCount",
+               ExternWorkerAcConnectionCount);
+  Config::Bind(ExternWorkerVerboseLogging, ini, config,
+               "ExternWorker.VerboseLogging",
+               ExternWorkerVerboseLogging);
+  Config::Bind(ExternWorkerThrottleRetries, ini, config,
+               "ExternWorker.ThrottleRetries",
+               ExternWorkerThrottleRetries);
+  Config::Bind(ExternWorkerThrottleBaseWaitMSecs, ini, config,
+               "ExternWorker.ThrottleBaseWaitMSecs",
+               ExternWorkerThrottleBaseWaitMSecs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

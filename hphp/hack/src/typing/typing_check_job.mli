@@ -11,7 +11,7 @@ val type_fun :
   Provider_context.t ->
   Relative_path.t ->
   string ->
-  (Tast.def * Typing_inference_env.t_global_with_pos) option
+  (Tast.def list * Typing_inference_env.t_global_with_pos) option
 
 val type_class :
   Provider_context.t ->

@@ -1,5 +1,5 @@
 <?hh
 
   class test {
-    static $foo = 27;
+    public static $foo = 27;
   }

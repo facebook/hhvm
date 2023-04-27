@@ -99,11 +99,11 @@ let union_errs env errs =
       (env, Error (ty_actual, ty_expect)))
   @@ fold_errs errs
 
-(*  Here we have a function returns the updated environment, a local type
-    and results indicating type errors for both and index expression and
-    the rhs expression of an assignment *)
+(* Here we have a function returns the updated environment, a local type
+   and results indicating type errors for both and index expression and
+   the rhs expression of an assignment *)
 let apply_rules_with_array_index_value_ty_mismatches
-    ?(ignore_type_structure = false) env ty f =
+    ?(ignore_type_structure = false) ?(preserve_supportdyn = true) env ty f =
   let rec iter ~is_nonnull env ty =
     let (env, ety) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
@@ -127,13 +127,24 @@ let apply_rules_with_array_index_value_ty_mismatches
       let (env, val_ty_mismatch) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
+    | (_, Tnewtype (cid, _, _))
+      when String.equal cid SN.Classes.cSupportDyn
+           && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
+      (* If we are under_dynamic_assumptions, we might want to take advantage of
+         the dynamic in supportdyn<t>, so don't break it apart as in the next case. *)
+      default ()
     (* Preserve supportdyn<_> across operation *)
     | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
       ->
       let (env, (ty, arr_errs, key_errs, val_errs)) =
         iter ~is_nonnull env bound
       in
-      let (env, ty) = Typing_utils.make_supportdyn r env ty in
+      let (env, ty) =
+        if preserve_supportdyn then
+          Typing_utils.make_supportdyn r env ty
+        else
+          (env, ty)
+      in
       (env, (ty, arr_errs, key_errs, val_errs))
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
@@ -210,8 +221,8 @@ let apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty f =
   in
   (env, (ty, idx_ty_mismatch, val_ty_mismatch))
 
-(*  Here we have a function returns the updated environment, a local type
-    and a result indicating type errors for the rhs of an assignment *)
+(* Here we have a function returns the updated environment, a local type
+   and a result indicating type errors for the rhs of an assignment *)
 let apply_rules_with_ty_mismatch ?ignore_type_structure env ty f =
   let g env ty =
     let (env, (ty, ty_mismatch)) = f env ty in

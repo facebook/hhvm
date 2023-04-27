@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a6e10462d688c37f85b6f41df57ce527>>
+// @generated SignedSource<<63b5781d77a345d0550d3f22669c709c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,17 +11,15 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::ConstDecl;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
-
-pub use typing_defs::ConstDecl;
 
 #[derive(
     Clone,
@@ -38,6 +36,8 @@ pub use typing_defs::ConstDecl;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "scc_")]
 #[repr(C)]
 pub struct ShallowClassConst<'a> {
     pub abstract_: oxidized::typing_defs::ClassConstKind,
@@ -73,6 +73,8 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowClassConst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "stc_")]
 #[repr(C)]
 pub struct ShallowTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -103,13 +105,15 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "sp_")]
 #[repr(C)]
 pub struct ShallowProp<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: typing_defs::PosId<'a>,
     pub xhp_attr: Option<XhpAttr>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: Option<&'a Ty<'a>>,
+    pub type_: &'a Ty<'a>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub flags: prop_flags::PropFlags,
 }
@@ -131,6 +135,8 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowProp<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "sm_")]
 #[repr(C)]
 pub struct ShallowMethod<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -147,6 +153,9 @@ pub struct ShallowMethod<'a> {
 impl<'a> TrivialDrop for ShallowMethod<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+pub type XhpEnumValues<'a> = s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>;
+
 #[derive(
     Clone,
     Debug,
@@ -162,6 +171,8 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,
@@ -187,6 +198,7 @@ pub struct ShallowClass<'a> {
     pub xhp_attr_uses: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
+    pub xhp_marked_empty: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub req_extends: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -214,16 +226,22 @@ pub struct ShallowClass<'a> {
     pub user_attributes: &'a [&'a UserAttribute<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_type: Option<&'a EnumType<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub docs_url: Option<&'a str>,
 }
 impl<'a> TrivialDrop for ShallowClass<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShallowClass<'arena>);
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type FunDecl<'a> = FunElt<'a>;
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type ClassDecl<'a> = ShallowClass<'a>;
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type TypedefDecl<'a> = TypedefType<'a>;
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type ModuleDecl<'a> = typing_defs::ModuleDefType<'a>;
 
 #[derive(
@@ -242,6 +260,7 @@ pub type ModuleDecl<'a> = typing_defs::ModuleDefType<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum Decl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

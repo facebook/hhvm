@@ -2,4 +2,4 @@
 
 <<file: __EnableUnstableFeatures('modules')>>
 
-module :lol {}
+new module :lol {}

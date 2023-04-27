@@ -3,28 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
-use ::anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
-use structopt::StructOpt;
+use ::anyhow::Context;
+use ::anyhow::Result;
+use clap::Parser;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use relative_path::RelativePath;
+use serde::Deserialize;
+use serde::Serialize;
 use walkdir::WalkDir;
 
-use oxidized::relative_path::{self, RelativePath};
-use oxidized_by_ref::direct_decl_parser::Decls;
-
-#[derive(StructOpt, Clone, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Clone, Debug)]
 pub struct Opts {
     path: PathBuf,
 }
 
 fn main() -> ::anyhow::Result<()> {
-    let opts = Opts::from_args();
+    let opts = Opts::try_parse()?;
     let mut path = std::env::current_dir().expect("current path is none");
     path.push(opts.path);
     let mut results: Vec<Result<Profile, Error>> = vec![];
@@ -42,12 +41,11 @@ fn main() -> ::anyhow::Result<()> {
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
 
         let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls(
-            Default::default(),
+        let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
+            &Default::default(),
             relative_path,
             &content,
             &arena,
-            None,
         );
         let decls = parsed_file.decls;
 

@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use lazy_static::lazy_static;
 use std::collections::BTreeMap;
+
+use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref TYPES_MAP: BTreeMap<String, String> = make_map(TYPES);
@@ -24,6 +25,7 @@ pub static TYPES: &[&str] = &[
     "AwaitAllWaitHandle",
     "classname",
     "Collection",
+    "ConcurrentWaitHandle",
     "ConditionWaitHandle",
     "Container",
     "darray",
@@ -54,7 +56,6 @@ pub static TYPES: &[&str] = &[
     "SleepWaitHandle",
     "StaticWaitHandle",
     "supportdyn",
-    "supportdynamic",
     "Traversable",
     "typename",
     "TypeStructure",
@@ -102,11 +103,12 @@ static FUNCS: &[&str] = &[
     "meth_caller",
     "objprof_get_data",
     "objprof_get_paths",
-    "objprof_get_strings",
+    "package_exists",
     "server_warmup_status",
     "thread_mark_stack",
     "thread_memory_stats",
     "type_structure",
+    "type_structure_for_alias",
     "varray",
     "vec",
     "xenon_get_data",

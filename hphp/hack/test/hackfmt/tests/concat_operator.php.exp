@@ -21,7 +21,6 @@ $str = $first.
   $eleventh.
   $twelfth;
 
-
 $str = $one.$two + $three;
 
 function_call(

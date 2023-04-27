@@ -68,8 +68,6 @@ module Dep = struct
           add local (Fake.make_id x y) acc
         | Class_get ((_, _, x), CGstring (_, y), _) ->
           add local (Fake.make_static_id x y) acc
-        | Class_get _ ->
-          failwith "Dynamic Class_get should never occur after naming"
         | _ -> parent#on_expr acc e
     end
 
@@ -93,7 +91,6 @@ end = struct
       Some (Local_id.to_string (Fake.make_id x y))
     | Class_get ((_, _, x), CGstring (_, y), _) ->
       Some (Local_id.to_string (Fake.make_static_id x y))
-    | Class_get _ -> failwith "This case should never occur after naming"
     | _ -> None
 
   let visitor =
@@ -102,16 +99,22 @@ end = struct
 
       method! on_expr acc ((_, _, e_) as e) =
         match e_ with
-        | Binop (Ast_defs.Eq _, (_, p, List el), x2) ->
+        | Binop Aast.{ bop = Ast_defs.Eq _; lhs = (_, p, List el); rhs = x2 } ->
           List.fold_left
             ~f:
               begin
                 fun acc e ->
-                this#on_expr acc ((), p, Binop (Ast_defs.Eq None, e, x2))
+                  this#on_expr
+                    acc
+                    ( (),
+                      p,
+                      Binop Aast.{ bop = Ast_defs.Eq None; lhs = e; rhs = x2 }
+                    )
               end
             ~init:acc
             el
-        | Binop (Ast_defs.Eq _, x1, x2) -> this#on_assign acc x1 x2
+        | Binop Aast.{ bop = Ast_defs.Eq _; lhs; rhs } ->
+          this#on_assign acc lhs rhs
         | _ -> parent#on_expr acc e
 
       method on_assign acc (_, _, e1) e2 =
@@ -119,12 +122,11 @@ end = struct
           (local_to_string e1)
           ~f:
             begin
-              fun s ->
-              Dep.expr s acc e2
+              (fun s -> Dep.expr s acc e2)
             end
           ~default:acc
 
-      method! on_efun acc _ _ = acc
+      method! on_efun acc _ = acc
 
       method! on_lfun acc _ _ = acc
     end
@@ -152,8 +154,8 @@ end = struct
     SMap.fold
       begin
         fun k _ (visited, current_max) ->
-        let (visited, n) = key aliases visited k in
-        (visited, max n current_max)
+          let (visited, n) = key aliases visited k in
+          (visited, max n current_max)
       end
       aliases
       (SMap.empty, 0)

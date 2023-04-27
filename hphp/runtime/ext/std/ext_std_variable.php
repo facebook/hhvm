@@ -59,8 +59,8 @@ function is_scalar(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is an array.
  */
-<<__IsFoldable, __Native, __Pure>>
-function is_array(<<__MaybeMutable>> readonly mixed $var): bool;
+<<__IsFoldable, __Native>>
+function is_array(readonly mixed $var): bool;
 
 /* Finds whether the given variable is an object.
  */
@@ -150,7 +150,7 @@ function var_export_pure(mixed $expression)[]: mixed;
 /* Dumps a string representation of an internal zend value to output.
  */
 <<__Native("NoFCallBuiltin")>>
-function var_dump(readonly mixed $arg1, ...$argv): void;
+function var_dump(readonly mixed $arg1, mixed... $argv): void;
 
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
@@ -175,7 +175,10 @@ function serialize(mixed $value): string;
 function serialize_pure(mixed $value)[]: string;
 
 <<__Native>>
-function unserialize(string $str, darray $options = darray[]): mixed;
+function unserialize(
+  string $str,
+  darray<string, mixed> $options = darray[],
+): mixed;
 
 /**
  * Pure variant of unserialize.
@@ -183,7 +186,10 @@ function unserialize(string $str, darray $options = darray[]): mixed;
  * will result in coeffect violations.
  */
 <<__Native>>
-function unserialize_pure(string $str, darray $options = darray[])[]: mixed;
+function unserialize_pure(
+  string $str,
+  darray<string, mixed> $options = darray[],
+)[]: mixed;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
  * you disabled register_globals, but would like to see some variables in the
@@ -235,11 +241,11 @@ namespace HH {
   <<__Native, __IsFoldable>>
   function is_keyset(readonly mixed $var)[]: bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_varray(<<__MaybeMutable>> readonly mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_varray(readonly mixed $var): bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_darray(<<__MaybeMutable>> readonly mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_darray(readonly mixed $var): bool;
 
   <<__Native, __IsFoldable>>
   function is_any_array(readonly mixed $var)[]: bool;
@@ -258,7 +264,7 @@ namespace HH {
    * from 0 to N-1, in that order.
    */
   <<__Native, __IsFoldable>>
-  function is_list_like(readonly AnyArray $var)[]: bool;
+  function is_list_like(readonly AnyArray<arraykey, mixed> $var)[]: bool;
 
   <<__Native, __IsFoldable>>
   function is_meth_caller(readonly mixed $var)[]: bool;
@@ -285,7 +291,10 @@ namespace HH {
   *                    serialized data to leave HHVM process.
   */
   <<__Native, __IsFoldable>>
-  function serialize_with_options(mixed $value, dict $options = dict[]): string;
+  function serialize_with_options(
+    mixed $value,
+    dict<string, mixed> $options = dict[],
+  ): string;
 
   /*
    * This function returns an array of an object's properties in the same manner
@@ -295,8 +304,10 @@ namespace HH {
    * throwing an exception
    */
   <<__Native>>
-  function object_prop_array(object $obj,
-                             bool $ignore_late_init = false)[]: darray;
+  function object_prop_array(
+    \object $obj,
+    bool $ignore_late_init = false,
+  )[]: darray<string, mixed>;
 
   /*
    * Return true if the <<__LateInit>> property (with name $prop) on the given
@@ -304,8 +315,8 @@ namespace HH {
    * accessed). Throws InvalidArgumentException if the property does not exist
    * or is inaccessible in the current context.
    */
-  <<__Native, NoDoc>>
-  function is_late_init_prop_init(object $obj, string $prop): bool;
+  <<__Native, \NoDoc>>
+  function is_late_init_prop_init(\object $obj, string $prop): bool;
 
   /*
    * Return true if the <<__LateInit>> static property (with name $prop) on the
@@ -314,7 +325,7 @@ namespace HH {
    * classname, if the static property does not exist, or if the static property
    * is inaccessible in the current context.
    */
-  <<__Native, NoDoc>>
+  <<__Native, \NoDoc>>
   function is_late_init_sprop_init(string $cls, string $prop): bool;
 
   /*

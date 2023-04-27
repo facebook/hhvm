@@ -28,11 +28,7 @@
 
 #include <cstddef>
 
-#ifndef _MSC_VER
 #include <unwind.h>
-#else
-#include "hphp/util/unwind-itanium-msvc.h"
-#endif
 
 namespace HPHP {
 
@@ -130,4 +126,3 @@ void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

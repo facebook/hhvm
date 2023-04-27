@@ -1,6 +1,6 @@
 <?hh
 
-type MyAlias = shape('foo'=>E);
+type MyAlias = shape('foo'=>DoesNotExist5);
 
 <<__EntryPoint>>
 function entrypoint_ReflectionTypeAlias5(): void {

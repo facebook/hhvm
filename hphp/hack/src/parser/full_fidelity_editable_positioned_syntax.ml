@@ -33,7 +33,7 @@ module Value = struct
   type t =
     | Positioned of SourceData.t
     | Synthetic
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   let from_positioned_syntax syntax =
     Positioned (SourceData.from_positioned_syntax syntax)
@@ -213,7 +213,7 @@ module ValueBuilder = struct
 end
 
 (* TODO: This code is duplicated in the positioned syntax; consider pulling it
-out into its own module. *)
+   out into its own module. *)
 (* Takes a node and an offset; produces the descent through the parse tree
    to that position. *)
 let parentage node position =
@@ -250,7 +250,5 @@ let is_synthetic node =
 include Syntax.WithValueBuilder (ValueBuilder)
 
 let rust_parse _ _ = failwith "not implemented"
-
-let rust_parse_with_verify_sc _ _ = failwith "not implemented"
 
 let rust_parser_errors _ _ _ = failwith "not implemented"

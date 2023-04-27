@@ -5,7 +5,7 @@ function incr(int $x): int {
 }
 
 function f(): nonnull {
-  return fun('incr');
+  return incr<>;
 }
 
 function cast_function((function(int): int) $f): nonnull {

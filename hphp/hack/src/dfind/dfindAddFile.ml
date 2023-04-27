@@ -142,9 +142,9 @@ and add_new_file links env path =
         SSet.fold
           begin
             fun file all_files ->
-            match SMap.find_opt file env.dirs with
-            | Some sub_dir -> SSet.union sub_dir all_files
-            | None -> SSet.add file all_files
+              match SMap.find_opt file env.dirs with
+              | Some sub_dir -> SSet.union sub_dir all_files
+              | None -> SSet.add file all_files
           end
           files
           prev_files

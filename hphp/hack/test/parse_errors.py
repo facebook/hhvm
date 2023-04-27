@@ -68,6 +68,8 @@ def same_error(line: str, multiple_error_file: bool) -> bool:
         return not end_of_file(line)
 
 
+# parse a "plain" formatted error. The expected format is emittted by
+# Errors.to_string (OCaml) or Error::display_plain() (Rust).
 def parse_error(output_file: IO[str], multiple_error_file: bool) -> List[Error]:
     errors = []
     line = output_file.readline()

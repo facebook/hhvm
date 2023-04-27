@@ -3,7 +3,6 @@
   (flags
    (:standard -w @a-4-29-35-41-42-44-45-48-50-70 \ -strict-sequence))))
 
-
 (executable
  (name hh_single_type_check)
  (modules hh_single_type_check)
@@ -12,6 +11,7 @@
   (:standard
    (:include dune_config/ld-opts.sexp)))
  (libraries
+  camlp-streams
   ifc
   ifc_lib
   client_color_file
@@ -19,20 +19,29 @@
   client_find_refs_print
   client_get_definition
   client_highlight_refs
+  count_imprecise_types
   decl_parser_options
   default_injector_config
+  dep_hash_to_symbol
   direct_decl_parser
   direct_decl_utils
   gen_deps
   glean_dependency_graph_convert
   hhi
+  hhi_get
   naming_ast_print
   memtrace
+  package
   parent
+  rust_provider_backend_stubs
+  refactor_sd
+  remove_dead_unsafe_casts
+  sdt_analysis
   server_coverage_metric_utils
   server_color_file
   server_env
   server_env_build
+  server_code_actions_services
   server_file_outline
   server_find_refs
   server_global_inference
@@ -44,9 +53,9 @@
   tast_typecheck
   temp_file
   typing
-  typing_serialization
   utils_core
-  utils_multifile))
+  utils_multifile
+  write_symbol_info))
 
 (executable
  (name hh_single_ai)
@@ -161,6 +170,8 @@
   default_injector_config
   direct_decl_parser
   file_provider
+  ocamlrep_marshal_ffi
+  package
   ppxlib.print_diff
   provider_context
   provider_utils
@@ -190,6 +201,24 @@
    (:include dune_config/ld-opts.sexp)))
  (libraries core_kernel str parser_schema collections utils_core))
 
+ (executable
+  (name hh_single_fanout)
+  (modules hh_single_fanout)
+  (modes exe byte_complete)
+  (link_flags
+   (:standard
+    (:include dune_config/ld-opts.sexp)))
+ (libraries
+    decl_redecl_service
+    default_injector_config
+    dep_hash_to_symbol
+    direct_decl_service
+    naming_table
+    typing_check_job
+    typing_deps)
+  (preprocess
+    (pps ppx_deriving.std)))
+
 (alias
  (name exe)
  (deps
@@ -202,6 +231,7 @@
   hh_single_type_check.exe
   hh_single_complete.exe
   hh_single_ai.exe
+  hh_single_fanout.exe
   ai/zoncolan.exe))
 
 (alias
@@ -226,4 +256,5 @@
   hh_server.bc.exe
   hh_single_type_check.bc.exe
   hh_single_complete.bc.exe
+  hh_single_fanout.bc.exe
   hh_single_ai.bc.exe))

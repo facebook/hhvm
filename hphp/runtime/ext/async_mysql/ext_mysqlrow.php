@@ -17,14 +17,14 @@
 
 interface MysqlRow extends
   Countable,
-  IteratorAggregate<?mixed>,
-  \HH\KeyedTraversable<string, ?mixed> {
-  public function at(mixed $field): ?mixed;
+  IteratorAggregate<mixed>,
+  \HH\KeyedTraversable<string, mixed> {
+  public function at(mixed $field): mixed;
   public function getFieldAsInt(mixed $field): int;
   public function getFieldAsDouble(mixed $field): float;
   public function getFieldAsString(mixed $field): string;
   public function fieldType(mixed $field): int;
   public function isNull(mixed $field): bool;
-  public function count(): int;
-  public function getIterator(): \HH\KeyedIterator<string, ?mixed>;
+  public function count()[]: int;
+  public function getIterator(): \HH\KeyedIterator<string, mixed>;
 }

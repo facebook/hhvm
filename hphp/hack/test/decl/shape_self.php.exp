@@ -6,8 +6,9 @@
        sc_module = None; sc_name = ([3:7-16], "\\TestClass");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:16-19], "KEY");
@@ -19,7 +20,7 @@
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type =
                (Rhint ([6:27-8:4]),
-                (Tshape (Typing_defs_core.Closed_shape,
+                (Tshape ((Rhint ([Pos.none]), (Tunion [])),
                    { (Typing_defs_core.TSFclass_const (
                         ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
                      { sft_optional = false;
@@ -31,7 +32,5 @@
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }))
+       sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

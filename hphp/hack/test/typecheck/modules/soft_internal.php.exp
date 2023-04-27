@@ -1,0 +1,10 @@
+File "soft_internal.php--file2.php", line 8, characters 3-16:
+<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
+File "soft_internal.php--file2.php", line 11, characters 3-16:
+<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
+File "soft_internal.php--file2.php", line 13, characters 5-18:
+<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
+File "soft_internal.php--file2.php", line 16, characters 5-18:
+<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
+File "soft_internal.php--file2.php", line 18, characters 5-18:
+<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])

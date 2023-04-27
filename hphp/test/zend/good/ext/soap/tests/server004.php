@@ -6,7 +6,7 @@ function Sub($x,$y) {
   return $x-$y;
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
 $server->addFunction(varray["Sub","Add"]);
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -14,10 +14,10 @@ open Hh_prelude
 module RP = Relative_path
 
 (* For linting from stdin, we pass the file contents in directly because there's
-no other way to get ahold of the contents of stdin from a worker process. But
-when linting from disk, we want each individual worker to read the file off disk
-by itself, so that we don't need to read all the files at the beginning and hold
-them all in memory. *)
+   no other way to get ahold of the contents of stdin from a worker process. But
+   when linting from disk, we want each individual worker to read the file off disk
+   by itself, so that we don't need to read all the files at the beginning and hold
+   them all in memory. *)
 type lint_target = {
   filename: RP.t;
   contents: string option;
@@ -29,17 +29,18 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
     ~f:
       begin
         fun acc { filename; contents } ->
-        let (errs, ()) =
-          Lints_core.do_ (fun () ->
-              Errors.ignore_ (fun () ->
-                  let contents =
-                    match contents with
-                    | Some contents -> contents
-                    | None -> Sys_utils.cat (Relative_path.to_absolute filename)
-                  in
-                  Linting_main.lint tcopt filename contents))
-        in
-        errs @ acc
+          let (errs, ()) =
+            Lints_core.do_ (fun () ->
+                Errors.ignore_ (fun () ->
+                    let contents =
+                      match contents with
+                      | Some contents -> contents
+                      | None ->
+                        Sys_utils.cat (Relative_path.to_absolute filename)
+                    in
+                    Linting_main.lint tcopt filename contents))
+          in
+          errs @ acc
       end
     ~init:[]
 

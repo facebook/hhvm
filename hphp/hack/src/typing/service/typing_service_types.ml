@@ -23,6 +23,8 @@ type workitem =
 type remote_computation_payload = {
   nonce: string;
   payload: workitem BigList.t;
+  changed_files: Relative_path.t list option; [@opaque]
+  dirty_files: (Relative_path.t * string option) list; [@opaque]
 }
 [@@deriving show]
 
@@ -58,8 +60,6 @@ let make_typing_result () =
 let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
-  (* The Measure API is mutating, but we want to be functional, so we'll serialize+deserialize
-     This might sound expensive, but the actual implementation makes it cheap. *)
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
     dep_edges =
@@ -87,6 +87,7 @@ type job_progress = {
 type check_info = {
   init_id: string;
   check_reason: string;
+  log_errors: bool;
   recheck_id: string option;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
@@ -138,6 +139,8 @@ module type LocalServerApi = sig
   *)
   val update_state : state_filename:string -> check_id:string option -> unit
 
+  val upload_naming_table : nonce:string -> unit
+
   (* Tells the server to save the naming table state to a given
      destination path.
   *)
@@ -156,18 +159,18 @@ module type LocalServerApi = sig
   (* Packages the files changed since the mergebase into a single file.
     *)
   val write_changed_files : string list -> destination_path:string -> unit
+
+  (* Gather the filepaths changed since the mergebase and load their content *)
+  val load_changed_files : string list -> (Relative_path.t * string option) list
 end
 
 type delegate_env = {
-  (* The amount of time to wait between heartbeat checks, in seconds *)
-  heartbeat_period: int;
   init_id: string;
-  (* Whether to use mergebase to calculate changed files or not *)
-  use_mergebase: bool;
   mergebase: Hg.hg_rev option;
   num_workers: int;
   recheck_id: string;
   nonce: Int64.t;
+  tenant: string;
   root: string;
   tcopt: TypecheckerOptions.t;
   (* This module exposes to the controller the limited set of operations that
@@ -182,7 +185,11 @@ type delegate_env = {
   version_specifier: string option;
   (* The minimum log level workers should be logging at *)
   worker_min_log_level: Hh_logger.Level.t;
-  (* Optional transport channel used by remote type checking. None means default. *)
-  transport_channel: string option;
   naming_table_manifold_path: string option;
+  (* Function that returns a future of result of the manifold path and changed_files list.
+     This largely exists to allow unit tests to run without making saved state calls to watchman.
+  *)
+  saved_state_data_loader:
+    (unit -> (string option * Relative_path.t list, string) result Future.t)
+    option;
 }

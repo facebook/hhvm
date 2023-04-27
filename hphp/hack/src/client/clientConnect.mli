@@ -6,10 +6,6 @@
  *
  *)
 
-(** This callback is typically provided for env.progress_callback; it prints data with
-a spinner to stderr. *)
-val tty_progress_reporter : unit -> string option -> unit
-
 (** Used solely as an argument to [connect] *)
 type env = {
   root: Path.t;
@@ -21,10 +17,8 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
-  log_on_slow_monitor_connect: bool;
   remote: bool;
-  ai_mode: string option;
-  progress_callback: (string option -> unit) option;
+  progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
   save_64bit: string option;
@@ -47,7 +41,7 @@ type conn = {
   t_sent_connection_type: float;
   channels: Timeout.in_channel * out_channel;
   server_specific_files: ServerCommandTypes.server_specific_files;
-  conn_progress_callback: (string option -> unit) option;
+  conn_progress_callback: string option -> unit;
   conn_root: Path.t;
   conn_deadline: float option;
   from: string;
@@ -71,3 +65,10 @@ val rpc_with_retry :
   desc:string ->
   'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t ->
   'a Lwt.t
+
+(**For batch commands, retries each result in turn **)
+val rpc_with_retry_list :
+  (unit -> conn Lwt.t) ->
+  desc:string ->
+  'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t ->
+  'a list Lwt.t

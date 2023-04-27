@@ -27,9 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
 #include <cxxabi.h>
-#endif
 
 #if defined USE_FOLLY_SYMBOLIZER
 

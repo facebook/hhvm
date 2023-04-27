@@ -1,0 +1,3 @@
+--inputs=__DIR__/namespacebar.php.inc
+--inputs=__DIR__/namespacefoo.php.inc
+--inputs=__DIR__/traits.inc

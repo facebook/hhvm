@@ -44,6 +44,11 @@ let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
 [@@@warning "+32"]
 
+type expr_tree_env = {
+  dsl: Aast.hint;
+  outer_locals: Typing_local_types.t;
+}
+
 (** See the .mli file for the documentation of fields. *)
 type env = {
   fresh_typarams: SSet.t;
@@ -52,9 +57,9 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_expr_tree: bool;
+  in_expr_tree: expr_tree_env option;
   inside_constructor: bool;
-  in_support_dynamic_type_method_check: bool;
+  checked: Tast.check_status;
   tracing_info: Decl_counters.tracing_info option;
   tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
@@ -62,6 +67,7 @@ type env = {
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
+  loaded_packages: SSet.t;
 }
 
 (** See the .mli file for the documentation of fields. *)
@@ -70,7 +76,7 @@ and genv = {
   callable_pos: Pos.t;
   readonly: bool;
   return: Typing_env_return_info.t;
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
   condition_types: decl_ty SMap.t;
   parent: (string * decl_ty) option;
   self: (string * locl_ty) option;
@@ -79,9 +85,10 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
+  package_info: Package.Info.t;
 }
 
 let initial_local tpenv =
@@ -97,10 +104,10 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;
     in_try = false;
-    in_expr_tree = false;
+    in_expr_tree = None;
     inside_constructor = false;
-    in_support_dynamic_type_method_check = false;
-    decl_env = { Decl_env.mode; droot; ctx };
+    checked = Tast.COnce;
+    decl_env = { Decl_env.mode; droot; droot_member = None; ctx };
     tracing_info =
       Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });
     genv =
@@ -117,8 +124,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
                 et_enforced = Unenforced;
               };
             return_disposable = false;
-            return_explicit = false;
-            return_dynamically_callable = false;
           };
         params = Local_id.Map.empty;
         condition_types = SMap.empty;
@@ -129,9 +134,10 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_kind = Ast_defs.FSync;
         fun_is_ctor = false;
         file;
-        this_module = None;
+        current_module = None;
         this_internal = false;
         this_support_dynamic_type = false;
+        package_info = Provider_context.get_package_info ctx;
       };
     tpenv = Type_parameter_env.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
@@ -139,6 +145,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     allow_wildcards = false;
     big_envs = ref [];
     fun_tast_info = None;
+    loaded_packages = SSet.empty;
   }
 
 let get_log_level env key =

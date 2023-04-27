@@ -16,13 +16,7 @@ type expand_typedef =
 
 val expand_typedef_ref : expand_typedef ref
 
-val expand_typedef :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+val expand_typedef : expand_typedef
 
 type sub_type =
   Typing_env_types.env ->
@@ -68,34 +62,22 @@ val is_sub_type_ref : is_sub_type_type ref
 val is_sub_type :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
-val is_sub_type_for_coercion_ref : is_sub_type_type ref
-
 val is_sub_type_for_union_ref :
-  (Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool)
+  (Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool)
   ref
 
 val is_sub_type_for_union_i_ref :
   (Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   Typing_defs.internal_type ->
   Typing_defs.internal_type ->
   bool)
   ref
 
 val is_sub_type_for_union :
-  Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
 val is_sub_type_for_union_i :
   Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   Typing_defs.internal_type ->
   Typing_defs.internal_type ->
   bool
@@ -118,7 +100,7 @@ val try_unwrap_class_type :
   * Typing_defs.decl_ty list)
   option
 
-val class_is_final_and_not_contravariant : Decl_provider.Class.t -> bool
+val class_is_final_and_invariant : Decl_provider.Class.t -> bool
 
 module HasTany : sig
   val check : Typing_defs.locl_ty -> bool
@@ -153,6 +135,10 @@ val localize :
   ety_env:Typing_defs.expand_env ->
   Typing_defs.decl_ty ->
   (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+
+val is_class_i : Typing_defs.internal_type -> bool
+
+val is_class : Typing_defs.locl_ty -> bool
 
 val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 
@@ -200,8 +186,17 @@ val is_tunion : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val is_tintersection : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
+val is_tyvar : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val is_opt_tyvar : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val is_tyvar_error : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
 val get_base_type :
-  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+  ?expand_supportdyn:bool ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty
 
 val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 
@@ -342,6 +337,16 @@ type simplify_unions =
 
 val simplify_unions_ref : simplify_unions ref
 
+type intersect_list =
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
+val intersect_list_ref : intersect_list ref
+
+val intersect_list : intersect_list
+
 val contains_tvar_decl : Typing_defs.decl_ty -> bool
 
 val contains_generic_decl : Typing_defs.decl_ty -> Pos_or_decl.t option
@@ -437,11 +442,6 @@ val tany : Typing_env_types.env -> Typing_defs.locl_phase Typing_defs.ty_
 val mk_tany :
   Typing_env_types.env -> Pos.t -> Typing_reason.locl_phase Typing_defs.ty
 
-val mk_tany_ :
-  Typing_env_types.env -> Pos_or_decl.t -> Typing_defs.locl_phase Typing_defs.ty
-
-val terr : Typing_env_types.env -> 'a Typing_defs.Reason.t_ -> 'a Typing_defs.ty
-
 val make_locl_subst_for_class_tparams :
   Decl_provider.Class.t ->
   Typing_defs.locl_ty list ->
@@ -463,6 +463,12 @@ val has_ancestor_including_req :
 val try_strip_dynamic :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty option
 
+val try_strip_dynamic_from_union :
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  Typing_defs.locl_ty list ->
+  Typing_defs.locl_ty option
+
 (* If input is dynamic | t or t | dynamic then return t,
  * otherwise return type unchanged. *)
 val strip_dynamic :
@@ -477,6 +483,50 @@ val make_supportdyn :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+val simple_make_supportdyn :
+  Typing_reason.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
+val make_supportdyn_decl_type :
+  Pos_or_decl.t ->
+  Typing_defs.Reason.decl_t ->
+  Typing_defs.decl_ty ->
+  Typing_defs.decl_ty
+
+(* Wrap ~ around a type, unless it is already a dynamic or a like type *)
+val make_like :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+
+(* Wrap ~ around a type if it is enforced. This is used for returns, property
+ * assignment, and default expression typing
+ *)
+val make_like_if_enforced :
+  Typing_env_types.env ->
+  Typing_defs.locl_possibly_enforced_ty ->
+  Typing_defs.locl_possibly_enforced_ty
+
 val is_capability : Typing_defs.locl_ty -> bool
 
 val is_capability_i : Typing_defs.internal_type -> bool
+
+val supports_dynamic :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  Typing_env_types.env * Typing_error.t option
+
+(* Return true if type definitely is a subtype of supportdyn<mixed> *)
+val is_supportdyn : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val strip_supportdyn :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  bool * Typing_env_types.env * Typing_defs.locl_ty
+
+val no_upper_bound :
+  include_sd_mixed:bool ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * bool

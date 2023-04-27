@@ -16,5 +16,5 @@ function test_eval($name, $f) {
 <<__EntryPoint>>
 function main() {
   test_eval('varray', varray[A::class, 'f1']);
-  test_eval('class_meth', HH\class_meth(A::class, 'f1'));
+  test_eval('class_meth', A::f1<>);
 }

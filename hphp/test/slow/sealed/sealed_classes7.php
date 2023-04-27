@@ -1,5 +1,7 @@
 <?hh
 
+namespace SealedClass7;
+
 <<__Sealed(SomeOtherTrait::class, SomeClass::class)>>
 trait SomeTrait {}
 

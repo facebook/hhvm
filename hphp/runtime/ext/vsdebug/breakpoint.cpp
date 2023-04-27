@@ -45,7 +45,7 @@ Breakpoint::Breakpoint(
     m_line(line),
     m_column(column),
     m_path(path),
-    m_filePath(boost::filesystem::path(path)),
+    m_filePath(std::filesystem::path(path)),
     m_function(""),
     m_hitCount(0) {
 
@@ -62,7 +62,7 @@ Breakpoint::Breakpoint(
     m_line(-1),
     m_column(-1),
     m_path(""),
-    m_filePath(boost::filesystem::path("")),
+    m_filePath(std::filesystem::path("")),
     m_function(function),
     m_hitCount(0) {
 
@@ -118,7 +118,7 @@ BreakpointManager::~BreakpointManager() {
 
 bool BreakpointManager::bpMatchesPath(
   const Breakpoint* bp,
-  const boost::filesystem::path& unitPath
+  const std::filesystem::path& unitPath
 ) {
   if (bp->m_type != BreakpointType::Source) {
     return false;
@@ -127,7 +127,7 @@ bool BreakpointManager::bpMatchesPath(
   // A breakpoint matches the specified path if the breakpoint
   // has an absolute path and the full file path matches exactly OR
   // the breakpoint has a relative path and the filenames match.
-  const auto bpPath = boost::filesystem::path(bp->m_path);
+  const auto bpPath = std::filesystem::path(bp->m_path);
   if (bpPath.is_absolute()) {
     return bp->m_path == unitPath.string();
   } else {
@@ -160,7 +160,7 @@ const std::unordered_set<int> BreakpointManager::getBreakpointIdsForPath(
   const std::string& unitPath
 ) const {
   std::unordered_set<int> ids;
-  const auto path = boost::filesystem::path(unitPath);
+  const auto path = std::filesystem::path(unitPath);
   for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
     if (bpMatchesPath(it->second, path)) {
       ids.insert(it->first);

@@ -1,0 +1,34 @@
+*** Testing shuffle() : with array containing heredoc strings ***
+
+-- with array of heredoc strings --
+bool(true)
+
+The output array is:
+vec(6) {
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+}
+
+-- with array having heredoc strings as keys --
+bool(true)
+
+The output array is:
+dict(6) {
+  [0]=>
+  string(8) "%*{heredoc%d}"
+  [1]=>
+  string(8) "%*{heredoc%d}"
+  [2]=>
+  string(8) "%*{heredoc%d}"
+  [3]=>
+  string(8) "%*{heredoc%d}"
+  [4]=>
+  string(8) "%*{heredoc%d}"
+  [5]=>
+  string(8) "%*{heredoc%d}"
+}
+Done

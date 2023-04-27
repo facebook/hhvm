@@ -1,8 +1,8 @@
 File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
-Invalid type hint `boolean`. Use `bool` instead (Parsing[1002])
+No such type `boolean`, did you mean `bool`? (Naming[2123])
 File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
 Unbound name: `boolean` (Naming[2049])
 File "use_boolean_instead_of_bool.php", line 11, characters 7-9:
 Class `Foo` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-File "use_boolean_instead_of_bool.php", line 12, characters 19-20:
-`$this->b` is not initialized.
+  File "use_boolean_instead_of_bool.php", line 12, characters 19-20:
+  `$this->b` is not initialized.

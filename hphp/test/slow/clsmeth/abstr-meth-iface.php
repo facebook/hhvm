@@ -6,7 +6,7 @@ interface I {
 
 <<__EntryPoint>>
 function main() {
-  $f = class_meth(I::class, 'foo');
+  $f = I::foo<>;
   echo "FAIL\n";
   var_dump($f());
 }

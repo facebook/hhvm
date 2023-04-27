@@ -125,12 +125,11 @@ let delta_tostring d =
 let lookup v e =
   match normenv e with
   | Botenv -> bottype
-  | M e ->
-    begin
-      match VMap.find_opt v e with
-      | None -> Top
-      | Some dt -> dt
-    end
+  | M e -> begin
+    match VMap.find_opt v e with
+    | None -> Top
+    | Some dt -> dt
+  end
 
 (* have to be careful about tops for missing vars so do something simple but a bit expensive *)
 let enventails e1 e2 =
@@ -187,12 +186,11 @@ let rec infer_exp e t =
 let tyminus dt1 dt2 =
   match dt2 with
   | Top -> bottype
-  | D ds2 ->
-    begin
-      match dt1 with
-      | Top -> Top (* hopelessly weak, but will do for now *)
-      | D ds1 -> D (TypeSet.diff ds1 ds2)
-    end
+  | D ds2 -> begin
+    match dt1 with
+    | Top -> Top (* hopelessly weak, but will do for now *)
+    | D ds1 -> D (TypeSet.diff ds1 ds2)
+  end
 
 let tyintersect dt1 dt2 =
   match (dt1, dt2) with
@@ -287,16 +285,16 @@ let c6 =
     (Cseq (Cseq (Cass ("x", Etrue), Cbreak), Cass ("y", Eplus (Ev "x", En 1))))
 
 (* example needing fixpoints, due to @ajk
-  $x = 0;
-  $y = 1;
-  $z = 2;
-  for ($i = 0; $i < 3; $i++) {
-    $x = $y;
-    $y = $z;
-    $z = true;
-  }
-yields:
-{skip=<z:int|bool,y:int|bool,x:int|bool,i:int,> break=Botenv continue=Botenv}
+     $x = 0;
+     $y = 1;
+     $z = 2;
+     for ($i = 0; $i < 3; $i++) {
+       $x = $y;
+       $y = $z;
+       $z = true;
+     }
+   yields:
+   {skip=<z:int|bool,y:int|bool,x:int|bool,i:int,> break=Botenv continue=Botenv}
 *)
 let thebody =
   Cif

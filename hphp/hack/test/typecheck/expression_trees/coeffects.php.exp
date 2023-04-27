@@ -1,0 +1,12 @@
+File "coeffects.php", line 18, characters 3-5:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "coeffects.php", line 14, characters 16-17:
+  From this declaration, the context of this function body provides the capability set {}
+  File "coeffects.php", line 10, characters 10-12:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+File "coeffects.php", line 20, characters 16-18:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "coeffects.php", line 14, characters 16-17:
+  From this declaration, the context of this function body provides the capability set {}
+  File "coeffects.php", line 10, characters 10-12:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

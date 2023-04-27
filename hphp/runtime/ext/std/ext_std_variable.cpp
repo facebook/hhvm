@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -587,9 +586,10 @@ void HHVM_FUNCTION(parse_str,
 bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func = fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx = MemberLookupContext(func->cls(), func->moduleName());
   auto const val = obj->getPropIgnoreLateInit(ctx, name.get());
   if (!val) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -612,9 +612,10 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
       folly::sformat("Unknown class {}", clsName)
     );
   }
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func =fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx =  MemberLookupContext(func->cls(), func->unit()->moduleName());
   auto const lookup = cls->getSPropIgnoreLateInit(ctx, name.get());
   if (!lookup.val || !lookup.accessible) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -680,10 +681,11 @@ void StandardExtension::initVariable() {
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first, HH_first);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last, HH_last);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first_key, HH_first_key);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last_key, HH_last_key);
+  // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first", HH_first);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last", HH_last);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first_key", HH_first_key);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last_key", HH_last_key);
   HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
   HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
   HHVM_FALIAS(HH\\global_key_exists, HH_global_key_exists);

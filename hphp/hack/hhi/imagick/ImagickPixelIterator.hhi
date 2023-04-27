@@ -8,14 +8,13 @@
  *
  */
 
-class ImagickPixelIterator implements
-  KeyedTraversable<int, varray<ImagickPixel>>,
-  Iterator<varray<ImagickPixel>> {
+class ImagickPixelIterator
+  implements
+    KeyedTraversable<int, varray<ImagickPixel>>,
+    Iterator<varray<ImagickPixel>> {
 
   // Methods
-  public static function getPixelIterator(
-    Imagick $wand,
-  ): ImagickPixelIterator;
+  public static function getPixelIterator(Imagick $wand): ImagickPixelIterator;
   public static function getPixelRegionIterator(
     Imagick $wand,
     int $x,

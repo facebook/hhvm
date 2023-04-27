@@ -5,8 +5,10 @@
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(
     Clone,
@@ -24,10 +26,7 @@ use serde::{Deserialize, Serialize};
 pub struct Lazy<T>(pub T);
 
 impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         unimplemented!()
     }
 }

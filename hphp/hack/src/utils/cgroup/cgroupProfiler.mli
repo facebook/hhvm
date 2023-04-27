@@ -7,10 +7,10 @@
  *)
 
 (* The CgroupProfiler module is to help us keep track of how cgroup
-memory usage evolves during the various steps of work done by hh_server.
+   memory usage evolves during the various steps of work done by hh_server.
 
-It helps to group steps into groups. An example step-group is "init",
-which is made up of steps "update naming table" then "update depgraph". *)
+   It helps to group steps into groups. An example step-group is "init",
+   which is made up of steps "update naming table" then "update depgraph". *)
 
 (** Represents a step-group that's underway; created by [step_group] *)
 type step_group

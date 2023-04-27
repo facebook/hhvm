@@ -76,22 +76,13 @@ let collect_in_decl =
       let acc = process_method env ty (p, SN.Members.__construct) in
       acc + super#on_New env c targs el unpacked_element ctor_annot
 
-    method! on_expr env ((_, pos, expr_) as expr) =
+    method! on_expr env ((_, _, expr_) as expr) =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
-        | T.Fun_id id ->
-          process_function (pos, SN.AutoimportedFunctions.fun_)
-          + process_function id
         | T.Method_caller ((p, cid), mid) ->
           process_function (p, SN.AutoimportedFunctions.meth_caller)
           + process_method_cid mid cid
-        | T.Smethod_id ((ty, p, _), mid) ->
-          process_function (p, SN.AutoimportedFunctions.class_meth)
-          + process_method env ty mid
-        | T.Method_id ((ty, p, _), mid) ->
-          process_function (p, SN.AutoimportedFunctions.inst_meth)
-          + process_method env ty mid
         | T.FunctionPointer (T.FP_id id, _targs) -> process_function id
         | T.FunctionPointer (T.FP_class_const ((ty, _, _cid), mid), _targs) ->
           process_method env ty mid
@@ -154,21 +145,20 @@ let handlers =
       {
         S.plus = collect_in_decl#plus;
         S.on_method = collect_in_decl#on_method_;
-        S.on_fun = collect_in_decl#on_fun_;
+        S.on_fun_def = collect_in_decl#on_fun_def;
       };
     S.get_state =
       begin
-        fun ctx fn ->
-        Ast_provider.get_ast ~full:true ctx fn
+        (fun ctx fn -> Ast_provider.get_ast ~full:true ctx fn)
       end;
     S.map_result =
       begin
         fun ctx ast refs ->
-        let ast = Some ast in
-        Results.elements refs
-        |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
-        |> List.sort ~compare
-        |> remove_duplicates_except_none ~compare
+          let ast = Some ast in
+          Results.elements refs
+          |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
+          |> List.sort ~compare
+          |> remove_duplicates_except_none ~compare
       end;
   }
 

@@ -167,6 +167,12 @@ struct Global {
     , vmRegsLiveness(analyzeVMRegLiveness(unit, reverse(rpoBlocks)))
   {}
 
+  bool changed() const {
+    return
+      instrsReduced || loadsRemoved || loadsRefined || jumpsRemoved ||
+      edgesOptimized || stackTeardownsOptimized;
+  }
+
   IRUnit& unit;
   BlockList rpoBlocks;
   AliasAnalysis ainfo;
@@ -193,6 +199,7 @@ struct Global {
   size_t loadsRemoved  = 0;
   size_t loadsRefined  = 0;
   size_t jumpsRemoved  = 0;
+  size_t edgesOptimized = 0;
   size_t stackTeardownsOptimized = 0;
 };
 
@@ -579,7 +586,7 @@ Flags handle_general_effects(Local& env,
         assertx(inst.src(0)->isA(TVec));
         if (!inst.src(1)->hasConstVal(TInt)) return std::nullopt;
         auto const idx = inst.src(1)->intVal();
-        auto const acls = canonicalize(AElemI { inst.src(0), idx });
+        auto const acls = canonicalize(AliasClass(AElemI { inst.src(0), idx }));
         auto const meta = env.global.ainfo.find(acls);
         if (!meta) return std::nullopt;
         if (!env.state.avail[meta->index]) return std::nullopt;
@@ -641,6 +648,7 @@ void handle_call_effects(Local& env,
 
   // Any stack locations modified by the callee are no longer valid
   store(env, effects.kills, nullptr);
+  store(env, effects.uninits, nullptr);
   store(env, effects.inputs, nullptr);
   store(env, effects.actrec, nullptr);
   store(env, effects.outputs, nullptr);
@@ -863,7 +871,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     // and so avoid value type-checks. Here, "dropConstVal" drops the precise
     // value of the end (for static bases) but preserves the pointee type.
     auto const iter = inst.extra<LdIterPos>()->iterId;
-    auto const end_cls = canonicalize(aiter_end(inst.src(0), iter));
+    auto const end_cls = canonicalize(AliasClass(aiter_end(inst.src(0), iter)));
     auto const end = find_tracked(env, env.global.ainfo.find(end_cls));
     if (end != nullptr) {
       auto const end_type = end->knownType.dropConstVal();
@@ -876,10 +884,33 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
     auto const extra = inst.extra<StIterType>();
     auto const value = iter_type_immediate(*extra);
-    auto const acls = canonicalize(aiter_type(inst.src(0), extra->iterId));
+    auto const acls = canonicalize(AliasClass(aiter_type(inst.src(0), extra->iterId)));
     store(env, acls, env.global.unit.cns(value));
     break;
   }
+  case EndInlining:
+    if (RO::EvalHHIRInliningAssertMemoryEffects) {
+      assertx(inst.src(0)->inst()->is(BeginInlining));
+      auto const fp = inst.src(0);
+      auto const callee = fp->inst()->extra<BeginInlining>()->func;
+
+      auto const assertDead = [&] (AliasClass acls, const char* what) {
+        auto const canon = canonicalize(acls);
+        auto const mustBeDead = env.global.ainfo.expand(canon);
+        always_assert_flog(
+          (env.state.avail & mustBeDead).none(),
+          "Detected that {} locations were still live after accounting for all "
+          "effects at an EndInlining position\n    Locations: {}\n",
+          what,
+          show(mustBeDead)
+        );
+      };
+
+      // Assert that all of the locals and iterators for this frame as well as
+      // the ActRec itself and the minstr state have been marked dead.
+      for_each_frame_location(fp, callee, assertDead);
+    }
+    break;
   default:
     assert_mem(env, inst);
     break;
@@ -1009,7 +1040,8 @@ SSATmp* resolve_phis(Global& env, Block* block, uint32_t alocID) {
 }
 
 template<class Flag>
-SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
+SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags,
+                      bool createPhis) {
   if (inst.dst() && !(flags.knownType <= inst.dst()->type())) {
     /*
      * It's possible we could assert the intersection of the types, but it's
@@ -1024,12 +1056,16 @@ SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
   if (val == nullptr) return nullptr;
   return val.match(
     [&] (SSATmp* t) { return t; },
-    [&] (Block* b) { return resolve_phis(env, b, flags.aloc); }
+    [&] (Block* b) -> SSATmp* {
+      if (!createPhis) return nullptr;
+      return resolve_phis(env, b, flags.aloc);
+    }
   );
 }
 
-bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
-  auto const resolved = resolve_value(env, inst, flags);
+bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags,
+                 bool createPhis) {
+  auto const resolved = resolve_value(env, inst, flags, createPhis);
   if (!resolved) return false;
 
   DEBUG_ONLY Opcode oldOp = inst.op();
@@ -1171,14 +1207,16 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
+void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
+                   bool createPhis) {
   auto simplify = false;
   match<void>(
     flags,
     [&] (FNone) {},
 
     [&] (FRedundant redundantFlags) {
-      auto const resolved = resolve_value(env, inst, redundantFlags);
+      auto const resolved =
+        resolve_value(env, inst, redundantFlags, createPhis);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
@@ -1207,7 +1245,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     },
 
     [&] (FReducible reducibleFlags) {
-      if (reduce_inst(env, inst, reducibleFlags)) simplify = true;
+      if (reduce_inst(env, inst, reducibleFlags, createPhis)) simplify = true;
     },
 
     [&] (FRefinableLoad f) {
@@ -1247,23 +1285,88 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     }
   );
 
-  if (simplify) simplifyInPlace(env.unit, &inst);
+  // simplifyInPlace may perform CFG changes incompatible with phi creation.
+  if (simplify && !createPhis) simplifyInPlace(env.unit, &inst);
 }
 
-void optimize_block(Local& env, Global& genv, Block* blk) {
+void optimize_edges(Global& env, Block* blk) {
+  /*
+   * If a target block of an edge is a branch which could be trivially resolved
+   * in the context of the source block state, replace the target block with
+   * the resolved branch.
+   */
+  auto const optimize = [&](const State& state, Block* targetBlk) -> Block* {
+    if (targetBlk == nullptr) return nullptr;
+
+    while (targetBlk->front().is(Jmp) && targetBlk->front().numSrcs() == 0) {
+      targetBlk = targetBlk->front().taken();
+    }
+
+    if (targetBlk->instrs().size() != 1) return nullptr;
+    auto const& inst = targetBlk->front();
+
+    auto const handleCheck = [&](Type typeParam) -> Block* {
+      assertx(inst.next() && inst.taken());
+      auto const ge = boost::get<GeneralEffects>(memory_effects(inst));
+      auto const meta = env.ainfo.find(canonicalize(ge.loads));
+      if (!meta) return nullptr;
+      if (!state.avail[meta->index]) return nullptr;
+      auto const& tloc = state.tracked[meta->index];
+      if (tloc.knownType <= typeParam) return inst.next();
+      if (!tloc.knownType.maybe(typeParam)) return inst.taken();
+      return nullptr;
+    };
+
+    switch (inst.op()) {
+      case CheckTypeMem:
+      case CheckLoc:
+      case CheckStk:
+      case CheckMBase:
+        return handleCheck(inst.typeParam());
+
+      case CheckInitMem:
+        return handleCheck(TInitCell);
+
+      case CheckMROProp:
+        return handleCheck(Type::cns(true));
+
+      default:
+        return nullptr;
+    }
+  };
+
+  auto const& bi = env.blockInfo[blk];
+  while (auto const newNext = optimize(bi.stateOutNext, blk->next())) {
+    FTRACE(2, "      setNext: {} -> {}\n", blk->next()->id(), newNext->id());
+    blk->back().setNext(newNext);
+    ++env.edgesOptimized;
+  }
+  while (auto const newTaken = optimize(bi.stateOutTaken, blk->taken())) {
+    FTRACE(2, "      setTaken: {} -> {}\n", blk->taken()->id(), newTaken->id());
+    blk->back().setTaken(newTaken);
+    ++env.edgesOptimized;
+  }
+}
+
+void optimize_block(Local& env, Global& genv, Block* blk, bool createPhis) {
   if (!env.state.initialized) {
     FTRACE(2, "  unreachable\n");
     return;
   }
 
   for (auto& inst : *blk) {
-    simplifyInPlace(genv.unit, &inst);
+    // simplifyInPlace may perform CFG changes incompatible with phi creation.
+    if (!createPhis) simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
-    optimize_inst(genv, inst, flags);
+    optimize_inst(genv, inst, flags, createPhis);
   }
+
+  // If we are allowed to create phis, we can't perform CFG optimizations that
+  // may move jumps through blocks defining these phis.
+  if (!createPhis) optimize_edges(genv, blk);
 }
 
-void optimize(Global& genv) {
+void optimize(Global& genv, bool createPhis) {
   /*
    * Simplify() calls can make blocks unreachable as we walk, and visiting the
    * unreachable blocks with simplify calls is not allowed.  They may have uses
@@ -1283,7 +1386,7 @@ void optimize(Global& genv) {
     }
 
     auto env = Local { genv, genv.blockInfo[blk].stateIn };
-    optimize_block(env, genv, blk);
+    optimize_block(env, genv, blk, createPhis);
 
     if (auto const x = blk->next()) reachable[x] = true;
     if (auto const x = blk->taken()) reachable[x] = true;
@@ -1372,25 +1475,45 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
 
   auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
 
-  // CheckInitMem's pointee is TUninit on the taken branch, so update
-  // outState. Likewise, CheckMROProp's taken branch means the bit is
-  // set to false.
-  if (inst.is(CheckInitMem, CheckMROProp)) {
+  auto const handleCheck = [&](Type maxTakenType, Type subtractedType) {
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
     assertx(ge.inout == AEmpty);
     assertx(ge.backtrace == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
-    auto const newType = inst.is(CheckInitMem) ? TUninit : Type::cns(false);
     if (auto const tloc = find_tracked(outState, meta)) {
-      tloc->knownType &= newType;
+      tloc->knownType = negativeCheckType(
+        tloc->knownType & maxTakenType, subtractedType);
     } else if (meta) {
       auto tloc = &outState.tracked[meta->index];
       tloc->knownValue = nullptr;
-      tloc->knownType = newType;
+      tloc->knownType = negativeCheckType(maxTakenType, subtractedType);
       outState.avail.set(meta->index);
     }
+  };
+
+  switch (inst.op()) {
+    case CheckTypeMem:
+    case CheckLoc:
+    case CheckStk:
+    case CheckMBase:
+      // Subtract inst.typeParam() on the taken branch.
+      handleCheck(TCell, inst.typeParam());
+      break;
+
+    case CheckInitMem:
+      // The pointee is TUninit on the taken branch.
+      handleCheck(TUninit, TBottom);
+      break;
+
+    case CheckMROProp:
+      // The bit is set to false on taken branch.
+      handleCheck(Type::cns(false), TBottom);
+      break;
+
+    default:
+      break;
   }
 }
 
@@ -1545,6 +1668,7 @@ void optimizeLoads(IRUnit& unit) {
   size_t loadsRemoved = 0;
   size_t loadsRefined = 0;
   size_t jumpsRemoved = 0;
+  size_t edgesOptimized = 0;
   size_t stackTeardownsOptimized = 0;
   do {
     auto genv = Global { unit };
@@ -1571,13 +1695,14 @@ void optimizeLoads(IRUnit& unit) {
           );
 
     FTRACE(1, "\nOptimize:\n");
-    optimize(genv);
+    optimize(genv, false);
 
-    if (!genv.instrsReduced &&
-        !genv.loadsRemoved &&
-        !genv.loadsRefined &&
-        !genv.jumpsRemoved &&
-        !genv.stackTeardownsOptimized) {
+    if (!genv.changed()) {
+      FTRACE(1, "\nOptimize with phis:\n");
+      optimize(genv, true);
+    }
+
+    if (!genv.changed()) {
       // Nothing changed so we're done
       break;
     }
@@ -1585,6 +1710,7 @@ void optimizeLoads(IRUnit& unit) {
     loadsRemoved += genv.loadsRemoved;
     loadsRefined += genv.loadsRefined;
     jumpsRemoved += genv.jumpsRemoved;
+    edgesOptimized += genv.edgesOptimized;
     stackTeardownsOptimized += genv.stackTeardownsOptimized;
 
     FTRACE(2, "reflowing types\n");
@@ -1616,6 +1742,7 @@ void optimizeLoads(IRUnit& unit) {
     entry->setInt("optimize_loads_loads_removed", loadsRemoved);
     entry->setInt("optimize_loads_loads_refined", loadsRefined);
     entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
+    entry->setInt("optimize_loads_edges_optimized", edgesOptimized);
     entry->setInt("optimize_loads_stack_teardowns_optimized",
       stackTeardownsOptimized);
   }

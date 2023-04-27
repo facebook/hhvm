@@ -1,0 +1,6 @@
+/etc/hhvm/server.ini
+/etc/hhvm/php.ini
+/etc/default/hhvm
+/etc/init.d/hhvm
+/etc/nginx/hhvm.conf
+/etc/apache2/mods-available/hhvm_proxy_fcgi.conf

@@ -22,7 +22,7 @@ final class FileDescriptor {
   private function __construct() {}
 
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 } // namespace OS

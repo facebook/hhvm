@@ -2,5 +2,5 @@ File "fc_enum_13.php", line 5, characters 18-31:
 `HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
 File "fc_enum_13.php", line 5, characters 18-31:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "BuiltinEnum.hhi", line 26, characters 16-26:
+  File "BuiltinEnum.hhi", line 26, characters 18-28:
   Definition is here

@@ -9,7 +9,7 @@ abstract class C {
 
 <<__EntryPoint>>
 function main() {
-  $f = class_meth(C::class, 'foo');
+  $f = C::foo<>;
   echo "FAIL\n";
   var_dump($f());
 }

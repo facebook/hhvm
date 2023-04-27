@@ -1,6 +1,6 @@
-File "shape_idx_dependent.php", line 8, characters 12-34:
-Invalid return type (Typing[4110])
-File "shape_idx_dependent.php", line 7, characters 37-39:
-Expected `int`
-File "shape_idx_dependent.php", line 5, characters 41-44:
-But got `?int`
+File "shape_idx_dependent.php", line 8, characters 24-25:
+Invalid argument (Typing[4110])
+  File "shape_idx_dependent.php", line 7, characters 37-39:
+  Expected `int`
+  File "shape_idx_dependent.php", line 5, characters 41-44:
+  But got `null`

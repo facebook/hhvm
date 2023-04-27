@@ -648,7 +648,7 @@ public:
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
     bool highByteReg = false;
-    // movzbx's first operand is a bytereg regardless of operand size
+    // movzbx's first operand is a byteReg regardless of operand size
     if (opSz == sz::byte || (op.flags & IF_BYTEREG)) {
       if (byteRegNeedsRex(r1) ||
           (!(op.flags & IF_BYTEREG) && byteRegNeedsRex(r2))) {

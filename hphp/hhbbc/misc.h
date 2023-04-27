@@ -21,7 +21,12 @@
 #include <boost/variant.hpp>
 #include <memory>
 
+#include "hphp/hhbbc/options.h"
+
+#include "hphp/runtime/vm/repo-global-data.h"
+
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/extern-worker.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
@@ -62,7 +67,19 @@ enum class Flavor { C, U, CU };
 struct PrepKind {
   TriBool inOut;
   TriBool readonly;
+  bool operator==(const PrepKind& o) const {
+    return std::tie(inOut, readonly) == std::tie(o.inOut, o.readonly);
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(inOut, readonly);
+  }
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(inOut)
+      (readonly)
+      ;
+  }
 };
+using PrepKindVec = CompactVector<PrepKind>;
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;
@@ -105,78 +122,82 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
+// "Bucketize" a vector of strings into N buckets, using consistent
+// hashing.
+std::vector<std::vector<SString>>
+consistently_bucketize(const std::vector<SString>&, size_t bucketSize);
+
+//////////////////////////////////////////////////////////////////////
+
+// Helper functions to produce a std::vector<T> from a single T
+// without boilerplate.
+template <typename T> std::vector<T> singleton_vec(T t) {
+  std::vector<T> out;
+  out.emplace_back(std::move(t));
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void profile_memory(const char* what, const char* when, const std::string&);
-void summarize_memory(StructuredLogEntry&);
+void summarize_memory(StructuredLogEntry*);
 
 struct trace_time {
-  using clock      = std::chrono::system_clock;
-  using time_point = clock::time_point;
-
   explicit trace_time(const char* what,
-                      const std::string& extra = std::string{})
-    : what(what)
-    , start(clock::now())
-    , extra(extra)
-  {
-    profile_memory(what, "start", extra);
-    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-      Trace::traceRelease(
-        "%s",
-        folly::sformat(
-          "{}: {}: start{}\n",
-          ts(start),
-          what,
-          !extra.empty() ? folly::format(" ({})", extra).str() : extra
-        ).c_str()
-      );
-    }
-  }
-
-  ~trace_time() {
-    namespace C = std::chrono;
-    auto const end = clock::now();
-    auto const elapsed = C::duration_cast<C::milliseconds>(
-      end - start
-    );
-    profile_memory(what, "end", extra);
-    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-      Trace::traceRelease(
-        "%s",
-        folly::sformat(
-          "{}: {}: {}ms elapsed\n",
-          ts(end), what, elapsed.count())
-          .c_str()
-      );
-    }
-  }
+                      std::string extra,
+                      StructuredLogEntry* logEntry);
+  explicit trace_time(const char* what)
+    : trace_time{what, std::string{}, nullptr} {}
+  explicit trace_time(const char* what, StructuredLogEntry* logEntry)
+    : trace_time{what, std::string{}, logEntry} {}
+  explicit trace_time(const char* what, std::string extra)
+    : trace_time{what, std::move(extra), nullptr} {}
+  ~trace_time();
 
   trace_time(const trace_time&) = delete;
   trace_time& operator=(const trace_time&) = delete;
 
-  const char* label() const {
-    return what;
-  }
+  void ignore_client_stats();
 
-  int64_t elapsed_ms() const {
-    namespace C = std::chrono;
-    return C::duration_cast<C::milliseconds>(clock::now() - start).count();
-  }
+  // Register a Client::Stats to automatically report on
+  static void register_client_stats(extern_worker::Client::Stats::Ptr);
 
 private:
-  std::string ts(time_point t) {
-    char snow[64];
-    auto tm = std::chrono::system_clock::to_time_t(t);
-    ctime_r(&tm, snow);
-    // Eliminate trailing newline from ctime_r.
-    snow[24] = '\0';
-    return snow;
-  }
+  using clock      = std::chrono::system_clock;
+  using time_point = clock::time_point;
+
   const char* what;
   time_point start;
   std::string extra;
+  extern_worker::Client::Stats::Ptr clientBefore;
+  StructuredLogEntry* logEntry;
+  int64_t beforeRss;
 };
 
 //////////////////////////////////////////////////////////////////////
 
+// Set up the process state (either for the main process or for
+// extern-worker Jobs). If "full" is true, systemlib will be parsed
+// and initialized.
+void process_init(const Options&, const RepoGlobalData&, bool full);
+// Undo process_init().
+void process_exit();
+
 }}
 
+//////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+//////////////////////////////////////////////////////////////////////
+
+template<>
+struct hash<HPHP::HHBBC::PrepKind> {
+  size_t operator()(HPHP::HHBBC::PrepKind k) const {
+    return k.hash();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+}

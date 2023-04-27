@@ -1,0 +1,1395 @@
+'\" t
+.\"     Title: \fBndbd\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDBD\FR" "8" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndbd \- the NDB Cluster data node daemon
+.SH "SYNOPSIS"
+.HP \w'\fBndbd\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndbd \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndbd\fR
+is the process that is used to handle all the data in tables using the NDB Cluster storage engine\&. This is the process that empowers a data node to accomplish distributed transaction handling, node recovery, checkpointing to disk, online backup, and related tasks\&.
+.PP
+In an NDB Cluster, a set of
+\fBndbd\fR
+processes cooperate in handling data\&. These processes can execute on the same computer (host) or on different computers\&. The correspondences between data nodes and Cluster hosts is completely configurable\&.
+.PP
+The following table includes command options specific to the NDB Cluster data node program
+\fBndbd\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndbd\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.250.\ \&Command\-line options for the ndbd program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--bind-address=name\fR\fB \fR
+T}:T{
+Local bind address
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--connect-delay=#\fR\fB \fR
+T}:T{
+Time to wait between attempts to contact a management server, in
+              seconds; 0 means do not wait between attempts
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--connect-retries=#\fR\fB \fR
+T}:T{
+Set the number of times to retry a connection before giving up; 0 means
+              1 attempt only (and no retries)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--connect-retry-delay=#\fR\fB \fR
+T}:T{
+Time to wait between attempts to contact a management server, in
+              seconds; 0 means do not wait between attempts
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--daemon\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Start ndbd as daemon (default); override with --nodaemon
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--foreground\fR\fB \fR
+T}:T{
+Run ndbd in foreground, provided for debugging purposes (implies
+              --nodaemon)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--initial\fR\fB \fR
+T}:T{
+Perform initial start of ndbd, including cleaning the file system.
+              Consult the documentation before using this option
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--initial-start\fR\fB \fR
+T}:T{
+Perform partial initial start (requires --nowait-nodes)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--install[=name]\fR\fB \fR
+T}:T{
+Used to install the data node process as a Windows service. Does not
+              apply on non-Windows platforms
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--logbuffer-size=#\fR\fB \fR
+T}:T{
+Control size of log buffer. For use when debugging with many log
+              messages being generated; default is sufficient for normal
+              operations
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nodaemon\fR\fB \fR
+T}:T{
+Do not start ndbd as daemon; provided for testing purposes
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--nostart\fR,
+.PP
+\fB \fR\fB-n\fR\fB \fR
+T}:T{
+Do not start ndbd immediately; ndbd waits for command to start from
+              ndb_mgmd
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nowait-nodes=list\fR\fB \fR
+T}:T{
+Do not wait for these data nodes to start (takes comma-separated list of
+              node IDs). Also requires --ndb-nodeid to be used
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--remove[=name]\fR\fB \fR
+T}:T{
+Used to remove a data node process that was previously installed as a
+              Windows service. Does not apply on non-Windows platforms
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--verbose\fR,
+.PP
+\fB \fR\fB-v\fR\fB \fR
+T}:T{
+Causes the data log to write extra debugging information to the node log
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+All of these options also apply to the multithreaded version of this program (\fBndbmtd\fR) and you may substitute
+\(lq\fBndbmtd\fR\(rq
+for
+\(lq\fBndbd\fR\(rq
+wherever the latter occurs in this section\&.
+.sp .5v
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-bind\-address\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--bind-address=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Causes
+\fBndbd\fR
+to bind to a specific network interface (host name or IP address)\&. This option has no default value\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connect\-delay=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connect-delay=#
+T}
+T{
+\fBDeprecated\fR
+T}:T{
+Yes
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+5
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+3600
+T}
+.TE
+.sp 1
+Determines the time to wait between attempts to contact a management server when starting (the number of attempts is controlled by the
+\fB\-\-connect\-retries\fR
+option)\&. The default is 5 seconds\&.
+.sp
+This option is deprecated, and is subject to removal in a future release of NDB Cluster\&. Use
+\fB\-\-connect\-retry\-delay\fR
+instead\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connect\-retries=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connect-retries=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+12
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+65535
+T}
+.TE
+.sp 1
+Set the number of times to retry a connection before giving up; 0 means 1 attempt only (and no retries)\&. The default is 12 attempts\&. The time to wait between attempts is controlled by the
+\fB\-\-connect\-retry\-delay\fR
+option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connect\-retry\-delay=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connect-retry-delay=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+5
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Determines the time to wait between attempts to contact a management server when starting (the time between attempts is controlled by the
+\fB\-\-connect\-retries\fR
+option)\&. The default is 5 seconds\&.
+.sp
+This option takes the place of the
+\fB\-\-connect\-delay\fR
+option, which is now deprecated and subject to removal in a future release of NDB Cluster\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-daemon\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--daemon
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Instructs
+\fBndbd\fR
+or
+\fBndbmtd\fR
+to execute as a daemon process\&. This is the default behavior\&.
+\fB\-\-nodaemon\fR
+can be used to prevent the process from running as a daemon\&.
+.sp
+This option has no effect when running
+\fBndbd\fR
+or
+\fBndbmtd\fR
+on Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-foreground\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--foreground
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Causes
+\fBndbd\fR
+or
+\fBndbmtd\fR
+to execute as a foreground process, primarily for debugging purposes\&. This option implies the
+\fB\-\-nodaemon\fR
+option\&.
+.sp
+This option has no effect when running
+\fBndbd\fR
+or
+\fBndbmtd\fR
+on Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-initial\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--initial
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Instructs
+\fBndbd\fR
+to perform an initial start\&. An initial start erases any files created for recovery purposes by earlier instances of
+\fBndbd\fR\&. It also re\-creates recovery log files\&. On some operating systems, this process can take a substantial amount of time\&.
+.sp
+An
+\fB\-\-initial\fR
+start is to be used
+\fIonly\fR
+when starting the
+\fBndbd\fR
+process under very special circumstances; this is because this option causes all files to be removed from the NDB Cluster file system and all redo log files to be re\-created\&. These circumstances are listed here:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+When performing a software upgrade which has changed the contents of any files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+When restarting the node with a new version of
+\fBndbd\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+As a measure of last resort when for some reason the node restart or system restart repeatedly fails\&. In this case, be aware that this node can no longer be used to restore data due to the destruction of the data files\&.
+.RE
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBWarning\fR
+.ps -1
+.br
+To avoid the possibility of eventual data loss, it is recommended that you
+\fInot\fR
+use the
+\fB\-\-initial\fR
+option together with
+StopOnError = 0\&. Instead, set
+StopOnError
+to 0 in
+config\&.ini
+only after the cluster has been started, then restart the data nodes normally\(emthat is, without the
+\fB\-\-initial\fR
+option\&. See the description of the
+StopOnError
+parameter for a detailed explanation of this issue\&. (Bug #24945638)
+.sp .5v
+.RE
+Use of this option prevents the
+StartPartialTimeout
+and
+StartPartitionedTimeout
+configuration parameters from having any effect\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+This option does
+\fInot\fR
+affect either of the following types of files:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Backup files that have already been created by the affected node
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NDB Cluster Disk Data files (see
+Section\ \&22.5.13, \(lqNDB Cluster Disk Data Tables\(rq)\&.
+.RE
+.sp
+This option also has no effect on recovery of data by a data node that is just starting (or restarting) from data nodes that are already running\&. This recovery of data occurs automatically, and requires no user intervention in an NDB Cluster that is running normally\&.
+.sp .5v
+.RE
+It is permissible to use this option when starting the cluster for the very first time (that is, before any data node files have been created); however, it is
+\fInot\fR
+necessary to do so\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-initial\-start\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--initial-start
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+This option is used when performing a partial initial start of the cluster\&. Each node should be started with this option, as well as
+\fB\-\-nowait\-nodes\fR\&.
+.sp
+Suppose that you have a 4\-node cluster whose data nodes have the IDs 2, 3, 4, and 5, and you wish to perform a partial initial start using only nodes 2, 4, and 5\(emthat is, omitting node 3:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndbd \-\-ndb\-nodeid=2 \-\-nowait\-nodes=3 \-\-initial\-start\fR
+shell> \fBndbd \-\-ndb\-nodeid=4 \-\-nowait\-nodes=3 \-\-initial\-start\fR
+shell> \fBndbd \-\-ndb\-nodeid=5 \-\-nowait\-nodes=3 \-\-initial\-start\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+When using this option, you must also specify the node ID for the data node being started with the
+\fB\-\-ndb\-nodeid\fR
+option\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+Do not confuse this option with the
+\fB\-\-nowait\-nodes\fR
+option for
+\fBndb_mgmd\fR, which can be used to enable a cluster configured with multiple management servers to be started without all management servers being online\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-install[=\fR\fB\fIname\fR\fR\fB]\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--install[=name]
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+ndbd
+T}
+.TE
+.sp 1
+Causes
+\fBndbd\fR
+to be installed as a Windows service\&. Optionally, you can specify a name for the service; if not set, the service name defaults to
+ndbd\&. Although it is preferable to specify other
+\fBndbd\fR
+program options in a
+my\&.ini
+or
+my\&.cnf
+configuration file, it is possible to use together with
+\fB\-\-install\fR\&. However, in such cases, the
+\fB\-\-install\fR
+option must be specified first, before any other options are given, for the Windows service installation to succeed\&.
+.sp
+It is generally not advisable to use this option together with the
+\fB\-\-initial\fR
+option, since this causes the data node file system to be wiped and rebuilt every time the service is stopped and started\&. Extreme care should also be taken if you intend to use any of the other
+\fBndbd\fR
+options that affect the starting of data nodes\(emincluding
+\fB\-\-initial\-start\fR,
+\fB\-\-nostart\fR, and
+\fB\-\-nowait\-nodes\fR\(emtogether with
+\fB\-\-install\fR, and you should make absolutely certain you fully understand and allow for any possible consequences of doing so\&.
+.sp
+The
+\fB\-\-install\fR
+option has no effect on non\-Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-logbuffer\-size=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--logbuffer-size=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+32768
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+2048
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Sets the size of the data node log buffer\&. When debugging with high amounts of extra logging, it is possible for the log buffer to run out of space if there are too many log messages, in which case some log messages can be lost\&. This should not occur during normal operations\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nodaemon\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--nodaemon
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Prevents
+\fBndbd\fR
+or
+\fBndbmtd\fR
+from executing as a daemon process\&. This option overrides the
+\fB\-\-daemon\fR
+option\&. This is useful for redirecting output to the screen when debugging the binary\&.
+.sp
+The default behavior for
+\fBndbd\fR
+and
+\fBndbmtd\fR
+on Windows is to run in the foreground, making this option unnecessary on Windows platforms, where it has no effect\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nostart\fR,
+\fB\-n\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--nostart
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Instructs
+\fBndbd\fR
+not to start automatically\&. When this option is used,
+\fBndbd\fR
+connects to the management server, obtains configuration data from it, and initializes communication objects\&. However, it does not actually start the execution engine until specifically requested to do so by the management server\&. This can be accomplished by issuing the proper
+START
+command in the management client (see
+Section\ \&22.5.2, \(lqCommands in the NDB Cluster Management Client\(rq)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nowait\-nodes=\fR\fB\fInode_id_1\fR\fR\fB[, \fR\fB\fInode_id_2\fR\fR\fB[, \&.\&.\&.]]\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--nowait-nodes=list
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+This option takes a list of data nodes which for which the cluster will not wait for before starting\&.
+.sp
+This can be used to start the cluster in a partitioned state\&. For example, to start the cluster with only half of the data nodes (nodes 2, 3, 4, and 5) running in a 4\-node cluster, you can start each
+\fBndbd\fR
+process with
+\fB\-\-nowait\-nodes=3,5\fR\&. In this case, the cluster starts as soon as nodes 2 and 4 connect, and does
+\fInot\fR
+wait
+StartPartitionedTimeout
+milliseconds for nodes 3 and 5 to connect as it would otherwise\&.
+.sp
+If you wanted to start up the same cluster as in the previous example without one
+\fBndbd\fR
+(say, for example, that the host machine for node 3 has suffered a hardware failure) then start nodes 2, 4, and 5 with
+\fB\-\-nowait\-nodes=3\fR\&. Then the cluster will start as soon as nodes 2, 4, and 5 connect and will not wait for node 3 to start\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-remove[=\fR\fB\fIname\fR\fR\fB]\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--remove[=name]
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+ndbd
+T}
+.TE
+.sp 1
+Causes an
+\fBndbd\fR
+process that was previously installed as a Windows service to be removed\&. Optionally, you can specify a name for the service to be uninstalled; if not set, the service name defaults to
+ndbd\&.
+.sp
+The
+\fB\-\-remove\fR
+option has no effect on non\-Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Causes extra debug output to be written to the node log\&.
+.sp
+You can also use
+NODELOG DEBUG ON
+and
+NODELOG DEBUG OFF
+to enable and disable this extra logging while the data node is running\&.
+.RE
+.PP
+\fBndbd\fR
+generates a set of log files which are placed in the directory specified by
+DataDir
+in the
+config\&.ini
+configuration file\&.
+.PP
+These log files are listed below\&.
+\fInode_id\fR
+is and represents the node\*(Aqs unique identifier\&. For example,
+ndb_2_error\&.log
+is the error log generated by the data node whose node ID is
+2\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_error\&.log
+is a file containing records of all crashes which the referenced
+\fBndbd\fR
+process has encountered\&. Each record in this file contains a brief error string and a reference to a trace file for this crash\&. A typical entry in this file might appear as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Date/Time: Saturday 30 July 2004 \- 00:20:01
+Type of error: error
+Message: Internal program error (failed ndbrequire)
+Fault ID: 2341
+Problem data: DbtupFixAlloc\&.cpp
+Object of reference: DBTUP (Line: 173)
+ProgramName: NDB Kernel
+ProcessID: 14909
+TraceFile: ndb_2_trace\&.log\&.2
+***EOM***
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Listings of possible
+\fBndbd\fR
+exit codes and messages generated when a data node process shuts down prematurely can be found in
+\m[blue]\fBData Node Error Messages\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+\fIThe last entry in the error log file is not necessarily the newest one\fR
+(nor is it likely to be)\&. Entries in the error log are
+\fInot\fR
+listed in chronological order; rather, they correspond to the order of the trace files as determined in the
+ndb_\fInode_id\fR_trace\&.log\&.next
+file (see below)\&. Error log entries are thus overwritten in a cyclical and not sequential fashion\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_trace\&.log\&.\fItrace_id\fR
+is a trace file describing exactly what happened just before the error occurred\&. This information is useful for analysis by the NDB Cluster development team\&.
+.sp
+It is possible to configure the number of these trace files that will be created before old files are overwritten\&.
+\fItrace_id\fR
+is a number which is incremented for each successive trace file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_trace\&.log\&.next
+is the file that keeps track of the next trace file number to be assigned\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_out\&.log
+is a file containing any data output by the
+\fBndbd\fR
+process\&. This file is created only if
+\fBndbd\fR
+is started as a daemon, which is the default behavior\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR\&.pid
+is a file containing the process ID of the
+\fBndbd\fR
+process when started as a daemon\&. It also functions as a lock file to avoid the starting of nodes with the same identifier\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_signal\&.log
+is a file used only in debug versions of
+\fBndbd\fR, where it is possible to trace all incoming, outgoing, and internal messages with their data in the
+\fBndbd\fR
+process\&.
+.RE
+.PP
+It is recommended not to use a directory mounted through NFS because in some environments this can cause problems whereby the lock on the
+\&.pid
+file remains in effect even after the process has terminated\&.
+.PP
+To start
+\fBndbd\fR, it may also be necessary to specify the host name of the management server and the port on which it is listening\&. Optionally, one may also specify the node ID that the process is to use\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndbd \-\-connect\-string="nodeid=2;host=ndb_mgmd\&.mysql\&.com:1186"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+See
+Section\ \&22.3.3.3, \(lqNDB Cluster Connection Strings\(rq, for additional information about this issue\&.
+Options Common to NDB Cluster Programs(1), describes other command\-line options which can be used with
+\fBndbd\fR\&. For information about data node configuration parameters, see
+Section\ \&22.3.3.6, \(lqDefining NDB Cluster Data Nodes\(rq\&.
+.PP
+When
+\fBndbd\fR
+starts, it actually initiates two processes\&. The first of these is called the
+\(lqangel process\(rq; its only job is to discover when the execution process has been completed, and then to restart the
+\fBndbd\fR
+process if it is configured to do so\&. Thus, if you attempt to kill
+\fBndbd\fR
+using the Unix
+\fBkill\fR
+command, it is necessary to kill both processes, beginning with the angel process\&. The preferred method of terminating an
+\fBndbd\fR
+process is to use the management client and stop the process from there\&.
+.PP
+The execution process uses one thread for reading, writing, and scanning data, as well as all other activities\&. This thread is implemented asynchronously so that it can easily handle thousands of concurrent actions\&. In addition, a watch\-dog thread supervises the execution thread to make sure that it does not hang in an endless loop\&. A pool of threads handles file I/O, with each thread able to handle one open file\&. Threads can also be used for transporter connections by the transporters in the
+\fBndbd\fR
+process\&. In a multi\-processor system performing a large number of operations (including updates), the
+\fBndbd\fR
+process can consume up to 2 CPUs if permitted to do so\&.
+.PP
+For a machine with many CPUs it is possible to use several
+\fBndbd\fR
+processes which belong to different node groups; however, such a configuration is still considered experimental and is not supported for MySQL 8\&.0 in a production setting\&. See
+Section\ \&22.1.7, \(lqKnown Limitations of NDB Cluster\(rq\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+Data Node Error Messages
+.RS 4
+\%https://dev.mysql.com/doc/ndb-internals/en/ndb-node-error-messages.html
+.RE
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

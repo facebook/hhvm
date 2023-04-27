@@ -69,12 +69,6 @@ enum TypeConstraintFlags : uint16_t {
   Resolved = 0x40,
 
   /*
-   * Indicates that no mock object can satisfy this constraint.  This is
-   * resolved by HHBBC.
-   */
-  NoMockObjects = 0x80,
-
-  /*
    * Indicates that a type-constraint should be displayed as nullable (even if
    * isNullable()) is false. This is used to maintain proper display of
    * type-constraints even when resolved.

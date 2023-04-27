@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 module Unix = Caml_unix
 
 type timings = {
@@ -260,9 +260,9 @@ module Select_timeout = struct
   (* A negative timeout for select means block until a fd is ready *)
   let no_select_timeout = ~-.1.0
 
-  (* A wrapper around Sys_utils.select_non_intr. If timeout would fire before the select's timeout,
-   * then change the select's timeout and throw an exception when it fires *)
   let select ?timeout rfds wfds xfds select_timeout =
+    (* A wrapper around Sys_utils.select_non_intr. If timeout would fire before the select's timeout,
+     * then change the select's timeout and throw an exception when it fires *)
     match timeout with
     (* No timeout set, fallback to Sys_utils.select_non_intr *)
     | None -> Sys_utils.select_non_intr rfds wfds xfds select_timeout
@@ -547,17 +547,16 @@ module Select_timeout = struct
        * to use getsockopt to read the SO_ERROR option at level SOL_SOCKET to figure out if the
        * connect worked. However, this code is only used on Windows, so that's fine *)
       try Unix.connect sock sockaddr with
-      | Unix.Unix_error ((Unix.EINPROGRESS | Unix.EWOULDBLOCK), _, _) ->
-        begin
-          match select ?timeout [] [sock] [] no_select_timeout with
-          | (_, [], [exn_sock]) when Poly.(exn_sock = sock) ->
-            failwith "Failed to connect to socket"
-          | (_, [], _) ->
-            failwith
-              "This should be unreachable. How did select return with no fd when there is no timeout?"
-          | (_, [_sock], _) -> ()
-          | (_, _, _) -> assert false
-        end
+      | Unix.Unix_error ((Unix.EINPROGRESS | Unix.EWOULDBLOCK), _, _) -> begin
+        match select ?timeout [] [sock] [] no_select_timeout with
+        | (_, [], [exn_sock]) when Poly.(exn_sock = sock) ->
+          failwith "Failed to connect to socket"
+        | (_, [], _) ->
+          failwith
+            "This should be unreachable. How did select return with no fd when there is no timeout?"
+        | (_, [_sock], _) -> ()
+        | (_, _, _) -> assert false
+      end
       | exn ->
         let e = Exception.wrap exn in
         Unix.close sock;

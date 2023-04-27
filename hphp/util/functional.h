@@ -109,6 +109,16 @@ struct stringHashCompare {
   }
 };
 
+struct stringiHashCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1.size() == s2.size() &&
+      strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_i_unsafe(s.c_str(), s.size());
+  }
+};
+
 template <typename T, typename U, typename THash, typename UHash>
 struct pairHashCompare {
   THash thash;

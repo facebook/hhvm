@@ -49,6 +49,9 @@ namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
 struct Resumable;
+namespace stream_transport {
+struct StreamTransport;
+}
 }
 
 namespace HPHP {
@@ -189,6 +192,7 @@ public:
    */
   Transport* getTransport();
   void setTransport(Transport*);
+  std::shared_ptr<stream_transport::StreamTransport> getServerStreamTransport() const;
   void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
@@ -322,6 +326,8 @@ public:
 
   bool hasRequestEventHandlers() const;
 
+  const PackageInfo& getPackageInfo() const;
+
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
   const RepoOptions& getRepoOptionsForFrame(int frame) const;
 
@@ -380,7 +386,7 @@ public:
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  TypedValue lookupClsCns(const NamedEntity* ne,
+  TypedValue lookupClsCns(const NamedType*,
                     const StringData* cls,
                     const StringData* cns);
   TypedValue lookupClsCns(const StringData* cls,
@@ -641,6 +647,13 @@ public:
   VMParserFrame* m_parserFrame{nullptr};
 
   Optional<struct timespec> m_requestStartForTearing;
+
+  // When logging request tearing we store a fast map of deps to the paths to
+  // units that depend on them and the SHA-1s that they observed.
+  req::fast_map<
+    const StringData*,
+    req::vector<std::pair<std::string, SHA1>>
+  > m_loadedRdepMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -649,12 +662,8 @@ using GContextType = rds::local::AliasedRDSLocal<ExecutionContext,
       rds::local::Initialize::Explicitly,
       &rds::local::detail::HotRDSLocals::g_context>;
 
-// MSVC doesn't instantiate this, causing an undefined symbol at link time
-// if the template<> is present, but other compilers require it.
 namespace rds::local {
-#ifndef _MSC_VER
 template<>
-#endif
 void GContextType::Base::destroy();
 }
 

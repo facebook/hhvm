@@ -6,9 +6,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 //
 
+use std::borrow::Cow;
+use std::cmp::Ordering;
+
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+
 use crate::token_kind::TokenKind;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use std::{borrow::Cow, cmp::Ordering};
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
@@ -19,7 +23,7 @@ pub enum ErrorType {
     RuntimeError,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum LvalRoot {
     Unset,
     Assignment,
@@ -172,9 +176,12 @@ pub const error1055: Error = Cow::Borrowed(concat!(
     "A fallthrough directive can only appear at the end of",
     " a `switch` section."
 ));
-// TODO(20052790): use the specific token's text in the message body.
-pub const error1056: Error =
-    Cow::Borrowed("This token is not valid as part of a function declaration.");
+pub fn error1056(text: &str) -> Error {
+    Cow::Owned(format!(
+        "This token `{}` is not valid as part of a function declaration.",
+        text
+    ))
+}
 pub fn error1057(text: &str) -> Error {
     // TODO (kasper): T52404885: why does removing to_string() here segfaults
     Cow::Owned(format!("Encountered unexpected token `{}`.", text))
@@ -208,6 +215,8 @@ pub fn error1060(extension: &str) -> Error {
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
+pub const error1066: Error = Cow::Borrowed("Only one 'exports to' is allowed.");
+pub const error1067: Error = Cow::Borrowed("Only one 'imports from' is allowed.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in `strict` mode.");
 pub const error2003: Error =
     Cow::Borrowed("A `case` statement may only appear directly inside a `switch`.");
@@ -369,6 +378,30 @@ pub const inline_function_def: Error =
 pub const decl_outside_global_scope: Error =
     Cow::Borrowed("Declarations are not supported outside global scope");
 pub const type_keyword: Error = Cow::Borrowed("The `type` keyword is expected here.");
+pub fn unbounded_refinement_member_of(type_name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "A member that belongs to a refinement of type {} must be constrained either by ",
+            "an exact bound (`=`) or by at least one `as`/`super` bound."
+        ),
+        type_name
+    ))
+}
+pub fn duplicate_refinement_member_of(type_or_ctx: &str) -> Error {
+    Cow::Owned(format!(
+        "Member {} is involved in multiple refinement constraints. Members must be constrained at most once, consider fusing constraints (e.g., `Cls with {{ type T as A as B super C; }}`)",
+        type_or_ctx
+    ))
+}
+pub const expected_refinement_member: Error = Cow::Borrowed(concat!(
+    "Expected `type` or `ctx` member(s) within the refinement that ends with `}`, ",
+    "e.g.: `type T as U`, `type T = X`, `ctx C super [defaults]`."
+));
+pub const cannot_chain_type_refinements: Error = Cow::Borrowed(concat!(
+    "A type refinement cannot be chained (e.g., `Cls with { ... } with { type T2 ... }`), ",
+    "consider combining members into a single with-block."
+));
+
 pub const expected_simple_offset_expression: Error =
     Cow::Borrowed("A simple offset expression is expected here");
 pub const expected_user_attribute: Error = Cow::Borrowed("A user attribute is expected here.");
@@ -381,12 +414,10 @@ pub const instanceof_disabled: Error = Cow::Borrowed(
 );
 pub const abstract_instance_property: Error =
     Cow::Borrowed("Instance property may not be abstract.");
-pub const memoize_lsb_on_non_static: Error = Cow::Borrowed(
-    "`<<__MemoizeLSB>>` and `<<__PolicyShardedMemoizeLSB>>` can only be applied to static methods",
-);
-pub const memoize_lsb_on_non_method: Error = Cow::Borrowed(
-    "`<<__MemoizeLSB>>` and `<<__PolicyShardedMemoizeLSB>>` can only be applied to methods",
-);
+pub const memoize_lsb_on_non_static: Error =
+    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to static methods");
+pub const memoize_lsb_on_non_method: Error =
+    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to methods");
 pub const expression_as_attribute_arguments: Error =
     Cow::Borrowed("Attribute arguments must be literals");
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
@@ -543,6 +574,8 @@ pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` 
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
+pub const no_attributes_on_enum_class_enumerator: Error =
+    Cow::Borrowed("Attributes on enum class enumerators are not allowed");
 pub const invalid_constant_initializer: Error =
     Cow::Borrowed("Expected constant expression for initializer");
 pub const parent_static_prop_decl: Error =
@@ -701,7 +734,7 @@ pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name:
     ))
 }
 pub const sealed_val_not_classname: Error =
-    Cow::Borrowed("Values in sealed whitelist must be classname constants.");
+    Cow::Borrowed("Values in sealed allowlist must be classname constants.");
 pub const sealed_qualifier_invalid: Error =
     Cow::Borrowed("`__Sealed` can only be used with named types, e.g. `Foo::class`");
 pub const list_must_be_lvar: Error =
@@ -858,12 +891,6 @@ pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
 }
 pub const break_continue_n_not_supported: Error =
     Cow::Borrowed("`break`/`continue N` operators are not supported.");
-pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
-    Cow::Owned(format!(
-        "Invalid type hint `{}`. Use `{}` instead",
-        alias, hint,
-    ))
-}
 
 pub const function_pointer_bad_recv: Error = Cow::Borrowed(concat!(
     "Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. ",
@@ -971,15 +998,53 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
 
 pub fn effect_policied_memoized(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has zoned context",
+        "This {} can only be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC) because it has zoned context",
         kind
     ))
 }
 
 pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} requires a zoned context to be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB",
+        "This {} requires a zoned context to be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC)",
         kind
+    ))
+}
+
+pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "This {} requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible",
+        kind
+    ))
+}
+
+pub fn memoize_category_without_implicit_policy_capability(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "{}s that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB",
+        kind
+    ))
+}
+
+pub fn memoize_invalid_arity(attr: &str, num_args: usize, label: &str) -> Error {
+    Cow::Owned(format!(
+        "`{}` takes {} argument{} when using `{}`.",
+        attr,
+        num_args,
+        if num_args == 1 { "" } else { "s" },
+        label
+    ))
+}
+
+pub const memoize_invalid_sample_rate: Error =
+    Cow::Borrowed("Expected a valid 32-bit integer as a sample rate.");
+
+pub fn memoize_invalid_label(attr: &str) -> Error {
+    Cow::Owned(format!("Invalid label for `{}`.", attr))
+}
+
+pub fn memoize_requires_label(attr: &str) -> Error {
+    Cow::Owned(format!(
+        "The first argument to `{}` must be a label, e.g. `#KeyedByIC`.",
+        attr
     ))
 }
 
@@ -1045,6 +1110,10 @@ pub const inout_readonly_argument: Error = Cow::Borrowed(
     "This expression is readonly. We currently do not support passing readonly values to an inout parameter.",
 );
 
+pub const yield_readonly: Error = Cow::Borrowed(
+    "This expression is readonly. We currently do not support yielding readonly values.",
+);
+
 pub const enum_class_constant_missing_initializer: Error =
     Cow::Borrowed("Concrete enum class constants must have an initial value");
 
@@ -1052,6 +1121,9 @@ pub const enum_class_abstract_constant_with_value: Error =
     Cow::Borrowed("Abstract enum class constants must not provide any initial value");
 
 pub const enum_with_modifiers: Error = Cow::Borrowed("Enums can't have any modifiers");
+
+pub const enum_missing_base_type: Error =
+    Cow::Borrowed("Enums must have a base type, such as `arraykey` or `int`.");
 
 pub const readonly_static_method: Error =
     Cow::Borrowed("Static methods do not need to be marked readonly");
@@ -1074,7 +1146,7 @@ pub const write_props_without_capability: Error = Cow::Borrowed(
 );
 
 pub const closure_in_local_context: Error = Cow::Borrowed(
-    "Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults].",
+    "Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults].",
 );
 
 pub const read_globals_without_capability: Error = Cow::Borrowed(
@@ -1109,4 +1181,43 @@ pub const require_class_applied_to_generic: Error =
 
 pub const invalid_enum_class_label_qualifier: Error = Cow::Borrowed(
     "Invalid label qualifier. Only names or qualified names are allowed at this position.",
+);
+
+pub const internal_outside_of_module: Error = Cow::Borrowed(
+    "`internal` cannot be used outside of a module. Please define a module for this file.",
+);
+pub const module_newtype_outside_of_module: Error = Cow::Borrowed(
+    "`module newtype` type aliases cannot be used outside of a module. Please define a module for this file.",
+);
+
+pub const public_toplevel_outside_of_module: Error = Cow::Borrowed(
+    "`public` on toplevel entities cannot be used outside of a module. Please define a module for this file.",
+);
+
+pub fn module_first_in_file(name: &str) -> Error {
+    Cow::Owned(format!(
+        "`module {};` must be unique, and precede any other declarations in a file.",
+        name
+    ))
+}
+
+pub const module_declaration_in_module: Error =
+    Cow::Borrowed("You cannot declare new modules within an existing module");
+
+pub fn invalid_cross_package_argument(message: &str) -> Error {
+    Cow::Owned(format!(
+        "This is an invalid use of '__CrossPackage' because {}",
+        message
+    ))
+}
+
+pub fn cross_package_wrong_arity(count: usize) -> Error {
+    Cow::Owned(format!(
+        "The '__CrossPackage' attribute expects exactly 1 argument, {} given.",
+        count
+    ))
+}
+
+pub const expected_bar_or_semicolon: Error = Cow::Borrowed(
+    "Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.",
 );

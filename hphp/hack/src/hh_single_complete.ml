@@ -8,8 +8,6 @@
  *)
 
 open Hh_prelude
-open File_content
-open String_utils
 open Sys_utils
 
 (*****************************************************************************)
@@ -20,7 +18,6 @@ type mode =
   | NoMode
   | Autocomplete
   | Autocomplete_manually_invoked
-  | Ffp_autocomplete
 
 type options = {
   files: string list;
@@ -116,10 +113,6 @@ let parse_options () =
       ( "--auto-complete-manually-invoked",
         Arg.Unit (set_mode Autocomplete_manually_invoked),
         " Produce autocomplete suggestions as if manually triggered by user" );
-      ( "--ffp-auto-complete",
-        Arg.Unit (set_mode Ffp_autocomplete),
-        " Produce autocomplete suggestions using the full-fidelity parse tree"
-      );
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
         " API key used to download a saved state from Manifold (optional)" );
@@ -136,16 +129,19 @@ let parse_options () =
   let root = Path.make "/" (* we use this dummy *) in
 
   let tcopt =
-    GlobalOptions.make
+    GlobalOptions.set
+      ~tco_saved_state:
+        (GlobalOptions.default_saved_state
+        |> GlobalOptions.with_saved_state_manifold_api_key
+             !saved_state_manifold_api_key)
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~tco_saved_state_manifold_api_key:!saved_state_manifold_api_key
-      ()
+      GlobalOptions.default
   in
   (* Configure symbol index settings *)
-  let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
+  let namespace_map = ParserOptions.auto_namespace_map tcopt in
   let sienv =
     SymbolIndex.initialize
       ~globalrev:None
@@ -173,17 +169,14 @@ let parse_options () =
     },
     sienv,
     root,
-    None,
     SharedMem.default_config )
 
 (** This is an almost-pure function which returns what we get out of parsing.
 The only side-effect it has is on the global errors list. *)
 let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
-      let tcopt = Provider_context.get_tcopt ctx in
-      (* Get parse errors. Hold on to the AST, since we'll convert it to
-         fileinfo below if direct decl is disabled. *)
-      let parsed_file =
+      (* Get parse errors. *)
+      let () =
         Errors.run_in_context fn Errors.Parsing (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
@@ -197,28 +190,11 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast })
+            ())
       in
-      if TypecheckerOptions.use_direct_decl_parser tcopt then
-        match Direct_decl_utils.direct_decl_parse ctx fn with
-        | None -> failwith "no file contents"
-        | Some decl_and_mode_and_hash ->
-          Direct_decl_utils.decls_to_fileinfo fn decl_and_mode_and_hash
-      else
-        let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
-        (* If the feature is turned on, deregister functions with attribute
-           __PHPStdLib. This does it for all functions, not just hhi files *)
-        let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
-        {
-          FileInfo.file_mode;
-          funs;
-          classes;
-          typedefs;
-          consts;
-          modules;
-          comments = Some comments;
-          hash = None;
-        })
+      match Direct_decl_utils.direct_decl_parse ctx fn with
+      | None -> failwith "no file contents"
+      | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
 
 (** This function is used for gathering naming and parsing errors,
 and the side-effect of updating the global reverse naming table (and
@@ -257,13 +233,12 @@ let scan_files_for_symbol_index
   in
   SymbolIndexCore.update_files ~ctx ~sienv ~paths:transformed_list
 
-let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
+let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
     | _ -> die "Only single file expected"
   in
-  let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
   | NoMode -> die "Exactly one mode must be setup"
   | Autocomplete
@@ -300,51 +275,31 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
         ~entry
         ~sienv
         ~autocomplete_context
+        ~naming_table
     in
     List.iter
       ~f:
         begin
           fun r ->
-          AutocompleteTypes.(Printf.printf "%s %s\n" r.res_name r.res_ty)
+            begin
+              let open AutocompleteTypes in
+              Printf.printf "%s\n" r.res_label;
+              List.iter r.res_additional_edits ~f:(fun (s, _) ->
+                  Printf.printf "  INSERT %s\n" s);
+              Printf.printf
+                "  INSERT %s\n"
+                (match r.res_insert_text with
+                | InsertLiterally s -> s
+                | InsertAsSnippet { snippet; _ } -> snippet);
+              Printf.printf "  %s\n" r.res_detail;
+              match r.res_documentation with
+              | Some doc ->
+                List.iter (String.split_lines doc) ~f:(fun line ->
+                    Printf.printf "  %s\n" line)
+              | None -> ()
+            end
         end
       result.Utils.With_complete_flag.value
-  | Ffp_autocomplete ->
-    iter_over_files (fun path ->
-        try
-          let sienv = scan_files_for_symbol_index path sienv ctx in
-          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-          (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-          let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-          let position =
-            try
-              let file_text = Provider_context.read_file_contents_exn entry in
-              let _ = Str.search_forward args_regex file_text 0 in
-              let raw_flags = Str.matched_string file_text in
-              match split ' ' raw_flags with
-              | [_; row; column] ->
-                { line = int_of_string row; column = int_of_string column }
-              | _ -> failwith "Invalid test file: no flags found"
-            with
-            | Caml.Not_found -> failwith "Invalid test file: no flags found"
-          in
-          let result =
-            FfpAutocompleteService.auto_complete
-              ctx
-              entry
-              position
-              ~filter_by_token:true
-              ~sienv
-          in
-          match result with
-          | [] -> Printf.printf "No result found\n"
-          | res ->
-            List.iter res ~f:(fun r ->
-                AutocompleteTypes.(Printf.printf "%s\n" r.res_name))
-        with
-        | Failure msg
-        | Invalid_argument msg ->
-          Printf.printf "%s\n" msg;
-          exit 1)
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -354,7 +309,6 @@ let decl_and_run_mode
     { files; extra_builtins; mode; no_builtins; tcopt }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
-    (naming_table_path : string option)
     (sienv : SearchUtils.si_env) : unit =
   Ident.track_names := true;
   let builtins =
@@ -420,8 +374,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in
@@ -434,23 +387,14 @@ let decl_and_run_mode
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-     so it will look in the sqlite database for names it doesn't know.
-     This function returns the forward naming table, but we don't care about that;
-     it's only needed for tools that process file changes, to know in the event
-     of a file-change which old symbols used to be defined in the file. *)
-  let _naming_table_for_root : Naming_table.t option =
-    Option.map naming_table_path ~f:(fun path ->
-        Naming_table.load_from_sqlite ctx path)
-  in
-  let (_errors, _files_info) = parse_name_and_decl ctx to_decl in
-  handle_mode mode files ctx sienv
+  let (_errors, files_info) = parse_name_and_decl ctx to_decl in
+  let naming_table = Naming_table.create files_info in
+  handle_mode mode files ctx sienv naming_table
 
 let main_hack
     ({ tcopt; _ } as opts)
     (sienv : SearchUtils.si_env)
     (root : Path.t)
-    (naming_table : string option)
     (sharedmem_config : SharedMem.config) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -464,7 +408,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root naming_table sienv;
+      decl_and_run_mode opts tcopt hhi_root sienv;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)
@@ -477,13 +421,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, sienv, root, naming_table, sharedmem_config) =
-    parse_options ()
-  in
-  Unix.handle_unix_error
-    main_hack
-    options
-    sienv
-    root
-    naming_table
-    sharedmem_config
+  let (options, sienv, root, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options sienv root sharedmem_config

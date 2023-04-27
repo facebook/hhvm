@@ -5,8 +5,11 @@
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(
     Clone,
@@ -22,24 +25,21 @@ use serde::{Deserialize, Serialize};
     Serialize
 )]
 #[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
-pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] pub T);
+pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] pub Option<T>);
 
 arena_deserializer::impl_deserialize_in_arena!(Lazy<T>);
 
 impl<T> arena_trait::TrivialDrop for Lazy<T> {}
 
 impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         unimplemented!()
     }
 }
 
 impl<T: FromOcamlRep> FromOcamlRep for Lazy<T> {
     fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        unimplemented!()
+        Ok(Self(None))
     }
 }
 
@@ -48,6 +48,6 @@ impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for Lazy<T> {
         _value: ocamlrep::Value<'_>,
         _alloc: &'a bumpalo::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
-        unimplemented!()
+        Ok(Self(None))
     }
 }

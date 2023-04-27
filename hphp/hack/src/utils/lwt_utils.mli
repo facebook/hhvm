@@ -52,17 +52,33 @@ module Process_failure : sig
 end
 
 (** Run a command with a given input and return the output. If the command exits
-with an exit status other than zero, raises [Process_failure] instead.
+with an exit status other than zero, returns [Process_failure] instead.
 
-NOTE: on cancellation, this function will not kill the underlying process. (I
-tried to implement it, but after killing the process, both [Lwt_io.close] and
-[Lwt_io.abort] would hang when trying to close the process's
-stdin/stdout/stderr.)
-*)
+There are several ways for it to be cancelled:
+* [cancel] parameter
+  e.g. `let (cancel, u) = Lwt.bind(); Lwt.wakeup_later u (); exec_checked ~cancel`
+  Upon the cancel parameter being completed, we will send a SIGKILL to the underlying
+  process. In Unix, this cannot be ignored nor blocked. It will result in
+  Process_failure.status=WSIGNALED Sys.sigkill, and .stdout/.stderr will contain
+  whatever the process had sent before that.
+* [timeout] parameter
+  e.g. `exec_checked ~timeout:30.0`
+  This parameter is passed straight through to Lwt_process.open_process_full.
+  Its behavior is to aggressively closes stdout/stderr pipes and also send a SIGKILL.
+  It will result in Process_failure.status=WSIGNALED Sys.sigkill, and .stdout/.stderr
+  will be empty because of the closed pipes, and .exn will likely be something about
+  those closed pipes too.
+* Lwt.cancel
+  e.g. `Lwt.pick [exec_checked ...; Lwt.return_none]`.
+  This has been deprecated as a cancellation mechanism by the Lwt folks.
+  This will *NOT* kill the underlying process. It will close the pipes.
+  As to what happens to the promise? you shouldn't really even be asking,
+  and indeed varies depending on the process. *)
 val exec_checked :
   ?input:string ->
   ?env:string array ->
   ?timeout:float ->
+  ?cancel:unit Lwt.t ->
   Exec_command.t ->
   string array ->
   (Process_success.t, Process_failure.t) Lwt_result.t

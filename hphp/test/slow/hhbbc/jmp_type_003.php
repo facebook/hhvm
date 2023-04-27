@@ -4,7 +4,7 @@ class Blah {
   public function foo() { echo "sup\n"; }
 }
 
-function main(Blah $x = null) {
+function main(?Blah $x = null) {
   if (!$x) {
     $k = varray[1,2,3,4];
   } else {

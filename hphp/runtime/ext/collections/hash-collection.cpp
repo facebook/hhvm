@@ -60,54 +60,6 @@ int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
   return ei;
 }
 
-NEVER_INLINE
-void HashCollection::warnOnStrIntDup() const {
-  req::fast_set<int64_t> seenVals;
-
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    int64_t newVal = 0;
-
-    if (e->hasIntKey()) {
-      newVal = e->ikey;
-    } else {
-      assertx(e->hasStrKey());
-      // isStriclyInteger() puts the int value in newVal as a side effect.
-      if (!e->skey->isStrictlyInteger(newVal)) continue;
-    }
-
-    if (!seenVals.insert(newVal).second) {
-      auto cls = getVMClass()->name()->toCppString();
-      auto pos = cls.rfind('\\');
-      if (pos != std::string::npos) {
-        cls = cls.substr(pos + 1);
-      }
-      raise_warning(
-        "%s::toArray() for a %s containing both int(%" PRId64 ") "
-        "and string('%" PRId64 "')",
-        cls.c_str(),
-        toLower(cls).c_str(),
-        newVal,
-        newVal
-      );
-      return;
-    }
-  }
-  // Do nothing if no 'duplicates' were found.
-}
-
-Array HashCollection::toVArray() {
-  if (!m_size) return empty_vec_array();
-  return Array{arrayData()}.toVec();
-}
-
-Array HashCollection::toDArray() {
-  if (!m_size) return empty_dict_array();
-  auto arr = Array{arrayData()}.toDict();
-  if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
-  return arr;
-}
-
 Array HashCollection::toKeysArray() {
   VecInit ai(m_size);
   auto* eLimit = elmLimit();
@@ -123,7 +75,8 @@ Array HashCollection::toKeysArray() {
 }
 
 Array HashCollection::toValuesArray() {
-  return toVArray();
+  if (!m_size) return empty_vec_array();
+  return Array{arrayData()}.toVec();
 }
 
 void HashCollection::remove(int64_t key) {
@@ -243,7 +196,7 @@ void HashCollection::compact() {
   if (!arrayData()->cowCheck()) {
     // VanillaDict::compact can only handle cases where the buffer's
     // refcount is 1.
-    arrayData()->compact(false);
+    arrayData()->compact();
   } else {
     // For cases where the buffer's refcount is greater than 1, call
     // resizeHelper().
@@ -267,11 +220,6 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     for (; newCap < m_size; newCap <<= 1) {}
     assertx(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
-    if (m_size == 0 && nextKI() == 0) {
-      decRefArr(arrayData());
-      setArrayData(CreateDictAsMixed());
-      return;
-    }
     // If no old capacity was provided, we compute the largest capacity
     // where m_size/cap() is less than or equal to 0.5 for good hysteresis
     size_t doubleSz = size_t(m_size) * 2;

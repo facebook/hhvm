@@ -1,0 +1,10 @@
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+Testing/
+cmake_install.cmake
+install_manifest.txt
+gtest/
+bin/
+lib/

@@ -44,7 +44,7 @@ module Constants = struct
 
   let no_errors : Errors.t = Errors.from_file_error_list []
 
-  let no_errors_absolute = SMap.empty
+  (* let no_errors_absolute = SMap.empty *)
 
   let one_error file error : Errors.t =
     Errors.from_file_error_list [(file, error)]
@@ -228,7 +228,9 @@ let connect_persistent () =
         { ClientProvider.client; m2s_sequence_number = _ } ->
       client
     | ClientProvider.Select_persistent
-    | ClientProvider.Select_nothing ->
+    | ClientProvider.Select_nothing
+    | ClientProvider.Select_exception _
+    | ClientProvider.Not_selecting_hg_updating ->
       assert false
   in
   Ide_info_store.new_ client;

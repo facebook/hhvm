@@ -27,33 +27,33 @@ namespace HPHP {
 using Result = BCPattern::Result;
 
 Result BCPattern::matchAnchored(const Func* func) {
-  return matchAnchored(func->entry(), func->entry() + func->bclen());
+  return matchAnchored(func->entry(), 0, func->bclen());
 }
 
-Result BCPattern::matchAnchored(PC start, PC end) {
+Result BCPattern::matchAnchored(PC entry, Offset start, Offset end) {
   Result result;
 
-  matchAnchored(m_pattern, start, end, result);
+  matchAnchored(m_pattern, entry, start, end, result);
   return result;
 }
 
-void BCPattern::matchAnchored(const Expr& pattern,
-                              PC start, PC end, Result& result) {
+void BCPattern::matchAnchored(const Expr& pattern, PC entry,
+                              Offset start, Offset end, Result& result) {
   auto pos = pattern.begin();
 
   for (auto inst = start; inst != end; ) {
     // Detect a match.
     if (pos == pattern.end()) {
-      result.m_start = start;
-      result.m_end = inst;
+      result.m_start = entry + start;
+      result.m_end = entry + inst;
       return;
     }
 
-    auto const op = peek_op(inst);
+    auto const op = peek_op(entry + inst);
 
     // Skip pattern-globally ignored opcodes.
     if (m_ignores.count(op)) {
-      inst = next(inst);
+      inst = next(entry, inst);
       continue;
     }
 
@@ -73,11 +73,11 @@ void BCPattern::matchAnchored(const Expr& pattern,
         auto res = result;
 
         // Match on the alternate.
-        matchAnchored(alt, inst, end, res);
+        matchAnchored(alt, entry, inst, end, res);
 
         if (res.found()) {
           result = res;
-          result.m_start = start;
+          result.m_start = entry + start;
           return;
         }
       }
@@ -86,7 +86,7 @@ void BCPattern::matchAnchored(const Expr& pattern,
 
     // Capture the atom if desired.
     if (pos->shouldCapture()) {
-      result.m_captures.push_back(inst);
+      result.m_captures.push_back(entry + inst);
     }
 
     // Check for shallow match.
@@ -97,17 +97,17 @@ void BCPattern::matchAnchored(const Expr& pattern,
     auto filter = pos->getFilter();
 
     // Check for deep match if desired.
-    if (filter && !filter(inst, result.m_captures)) {
+    if (filter && !filter(entry + inst, result.m_captures)) {
       return nomatch();
     }
 
     if ((pos->op() == Op::JmpZ || pos->op() == Op::JmpNZ)) {
       // Match the taken block, if there is one.
-      auto const offsets = instrJumpOffsets(inst);
+      auto const offsets = instrJumpTargets(entry, inst);
       assertx(offsets.size() == 1);
 
       auto res = result;
-      matchAnchored(pos->getTaken(), inst + offsets[0], end, res);
+      matchAnchored(pos->getTaken(), entry, offsets[0], end, res);
 
       if (!res.found()) {
         return nomatch();
@@ -120,7 +120,7 @@ void BCPattern::matchAnchored(const Expr& pattern,
     if (pos->hasSeq()) {
       // Match the subsequence if we have one.
       auto res = result;
-      matchAnchored(pos->getSeq(), next(inst), end, res);
+      matchAnchored(pos->getSeq(), entry, next(entry, inst), end, res);
 
       if (!res.found()) {
         return nomatch();
@@ -128,10 +128,10 @@ void BCPattern::matchAnchored(const Expr& pattern,
 
       // Set the PC.
       result.m_captures = res.m_captures;
-      inst = res.m_end;
+      inst = res.m_end - entry;
     } else {
       // Step the PC.
-      inst = next(inst);
+      inst = next(entry, inst);
     }
 
     // Step the pattern.
@@ -140,8 +140,8 @@ void BCPattern::matchAnchored(const Expr& pattern,
 
   // Detect a terminal match.
   if (pos == pattern.end()) {
-    result.m_start = start;
-    result.m_end = end;
+    result.m_start = entry + start;
+    result.m_end = entry + end;
   }
 }
 

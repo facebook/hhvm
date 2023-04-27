@@ -68,7 +68,7 @@ struct ISS {
     , state(bag.state)
     , undo(bag.undo)
     , propagate(propagate)
-    , analyzeDepth(options.StrengthReduce ? 0 : 1)
+    , analyzeDepth(0)
   {}
 
   const Index& index;
@@ -343,8 +343,9 @@ void setThisAvailable(ISS& env) {
 }
 
 bool thisAvailable(ISS& env) {
-  assertx(!env.state.thisType.subtypeOf(BBottom));
-  return env.state.thisType.subtypeOf(BObj);
+  return
+    env.state.thisType.subtypeOf(BObj) &&
+    !env.state.thisType.is(BBottom);
 }
 
 // Returns the type $this would have if it's not null.  Generally
@@ -385,17 +386,28 @@ Optional<Type> parentClsExact(ISS& env) {
   return std::nullopt;
 }
 
+// Like selfClsExact, but if the func is non-static, use an object
+// type instead.
+inline Type selfExact(ISS& env) {
+  assertx(env.ctx.func);
+  auto ty = selfClsExact(env);
+  if (env.ctx.func->attrs & AttrStatic) {
+    return ty ? *ty : TCls;
+  }
+  return ty ? toobj(*ty) : TObj;
+}
+
 //////////////////////////////////////////////////////////////////////
 // folding
 
 const StaticString s___NEVER_INLINE("__NEVER_INLINE");
+
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
-             Type context, bool maybeDynamic) {
+                         Type context, bool maybeDynamic) {
   if (!func ||
       fca.hasUnpack() ||
       fca.hasGenerics() ||
       fca.numRets() != 1 ||
-      !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
       any(env.collect.opts & CollectionOpts::Optimizing)) {
@@ -429,6 +441,13 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
+  // Internal functions may raise module boundary violations
+  if ((func->attrs & AttrInternal) &&
+      env.index.lookup_func_unit(*env.ctx.func)->moduleName !=
+      env.index.lookup_func_unit(*func)->moduleName) {
+    return false;
+  }
+
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
 
@@ -451,14 +470,22 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // Any native functions at this point are known to be
   // non-foldable, but other builtins might be, even if they
   // don't have the __Foldable attribute.
-  if (func->nativeInfo) return false;
+  if (func->isNative) return false;
 
   if (func->params.size()) return true;
 
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  if (env.index.is_effect_free(func) &&
-      is_scalar(env.index.lookup_return_type_raw(func).first)) {
+  if (env.index.is_effect_free(env.ctx, func) &&
+      is_scalar(
+        env.index.lookup_return_type(
+          env.ctx,
+          &env.collect.methods,
+          func,
+          Dep::InlineDepthLimit
+        )
+      )
+     ) {
     return true;
   }
 
@@ -469,8 +496,8 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
     // The method may be foldable if we know more about $this.
     if (is_specialized_obj(context)) {
-      auto const dobj = dobj_of(context);
-      if (dobj.type == DObj::Exact || dobj.cls.cls() != func->cls) {
+      auto const& dobj = dobj_of(context);
+      if (dobj.isExact() || (!dobj.isIsect() && dobj.cls().cls() != func->cls)) {
         return true;
       }
     }
@@ -727,34 +754,30 @@ bool locCouldBeUninit(ISS& env, LocalId l) {
 }
 
 /*
- * Update the known type of a local, based on assertions
- * (VerifyParamType; or IsType/JmpCC), rather than an actual
- * modification to the local.
+ * Update the known type of a local, based on assertions (e.g. IsType/JmpCC),
+ * rather than an actual modification to the local.
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
-  if (!is_volatile_local(env.ctx.func, l) && v.subtypeOf(BCell)) {
+  assertx(v.subtypeOf(BCell));
+  if (!is_volatile_local(env.ctx.func, l)) {
     if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
     env.state.locals[l] = std::move(t);
   }
 }
 
+/*
+ * Refine all locals in an equivalence class using fun. Returns false if refined
+ * local is unreachable.
+ */
 template<typename F>
 bool refineLocation(ISS& env, LocalId l, F fun) {
   bool ok = true;
   auto refine = [&] (Type t) {
     always_assert(t.subtypeOf(BCell));
-    auto r1 = fun(t);
-    auto r2 = intersection_of(r1, t);
-    // In unusual edge cases (mainly intersection of two unrelated
-    // interfaces) the intersection may not be a subtype of its inputs.
-    // In that case, always choose fun's type.
-    if (r2.subtypeOf(r1)) {
-      if (r2.subtypeOf(BBottom)) ok = false;
-      return r2;
-    }
-    if (r1.subtypeOf(BBottom)) ok = false;
-    return r1;
+    auto i = intersection_of(fun(t), t);
+    if (i.subtypeOf(BBottom)) ok = false;
+    return i;
   };
   if (l == StackDupId) {
     auto stkIdx = env.state.stack.size();
@@ -772,8 +795,10 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     if (env.state.thisLoc != NoLocalId) {
       l = env.state.thisLoc;
     }
+    return ok;
   }
-  if (l > MaxLocalId) return ok;
+  if (l == NoLocalId) return ok;
+  assertx(l <= MaxLocalId);
   auto fixThis = false;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
@@ -790,15 +815,18 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
   return ok;
 }
 
-template<typename PreFun, typename PostFun>
+/*
+ * Refine locals along taken and fallthrough edges.
+ */
+template<typename Taken, typename Fallthrough>
 void refineLocation(ISS& env, LocalId l,
-                    PreFun pre, BlockId target, PostFun post) {
+                    Taken taken, BlockId target, Fallthrough fallthrough) {
   auto state = env.state;
-  auto const target_reachable = refineLocation(env, l, pre);
+  auto const target_reachable = refineLocation(env, l, taken);
   if (!target_reachable) jmp_nevertaken(env);
   // swap, so we can restore this state if the branch is always taken.
   env.state.swap(state);
-  if (!refineLocation(env, l, post)) {
+  if (!refineLocation(env, l, fallthrough)) { // fallthrough unreachable.
     jmp_setdest(env, target);
     env.state.copy_from(std::move(state));
   } else if (target_reachable) {
@@ -909,17 +937,14 @@ void killThisProps(ISS& env) {
  * that could result from reading a property $this->name.
  */
 Optional<Type> thisPropAsCell(ISS& env, SString name) {
-  auto const elem = env.collect.props.readPrivateProp(name);
-  if (!elem) return std::nullopt;
-  if (elem->ty.couldBe(BUninit) && !is_specialized_obj(thisType(env))) {
-    return TInitCell;
-  }
-  return to_cell(elem->ty);
+  auto const ty = thisPropType(env, name);
+  if (!ty) return std::nullopt;
+  return to_cell(ty.value());
 }
 
 /*
  * Merge a type into the tracked property types on $this, in the sense
- * of tvSet (i.e. setting the inner type on possible refs).
+ * of tvSet.
  *
  * Note that all types we see that could go into an object property have to
  * loosen_all.  This is because the object could be serialized and then

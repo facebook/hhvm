@@ -20,18 +20,11 @@ type genv = {
   workers: MultiWorker.worker list option;
       (** Early-initialized workers to be used in MultiWorker jobs
           They are initialized early to keep their heaps as empty as possible. *)
+  notifier: ServerNotifier.t;  (** Common abstraction for watchman/dfind *)
   indexer: (string -> bool) -> unit -> string list;
-      (** Returns the list of files under .hhconfig, subject to a filter *)
-  notifier_async: unit -> ServerNotifierTypes.notifier_changes;
-      (** Each time this is called, it should return the files that have changed
-          since the last invocation *)
-  notifier_async_reader: unit -> Buffered_line_reader.t option;
-      (** If this FD is readable, next call to notifier_async () should read
-          something from it. *)
-  notifier: unit -> SSet.t;
-  wait_until_ready: unit -> unit;
-      (** If daemons are spawned as part of the init process, wait for them here
-          e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
+      (** Returns the list of files under .hhconfig, subject to a filter.
+      TODO: this indexer should be moved to a member of ServerNotifier,
+      but can't because zoncolan needs to tweak it. *)
   mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 
@@ -201,8 +194,9 @@ module RecheckLoopStats : sig
         (** Watchman subscription has gone down, so state of the world after the
             recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
-    rechecked_count: int;
-    total_rechecked_count: int;  (** includes dependencies *)
+    total_changed_files_count: int;
+        (** Count of files changed on disk and potentially also in the IDE. *)
+    total_rechecked_count: int;
     last_iteration_start_time: seconds_since_epoch;
         (** Start time of the last loop iteration, after the last user change. *)
     duration: seconds;
@@ -267,16 +261,15 @@ type env = {
   last_notifier_check_time: float;
       (** Timestamp of last query for disk changes *)
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
-  remote_execution_files: Relative_path.Set.t;
-      (** Files that need to be typechecked via remote execution *)
-  remote_execution: ReEnv.t option;
-      (** Whether type check should happen via remote execution *)
   editor_open_files: Relative_path.Set.t;
       (** The map from full path to synchronized file contents *)
   ide_needs_parsing: Relative_path.Set.t;
       (** Files which parse trees were invalidated (because they changed on disk
           or in editor) and need to be re-parsed *)
   disk_needs_parsing: Relative_path.Set.t;
+  clock: Watchman.clock option;
+      (** This is the clock as of when disk_needs_parsing was last updated.
+      None if not using Watchman. *)
   needs_phase2_redecl: Relative_path.Set.t;
       (** Declarations that became invalidated and moved to "old" part of the heap.
           We keep them there to be used in "determining changes" step of recheck.
@@ -288,6 +281,12 @@ type env = {
           executed . After full check this should be empty, unless that check was
           cancelled mid-flight, in which case full_check_status will be set to
           Full_check_started and entire thing will be retried on next iteration. *)
+  why_needs_server_type_check: string * string;
+      (** Why is a round of ServerTypeCheck needed? For instance, if a typecheck
+      got interrupted+cancelled leaving files still needing to be checked, the
+      reason will be stored here. It's written+read by [ServerTypeCheck.type_check].
+      The first of the two strings is a user-facing message, and the second is additional
+      information for logs. *)
   init_env: init_env;
   full_recheck_on_file_changes: full_recheck_on_file_changes;
       (** Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck
@@ -327,6 +326,8 @@ type env = {
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
+  package_info: Package.Info.t; [@opaque]
+      (** Function for determining which package a module belongs to *)
 }
 [@@deriving show]
 
@@ -339,3 +340,5 @@ val is_full_check_started : full_check_status -> bool
 val list_files : env -> string list
 
 val add_changed_files : env -> Relative_path.Set.t -> env
+
+val show_clock : Watchman.clock option -> string

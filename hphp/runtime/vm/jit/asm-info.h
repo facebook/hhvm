@@ -38,9 +38,9 @@ struct AsmInfo {
     // the offset between logical and physical addresses.
     ptrdiff_t offset{0};
   };
-  typedef StateMultiMap<Block, TcaRange> BlockRanges;
+  using BlockRanges = StateMultiMap<Block, TcaRange>;
   // Map from IRInstruction to Block id.
-  typedef StateVector<IRInstruction, uint32_t> InstBlockMap;
+  using InstBlockMap = StateVector<IRInstruction, uint32_t>;
 
   OffsetInstRanges mainInstRanges;
   OffsetInstRanges coldInstRanges;

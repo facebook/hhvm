@@ -3,8 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::{AllocError, Allocator, Layout};
-use std::hash::{BuildHasher, Hash, Hasher};
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
+use std::hash::BuildHasher;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
@@ -13,8 +17,19 @@ use owning_ref::OwningRef;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
-use crate::shardalloc::{ShardAlloc, ShardAllocControlData, SHARD_ALLOC_MIN_CHUNK_SIZE};
-use crate::sync::{RwLock, RwLockReadGuard, RwLockRef, RwLockWriteGuard};
+use crate::shardalloc::ShardAlloc;
+use crate::shardalloc::ShardAllocControlData;
+use crate::shardalloc::SHARD_ALLOC_MIN_CHUNK_SIZE;
+use crate::sync::RwLock;
+use crate::sync::RwLockReadGuard;
+use crate::sync::RwLockRef;
+use crate::sync::RwLockWriteGuard;
+
+/// Timeout for acquiring shard locks.
+///
+/// We'd like to not hang forever if another worker craches (or is killed)
+/// while holding the lock (e.g. because of an OOM kill)
+pub const LOCK_TIMEOUT: Option<std::time::Duration> = Some(std::time::Duration::new(60, 0));
 
 /// The number of shards.
 ///
@@ -58,6 +73,16 @@ pub trait CMapValue {
     /// whether or not the value points to evictable data, and thus whether or not
     /// it should be evicted.
     fn points_to_evictable_data(&self) -> bool;
+
+    /// An evictable heap can contain data which, in addition to being evictable
+    /// upon memory pressure, can be removed via invalidation. We call this type
+    /// of data "flushable". This function tells us whether a value in the hash map
+    /// points to flushable data in the evitcable heap, so that they can be removed.
+    fn points_to_flushable_data(&self) -> bool;
+
+    /// A hash map value holds a pointer to its corresponding data in the heap.
+    /// This function returns that pointer.
+    fn ptr(&self) -> &NonNull<u8>;
 }
 
 /// A reference to a value.
@@ -207,7 +232,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         // Initialize maps themselves.
         for map in maps.iter() {
-            map.write()
+            map.write(LOCK_TIMEOUT)
                 .unwrap()
                 .reset_with_hasher(cmap.file_alloc, cmap.hash_builder.clone());
         }
@@ -269,6 +294,9 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
 impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     fn shard_index_for(&self, key: &K) -> usize {
+        if NUM_SHARDS == 1 {
+            return 0;
+        }
         let mut hasher = self.hash_builder.build_hasher();
         key.hash(&mut hasher);
         let hash = hasher.finish();
@@ -282,7 +310,7 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 
     fn shard_for_writing<'a>(&'a self, key: &K) -> Shard<'shm, 'a, K, V, S> {
         let shard_index = self.shard_index_for(key);
-        let map = self.maps[shard_index].write().unwrap();
+        let map = self.maps[shard_index].write(LOCK_TIMEOUT).unwrap();
         let alloc_non_evictable = &self.shard_allocs_non_evictable[shard_index];
         let alloc_evictable = &self.shard_allocs_evictable[shard_index];
         Shard {
@@ -294,7 +322,22 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 
     fn shard_for_reading<'a>(&'a self, key: &K) -> RwLockReadGuard<'a, Map<'shm, K, V, S>> {
         let shard_index = self.shard_index_for(key);
-        self.maps[shard_index].read().unwrap()
+        self.maps[shard_index].read(LOCK_TIMEOUT).unwrap()
+    }
+
+    /// Remove from the index the ones that don't satisfy the predicate
+    /// and compact everything remaining.
+    #[allow(unused)]
+    fn filter_and_compact<'a, P: FnMut(&mut V) -> bool>(
+        shard: &mut Shard<'shm, 'a, K, V, S>,
+        mut f: P,
+    ) {
+        let entries_to_invalidate = shard.map.drain_filter(|_, value| !f(value));
+        entries_to_invalidate.for_each(|(_, value)| {
+            let data = value.ptr();
+            shard.alloc_evictable.mark_as_unreachable(data)
+        });
+        shard.alloc_evictable.compact()
     }
 
     /// Empty a shard.
@@ -418,32 +461,48 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     ///
     /// Will loop over each shard.
     pub fn len(&self) -> usize {
-        self.maps.iter().map(|map| map.read().unwrap().len()).sum()
+        self.maps
+            .iter()
+            .map(|map| map.read(LOCK_TIMEOUT).unwrap().len())
+            .sum()
     }
 
     /// Return true if the hashmap is empty.
     /// Will loop over each shard.
     pub fn is_empty(&self) -> bool {
-        self.maps.iter().all(|map| map.read().unwrap().is_empty())
+        self.maps
+            .iter()
+            .all(|map| map.read(LOCK_TIMEOUT).unwrap().is_empty())
     }
 }
 
 #[cfg(test)]
 mod integration_tests {
-    use super::*;
-
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashMap;
+    use std::collections::HashSet;
     use std::time::Duration;
 
     use nix::sys::wait::WaitStatus;
     use nix::unistd::ForkResult;
     use rand::prelude::*;
 
+    use super::*;
+
     struct U64Value(u64);
 
     impl CMapValue for U64Value {
         fn points_to_evictable_data(&self) -> bool {
             false
+        }
+
+        fn points_to_flushable_data(&self) -> bool {
+            false
+        }
+
+        fn ptr(&self) -> &NonNull<u8> {
+            // Since none of the existing unit tests below actually write to
+            // memory, we should not invoke this function to attempt accessing it
+            panic!("This method should not be invoked!")
         }
     }
 

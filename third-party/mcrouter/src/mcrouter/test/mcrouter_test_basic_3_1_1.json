@@ -1,0 +1,11 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [ "localhost:12345" ]
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "foo"
+  }
+}

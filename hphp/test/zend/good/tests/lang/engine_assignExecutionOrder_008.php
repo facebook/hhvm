@@ -1,5 +1,5 @@
 <?hh
-class C { static $p; }
+class C { public static $p; }
 function f() { return 0; }
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_STRICT);

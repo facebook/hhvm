@@ -7,5 +7,5 @@ function func_with_vararg(int $a, mixed ...$args): void {}
 function hint_variadic((function(int, mixed...): void) $f): void {}
 
 function test(): void {
-  hint_variadic(fun('func_with_vararg'));
+  hint_variadic(func_with_vararg<>);
 }

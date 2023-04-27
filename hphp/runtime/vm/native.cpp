@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/native.h"
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -112,12 +113,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     regs.GP_regs[regs.GP_count++] = val(tv).num;
     regs.GP_regs[regs.GP_count++] = dataType;
   } else {
-#if defined(__powerpc64__)
-    // We don't have room to spill two 64-bit values in PowerPC. If it becomes
-    // an issue, we can always up kMaxBuiltinArgs later. (We have room to pass
-    // 15 TypedValue arguments on PowerPC already, which should be plenty.)
-    always_assert(false);
-#else
     assertx(regs.spilled_count + 1 < kMaxBuiltinArgs - kNumGPRegs);
     regs.spilled_args[regs.spilled_count++] = val(tv).num;
     regs.spilled_args[regs.spilled_count++] = dataType;
@@ -126,7 +121,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     #ifdef __aarch64__
       regs.GP_count = kNumGPRegs;
     #endif
-#endif
   }
 }
 
@@ -162,7 +156,7 @@ void populateArgs(Registers& regs,
   for (auto i = 0; i < numArgs; ++i) {
     auto const arg = get(i);
     auto const& pi = func->params()[i];
-    auto const type = pi.builtinType;
+    auto const type = pi.builtinType();
     if (func->isInOut(i)) {
       if (auto const iv = builtinInValue(func, i)) {
         *io = *iv;
@@ -215,7 +209,7 @@ void callFunc(const Func* const func,
               bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->hniReturnType();
+  auto retType = func->returnTypeConstraint().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
@@ -325,7 +319,14 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
     auto const tv = args(i);
 
     auto tc = pi.typeConstraint;
-    auto targetType = pi.builtinType;
+    auto targetType = pi.builtinType();
+
+    if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+      // If we're dealing with an array-like interface, then there's no need to
+      // coerce the input type: it's going to be mixed on the C++ side anyhow.
+      continue;
+    }
+
     if (tc.isNullable()) {
       if (tvIsNull(tv)) {
         // No need to coerce when passed a null for a nullable type
@@ -581,9 +582,17 @@ Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
 static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   using T = NativeSig::Type;
 
+  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+    // TODO(T116301380): If native builtins resolved properly, we could probably
+    // do something smarter here. As it stands we match on whether the type here
+    // is _exactly_ one of the magic interfaces that supports array like things,
+    // including Hack Collections.
+    return ty == T::Mixed || ty == T::MixedTV;
+  }
+
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isArrayLike() || tc.isClassname()) {
+      tc.isArrayLike() || tc.isClassname() || tc.isTypeVar()) {
     return ty == T::Mixed || ty == T::MixedTV;
   }
 
@@ -665,7 +674,7 @@ static bool tcCheckNativeIO(
   auto const& tc = pinfo.typeConstraint;
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isArrayLike() || tc.isClassname()) {
+      tc.isArrayLike() || tc.isClassname() || tc.isTypeVar()) {
     return ty == T::MixedIO;
   }
 

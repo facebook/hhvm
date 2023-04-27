@@ -36,8 +36,8 @@ let with_ide_cache f =
     ~f:
       begin
         fun () ->
-        activate ();
-        f ()
+          activate ();
+          f ()
       end
     ~finally:deactivate
 
@@ -96,8 +96,6 @@ let get_ast tcopt path content =
     let (errors, ast) =
       Errors.do_ @@ fun () ->
       Full_fidelity_ast.defensive_program
-        ~fail_open:true
-        ~keep_errors:true
         ~include_line_comments:true
         ~quick:false
         tcopt

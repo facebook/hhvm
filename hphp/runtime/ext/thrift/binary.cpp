@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/field_wrapper.h"
+#include "hphp/runtime/ext/thrift/type_wrapper.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -78,7 +79,8 @@ Object binary_deserialize_struct(const String& clsName,
 Variant binary_deserialize(int8_t thrift_typeID,
                            PHPInputTransport& transport,
                            const FieldSpec& fieldspec,
-                           int options);
+                           int options,
+                           bool& hasTypeWrapper);
 void binary_serialize_struct(const Object& zthis,
                              PHPOutputTransport& transport);
 void binary_serialize(int8_t thrift_typeID,
@@ -95,7 +97,8 @@ void throw_tprotocolexception(const String& what, long errorcode) {
 Variant binary_deserialize_internal(int8_t thrift_typeID,
                                     PHPInputTransport& transport,
                                     const FieldSpec& fieldspec,
-                                    int options) {
+                                    int options,
+                                    bool& hasTypeWrapper) {
   switch (thrift_typeID) {
     case T_STOP:
     case T_VOID:
@@ -170,6 +173,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       uint32_t size = transport.readU32();
       auto const& key_spec = fieldspec.key();
       auto const& val_spec = fieldspec.val();
+      hasTypeWrapper = hasTypeWrapper || val_spec.isTypeWrapped;
       if (s_harray.equal(fieldspec.format)) {
         DictInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -179,17 +183,19 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
             case TType::T_I32:
             case TType::T_I64: {
               int64_t key = binary_deserialize(
-                types[0], transport, key_spec, options).toInt64();
+                types[0], transport, key_spec, options, hasTypeWrapper
+              ).toInt64();
               Variant value = binary_deserialize(
-                types[1], transport, val_spec, options);
+                types[1], transport, val_spec, options, hasTypeWrapper);
               arr.set(key, value);
               break;
             }
             case TType::T_STRING: {
               String key = binary_deserialize(
-                types[0], transport, key_spec, options).toString();
+                types[0], transport, key_spec, options, hasTypeWrapper
+              ).toString();
               Variant value = binary_deserialize(
-                types[1], transport, val_spec, options);
+                types[1], transport, val_spec, options, hasTypeWrapper);
               arr.set(key, value);
               break;
             }
@@ -204,9 +210,9 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         auto obj(req::make<c_Map>(size));
         for (uint32_t s = 0; s < size; ++s) {
           auto key = binary_deserialize(
-            types[0], transport, key_spec, options);
+            types[0], transport, key_spec, options, hasTypeWrapper);
           auto value = binary_deserialize(
-            types[1], transport, val_spec, options);
+            types[1], transport, val_spec, options, hasTypeWrapper);
           collections::set(obj.get(), key.asTypedValue(), value.asTypedValue());
         }
         return Variant(std::move(obj));
@@ -217,9 +223,9 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         }
         for (uint32_t i = 0; i < size; i++) {
           auto key = binary_deserialize(
-            types[0], transport, key_spec, options);
+            types[0], transport, key_spec, options, hasTypeWrapper);
           auto val = binary_deserialize(
-            types[1], transport, val_spec, options);
+            types[1], transport, val_spec, options, hasTypeWrapper);
           set_with_intish_key_cast(arr, key, val);
         }
         return arr.toVariant();
@@ -229,10 +235,13 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       int8_t type = transport.readI8();
       uint32_t size = transport.readU32();
       auto const& val_spec = fieldspec.val();
+      hasTypeWrapper = hasTypeWrapper || val_spec.isTypeWrapped;
       if (s_harray.equal(fieldspec.format)) {
         VecInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.append(binary_deserialize(type, transport, val_spec, options));
+          arr.append(
+            binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
+          );
         }
         return arr.toVariant();
       } else if (s_collection.equal(fieldspec.format)) {
@@ -242,7 +251,8 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         auto vec = req::make<c_Vector>(size);
         int64_t i = 0;
         do {
-          auto val = binary_deserialize(type, transport, val_spec, options);
+          auto val = binary_deserialize(
+            type, transport, val_spec, options, hasTypeWrapper);
           tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
         } while (++i < size);
         return Variant(std::move(vec));
@@ -252,7 +262,9 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
           vai.setLegacyArray(true);
         }
         for (auto s = uint32_t{0}; s < size; ++s) {
-          vai.append(binary_deserialize(type, transport, val_spec, options));
+          vai.append(
+            binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
+          );
         }
         return vai.toVariant();
       }
@@ -267,13 +279,16 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       if (s_harray.equal(fieldspec.format)) {
         KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.add(binary_deserialize(type, transport, val_spec, options));
+          arr.add(
+            binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
+          );
         }
         return arr.toVariant();
       } else if (s_collection.equal(fieldspec.format)) {
         auto set_ret(req::make<c_Set>(size));
         for (uint32_t s = 0; s < size; ++s) {
-          Variant key = binary_deserialize(type, transport, val_spec, options);
+          Variant key = binary_deserialize(
+            type, transport, val_spec, options, hasTypeWrapper);
           if (key.isInteger()) {
             set_ret->add(key);
           } else {
@@ -288,7 +303,8 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
           init.setLegacyArray();
         }
         for (uint32_t s = 0; s < size; ++s) {
-          Variant key = binary_deserialize(type, transport, val_spec, options);
+          Variant key = binary_deserialize(
+            type, transport, val_spec, options, hasTypeWrapper);
           set_with_intish_key_cast(init, key, true);
         }
         return init.toVariant();
@@ -305,9 +321,11 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
 Variant binary_deserialize(int8_t thrift_typeID,
                            PHPInputTransport& transport,
                            const FieldSpec& fieldspec,
-                           int options) {
-  const auto thriftValue =
-      binary_deserialize_internal(thrift_typeID, transport, fieldspec, options);
+                           int options,
+                           bool& hasTypeWrapper) {
+  const auto thriftValue = binary_deserialize_internal(
+        thrift_typeID, transport, fieldspec, options, hasTypeWrapper);
+  hasTypeWrapper = hasTypeWrapper || fieldspec.isTypeWrapped;
   return fieldspec.adapter
            ? transformToHackType(thriftValue, *fieldspec.adapter)
            : thriftValue;
@@ -409,8 +427,11 @@ void binary_deserialize_slow(const Object& zthis,
   while (ttype != T_STOP) {
     if (const auto* fieldspec = getFieldSlow(spec, fieldno)) {
       if (ttypes_are_compatible(ttype, fieldspec->type)) {
-        Variant rv = binary_deserialize(ttype, transport, *fieldspec, options);
-        if (fieldspec->isWrapped) {
+        bool hasTypeWrapper = false;
+        Variant rv = binary_deserialize(ttype, transport, *fieldspec, options, hasTypeWrapper);
+        if (hasTypeWrapper) {
+          setThriftField(rv, zthis, StrNR(fieldspec->name));
+        } else if (fieldspec->isWrapped) {
           setThriftType(rv, zthis, StrNR(fieldspec->name));
         } else {
           zthis->o_set(StrNR(fieldspec->name), rv, zthis->getClassName());
@@ -440,6 +461,7 @@ Object binary_deserialize_struct(const String& clsName,
   SpecHolder specHolder;
   auto const& spec = specHolder.getSpec(cls);
   Object dest = spec.newObject(cls);
+  spec.clearTerseFields(cls, dest);
 
   auto const& fields = spec.fields;
   const size_t numFields = fields.size();
@@ -479,8 +501,11 @@ Object binary_deserialize_struct(const String& clsName,
       }
     }
     auto index = cls->propSlotToIndex(i);
-    auto value = binary_deserialize(fieldType, transport, fields[i], options);
-    if (fields[i].isWrapped) {
+    bool hasTypeWrapper = false;
+    auto value = binary_deserialize(fieldType, transport, fields[i], options, hasTypeWrapper);
+    if (hasTypeWrapper) {
+      setThriftField(value, dest, StrNR(fields[i].name));
+    } else if (fields[i].isWrapped) {
       setThriftType(value, dest, StrNR(fields[i].name));
     } else {
       tvSet(*value.asTypedValue(), objProps->at(index));
@@ -517,13 +542,13 @@ void binary_serialize_internal(int8_t thrift_typeID,
       transport.writeI8(value.toBoolean() ? 1 : 0);
       return;
     case T_BYTE:
-      transport.writeI8(value.toByte());
+      transport.writeI8((char)value.toInt64());
       return;
     case T_I16:
-      transport.writeI16(value.toInt16());
+      transport.writeI16((short)value.toInt64());
       return;
     case T_I32:
-      transport.writeI32(value.toInt32());
+      transport.writeI32((int)value.toInt64());
       return;
     case T_I64:
     case T_U64:
@@ -603,34 +628,49 @@ void binary_serialize(int8_t thrift_typeID,
                       PHPOutputTransport& transport,
                       const Variant& value,
                       const FieldSpec& fieldspec) {
-  const auto& thriftValue = fieldspec.adapter
-                              ? transformToThriftType(value, *fieldspec.adapter)
-                              : value;
-  binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+  auto thrift_value = value;
+  if (fieldspec.isTypeWrapped && value.isObject()) {
+    thrift_value = getThriftField(value.toObject());
+  }
+  if (fieldspec.adapter)  {
+    const auto& thriftValue = transformToThriftType(thrift_value, *fieldspec.adapter);
+    binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+  } else {
+    binary_serialize_internal(thrift_typeID, transport, thrift_value, fieldspec);
+  }
 }
 
-void binary_serialize_slow(const FieldSpec& field,
+void binary_serialize_slow(const FieldSpec& field_spec,
                            const Object& obj,
                            PHPOutputTransport& transport) {
   INC_TPC(thrift_write_slow);
-  StrNR fieldName(field.name);
+  StrNR fieldName(field_spec.name);
   Variant fieldVal;
-  if (field.isWrapped) {
+  if (field_spec.isWrapped) {
     fieldVal = getThriftType(obj, fieldName);
   } else {
      fieldVal = obj->o_get(fieldName, true, obj->getClassName());
   }
   if (!fieldVal.isNull()) {
-    TType fieldType = field.type;
-    transport.writeI8(fieldType);
-    transport.writeI16(field.fieldNum);
-    binary_serialize(fieldType, transport, fieldVal, field);
+    TType fieldType = field_spec.type;
+    if (field_spec.isTypeWrapped && fieldVal.isObject()) {
+      fieldVal = getThriftField(fieldVal.toObject());
+    }
+    if(field_spec.adapter){
+      fieldVal = transformToThriftType(fieldVal, *field_spec.adapter);
+    }
+    if(!(field_spec.isTerse && is_value_type_default(fieldType, fieldVal))){
+      transport.writeI8(fieldType);
+      transport.writeI16(field_spec.fieldNum);
+      binary_serialize_internal(fieldType, transport, fieldVal, field_spec);
+    }
   }
 }
 
 void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
   Class* cls = obj->getVMClass();
   auto prop = cls->declProperties().begin();
+  obj->deserializeAllLazyProps();
   auto objProps = obj->props();
   const size_t numProps = cls->numDeclProperties();
 
@@ -643,16 +683,25 @@ void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
       auto index = cls->propSlotToIndex(slot);
       VarNR fieldWrapper(objProps->at(index).tv());
       Variant fieldVal;
+      TType fieldType = fields[slot].type;
       if (fields[slot].isWrapped) {
         fieldVal = getThriftType(obj, StrNR(fields[slot].name));
       } else {
         fieldVal = fieldWrapper;
       }
       if (!fieldVal.isNull()) {
-        TType fieldType = fields[slot].type;
+        if (fields[slot].isTypeWrapped && fieldVal.isObject()) {
+          fieldVal = getThriftField(fieldVal.toObject());
+        }
+        if(fields[slot].adapter){
+          fieldVal = transformToThriftType(fieldVal, *fields[slot].adapter);
+        }
+        if(fields[slot].isTerse && is_value_type_default(fieldType, fieldVal)){
+          continue;
+        }
         transport.writeI8(fieldType);
         transport.writeI16(fields[slot].fieldNum);
-        binary_serialize(fieldType, transport, fieldVal, fields[slot]);
+        binary_serialize_internal(fieldType, transport, fieldVal, fields[slot]);
       } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                  (prop[slot].attrs & AttrLateInit)) {
         throw_late_init_prop(prop[slot].cls, prop[slot].name, false);

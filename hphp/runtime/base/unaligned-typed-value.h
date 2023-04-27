@@ -33,7 +33,7 @@ struct UnalignedTypedValue final {
   }
 };
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 static_assert(alignof(UnalignedTypedValue) == 1);
 static_assert(sizeof(UnalignedTypedValue) == 9);
 #endif

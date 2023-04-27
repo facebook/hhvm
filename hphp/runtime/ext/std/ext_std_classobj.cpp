@@ -99,6 +99,12 @@ bool HHVM_FUNCTION(enum_exists, const String& enum_name,
   return cls && isAnyEnum(cls);
 }
 
+bool HHVM_FUNCTION(module_exists, const String& module_name,
+                   bool autoload /* = true */) {
+  if (autoload) return Module::load(module_name.get()) != nullptr;
+  return Module::lookup(module_name.get()) != nullptr;
+}
+
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
@@ -162,9 +168,10 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func = fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx = MemberLookupContext(func->cls(), func);
 
   DictInit arr(numDeclProps + numSProps);
 
@@ -339,8 +346,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
     );
     return Variant(Variant::NullInit());
   }
-
-  auto const lookup = cls->getDeclPropSlot(cls, property.get());
+  assertx(cls);
+  // Class is nonnull here, so no need to fill in module name in the lookup context
+  auto const lookup = cls->getDeclPropSlot(MemberLookupContext(cls), property.get());
   if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&
@@ -514,6 +522,7 @@ void StandardExtension::initClassobj() {
   HHVM_FE(interface_exists);
   HHVM_FE(trait_exists);
   HHVM_FE(enum_exists);
+  HHVM_FE(module_exists);
   HHVM_FE(get_class_methods);
   HHVM_FE(get_class_constants);
   HHVM_FE(get_class_vars);

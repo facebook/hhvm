@@ -1,5 +1,5 @@
 module List = struct
-  include Core_kernel.List
+  include Core.List
 
   let unzip4 xyzws =
     let rec aux ((xs, ys, zs, ws) as acc) = function
@@ -259,6 +259,14 @@ module List = struct
       | (env, true) -> (env, true)
       | (env, false) -> exists_env env xs ~f)
 
+  let rec for_all_env env xs ~f =
+    match xs with
+    | [] -> (env, true)
+    | x :: xs ->
+      (match f env x with
+      | (env, false) -> (env, false)
+      | (env, true) -> for_all_env env xs ~f)
+
   let rec replicate ~num x =
     match num with
     | 0 -> []
@@ -270,7 +278,7 @@ module List = struct
 end
 
 module Result = struct
-  include Core_kernel.Result
+  include Core.Result
 
   let fold t ~ok ~error =
     match t with

@@ -18,6 +18,7 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
@@ -61,14 +62,10 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
   if (!ty.subtypeOf(BObj)) return NoReduced{};
 
   if (!is_specialized_obj(ty)) return TStr;
-  auto const d = dobj_of(ty);
-  switch (d.type) {
-  case DObj::Sub:   return TStr;
-  case DObj::Exact: break;
-  }
-
+  auto const& d = dobj_of(ty);
+  if (!d.isExact()) return TStr;
   constprop(env);
-  return sval(d.cls.name());
+  return sval(d.cls().name());
 }
 
 TypeOrReduced builtin_abs(ISS& env, const php::Func* func,
@@ -133,6 +130,23 @@ TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
   return ty.subtypeOf(BPrim | BStr) ? TInt : TOptInt;
 }
 
+TypeOrReduced builtin_is_numeric(ISS& env, const php::Func* func,
+                                 const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+  if (!ty.couldBe(BInt | BDbl | BStr)) return TFalse;
+  if (ty.subtypeOf(BInt | BDbl)) return TTrue;
+  if (ty.subtypeOf(BStr)) {
+     if (auto const val = tv(ty)) {
+       int64_t ival;
+       double dval;
+       auto const dt = val->m_data.pstr->toNumeric(ival, dval);
+       return dt == KindOfInt64 || dt == KindOfDouble ? TTrue : TFalse;
+     }
+  }
+  return TBool;
+}
+
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
@@ -184,6 +198,21 @@ TypeOrReduced builtin_trait_exists(ISS& env, const php::Func* func,
   return handle_oodecl_exists(env, func, fca, OODeclExistsOp::Trait);
 }
 
+TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
+                                     const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto name = getArg(env, func, fca, 0);
+  if (!name.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const v = tv(name);
+  if (!v) return NoReduced{};
+  auto const packageName = v->m_data.pstr;
+  auto const unit = env.index.lookup_func_unit(*env.ctx.func);
+  if (!unit) return NoReduced{};
+  constprop(env);
+  return unit->packageInfo.isPackageInActiveDeployment(packageName)
+    ? TTrue : TFalse;
+}
+
 TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
                                      const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -203,9 +232,9 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
   }
   if (ty.couldBe(BCls)) {
     if (is_specialized_cls(ty)) {
-      auto const dcls = dcls_of(ty);
-      if (dcls.type == DCls::Exact) {
-        auto cname = dcls_of(ty).cls.name();
+      auto const& dcls = dcls_of(ty);
+      if (dcls.isExact()) {
+        auto cname = dcls.cls().name();
         retTy |= sval(cname);
       } else {
         retTy |= TSStr;
@@ -317,10 +346,10 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     auto const clsStr = [&] () -> SString {
       auto const t = getArg(env, func, fca, 0);
       if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
-        auto const dcls = dcls_of(t);
-        if (dcls.type != DCls::Exact) return nullptr;
+        auto const& dcls = dcls_of(t);
+        if (!dcls.isExact()) return nullptr;
         if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
-        return dcls.cls.name();
+        return dcls.cls().name();
       }
       if (t.subtypeOf(BStr) && is_specialized_string(t)) {
         return sval_of(t);
@@ -367,7 +396,7 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     if (t.subtypeOf(BObj)) return objcls(t);
     if (t.subtypeOf(BStr) && is_specialized_string(t)) {
       auto const str = sval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
+      auto const rcls = env.index.resolve_class(str);
       if (!rcls || !rcls->resolved()) {
         throws = TriBool::Maybe;
         return TCls;
@@ -376,7 +405,7 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
+      auto const rcls = env.index.resolve_class(str);
       if (!rcls || !rcls->resolved()) {
         throws = TriBool::Maybe;
         return TCls;
@@ -502,6 +531,23 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   return intersection_of(classname, TSStr);
 }
 
+TypeOrReduced builtin_create_special_implicit_context(ISS& env,
+                                                      const php::Func* func,
+                                                      const FCallArgs& fca) {
+  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
+
+  auto const type = getArg(env, func, fca, 0);
+  if (!type.subtypeOf(BInt)) return NoReduced{};
+
+  if (fca.numArgs() == 1) {
+    reduce(env, bc::Null {}, bc::CreateSpecialImplicitContext {});
+  } else {
+    if (!getArg(env, func, fca, 1).subtypeOf(BOptStr)) return NoReduced{};
+    reduce(env, bc::CreateSpecialImplicitContext {});
+  }
+  return Reduced{};
+}
+
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -510,16 +556,19 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(max2, max2)                                                         \
   X(min2, min2)                                                         \
   X(strlen, strlen)                                                     \
+  X(is_numeric, is_numeric)                                             \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
+  X(package_exists, HH\\package_exists)                                 \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
+  X(create_special_implicit_context, HH\\ImplicitContext\\_Private\\create_special_implicit_context)   \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS
@@ -559,17 +608,12 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
-      !func->nativeInfo ||
+      !func->isNative ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
       fca.hasGenerics() ||
       !RuntimeOption::EvalEnableCallBuiltin) {
     return false;
   }
-
-  // We rely on strength reduction to convert builtins, but if we do
-  // the analysis on the assumption that builtins will be created, but
-  // don't actually create them, all sorts of things can go wrong.
-  if (!options.StrengthReduce) return false;
 
   // Do not allow for inout arguments, unpack and variadic arguments
   if (func->hasInOutArgs ||

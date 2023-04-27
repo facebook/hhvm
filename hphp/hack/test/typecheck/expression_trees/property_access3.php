@@ -8,7 +8,9 @@ function test(): void {
   }`;
 }
 
-async function foo(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleInt): MyState)>> {
+async function foo(
+  ExampleContext $_,
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleInt): MyState)>>> {
   throw new Exception();
 }
 

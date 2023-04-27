@@ -84,7 +84,7 @@ ObjectData* alloc(CollectionType ctype, ArrayData* arr);
 ObjectData* allocPair(TypedValue c1, TypedValue c2);
 
 /////////////////////////////////////////////////////////////////////////////
-// Casting and Cloing
+// Casting and Cloning
 
 bool isType(const Class* cls, CollectionType type);
 template<typename ...Args>

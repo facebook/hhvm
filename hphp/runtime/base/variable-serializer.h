@@ -70,7 +70,7 @@ struct VariableSerializer {
   static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
 
   /**
-   * Top level entry function called by f_ functions.
+   * Top level entry function called by native builtins.
    */
   String serialize(const_variant_ref v, bool ret, bool keepCount = false);
   String serialize(const Variant& var, bool ret, bool keepCount = false) {
@@ -130,7 +130,7 @@ struct VariableSerializer {
   // can distinguish between all 3 possible array states (unmarked varray,
   // unmarked vec, marked varray/vec). Now corresponds to marked vec/dict.
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
-                         MarkedVArray, MarkedDArray };
+                         MarkedVArray, MarkedDArray, BespokeTypeStructure };
 
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
@@ -245,8 +245,12 @@ private:
 
   private:
     struct TvHash {
+      using folly_is_avalanching = std::true_type;
+      using folly_assume_32bit_hash = std::true_type;
+
       std::size_t operator()(const TypedValue& tv) const {
-        return pointer_hash<void>()(tv.m_data.parr);
+        auto hash = pointer_hash<void>()(tv.m_data.parr);
+        return std::uint32_t(hash) | (std::size_t(hash) << 32);
       }
     };
 
@@ -295,7 +299,7 @@ private:
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
-  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_currentDepth{0};      // current depth (nested objects/arrays)
   size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
   bool m_keyPrinted{false};
 

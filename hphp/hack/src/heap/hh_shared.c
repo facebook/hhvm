@@ -115,10 +115,12 @@
 #include <time.h>
 #include <zstd.h>
 
+#include "dictionary_data.h"
+
 // Some OCaml utility functions (introduced only in 4.12.0)
 //
 // TODO(hverr): Remove these when we move to 4.12.0
-value hh_shared_caml_alloc_some(value v) {
+static value hh_shared_caml_alloc_some(value v) {
   CAMLparam1(v);
   value some = caml_alloc_small(1, 0);
   Store_field(some, 0, v);
@@ -175,8 +177,6 @@ value hh_shared_caml_alloc_some(value v) {
 #    ifndef SYS_memfd_create
 #      if defined(__x86_64__)
 #        define SYS_memfd_create 319
-#      elif defined(__powerpc64__)
-#        define SYS_memfd_create 360
 #      elif defined(__aarch64__)
 #        define SYS_memfd_create 385
 #      else
@@ -236,6 +236,10 @@ extern value shmffi_remove(uint64_t hash);
 extern value shmffi_allocated_bytes();
 extern value shmffi_num_entries();
 
+extern value shmffi_add_raw(uint64_t hash, value data);
+extern value shmffi_get_raw(uint64_t hash);
+extern value shmffi_deserialize_raw(value data);
+extern value shmffi_serialize_raw(value data);
 
 /*****************************************************************************/
 /* Config settings (essentially constants, so they don't need to live in shared
@@ -280,13 +284,15 @@ typedef enum {
 #  define SHARED_MEM_INIT ((char *) 0x48047e00000ll)
 #elif defined __aarch64__
 /* CentOS 7.3.1611 kernel does not support a full 48-bit VA space, so choose a
- * value low enough that the 21 GB's mmapped in do not interfere with anything
+ * value low enough that the 100 GB's mmapped in do not interfere with anything
  * growing down from the top. 1 << 36 works. */
 #  define SHARED_MEM_INIT ((char *) 0x1000000000ll)
+#  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x2000000000ll)
+#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
 #else
 #  define SHARED_MEM_INIT ((char *) 0x500000000000ll)
 #  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
-#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
+#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)200 * 1024 * 1024 * 1024)
 #endif
 
 /* As a sanity check when loading from a file */
@@ -425,6 +431,9 @@ static size_t used_heap_size(void) {
 
 static long removed_count = 0;
 
+static ZSTD_CCtx* zstd_cctx = NULL;
+static ZSTD_DCtx* zstd_dctx = NULL;
+
 /* Expose so we can display diagnostics */
 CAMLprim value hh_used_heap_size(void) {
   if (shm_use_sharded_hashtbl) {
@@ -483,13 +492,13 @@ CAMLprim value hh_hash_slots(void) {
 
 #ifdef _WIN32
 
-struct timeval log_duration(const char *prefix, struct timeval start_t) {
+static struct timeval log_duration(const char *prefix, struct timeval start_t) {
    return start_t; // TODO
 }
 
 #else
 
-struct timeval log_duration(const char *prefix, struct timeval start_t) {
+static struct timeval log_duration(const char *prefix, struct timeval start_t) {
   struct timeval end_t = {0};
   gettimeofday(&end_t, NULL);
   time_t secs = end_t.tv_sec - start_t.tv_sec;
@@ -521,7 +530,7 @@ static HANDLE memfd;
  * Committing the whole shared heap at once would require the same
  * amount of free space in memory (or in swap file).
  **************************************************************************/
-void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   memfd = CreateFileMapping(
     INVALID_HANDLE_VALUE,
     NULL,
@@ -558,7 +567,7 @@ static void raise_less_than_minimum_available(uint64_t avail) {
 }
 
 #include <sys/statvfs.h>
-void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
+static void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   struct statvfs stats;
   uint64_t avail;
   if (statvfs(shm_dir, &stats)) {
@@ -570,7 +579,7 @@ void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   }
 }
 
-int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   int memfd = -1;
 
   if (shm_dir == NULL) {
@@ -647,7 +656,7 @@ int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem
  * The resulting file descriptor should be mmaped with the memfd_map
  * function (see below).
  ****************************************************************************/
-void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   memfd_shared_mem = memfd_create_helper("fb_heap", shm_dir, shared_mem_size, minimum_avail);
   if (shm_use_sharded_hashtbl) {
     memfd_shmffi = memfd_create_helper("fb_sharded_hashtbl", shm_dir, SHARDED_HASHTBL_MEM_SIZE, 0);
@@ -864,6 +873,29 @@ static size_t get_shared_mem_size(void) {
           heap_size + page_size + locals_size_b);
 }
 
+// Must be called AFTER init_shared_globals / define_globals
+// once per process, during hh_shared_init / hh_connect
+static void init_zstd_compression() {
+  // if use ZSTD
+  if (*compression) {
+    /* The resources below (dictionaries, contexts) technically leak,
+     * we don't free them as there is no proper API from workers.
+     * However, they are in use till the end of the process live. */
+    zstd_cctx = ZSTD_createCCtx();
+    zstd_dctx = ZSTD_createDCtx();
+    {
+      ZSTD_CDict* zstd_cdict = ZSTD_createCDict(dictionary_data, dictionary_data_len, *compression);
+      const size_t result = ZSTD_CCtx_refCDict(zstd_cctx, zstd_cdict);
+      assert(!ZSTD_isError(result));
+    }
+    {
+      ZSTD_DDict* zstd_ddict = ZSTD_createDDict(dictionary_data, dictionary_data_len);
+      const size_t result = ZSTD_DCtx_refDDict(zstd_dctx, zstd_ddict);
+      assert(!ZSTD_isError(result));
+    }
+  }
+}
+
 static void init_shared_globals(
   size_t config_log_level,
   double config_sample_rate,
@@ -924,7 +956,6 @@ CAMLprim value hh_shared_init(
   value num_workers_val
 ) {
   CAMLparam3(config_val, shm_dir_val, num_workers_val);
-  CAMLlocal1(connector);
   CAMLlocal4(
     config_global_size_val,
     config_heap_size_val,
@@ -987,6 +1018,7 @@ CAMLprim value hh_shared_init(
     Double_val(Field(config_val, 8)),
     Long_val(Field(config_val, 9))
   );
+  init_zstd_compression();
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
 
@@ -1002,17 +1034,7 @@ CAMLprim value hh_shared_init(
   sigaction(SIGSEGV, &sigact, NULL);
 #endif
 
-  connector = caml_alloc_tuple(8);
-  Store_field(connector, 0, Val_handle(memfd_shared_mem));
-  Store_field(connector, 1, config_global_size_val);
-  Store_field(connector, 2, config_heap_size_val);
-  Store_field(connector, 3, config_hash_table_pow_val);
-  Store_field(connector, 4, num_workers_val);
-  Store_field(connector, 5, config_shm_use_sharded_hashtbl);
-  Store_field(connector, 6, config_shm_cache_size);
-  Store_field(connector, 7, Val_handle(memfd_shmffi));
-
-  CAMLreturn(connector);
+  CAMLreturn(hh_get_handle());
 }
 
 /* Must be called by every worker before any operation is performed */
@@ -1037,6 +1059,7 @@ value hh_connect(value connector, value worker_id_val) {
   assert(memfd_shared_mem >= 0);
   char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
   define_globals(shared_mem_init);
+  init_zstd_compression();
 
   if (shm_use_sharded_hashtbl) {
     assert(memfd_shmffi >= 0);
@@ -1060,8 +1083,8 @@ value hh_get_handle(void) {
   Store_field(connector, 3, Val_long(hash_table_pow));
   Store_field(connector, 4, Val_long(num_workers));
   Store_field(connector, 5, Val_bool(shm_use_sharded_hashtbl));
-  Store_field(connector, 6, Val_bool(shm_cache_size_b));
-  Store_field(connector, 7, Val_bool(memfd_shmffi));
+  Store_field(connector, 6, Val_long(shm_cache_size_b));
+  Store_field(connector, 7, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);
 }
@@ -1104,20 +1127,26 @@ CAMLprim value hh_counter_next(void) {
  * process
  */
 /*****************************************************************************/
-void assert_master(void) {
+static void assert_master(void) {
   assert(my_pid == *master_pid);
 }
 
-void assert_not_master(void) {
+static void assert_not_master(void) {
   assert(my_pid != *master_pid);
 }
 
-void assert_allow_removes(void) {
+static void assert_allow_removes(void) {
   assert(*allow_removes);
 }
 
-void assert_allow_hashtable_writes_by_current_process(void) {
+static void assert_allow_hashtable_writes_by_current_process(void) {
   assert(allow_hashtable_writes_by_current_process);
+}
+
+CAMLprim value hh_assert_master(void) {
+  CAMLparam0();
+  assert_master();
+  CAMLreturn(Val_unit);
 }
 
 /*****************************************************************************/
@@ -1154,7 +1183,7 @@ CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLreturn(Val_unit);
 }
 
-void check_should_exit(void) {
+static void check_should_exit(void) {
   if (workers_should_exit == NULL) {
     caml_failwith(
       "`check_should_exit` failed: `workers_should_exit` was uninitialized. "
@@ -1380,7 +1409,7 @@ value hh_serialize_raw(value data) {
   size_t uncompressed_size = 0;
   storage_kind kind = 0;
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_serialize_raw(data));
   }
 
   // If the data is an Ocaml string it is more efficient to copy its contents
@@ -1413,7 +1442,7 @@ value hh_serialize_raw(value data) {
     max_compression_size = ZSTD_compressBound(size);
     compressed_data = malloc(max_compression_size);
 
-    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+    compressed_size = ZSTD_compress2(zstd_cctx, compressed_data, max_compression_size, data_value, size);
   }
   else {
     max_compression_size = LZ4_compressBound(size);
@@ -1505,7 +1534,7 @@ static heap_entry_t* hh_store_ocaml(
     max_compression_size = ZSTD_compressBound(size);
     compressed_data = malloc(max_compression_size);
 
-    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+    compressed_size = ZSTD_compress2(zstd_cctx, compressed_data, max_compression_size, data_value, size);
   }
   else {
     max_compression_size = LZ4_compressBound(size);
@@ -1557,7 +1586,7 @@ static uint64_t get_hash(value key) {
   return *((uint64_t*)String_val(key));
 }
 
-CAMLprim value get_hash_ocaml(value key) {
+CAMLprim value hh_get_hash_ocaml(value key) {
   return caml_copy_int64(*((uint64_t*)String_val(key)));
 }
 
@@ -1728,11 +1757,11 @@ static value write_raw_at(unsigned int slot, value data) {
 /*****************************************************************************/
 CAMLprim value hh_add_raw(value key, value data) {
   CAMLparam2(key, data);
+  uint64_t hash = get_hash(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_add_raw(hash, data));
   }
   check_should_exit();
-  uint64_t hash = get_hash(key);
   unsigned int slot = hash & (hashtbl_size - 1);
   unsigned int init_slot = slot;
   while(1) {
@@ -1807,7 +1836,7 @@ static unsigned int find_slot(value key) {
   }
 }
 
-_Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
+static _Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
   _Bool good_hash = hashtbl[slot].hash == get_hash(key);
   _Bool non_null_addr = hashtbl[slot].addr != NULL;
   if (good_hash && non_null_addr) {
@@ -1815,7 +1844,7 @@ _Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
     // actually is ready to be used before returning.
     time_t start = 0;
     while (hashtbl[slot].addr == HASHTBL_WRITE_IN_PROGRESS) {
-#if defined(__aarch64__) || defined(__powerpc64__)
+#if defined(__aarch64__)
       asm volatile("yield" : : : "memory");
 #else
       asm volatile("pause" : : : "memory");
@@ -1858,7 +1887,7 @@ value hh_mem(value key) {
 /*****************************************************************************/
 /* Deserializes the value pointed to by elt. */
 /*****************************************************************************/
-CAMLprim value hh_deserialize(heap_entry_t *elt) {
+static CAMLprim value hh_deserialize(heap_entry_t *elt) {
   CAMLparam0();
   CAMLlocal1(result);
   size_t size = Entry_size(elt->header);
@@ -1869,7 +1898,7 @@ CAMLprim value hh_deserialize(heap_entry_t *elt) {
     data = malloc(uncompressed_size_exp);
   size_t uncompressed_size = 0;
   if (*compression) {
-    uncompressed_size = ZSTD_decompress(data, uncompressed_size_exp, src, size);
+    uncompressed_size = ZSTD_decompressDCtx(zstd_dctx, data, uncompressed_size_exp, src, size);
   }
   else {
     uncompressed_size = LZ4_decompress_safe(
@@ -1922,7 +1951,7 @@ CAMLprim value hh_get_and_deserialize(value key) {
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_get_raw(get_hash(key)));
   }
   check_should_exit();
   CAMLlocal2(result, bytes);
@@ -1949,7 +1978,7 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
   CAMLparam1(heap_entry);
   CAMLlocal1(result);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_deserialize_raw(heap_entry));
   }
 
   heap_entry_t* entry = (heap_entry_t*)Bytes_val(heap_entry);

@@ -50,12 +50,12 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function static_compare() {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $va = varray[Foo::class, 'bar'];
   $oa = varray[new StrObj(Foo::class), new StrObj('bar')];
-  $fa = varray[Foo::class, fun('bar')];
+  $fa = varray[Foo::class, bar<>];
   $ca = varray[CLS('Foo'), 'bar'];
-  $pa = varray[CLS('Foo'), fun('bar')];
+  $pa = varray[CLS('Foo'), bar<>];
 
   $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
   $cx = varray[$ca]; $px = varray[$pa];
@@ -201,12 +201,12 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $va = LV(varray[Foo::class, 'bar']);
   $oa = LV(varray[new StrObj(Foo::class), new StrObj('bar')]);
-  $fa = LV(varray[Foo::class, fun('bar')]);
+  $fa = LV(varray[Foo::class, bar<>]);
   $ca = LV(varray[CLS('Foo'), 'bar']);
-  $pa = LV(varray[CLS('Foo'), fun('bar')]);
+  $pa = LV(varray[CLS('Foo'), bar<>]);
 
   $xx = WRAPA($cm); $vx = WRAPA($va); $ox = WRAPA($oa); $fx = WRAPA($fa);
   $cx = WRAPA($ca); $px = WRAPA($pa);

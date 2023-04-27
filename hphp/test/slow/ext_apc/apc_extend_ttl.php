@@ -19,9 +19,9 @@ function main_apc_extend_ttl() {
   if (apc_extend_ttl('key_to_not_extend', 1)) {
     echo "apc_extend_ttl managed to shorten a ttl\n";
   }
-  sleep(2);
-  if (!apc_extend_ttl('key_to_extend_later', 3)) {
-    echo "Failed to extend a ttl after 2 seconds\n";
+  sleep(1);
+  if (!apc_extend_ttl('key_to_extend_later', 4)) {
+    echo "Failed to extend a ttl after 1 second\n";
   }
   sleep(2);
   print_key_status('key_to_extend');

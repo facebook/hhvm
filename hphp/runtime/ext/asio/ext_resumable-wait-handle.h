@@ -68,15 +68,6 @@ inline c_ResumableWaitHandle* c_Awaitable::asResumable() {
   return static_cast<c_ResumableWaitHandle*>(this);
 }
 
-void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnAwaitCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnSuccessCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnFailCallback,
-                        const Variant& callback);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

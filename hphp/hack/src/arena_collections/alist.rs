@@ -23,11 +23,12 @@
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
-use bumpalo::Bump;
-use serde::{Deserialize, Serialize};
-
 use arena_trait::TrivialDrop;
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use bumpalo::Bump;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Perform a linear search for the last entry in the slice with the given key.
 #[inline(always)]
@@ -951,12 +952,11 @@ impl<'a, K: Ord, V> From<AssocListMut<'a, K, V>> for SortedAssocList<'a, K, V> {
 }
 
 impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for SortedAssocList<'_, K, V> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.len();
-        let mut iter = self.iter();
+        let mut iter = self
+            .iter()
+            .map(|(k, v)| (k.to_ocamlrep(alloc), v.to_ocamlrep(alloc)));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
         value
     }

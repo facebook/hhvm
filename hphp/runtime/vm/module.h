@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/user-attributes.h"
 
+#include "hphp/runtime/vm/containers.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -28,18 +30,48 @@ namespace HPHP {
  * This is the runtime representation of a module.
  */
 struct Module {
+  struct RuleSet {
+    struct NameRule {
+      bool prefix;
+      VMCompactVector<LowStringPtr> names;
+
+      template<class SerDe>
+      void serde(SerDe& sd) {
+        sd(prefix)
+          (names)
+          ;
+      }
+    };
+
+    bool global_rule;
+    VMCompactVector<NameRule> name_rules;
+
+    template<class SerDe>
+    void serde(SerDe& sd) {
+      sd(global_rule)
+        (name_rules)
+        ;
+    }
+  };
+
   LowStringPtr name;
+  LowStringPtr docComment;
   int line0; // start line number on the src file
   int line1; // end line number on the src file
   Attr attrs;
   UserAttributeMap userAttributes;
+  Optional<RuleSet> exports;
+  Optional<RuleSet> imports;
 
   template<class SerDe>
   void serde(SerDe& sd) {
-    sd(line0)
+    sd(docComment)
+      (line0)
       (line1)
       (attrs)
       (userAttributes)
+      (exports)
+      (imports)
       ;
   }
 
@@ -52,11 +84,31 @@ struct Module {
   static Module* lookup(const StringData* name);
 
   /*
+   * Look up, or autoload and define, the Module in this request with name `name'.
+   */
+  static Module* load(const StringData* name);
+
+  /*
    * Define module m for this request.
    */
   static void def(Module* m);
+
+  /*
+   * Are module warnings enabled for this func?
+   */
+  static bool warningsEnabled(const Func* f);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
+/*
+ * Will the use of symbol raise a module boundary violation?
+ */
+template <typename Sym, typename Ctx>
+bool will_symbol_raise_module_boundary_violation(
+  const Sym* symbol,
+  const Ctx* context
+);
+
+///////////////////////////////////////////////////////////////////////////////
+}

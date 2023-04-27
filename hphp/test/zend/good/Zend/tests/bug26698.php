@@ -1,6 +1,6 @@
 <?hh
 
-class Object
+class MyObject
 {
     function getNone()
     {
@@ -18,7 +18,7 @@ class Proxy
     {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three($res->getNone());
         }
         catch(Exception $e)
@@ -31,7 +31,7 @@ class Proxy
     {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three(1, $res->getNone());
         }
         catch(Exception $e)
@@ -44,7 +44,7 @@ class Proxy
     {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three(1, 2, $res->getNone());
         }
         catch(Exception $e)

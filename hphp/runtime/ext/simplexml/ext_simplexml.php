@@ -4,7 +4,7 @@
 /** Represents an element in an XML document.
  */
 <<__NativeData("SimpleXMLElement")>>
-class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
+class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>, Countable {
 
   /** @param string $data
    * @param int $options
@@ -53,7 +53,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    * @return int - Returns the number of elements of an element.
    */
   <<__Native>>
-  public function count(): int;
+  public function count()[]: int;
 
   /** @param string $path - An XPath path
    * @return mixed - Returns an array of SimpleXMLElement objects or FALSE in
@@ -87,7 +87,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    * @return array
    */
   <<__Native>>
-  public function getNamespaces(bool $recursive = false): darray;
+  public function getNamespaces(bool $recursive = false): darray<string, mixed>;
 
   /** @param bool $recursive
    * @param bool $from_root
@@ -95,7 +95,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    */
   <<__Native>>
   public function getDocNamespaces(bool $recursive = false,
-                                   bool $from_root = true): darray;
+                                   bool $from_root = true): darray<string, mixed>;
 
   /** @param string $ns - An XML namespace.
    * @param bool $is_prefix - If is_prefix is TRUE, ns will be regarded as a
@@ -105,7 +105,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    */
   <<__Native>>
   public function children(string $ns = "",
-                           bool $is_prefix = false): ?object;
+                           bool $is_prefix = false): ?this;
 
   /** @return string
    */
@@ -147,7 +147,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
 }
 
 <<__NativeData("SimpleXMLElementIterator")>>
-class SimpleXMLElementIterator implements Iterator {
+class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {
 
   <<__Native>>
   public function __construct(?SimpleXMLElement $sxe = null): void;
@@ -155,67 +155,51 @@ class SimpleXMLElementIterator implements Iterator {
   /** @return mixed
    */
   <<__Native>>
-  public function current(): mixed;
+  public function current(): SimpleXMLElement;
 
   /** @return mixed
    */
   <<__Native>>
-  public function key(): mixed;
+  public function key(): ?string;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function next(): mixed;
+  public function next(): void;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function rewind(): mixed;
+  public function rewind(): void;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function valid(): mixed;
+  public function valid(): bool;
 }
 
 <<__NativeData("SimpleXMLIterator")>>
 class SimpleXMLIterator extends SimpleXMLElement
-                        implements RecursiveIterator {
+                        implements RecursiveIterator<SimpleXMLElement> {
 
-  /** @return object
-   */
   <<__Native>>
-  public function getChildren(): ?object;
+  public function getChildren(): ?this;
 
   /** @return bool
    */
   <<__Native>>
   public function hasChildren(): bool;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function current(): mixed;
+  public function current(): SimpleXMLElement;
 
   /** @return mixed
    */
   <<__Native>>
   public function key(): mixed;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function next(): mixed;
+  public function next(): void;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function rewind(): mixed;
+  public function rewind(): void;
 
-  /** @return mixed
-   */
   <<__Native>>
-  public function valid(): mixed;
+  public function valid(): bool;
 
 }
 

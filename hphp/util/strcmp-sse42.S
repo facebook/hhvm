@@ -16,7 +16,7 @@
 
 #include "hphp/util/etch-helpers.h"
 
-#if defined __SSE4_2__ && !defined _MSC_VER
+#if defined __SSE4_2__
         .file     "hphp/util/strcmp-sse42.S"
         ETCH_SECTION(strcmp)
 
@@ -141,8 +141,6 @@ ETCH_LABEL(bad):
         ETCH_SIZE(strcmp)
 
         .ident    "GCC: (GNU) 4.8.2"
-#ifdef __linux__
         .section  .note.GNU-stack,"",@progbits
-#endif
 
 #endif

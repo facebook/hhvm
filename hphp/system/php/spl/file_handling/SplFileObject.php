@@ -428,9 +428,9 @@ class SplFileObject extends SplFileInfo
    *
    * An SplFileObject does not have children so this method returns NULL.
    *
-   * @return     mixed   No value is returned.
+   * @return     null    No value is returned.
    */
-  public function getChildren() {
+  public function getChildren(): null {
     return null; // An SplFileOjbect does not have children
   }
 
@@ -482,9 +482,9 @@ class SplFileObject extends SplFileInfo
    * An SplFileObject does not have children so this method always return
    * FALSE.
    *
-   * @return     mixed   Returns FALSE
+   * @return     bool    Returns FALSE
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return false; // An SplFileOjbect does not have children
   }
 
@@ -655,9 +655,9 @@ class SplFileObject extends SplFileInfo
    *
    * Check whether EOF has been reached.
    *
-   * @return     mixed   Returns TRUE if not reached EOF, FALSE otherwise.
+   * @return     bool    Returns TRUE if not reached EOF, FALSE otherwise.
    */
-  public function valid() {
+  public function valid(): bool {
     if ((int)$this->flags & self::READ_AHEAD) {
       return $this->current() !== false;
     }

@@ -23,6 +23,8 @@
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/assertions.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 
 struct StringData;
@@ -56,6 +58,13 @@ typename std::enable_if<
 getPathSymMap(const typename SymbolMap::Data& data) {
   return data.m_constantPath;
 }
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Module,
+    const PathToSymbolsMap<SymKind::Module>&>::type
+getPathSymMap(const typename SymbolMap::Data& data) {
+  return data.m_modulePath;
+}
 
 // non-const
 template <SymKind k>
@@ -77,6 +86,12 @@ typename std::enable_if<
     PathToSymbolsMap<SymKind::Constant>&>::type
 getPathSymMap(typename SymbolMap::Data& data) {
   return data.m_constantPath;
+}
+template <SymKind k>
+typename std::
+    enable_if<k == SymKind::Module, PathToSymbolsMap<SymKind::Module>&>::type
+    getPathSymMap(typename SymbolMap::Data& data) {
+  return data.m_modulePath;
 }
 
 /**
@@ -103,27 +118,54 @@ typename std::enable_if<
 getAllSymbolsFromDB(AutoloadDB& db) {
   return db.getAllConstantPaths();
 }
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Module,
+    AutoloadDB::MultiResult<AutoloadDB::SymbolPath>>::type
+getAllSymbolsFromDB(AutoloadDB& db) {
+  return db.getAllModulePaths();
+}
 
 } // namespace
 
+AutoloadDBVault::AutoloadDBVault(AutoloadDB::Handle dbHandle)
+    : m_dbHandle{std::move(dbHandle)} {}
+
+std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
+  return m_dbs.withULockPtr([this](auto ulock) {
+    auto it = ulock->find(std::this_thread::get_id());
+    if (it != ulock->end()) {
+      return it->second;
+    }
+    auto wlock = ulock.moveFromUpgradeToWrite();
+    return wlock->insert({std::this_thread::get_id(), m_dbHandle()})
+        .first->second;
+  });
+}
+
 SymbolMap::SymbolMap(
-    folly::fs::path root,
+    fs::path root,
     AutoloadDB::Handle dbHandle,
-    hphp_hash_set<std::string> indexedMethodAttrs)
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
-          1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
-    , m_root{std::move(root)}
-    , m_dbHandle{std::move(dbHandle)}
-    , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
+          1,
+          std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
+      m_root{std::move(root)},
+      m_dbVault{std::move(dbHandle)},
+      m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }
 
 SymbolMap::~SymbolMap() {
-  waitForDBUpdate();
+  try {
+    waitForDBUpdate();
+  } catch (...) {
+    // Swallow the exception so we don't crash the program
+  }
 }
 
-Optional<Symbol<SymKind::Type>>
-SymbolMap::getTypeName(const StringData& typeName) {
+Optional<Symbol<SymKind::Type>> SymbolMap::getTypeName(
+    const StringData& typeName) {
   Symbol<SymKind::Type> type{typeName};
   auto path = getSymbolPath(type);
   if (path == nullptr) {
@@ -135,6 +177,14 @@ SymbolMap::getTypeName(const StringData& typeName) {
     return {};
   }
   return *it;
+}
+
+Path SymbolMap::getTypeOrTypeAliasFile(Symbol<SymKind::Type> type) {
+  return getSymbolPath(type);
+}
+
+Path SymbolMap::getTypeOrTypeAliasFile(const StringData& type) {
+  return getTypeOrTypeAliasFile(Symbol<SymKind::Type>{type});
 }
 
 Path SymbolMap::getTypeFile(Symbol<SymKind::Type> type) {
@@ -194,8 +244,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypes(const folly::fs::path& path) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(
+    const fs::path& path) {
   return getFileTypes(Path{path});
 }
 
@@ -207,8 +257,8 @@ std::vector<Symbol<SymKind::Function>> SymbolMap::getFileFunctions(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Function>>
-SymbolMap::getFileFunctions(const folly::fs::path& path) {
+std::vector<Symbol<SymKind::Function>> SymbolMap::getFileFunctions(
+    const fs::path& path) {
   return getFileFunctions(Path{path});
 }
 
@@ -220,9 +270,22 @@ std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Constant>>
-SymbolMap::getFileConstants(const folly::fs::path& path) {
+std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(
+    const fs::path& path) {
   return getFileConstants(Path{path});
+}
+
+std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(Path path) {
+  auto const& symbols = getPathSymbols<SymKind::Module>(path);
+  std::vector<Symbol<SymKind::Module>> symbolVec;
+  symbolVec.reserve(symbols.size());
+  std::copy(symbols.begin(), symbols.end(), std::back_inserter(symbolVec));
+  return symbolVec;
+}
+
+std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(
+    const fs::path& path) {
+  return getFileModules(Path{path});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
@@ -240,8 +303,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypeAliases(const folly::fs::path& path) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(
+    const fs::path& path) {
   return getFileTypeAliases(Path{path});
 }
 
@@ -271,6 +334,11 @@ SymbolMap::getAllConstants() {
   return getAllSymbols<SymKind::Constant>();
 }
 
+std::vector<std::pair<Symbol<SymKind::Module>, Path>>
+SymbolMap::getAllModules() {
+  return getAllSymbols<SymKind::Module>();
+}
+
 std::vector<std::pair<Symbol<SymKind::Type>, Path>>
 SymbolMap::getAllTypeAliases() {
   auto results = getAllSymbols<SymKind::Type>();
@@ -288,8 +356,9 @@ SymbolMap::getAllTypeAliases() {
   return results;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getBaseTypes(
+    Symbol<SymKind::Type> derivedType,
+    DeriveKind kind) {
   auto derivedTypePath = getSymbolPath(derivedType);
   if (derivedTypePath == nullptr) {
     return {};
@@ -315,9 +384,9 @@ SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
         }
         return makeVec(*baseTypes);
       },
-      [&](AutoloadDB& db) -> std::vector<SubtypeQuery> {
-        auto const symbolStrs = db.getBaseTypes(
-            folly::fs::path{std::string{derivedTypePath.slice()}},
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<SubtypeQuery> {
+        auto const symbolStrs = db->getBaseTypes(
+            fs::path{std::string{derivedTypePath.slice()}},
             derivedType.slice(),
             kind);
         std::vector<SubtypeQuery> symbols;
@@ -334,13 +403,15 @@ SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getBaseTypes(const StringData& derivedType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getBaseTypes(
+    const StringData& derivedType,
+    DeriveKind kind) {
   return getBaseTypes(Symbol<SymKind::Type>{derivedType}, kind);
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
+    Symbol<SymKind::Type> baseType,
+    DeriveKind kind) {
   // Return empty results if the given type is undefined
   if (getSymbolPath(baseType) == nullptr) {
     return {};
@@ -366,8 +437,8 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
         }
         return makeVec(*derivedTypes);
       },
-      [&](AutoloadDB& db) -> std::vector<EdgeToSupertype> {
-        auto const typeDefStrs = db.getDerivedTypes(baseType.slice(), kind);
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<EdgeToSupertype> {
+        auto const typeDefStrs = db->getDerivedTypes(baseType.slice(), kind);
         std::vector<EdgeToSupertype> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& typeDefStr : typeDefStrs) {
@@ -385,8 +456,9 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
   return subtypes;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getDerivedTypes(const StringData& baseType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
+    const StringData& baseType,
+    DeriveKind kind) {
   return getDerivedTypes(Symbol<SymKind::Type>{baseType}, kind);
 }
 
@@ -407,7 +479,8 @@ SymbolMap::getTransitiveDerivedTypes(
     for (auto deriveKind :
          {DeriveKind::Extends,
           DeriveKind::RequireExtends,
-          DeriveKind::RequireImplements}) {
+          DeriveKind::RequireImplements,
+          DeriveKind::RequireClass}) {
       if (deriveKinds & static_cast<int>(deriveKind)) {
         for (auto subtype : getDerivedTypes(type, deriveKind)) {
           if (seen.count(subtype) > 0) {
@@ -440,8 +513,8 @@ SymbolMap::getTransitiveDerivedTypes(
       Symbol<SymKind::Type>{baseType}, kinds, deriveKinds);
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
+    Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -463,15 +536,16 @@ SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
         // If `type` is actually a type alias in `path`, and we don't do this
         // check, we'll pollute our in-memory map
-        auto [kind, _] = db.getKindAndFlags(type.slice(), path.native());
+        auto [kind, _] = db->getKindAndFlags(type.slice(), path.native());
         if (kind == TypeKind::TypeAlias) {
           return {};
         }
         auto const attrStrs =
-            db.getAttributesOfType(type.slice(), path.native());
+            db->getAttributesOfType(type.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -486,13 +560,13 @@ SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfType(const StringData& type) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
+    const StringData& type) {
   return getAttributesOfType(Symbol<SymKind::Type>{type});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfTypeAlias(
+    Symbol<SymKind::Type> typeAlias) {
   auto path = getSymbolPath(typeAlias);
   if (path == nullptr) {
     return {};
@@ -514,15 +588,16 @@ SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
         // If `typeAlias` is actually a type in `path`, and we don't do this
         // check, we'll pollute our in-memory map
-        auto [kind, _] = db.getKindAndFlags(typeAlias.slice(), path.native());
+        auto [kind, _] = db->getKindAndFlags(typeAlias.slice(), path.native());
         if (kind != TypeKind::TypeAlias) {
           return {};
         }
         auto const attrStrs =
-            db.getAttributesOfType(typeAlias.slice(), path.native());
+            db->getAttributesOfType(typeAlias.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -537,13 +612,13 @@ SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfTypeAlias(const StringData& typeAlias) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfTypeAlias(
+    const StringData& typeAlias) {
   return getAttributesOfTypeAlias(Symbol<SymKind::Type>{typeAlias});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypesWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using TypeVec = std::vector<Symbol<SymKind::Type>>;
   auto makeVec = [&](auto const& typeDefs) -> TypeVec {
     TypeVec typeVec;
@@ -561,8 +636,8 @@ SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<TypeDecl> {
-        auto const typeDefStrs = db.getTypesWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<TypeDecl> {
+        auto const typeDefStrs = db->getTypesWithAttribute(attr.slice());
         std::vector<TypeDecl> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& [type, path] : typeDefStrs) {
@@ -577,13 +652,13 @@ SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
   return types;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypesWithAttribute(const StringData& attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypesWithAttribute(
+    const StringData& attr) {
   return getTypesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using TypeAliasVec = std::vector<Symbol<SymKind::Type>>;
   auto makeVec = [&](auto const& typeAliasDefs) -> TypeAliasVec {
     TypeAliasVec typeAliasVec;
@@ -601,9 +676,9 @@ SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<TypeDecl> {
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<TypeDecl> {
         auto const typeAliasDefStrs =
-            db.getTypeAliasesWithAttribute(attr.slice());
+            db->getTypeAliasesWithAttribute(attr.slice());
         std::vector<TypeDecl> typeAliasDefs;
         typeAliasDefs.reserve(typeAliasDefStrs.size());
         for (auto const& [type, path] : typeAliasDefStrs) {
@@ -618,13 +693,14 @@ SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
   return typeAliases;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypeAliasesWithAttribute(const StringData& attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
+    const StringData& attr) {
   return getTypeAliasesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
-    Symbol<SymKind::Type> type, Symbol<SymKind::Function> method) {
+    Symbol<SymKind::Type> type,
+    Symbol<SymKind::Function> method) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -646,11 +722,10 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
-        auto const attrStrs = db.getAttributesOfMethod(
-            type.slice(),
-            method.slice(),
-            folly::fs::path{std::string{path.slice()}});
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
+        auto const attrStrs = db->getAttributesOfMethod(
+            type.slice(), method.slice(), fs::path{std::string{path.slice()}});
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -666,13 +741,14 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
-    const StringData& type, const StringData& method) {
+    const StringData& type,
+    const StringData& method) {
   return getAttributesOfMethod(
       Symbol<SymKind::Type>{type}, Symbol<SymKind::Function>{method});
 }
 
-std::vector<MethodDecl>
-SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using MethodVec = std::vector<MethodDecl>;
   auto makeVec = [](auto&& methods) -> MethodVec {
     MethodVec methodVec;
@@ -690,8 +766,8 @@ SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> MethodVec {
-        auto const dbMethodDecls = db.getMethodsWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> MethodVec {
+        auto const dbMethodDecls = db->getMethodsWithAttribute(attr.slice());
         MethodVec methodDecls;
         methodDecls.reserve(dbMethodDecls.size());
         for (auto const& [type, method, path] : dbMethodDecls) {
@@ -711,8 +787,8 @@ SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
   return methods;
 }
 
-std::vector<MethodDecl>
-SymbolMap::getMethodsWithAttribute(const StringData& attr) {
+std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
+    const StringData& attr) {
   return getMethodsWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
@@ -737,8 +813,9 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfFile(Path path) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
-        auto const attrStrs = db.getAttributesOfFile(path.native());
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
+        auto const attrStrs = db->getAttributesOfFile(path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -771,8 +848,8 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> PathVec {
-        auto dbPathDecls = db.getFilesWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> PathVec {
+        auto dbPathDecls = db->getFilesWithAttribute(attr.slice());
         PathVec pathDecls;
         pathDecls.reserve(dbPathDecls.size());
         for (auto const& path : dbPathDecls) {
@@ -792,7 +869,8 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(const StringData& attr) {
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
-    Symbol<SymKind::Type> type, Symbol<SymKind::Type> attr) {
+    Symbol<SymKind::Type> type,
+    Symbol<SymKind::Type> attr) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -807,8 +885,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getTypeAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getTypeAttributeArgs(
             type.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -818,13 +896,15 @@ std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
-    const StringData& type, const StringData& attribute) {
+    const StringData& type,
+    const StringData& attribute) {
   return getTypeAttributeArgs(
       Symbol<SymKind::Type>{type}, Symbol<SymKind::Type>{attribute});
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
-    Symbol<SymKind::Type> typeAlias, Symbol<SymKind::Type> attr) {
+    Symbol<SymKind::Type> typeAlias,
+    Symbol<SymKind::Type> attr) {
   auto path = getSymbolPath(typeAlias);
   if (path == nullptr) {
     return {};
@@ -839,8 +919,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getTypeAliasAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getTypeAliasAttributeArgs(
             typeAlias.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -850,7 +930,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
-    const StringData& typeAlias, const StringData& attribute) {
+    const StringData& typeAlias,
+    const StringData& attribute) {
   return getTypeAliasAttributeArgs(
       Symbol<SymKind::Type>{typeAlias}, Symbol<SymKind::Type>{attribute});
 }
@@ -873,8 +954,8 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getMethodAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getMethodAttributeArgs(
             type.slice(), method.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -893,8 +974,9 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
       Symbol<SymKind::Type>{attribute});
 }
 
-std::vector<folly::dynamic>
-SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
+std::vector<folly::dynamic> SymbolMap::getFileAttributeArgs(
+    Path path,
+    Symbol<SymKind::Type> attr) {
   if (path == nullptr) {
     return {};
   }
@@ -907,8 +989,8 @@ SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getFileAttributeArgs(path.slice(), attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getFileAttributeArgs(path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
         return data.m_fileAttrs.getAttributeArgs(
@@ -916,9 +998,18 @@ SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
       });
 }
 
-std::vector<folly::dynamic>
-SymbolMap::getFileAttributeArgs(Path path, const StringData& attribute) {
+std::vector<folly::dynamic> SymbolMap::getFileAttributeArgs(
+    Path path,
+    const StringData& attribute) {
   return getFileAttributeArgs(path, Symbol<SymKind::Type>{attribute});
+}
+
+Path SymbolMap::getModuleFile(Symbol<SymKind::Module> module) {
+  return getSymbolPath(module);
+}
+
+Path SymbolMap::getModuleFile(const StringData& module) {
+  return getModuleFile(Symbol<SymKind::Module>{module});
 }
 
 TypeKind SymbolMap::getKind(Symbol<SymKind::Type> type) {
@@ -931,7 +1022,7 @@ TypeKind SymbolMap::getKind(const StringData& type) {
 
 bool SymbolMap::isTypeAbstract(Symbol<SymKind::Type> type) {
   return getKindAndFlags(type).second &
-         static_cast<TypeFlagMask>(TypeFlag::Abstract);
+      static_cast<TypeFlagMask>(TypeFlag::Abstract);
 }
 
 bool SymbolMap::isTypeAbstract(const StringData& type) {
@@ -940,20 +1031,25 @@ bool SymbolMap::isTypeAbstract(const StringData& type) {
 
 bool SymbolMap::isTypeFinal(Symbol<SymKind::Type> type) {
   return getKindAndFlags(type).second &
-         static_cast<TypeFlagMask>(TypeFlag::Final);
+      static_cast<TypeFlagMask>(TypeFlag::Final);
 }
 
 bool SymbolMap::isTypeFinal(const StringData& type) {
   return isTypeFinal(Symbol<SymKind::Type>{type});
 }
 
-std::pair<TypeKind, TypeFlagMask>
-SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type) {
+bool SymbolMap::isAttrIndexed(const StringData& attr) {
+  return m_indexedMethodAttrs.contains(Symbol<SymKind::Type>{attr});
+}
+
+std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
+    Symbol<SymKind::Type> type) {
   return getKindAndFlags(type, getSymbolPath(type));
 }
 
-std::pair<TypeKind, TypeFlagMask>
-SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
+std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
+    Symbol<SymKind::Type> type,
+    Path path) {
   if (path == nullptr) {
     return {TypeKind::Unknown, static_cast<TypeFlagMask>(TypeFlag::Empty)};
   }
@@ -961,9 +1057,9 @@ SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
       [&](const Data& data) -> Optional<std::pair<TypeKind, int>> {
         return data.m_typeKind.getKindAndFlags(type, path);
       },
-      [&](AutoloadDB& db) {
-        return db.getKindAndFlags(
-            type.slice(), folly::fs::path{std::string{path.slice()}});
+      [&](std::shared_ptr<AutoloadDB> db) {
+        return db->getKindAndFlags(
+            type.slice(), fs::path{std::string{path.slice()}});
       },
       [&](Data& data, AutoloadDB::KindAndFlags kindAndFlags)
           -> std::pair<TypeKind, TypeFlagMask> {
@@ -988,8 +1084,8 @@ Optional<SHA1> SymbolMap::getSha1Hash(Path path) const {
 void SymbolMap::update(
     const Clock& since,
     const Clock& clock,
-    std::vector<folly::fs::path> alteredPaths,
-    std::vector<folly::fs::path> deletedPaths,
+    std::vector<fs::path> alteredPaths,
+    std::vector<fs::path> deletedPaths,
     std::vector<FileFacts> alteredPathFacts) {
   ++m_updatesInFlight;
   SCOPE_EXIT {
@@ -1011,12 +1107,12 @@ void SymbolMap::update(
 
   auto wlock = m_syncedData.wlock();
 
-  auto& db = getDB();
+  auto db = getDB();
 
   // If we have no clock (meaning this is the map's first update since
   // it was constructed), fill our clock from the DB.
   if (wlock->m_clock.isInitial()) {
-    wlock->m_clock = db.getClock();
+    wlock->m_clock = db->getClock();
   }
 
   if (since != wlock->m_clock) {
@@ -1044,7 +1140,7 @@ void SymbolMap::update(
 
   wlock->m_clock = clock;
 
-  if (!db.isReadOnly()) {
+  if (!db->isReadOnly()) {
     // Any individual DB update may fail spuriously, but we can't
     // drop updates on failure. So add a work item to the queue
     // and drain the queue as we complete work items successfully.
@@ -1117,17 +1213,16 @@ Clock SymbolMap::getClock() const noexcept {
 }
 
 Clock SymbolMap::dbClock() const {
-  auto& db = getDB();
-  return db.getClock();
+  return getDB()->getClock();
 }
 
 hphp_hash_set<Path> SymbolMap::getAllPaths() const {
   auto rlock = m_syncedData.rlock();
 
   hphp_hash_set<Path> allPaths;
-  auto& db = getDB();
+  auto db = getDB();
 
-  for (auto&& [path, _] : db.getAllPathsAndHashes()) {
+  for (auto&& [path, _] : db->getAllPathsAndHashes()) {
     assertx(path.is_relative());
     allPaths.insert(Path{path});
   }
@@ -1146,10 +1241,10 @@ hphp_hash_set<Path> SymbolMap::getAllPaths() const {
 
 hphp_hash_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
   auto rlock = m_syncedData.rlock();
-  auto& db = getDB();
+  auto db = getDB();
 
   hphp_hash_map<Path, SHA1> allPaths;
-  for (auto&& [path, hash] : db.getAllPathsAndHashes()) {
+  for (auto&& [path, hash] : db->getAllPathsAndHashes()) {
     assertx(path.is_relative());
     allPaths.insert({Path{path}, SHA1{hash}});
   }
@@ -1169,8 +1264,8 @@ hphp_hash_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
 void SymbolMap::updateDB(
     const Clock& since,
     const Clock& clock,
-    const std::vector<folly::fs::path>& alteredPaths,
-    const std::vector<folly::fs::path>& deletedPaths,
+    const std::vector<fs::path>& alteredPaths,
+    const std::vector<fs::path>& deletedPaths,
     const std::vector<FileFacts>& alteredPathFacts) const {
   assertx(alteredPaths.size() == alteredPathFacts.size());
 
@@ -1178,13 +1273,13 @@ void SymbolMap::updateDB(
     return;
   }
 
-  auto& db = getDB();
+  auto db = getDB();
 
   // Only update the DB if its clock matches the clock we thought it had.
   //
   // If the clocks don't match, someone updated the DB in the meantime
   // and proceeding might overwrite newer data.
-  auto const dbClock = db.getClock();
+  auto const dbClock = db->getClock();
   if (dbClock != since) {
     throw UpdateExc{folly::sformat(
         "Told to update the DB with information from {}, but DB is currently "
@@ -1196,24 +1291,26 @@ void SymbolMap::updateDB(
   for (auto i = 0; i < alteredPaths.size(); ++i) {
     auto const& absPath = alteredPaths.at(i);
     auto const& pathFacts = alteredPathFacts.at(i);
-    updateDBPath(db, absPath, pathFacts);
+    updateDBPath(*db, absPath, pathFacts);
   }
 
   for (auto const& path : deletedPaths) {
-    db.erasePath(path);
+    db->erasePath(path);
   }
 
   // ANALYZE after initially building the DB
   if (since.isInitial()) {
-    db.runPostBuildOptimizations();
+    db->runPostBuildOptimizations();
   }
 
-  db.insertClock(clock);
-  db.commit();
+  db->insertClock(clock);
+  db->commit();
 }
 
 void SymbolMap::updateDBPath(
-    AutoloadDB& db, const folly::fs::path& path, const FileFacts& facts) const {
+    AutoloadDB& db,
+    const fs::path& path,
+    const FileFacts& facts) const {
   assertx(path.is_relative());
 
   // Bail out early if the hex in memory is identical to the hex in the DB
@@ -1227,7 +1324,6 @@ void SymbolMap::updateDBPath(
   db.insertSha1Hex(path, facts.m_sha1hex);
 
   for (auto const& type : facts.m_types) {
-
     db.insertType(type.m_name, path, type.m_kind, type.m_flags);
     for (auto const& baseType : type.m_baseTypes) {
       db.insertBaseType(path, type.m_name, DeriveKind::Extends, baseType);
@@ -1239,6 +1335,9 @@ void SymbolMap::updateDBPath(
     for (auto const& baseType : type.m_requireImplements) {
       db.insertBaseType(
           path, type.m_name, DeriveKind::RequireImplements, baseType);
+    }
+    for (auto const& baseType : type.m_requireClass) {
+      db.insertBaseType(path, type.m_name, DeriveKind::RequireClass, baseType);
     }
     for (auto const& attribute : type.m_attributes) {
       if (attribute.m_args.empty()) {
@@ -1256,7 +1355,8 @@ void SymbolMap::updateDBPath(
         // If we have an allowlist of method attributes to index, then skip any
         // method attribute which isn't in that allowlist.
         if (!m_indexedMethodAttrs.empty() &&
-            !m_indexedMethodAttrs.count(attribute.m_name)) {
+            !m_indexedMethodAttrs.count(
+                Symbol<SymKind::Type>{attribute.m_name})) {
           continue;
         }
         if (attribute.m_args.empty()) {
@@ -1280,6 +1380,10 @@ void SymbolMap::updateDBPath(
         }
       }
     }
+  }
+
+  for (auto const& module : facts.m_modules) {
+    db.insertModule(module.m_name, path);
   }
 
   for (auto const& function : facts.m_functions) {
@@ -1312,7 +1416,8 @@ template <SymKind k>
 std::vector<std::pair<Symbol<k>, Path>> SymbolMap::getAllSymbols() {
   hphp_hash_map<Path, std::vector<Symbol<k>>> pathToSymbols;
 
-  for (auto&& [symbol, path] : getAllSymbolsFromDB<k>(getDB())) {
+  auto db = getDB();
+  for (auto&& [symbol, path] : getAllSymbolsFromDB<k>(*db)) {
     pathToSymbols[Path{path}].push_back(Symbol<k>{symbol});
   }
 
@@ -1341,7 +1446,9 @@ std::vector<std::pair<Symbol<k>, Path>> SymbolMap::getAllSymbols() {
 
 template <typename Ret, typename ReadFn, typename GetFromDBFn, typename WriteFn>
 Ret SymbolMap::readOrUpdate(
-    ReadFn readFn, GetFromDBFn getFromDBFn, WriteFn writeFn) {
+    ReadFn readFn,
+    GetFromDBFn getFromDBFn,
+    WriteFn writeFn) {
   {
     // Try reading with only a reader lock.
     auto rlock = m_syncedData.rlock();
@@ -1350,10 +1457,7 @@ Ret SymbolMap::readOrUpdate(
       return *readOnlyData;
     }
   }
-  auto dataFromDB = [&]() {
-    auto& db = getDB();
-    return getFromDBFn(db);
-  }();
+  auto dataFromDB = [&]() { return getFromDBFn(getDB()); }();
   return m_syncedData.withULockPtr([&](auto ulock) {
     // Try reading once again, in case someone else wrote the value before we
     // took out the upgrade lock.
@@ -1368,7 +1472,8 @@ Ret SymbolMap::readOrUpdate(
   });
 }
 
-template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
+template <SymKind k>
+Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
   auto symbolPath = [this](auto const& paths) -> Path {
     if (UNLIKELY(paths.empty())) {
       return Path{nullptr};
@@ -1386,15 +1491,17 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
           return std::nullopt;
         }
       },
-      [&](AutoloadDB& db) {
-        auto pathStrs = [&]() -> std::vector<folly::fs::path> {
+      [&](std::shared_ptr<AutoloadDB> db) {
+        auto pathStrs = [&]() -> std::vector<fs::path> {
           switch (k) {
             case SymKind::Type:
-              return db.getTypePath(symbol.slice());
+              return db->getTypePath(symbol.slice());
             case SymKind::Function:
-              return db.getFunctionPath(symbol.slice());
+              return db->getFunctionPath(symbol.slice());
             case SymKind::Constant:
-              return db.getConstantPath(symbol.slice());
+              return db->getConstantPath(symbol.slice());
+            case SymKind::Module:
+              return db->getModulePath(symbol.slice());
           }
         }();
 
@@ -1414,8 +1521,8 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
 }
 
 template <SymKind k>
-typename PathToSymbolsMap<k>::PathSymbolMap::Values
-SymbolMap::getPathSymbols(Path path) {
+typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
+    Path path) {
   using Symbols = typename PathToSymbolsMap<k>::PathSymbolMap::Values;
 
   return readOrUpdate<Symbols>(
@@ -1431,19 +1538,21 @@ SymbolMap::getPathSymbols(Path path) {
           return std::nullopt;
         }
       },
-      [&](AutoloadDB& db) {
+      [&](std::shared_ptr<AutoloadDB> db) {
         auto symbolStrs =
-            [&](const folly::fs::path& path) -> std::vector<std::string> {
+            [&](const fs::path& path) -> std::vector<std::string> {
           assertx(path.is_relative());
           switch (k) {
             case SymKind::Type:
-              return db.getPathTypes(path);
+              return db->getPathTypes(path);
             case SymKind::Function:
-              return db.getPathFunctions(path);
+              return db->getPathFunctions(path);
             case SymKind::Constant:
-              return db.getPathConstants(path);
+              return db->getPathConstants(path);
+            case SymKind::Module:
+              return db->getPathModules(path);
           }
-        }(folly::fs::path{std::string{path.slice()}});
+        }(fs::path{std::string{path.slice()}});
 
         Symbols symbols;
         symbols.reserve(symbolStrs.size());
@@ -1461,22 +1570,22 @@ SymbolMap::getPathSymbols(Path path) {
 }
 
 SymbolMap::Data::Data()
-    : m_versions{std::make_shared<PathVersions>()}
-    , m_typePath{m_versions}
-    , m_functionPath{m_versions}
-    , m_constantPath{m_versions}
-    , m_methodPath{m_versions}
-    , m_inheritanceInfo{m_versions}
-    , m_typeAttrs{m_versions}
-    , m_typeAliasAttrs{m_versions}
-    , m_methodAttrs{m_versions}
-    , m_fileAttrs{m_versions} {
-}
+    : m_versions{std::make_shared<PathVersions>()},
+      m_typePath{m_versions},
+      m_functionPath{m_versions},
+      m_constantPath{m_versions},
+      m_modulePath{m_versions},
+      m_methodPath{m_versions},
+      m_inheritanceInfo{m_versions},
+      m_typeAttrs{m_versions},
+      m_typeAliasAttrs{m_versions},
+      m_methodAttrs{m_versions},
+      m_fileAttrs{m_versions} {}
 
 void SymbolMap::Data::updatePath(
     Path path,
     FileFacts facts,
-    const hphp_hash_set<std::string>& indexedMethodAttrs) {
+    const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
   m_versions->bumpVersion(path);
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
@@ -1501,6 +1610,11 @@ void SymbolMap::Data::updatePath(
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,
+        DeriveKind::RequireClass,
+        std::move(type.m_requireClass));
+    m_inheritanceInfo.setBaseTypes(
+        typeName,
+        path,
         DeriveKind::RequireExtends,
         std::move(type.m_requireExtends));
     m_inheritanceInfo.setBaseTypes(
@@ -1517,7 +1631,8 @@ void SymbolMap::Data::updatePath(
                 attributes.begin(),
                 attributes.end(),
                 [&](const Attribute& attr) {
-                  return !indexedMethodAttrs.count(attr.m_name);
+                  return !indexedMethodAttrs.count(
+                      Symbol<SymKind::Type>{attr.m_name});
                 }),
             attributes.end());
       }
@@ -1529,6 +1644,12 @@ void SymbolMap::Data::updatePath(
       m_methodAttrs.setAttributes(methodDecl, std::move(attributes));
       methods.push_back(methodDecl);
     }
+  }
+
+  typename PathToSymbolsMap<SymKind::Module>::Symbols modules;
+  for (auto const& module : facts.m_modules) {
+    always_assert(!module.m_name.empty());
+    modules.push_back(Symbol<SymKind::Module>{module.m_name});
   }
 
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
@@ -1545,6 +1666,7 @@ void SymbolMap::Data::updatePath(
 
   m_fileAttrs.setAttributes({path}, facts.m_attributes);
 
+  m_modulePath.replacePathSymbols(path, std::move(modules));
   m_typePath.replacePathSymbols(path, std::move(types));
   m_functionPath.replacePathSymbols(path, std::move(functions));
   m_constantPath.replacePathSymbols(path, std::move(constants));
@@ -1566,11 +1688,15 @@ void SymbolMap::waitForDBUpdate() {
     updateDBFuture.wait();
   }
   // Refresh the DB transaction
-  getDB().commit();
+  try {
+    getDB()->commit();
+  } catch (const std::runtime_error& e) {
+    XLOG(ERR) << e.what();
+  }
 }
 
-AutoloadDB& SymbolMap::getDB() const {
-  return m_dbHandle();
+std::shared_ptr<AutoloadDB> SymbolMap::getDB() const {
+  return m_dbVault.get();
 }
 
 } // namespace Facts

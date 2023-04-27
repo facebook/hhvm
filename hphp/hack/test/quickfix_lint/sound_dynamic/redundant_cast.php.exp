@@ -1,0 +1,20 @@
+//// redundant_cast.php
+<?hh
+
+class Box<T> {
+  public function __construct(private T $val): void {}
+  public function getVal(): T { return $this->val; }
+}
+
+<<__SupportDynamicType>>
+function not_sure_if_redundant_cast(Box<float> $box): void {
+  (float) $box->getVal();
+}
+
+function redundant_cast(Box<float> $box): void {
+  $box->getVal();
+}
+
+
+There were input 1 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

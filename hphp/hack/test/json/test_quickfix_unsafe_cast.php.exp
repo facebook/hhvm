@@ -1,0 +1,19 @@
+{
+  "errors":[
+    {
+      "descr":"The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible. Consider using `?string` instead.",
+      "severity":"error",
+      "path":"test_quickfix_unsafe_cast.php",
+      "line":8,
+      "start":29,
+      "end":33,
+      "code":5636,
+      "bypass_changed_lines":false,
+      "original":"mixed",
+      "replacement":"?string",
+      "start_offset":111,
+      "width":5
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

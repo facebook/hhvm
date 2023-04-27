@@ -99,19 +99,13 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in two flavors: cells and refs.
-
-A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a pointer to data (for refcounted types). When a cell
-containing a pointer is duplicated, the new cell will point to the same data as
-the original cell. When a cell containing a pointer is duplicated or discarded,
-the execution engine is responsible for honoring the data's refcount logic.
-
-A "ref" is a structure that contains a pointer to a cell container. When a ref
-is duplicated, the new ref will point to the same container as the original
-ref. When a ref is duplicated or destroyed, the execution engine is responsible
-for honoring the container's refcount logic. When the container is destroyed,
-the cell it contains is also destroyed.
+variables. A value (or "cell") is a structure that contains a type identifier
+and either data (for non-refcounted types) or a pointer to data (for refcounted
+types). When a cell containing a pointer is duplicated, the new cell will point
+to the same data as the original cell. When a cell containing a pointer is
+duplicated or discarded, the execution engine is responsible for honoring the
+data's refcount logic. Throughout this document, we use "cell" and "value"
+interchangeably.
 
 Functions
 ---------
@@ -149,8 +143,8 @@ default values are called "optional parameters".
 
 The metadata of each function specifies a set of non-overlapping ranges of
 bytecode that compose the function body, and it specifies the main entry point
-and 0 or more DV entry points (entry points are discussed in more detail in
-the "Entry points" section).
+and 0 or more default value ("DV") entry points (entry points are discussed in
+more detail in the "Entry points" section).
 
 The total size of the bytecode for the function body must not exceed 2^31 - 1
 bytes. The bytecode for a function must be one contiguous range of bytecode.
@@ -182,8 +176,8 @@ documented much here. See class.h.
 Closures
 --------
 
-Closures are implemented in hhbc as subclasses of Closure, in conjunction with
-the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
+Closures are implemented in HHBC as subclasses of Closure, in conjunction with
+the CreateCl opcode. It is legal HHBC to create other subclasses of Closure (to
 represent user code that attempts to do the same), but attempting to
 instantiate one will result in a fatal error. The documentation of the CreateCl
 opcode below lists the requirements for a closure subclass to be usable with
@@ -242,8 +236,8 @@ change significantly, so this spec is staying light on details for now.
 Entry points
 ------------
 
-Entry points come in four varieties: the main entry point, DV entry points, and
-catch entry points.
+Entry points come in three varieties: the main entry point, default value ("DV")
+entry points, and catch entry points.
 
 Every function has exactly one main entry point. When a function is called, the
 dispatcher will set the PC of the new frame to point to the main entry point if
@@ -302,12 +296,8 @@ multiple rows that are marked as being unconditionally declared in the
 outermost scope with the same function name. Each function id must be between 0
 and 2^31 - 2 inclusive.
 
-Each row in the class table contains a unique class id, a class name specified
-by a litstr id, a flag that indicates if the class declaration is hoisted to
-the prelude of pseudo-main, and the class metadata. Note that there may be
-multiple rows in the class table with same class name. However, there may not
-be multiple rows that are marked as being hoisted with the same class name.
-Each class id must be between 0 and 2^31 - 2 inclusive.
+Each row in the class table contains a class name specified by a litstr id and
+the class metadata.
 
 
 Calling convention
@@ -569,8 +559,7 @@ for each of the instruction's inputs.
 
 Here is a description of each flavor descriptor:
 
-  C - cell; specifies that the value must be a cell at run time
-  V - ref; specifies that the value must be a ref at run time
+  C - cell; specifies that the value must be a typed value at run time
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
@@ -699,7 +688,8 @@ $1 is used to refer to the value at the top of the evaluation stack, $2 is used
 to refer to the value directly below $1 on the evaluation stack, $3 is used to
 refer to the value directly below $2, and so forth. Also, %1 is used to refer
 to the first immediate argument, and %2 is used to refer to the second
-immediate argument.
+immediate argument. Thus, the indices used to refer to values on both
+the evaluation stack and in the immediate arguments list are 1-indexed.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, Switch,
 or SSwitch instruction is relative to the beginning of the instruction.
@@ -723,7 +713,7 @@ location descriptors is given below:
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
-instruction in the group perform similar actions but take different kinds of
+instruction in the group performs similar actions but takes different kinds of
 inputs to specify the location to access.
 
 There are numerous instructions which incorporate a readonly immediate.
@@ -779,12 +769,6 @@ The instruction set is organized into the following sections:
 Nop    []  ->  []
 
   No operation. This instruction does nothing.
-
-EntryNop []  ->  []
-
-  No operation. This instruction is occasionally inserted by the emitter to
-  avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
-  is guaranteed to not be optimized away.
 
 PopC                  [C]  ->  []
 PopU                  [U]  ->  []
@@ -906,7 +890,7 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   in packed mode if %1 is Vector or ImmVector, and must be in mixed mode
   otherwise.
 
-  Note that integer-like string keys are converted to integers in array, but
+  Note that integer-like string keys are converted to integers in arrays, but
   not in collections; thus not all collections can be created using this
   instruction.
 
@@ -989,44 +973,23 @@ Mul    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
   Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws a
   fatal error if either $1 or $2 is not numeric.
 
-AddO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Add, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 + (double)$2.
-
-SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Sub, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$2 - (double)$1.
-
-MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Mul, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 * (double)$2.
-
 Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Int]  ->  [C:Bool|Dbl]
        [C:Int C:Dbl]  ->  [C:Bool|Dbl]
        [C:Dbl C:Dbl]  ->  [C:Bool|Dbl]
 
   Division (/). Pushes ($2 / $1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Mod    [C C]  ->  [C:Bool|Int]
 
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Pow    [C C]  ->  [C:Int|Dbl]
 
-  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction
-  never throws a fatal error.
+  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
 Not    [C]  ->  [C:Bool]
 
@@ -1225,17 +1188,14 @@ Fatal <fatal subop>  [C]  ->  []
 4. Control flow instructions
 ----------------------------
 
+Enter <rel offset>   []  ->  []
+
+  Enter the function body. This instruction is used at the end of default value
+  initializers to transfer control to the function body.
+
 Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
-
-JmpNS <rel offset>   []  ->  []
-
-  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
-  identically to the Jmp instruction, except that internal VM checks for things
-  like OOM and timeouts do not need to be performed even if the offset is
-  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
-  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -1327,12 +1287,12 @@ CGetQuietL <local variable id>    []  ->  [C]
 
 CGetL2 <local variable id>    [<C>:<T>]  ->  [C <C>:<T>]
 
-  Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack as
-  a cell, and then pushes $1 onto the stack.
+  Get local as cell. First, $1 is popped off the stack. If the local variable
+  given by %1 is defined, this instruction then gets the value of the local variable,
+  pushes it onto the stack as a cell, and then pushes $1 back onto the stack.
 
   If the local variable is not defined, this instruction raises a warning,
-  pushes null onto the stack, and then pushes $1 onto the stack.
+  pushes null onto the stack, and then pushes $1 back onto the stack.
 
 CUGetL <local variable id>    []  ->  [C|U]
 
@@ -1435,6 +1395,7 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
@@ -1461,6 +1422,7 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
@@ -1501,7 +1463,7 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
   Next, this instruction reads the local variable into x, then executes y = x
   <op> $1, assigns y into local variable %1, and then pushes y onto the stack.
   The immediate value must be one of the following opcodes:
-    Add, AddO, Sub, SubO, Mul, MulO, Div, Mod, Shl, Shr, Concat, BitAnd,
+    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd,
     BitOr, BitXor.
 
 SetOpG <op>    [C C]  ->  [C]
@@ -1619,9 +1581,7 @@ InitProp <propName> <op> [C] -> []
 --------------------
 
 NewObj                                      [C:Class]              ->  [C:Obj]
-NewObjR                                     [C:Class, C:Vec|Null]  ->  [C:Obj]
 NewObjD   <litstr id>                       []                     ->  [C:Obj]
-NewObjRD  <litstr id>                       [C:Vec|Null]           ->  [C:Obj]
 NewObjS   <mode>                            []                     ->  [C:Obj]
 
   New object. First, these instructions load a class into x as given
@@ -1630,12 +1590,10 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
     instruction   x
     ------------+----
       NewObj    | $1
-      NewObjR   | $2
       NewObjD   | %1
-      NewObjRD  | %1
       NewObjS   | %1
 
-  When loading %1 into x, NewObjD and NewObjRD will perform the work performed
+  When loading %1 into x, NewObjD will perform the work performed
   by the ClassGetC instruction to convert the name given by %1 into a class.
   NewObjS will perform the same work as LateBoundCls/SelfCls/ParentCls depending
   on the specified mode.
@@ -1643,9 +1601,6 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
   This instruction pushes a default-initialized object onto the stack. The
   initialization will complete by running a constructor with FCallCtor, and
   clearing the IsBeingConstructed flag using LockObj.
-
-  NewObjR's and NewObjRD's $1 contains a list of reified generics, or null if
-  none present.
 
 LockObj                                    [C:Obj] -> [C:Obj]
 
@@ -1665,7 +1620,7 @@ FCall* opcodes
   FCall* first looks up the callee function according to the specific opcode.
 
   The vector %4 must be either empty or it must contain exactly %2 booleans.
-  If it is non-empty, FCall* checks whether inout-ness of parameters 0..(%2-1)
+  If it is non-empty, FCall* checks whether inout-ness of parameters 1..%2
   of the callee matches the corresponding inout-ness values specified by the
   vector %4. Throws an exception if there is a mismatch.
 
@@ -1760,7 +1715,9 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
 
 FCallClsMethod <fca> <class hint> <op>
   [U U C|V..C|V C C:Class]  ->  [C..C]
-FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
+FCallClsMethodM <fca> <class hint> <op> <litstr id>
+  [U U C|V..C|V C]    ->  [C..C]
+FCallClsMethodD <fca> <litstr id> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
   [U U C|V..C|V C]  ->  [C..C]
@@ -1773,13 +1730,14 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
     instruction            x    y
     --------------------+----+-----
       FCallClsMethod    | $1 | $2
-      FCallClsMethodD   | %3 | %4
+      FCallClsMethodM   | $1 | %4
+      FCallClsMethodD   | %2 | %3
       FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
 
-  When loading litstr id %3 into x, FCallClsMethodD will perform the work
-  performed by the ClassGetC instruction to convert the name given by %3 into
-  a class.
+  When loading litstr id %2 into x, FCallClsMethodD will perform the work
+  performed by the ClassGetC instruction to convert the name given by %2 into
+  a class. Similarly, FCallClsMethodM will convert $1 into a class.
 
   When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
   perform the work performed by LateBoundCls/SelfCls/ParentCls depending
@@ -2108,7 +2066,7 @@ PropLD <local variable id>    [B]  ->  [B]
          y->x has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | null
-    01XXXX | y = new stdclass; create property y->x; y->x
+    01XXXX | y = new stdClass; create property y->x; y->x
     1X0X0X | create property y->x; y->x
     1X0X1X | y->__get(x)
     1X100X | throw fatal error
@@ -2465,7 +2423,7 @@ SetPropL <local variable id>    [C B]  ->  [C]
          y->k has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | raise warning; push null
-    01XXXX | y = new stdclass; y->k = x; push x
+    01XXXX | y = new stdClass; y->k = x; push x
     1X0X0X | create property y->k; y->k = x; push x
     1X0X1X | y->__set(k, x); push x
     1X100X | throw fatal error
@@ -2498,7 +2456,7 @@ SetOpPropL <op> <local variable id>    [C B]  ->  [C]
           y->k has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; z = null <op> x; y->k = z; push z
+    01XXXXX | y = new stdClass; z = null <op> x; y->k = z; push z
     100X0XX | z = null <op> x; y->k = z; push z
     100X10X | w = y->__get(k); z = w <op> x; y->k = z; push z
     100X11X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
@@ -2534,7 +2492,7 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
           y->x has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; b = null; a = b; <op>a; y->x = a;
+    01XXXXX | y = new stdClass; b = null; a = b; <op>a; y->x = a;
             |   push a (Pre*) or b (Post*)
     100X0XX | b = null; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
     100X10X | b = y->__get(x); a = b; <op>a; y->x = a;
@@ -2780,9 +2738,9 @@ IterNext  <IterArgs> <rel offset>    []   ->  []
 
   Iterator next. This instruction first advances the iterator with the ID given
   in %1. If the iterator has more elements, then it writes the next element's
-  value (and, for key-value iters, its key) to the output locals given in %1,
-  Otherwise, the base frees the iterator (with an implicit IterFree) and
-  transfers control to the location specified by %2.
+  value (and, for key-value iters, its key) to the output locals given in %1
+  and transfers control to the location specified by %2, Otherwise, the base
+  frees the iterator (with an implicit IterFree).
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
   depend on the iterator type. (We could also say it depends on the type of
@@ -2914,14 +2872,20 @@ OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
   the autoloader if needed and if $1 is true. The result of the existence check
   will be pushed on the stack.
 
-VerifyParamType <parameter id>    []  ->  []
+VerifyOutType <parameter id>    [C]  ->  [C]
+
+  Verify out param type. Check that $1 is a value compatible with the declared
+  parameter type specified by the given parameter. In case of a mismatch
+  a warning or recoverable error is raised.
+
+VerifyParamType <parameter id>    [C]  ->  [C]
 
   Verify parameter type. Functions and methods can optionally specify the types
   of arguments they will accept.
 
-  VerifyParamType checks the specified parameter against the enclosing
-  function's corresponding parameter constraints. In case of a mismatch, a
-  recoverable error is raised.
+  VerifyParamType checks the type of the parameter in $1 against the enclosing
+  function's corresponding parameter constraints for `parameter id`. In case
+  of a mismatch, a recoverable error is raised.
 
 VerifyRetTypeC    [C] -> [C]
 
@@ -2978,11 +2942,38 @@ RecordReifiedGeneric [C:Vec] -> [C:Vec]
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
 
-CheckReifiedGenericMismatch [C:Vec] -> []
+CheckClsReifiedGenericMismatch [C:Vec] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased
   matches exactly to the expectations of the current class. If there is
   no class in the current context, throws a fatal error as well.
+
+ClassHasReifiedGenerics [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class
+  or lazy class.
+
+GetClsRGProp [C:Class|LazyClass] -> [C:Vec|Null]
+
+  Gets the reified generics property for current instance, using the index of this
+  property as stored in class $1. Raises a fatal error if the current instance
+  is null or $1 is not a class or lazy class. Returns null if the current
+  instance or $1 doesn't have reified generics.
+
+HasReifiedParent [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the parent of the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class.
+  or lazy class.
+
+CheckClsRGSoft [C:Class|LazyClass] -> []
+
+  Raises a warning if every reified generic in class $1 is soft.
+  Otherwise, raises a fatal error. This bytecode should only be emitted
+  when a class which expects reified generics is being instantiated without
+  any reified generics given (thus guarded by a ClassHasReifiedGenerics bytecode).
+  Throws a fatal error if $1 is not a class or lazy class.
 
 NativeImpl    []  ->  []
 
@@ -2997,9 +2988,9 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class id>  [C|U..C|U]  ->  [C]
+CreateCl <num args> <class name>  [C|U..C|U]  ->  [C]
 
-  Creates an instance of the class specified by <class id> and pushes it on the
+  Creates an instance of the class specified by <class name> and pushes it on the
   stack.
 
   The specified class must be a subclass of "Closure", must have a single
@@ -3205,10 +3196,9 @@ ThrowNonExhaustiveSwitch [] -> []
   emitted correctly.
 
 ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
-                           []  ->  [C:Str]
 
   If %1 is a valid class name, resolve it to a class pointer value, then push
-  the pointer onto the top of stack. When resolution fails, push the class name.
+  the pointer onto the top of stack. When resolution fails, raise an error.
 
 RaiseClassStringConversionWarning [] -> []
 
@@ -3218,6 +3208,21 @@ RaiseClassStringConversionWarning [] -> []
 SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
+
+VerifyImplicitContextState [] -> []
+
+  Verifies whether the current state of the implicit context is valid with
+  respect to the current calling context. Raises warning or throws an
+  exception if the state is invalid, set to soft implicit context or cleared.
+  Can only be used in memoized wrapper functions.
+
+CreateSpecialImplicitContext [C:Int C:?Str] -> [C:?Obj]
+
+  Creates a special implicit context as if by calling the
+  create_special_implicit_context builtin. $1 is one of the
+  ImplicitContext::State enum values, and $2 is a nullable string optionally
+  providing a memo-key. If $1 is not an int, or if $2 is not a nullable string,
+  a fatal is raised.
 
 14. Generator creation and execution
 ---------------------------------------

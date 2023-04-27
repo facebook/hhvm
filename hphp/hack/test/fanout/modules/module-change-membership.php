@@ -2,33 +2,34 @@
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
-module B {}
+new module A {}
+new module B {}
 
 //// changed-decls.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
-module B {}
+new module A {}
+new module B {}
 
 //// base-f.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
 //// changed-f.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('B')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module B;
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
 //// base-g.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function g(): void {
   f();
@@ -36,7 +37,8 @@ function g(): void {
 
 //// changed-g.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function g(): void {
     f();

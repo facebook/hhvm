@@ -3,7 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
 
 pub fn test_opcodes() -> Vec<OpcodeData> {
     vec![

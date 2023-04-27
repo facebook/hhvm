@@ -254,7 +254,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;
-  auto const funcReturnType = callee->hniReturnType();
+  auto const funcReturnType = callee->returnTypeConstraint().asSystemlibType();
   auto const returnByValue = callee->isReturnByValue();
 
   auto& v = vmain(env);
@@ -325,12 +325,12 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // Cell. If it expects a specific type, just pass the
       // value. Otherwise pass it as a TypedValue.
       assertx(inst->src(srcNum)->isA(TCell));
-      if (pi.builtinType && !pi.isTakenAsTypedValue()) {
+      if (pi.builtinType() && !pi.isTakenAsTypedValue()) {
         args.ssa(srcNum);
       } else {
         args.typedValue(srcNum);
       }
-    } else if (pi.builtinType && !pi.isTakenAsVariant()) {
+    } else if (pi.builtinType() && !pi.isTakenAsVariant()) {
       // Otherwise the value is passed by value for some types, and by
       // ref for others. The function expects a specific type, so we
       // only need to pass the value. The input could be a Cell, a
@@ -506,7 +506,7 @@ void cgEnterTranslation(IRLS& env, const IRInstruction*) {
 
 IMPL_OPCODE_CALL(NewRFunc)
 
-void cgHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+void cgFuncHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
 
@@ -560,6 +560,30 @@ void cgLdFuncFromRClsMeth(IRLS& env, const IRInstruction* inst) {
 
 void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
   ldFromRClsMethCommon(env, inst, RClsMethData::genericsOffset());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const unit = v.makeReg();
+  if (inst->src(0)->isA(TFunc)) {
+    auto const func = srcLoc(env, inst, 0).reg();
+    v << load{func[Func::unitOff()], unit};
+  } else {
+    assertx(inst->src(0)->isA(TCls));
+    auto const cls = srcLoc(env, inst, 0).reg();
+    auto const preclass = v.makeReg();
+    v << load{cls[Class::preClassOff()], preclass};
+    v << load{preclass[PreClass::unitOffset()], unit};
+  }
+
+  auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
+  auto const sf = v.makeReg();
+  emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
+  v << setcc{CC_NZ, sf, dst};
 }
 
 }

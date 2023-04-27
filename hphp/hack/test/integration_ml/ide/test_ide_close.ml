@@ -53,12 +53,12 @@ let foo_ide_contents = "<?hh
 let foo_ide_errors =
   [
     "
-File \"/foo.php\", line 3, characters 2-2:
-A right brace `}` is expected here. (Parsing[1002])
-";
-    "
 File \"/foo.php\", line 3, characters 1-1:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+";
+    "
+File \"/foo.php\", line 3, characters 2-2:
+A right brace `}` is expected here. (Parsing[1002])
 ";
   ]
 

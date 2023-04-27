@@ -2,7 +2,7 @@
 
 namespace A\B;
 class Foo {
-  static $baz = 32;
+  public static $baz = 32;
   function __construct(varray $a) {
     \var_dump($a);
   }

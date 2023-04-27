@@ -352,8 +352,8 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
                                               bool mustBeReadOnly) {
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateStatics) {
-    if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;
-    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadonly)) return;
+    if (!ignoreConst && (kv.second.attrs & AttrIsConst)) continue;
+    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadonly)) continue;
     if (m_cls->work) {
       m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
       m_cls->work->propMutators[m_func].emplace(kv.first);
@@ -396,9 +396,9 @@ Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
 //////////////////////////////////////////////////////////////////////
 
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 php::Class* clo,
+                                 const php::Class& clo,
                                  CompactVector<Type> types) {
-  auto& current = dst[clo];
+  auto& current = dst[&clo];
   if (current.empty()) {
     current = std::move(types);
     return;

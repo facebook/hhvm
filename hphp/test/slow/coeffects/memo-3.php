@@ -1,6 +1,6 @@
 <?hh
 
-<<__PolicyShardedMemoize>>
+<<__Memoize(#KeyedByIC)>>
 function test()[] {
   echo "ok\n";
 }

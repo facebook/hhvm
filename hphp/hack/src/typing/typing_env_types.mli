@@ -16,6 +16,23 @@ type local_env = {
       (** Local variables that were assigned in a `using` clause *)
 }
 
+(** Contains contextual information useful when type checking an
+    expression tree. *)
+type expr_tree_env = {
+  dsl: Aast.hint;
+      (** The DSL the expression tree is representing. For instance in:
+
+          SomeDSL`1 + 1`
+
+          This hint would reference `SomeDsl` *)
+  outer_locals: Typing_local_types.t;
+      (** The set of locals defined outside the expression tree. Ex:
+        $x = 10;
+        SomeDSL`1 + 1`;
+
+        `$x` would be in this set *)
+}
+
 type env = {
   fresh_typarams: SSet.t;
   lenv: local_env;
@@ -23,9 +40,11 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_expr_tree: bool;
+  in_expr_tree: expr_tree_env option;
+      (** If set to Some(_), then we are performing type checking within a
+          expression tree. *)
   inside_constructor: bool;
-  in_support_dynamic_type_method_check: bool;
+  checked: Tast.check_status;
       (** Set to true when checking if a <<__SoundDynamicallyCallable>> method body
           is well-typed under dyn..dyn->dyn assumptions, that is if it can be safely called
           in a dynamic environment. *)
@@ -41,6 +60,8 @@ type env = {
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
       (** This is only filled in after type-checking the function in question *)
+  loaded_packages: SSet.t;
+      (** The set of packages loaded via a "package <pkg>" expression *)
 }
 
 and genv = {
@@ -49,9 +70,8 @@ and genv = {
   readonly: bool;
   (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
+      (** For each function/method parameter, its type, position, and inout "return" type. *)
   condition_types: decl_ty SMap.t;
       (** condition types associated with parameters.
           For every mayberx parameter that has condition type we create
@@ -68,12 +88,14 @@ and genv = {
   fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
-      (** Is the definition that we are checking marked <<__Internal>>? *)
+      (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
+  package_info: Package.Info.t;
+      (** Given a module name returns the package it is in **)
 }
 
 val empty :

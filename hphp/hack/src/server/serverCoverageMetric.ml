@@ -11,7 +11,6 @@ open Hh_prelude
 open Coverage_level_defs
 open Option.Monad_infix
 open Reordered_argument_collections
-open String_utils
 
 module NamingTableStore = GlobalStorage.Make (struct
   type t = Naming_table.t
@@ -61,7 +60,7 @@ let relativize root path =
   else
     (* naive implementation *)
     let root = root ^ Filename.dir_sep in
-    if string_starts_with path root then
+    if String.is_prefix path ~prefix:root then
       let root_len = String.length root in
       Some (String.sub path ~pos:root_len ~len:(String.length path - root_len))
     else

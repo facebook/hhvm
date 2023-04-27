@@ -1,6 +1,7 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module("B")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 class C {
   function f() {}
@@ -13,4 +14,5 @@ function main() {
   var_dump((new ReflectionFunction('f'))->getModule());
   var_dump((new ReflectionFunction('g'))->getModule());
   var_dump((new ReflectionMethod('C', 'f'))->getModule());
+  var_dump((new ReflectionClass('C'))->getModule());
 }

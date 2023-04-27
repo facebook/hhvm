@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -124,7 +123,7 @@ Layout::LayoutSet getTopMonotypeDictParents(KeyTypes kt) {
 
 Layout::LayoutSet getAllMonotypeDictLayouts() {
   Layout::LayoutSet result;
-#define DT(name, value) {                                                      \
+#define DT(name, value, ...) {                                                 \
     auto const type = KindOf##name;                                            \
     if (type != KindOfUninit) {                                                \
       result.insert(MonotypeDictLayout::Index(KeyTypes::Ints, type));          \
@@ -1579,7 +1578,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
   new TopMonotypeDictLayout(KeyTypes::Strings);
   new TopMonotypeDictLayout(KeyTypes::StaticStrings);
 
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type == dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeDictLayout(KeyTypes::Ints, type);                    \
@@ -1590,7 +1589,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
 DATATYPES
 #undef DT
 
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type != dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeDictLayout(KeyTypes::Ints, type);                    \

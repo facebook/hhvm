@@ -1,0 +1,9 @@
+type my_vec = x list
+
+type boxed_slice = x list
+
+type slice = x list
+
+type std_vec = x list
+
+type std_boxed_slice = x list

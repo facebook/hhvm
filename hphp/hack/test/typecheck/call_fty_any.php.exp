@@ -1,5 +1,5 @@
 File "call_fty_any.php", line 5, characters 21-24:
-Please add a type hint `public SomeType foo` (Naming[2001])
+Please add a type hint `public SomeType $foo` (Naming[2001])
 File "call_fty_any.php", line 10, characters 5-9:
 Was expecting an array or collection but type is unknown (Typing[4297])
   File "call_fty_any.php", line 8, characters 10-18:

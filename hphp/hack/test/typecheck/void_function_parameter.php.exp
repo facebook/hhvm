@@ -1,2 +1,2 @@
 File "void_function_parameter.php", line 12, characters 12-15:
-The `void` typehint can only be used to describe a function return type (Naming[2063])
+You can only use the `void` type as the return type of a function or method (Naming[2063])

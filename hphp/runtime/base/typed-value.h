@@ -54,7 +54,7 @@ struct BlobDecoder;
  * This union may only be used in contexts that have a discriminator, e.g. in
  * TypedValue (below), or when the type is known beforehand.
  */
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 #pragma pack(push, 1)
 #endif
 union Value {
@@ -73,11 +73,11 @@ union Value {
   RClsMethData* prclsmeth; // KindOfRClsMeth
   LazyClassData plazyclass;   // KindOfLazyClass
 };
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 #pragma pack(pop)
 #endif
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 static_assert(alignof(Value) == 1);
 #else
 static_assert(alignof(Value) == 8);
@@ -166,7 +166,7 @@ struct alignas(8) TypedValue {
   Value val() const { return m_data; }
 
   void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
+  void serde(BlobDecoder&, bool makeStatic = true);
 
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
@@ -234,11 +234,6 @@ struct TypedValueAux : TypedValue {
  * case.
  */
 constexpr size_t kTVSimdAlign = 0x10;
-
-/*
- * A TypedNum is a TypedValue that is either KindOfDouble or KindOfInt64.
- */
-using TypedNum = TypedValue;
 
 ///////////////////////////////////////////////////////////////////////////////
 

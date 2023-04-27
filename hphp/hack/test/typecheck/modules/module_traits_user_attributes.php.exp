@@ -1,0 +1,4 @@
+File "module_traits_user_attributes.php--B.php", line 6, characters 17-27:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_traits_user_attributes.php--A.php", line 6, characters 16-26:
+  This is from module `A`

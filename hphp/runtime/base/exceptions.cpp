@@ -230,8 +230,8 @@ namespace {
       exCls->declPropTypeConstraint(s_fileSlot).isString() &&
       erCls->declPropTypeConstraint(s_lineSlot).isInt() &&
       exCls->declPropTypeConstraint(s_lineSlot).isInt() &&
-      !erCls->declPropTypeConstraint(s_traceSlot).isCheckable() &&
-      !exCls->declPropTypeConstraint(s_traceSlot).isCheckable();
+      erCls->declPropTypeConstraint(s_traceSlot).isVec() &&
+      exCls->declPropTypeConstraint(s_traceSlot).isVec();
   }
 
   int64_t exception_get_trace_options() {
@@ -249,36 +249,8 @@ namespace {
     assertx(throwable_has_expected_props());
 
     auto const trace_rval = throwable->propRvalAtOffset(s_traceSlot);
-
-    if (trace_rval.type() == KindOfResource) {
-      auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
-      assertx(bt);
-
-      for (auto& f : bt->frames()) {
-        if (!f.func || f.func->isBuiltin()) continue;
-
-        auto const ln = f.func->getLineNumber(f.prevPc);
-        tvSet(
-          make_tv<KindOfInt64>(ln),
-          throwable->propLvalAtOffset(s_lineSlot)
-        );
-
-        if (auto fn = f.func->originalFilename()) {
-          tvSet(
-            make_tv<KindOfPersistentString>(fn),
-            throwable->propLvalAtOffset(s_fileSlot)
-          );
-        } else {
-          tvSet(
-            make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
-            throwable->propLvalAtOffset(s_fileSlot)
-          );
-        }
-        return;
-      }
-      return;
-    }
-
+    // We ought to only populate `$trace` from inside HHVM, to start. This
+    // should *always* be an array. If it's not, then we ought to assert.
     assertx(isArrayLikeType(trace_rval.type()));
     auto const trace = trace_rval.val().parr;
     for (ArrayIter iter(trace); iter; ++iter) {
@@ -372,7 +344,7 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
   assertx(throwable_has_expected_props());
 
   auto const prop = throwable->getVMClass()->declProperties()[s_traceSlot];
-  auto const name = StrNR(prop.mangledName).asString();
+  auto const name = StrNR(prop.mangledName()).asString();
   auto const base = props.lookup(name);
   if (!tvIsArrayLike(base)) return;
 
@@ -383,18 +355,34 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
 }
 
 String throwable_to_string(ObjectData* throwable) {
-  if (throwable->instanceof(SystemLib::s_ThrowableClass)) {
+  auto const cls = throwable->getVMClass();
+  if (cls->classof(SystemLib::s_ThrowableClass)) {
     try {
       auto result = ObjectData::InvokeSimple(throwable, s___toString,
                                              RuntimeCoeffects::fixme());
       if (result.isString()) {
         return result.asCStrRef();
       }
-    } catch (const Object&) {
-      // Ignore PHP exceptions from Throwable::__toString
+      Logger::FError("{}::__toString() didn't return a string",
+                     cls->name()->slice());
+    } catch (const Object& ex) {
+      Logger::FError("encountered {} in {}::__toString()",
+                     ex->getVMClass()->name()->slice(),
+                     cls->name()->slice());
     }
+    auto message = throwable->getProp(MemberLookupContext{cls},
+                                      makeStaticString("message"));
+    if (!message) {
+      Logger::Error("Throwable object doesn't have the expected message field");
+      return String{StringData::Make(cls->name(), ": no message")};
+    }
+    return String{StringData::Make(cls->name()->slice(),
+                              folly::StringPiece{": "},
+                              message.val().pstr->slice())};
+  } else {
+    return s_throwableToStringFailed +
+      " on an object of class " + cls->name()->data();
   }
-  return s_throwableToStringFailed;
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -89,6 +89,16 @@ struct GroupInfo final {
     }
   }
 
+  explicit GroupInfo(gid_t gid) {
+    if (getgrgid_r(gid, &buf.ent, buf.data.get(), buf.size, &gr)) {
+      throw Exception("getgrgid_r: %s", folly::errnoStr(errno).c_str());
+    }
+
+    if (gr == nullptr) {
+      throw Exception("getgrgid_r: no such group with gid: %u", gid);
+    }
+  }
+
   GroupBuffer buf;
   group* gr;
 };

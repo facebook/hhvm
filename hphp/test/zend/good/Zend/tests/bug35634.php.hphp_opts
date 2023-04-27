@@ -1,0 +1,2 @@
+--inputs=__DIR__/bug35634-1.inc
+--inputs=__DIR__/bug35634-2.inc

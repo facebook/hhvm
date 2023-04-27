@@ -7,7 +7,8 @@
  *
  *)
 
-type 'a job_result = 'a * Relative_path.t list
+type 'a job_result =
+  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
 
 type seconds_since_epoch = float
 
@@ -21,6 +22,7 @@ val should_enable_deferring : Typing_service_types.check_file_workitem -> bool
 val process_file :
   Provider_context.t ->
   Typing_service_types.check_file_workitem ->
+  log_errors:bool ->
   decl_cap_mb:int option ->
   process_file_results
 
@@ -37,11 +39,11 @@ val go :
   Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
+  root:Path.t option ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
-  remote_execution:ReEnv.t option ->
+  use_hh_distc_instead_of_hulk:bool ->
+  hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   result
 
@@ -54,12 +56,12 @@ val go_with_interrupt :
   Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
+  root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
-  remote_execution:ReEnv.t option ->
+  use_hh_distc_instead_of_hulk:bool ->
+  hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   ('env * result) job_result
 

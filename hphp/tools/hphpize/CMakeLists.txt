@@ -1,3 +1,5 @@
+include(GNUInstallDirs)
+
 GET_DIRECTORY_PROPERTY(SOURCE_INCLUDE_DIRS INCLUDE_DIRECTORIES)
 
 # Ensure that we pick up the includes for hhvm and folly

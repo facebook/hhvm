@@ -410,7 +410,7 @@ const StaticString s_replacedValueCount("replaced_values_count");
 const StaticString s_expiredValueCount("expired_values_count");
 
 std::string APCDetailedStats::getStatsInfo() const {
-  return "\nPrimitve and static strings count: " +
+  return "\nPrimitive and static strings count: " +
          std::to_string(m_uncounted->getValue()) +
          "\nAPC strings count: " +
          std::to_string(m_apcString->getValue()) +

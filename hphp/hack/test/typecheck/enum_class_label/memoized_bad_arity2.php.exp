@@ -1,0 +1,2 @@
+File "memoized_bad_arity2.php", line 3, characters 43-46:
+`__Memoize` takes 2 arguments when using `#SoftMakeICInaccessible`. (Parsing[1002])

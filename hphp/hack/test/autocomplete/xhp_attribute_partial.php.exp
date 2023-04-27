@@ -1,1 +1,3 @@
-my-attribute ?MyEnum
+my-attribute
+  INSERT my-attribute
+  ?MyEnum

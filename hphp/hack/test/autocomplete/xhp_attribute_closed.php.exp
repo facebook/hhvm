@@ -1,2 +1,6 @@
-style ?string
-number int
+style
+  INSERT style
+  ?string
+number
+  INSERT number
+  int

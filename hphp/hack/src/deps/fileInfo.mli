@@ -26,7 +26,7 @@ open Prim_defs
 type mode =
   | Mhhi (* just declare signatures, don't check anything *)
   | Mstrict (* check everything! *)
-[@@deriving eq, show, enum]
+[@@deriving eq, show, enum, ord, sexp_of]
 
 val is_strict : mode -> bool
 
@@ -54,6 +54,8 @@ type pos =
 [@@deriving eq, show]
 
 type id = pos * string * Int64.t option [@@deriving eq, show]
+
+val id_name : id -> string
 
 val pos_full : Pos.t * string * Int64.t option -> id
 
@@ -94,6 +96,7 @@ type names = {
   n_consts: SSet.t;
   n_modules: SSet.t;
 }
+[@@deriving show]
 
 (*****************************************************************************)
 (* The record used in our saved state. *)

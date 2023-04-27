@@ -1,8 +1,0 @@
-File "inst_meth7.php", line 19, characters 22-25:
-You cannot access this method (Typing[4112])
-  File "inst_meth7.php", line 13, characters 20-21:
-  This member is private
-File "inst_meth7.php", line 19, characters 22-25:
-You cannot use this method with `inst_meth` (whether you are in the same class or not). (Typing[4079])
-  File "inst_meth7.php", line 13, characters 20-21:
-  It is declared as `private` here

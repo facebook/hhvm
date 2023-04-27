@@ -170,8 +170,11 @@ struct Vframe {
     size_t exclusive{0};
   };
 
-  static constexpr int Root = 0;  // Frame defined by DefFP or DefFuncEntryFP
-  static constexpr int Top = -1;  // Parent of root frame
+  // Frame defined by DefFP, DefFuncEntryFP or Enterfunc
+  static constexpr int Root = 0;
+
+  // Parent of root frame
+  static constexpr int Top = -1;
 
   LowPtr<const Func> func;
   int32_t callOff{-1};
@@ -264,6 +267,14 @@ struct Vunit {
    * its blocks before being emitted.
    */
   bool needsFramesComputed() const;
+  /*
+   * Allocate a new VFrame for an EnterInlineFrame instruction or return the
+   * id of an existing already created frame for that FP.
+   *
+   * If the frame already exists its entry weight will be increased by the
+   * weight specified here.
+   */
+  int allocFrame(const Vinstr& inst, int parent_frame, uint64_t entry_weight);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -274,6 +285,7 @@ struct Vunit {
   jit::vector<Vblock> blocks;
   jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;
   jit::hash_map<size_t,Vconst> regToConst;
+  jit::hash_map<const SSATmp*,int> fpToFrame;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
@@ -284,6 +296,7 @@ struct Vunit {
   Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
   Annotations annotations;
+  const char* name{nullptr}; // used for unique stubs
 };
 
 inline tracing::Props traceProps(const Vunit& v) {
@@ -293,4 +306,3 @@ inline tracing::Props traceProps(const Vunit& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

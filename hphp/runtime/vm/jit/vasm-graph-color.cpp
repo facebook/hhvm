@@ -2744,6 +2744,17 @@ void infer_register_classes(State& state) {
  * recursion.
  */
 
+// Is this instruction a (simple) memory read?
+bool is_mem_read(const Vinstr& inst) {
+  // We're looking for instructions which read from memory and nothing
+  // else.
+  return
+    !isPure(inst) &&
+    !isCall(inst) &&
+    touchesMemory(inst.op) &&
+    !writesMemory(inst.op);
+}
+
 // Comparators for instruction source types
 namespace detail {
 
@@ -2766,6 +2777,7 @@ bool src_cmp(const Vunit& unit, VcallArgsId a1, VcallArgsId a2) {
 bool compare_remat_insts(const Vunit& unit,
                          const Vinstr& inst1,
                          const Vinstr& inst2) {
+  if (&inst1 == &inst2) return true;
   if (inst1.op != inst2.op) return false;
 
   switch (inst1.op) {
@@ -2795,6 +2807,25 @@ bool compare_remat_insts(const Vunit& unit,
 #undef U
 #undef I
 #undef O
+  }
+
+  // Special case: If these instructions (which now know are
+  // identical) represent a memory read, they must have an identical
+  // origin, or at least the same PureLoad memory effects. It's
+  // possible for two vasm instructions to be identical, but represent
+  // different memory effects. Once we canonicalize to a single
+  // defining instruction, we'll lose one of the memory effects or the
+  // other, and we won't be able to calculate potential write
+  // conflicts properly. So, if this is a memory read, extend the
+  // notion of equality to their memory effects as well.
+  if (inst1.origin != inst2.origin && is_mem_read(inst1)) {
+    if (!inst1.origin || !inst2.origin) return false;
+    auto const effects1 = memory_effects(*inst1.origin);
+    auto const effects2 = memory_effects(*inst2.origin);
+    auto const load1 = boost::get<PureLoad>(&effects1);
+    auto const load2 = boost::get<PureLoad>(&effects2);
+    if (!load1 || !load2) return false;
+    if (load1->src != load2->src) return false;
   }
 
   return true;
@@ -3094,17 +3125,6 @@ RematLookup find_defining_inst_for_remat(State& state,
   }
 }
 
-// Is this instruction a (simple) memory read?
-bool is_mem_read(const Vinstr& inst) {
-  // We're looking for instructions which read from memory and nothing
-  // else.
-  return
-    !isPure(inst) &&
-    !isCall(inst) &&
-    touchesMemory(inst.op) &&
-    !writesMemory(inst.op);
-}
-
 // Similar to find_defining_inst_for_remat, but first checks if a
 // cached entry for the Vreg exists. If not, it will call
 // find_defining_inst_for_remat to obtain one, then cache it and
@@ -3197,10 +3217,13 @@ RematInfo find_defining_inst_for_remat_enter(State& state,
     find_defining_inst_for_remat_cached(state, r, b, instIdx, recursives);
 
   // Remove any ephemeral entries in the cache from mutually recursive
-  // definitions. They're not safe to keep across lookups. We want to
-  // store them during a single lookup to avoid exponential path
-  // behavior.
+  // definitions. They're not safe to keep across lookups, because their
+  // results are incomplete. We still want to store them during a single
+  // lookup to avoid exponential path behavior. The final result for `r`
+  // is complete though, so keep it. This avoids quadratic lookup behavior
+  // for large cycles.
   for (auto const recur : recursives) {
+    if (recur == r) continue;
     assertx(!recur.isPhys());
     auto& info = reg_info(state, recur);
     assertx(info.cachedRemat);
@@ -3769,10 +3792,10 @@ AliasClass mem_writes_for_inst(const Vinstr& inst) {
     [] (const PureStore& a)       { return a.dst; },
     [] (const PureInlineCall& a)  { return a.base; },
     [] (const CallEffects& e)     {
-      return e.kills | e.actrec | e.outputs | AHeapAny | ARdsAny;
+      return e.kills | e.uninits | e.actrec | e.outputs | AHeapAny | ARdsAny;
     },
     [] (const ReturnEffects& e)   { return e.kills; },
-    [] (const ExitEffects& e)     { return e.kills; },
+    [] (const ExitEffects& e)     { return e.kills | e.uninits; },
     [] (const IrrelevantEffects&) { return AEmpty; },
     [] (const UnknownEffects&)    { return AUnknown; }
   );
@@ -4246,7 +4269,7 @@ Vinstr reload_with_remat(State& state,
   // If the rematerialization instruction is a reload, we'll just
   // return it, so no further checks are needed. Otherwise we can
   // cache an instruction which may be situationally usable, so we
-  // need to do these checks everytime (if the instruction is never
+  // need to do these checks every time (if the instruction is never
   // useful, we should have a reload stored here already).
   if (remat.instr.op == Vinstr::reload) return reload{src, dst};
 

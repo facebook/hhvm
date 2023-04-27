@@ -110,7 +110,7 @@ let has_accept_disposable_attribute param =
   param_has_attribute param SN.UserAttributes.uaAcceptDisposable
 
 let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
-  let timeout = (Env.get_tcopt env).GlobalOptions.tco_timeout in
+  let timeout = TypecheckerOptions.(timeout @@ Env.get_tcopt env) in
   if Int.equal timeout 0 then
     Some (do_ env)
   else
@@ -131,17 +131,62 @@ let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
       ~do_:(fun _ -> Some (do_ env))
 
 (* If the localized types of the return type is a tyvar we force it to be covariant.
-  The same goes for parameter types, but this time we force them to be contravariant
+   The same goes for parameter types, but this time we force them to be contravariant
 *)
 let set_tyvars_variance_in_callable env return_ty param_tys =
   Env.log_env_change "set_tyvars_variance_in_callable" env
   @@
   let set_variance = Env.set_tyvar_variance ~for_all_vars:true in
   let env = set_variance env return_ty in
-  let env = List.fold param_tys ~init:env ~f:(set_variance ~flip:true) in
+  let env =
+    List.fold param_tys ~init:env ~f:(fun env opt_ty ->
+        match opt_ty with
+        | None -> env
+        | Some ty -> set_variance ~flip:true env ty)
+  in
   env
 
 let reify_kind = function
   | Erased -> Aast.Erased
   | SoftReified -> Aast.SoftReified
   | Reified -> Aast.Reified
+
+let merge_hint_with_decl_hint env type_hint decl_ty =
+  let contains_tvar decl_ty =
+    match decl_ty with
+    | None -> false
+    | Some decl_ty -> Typing_utils.contains_tvar_decl decl_ty
+  in
+  if contains_tvar decl_ty then
+    decl_ty
+  else
+    Option.map type_hint ~f:(Decl_hint.hint env.decl_env)
+
+let merge_decl_header_with_hints ~params ~ret decl_header env =
+  let ret_decl_ty =
+    merge_hint_with_decl_hint
+      env
+      (hint_of_type_hint ret)
+      (Option.map
+         ~f:(fun { ft_ret = { et_type; _ }; _ } -> et_type)
+         decl_header)
+  in
+  let params_decl_ty =
+    match decl_header with
+    | None ->
+      List.map
+        ~f:(fun h ->
+          merge_hint_with_decl_hint
+            env
+            (hint_of_type_hint h.param_type_hint)
+            None)
+        params
+    | Some { ft_params; _ } ->
+      List.zip_exn params ft_params
+      |> List.map ~f:(fun (h, { fp_type = { et_type; _ }; _ }) ->
+             merge_hint_with_decl_hint
+               env
+               (hint_of_type_hint h.param_type_hint)
+               (Some et_type))
+  in
+  (ret_decl_ty, params_decl_ty)

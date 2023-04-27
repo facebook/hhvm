@@ -51,6 +51,8 @@ template <typename T>
 struct Optional {
   // These all intentionally match the interface for std::optional:
 
+  using value_type = T;
+
   constexpr const T& operator*() const& {
     always_assert(m_opt.has_value());
     return *m_opt;

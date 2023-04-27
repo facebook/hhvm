@@ -1,0 +1,107 @@
+Copyright (c) 2009, 2019, Oracle and/or its affiliates. All rights reserved.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NOTE: Document is deprecated
+Use Component Services instead
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+How to create a new service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A "service" is a set of C functions in a structure that a
+service dynamic linker uses when a dynamic plugin is loaded.
+
+If you want to export C++ class you need to provide an
+extern "C" function that will create a new instance of your class,
+and put it in a service.
+
+Data structures are not part of the service structure, but they are part
+of the API you create and usually need to be declared in the same
+service_*.h file.
+
+To turn a set of functions (foo_func1, foo_func2)
+into a service "foo" you need to
+
+1. create a new file include/mysql/service_foo.h
+
+2. the template is
+==================================================================
+  #ifndef MYSQL_SERVICE_FOO_INCLUDED
+  /* standard GPL header */
+
+  /**
+    @file
+    *exhaustive* description of the interface you provide.
+    This file is the main user documentation of the new service
+  */
+  #ifdef __cplusplus
+  extern "C" {
+  #endif
+
+  extern struct foo_service_st {
+    int (*foo_func1_type)(...);  /* fix the prototype as appropriate */
+    void (*foo_func2_type)(...); /* fix the prototype as appropriate */
+  } *foo_service;
+
+  #ifdef MYSQL_DYNAMIC_PLUGIN
+
+  #define foo_func1(...) foo_service->foo_func1_type(...)
+  #define foo_func2(...) foo_service->foo_func2_type(...)
+
+  #else
+
+  int foo_func1_type(...);  /* fix the prototype as appropriate */
+  void foo_func2_type(...); /* fix the prototype as appropriate */
+
+  #endif
+
+  #ifdef __cplusplus
+  }
+  #endif
+
+  #define MYSQL_SERVICE_FOO_INCLUDED
+  #endif
+==================================================================
+
+the service_foo.h file should be self-contained, if it needs system headers -
+include them in it, e.g. if you use size_t - #include <stdlib.h>
+
+it should also declare all the accompanying data structures, as necessary
+(e.g. thd_alloc_service declares MYSQL_LEX_STRING).
+
+3. add the new file to include/Makefile.am (pkginclude_HEADERS)
+4. add the new file to include/mysql/services.h
+5. increase the minor plugin ABI version in include/mysql/plugin.h
+   (MYSQL_PLUGIN_INTERFACE_VERSION = MYSQL_PLUGIN_INTERFACE_VERSION+1)
+6. add the version of your service to include/service_versions.h:
+==================================================================
+    #define VERSION_foo 0x0100
+==================================================================
+
+7. create a new file libservices/foo_service.c using the following template:
+==================================================================
+  /* GPL header */
+  #include <service_versions.h>
+  SERVICE_VERSION *foo_service= (void*)VERSION_foo;
+==================================================================
+
+8. add the new file to libservices/CMakeLists.txt (MYSQLSERVICES_SOURCES)
+9. add the new file to libservices/Makefile.am (libmysqlservices_a_SOURCES)
+10. and finally, register your service for dynamic linking in
+    sql/sql_plugin_services.h
+10.1 fill in the service structure:
+==================================================================
+  static struct foo_service_st foo_handler = {
+    foo_func1,
+    foo_func2
+  }
+==================================================================
+
+10.2 and add it to the list of services
+
+==================================================================
+    { "foo_service", VERSION_foo, &foo_handler }
+==================================================================
+
+that's all.
+

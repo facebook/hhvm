@@ -42,29 +42,31 @@ type serialized_globals = Serialized_globals
 let serialize_globals () = Serialized_globals
 
 type rollout_flags = {
-  use_direct_decl_parser: bool;
-  longlived_workers: bool;
-  force_shallow_decl_fanout: bool;
-  log_from_client_when_slow_monitor_connections: bool;
   log_saved_state_age_and_distance: bool;
   naming_sqlite_in_hack_64: bool;
-  use_hack_64_naming_table: bool;
-  enable_disk_heap: bool;
   fetch_remote_old_decls: bool;
   ide_max_num_decls: int;
   ide_max_num_shallow_decls: int;
-  ide_max_num_linearizations: int;
-  max_bucket_size: int;
   max_typechecker_worker_memory_mb: int;
   max_workers: int;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
-  hulk_lite: bool;
-  hulk_heavy: bool;
   specify_manifold_api_key: bool;
   populate_member_heaps: bool;
   shm_use_sharded_hashtbl: bool;
   shm_cache_size: int;
-  ide_use_lfu_cache_instead_of_lru: bool;
+  remote_old_decls_no_limit: bool;
+  no_marshalled_naming_table_in_saved_state: bool;
+  use_manifold_cython_client: bool;
+  disable_naming_table_fallback_loading: bool;
+  use_type_alias_heap: bool;
+  override_load_state_natively: bool;
+  use_server_revision_tracker_v2: bool;
+  rust_provider_backend: bool;
+  load_hack_64_distc_saved_state: bool;
+  ide_should_use_hack_64_distc: bool;
+  use_hh_distc_instead_of_hulk: bool;
+  consume_streaming_errors: bool;
+  hh_distc_fanout_threshold: int;
 }
 
 let flush () = ()
@@ -75,8 +77,6 @@ let set_use_watchman _ = ()
 
 let set_use_full_fidelity_parser _ = ()
 
-let set_lazy_incremental _ = ()
-
 let set_search_chunk_size _ = ()
 
 let set_changed_mergebase _ = ()
@@ -86,8 +86,6 @@ let set_from _ = ()
 let set_hhconfig_version _ = ()
 
 let set_rollout_group _ = ()
-
-let set_machine_class _ = ()
 
 let set_rollout_flags _ = ()
 
@@ -102,7 +100,6 @@ let init
     ~informant_managed:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     ~time:_
     ~max_workers:_
     ~per_file_profiling:_ =
@@ -115,7 +112,6 @@ let init_worker
     ~custom_columns:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     ~time:_
     ~per_file_profiling:_ =
   ()
@@ -127,7 +123,6 @@ let init_monitor
     ~hhconfig_version:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     _
     _
     _ =
@@ -189,6 +184,16 @@ let client_restart ~data:_ = ()
 let client_check_start () = ()
 
 let client_check _ _ = ()
+
+let client_check_partial _ _ _ = ()
+
+let client_check_bad_exit _ _ _ = ()
+
+let client_check_errors_file_restarted _ = ()
+
+let client_lsp_shellout
+    ~root:_ ~command_line:_ ~result_count:_ ~result_extra_telemetry:_ =
+  ()
 
 let client_lsp_method_handled
     ~root:_
@@ -262,9 +267,9 @@ let ranked_autocomplete_request_duration ~start_time:_ = ()
 
 let monitor_dead_but_typechecker_alive () = ()
 
-let client_established_connection _ = ()
+let spinner_heartbeat _ _ = ()
 
-let client_establish_connection_exception _ = ()
+let client_established_connection _ = ()
 
 let client_connect_once ~t_start:_ = ()
 
@@ -292,6 +297,8 @@ let handled_persistent_connection _ = ()
 
 let handle_persistent_connection_exception _ _ ~is_fatal:_ = ()
 
+let server_file_edited_error ~reason:_ _ = ()
+
 let handled_command
     _ ~start_t:_ ~major_gc_time:_ ~minor_gc_time:_ ~parsed_files:_ =
   ()
@@ -306,11 +313,17 @@ let credentials_check_failure _ _ = ()
 
 let credentials_check_end _ _ = ()
 
-let remote_worker_type_check_end _ = ()
+let remote_worker_type_check_end _ ~start_t:_ = ()
 
 let remote_worker_load_naming_end _ = ()
 
-let recheck_end _ _ _ _ _ = ()
+let recheck_end
+    ~last_recheck_duration:_
+    ~update_batch_count:_
+    ~total_changed_files:_
+    ~total_rechecked:_
+    _ =
+  ()
 
 let indexing_end ~desc:_ _ = ()
 
@@ -334,7 +347,11 @@ let naming_from_saved_state_end _ = ()
 
 let naming_sqlite_local_changes_nonempty _ = ()
 
+let naming_sqlite_has_changes_since_baseline _ = ()
+
 let type_decl_end _ = ()
+
+let remote_old_decl_end _ _ = ()
 
 let first_redecl_end _ _ = ()
 
@@ -344,15 +361,24 @@ let type_check_primary_position_bug ~current_file:_ ~message:_ ~stack:_ = ()
 
 let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 
-let invariant_violation_bug ~path:_ ~pos:_ ~desc:_ _ = ()
+let invariant_violation_bug ?path:_ ?pos:_ ?data:_ ?data_int:_ ?telemetry:_ _ =
+  ()
 
 let type_check_end
-    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
+    _
+    ~heap_size:_
+    ~started_count:_
+    ~total_rechecked_count:_
+    ~desc:_
+    ~experiments:_
+    ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()
 
 let load_state_exn _ = ()
+
+let naming_table_sqlite_missing _ = ()
 
 let prechecked_update_rechecked _ = ()
 
@@ -367,9 +393,13 @@ let check_mergebase_success _ = ()
 let type_at_pos_batch ~start_time:_ ~num_files:_ ~num_positions:_ ~results:_ =
   ()
 
+let worker_large_data_send ~path:_ _ = ()
+
 let with_id ~stage:_ _ f = f ()
 
-let with_rechecked_stats _ _ _ f = f ()
+let with_rechecked_stats
+    ~update_batch_count:_ ~total_changed_files:_ ~total_rechecked:_ f =
+  f ()
 
 let with_init_type _ f = f ()
 
@@ -379,14 +409,6 @@ let state_loader_dirty_files _ = ()
 
 let changed_while_parsing_end _ = ()
 
-let save_decls_end _ _ = ()
-
-let save_decls_failure _ = ()
-
-let load_decls_end _ = ()
-
-let load_decls_failure _ = ()
-
 let saved_state_load_ok _ ~start_time:_ = ()
 
 let saved_state_load_failure _ ~start_time:_ = ()
@@ -395,7 +417,7 @@ let saved_state_dirty_files_ok ~start_time:_ = ()
 
 let saved_state_dirty_files_failure _ ~start_time:_ = ()
 
-let informant_induced_restart _ = ()
+let monitor_update_status _ _ = ()
 
 let find_svn_rev_failed _ _ = ()
 
@@ -434,6 +456,10 @@ let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
 
+let invalid_mercurial_state_transition ~state:_ = ()
+
+let server_revision_tracker_forced_reset ~telemetry:_ = ()
+
 let search_symbol_index
     ~query_text:_
     ~max_results:_
@@ -452,6 +478,10 @@ let server_progress_write_exn ~server_progress_file:_ _ = ()
 let server_progress_read_exn ~server_progress_file:_ _ = ()
 
 let worker_exception _ = ()
+
+(* Typing service events. *)
+
+let hulk_type_check_end _ _ ~start_t:_ = ()
 
 module ProfileTypeCheck = struct
   type stats = unit
@@ -509,39 +539,20 @@ module CGroup = struct
       ~step:_
       ~start_time:_
       ~total_relative_to:_
-      ~totalswap_relative_to:_
       ~anon_relative_to:_
       ~shmem_relative_to:_
       ~file_relative_to:_
       ~total_start:_
-      ~totalswap_start:_
       ~anon_start:_
       ~shmem_start:_
       ~file_start:_
       ~total_hwm:_
       ~total:_
-      ~totalswap:_
       ~anon:_
       ~shmem:_
       ~file:_
       ~secs_at_total_gb:_
       ~secs_above_total_gb_summary:_ =
-    ()
-end
-
-module ReHulk = struct
-  let profile
-      ~recheck_id:_
-      ~start_time:_
-      ~action:_
-      ~re_worker:_
-      ~queued_duration:_
-      ~input_upload_duration:_
-      ~input_fetch_duration:_
-      ~output_upload_duration:_
-      ~output_fetch_duration:_
-      ~worker_duration:_
-      ~execution_duration:_ =
     ()
 end
 
@@ -569,6 +580,8 @@ end
 module Rage = struct
   let rage_start ~rageid:_ ~desc:_ ~root:_ ~from:_ ~disk_config:_ = ()
 
+  let rage_watchman ~rageid:_ ~items:_ = ()
+
   let rage
       ~rageid:_
       ~desc:_
@@ -583,5 +596,20 @@ module Rage = struct
       ~items:_
       ~result:_
       ~start_time:_ =
+    ()
+end
+
+module Fanouts = struct
+  let log_class
+      ~class_name:_
+      ~class_diff:_
+      ~class_diff_category:_
+      ~fanout_cardinal:_
+      ~direct_references_cardinal:_
+      ~descendants_cardinal:_
+      ~children_cardinal:_ =
+    ()
+
+  let log ~changes_cardinal:_ ~fanout_cardinal:_ ~max_class_fanout_cardinal:_ =
     ()
 end

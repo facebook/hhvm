@@ -66,44 +66,6 @@ struct DateTimeData {
 void HHVM_METHOD(DateTime, __construct,
                  const String& time = "now",
                  const Variant& timezone = uninit_variant);
-Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
-                           const String& format,
-                           const String& time,
-                           const Variant& timezone /*= uninit_variant */);
-Variant HHVM_METHOD(DateTime, diff,
-                    const Variant& datetime2,
-                    const Variant& absolute);
-String HHVM_METHOD(DateTime, format,
-                   const Variant& format);
-Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
-int64_t HHVM_METHOD(DateTime, getOffset);
-int64_t HHVM_METHOD(DateTime, gettimestamp);
-Variant HHVM_METHOD(DateTime, getTimezone);
-Variant HHVM_METHOD(DateTime, modify,
-                   const String& modify);
-Object HHVM_METHOD(DateTime, setDate,
-                   int64_t year,
-                   int64_t month,
-                   int64_t day);
-Object HHVM_METHOD(DateTime, setISODate,
-                   int64_t year,
-                   int64_t week,
-                   int64_t day /*= 1*/);
-Object HHVM_METHOD(DateTime, setTime,
-                   int64_t hour,
-                   int64_t minute,
-                   int64_t second /*= 0*/);
-Object HHVM_METHOD(DateTime, setTimestamp,
-                   int64_t unixtimestamp);
-Variant HHVM_METHOD(DateTime, setTimezone,
-                    const Object& timezone);
-Variant HHVM_METHOD(DateTime, add,
-                    const Object& interval);
-Variant HHVM_METHOD(DateTime, sub,
-                    const Object& interval);
-Array HHVM_METHOD(DateTime, __sleep);
-void HHVM_METHOD(DateTime, __wakeup);
-Array HHVM_METHOD(DateTime, __debugInfo);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
@@ -149,18 +111,6 @@ struct DateTimeZoneData {
 
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
-Array HHVM_METHOD(DateTimeZone, getLocation);
-String HHVM_METHOD(DateTimeZone, getName);
-Array HHVM_METHOD(DateTimeZone, __debugInfo);
-Variant HHVM_METHOD(DateTimeZone, getOffset,
-                    const Object& datetime);
-TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
-                       int64_t timestamp_begin = k_PHP_INT_MIN,
-                       int64_t timestamp_end = k_PHP_INT_MAX);
-Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
-Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
-                           int64_t what,
-                           const String& country);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
@@ -183,74 +133,10 @@ struct DateIntervalData {
   static const StaticString s_className;
 };
 
-void HHVM_METHOD(DateInterval, __construct,
-                 const String& interval_spec);
-Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
-                          const String& time);
-String HHVM_METHOD(DateInterval, format,
-                   const String& format);
-
-///////////////////////////////////////////////////////////////////////////////
-// timestamp
-
-Variant HHVM_FUNCTION(gettimeofday,
-                      bool return_float = false);
-Variant HHVM_FUNCTION(microtime,
-                      bool get_as_float = false);
-int64_t HHVM_FUNCTION(time);
-Variant HHVM_FUNCTION(mktime,
-                      int64_t hour,
-                      int64_t minute,
-                      int64_t second,
-                      int64_t month,
-                      int64_t day,
-                      int64_t year);
-Variant HHVM_FUNCTION(gmmktime,
-                      int64_t hour,
-                      int64_t minute,
-                      int64_t second,
-                      int64_t month,
-                      int64_t day,
-                      int64_t year);
-Variant HHVM_FUNCTION(strptime,
-                      const String& date,
-                      const String& format);
-
 ///////////////////////////////////////////////////////////////////////////////
 // timezone
 
 String HHVM_FUNCTION(date_default_timezone_get);
-bool HHVM_FUNCTION(date_default_timezone_set,
-                   const String& name);
-Variant HHVM_FUNCTION(timezone_name_from_abbr,
-                      const String& abbr,
-                      int64_t gmtoffset = -1,
-                      int64_t isdst = 1);
-String HHVM_FUNCTION(timezone_version_get);
-
-///////////////////////////////////////////////////////////////////////////////
-// datetime
-
-bool HHVM_FUNCTION(checkdate,
-                   int64_t month,
-                   int64_t day,
-                   int64_t year);
-Variant HHVM_FUNCTION(date_create,
-                      const Variant& time = uninit_variant,
-                      const Variant& timezone = uninit_variant);
-Variant HHVM_FUNCTION(date_format,
-                      const Object& datetime,
-                      const String& format);
-Variant HHVM_FUNCTION(date_parse,
-                      const String& date);
-
-///////////////////////////////////////////////////////////////////////////////
-// sun
-
-Array HHVM_FUNCTION(date_sun_info,
-                    int64_t ts,
-                    double latitude,
-                    double longitude);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

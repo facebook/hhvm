@@ -14,6 +14,7 @@ module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
+module XRefs = Symbol_xrefs
 
 let namespace_decl name progress =
   let json_fields =
@@ -37,13 +38,25 @@ let container_decl decl_pred name progress =
   Fact_acc.add_fact decl_pred json progress
 
 (* Helper function for adding facts for container parents, given
-a context, a list of declarations, a predicate type, and progress state *)
+   a context, a list of declarations, a predicate type, and progress state *)
 let parent_decls ctx decls pred prog =
   List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
       let name = Util.strip_tparams (Util.get_type_from_hint ctx decl) in
       let (decl_id, prog) = container_decl pred name prog in
       let ref = Build_json.build_id_json decl_id in
       (ref :: decl_refs, prog))
+
+let module_decl name progress =
+  let json = JSON_Object [("name", Build_json.build_name_json_nested name)] in
+  Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json progress
+
+let module_field module_ internal progress =
+  match module_ with
+  | None -> ([], progress)
+  | Some (_pos, module_name) ->
+    let (decl_id, progress) = module_decl module_name progress in
+    ( [("module_", Build_json.build_module_membership_nested decl_id ~internal)],
+      progress )
 
 let container_defn ctx source_text clss decl_id member_decls prog =
   let prog = namespace_decl_opt clss.c_namespace prog in
@@ -52,19 +65,20 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       clss.c_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (mf, prog) = module_field clss.c_module clss.c_internal prog in
   let common_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("members", JSON_Array member_decls);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          clss.c_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ("members", JSON_Array member_decls);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            clss.c_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
-  (* TODO T112092175: export require class requirements to Facts *)
-  let (req_extends_hints, req_implements_hints, _) =
+  let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (req_extends, prog) =
@@ -79,6 +93,13 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       ctx
       (List.map req_implements_hints ~f:fst)
       Predicate.(Hack InterfaceDeclaration)
+      prog
+  in
+  let (req_class, prog) =
+    parent_decls
+      ctx
+      (List.map req_class_hints ~f:fst)
+      Predicate.(Hack ClassDeclaration)
       prog
   in
   let (defn_pred, json_fields, prog) =
@@ -117,6 +138,7 @@ let container_defn ctx source_text clss decl_id member_decls prog =
             ("uses", JSON_Array uses);
             ("requireExtends", JSON_Array req_extends);
             ("requireImplements", JSON_Array req_implements);
+            ("requireClass", JSON_Array req_class);
           ]
       in
       (Predicate.(Hack TraitDefinition), req_fields, prog)
@@ -204,23 +226,91 @@ let method_decl con_type decl_id name progress =
   in
   Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json progress
 
+let type_info ~ty sym_pos progress =
+  let json =
+    JSON_Object
+      [
+        ("displayType", Build_json.build_type_json_nested ty);
+        ("xrefs", Build_json.build_hint_xrefs_json sym_pos);
+      ]
+  in
+  Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
+
+let aggregate_pos (json_pos_list : (json * Util.pos) list) :
+    (json * Util.pos list) list =
+  let jmap =
+    List.fold json_pos_list ~init:JMap.empty ~f:(fun acc (json, pos) ->
+        let f = function
+          | None -> Some [pos]
+          | Some prev -> Some (pos :: prev)
+        in
+        JMap.update json f acc)
+  in
+  JMap.to_seq jmap |> Caml.List.of_seq
+
+let build_signature ctx pos_map_opt source_text params ctxs ret progress =
+  let pos_map =
+    match pos_map_opt with
+    | Some pos_map -> pos_map
+    | None -> failwith "Internal error: pos_map should be set in previous phase"
+  in
+  let hint_to_str_opt h progress =
+    match hint_of_type_hint h with
+    | None -> (None, None, progress)
+    | Some hint ->
+      let legacy_ty = Util.get_type_from_hint ctx hint in
+      let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
+      let decl_json_pos =
+        List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
+            match XRefs.PosMap.find_opt source_pos pos_map with
+            | None -> None
+            | Some XRefs.{ target; _ } -> Some (target, pos))
+      in
+      let decl_json_aggr_pos = aggregate_pos decl_json_pos in
+      let (fact_id, progress) = type_info ~ty decl_json_aggr_pos progress in
+      (Some legacy_ty, Some fact_id, progress)
+  in
+  let (params, progress) =
+    List.fold params ~init:([], progress) ~f:(fun (t_params, progress) p ->
+        let (p_ty, fact_id, progress) =
+          hint_to_str_opt p.param_type_hint progress
+        in
+        ((p, fact_id, p_ty) :: t_params, progress))
+  in
+  let params = List.rev params in
+  let (ret_ty, return_info, progress) = hint_to_str_opt ret progress in
+  let signature =
+    Build_json.build_signature_json
+      ctx
+      source_text
+      params
+      ctxs
+      ~ret_ty
+      ~return_info
+  in
+  (signature, progress)
+
 let method_defn ctx source_text meth decl_id progress =
   let tparams =
     List.map
       meth.m_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (signature, progress) =
+    build_signature
+      ctx
+      (Fact_acc.get_pos_map progress)
+      source_text
+      meth.m_params
+      meth.m_ctxs
+      meth.m_ret
+      progress
+  in
   let json =
     JSON_Object
       [
         ("declaration", Build_json.build_id_json decl_id);
-        ( "signature",
-          Build_json.build_signature_json
-            ctx
-            source_text
-            meth.m_params
-            meth.m_ctxs
-            meth.m_ret );
+        ("signature", signature);
         ("visibility", Build_json.build_visibility_json meth.m_visibility);
         ("isAbstract", JSON_Bool meth.m_abstract);
         ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
@@ -338,20 +428,22 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
     parent_decls ctx enum_data.e_includes Predicate.(Hack EnumDeclaration) prog
   in
   let is_enum_class = Aast.is_enum_class enm in
+  let (mf, prog) = module_field enm.c_module enm.c_internal prog in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json enum_id);
-      ( "enumBase",
-        Build_json.build_type_json_nested
-          (Util.get_type_from_hint ctx enum_data.e_base) );
-      ("enumerators", JSON_Array enumerators);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          enm.c_user_attributes );
-      ("includes", JSON_Array includes);
-      ("isEnumClass", JSON_Bool is_enum_class);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json enum_id);
+        ( "enumBase",
+          Build_json.build_type_json_nested
+            (Util.get_type_from_hint ctx enum_data.e_base) );
+        ("enumerators", JSON_Array enumerators);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            enm.c_user_attributes );
+        ("includes", JSON_Array includes);
+        ("isEnumClass", JSON_Bool is_enum_class);
+      ]
   in
   let json_fields =
     match enum_data.e_constraint with
@@ -384,32 +476,51 @@ let func_defn ctx source_text fd decl_id progress =
   let elem = fd.fd_fun in
   let prog = namespace_decl_opt fd.fd_namespace progress in
   let tparams =
-    List.map
-      elem.f_tparams
-      ~f:(Build_json.build_type_param_json ctx source_text)
+    List.map fd.fd_tparams ~f:(Build_json.build_type_param_json ctx source_text)
+  in
+  let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
+  let (signature, prog) =
+    build_signature
+      ctx
+      (Fact_acc.get_pos_map progress)
+      source_text
+      elem.f_params
+      elem.f_ctxs
+      elem.f_ret
+      prog
   in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ( "signature",
-        Build_json.build_signature_json
-          ctx
-          source_text
-          elem.f_params
-          elem.f_ctxs
-          elem.f_ret );
-      ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          elem.f_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ("signature", signature);
+        ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            elem.f_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
   Fact_acc.add_fact
     Predicate.(Hack FunctionDefinition)
     (JSON_Object json_fields)
     prog
+
+let module_defn _ctx source_text elem decl_id progress =
+  let json_fields =
+    [
+      ("declaration", Build_json.build_id_json decl_id);
+      ( "attributes",
+        Build_json.build_attributes_json_nested
+          source_text
+          elem.md_user_attributes );
+    ]
+  in
+  Fact_acc.add_fact
+    Predicate.(Hack ModuleDefinition)
+    (JSON_Object json_fields)
+    progress
 
 let typedef_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
@@ -420,24 +531,28 @@ let typedef_defn ctx source_text elem decl_id progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
-    | Tinternal -> true
-    | Opaque -> false
+    | CaseType
+    | Opaque
+    | OpaqueModule ->
+      false
   in
   let tparams =
     List.map
       elem.t_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (mf, prog) = module_field elem.t_module elem.t_internal prog in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("isTransparent", JSON_Bool is_transparent);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          elem.t_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ("isTransparent", JSON_Bool is_transparent);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            elem.t_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
   Fact_acc.add_fact
     Predicate.(Hack TypedefDefinition)
@@ -464,43 +579,40 @@ let gconst_defn ctx source_text elem decl_id progress =
   let json = JSON_Object json_fields in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json prog
 
-let decl_loc pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_loc ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json progress
 
-let decl_comment pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_comment ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationComment) json progress
 
-let decl_span pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_span ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json progress
 
-let file_lines filepath sourceText progress =
+let file_lines ~path sourceText progress =
   let lineLengths =
     Line_break_map.offsets_to_line_lengths
       sourceText.Full_fidelity_source_text.offset_map
@@ -509,28 +621,41 @@ let file_lines filepath sourceText progress =
   let hasUnicodeOrTabs = Util.has_tabs_or_multibyte_codepoints sourceText in
   let json =
     Build_json.build_file_lines_json
-      filepath
+      path
       lineLengths
       endsInNewline
       hasUnicodeOrTabs
   in
   Fact_acc.add_fact Predicate.(Src FileLines) json progress
 
-let file_xrefs filepath xref_map progress =
+let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
+    =
+  let json =
+    Build_json.build_gen_code_json
+      ~path
+      ~fully_generated
+      ~signature
+      ~source
+      ~command
+      ~class_
+  in
+  Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
+
+let file_xrefs ~path fact_map progress =
   let json =
     JSON_Object
       [
-        ("file", Build_json.build_file_json_nested filepath);
-        ("xrefs", Build_json.build_xrefs_json xref_map);
+        ("file", Build_json.build_file_json_nested path);
+        ("xrefs", Build_json.build_xrefs_json fact_map);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json progress
 
-let file_decls filepath decls progress =
+let file_decls ~path decls progress =
   let json =
     JSON_Object
       [
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("declarations", JSON_Array decls);
       ]
   in
@@ -552,3 +677,50 @@ let method_occ receiver_class name progress =
     Predicate.(Hack MethodOccurrence)
     (JSON_Object json)
     progress
+
+let file_call
+    ~path pos ~callee_xref ~call_args ~dispatch_arg ~receiver_type progress =
+  let receiver_type =
+    match receiver_type with
+    | None -> []
+    | Some receiver_type -> [("receiver_type", receiver_type)]
+  in
+  let dispatch_arg =
+    match dispatch_arg with
+    | None -> receiver_type
+    | Some dispatch_arg -> ("dispatch_arg", dispatch_arg) :: receiver_type
+  in
+  let xref_dispatch =
+    match callee_xref with
+    | None -> dispatch_arg
+    | Some callee_xref -> ("callee_xref", callee_xref) :: dispatch_arg
+  in
+  let json =
+    JSON_Object
+      ([
+         ("file", Build_json.build_file_json_nested path);
+         ("callee_span", Build_json.build_bytespan_json pos);
+         ("call_args", JSON_Array call_args);
+       ]
+      @ xref_dispatch)
+  in
+  Fact_acc.add_fact Predicate.(Hack FileCall) json progress
+
+let global_namespace_alias ~from ~to_ progress =
+  let json =
+    JSON_Object
+      [
+        ("from", Build_json.build_name_json_nested from);
+        ("to", Build_json.build_namespaceqname_json_nested to_);
+      ]
+  in
+  Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json progress
+
+let indexerInputsHash key hashes progress =
+  let value =
+    JSON_String
+      (List.map hashes ~f:(fun x -> Md5.to_binary x |> Base64.encode_string)
+      |> String.concat)
+  in
+  let key = JSON_String key in
+  Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value progress

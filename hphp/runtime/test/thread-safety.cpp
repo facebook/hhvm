@@ -70,7 +70,7 @@ void runInManyThreads(unsigned nThreads, Func f) {
 
 TEST(MultiThread, LDAP) {
   runInManyThreads(Process::GetCPUCount(), [] {
-    f_ldap_connect("localhost");
+    HHVM_FN(ldap_connect)("localhost");
   });
 }
 

@@ -7,13 +7,11 @@ long_directory_name.php--child.php:3:19
       2 | class Child extends Foo {
 [1,2] 3 |   public function f(string $x): void {}
       4 | }
-      5 |
 
 long_directory_name.php--long/directory/name/class_def.php:3:21
       1 | <?hh // strict
       2 | class Foo {
 [3]   3 |   public function f(int $x): void {}
       4 | }
-      5 |
 
 1 error found.

@@ -1,0 +1,14 @@
+object(HH\Set) (0) {
+}
+
+Notice: Hack Array Compat: append to dict at index > (maxIntKey + 1) in %s/slow/collection_classes/set_remove_all_until_empty_edge_case.php on line 7
+dict(1) {
+  [3]=>
+  bool(true)
+}
+object(HH\Set) (0) {
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}

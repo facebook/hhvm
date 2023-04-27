@@ -33,7 +33,11 @@ function pcntl_alarm(int $seconds): int;
  *
  */
 <<__Native>>
-function pcntl_exec(string $path, varray $args = varray[], darray $envs = darray[]): void;
+function pcntl_exec(
+  string $path,
+  varray<string> $args = varray[],
+  darray<string, string> $envs = darray[],
+): void;
 
 /**
  * The pcntl_fork() function creates a child process that differs from the
@@ -128,7 +132,7 @@ function pcntl_signal(int $signo,
 <<__Native>>
 function pcntl_sigprocmask(
   int $how,
-  varray $set,
+  varray<int> $set,
   <<__OutOnly("varray")>>
   inout mixed $oldset
 ): bool;

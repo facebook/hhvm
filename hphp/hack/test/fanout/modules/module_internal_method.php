@@ -2,17 +2,18 @@
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// changed-a-decl.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 class Foo {
   public function foo(): void {}
@@ -21,11 +22,11 @@ class Foo {
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 class Foo {
-  <<__Internal>>
-  public function foo(): void {}
+  internal function foo(): void {}
 }
 
 //// base-foo-use.php

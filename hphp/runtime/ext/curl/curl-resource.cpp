@@ -171,17 +171,18 @@ void CurlResource::prepare() {
     curl_easy_setopt(m_cp, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(m_cp, CURLOPT_PROXY_CAINFO, NULL);
   }
+
+  if (m_emptyPost) {
+    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
+    // the reader function will be called
+    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
+  }
 }
 
 Variant CurlResource::execute() {
   assertx(!m_exception);
   if (m_cp == nullptr) {
     return false;
-  }
-  if (m_emptyPost) {
-    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
-    // the reader function will be called
-    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
   }
   m_write.buf.clear();
   m_write.content.clear();
@@ -533,6 +534,29 @@ bool CurlResource::isLongOption(long option) {
     case CURLOPT_UPKEEP_INTERVAL_MS:
     case CURLOPT_UPLOAD_BUFFERSIZE:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074000 /* Available since 7.64.0 */
+    case CURLOPT_HTTP09_ALLOWED:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC_CTRL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074100 /* Available since 7.65.0 */
+    case CURLOPT_MAXAGE_CONN:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS_CTRL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+    case CURLOPT_DOH_SSL_VERIFYHOST:
+    case CURLOPT_DOH_SSL_VERIFYPEER:
+    case CURLOPT_DOH_SSL_VERIFYSTATUS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_MAXLIFETIME_CONN:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
+    case CURLOPT_MIME_OPTIONS:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -692,6 +716,24 @@ bool CurlResource::isStringOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
     case CURLOPT_DOH_URL:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+    case CURLOPT_SASL_AUTHZID:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
+    case CURLOPT_SSL_EC_CURVES:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0 */
+    case CURLOPT_AWS_SIGV4:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256:
+#endif
       return true;
     default:
       return isStringFilePathOption(option);
@@ -789,18 +831,24 @@ bool CurlResource::setNullableStringOption(long option, const Variant& value) {
 }
 
 bool CurlResource::isBlobOption(long option) {
-#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
   switch (option) {
-  case CURLOPT_SSLCERT_BLOB:
-  case CURLOPT_SSLKEY_BLOB:
-  case CURLOPT_PROXY_SSLCERT_BLOB:
-  case CURLOPT_PROXY_SSLKEY_BLOB:
-  case CURLOPT_ISSUERCERT_BLOB:
-  case CURLOPT_PROXY_ISSUERCERT_BLOB:
-    return true;
-  }
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+    case CURLOPT_SSLCERT_BLOB:
+    case CURLOPT_SSLKEY_BLOB:
+    case CURLOPT_PROXY_SSLCERT_BLOB:
+    case CURLOPT_PROXY_SSLKEY_BLOB:
+    case CURLOPT_ISSUERCERT_BLOB:
+    case CURLOPT_PROXY_ISSUERCERT_BLOB:
+      return true;
 #endif
-  return false;
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0 */
+    case CURLOPT_CAINFO_BLOB:
+    case CURLOPT_PROXY_CAINFO_BLOB:
+      return true;
+#endif
+    default:
+      return false;
+  }
 }
 
 bool CurlResource::setBlobOption(long option, const String& value) {
@@ -1402,66 +1450,68 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Load the CA from the cache.
   if (cp->useCertCache()) {
     auto const cainfo = cp->cainfo(false);
-    auto const store = [&] () -> X509_STORE* {
-      {
-        folly::SharedMutex::ReadHolder lock(s_mutex);
+    if (!cainfo.empty()) {
+      auto const store = [&] () -> X509_STORE* {
+        {
+          folly::SharedMutex::ReadHolder lock(s_mutex);
+          auto const iter = s_certCache.find(cainfo);
+          if (iter != s_certCache.end()) return iter->second;
+        }
+
+        STACK_OF(X509_INFO) *stack;
+        BIO *in;
+
+        in = BIO_new_file(cainfo.data(), "r");
+        if (!in) return nullptr;
+        stack = PEM_X509_INFO_read_bio(in, nullptr, nullptr, (void*)"");
+        BIO_free(in);
+        if (!stack) return nullptr;
+
+        auto const store = X509_STORE_new();
+        if (!store) return nullptr;
+        X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
+        X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
+
+        unsigned count = 0;
+        for (int i = 0; i < sk_X509_INFO_num(stack); i++) {
+          X509_INFO* info;
+          info = sk_X509_INFO_value(stack, i);
+          if (info->x509) {
+            if (!X509_STORE_add_cert(store, info->x509)) {
+              X509_STORE_free(store);
+              sk_X509_INFO_pop_free(stack, X509_INFO_free);
+              return nullptr;
+            }
+            count++;
+          }
+          if (info->crl) {
+            if (!X509_STORE_add_crl(store, info->crl)) {
+              X509_STORE_free(store);
+              sk_X509_INFO_pop_free(stack, X509_INFO_free);
+              return nullptr;
+            }
+            count++;
+          }
+        }
+        sk_X509_INFO_pop_free(stack, X509_INFO_free);
+        if (count == 0) {
+          X509_STORE_free(store);
+          return nullptr;
+        }
+
+        folly::SharedMutex::WriteHolder lock(s_mutex);
         auto const iter = s_certCache.find(cainfo);
-        if (iter != s_certCache.end()) return iter->second;
-      }
-
-      STACK_OF(X509_INFO) *stack;
-      BIO *in;
-
-      in = BIO_new_file(cainfo.data(), "r");
-      if (!in) return nullptr;
-      stack = PEM_X509_INFO_read_bio(in, nullptr, nullptr, (void*)"");
-      BIO_free(in);
-      if (!stack) return nullptr;
-
-      auto const store = X509_STORE_new();
-      if (!store) return nullptr;
-      X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-      X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
-
-      unsigned count = 0;
-      for (int i = 0; i < sk_X509_INFO_num(stack); i++) {
-        X509_INFO* info;
-        info = sk_X509_INFO_value(stack, i);
-        if (info->x509) {
-          if (!X509_STORE_add_cert(store, info->x509)) {
-            X509_STORE_free(store);
-            sk_X509_INFO_pop_free(stack, X509_INFO_free);
-            return nullptr;
-          }
-          count++;
+        if (iter != s_certCache.end()) {
+          X509_STORE_free(store);
+          return iter->second;
+        } else {
+          s_certCache.emplace(cainfo, store);
+          return store;
         }
-        if (info->crl) {
-          if (!X509_STORE_add_crl(store, info->crl)) {
-            X509_STORE_free(store);
-            sk_X509_INFO_pop_free(stack, X509_INFO_free);
-            return nullptr;
-          }
-          count++;
-        }
-      }
-      sk_X509_INFO_pop_free(stack, X509_INFO_free);
-      if (count == 0) {
-        X509_STORE_free(store);
-        return nullptr;
-      }
-
-      folly::SharedMutex::WriteHolder lock(s_mutex);
-      auto const iter = s_certCache.find(cainfo);
-      if (iter != s_certCache.end()) {
-        X509_STORE_free(store);
-        return iter->second;
-      } else {
-        s_certCache.emplace(cainfo, store);
-        return store;
-      }
-    }();
-    if (!store) return CURLE_FAILED_INIT;
-    SSL_CTX_set1_cert_store(ctx, store);
+      }();
+      if (!store) return CURLE_FAILED_INIT;
+      SSL_CTX_set1_cert_store(ctx, store);
+    }
   }
 #endif
 

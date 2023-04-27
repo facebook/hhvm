@@ -1,7 +1,7 @@
 name: \C::FOO, kind: member_const, span: line 4, characters 25-27, is_declaration: true
 definition:
  FOO
-   kind: const
+   kind: class constant
    id: class_const::C::FOO
    position: line 4, characters 25-27
    span: line 4, character 25 - line 4, character 27

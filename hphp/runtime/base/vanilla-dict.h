@@ -44,7 +44,7 @@ struct VanillaDictElm {
   // We store values here, but also some information local to this array:
   // data.m_aux.u_hash contains either a negative number (for an int key) or
   // a string hashcode (31-bit and thus non-negative); the high bit is the
-  // int/string key descriminator. data.m_type == kInvalidDataType if this is
+  // int/string key discriminator. data.m_type == kInvalidDataType if this is
   // an empty slot in the array (e.g. after a key is deleted).  It is
   // critical that when we return &data to clients, that they not read or
   // write the m_aux field!
@@ -254,7 +254,7 @@ public:
   static ArrayData* MakeUncounted(
       ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
-  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);
@@ -306,10 +306,8 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* PopMove(ArrayData*, Variant& value);
 
-  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
@@ -462,8 +460,6 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayMergeGeneric(VanillaDict*, const ArrayData*);
-
   // Assert a bunch of invariants about this array then return true.
   // usage:  assertx(checkInvariants());
   bool checkInvariants() const;
@@ -481,7 +477,6 @@ private:
 
   using HashTable<VanillaDict, VanillaDictElm>::findForRemove;
 
-  template <bool Move>
   void nextInsert(TypedValue);
 
   template <class K> arr_lval addLvalImpl(K k);
@@ -511,7 +506,7 @@ private:
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber = false);
+  void compact();
 
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }

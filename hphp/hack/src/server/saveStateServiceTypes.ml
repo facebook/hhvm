@@ -7,7 +7,9 @@
  *
  *)
 
-(* An alias for the errors type that we marshal to and unmarshal from the saved state *)
+(** An alias for the errors type that we marshal to and unmarshal from the saved state.
+Although this is represented as a list, no entries in the list share the same phase.
+(It might have been nicer to store it as a phase map). *)
 type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
 
 type save_state_result = { dep_table_edges_added: int }

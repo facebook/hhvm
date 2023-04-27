@@ -260,10 +260,10 @@ class RecursiveIteratorIterator implements OuterIterator {
    * http://php.net/manual/en/recursiveiteratoriterator.valid.php )
    *
    *
-   * @return     mixed   TRUE if the current position is valid, otherwise
+   * @return     bool    TRUE if the current position is valid, otherwise
    *                     FALSE
    */
-  public function valid() {
+  public function valid(): bool {
     $depth = $this->getDepth();
     while ($depth >= 0) {
       if ($this->getSubIterator($depth)->valid()) {

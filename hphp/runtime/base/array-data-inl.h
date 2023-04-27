@@ -71,7 +71,6 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-NO_PROFILING
 inline void ArrayData::release() DEBUG_NOEXCEPT {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);
@@ -135,7 +134,8 @@ inline bool ArrayData::hasStrKeyTable() const {
 }
 
 inline uint8_t ArrayData::auxBits() const {
-  return safe_cast<uint8_t>(m_aux16 & (kLegacyArray | kSampledArray));
+  return safe_cast<uint8_t>(m_aux16 &
+                            (kLegacyArray | kSampledArray | kMayContainCounted));
 }
 
 inline uint8_t ArrayData::sizeIndex() const {

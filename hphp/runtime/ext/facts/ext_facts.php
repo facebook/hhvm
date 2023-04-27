@@ -3,6 +3,19 @@
 namespace HH\Facts {
 
 /**
+ * Used to communicate whether a symbol string is the name of a type, function,
+ * constant, or type alias.
+ *
+ * Replicated as `AutoloadMap::KindOf` in `autoload-map.h`
+ */
+enum SymbolKind : int {
+  K_TYPE = 1;
+  K_FUNCTION = 2;
+  K_CONSTANT = 3;
+  K_MODULE = 4;
+}
+
+/**
  * These are the different kinds of types that Facts concerns itself with.
  * These values are replicated in ext_facts.h.
  */
@@ -63,6 +76,18 @@ function enabled()[]: bool;
 function db_path(string $root)[]: ?string;
 
 /**
+ * Return the schema version in use by this hhvm binary.
+ */
+<<__Native>>
+function schema_version()[]: int;
+
+/**
+ * Blocks until Facts is synchronized as of when the call was intiated.
+ */
+<<__Native>>
+function sync(): void;
+
+/**
  * Return the only path defining a given symbol.
  *
  * Return `null` if the symbol is not defined, or is defined in more than one
@@ -71,6 +96,8 @@ function db_path(string $root)[]: ?string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
+function module_to_path(string $module_name)[]: ?string;
+<<__Native>>
 function type_to_path(string $type_name)[]: ?string;
 <<__Native>>
 function function_to_path(string $function_name)[]: ?string;
@@ -78,12 +105,16 @@ function function_to_path(string $function_name)[]: ?string;
 function constant_to_path(string $constant_name)[]: ?string;
 <<__Native>>
 function type_alias_to_path(string $type_alias_name)[]: ?string;
+<<__Native>>
+function type_or_type_alias_to_path(string $type_name)[]: ?string;
 
 /**
  * Return all the symbols defined in the given path.
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
+<<__Native>>
+function path_to_modules(string $path)[]: vec<string>;
 <<__Native>>
 function path_to_types(string $path)[]: vec<string>;
 <<__Native>>
@@ -201,11 +232,14 @@ function type_aliases_with_attribute(
  * Get all methods matching the given filters.
  *
  * Throws InvalidOperationException if Facts is not enabled.
+ * Throws a RuntimeException if querying for an attribute that's not listed
+ *   in the `Autoload.IndexedMethodAttributes` setting in this repo's
+ *   `.hhvmconfig.hdf` file.
  */
 <<__Native>>
 function methods_with_attribute(
   /* classname<\HH\MethodAttribute> */ string $attribute,
-)[]: vec<string>; /* vec<(classname<nonnull>, string)> */
+)[]: vec<(classname<nonnull>, string)>;
 
 /**
  * Get all files matching the given filters.
@@ -325,6 +359,8 @@ function file_attribute_parameters(
  * symbol will be chosen in an unspecified manner.
  */
 <<__Native>>
+function all_modules()[]: dict<string, string>;
+<<__Native>>
 function all_types()[]: dict<classname<nonnull>, string>;
 <<__Native>>
 function all_functions()[]: dict<string, string>;
@@ -348,13 +384,19 @@ type TypeData = shape(
   'kind' => TypeKind,
   'flags' => int,
   'baseTypes' => vec<string>,
+  'requireClass' => vec<string>,
   'requireExtends' => vec<string>,
   'requireImplements' => vec<string>,
   'attributes' => vec<AttributeData>,
   'methods' => vec<MethodData>,
 );
 
+type ModuleData = shape(
+  'name' => string,
+);
+
 type FileData = shape(
+  'modules' => vec<ModuleData>,
   'types' => vec<TypeData>,
   'functions' => vec<string>,
   'constants' => vec<string>,

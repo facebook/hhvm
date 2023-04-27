@@ -17,9 +17,9 @@ class testClass2 extends testClass {
             self::$__constructX++;
 
             parent::__construct(1);
-            testclass::__construct(2);
+            testClass::__construct(2);
             parent::__construct(3);
-            testclass::__construct(4);
+            testClass::__construct(4);
         }
     }
 }

@@ -456,7 +456,7 @@ struct Object {
     // Optional string for static functions giving the symbol for this function.
     std::string linkage_name;
     // Optional address for static functions giving the address for this
-    // function. Whether this addresss is absolute or relocatable depends on the
+    // function. Whether this address is absolute or relocatable depends on the
     // file the information is being extracted from.
     HPHP::Optional<std::uintptr_t> address;
   };
@@ -539,7 +539,8 @@ struct Printer {
   virtual void operator()(
     std::ostream& os,
     std::size_t begin = 0,
-    std::size_t end = std::numeric_limits<std::size_t>::max()
+    std::size_t end = std::numeric_limits<std::size_t>::max(),
+    bool dwp = false
   ) const = 0;
 };
 

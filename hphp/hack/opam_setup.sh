@@ -39,6 +39,11 @@ export OPAMROOT="$OPAMROOT"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
 
+# Prevents opam from trying to invoke brew install and dpkg, because all the
+# dependencies should have been installed by Nix, Apt or Homebrew.
+export OPAMASSUMEDEPEXTS="1"
+export OPAMNODEPEXTS="1"
+
 # shellcheck disable=SC1090
 source "$SOURCE_ROOT/opam_helpers.sh"
 # shellcheck disable=SC1090

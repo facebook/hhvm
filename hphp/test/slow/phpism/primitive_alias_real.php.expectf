@@ -1,1 +1,1 @@
-Fatal error: Invalid type hint `real`. Use `float` instead in %s on line %d
+Fatal error: No such type `real`, did you mean `float`? in %s on line %d

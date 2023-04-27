@@ -41,11 +41,17 @@ struct Array;
 struct MakeUncountedEnv;
 struct String;
 struct StringData;
+struct Unit;
+struct UnitEmitter;
 struct Variant;
 
 namespace bespoke {
   struct LoggingArray;
   struct MonotypeVec;
+
+  namespace detail_struct_data_layout {
+    struct TypePosValLayout;
+  }
 
   // Type-safe layout index, so that we can't mix it up with other ints.
   struct LayoutIndex {
@@ -136,6 +142,12 @@ struct ArrayData : MaybeCountable {
    * for arrays produced by native constructors - e.g. builtins, varargs.
    */
   static auto constexpr kSampledArray = 8;
+
+  /*
+   * Indicates that this array-like may have ref-counted elements. Currently
+   * this bit is used only for StructDicts.
+   */
+  static auto constexpr kMayContainCounted = 16;
 
   /*
    * See notes on the m_layout_index field for constraints on this value.
@@ -641,6 +653,7 @@ protected:
   friend struct c_ImmMap;
   friend struct bespoke::LoggingArray;
   friend struct bespoke::MonotypeVec;
+  friend struct bespoke::detail_struct_data_layout::TypePosValLayout;
 
   uint32_t m_size;
 
@@ -798,6 +811,24 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwVarrayUnsetException();
 [[noreturn]] void throwVecUnsetException();
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<>
+struct BlobEncoderHelper<const ArrayData*> {
+  static void serde(BlobEncoder&, const ArrayData*);
+  static void serde(BlobDecoder&, const ArrayData*&,
+                    bool makeStatic = true);
+
+  // If set, will utilize the UnitEmitter's array table.
+  static __thread UnitEmitter* tl_unitEmitter;
+  // Likewise, but only for lazy loading (so only deserializing
+  // supported).
+  static __thread Unit* tl_unit;
+  // If true, will ignore tl_unitEmitter/tl_unit for top array, but
+  // not for any children.
+  static __thread bool tl_defer;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -126,7 +126,7 @@ type refresh_env = {
 
 (* refresh_ functions will return [Elim ...] when they eliminated a rigid
    type variable from their result. [Unchanged] is returned when nothing
-   has changed in the data to refresh.  *)
+   has changed in the data to refresh. *)
 type changed =
   | Elim of Pos_or_decl.t * string
   | Unchanged
@@ -204,9 +204,8 @@ and refresh_type renv v ty_orig =
   with_default ~default:ty_orig
   @@
   match deref ty with
-  | ( _,
-      ( Tany _ | Terr | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _
-      | Tneg _ ) ) ->
+  | (_, (Tany _ | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _ | Tneg _))
+    ->
     (renv, ty_orig, Unchanged)
   | (r, Toption ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in
@@ -230,7 +229,7 @@ and refresh_type renv v ty_orig =
   | (r, Ttuple l) ->
     let (renv, l, changed) = refresh_types renv v l in
     (renv, mk (r, Ttuple l), changed)
-  | (r, Tshape (sk, sm)) ->
+  | (r, Tshape (_, sk, sm)) ->
     let (renv, sm, ch) =
       TShapeMap.fold
         (fun sfn { sft_optional; sft_ty } (renv, sm, ch) ->
@@ -240,40 +239,38 @@ and refresh_type renv v ty_orig =
         sm
         (renv, TShapeMap.empty, Unchanged)
     in
-    (renv, mk (r, Tshape (sk, sm)), ch)
+    (renv, mk (r, Tshape (Missing_origin, sk, sm)), ch)
   | (_, Tvar v) ->
     let renv = { renv with tvars = IMap.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)
-  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) ->
+  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) -> begin
     (* look if the Tgeneric has to go away and kill it using its
        bounds if the variance of the current occurrence permits it *)
-    begin
-      match renv.remove (Rtv_tparam name) with
-      | None -> (renv, ty_orig, Unchanged)
-      | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
-        (renv, ty_orig, Unchanged)
-      | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
-        let rtv_pos =
-          if Pos_or_decl.(equal pos none) then
-            Reason.to_pos r
-          else
-            pos
-        in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
-  | (r, Tdependent ((DTexpr id as dt), ty1)) ->
-    begin
-      match renv.remove (Rtv_dependent id) with
-      | None ->
-        let (renv, ty1, ch1) = refresh_type renv v ty1 in
-        (renv, mk (r, Tdependent (dt, ty1)), ch1)
-      | Some _ ->
-        let lbs = TySet.empty in
-        let ubs = TySet.singleton ty1 in
-        let rtv_pos = Reason.to_pos r in
-        let name = DependentKind.to_string dt in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
+    match renv.remove (Rtv_tparam name) with
+    | None -> (renv, ty_orig, Unchanged)
+    | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
+      (renv, ty_orig, Unchanged)
+    | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
+      let rtv_pos =
+        if Pos_or_decl.(equal pos none) then
+          Reason.to_pos r
+        else
+          pos
+      in
+      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+  end
+  | (r, Tdependent ((DTexpr id as dt), ty1)) -> begin
+    match renv.remove (Rtv_dependent id) with
+    | None ->
+      let (renv, ty1, ch1) = refresh_type renv v ty1 in
+      (renv, mk (r, Tdependent (dt, ty1)), ch1)
+    | Some _ ->
+      let lbs = TySet.empty in
+      let ubs = TySet.singleton ty1 in
+      let rtv_pos = Reason.to_pos r in
+      let name = DependentKind.to_string dt in
+      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+  end
   | (r, Tunion l) ->
     let (renv, l, changed) = refresh_types renv v l in
     begin
@@ -347,6 +344,13 @@ and refresh_types_w_variance renv v vl tl =
   in
   with_default ~default:tl (go renv Unchanged vl tl [])
 
+let refresh_type_opt renv v tyo =
+  match tyo with
+  | None -> (renv, None, Unchanged)
+  | Some ty ->
+    let (renv, ty, ch) = refresh_type renv v ty in
+    (renv, Some ty, ch)
+
 let rec refresh_ctype renv v cty_orig =
   let inv = Ast_defs.Invariant in
   with_default ~default:cty_orig
@@ -356,16 +360,35 @@ let rec refresh_ctype renv v cty_orig =
     let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } = hm in
     let (renv, hm_type, changed) = refresh_type renv inv hm_type in
     (renv, mk_constraint_type (r, Thas_member { hm with hm_type }), changed)
+  | (r, Thas_type_member htm) ->
+    let { htm_id; htm_lower; htm_upper } = htm in
+    let v' = Ast_defs.swap_variance v in
+    let (renv, htm_upper, ch1) = refresh_type renv v htm_upper in
+    let (renv, htm_lower, ch2) = refresh_type renv v' htm_lower in
+    let htm = { htm_id; htm_lower; htm_upper } in
+    (renv, mk_constraint_type (r, Thas_type_member htm), ch1 || ch2)
+  | (r, Tcan_index ci) ->
+    let (renv, ci_val, ch1) = refresh_type renv inv ci.ci_val in
+    let (renv, ci_key, ch2) = refresh_type renv inv ci.ci_key in
+    ( renv,
+      mk_constraint_type (r, Tcan_index { ci with ci_val; ci_key }),
+      ch1 || ch2 )
+  | (r, Tcan_traverse ct) ->
+    let (renv, ct_val, ch1) = refresh_type renv inv ct.ct_val in
+    let (renv, ct_key, ch2) =
+      match ct.ct_key with
+      | None -> (renv, None, Unchanged)
+      | Some ct_key ->
+        let (renv, ct_key, ch2) = refresh_type renv inv ct_key in
+        (renv, Some ct_key, ch2)
+    in
+    ( renv,
+      mk_constraint_type (r, Tcan_traverse { ct with ct_val; ct_key }),
+      ch1 || ch2 )
   | (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) ->
     let (renv, d_required, ch1) = refresh_types renv inv d_required in
     let (renv, d_optional, ch2) = refresh_types renv inv d_optional in
-    let (renv, d_variadic, ch3) =
-      match d_variadic with
-      | Some ty ->
-        let (renv, ty, ch) = refresh_type renv inv ty in
-        (renv, Some ty, ch)
-      | None -> (renv, None, Unchanged)
-    in
+    let (renv, d_variadic, ch3) = refresh_type_opt renv inv d_variadic in
     let des = { d_required; d_optional; d_variadic; d_kind } in
     (renv, mk_constraint_type (r, Tdestructure des), ch1 || ch2 || ch3)
   | (r, TCunion (lty, cty)) ->

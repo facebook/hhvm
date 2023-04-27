@@ -41,7 +41,9 @@ struct DebuggerThriftBuffer : ThriftBuffer {
     m_socket = socket->getData();
   }
   void close() {
-    getSocket()->close();
+    if (m_socket) {
+      m_socket->closeImpl();
+    }
   }
 
 protected:

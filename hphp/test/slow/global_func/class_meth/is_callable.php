@@ -30,6 +30,6 @@ function check($m) {
 function main() {
   typehint(vec[D::class, 'func1']);
   check(vec[D::class, 'func1']);
-  typehint(HH\class_meth(D::class, 'func1'));
-  check(HH\class_meth(D::class, 'func1'));
+  typehint(D::func1<>);
+  check(D::func1<>);
 }

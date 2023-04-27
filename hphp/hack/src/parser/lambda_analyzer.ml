@@ -165,16 +165,15 @@ let filter_parents parents =
   let rec aux acc parents =
     match parents with
     | [] -> acc
-    | h :: t ->
-      begin
-        match syntax h with
-        | FunctionDeclaration _
-        | MethodishDeclaration _
-        | AnonymousFunction _ ->
-          h :: acc
-        | LambdaExpression _ -> aux (h :: acc) t
-        | _ -> aux acc t
-      end
+    | h :: t -> begin
+      match syntax h with
+      | FunctionDeclaration _
+      | MethodishDeclaration _
+      | AnonymousFunction _ ->
+        h :: acc
+      | LambdaExpression _ -> aux (h :: acc) t
+      | _ -> aux acc t
+    end
   in
   List.rev (aux [] parents)
 

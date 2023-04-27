@@ -171,7 +171,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   }
   Object obj{DateTimeData::getClass()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
-  const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
+  const auto curr = (format.find("!") != String::npos) ? 0 : ::time(0);
   data->m_dt = req::make<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, tz, format.data(), false)) {
     return false;
@@ -326,12 +326,12 @@ Array HHVM_METHOD(DateTime, __sleep) {
   auto const data = getDateTimeData(this_);
 
   auto const formatted = data->format(s_ISOformat);
-  this_->setProp(nullptr, s_date.get(), formatted.asTypedValue());
+  this_->setProp(nullctx, s_date.get(), formatted.asTypedValue());
   int zoneType = data->m_dt->zoneType();
-  this_->setProp(nullptr, s_timezone_type.get(),
+  this_->setProp(nullctx, s_timezone_type.get(),
                  make_tv<KindOfInt64>(zoneType));
   auto const timezone = zone_type_to_string(zoneType, data->m_dt);
-  this_->setProp(nullptr, s_timezone.get(), timezone.asTypedValue());
+  this_->setProp(nullctx, s_timezone.get(), timezone.asTypedValue());
   return make_vec_array(s_date, s_timezone_type, s_timezone);
 }
 
@@ -343,10 +343,10 @@ void HHVM_METHOD(DateTime, __wakeup) {
                                  std::move(dtz_obj));
 
   // cleanup
-  Class* cls = this_->getVMClass();
-  this_->unsetProp(cls, s_date.get());
-  this_->unsetProp(cls, s_timezone_type.get());
-  this_->unsetProp(cls, s_timezone.get());
+  auto const ctx = MemberLookupContext(this_->getVMClass());
+  this_->unsetProp(ctx, s_date.get());
+  this_->unsetProp(ctx, s_timezone_type.get());
+  this_->unsetProp(ctx, s_timezone.get());
 }
 
 Array HHVM_METHOD(DateTime, __debugInfo) {
@@ -416,7 +416,7 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
     auto rval = datetime->getProp(
-      SystemLib::s_DateTimeImmutableClass,
+      MemberLookupContext(SystemLib::s_DateTimeImmutableClass),
       s_data.get()
     );
     assertx(rval.is_set() && type(rval) == KindOfObject);
@@ -936,6 +936,10 @@ TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
 
 static struct DateTimeExtension final : Extension {
   DateTimeExtension() : Extension("date") { }
+
+  void loadDecls() override {
+    loadDeclsFrom("datetime");
+  }
 
   void moduleInit() override {
     HHVM_ME(DateTime, __construct);

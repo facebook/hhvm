@@ -23,9 +23,10 @@
  */
 #pragma once
 
-#include "hphp/util/locale-portability.h"
 #include <folly/Portability.h>
 
+#include <locale.h>
+#include <langinfo.h>
 #include <stdint.h>
 
 extern "C" ssize_t strfmon_l(char* __restrict s,
@@ -37,4 +38,3 @@ extern "C" ssize_t strfmon(char* __restrict s,
                            size_t n,
                            const char* __restrict fmt,
                            ...);
-

@@ -313,10 +313,10 @@ class SplDoublyLinkedList
    *
    * Checks if the doubly linked list contains any more nodes.
    *
-   * @return     mixed   Returns TRUE if the doubly linked list contains any
+   * @return     bool    Returns TRUE if the doubly linked list contains any
    *                     more nodes, FALSE otherwise.
    */
-  public function valid() {
+  public function valid(): bool {
     return $this->current !== null;
   }
 

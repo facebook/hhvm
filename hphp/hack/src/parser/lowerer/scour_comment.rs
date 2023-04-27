@@ -3,17 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{i_set::ISet, pos::Pos, prim_defs::Comment, scoured_comments::ScouredComments};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::LexablePositionedToken,
-    lexable_trivia::LexableTrivium,
-    positioned_trivia::PositionedTrivium,
-    source_text::SourceText,
-    syntax_by_ref::{syntax::Syntax, syntax_variant_generated::SyntaxVariant::*},
-    syntax_trait::SyntaxTrait,
-    trivia_kind::TriviaKind,
-};
+use oxidized::i_set::ISet;
+use oxidized::pos::Pos;
+use oxidized::prim_defs::Comment;
+use oxidized::scoured_comments::ScouredComments;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexablePositionedToken;
+use parser_core_types::lexable_trivia::LexableTrivium;
+use parser_core_types::positioned_trivia::PositionedTrivium;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::trivia_kind::TriviaKind;
 use regex::bytes::Regex;
 use rescan_trivia::RescanTrivia;
 
@@ -31,7 +33,7 @@ pub struct ScourComment<'a, T, V> {
     pub include_line_comments: bool,
     pub allowed_decl_fixme_codes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
-    pub disable_hh_ignore_error: bool,
+    pub disable_hh_ignore_error: isize,
 }
 
 impl<'src, 'arena, T, V> ScourComment<'src, T, V>
@@ -57,7 +59,7 @@ where
                         || (self.collect_fixmes
                             && (t.has_trivia_kind(TriviaKind::FixMe)
                                 || (t.has_trivia_kind(TriviaKind::IgnoreError)
-                                    && !self.disable_hh_ignore_error)))
+                                    && self.disable_hh_ignore_error <= 1)))
                     {
                         let leading = t.scan_leading(self.source_text());
                         let trailing = t.scan_trailing(self.source_text());
@@ -84,7 +86,7 @@ where
         t: &PositionedTrivium,
         acc: &mut ScouredComments,
     ) {
-        use oxidized::relative_path::Prefix;
+        use relative_path::Prefix;
         use TriviaKind::*;
         match t.kind() {
             WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => {}
@@ -102,7 +104,7 @@ where
                     let start = t.start_offset();
                     let start = start + if text[start] == b'#' { 1 } else { 2 };
                     let end = t.end_offset();
-                    let len = end - start + 1;
+                    let len = end + 1 - start;
                     let p = self.pos_of_offset(start, end);
                     let mut text = self.source_text().sub_as_str(start, len).to_string();
                     text.push('\n');
@@ -119,7 +121,7 @@ where
                     let text = t.text_raw(self.source_text());
                     let pos = self.p_pos(node);
                     let line = pos.line() as isize;
-                    let p = self.pos_of_offset(t.start_offset(), t.end_offset());
+                    let p = self.pos_of_offset(t.start_offset(), t.end_offset() + 1);
                     match IGNORE_ERROR
                         .captures(text)
                         .and_then(|c| c.get(1))
@@ -134,6 +136,8 @@ where
                                 || self.allowed_decl_fixme_codes.contains(&code))
                             {
                                 acc.add_to_misuses(line, code, p);
+                            } else if self.disable_hh_ignore_error == 1 && t.kind() == IgnoreError {
+                                acc.add_disallowed_ignore(p);
                             } else {
                                 acc.add_to_fixmes(line, code, p);
                             }
@@ -154,10 +158,10 @@ where
 
     fn p_pos(&self, node: &Syntax<'arena, T, V>) -> Pos {
         node.position_exclusive(self.indexed_source_text)
-            .unwrap_or_else(Pos::make_none)
+            .map_or(Pos::NONE, Into::into)
     }
 
     fn pos_of_offset(&self, start: usize, end: usize) -> Pos {
-        self.indexed_source_text.relative_pos(start, end)
+        self.indexed_source_text.relative_pos(start, end).into()
     }
 }

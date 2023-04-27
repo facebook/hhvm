@@ -6,28 +6,22 @@
  *
  *)
 
+module T = Typing_defs
 open Shape_analysis_types
 
-let result_id_counter = ref 0
+let singleton key sft_ty sft_optional =
+  T.TShapeMap.singleton key T.{ sft_ty; sft_optional }
 
-let fresh_result_id () =
-  let result_id = !result_id_counter in
-  result_id_counter := result_id + 1;
-  ResultID.singleton result_id
-
-let singleton result_id key ty = (result_id, ShapeKeyMap.singleton key ty)
-
-let ( <> ) ~env (id1, sk1) (id2, sk2) =
+let ( <> ) ~env sk1 sk2 =
   let merge_shape_key_map _key ty_opt ty_opt' =
     match (ty_opt, ty_opt') with
-    | (Some ty, Some ty') ->
-      let (_env, ty) = Typing_union.union env ty ty' in
-      Some ty
+    | (Some sft, Some sft') ->
+      let (_env, sft_ty) = Typing_union.union env sft.T.sft_ty sft'.T.sft_ty in
+      let sft_optional = sft.T.sft_optional && sft'.T.sft_optional in
+      Some T.{ sft_ty; sft_optional }
     | (None, (Some _ as ty_opt))
     | ((Some _ as ty_opt), None) ->
       ty_opt
     | (None, None) -> None
   in
-  let result_id = ResultID.union id1 id2 in
-  let map = ShapeKeyMap.merge merge_shape_key_map sk1 sk2 in
-  (result_id, map)
+  T.TShapeMap.merge merge_shape_key_map sk1 sk2

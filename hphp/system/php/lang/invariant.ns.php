@@ -3,7 +3,7 @@
 namespace __SystemLib {
 
 abstract final class InvariantCallback {
-  public static $cb = null;
+  public static ?(function(string, mixed...)[]: void) $cb = null;
 }
 
 /**
@@ -11,11 +11,12 @@ abstract final class InvariantCallback {
  * which causes a fatal. Handle them gracefully by displaying the class
  * name.
  */
-function invariant_violation_helper($arg)[] {
+function invariant_violation_helper(mixed $arg)[]: mixed {
   if (!\is_object($arg) || \method_exists($arg, '__toString')) {
     return $arg;
   }
-  return 'Object of type '.\get_class($arg);
+  return 'Object of type '.
+    HH\FIXME\UNSAFE_CAST<mixed, string>(\get_class($arg));
 }
 
 }
@@ -32,7 +33,9 @@ class InvariantException extends \Exception {
  *
  * @param $callback - The function that will be called if your invariant fails.
  */
-function invariant_callback_register($callback)[globals] {
+function invariant_callback_register(
+  (function(string, mixed...)[]: void) $callback,
+)[globals]: void {
   invariant(
     \is_callable($callback),
     'Callback not callable: %s',
@@ -74,9 +77,16 @@ function invariant_callback_register($callback)[globals] {
  *                      invariant fails, with possible placeholders.
  * @param $args - Actual values to placeholders in your format string.
  */
-function invariant(mixed $test, $format_str, ...$args)[]: void {
+function invariant(
+  mixed $test,
+  mixed $format_str,
+  mixed... $args
+)[]: void {
   if (!$test) {
-    \HH\invariant_violation($format_str, ...$args);
+    \HH\invariant_violation(
+      HH\FIXME\UNSAFE_CAST<mixed, string>($format_str),
+      ...$args,
+    );
   }
 }
 
@@ -90,7 +100,7 @@ function invariant(mixed $test, $format_str, ...$args)[]: void {
  * @param $args - Actual values to placeholders in your format string.
  */
 <<__IgnoreCoeffectLocalErrors>>
-function invariant_violation(string $format_str, ...$args)[]: void {
+function invariant_violation(string $format_str, mixed... $args)[]: noreturn {
   // TODO(T94673071): The callback only ever gets set once at the beginning of
   // the request for FB WWW. This means that this global read is technically
   // pure within the request.

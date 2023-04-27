@@ -1739,7 +1739,7 @@ static void HHVM_METHOD(SimpleXMLElementIterator, __construct,
   }
 }
 
-static Variant HHVM_METHOD(SimpleXMLElementIterator, current) {
+static Object HHVM_METHOD(SimpleXMLElementIterator, current) {
   return Native::data<SimpleXMLElementIterator>(this_)->sxe()->iter.data;
 }
 
@@ -1756,19 +1756,17 @@ static Variant HHVM_METHOD(SimpleXMLElementIterator, key) {
   }
 }
 
-static Variant HHVM_METHOD(SimpleXMLElementIterator, next) {
+static void HHVM_METHOD(SimpleXMLElementIterator, next) {
   auto sxe = Native::data<SimpleXMLElementIterator>(this_)->sxe();
   php_sxe_move_forward_iterator(sxe);
-  return init_null();
 }
 
-static Variant HHVM_METHOD(SimpleXMLElementIterator, rewind) {
+static void HHVM_METHOD(SimpleXMLElementIterator, rewind) {
   auto sxe = Native::data<SimpleXMLElementIterator>(this_)->sxe();
   php_sxe_reset_iterator(sxe, true);
-  return init_null();
 }
 
-static Variant HHVM_METHOD(SimpleXMLElementIterator, valid) {
+static bool HHVM_METHOD(SimpleXMLElementIterator, valid) {
   auto sxe = Native::data<SimpleXMLElementIterator>(this_)->sxe();
   return !sxe->iter.data.isNull();
 }
@@ -1776,7 +1774,7 @@ static Variant HHVM_METHOD(SimpleXMLElementIterator, valid) {
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLIterator
 
-static Variant HHVM_METHOD(SimpleXMLIterator, current) {
+static Object HHVM_METHOD(SimpleXMLIterator, current) {
   auto data = Native::data<SimpleXMLIterator>(this_);
   return data->iter.data;
 }
@@ -1793,19 +1791,17 @@ static Variant HHVM_METHOD(SimpleXMLIterator, key) {
   return String((char*)curnode->name);
 }
 
-static Variant HHVM_METHOD(SimpleXMLIterator, next) {
+static void HHVM_METHOD(SimpleXMLIterator, next) {
   auto data = Native::data<SimpleXMLIterator>(this_);
   php_sxe_move_forward_iterator(data);
-  return init_null();
 }
 
-static Variant HHVM_METHOD(SimpleXMLIterator, rewind) {
+static void HHVM_METHOD(SimpleXMLIterator, rewind) {
   auto data = Native::data<SimpleXMLIterator>(this_);
   php_sxe_reset_iterator(data, true);
-  return init_null();
 }
 
-static Variant HHVM_METHOD(SimpleXMLIterator, valid) {
+static bool HHVM_METHOD(SimpleXMLIterator, valid) {
   auto data = Native::data<SimpleXMLIterator>(this_);
   return !data->iter.data.isNull();
 }

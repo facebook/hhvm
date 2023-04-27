@@ -29,9 +29,12 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
+#include "hphp/util/tiny-vector.h"
 #include "hphp/util/tribool.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
+
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -53,13 +56,17 @@ struct MethodsInfo;
 
 struct TypeStructureResolution;
 
+struct DCls;
+
 extern const Type TCell;
 
 namespace php {
 struct Class;
+struct ClassBytecode;
 struct Prop;
 struct Const;
 struct Func;
+struct FuncBytecode;
 struct Unit;
 struct Program;
 struct TypeAlias;
@@ -115,13 +122,6 @@ enum class DependencyContextType : uint16_t {
 
 using DependencyContext = CompactTaggedPtr<const void, DependencyContextType>;
 
-struct DependencyContextLess {
-  bool operator()(const DependencyContext& a,
-                  const DependencyContext& b) const {
-    return a.getOpaque() < b.getOpaque();
-  }
-};
-
 struct DependencyContextEquals {
   bool operator()(const DependencyContext& a,
                   const DependencyContext& b) const {
@@ -142,14 +142,11 @@ struct DependencyContextHashCompare : DependencyContextHash {
   size_t hash(const DependencyContext& d) const { return (*this)(d); }
 };
 
-using DependencyContextSet = hphp_hash_set<DependencyContext,
+using DependencyContextSet = hphp_fast_set<DependencyContext,
                                            DependencyContextHash,
                                            DependencyContextEquals>;
-using ContextSet = hphp_hash_set<Context, ContextHash>;
 
 std::string show(Context);
-
-using ConstantMap = hphp_hash_map<SString, TypedValue>;
 
 /*
  * State of properties on a class.  Map from property name to its
@@ -185,6 +182,7 @@ struct PropLookupResult {
   TriBool isConst; // If the property is AttrConst
   TriBool readOnly; // If the property is AttrIsReadonly
   TriBool lateInit; // If the property is AttrLateInit
+  TriBool internal; // If the property is Internal
   bool classInitMightRaise; // If class initialization during the
                             // property access can raise (unlike the
                             // others, this is only no or maybe).
@@ -199,6 +197,7 @@ inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
   a.isConst |= b.isConst;
   a.readOnly |= b.readOnly;
   a.lateInit |= b.lateInit;
+  a.internal |= b.internal;
   a.classInitMightRaise |= b.classInitMightRaise;
   return a;
 }
@@ -282,6 +281,7 @@ std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
 
 // private types
 struct ClassInfo;
+struct UnresolvedClassMaker;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -304,36 +304,56 @@ namespace res {
  */
 struct Class {
   /*
-   * Returns whether two classes are definitely same at runtime.  If
-   * this function returns false, they still *may* be the same at
-   * runtime.
+   * Returns whether two (exact) classes are definitely same at
+   * runtime. This ignores all complications due to non-regular
+   * classes and is usually not what you want to use.
    */
-  bool same(const Class&) const;
+  bool same(const Class& o) const;
 
   /*
-   * Returns true if this class is definitely going to be a subtype
-   * of `o' at runtime.  If this function returns false, this may
-   * still be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns true if this class is a subtype of 'o'. That is, every
+   * subclass of 'this' (including 'this' itself) is a subclass of
+   * 'o'. For the exact variant, 'this' is considered to be exact
+   * (that is, exactly that class). For the sub variant, 'this' could
+   * also be a subclass. This distinction only matters for non-regular
+   * classes. 'o' is considered to be a subclass except for
+   * exactSubtypeOfExact. This is needed since two exact classes, even
+   * if the same, may not be a sub-type of one another if
+   * nonRegularL/nonRegularR differ.
+   *
+   * Classes can have implementations/subclasses which aren't
+   * "regular" classes (interfaces/traits/abstract/etc). Whether these
+   * will be considered as part of the check (on either side) is
+   * context dependent and specified by nonRegularL and nonRegularR.
    */
-  bool mustBeSubtypeOf(const Class& o) const;
+  bool exactSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
+  bool exactSubtypeOfExact(
+      const Class& o, bool nonRegularL, bool nonRegularR
+  ) const;
+  bool subSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
-   * Returns false if this class is definitely not going to be a subtype
-   * of `o' at runtime.  If this function returns true, this may
-   * still not be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns false if this class has no subclasses in common with
+   * 'o'. This is equivalent to saying that their intersection is
+   * empty. For the exact variant, 'this' is considered to be exactly
+   * that class (no sub-classes). For the sub variant, 'this' might be
+   * that class, or any subclass of that class.
+   *
+   * Since couldBe is symmetric, this covers all of the cases. 'o' is
+   * considered to be a subclass, except for exactCouldBeExact. This
+   * is needed since two exact classes, even if the same, may not have
+   * anything in common if nonRegularL/nonRegularR differ.
+   *
+   * Classes can have implementations/subclasses which aren't
+   * "regular" classes (interfaces/traits/abstract/etc). Whether these
+   * will be considered as part of the check (on either side) is
+   * context dependent and specified by nonRegularL and nonRegularR.
    */
-  bool maybeSubtypeOf(const Class& o) const;
-
-  /*
-   * If this function return false, it is known that this class
-   * is in no subtype relationship with the argument Class 'o'.
-   * Returns true if this class could be a subtype of `o' at runtime.
-   * When true is returned the two classes may still be unrelated but it is
-   * not possible to tell. A typical example is with "non unique" classes.
-   */
-  bool couldBe(const Class& o) const;
+  bool exactCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
+  bool exactCouldBeExact(
+      const Class& o, bool nonRegularL, bool nonRegularR
+  ) const;
+  bool subCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
    * Returns the name of this class.  Non-null guarantee.
@@ -341,27 +361,52 @@ struct Class {
   SString name() const;
 
   /*
-   * Whether this class could possibly be an interface/interface or trait.
+   * Returns whether this class is a final class as determined by
+   * static analysis. The first variant considers all classes, while
+   * the second variant only considers potentially overriding regular
+   * classes (this distinction is important if you already have an
+   * instance of the class, as abstract classes cannot be
+   * instantiated).
    *
-   * True means it might be, false means it is not.
+   * NB: Traits never can be overridden and will always return false
+   * (their subclass list reflects users which the trait will be
+   * flattened into at runtime).
+   *
+   * When returning false the class is guaranteed to be final. When
+   * returning true the system cannot tell though the class may still
+   * be final.
    */
-  bool couldBeInterface() const;
+  bool couldBeOverridden() const;
+  bool couldBeOverriddenByRegular() const;
 
   /*
-   * Whether this class must be an interface.
-   *
-   * True means it is, false means it might not be.
+   * Returns whether this class might be a regular/non-regular class
+   * at runtime. For resolved classes this check is precise, but for
+   * unresolved classes this will always conservatively return
+   * true. This only checks the class itself and says nothing about
+   * any potential subclasses of this.
    */
-  bool mustBeInterface() const;
+  bool mightBeRegular() const;
+  bool mightBeNonRegular() const;
+
   /*
-   * Returns whether this type has the no override attribute, that is, if it
-   * is a final class (explicitly marked by the user or known by the static
-   * analysis).
-   *
-   * When returning false the class is guaranteed to be final.  When returning
-   * true the system cannot tell though the class may still be final.
+   * Whether this class (or its subtypes) might be a non-regular
+   * class. For resolved classes this check is precise, but for
+   * unresolved classes this will always conservatively return true.
    */
-  bool couldBeOverriden() const;
+  bool mightContainNonRegular() const;
+
+  /*
+   * Return the best class equivalent to this, but with any
+   * non-regular classes removed. By equivalent, we mean the most
+   * specific representable class which contains all of the same
+   * regular subclasses that the original did. If std::nullopt is
+   * returned, this class contains no regular classes (and therefore
+   * the result is a Bottom). The returned classes may be the original
+   * class, and for interfaces and abstract classes, the result may
+   * not be an interface or abstract class.
+   */
+  Optional<res::Class> withoutNonRegular() const;
 
   /*
    * Whether this class (or its subtypes) could possibly have have
@@ -370,10 +415,10 @@ struct Class {
   bool couldHaveMagicBool() const;
 
   /*
-   * Whether this class could possibly have a derived class that is mocked.
-   * Including itself.
+   * Whether this class could possibly have a sub-class that is
+   * mocked, including itself.
    */
-  bool couldHaveMockedDerivedClass() const;
+  bool couldHaveMockedSubClass() const;
 
   /*
    * Whether this class could possibly be mocked.
@@ -386,6 +431,21 @@ struct Class {
   bool couldHaveReifiedGenerics() const;
 
   /*
+   * Whether this class must have reified generics
+   */
+  bool mustHaveReifiedGenerics() const;
+
+  /*
+   * Whether this class could have a reified parent
+   */
+  bool couldHaveReifiedParent() const;
+
+  /*
+   * Whether this class must have a reified parent
+   */
+  bool mustHaveReifiedParent() const;
+
+  /*
    * Returns whether this resolved class might distinguish being constructed
    * dynamically versus being constructed normally (IE, might raise a notice).
    */
@@ -395,13 +455,7 @@ struct Class {
    * Whether this class (or clases derived from it) could have const props.
    */
   bool couldHaveConstProp() const;
-  bool derivedCouldHaveConstProp() const;
-
-  /*
-   * Returns the Class that is the first common ancestor between 'this' and 'o'.
-   * If there is no common ancestor std::nullopt is returned
-   */
-  Optional<Class> commonAncestor(const Class& o) const;
+  bool subCouldHaveConstProp() const;
 
   /*
    * Returns the res::Class for this Class's parent if there is one,
@@ -428,14 +482,105 @@ struct Class {
    */
   void forEachSubclass(const std::function<void(const php::Class*)>&) const;
 
-private:
-  explicit Class(Either<SString,ClassInfo*>);
-  template <bool> bool subtypeOfImpl(const Class&) const;
+  /*
+   * Given two lists of classes, calculate the union between them (in
+   * canonical form). A list of size 1 represents a single class, and
+   * a larger list represents an intersection of classes. The input
+   * lists are assumed to be in canonical form. If the output is an
+   * empty list, the union is *all* classes (corresponding to TObj or
+   * TCls). This function is really an implementation detail of
+   * union_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> combine(folly::Range<const Class*> classes1,
+                                      folly::Range<const Class*> classes2,
+                                      bool isSub1,
+                                      bool isSub2,
+                                      bool nonRegular1,
+                                      bool nonRegular2);
+  /*
+   * Given two lists of classes, calculate the intersection between
+   * them (in canonical form). A list of size 1 represents a single
+   * class, and a larger list represents an intersection of
+   * classes. The input lists are assumed to be in canonical form. If
+   * the output is an empty list, the intersection is empty
+   * (equivalent to Bottom). This function is really an implementation
+   * detail of intersection_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> intersect(folly::Range<const Class*> classes1,
+                                        folly::Range<const Class*> classes2,
+                                        bool nonRegular1,
+                                        bool nonRegular2,
+                                        bool& nonRegularOut);
 
+  /*
+   * Given a list of classes, return a new list of classes
+   * representing all of the non-regular classes removed (and
+   * canonicalized). If the output list is empty, there are no regular
+   * classes.
+   */
+  static TinyVector<Class, 2>
+  removeNonRegular(folly::Range<const Class*> classes);
+
+  /*
+   * Given two lists of classes, calculate whether their intersection
+   * is non-empty. This is equivalent to calling intersect and
+   * checking the result, but more efficient.
+   */
+  static bool couldBeIsect(folly::Range<const Class*> classes1,
+                           folly::Range<const Class*> classes2,
+                           bool nonRegular1,
+                           bool nonRegular2);
+
+  /*
+   * Produce an unresolved class representing the base class of a wait
+   * handle (this will be a sub-class of Awaitable). Since this is
+   * unresolved, it does not require an Index.
+   */
+  static Class unresolvedWaitHandle();
+
+  /*
+   * Convert this class to/from an opaque integer. The integer is
+   * "pointerish" (has upper bits cleared), so can be used in
+   * something like CompactTaggedPtr. It is not, however, guaranteed
+   * to be aligned (lower bits may be set).
+   */
+  uintptr_t toOpaque() const { return val.toOpaque(); }
+  static Class fromOpaque(uintptr_t o) {
+    return Class{decltype(val)::fromOpaque(o)};
+  }
+
+  size_t hash() const { return val.toOpaque(); }
+
+  /*
+   * NB: Serd-ing a Class only encodes the name. Deserializing it
+   * always produces a name-only unresolved class, regardless of the
+   * original. If necessary, the Class must be manually resolved
+   * afterwards.
+   */
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(name());
+  }
+
+  template <typename SerDe> static Class makeForSerde(SerDe& sd) {
+    SString n;
+    sd(n);
+    assertx(n);
+    return Class{n};
+  }
+private:
+  explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
+
+  template <typename F>
+  static void visitEverySub(folly::Range<const Class*>, bool, const F&);
+  static ClassInfo* commonAncestor(ClassInfo*, ClassInfo*);
+  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&, bool);
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
+  friend struct ::HPHP::HHBBC::ClassInfo;
+  friend struct ::HPHP::HHBBC::UnresolvedClassMaker;
   Either<SString,ClassInfo*> val;
 };
 
@@ -495,7 +640,6 @@ struct Func {
   const CompactVector<CoeffectRule>* coeffectRules() const;
 
   struct FuncInfo;
-  struct MethTabEntryPair;
   struct FuncFamily;
 
 private:
@@ -510,11 +654,38 @@ private:
     bool operator==(MethodName o) const { return name == o.name; }
     SString name;
   };
+  struct Method {
+    const php::Func* func;
+  };
+  // Like Method, but the method is not guaranteed to actually exist
+  // (this only matters for things like exactFunc()).
+  struct MethodOrMissing {
+    const php::Func* func;
+  };
+  // Method/Func is known to not exist
+  struct Missing {
+    SString name;
+  };
+  // Group of methods (a wrapper around a FuncFamily).
+  struct MethodFamily {
+    FuncFamily* family;
+    bool regularOnly;
+  };
+  // Simultaneously a group of func families. Any data must be
+  // intersected across all of the func families in the list. Used for
+  // method resolution on a DCls where isIsect() is true.
+  struct Isect {
+    CompactVector<FuncFamily*> families;
+    bool regularOnly{false};
+  };
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
-                            , const MethTabEntryPair*
-                            , FuncFamily*
+                            , Method
+                            , MethodFamily
+                            , MethodOrMissing
+                            , Missing
+                            , Isect
                             >;
 
 private:
@@ -536,6 +707,26 @@ std::string show(const Class&);
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * A type which is an alias to another. This includes standard
+ * type-aliases, but also enums (which are aliases of their underlying
+ * base type). Type mappings can alias to another type mapping.
+ */
+struct TypeMapping {
+  LSString name;
+  LSString value;
+  // If an enum, this is the same value as name. Otherwise it's the
+  // first enum encountered when resolving a type-alias.
+  LSString firstEnum;
+  AnnotType type;
+  bool nullable;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(name)(value)(firstEnum)(type)(nullable);
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * This class encapsulates the known facts about the program, with a
  * whole-program view.
  *
@@ -548,16 +739,68 @@ std::string show(const Class&);
  * "update" step in between whole program analysis rounds).
  */
 struct Index {
+  // The input used to build the Index is largely the extern-worker
+  // refs representing the program components. However, some
+  // additional metadata is needed locally to know what the refs
+  // represent (and schedule some initial jobs).
+  struct Input {
+    template <typename T> using R = extern_worker::Ref<std::unique_ptr<T>>;
+
+    struct ClassMeta {
+      R<php::Class> cls;
+      LSString name;
+      std::vector<SString> dependencies;
+      LSString closureContext;
+      bool isClosure;
+      // If this class is an enum, the type-mapping representing it's
+      // base type.
+      Optional<TypeMapping> typeMapping;
+      std::vector<SString> unresolvedTypes;
+    };
+
+    struct FuncMeta {
+      R<php::Func> func;
+      LSString name;
+      LSString methCallerUnit; // nullptr if not MethCaller
+      std::vector<SString> unresolvedTypes;
+    };
+
+    struct UnitMeta {
+      R<php::Unit> unit;
+      LSString name;
+      std::vector<TypeMapping> typeMappings;
+    };
+
+    struct FuncBytecodeMeta {
+      R<php::FuncBytecode> bc;
+      LSString name;
+      LSString methCallerUnit; // nullptr if not associated with a MethCaller
+    };
+
+    struct ClassBytecodeMeta {
+      R<php::ClassBytecode> bc;
+      LSString name;
+    };
+
+    static std::vector<SString> makeDeps(const php::Class&);
+
+    std::vector<ClassMeta> classes;
+    std::vector<UnitMeta> units;
+    std::vector<FuncMeta> funcs;
+    std::vector<ClassBytecodeMeta> classBC;
+    std::vector<FuncBytecodeMeta> funcBC;
+  };
+
   /*
    * Create an Index for a php::Program.  Performs some initial
    * analysis of the program.
    */
-  explicit Index(php::Program*);
-
-  /*
-   * This class must not be destructed after its associated
-   * php::Program.
-   */
+  Index(Input,
+        Config,
+        std::unique_ptr<coro::TicketExecutor>,
+        std::unique_ptr<extern_worker::Client>,
+        DisposeCallback,
+        StructuredLogEntry*);
   ~Index();
 
   /*
@@ -599,7 +842,58 @@ struct Index {
    * Throw away data structures that won't be needed after the emit
    * stage.
    */
-  void cleanup_post_emit(php::ProgramPtr program);
+  void cleanup_post_emit();
+
+  /*
+   * Access the StructuredLogEntry that the Index is using (if any).
+   */
+  StructuredLogEntry* sample() const;
+
+  /*
+   * Access the php::Program this Index is analyzing.
+   */
+  const php::Program& program() const;
+
+  /*
+   * Obtain a pointer to the unit which defined the given func.
+   */
+  const php::Unit* lookup_func_unit(const php::Func&) const;
+  const php::Unit* lookup_func_original_unit(const php::Func&) const;
+
+  /*
+   * Obtain a pointer to the unit which defined the given class.
+   */
+  const php::Unit* lookup_class_unit(const php::Class&) const;
+
+  /*
+   * Obtain a pointer to the class which defines the given class
+   * constant.
+   */
+  const php::Class* lookup_const_class(const php::Const&) const;
+
+  /*
+   * Obtain a pointer to the class which serves as the context for the
+   * given class. For non-closures, this is just the input, but may be
+   * different in closures.
+   */
+  const php::Class* lookup_closure_context(const php::Class&) const;
+
+  /*
+   * Call the given callback for each (top-level) func defined in the
+   * given Unit.
+   */
+  void for_each_unit_func(const php::Unit&,
+                          std::function<void(const php::Func&)>) const;
+  void for_each_unit_func_mutable(php::Unit&,
+                                  std::function<void(php::Func&)>);
+
+  /*
+   * Call the given callback for each class defined in the given Unit.
+   */
+  void for_each_unit_class(const php::Unit&,
+                           std::function<void(const php::Class&)>) const;
+  void for_each_unit_class_mutable(php::Unit&,
+                                   std::function<void(php::Class&)>);
 
   /*
    * Find all the closures created inside the context of a given
@@ -616,29 +910,26 @@ struct Index {
     lookup_extra_methods(const php::Class*) const;
 
   /*
-   * Try to find a res::Class for a given php::Class.
+   * Find a res::Class for a given php::Class.
    *
-   * Note, the returned class may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns a name-only resolution if there are no legal
-   * instantiations of the class, or if there is more than one.
+   * Returns std::nullopt if the given php::Class is not actually
+   * definable.
    */
-  res::Class resolve_class(const php::Class*) const;
+  Optional<res::Class> resolve_class(const php::Class*) const;
 
   /*
-   * Try to resolve which class will be the class named `name' from a
-   * given context, if we can resolve it to a single class.
+   * Resolve the given class name to a res::Class.
    *
-   * Note, the returned class may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns std::nullopt if we can't prove the supplied name must be a
-   * object type.  (E.g. if there are type aliases.)
+   * Returns std::nullopt if no such class with that name exists, or
+   * if the class is not definable.
    */
-  Optional<res::Class> resolve_class(Context, SString name) const;
+  Optional<res::Class> resolve_class(SString name) const;
+
+  /*
+   * Resolve the given class name to a name-only res::Class. This is
+   * meant for use in tests.
+   */
+  res::Class resolve_class_name_only(SString name) const;
 
   /*
    * Find a type-alias with the given name. If a nullptr is returned,
@@ -652,26 +943,14 @@ struct Index {
   Optional<res::Class> selfCls(const Context& ctx) const;
   Optional<res::Class> parentCls(const Context& ctx) const;
 
-  template <typename T>
-  struct ResolvedInfo {
-    AnnotType                               type;
-    bool                                    nullable;
-    T value;
-  };
-
-  /*
-   * Try to resolve name, looking through TypeAliases and enums.
-   */
-  ResolvedInfo<Optional<res::Class>> resolve_type_name(SString name) const;
-
   /*
    * Resolve a closure class.
    *
    * Returns both a resolved Class, and the actual php::Class for the
    * closure.
    */
-  std::pair<res::Class,php::Class*>
-    resolve_closure_class(Context ctx, int32_t idx) const;
+  std::pair<res::Class, const php::Class*>
+    resolve_closure_class(Context ctx, SString name) const;
 
   /*
    * Return a resolved class for a builtin class.
@@ -690,63 +969,82 @@ struct Index {
   res::Func resolve_func(Context, SString name) const;
 
   /*
-   * Try to resolve a class method named `name' with a given Context
-   * and class type.
+   * Try to resolve a method named `name' with a this type of
+   * `thisType' within a given Context.
    *
-   * Pre: clsType.subtypeOf(BCls)
+   * The type of `thisType' determines if the method is meant to be
+   * static or not. A this type of BCls is a static method and a BObj
+   * is for an instance method.
+   *
+   * Note: a resolved method does not imply the function is actually
+   * callable at runtime. You still need to apply visibility checks,
+   * etc.
+   *
+   * Pre: thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj)
    */
-  res::Func resolve_method(Context, Type clsType, SString name) const;
+  res::Func resolve_method(Context, const Type& thisType, SString name) const;
 
   /*
-   * Try to resolve a class constructor for the supplied class type.
+   * Resolve a class constructor for the supplied object type.
    *
-   * Returns: std::nullopt if it can't at least figure out a func
-   * family for the call.
+   * Pre: obj.subtypeOf(BObj)
    */
-  Optional<res::Func>
-  resolve_ctor(Context, res::Class rcls, bool exact) const;
+  res::Func resolve_ctor(const Type& obj) const;
 
   /*
-   * Give the Type in our type system that matches an hhvm
-   * TypeConstraint, subject to the information in this Index.
-   *
-   * This function returns a subtype of Cell, although TypeConstraints
-   * at runtime can match reference parameters.  The caller should
-   * make sure to handle that case.
-   *
-   * For soft constraints (@), this function returns Cell.
-   *
-   * For some non-soft constraints (such as "Stringish"), this
-   * function may return a Type that is a strict supertype of the
-   * constraint's type.
-   *
-   * If something is known about the type of the object against which
-   * the constraint will be checked, it can be passed in to help
-   * disambiguate certain constraints (useful because we don't support
-   * arbitrary unions, or intersection).
+   * Return a resolved class representing the base class of a wait
+   * handle (this will be a sub-class of Awaitable).
    */
-  Type lookup_constraint(Context, const TypeConstraint&,
-                         const Type& t = TCell) const;
+  res::Class wait_handle_class() const;
 
   /*
-   * If this function returns true, it is safe to assume that Type t
-   * will always satisfy TypeConstraint tc at run time.
+   * Resolve a type-constraint into its equivalent set of HHBBC types.
+   *
+   * In general, a type-constraint cannot be represented exactly by a
+   * single HHBBC type, so a lower and upper bound is provided
+   * instead.
+   *
+   * A "candidate" type can be provided which will be applied to the
+   * type-constraint and can further constrain the output types. This
+   * is useful for the magic interfaces, whose lower-bound cannot be
+   * precisely represented by a single type.
    */
-  bool satisfies_constraint(Context, const Type& t,
-                            const TypeConstraint& tc) const;
+  template <typename T = Type>
+  struct ConstraintType {
+    // Lower bound of constraint. Any type which is a subtype of this
+    // is guaranteed to pass a type-check without any side-effects.
+    T lower;
+    // Upper bound of constraint. Any type which does not intersect
+    // with this is guaranteed to always fail a type-check.
+    T upper;
+    // If this type-constraint might promote a "classish" type to a
+    // static string as a side-effect.
+    TriBool coerceClassToString{TriBool::No};
+    // Whether this type-constraint might map to a mixed
+    // type-hint. The mixed type-hint has special semantics when it
+    // comes to properties.
+    bool maybeMixed{false};
+  };
 
-  /*
-   * Returns true if the given type-hint (declared on the given class) might not
-   * be enforced at runtime (IE, it might map to mixed or be soft).
-   */
-  bool prop_tc_maybe_unenforced(const php::Class& propCls,
-                                const TypeConstraint& tc) const;
+  ConstraintType<>
+  lookup_constraint(const Context&, const TypeConstraint&,
+                    const Type& candidate = TCell) const;
 
   /*
    * Returns true if the type constraint can contain a reified type
    * Currently, only classes and interfaces are supported
    */
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
+
+  /*
+   * Returns a tuple containing a type after the parameter type
+   * verification, a flag indicating whether the verification is a
+   * no-op (because it always passes without any conversion), and a
+   * flag indicating whether the verification is effect free (the
+   * verification could convert a type without causing a side-effect).
+   */
+  std::tuple<Type, bool, bool>
+  verify_param_type(const Context& ctx, uint32_t paramId, const Type& t) const;
 
   /*
    * Lookup metadata about the constant access `cls'::`name', in the
@@ -808,6 +1106,8 @@ struct Index {
    * context insensitive way.  Returns TInitCell at worst.
    */
   Type lookup_return_type(Context, MethodsInfo*, res::Func,
+                          Dep dep = Dep::ReturnTy) const;
+  Type lookup_return_type(Context, MethodsInfo*, const php::Func*,
                           Dep dep = Dep::ReturnTy) const;
 
   /*
@@ -941,15 +1241,8 @@ struct Index {
    * don't do analysis on public properties, this just inferred from the
    * property's type-hint (if enforced).
    */
-  Type lookup_public_prop(const Type& cls, const Type& name) const;
+  Type lookup_public_prop(const Type& obj, const Type& name) const;
   Type lookup_public_prop(const php::Class* cls, SString name) const;
-
-  /*
-   * We compute the interface vtables in a separate thread. It needs
-   * to be joined (in single threaded context) before calling
-   * lookup_iface_vtable_slot.
-   */
-  void join_iface_vtable_thread() const;
 
   /*
    * Returns the computed vtable slot for the given class, if it's an interface
@@ -1014,7 +1307,7 @@ struct Index {
    * Attempt to pre-resolve as many type-structures as possible in
    * type-constants and type-aliases.
    */
-  void preresolve_type_structures(php::Program&);
+  void preresolve_type_structures();
 
   /*
    * Refine the types of the class constants defined by an 86cinit,
@@ -1142,31 +1435,16 @@ struct Index {
                                       DependencyContextSet& deps);
 
   /*
-   * Mark any properties in cls that definitely do not redeclare a property in
-   * the parent, which has an inequivalent type-hint.
-   */
-  void mark_no_bad_redeclare_props(php::Class& cls) const;
-
-  /*
-   * Rewrite the initial values of any AttrSystemInitialValue properties to
-   * something more suitable for its type-hint, and add AttrNoImplicitNullable
-   * where appropriate.
-   *
-   * This must be done before any analysis is done, as the initial values
-   * affects the analysis.
-   */
-  void rewrite_default_initial_values(php::Program&) const;
-
-  /*
    * Return true if the resolved function supports async eager return.
    */
-  Optional<bool> supports_async_eager_return(res::Func rfunc) const;
+  TriBool supports_async_eager_return(res::Func rfunc) const;
 
   /*
    * Return true if the function is effect free.
    */
-  bool is_effect_free(res::Func rfunc) const;
-  bool is_effect_free(const php::Func* func) const;
+  bool is_effect_free(Context, res::Func rfunc) const;
+  bool is_effect_free(Context, const php::Func* func) const;
+  bool is_effect_free_raw(const php::Func* func) const;
 
   /*
    * Do any necessary fixups to a return type.
@@ -1193,27 +1471,12 @@ private:
 
   res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
-  bool could_be_related(const php::Class*,
-                        const php::Class*) const;
 
-  template<bool getSuperType>
-  Type get_type_for_constraint(Context,
-                               const TypeConstraint&,
-                               const Type&) const;
+  template <typename F>
+  bool visit_every_dcls_cls(const DCls&, const F&) const;
 
-  struct ConstraintResolution;
-
-  /*
-   * Try to resolve name in the given context. Follows TypeAliases.
-   */
-  ConstraintResolution resolve_named_type(
-      const Context& ctx, SString name, const Type& candidate) const;
-
-  ConstraintResolution get_type_for_annotated_type(
-    Context ctx, AnnotType annot, bool nullable,
-    SString name, const Type& candidate) const;
-
-  void init_return_type(const php::Func* func);
+  template <typename P, typename G>
+  static res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&);
 
 private:
   std::unique_ptr<IndexData> const m_data;

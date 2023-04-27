@@ -18,10 +18,10 @@ $xml =
   <media:category label="Music" scheme="http://gdata.youtube.com/schemas/2007/categories.cat">Music</media:category>
 </entry>';
 
-$doc = new \DomDocument('1.0', 'UTF-8');
+$doc = new \DOMDocument('1.0', 'UTF-8');
 $doc->loadXML($xml);
 
-$dxp = new \DomXPath($doc);
+$dxp = new \DOMXPath($doc);
 $query='(//namespace::*[name()="yt"])[last()]';
 $out = $dxp->query($query);
 

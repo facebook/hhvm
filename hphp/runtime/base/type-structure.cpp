@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/text-util.h"
@@ -426,7 +427,20 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
   return name;
 }
 
-Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr);
+Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
+  StringData* alias = nullptr, ArrayData* typevarTypes = nullptr);
+
+Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr);
+
+Array maybeMakeBespoke(Array& ts) {
+  if (allowBespokeArrayLikes() &&
+      RO::EvalEmitBespokeTypeStructures &&
+      bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
+    auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
+    if (bespokeTS) return Array::attach(bespokeTS);
+  }
+  return ts;
+}
 
 Array resolveList(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   auto const sz = arr.size();
@@ -593,13 +607,13 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
     auto tv = wrapper.lookup(s_value);
     auto valueArr = tv.is_init() ? tvAsVariant(tv).toArray() : wrapper;
-    auto value = resolveTS(env, ctx, valueArr);
+    auto value = resolveTSImpl(env, ctx, valueArr);
 
     if (wrapper.exists(s_optional_shape_field)) {
       value.set(s_optional_shape_field, make_tv<KindOfBoolean>(true));
     }
 
-    newfields.set(key, Variant(value));
+    newfields.set(key, Variant(maybeMakeBespoke(value)));
   }
 
   return newfields;
@@ -644,7 +658,7 @@ void copyTypeModifiers(const Array& from, Array& to) {
   if (from.exists(s_soft))     to.set(s_soft, make_tv<KindOfBoolean>(true));
 }
 
-Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
+Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   assertx(arr.exists(s_kind));
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());
@@ -711,21 +725,19 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       auto ts = tsAndPreresolved.first;
       auto const preresolved = tsAndPreresolved.second;
 
-      auto resolve = [&] (const ArrayData* generics = nullptr) {
+      auto resolve = [&] (ArrayData* generics = nullptr) {
         // If it's already resolved, don't do so again.
         if (preresolved) return ts;
         TSCtx newCtx;
         newCtx.name = clsName.get();
         newCtx.generics = generics;
-        auto resolved = resolveTS(env, newCtx, ts);
-        resolved.set(s_alias, Variant(clsName));
-        return resolved;
+        return resolveTS(env, newCtx, ts, clsName.get(), generics);
       };
 
       if (!ts.empty()) {
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;
-          folly::split(",", ts[s_typevars].asCStrRef().data(), typevars);
+          folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
           ts.remove(s_typevars);
 
           auto generic_types = resolveGenerics(env, ctx, arr);
@@ -738,7 +750,6 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           }
           auto generics = newarr.toArray();
           ts = resolve(generics.get());
-          ts.set(s_typevar_types, Variant(generics));
         } else {
           ts = resolve();
         }
@@ -872,6 +883,15 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   return newarr;
 }
 
+Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
+    StringData* alias, ArrayData* typevarTypes) {
+  auto ts = resolveTSImpl(env, ctx, arr);
+  if (alias) ts.set(s_alias, Variant(alias));
+  if (typevarTypes) ts.set(s_typevar_types, Variant(typevarTypes));
+
+  return maybeMakeBespoke(ts);
+}
+
 } // anonymous namespace
 
 std::string xhpNameFromTS(const Array& arr) {
@@ -915,8 +935,7 @@ Array TypeStructure::resolve(const String& aliasName,
   TSCtx ctx;
   ctx.name = aliasName.get();
   ctx.generics = generics.get();
-  auto resolved = resolveTS(env, ctx, arr);
-  resolved.set(s_alias, Variant(aliasName));
+  auto resolved = resolveTS(env, ctx, arr, aliasName.get());
   persistent = env.persistent;
   return resolved;
 }

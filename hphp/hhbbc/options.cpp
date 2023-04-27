@@ -20,10 +20,15 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
+#include "hphp/runtime/vm/repo-global-data.h"
+
+#include "hphp/hhbbc/hhbbc.h"
+
 #include "hphp/util/address-range.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::HHBBC {
@@ -99,7 +104,7 @@ void profile_memory(const char* what, const char* when,
   jemalloc_pprof_dump(name, true);
 }
 
-void summarize_memory(StructuredLogEntry& sample) {
+void summarize_memory(StructuredLogEntry* sample) {
   std::string phase, lowPhase;
   int64_t usageMb;
   size_t lowMb, sstrMb;
@@ -115,18 +120,31 @@ void summarize_memory(StructuredLogEntry& sample) {
     sstrMb = s_maxSStringMb;
   }
 
-  Logger::Info("%s", folly::sformat(
-    "Max RSS at {}: {} Mb", phase, usageMb
-  ).c_str());
-  Logger::Info("%s", folly::sformat(
-    "Max low-mem at {}: {} Mb [{} Mb sstrings]", lowPhase, lowMb, sstrMb
-  ).c_str());
+  Logger::FInfo("Max RSS at {}: {} Mb", phase, usageMb);
+  Logger::FInfo(
+    "Max low-mem at {}: {} Mb [{} Mb sstrings]",
+    lowPhase, lowMb, sstrMb
+  );
 
-  sample.setStr("max_rss_phase", phase);
-  sample.setInt("max_rss", usageMb << 20);
-  sample.setStr("max_lowmem_phase", lowPhase);
-  sample.setInt("max_lowmem", lowMb << 20);
-  sample.setInt("max_sstr", sstrMb << 20);
+  if (sample) {
+    sample->setStr("hhbbc_max_rss_phase", phase);
+    sample->setInt("hhbbc_max_rss_bytes", usageMb << 20);
+    sample->setStr("hhbbc_max_lowmem_phase", lowPhase);
+    sample->setInt("hhbbc_max_lowmem_bytes", lowMb << 20);
+    sample->setInt("hhbbc_max_sstr_bytes", sstrMb << 20);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Config Config::get(RepoGlobalData gd) {
+  Config c;
+  c.o = options;
+  c.o.SourceRootForFileBC = gd.SourceRootForFileBC;
+  c.gd = std::move(gd);
+  // Keep things deterministic
+  c.gd.Signature = 0;
+  return c;
 }
 
 //////////////////////////////////////////////////////////////////////

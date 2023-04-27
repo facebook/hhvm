@@ -1,0 +1,140 @@
+{
+  "pools": {
+    "A": {
+      "keep_routing_prefix": true,
+      "servers": [ "localhost:12345" ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [ "/a/a/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": "/a/b/",
+        "ensure_key_prefix": "foo:"
+      }
+    },
+    {
+      "aliases": [ "/b/c/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "ensure_key_prefix": "foo:"
+      }
+    },
+    {
+      "aliases": [ "/c/d/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": ""
+      }
+    },
+    {
+      "aliases": [ "/d/e/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": "",
+        "ensure_key_prefix": ""
+      }
+    },
+    {
+      "aliases": [ "/e/f/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "ensure_key_prefix": "bar:",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/f/g/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "ensure_key_prefix": "bar:",
+        "modify_inplace": false
+      }
+    },
+    {
+      "aliases": [ "/g/h/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": "/a/b/",
+        "ensure_key_prefix": "bar:",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/h/i/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": "",
+        "ensure_key_prefix": "bar:",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/i/j/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_routing_prefix": "",
+        "ensure_key_prefix": "",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/d/w/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_key_suffix": ":bar"
+      }
+    },
+    {
+      "aliases": [ "/e/w/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_key_suffix": "foo",
+        "ensure_key_prefix": "bar:",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/f/w/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "set_key_suffix": "foo",
+        "ensure_key_prefix": "bar:",
+        "set_routing_prefix": "",
+        "modify_inplace": true
+      }
+    },
+    {
+      "aliases": [ "/j/k/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "ensure_key_prefix": "bar.",
+        "replace_key_prefix": "foo."
+      }
+    },
+    {
+      "aliases": [ "/j/l/" ],
+      "route": {
+        "type": "ModifyKeyRoute",
+        "target": "PoolRoute|A",
+        "ensure_key_prefix": "bar.",
+        "set_key_suffix": "moot",
+        "replace_key_prefix": "foo."
+      }
+    }
+  ]
+}

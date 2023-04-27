@@ -1,0 +1,6 @@
+File "lint_internal_class.php--use.php", line 7, characters 8-10:
+This is a classname of an `internal` class. Internal classnames are dangerous because they are effectively raw strings. Please avoid them, or make sure that they are never used outside of the module. (Lint[5649])
+File "lint_internal_class.php--use.php", line 8, characters 8-13:
+This is a classname of an `internal` class. Internal classnames are dangerous because they are effectively raw strings. Please avoid them, or make sure that they are never used outside of the module. (Lint[5649])
+File "lint_internal_class.php--use.php", line 14, characters 10-15:
+This is a classname of an `internal` class. Internal classnames are dangerous because they are effectively raw strings. Please avoid them, or make sure that they are never used outside of the module. (Lint[5649])

@@ -129,6 +129,7 @@ struct Vunit;
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
+  O(restoreripm, Inone, U(s), Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(target), U(args), Dn)\
   O(callphpfe, I(target), U(args), Dn)\
@@ -172,7 +173,7 @@ struct Vunit;
   O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(btrq, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(btrq, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))    \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -855,6 +856,12 @@ struct syncvmrettype { Vreg type; };
 struct phplogue { Vreg fp; };
 
 /*
+ * Restore the value stored at `s` into the CPU's expected location
+ * for the return address prior to a function return.
+ */
+struct restoreripm { Vptr s; };
+
+/*
  * Load fp[m_sfp] into rvmfp() and return to m_savedRip on `fp'.
  *
  * If `noframe' is set, rvmfp() is not changed.
@@ -895,9 +902,10 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 /*
  * Resume execution in the middle of a TC function.
  *
- * This must set up the native stack in the same way as a phplogue{} would,
- * before transferring control to `target'.  Before resumetc{} is executed,
- * the native stack will always be set up like this:
+ * This must set up the native stack in the same way as a phplogue{}
+ * would, before transferring control to `target'.  In architectures where
+ * calls push the return address on the stack, the native stack will
+ * always be set up like this before resumetc{} is executed:
  *
  *    +-----------------------+   <- 16-byte alignment
  *    |   <8 bytes of junk>   |
@@ -906,7 +914,8 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  * i.e., the native stack pointer will be misaligned coming in (but must, of
  * course, be aliged once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
- * recommended, in order to take advantage of return branch predictions.
+ * recommended, in order to take advantage of return branch predictions.  This
+ * is not required though.
  *
  * `exittc' is the address to resume execution at after returning from the TC.
  */
@@ -919,11 +928,13 @@ struct resumetc { Vreg64 target; TCA exittc; RegSet args; };
 struct inittc {};
 
 /*
- * Pop the address of enterTCExit off the stack, and return to it.
+ * Transfer control to enterTCExit stub.  Whether this is implemented via
+ * a return or a jump instruction is up to the target, but leavetc and
+ * resumetc must agree on the approach.
  *
  * Used to relinquish control to the async scheduler from an async function.
  */
-struct leavetc { RegSet args; };
+struct leavetc { RegSet args; TCA exittc; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Exception intrinsics.

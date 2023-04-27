@@ -1,8 +1,6 @@
 HHVM_DEFINE_EXTENSION("xml"
   SOURCES
     ext_xml.cpp
-  HEADERS
-    ext_xml.h
   SYSTEMLIB
     ext_xml.php
   DEPENDS

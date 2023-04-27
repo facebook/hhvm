@@ -1,0 +1,188 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;",
+  "includes": {
+    "refid": "detail_2Compare_8h",
+    "local": "no",
+    "text_html": "Compare.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename Adapter"
+    },
+    {
+      "type_html": "typename Tag"
+    }
+  ],
+  "types": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1a493ad2ddc626a308e3f55d596f4d521c",
+      "prot": "public",
+      "type_html": "type::adapted&lt;Adapter, Tag&gt;",
+      "definition_html": "using apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::adapted_tag =  type::adapted&lt;Adapter, Tag&gt;",
+      "argsstring_html": "",
+      "name_html": "adapted_tag",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "line": "529",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "bodystart": "529",
+        "bodyend": "-1"
+      },
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1acb2b1050d5df1b28cc39660bbf34f34a",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T1"
+        },
+        {
+          "type_html": "typename T2",
+          "defval_html": "T1"
+        }
+      ],
+      "type_html": "constexpr bool",
+      "definition_html": "constexpr bool apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+      "argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const T1 &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const T2 &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "line": "532",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "bodystart": "532",
+        "bodyend": "534"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T1, typename T2 = T1&gt;\nconstexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
+        "simple_raw": "template <typename T1, typename T2 = T1>\nconstexpr bool operator()(const T1& lhs, const T2& rhs) const",
+        "detailed_html": "template &lt;typename T1, typename T2 = T1&gt;\ninline constexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
+        "detailed_raw": "template <typename T1, typename T2 = T1>\ninline constexpr bool operator()(const T1& lhs, const T2& rhs) const",
+        "original_definition_html": "constexpr bool apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+        "original_argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+    "line": "528",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+    "bodystart": "528",
+    "bodyend": "535"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;"
+  ],
+  "enums": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename Adapter,\n  typename Tag\n> struct EqualTo< type::adapted< Adapter, Tag > >;",
+  "declaration_html": "template &lt;\n  typename Adapter,\n  typename Tag\n&gt; struct EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1acb2b1050d5df1b28cc39660bbf34f34a",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T1"
+                },
+                {
+                  "type_html": "typename T2",
+                  "defval_html": "T1"
+                }
+              ],
+              "type_html": "constexpr bool",
+              "definition_html": "constexpr bool apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+              "argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const T1 &amp;",
+                  "declname_html": "lhs"
+                },
+                {
+                  "type_html": "const T2 &amp;",
+                  "declname_html": "rhs"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+                "line": "532",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+                "bodystart": "532",
+                "bodyend": "534"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T1, typename T2 = T1&gt;\nconstexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
+                "simple_raw": "template <typename T1, typename T2 = T1>\nconstexpr bool operator()(const T1& lhs, const T2& rhs) const",
+                "detailed_html": "template &lt;typename T1, typename T2 = T1&gt;\ninline constexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
+                "detailed_raw": "template <typename T1, typename T2 = T1>\ninline constexpr bool operator()(const T1& lhs, const T2& rhs) const",
+                "original_definition_html": "constexpr bool apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+                "original_argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::EqualTo&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()"
+            }
+          ],
+          "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

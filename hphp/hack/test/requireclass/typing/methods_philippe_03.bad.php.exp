@@ -1,0 +1,6 @@
+File "methods_philippe_03.bad.php", line 23, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "methods_philippe_03.bad.php", line 23, characters 19-21:
+  Too few arguments (required 2 but got 1)
+  File "methods_philippe_03.bad.php", line 14, characters 19-21:
+  Because of this definition

@@ -1,0 +1,61 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator+=",
+  "compoundname_html": "apache::thrift::op::detail::NumberPatch::operator+=",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch_1a0026350e029ab40529b327919d74e0cc",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        }
+      ],
+      "type_html": "<code>NumberPatch</code> &amp;",
+      "definition_html": "NumberPatch&amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator+=",
+      "argsstring_html": "(U &amp;&amp;val)",
+      "name_html": "operator+=",
+      "param": [
+        {
+          "type_html": "U &amp;&amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "169",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "169",
+        "bodyend": "172"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator+=(U&amp;&amp; val)",
+        "simple_raw": "template <typename U>\nNumberPatch& operator+=(U&& val)",
+        "detailed_html": "template &lt;typename U&gt;\ninline NumberPatch&amp; operator+=(U&amp;&amp; val)",
+        "detailed_raw": "template <typename U>\ninline NumberPatch& operator+=(U&& val)",
+        "original_definition_html": "NumberPatch&amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator+=",
+        "original_argsstring_html": "(U &amp;&amp;val)"
+      },
+      "description": {
+        "brief_html": "<p>Increases the value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch",
+      "compoundname_html": "apache::thrift::op::detail::NumberPatch::operator+="
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
+  "minprot": "public",
+  "displayname_html": "operator+=",
+  "brief_html": "<p>Increases the value. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign"
+}

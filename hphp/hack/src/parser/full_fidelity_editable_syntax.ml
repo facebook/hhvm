@@ -25,7 +25,7 @@ module SyntaxWithToken = Full_fidelity_syntax.WithToken (Token)
  **)
 
 module Value = struct
-  type t = NoValue [@@deriving show, eq]
+  type t = NoValue [@@deriving show, eq, sexp_of]
 
   let to_json _value = Hh_json.(JSON_Object [])
 end
@@ -102,18 +102,18 @@ let is_in_body node position =
   aux parents
 
 (* This function takes a parse tree and renders it in the GraphViz DOT
-language; this is a small domain-specific language for visualizing graphs.
-You can use www.webgraphviz.com to render it in a browser, or the "dot"
-command line tool to turn DOT text into image files.
+   language; this is a small domain-specific language for visualizing graphs.
+   You can use www.webgraphviz.com to render it in a browser, or the "dot"
+   command line tool to turn DOT text into image files.
 
-Edge labels can make the graph hard to read, so they can be enabled or
-disabled as you like.
+   Edge labels can make the graph hard to read, so they can be enabled or
+   disabled as you like.
 
-Use hh_parse --full-fidelity-dot or --full-fidelity-dot-edges to parse
-a Hack file and display it in DOT form.
+   Use hh_parse --full-fidelity-dot or --full-fidelity-dot-edges to parse
+   a Hack file and display it in DOT form.
 
-TODO: There's nothing here that's unique to editable trees; this could
-be auto-generated as part of full_fidelity_syntax.ml.
+   TODO: There's nothing here that's unique to editable trees; this could
+   be auto-generated as part of full_fidelity_syntax.ml.
 *)
 let to_dot node with_labels =
   (* returns new current_id, accumulator *)
@@ -166,7 +166,5 @@ let to_json ?with_value:_ ?ignore_missing:_ node =
     [("parse_tree", tree); ("version", Hh_json.JSON_String version)]
 
 let rust_parse _ _ = failwith "not implemented"
-
-let rust_parse_with_verify_sc _ _ = failwith "not implemented"
 
 let rust_parser_errors _ _ _ = failwith "not implemented"

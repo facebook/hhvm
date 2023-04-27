@@ -21,9 +21,36 @@
 
 namespace HPHP {
 
-struct APCNamedEntity {
-  explicit APCNamedEntity(const Func* func)
-    : m_entity(func->getNamedEntity())
+struct APCNamedClass {
+  explicit APCNamedClass(const Class* cls)
+    : m_entity(cls->preClass()->namedType())
+    , m_name(cls->name())
+    , m_handle(APCKind::ClassEntity, kInvalidDataType)
+  {
+    assertx(!cls->isPersistent());
+  }
+
+  static const APCNamedClass* fromHandle(const APCHandle* handle) {
+    return reinterpret_cast<const APCNamedClass*>(
+      intptr_t(handle) - offsetof(APCNamedClass, m_handle)
+    );
+  }
+  APCHandle* getHandle() { return &m_handle; }
+  Variant getEntityOrNull() const {
+    assertx(m_handle.kind() == APCKind::ClassEntity);
+    auto const f = Class::load(m_entity, m_name);
+    return f ? Variant{f} : Variant{Variant::NullInit{}};
+  }
+
+private:
+  LowPtr<const NamedType> m_entity;
+  LowPtr<const StringData> m_name;
+  APCHandle m_handle;
+};
+
+struct APCNamedFunc {
+  explicit APCNamedFunc(const Func* func)
+    : m_entity(func->getNamedFunc())
     , m_name(func->name())
     , m_handle(APCKind::FuncEntity, kInvalidDataType)
   {
@@ -31,34 +58,20 @@ struct APCNamedEntity {
     assertx(!func->isPersistent());
   }
 
-  explicit APCNamedEntity(const Class* cls)
-    : m_entity(cls->preClass()->namedEntity())
-    , m_name(cls->name())
-    , m_handle(APCKind::ClassEntity, kInvalidDataType)
-  {
-    assertx(!cls->isPersistent());
-  }
-
-  static const APCNamedEntity* fromHandle(const APCHandle* handle) {
-    return reinterpret_cast<const APCNamedEntity*>(
-      intptr_t(handle) - offsetof(APCNamedEntity, m_handle)
+  static const APCNamedFunc* fromHandle(const APCHandle* handle) {
+    return reinterpret_cast<const APCNamedFunc*>(
+      intptr_t(handle) - offsetof(APCNamedFunc, m_handle)
     );
   }
   APCHandle* getHandle() { return &m_handle; }
   Variant getEntityOrNull() const {
-    assertx(m_handle.kind() == APCKind::FuncEntity ||
-            m_handle.kind() == APCKind::ClassEntity);
-    if (m_handle.kind() == APCKind::FuncEntity) {
-      auto const f = Func::load(m_entity, m_name);
-      return f ? Variant{f} : Variant{Variant::NullInit{}};
-    } else {
-      auto const f = Class::load(m_entity, m_name);
-      return f ? Variant{f} : Variant{Variant::NullInit{}};
-    }
+    assertx(m_handle.kind() == APCKind::FuncEntity);
+    auto const f = Func::load(m_entity, m_name);
+    return f ? Variant{f} : Variant{Variant::NullInit{}};
   }
 
 private:
-  LowPtr<const NamedEntity> m_entity;
+  LowPtr<const NamedFunc> m_entity;
   LowPtr<const StringData> m_name;
   APCHandle m_handle;
 };

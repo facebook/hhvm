@@ -187,7 +187,7 @@ struct HotCache {
    * Else, returns false, leaves 'value' unchanged, but fills 'idx' with
    * information about the failure to be passed to 'store'.
    */
-  bool get(const StringData* key, Variant& value, Idx& idx) const;
+  bool get(const StringData* key, Variant& value, Idx& idx, bool pure) const;
 
   /*
    * Try to add or update an entry (key, svar), if they both are eligible
@@ -220,8 +220,12 @@ struct HotCache {
   struct EqualityTester {
     bool operator()(const char* a, const StringData* b) const {
       // AtomicHashArray magic keys are < 0; valid pointers are > 0 and aligned.
+#if !FOLLY_SANITIZE
       return reinterpret_cast<intptr_t>(a) > 0 &&
         wordsame(a, b->data(), b->size() + 1);
+#else
+      return reinterpret_cast<intptr_t>(a) > 0 && !strcmp(a, b->data());
+#endif
     }
   };
   struct Hasher {
@@ -317,7 +321,7 @@ bool HotCache::hasValue(const StringData* key) const {
          it->second.load(std::memory_order_relaxed) != nullptr;
 }
 
-bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
+bool HotCache::get(const StringData* key, Variant& value, Idx& idx, bool pure) const {
   if (!maybeHotFast(key)) {
     idx = StoreValue::kHotCacheKnownIneligible;
     return false;
@@ -328,7 +332,7 @@ bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
     return false;
   }
   if (auto const handle = it->second.load(std::memory_order_relaxed)) {
-    value = handle->toLocal();
+    value = handle->toLocal(pure);
     return true;
   }
   idx = it.getIndex();
@@ -534,8 +538,9 @@ void ConcurrentTableSharedStore::purgeDeferred(req::vector<StringData*>&& keys) 
 
 bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
                                                   APCHandle* svar,
-                                                  const Variant& value) {
-  auto const pair = APCObject::MakeAPCObject(svar, value);
+                                                  const Variant& value,
+                                                  bool pure) {
+  auto const pair = APCObject::MakeAPCObject(svar, value, pure);
   if (!pair.handle) return false;
   auto const converted = pair.handle;
   auto const size = pair.size;
@@ -638,10 +643,10 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
   return false;
 }
 
-bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
+bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool pure) {
   FTRACE(3, "Get {}\n", keyStr.get()->data());
   HotCache::Idx hotIdx;
-  if (s_hotCache.get(keyStr.get(), value, hotIdx)) return true;
+  if (s_hotCache.get(keyStr.get(), value, hotIdx, pure)) return true;
   const StoreValue *sval;
   APCHandle *svar = nullptr;
   SharedMutex::ReadHolder l(m_lock);
@@ -664,7 +669,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
       svar->referenceNonRoot();
       needsToLocal = promoteObj = true;
     } else if (svar->isTypedValue()) {
-      value = svar->toLocal();
+      value = svar->toLocal(pure);
     } else {
       svar->referenceNonRoot();
       needsToLocal = true;
@@ -683,9 +688,9 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   if (needsToLocal) {
     SCOPE_EXIT { svar->unreferenceNonRoot(); };
 
-    l.unlock(); // toLocal() may reenter the autolaoder
-    value = svar->toLocal();
-    if (promoteObj) handlePromoteObj(keyStr, svar, value);
+    l.unlock(); // toLocal() may reenter the autoloader
+    value = svar->toLocal(pure);
+    if (promoteObj) handlePromoteObj(keyStr, svar, value, pure);
   }
 
   return true;
@@ -718,8 +723,11 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   assertx(sval.hotIndex == StoreValue::kHotCacheUnknown);
   s_hotCache.clearValue(sval);
 
-  auto const ret = oldHandle->toLocal().toInt64() + step;
-  auto const pair = APCHandle::Create(VarNR{ret}, APCHandleLevel::Outer, false);
+  auto const ret = oldHandle->toLocal(true /* pure irrelevant for int */).toInt64() + step;
+  auto const pair = APCHandle::Create(VarNR{ret},
+                                      APCHandleLevel::Outer,
+                                      false,
+                                      true /* pure doesn't matter for ints */);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.rawExpire() == 0, false);
@@ -745,11 +753,12 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   auto const oldHandle = sval.data();
   if ((oldHandle->kind() != APCKind::Int &&
        oldHandle->kind() != APCKind::Double) ||
-      oldHandle->toLocal().toInt64() != old) {
+      oldHandle->toLocal(false /* no pure cas variant */).toInt64() != old) {
     return false;
   }
 
-  auto const pair = APCHandle::Create(VarNR{val}, APCHandleLevel::Outer, false);
+  auto const pair = APCHandle::Create(VarNR{val}, APCHandleLevel::Outer,
+                                      false, false /* no pure cas variant */);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.rawExpire() == 0, false);
@@ -832,29 +841,32 @@ bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
 bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
-                                     int64_t bump_ttl) {
-  return storeImpl(key, val, max_ttl, bump_ttl, false);
+                                     int64_t bump_ttl,
+                                     bool pure) {
+  return storeImpl(key, val, max_ttl, bump_ttl, false, pure);
 }
 
 void ConcurrentTableSharedStore::set(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
-                                     int64_t bump_ttl) {
-  storeImpl(key, val, max_ttl, bump_ttl, true);
+                                     int64_t bump_ttl,
+                                     bool pure) {
+  storeImpl(key, val, max_ttl, bump_ttl, true, pure);
 }
 
 bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            const Variant& value,
                                            int64_t max_ttl,
                                            int64_t bump_ttl,
-                                           bool overwrite) {
+                                           bool overwrite,
+                                           bool pure) {
   StoreValue *sval;
   auto keyLen = key.size();
 
   // We need to do this before we acquire any locks. Serializing objects can
   // reenter the VM (__sleep) and certain operations may cause us to throw for
   // types that cannot be serialized to APC.
-  auto svar = APCHandle::Create(value, APCHandleLevel::Outer, false);
+  auto svar = APCHandle::Create(value, APCHandleLevel::Outer, false, pure);
 
   char* const kcp = strdup(key.data());
 
@@ -993,7 +1005,7 @@ static void dumpOneKeyAndValue(std::ostream &out,
     out << " #### ";
     if (!sval->expired()) {
       out << "INMEMORY ";
-      auto const value = sval->data()->toLocal();
+      auto const value = sval->data()->toLocal(false);
       try {
         auto valS = internal_serialize(value);
         out << valS.toCppString();
@@ -1110,9 +1122,9 @@ ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
   return samples;
 }
 
-std::vector<EntryInfo>
+std::vector<std::tuple<EntryInfo, uint32_t>>
 ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
-  std::vector<EntryInfo> samples;
+  std::vector<std::tuple<EntryInfo, uint32_t>> samples;
   if (bytes == 0) return samples;
   int64_t next = folly::Random::rand32(bytes);
   int64_t curr_time = time(nullptr);
@@ -1122,13 +1134,18 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
     auto const key = iter.first;
     StoreValue& value = iter.second;
     if (value.expired()) continue;
-    int size = sizeof(StoreValue) + strlen(key) + 1;
-    size += value.dataSize;
-    next -= size;
-    if (next < 0) {
-      samples.push_back(makeEntryInfo(key, &value, curr_time));
-      next += ((-next) / bytes + 1) * bytes;
-      assertx(next > 0);
+    int size = sizeof(StoreValue) + strlen(key) + 1 + value.dataSize;
+
+    if (size > next) {
+      uint32_t left = size - next;
+      uint32_t weight = ((left - 1) / bytes) + 1;
+
+      samples.push_back(std::make_tuple(makeEntryInfo(key, &value, curr_time),
+                                        weight));
+
+      next = weight * bytes - left;
+    } else {
+      next -= size;
     }
   }
   return samples;

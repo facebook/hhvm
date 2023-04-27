@@ -85,14 +85,14 @@ if (1)
 else    // this else does go with the outer if
     echo "Path 3\n";
 
-// test elseif
+// test else if
 
 $a = 10;
 if ($a < 0)
     ; // ...
-elseif ($a == 0)
+else if ($a == 0)
     ; // ...
-elseif ($a < 10)
+else if ($a < 10)
     ; // ...
 else
     ; // ...

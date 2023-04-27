@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function method_exists_basic_002(): void {
 echo " ---(Internal classes, using string class name)---\n";
 echo "Does Exception::getMessage exist? ";
 var_dump(method_exists("Exception", "getMessage"));

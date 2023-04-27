@@ -1,0 +1,12 @@
+File "gconst.php--gconst.hhi", line 7, characters 7-9:
+Wrong type hint (Typing[4110])
+  File "gconst.php--gconst.hhi", line 7, characters 7-9:
+  Expected `int`
+  File "gconst.php--gconst.hhi", line 7, characters 17-23:
+  But got `string`
+File "gconst.php--gconst.php", line 14, characters 12-13:
+Invalid argument (Typing[4110])
+  File "gconst.php--gconst.php", line 5, characters 3-8:
+  Expected `string`
+  File "gconst.php--gconst.hhi", line 4, characters 7-9:
+  But got `int`

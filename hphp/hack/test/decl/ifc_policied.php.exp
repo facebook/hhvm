@@ -5,12 +5,13 @@
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-13], "\\Policy"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -18,7 +19,8 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([5:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -38,7 +40,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {Test} }));
+                 ft_ifc_decl = FDPolicied {Test}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([10:19-20], "g");
@@ -55,7 +57,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {Public} }));
+                  ft_ifc_decl = FDPolicied {Public}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([13:19-27], "implicit");
@@ -72,7 +74,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {} }));
+                  ft_ifc_decl = FDPolicied {}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([16:19-29], "inferflows");
@@ -89,7 +91,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDInferFlows }));
+                  ft_ifc_decl = FDInferFlowsft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([19:19-28], "classname");
@@ -106,7 +108,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {\Policy} }));
+                  ft_ifc_decl = FDPolicied {\Policy}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([22:19-27], "defaults");
@@ -123,7 +125,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([24:19-28], "with_args");
@@ -165,7 +167,9 @@
                                 ~support_dynamic_type:false
                                 ~readonly_this:false ~is_memoized:false
                                 ~variadic:false);
-                              ft_ifc_decl = FDPolicied {PUBLIC} }))
+                              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
+                                                               None
+                              }))
                         };
                       fp_flags =
                       (make_fp_flags ~accept_disposable:false
@@ -183,11 +187,11 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\inferflows",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -204,9 +208,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDInferFlows }));
+              ft_ifc_decl = FDInferFlowsft_cross_package = None }));
         fe_pos = [31:10-20]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]
-
-They matched!

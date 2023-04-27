@@ -68,8 +68,8 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
-State entry_state(const Index& index, const Context& ctx,
-                  const KnownArgs* knownArgs) {
+Optional<State> entry_state(const Index& index, CollectedInfo& collect,
+                            const Context& ctx, const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisType = [&] {
@@ -78,10 +78,9 @@ State entry_state(const Index& index, const Context& ctx,
       if (knownArgs->context.subtypeOf(BOptObj)) {
         return setctx(knownArgs->context);
       }
-      if (is_specialized_cls(knownArgs->context)) {
-        auto const dcls = dcls_of(knownArgs->context);
-        return setctx(dcls.type == DCls::Exact ?
-                      objExact(dcls.cls) : subObj(dcls.cls));
+      if (knownArgs->context.subtypeOf(BCls) &&
+          is_specialized_cls(knownArgs->context)) {
+        return setctx(toobj(knownArgs->context));
       }
     }
     auto const maybeThisType = thisType(index, ctx);
@@ -102,25 +101,45 @@ State entry_state(const Index& index, const Context& ctx,
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = vec(std::move(pack));
         } else {
-          ret.locals[locId] = unctx(knownArgs->args[locId]);
+          auto [ty, _, effectFree] =
+            index.verify_param_type(ctx, locId, unctx(knownArgs->args[locId]));
+
+          if (ty.subtypeOf(BBottom)) {
+            ret.unreachable = true;
+            if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+              return std::nullopt;
+            }
+          }
+
+          ret.locals[locId] = std::move(ty);
+          collect.effectFree &= effectFree;
         }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
       continue;
     }
-    auto const& param = ctx.func->params[locId];
-    if (ctx.func->isMemoizeImpl) {
-      auto const& constraint = param.typeConstraint;
-      if (constraint.hasConstraint() && !constraint.isTypeVar() &&
-          !constraint.isTypeConstant()) {
-        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
-        continue;
-      }
+
+    if (ctx.func->params[locId].isVariadic) {
+      ret.locals[locId] = TVec;
+      continue;
     }
+
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
-    ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TInitCell;
+
+    auto [ty, _, effectFree] =
+      index.verify_param_type(ctx, locId, TInitCell);
+
+    if (ty.subtypeOf(BBottom)) {
+      ret.unreachable = true;
+      if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+        return std::nullopt;
+      }
+    }
+
+    ret.locals[locId] = std::move(ty);
+    collect.effectFree &= effectFree;
   }
 
   // Closures have use vars, we need to look up their types from the index.
@@ -194,12 +213,14 @@ State entry_state(const Index& index, const Context& ctx,
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
                     FuncAnalysis& ai,
+                    CollectedInfo& collect,
                     const KnownArgs* knownArgs) {
   auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
 
-  auto const entryState = entry_state(index, ctx, knownArgs);
+  auto const entryState = entry_state(index, collect, ctx, knownArgs);
+  if (!entryState) return incompleteQ;
 
   if (knownArgs) {
     // When we have known args, we only need to add one of the entry points to
@@ -209,7 +230,8 @@ prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->args.size(); i < numParams; ++i) {
         auto const dv = ctx.func->params[i].dvEntryPoint;
         if (dv != NoBlockId) {
-          ai.bdata[dv].stateIn.copy_from(entryState);
+          ai.bdata[dv].stateIn.copy_from(*entryState);
+          ai.bdata[dv].stateIn.unreachable = false;
           incompleteQ.push(rpoId(ai, dv));
           return true;
         }
@@ -217,8 +239,8 @@ prepare_incompleteQ(const Index& index,
       return false;
     }();
 
-    if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
+    if (!useDvInit && !entryState->unreachable) {
+      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
       incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
@@ -228,7 +250,8 @@ prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     auto const dv = ctx.func->params[paramId].dvEntryPoint;
     if (dv != NoBlockId) {
-      ai.bdata[dv].stateIn.copy_from(entryState);
+      ai.bdata[dv].stateIn.copy_from(*entryState);
+      ai.bdata[dv].stateIn.unreachable = false;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv].stateIn.locals[locId] =
@@ -237,8 +260,10 @@ prepare_incompleteQ(const Index& index,
     }
   }
 
-  ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
-  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  if (!entryState->unreachable) {
+    ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
+    incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  }
 
   return incompleteQ;
 }
@@ -251,10 +276,9 @@ prepare_incompleteQ(const Index& index,
  * Note that in the interpreter code, ctx.func->cls is not
  * necessarily the same as ctx.cls because of closures.
  */
-AnalysisContext adjust_closure_context(AnalysisContext ctx) {
-  if (ctx.cls && ctx.cls->closureContextCls) {
-    ctx.cls = ctx.cls->closureContextCls;
-  }
+AnalysisContext adjust_closure_context(const Index& index,
+                                       AnalysisContext ctx) {
+  if (ctx.cls) ctx.cls = index.lookup_closure_context(*ctx.cls);
   return ctx;
 }
 
@@ -262,7 +286,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
                                 const AnalysisContext& ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
-  assertx(ctx.cls == adjust_closure_context(ctx).cls);
+  assertx(ctx.cls == adjust_closure_context(index, ctx).cls);
   auto ai = FuncAnalysis { ctx };
 
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
@@ -307,7 +331,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * back edges---when state merges cause a change to the block
    * stateIn, we will add it to this queue so it gets visited again.
    */
-  auto incompleteQ = prepare_incompleteQ(index, ai, knownArgs);
+  auto incompleteQ = prepare_incompleteQ(index, ai, collect, knownArgs);
 
   /*
    * There are potentially infinitely growing types when we're using union_of to
@@ -453,7 +477,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
       );
     }
     ret += sep + bsep;
-    folly::format(&ret, "Inferred return type: {}\n", show(ai.inferredReturn));
+    folly::format(
+      &ret,
+      "Inferred return type: {}{}\n",
+      show(ai.inferredReturn),
+      ai.effectFree ? " (effect-free)" : ""
+    );
     ret += bsep;
     return ret;
   }());
@@ -465,7 +494,7 @@ FuncAnalysis do_analyze(const Index& index,
                         ClassAnalysis* clsAnalysis,
                         const KnownArgs* knownArgs = nullptr,
                         CollectionOpts opts = CollectionOpts{}) {
-  auto const ctx = adjust_closure_context(inputCtx);
+  auto const ctx = adjust_closure_context(index, inputCtx);
   auto collect = CollectedInfo { index, ctx, clsAnalysis, opts };
 
   auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
@@ -603,8 +632,11 @@ FuncAnalysis analyze_func_inline(const Index& index,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts) {
-  assertx(!ctx.func->isClosureBody);
-  auto const knownArgs = KnownArgs { thisType, args };
+  auto const knownArgs = KnownArgs {
+    ctx.func->isClosureBody ? TBottom : thisType,
+    args
+  };
+
   return do_analyze(index, ctx, nullptr, &knownArgs,
                     opts | CollectionOpts::Inlining);
 }
@@ -782,11 +814,11 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   // Build up the initial worklist:
   for (auto const& f : ctx.cls->methods) {
-    if (f->name->isame(s_86pinit.get()) ||
-        f->name->isame(s_86sinit.get()) ||
-        f->name->isame(s_86linit.get()) ||
-        f->name->isame(s_86cinit.get()) ||
-        f->name->isame(s_86reifiedinit.get())) {
+    if (f->name == s_86pinit.get() ||
+        f->name == s_86sinit.get() ||
+        f->name == s_86linit.get() ||
+        f->name == s_86cinit.get() ||
+        f->name == s_86reifiedinit.get()) {
       continue;
     }
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
@@ -815,7 +847,10 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     for (auto const m : *associatedMethods) {
       auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
       assertx(inserted);
-      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr, 0, 0});
+      funcMeta.emplace(
+        m,
+        FuncMeta{index.lookup_func_unit(*m), ctx.cls, nullptr, 0, 0}
+      );
     }
   }
 
@@ -878,8 +913,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
       auto& oldType = oldTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldType)) {
@@ -891,10 +924,11 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           results.inferredReturn = oldType;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldType)) {
+      } else if (!results.inferredReturn.moreRefined(oldType)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
         bail = true;
+        break;
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;
@@ -922,8 +956,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       assertx(returnTypeIt != work.returnTypes.end());
 
       auto& oldReturn = returnTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
@@ -936,10 +968,11 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           results.inferredReturn = oldReturn;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldReturn)) {
+      } else if (!results.inferredReturn.moreRefined(oldReturn)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
         bail = true;
+        break;
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;

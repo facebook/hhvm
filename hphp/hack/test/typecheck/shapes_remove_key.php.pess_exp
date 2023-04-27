@@ -1,6 +1,0 @@
-File "shapes_remove_key.php.pess", line 14, characters 3-39:
-Invalid assignment (Typing[4110])
-  File "shapes_remove_key.php.pess", line 6, characters 38-39:
-  Expected `~[unresolved]`
-  File "shapes_remove_key.php.pess", line 14, characters 15-39:
-  But got `shape('a' => int, 'b' => int)`

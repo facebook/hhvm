@@ -4,7 +4,7 @@
 
 class Foo {
   public static async function bar(ExampleContext $_):
-    Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): void)>>
+    Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): void)>>>
   {
     throw new Exception();
   }

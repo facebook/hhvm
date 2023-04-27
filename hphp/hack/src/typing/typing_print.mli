@@ -25,9 +25,12 @@ val full_strip_ns : env -> Typing_defs.locl_ty -> string
 
 val full_strip_ns_i : env -> Typing_defs.internal_type -> string
 
-val full_strip_ns_decl : env -> Typing_defs.decl_ty -> string
+(* if fuel reaches 0, if msg = true, an error message is added to the
+   type representation. msg is true by default *)
+val full_strip_ns_decl : ?msg:bool -> env -> Typing_defs.decl_ty -> string
 
-val full_decl : TypecheckerOptions.t -> Typing_defs.decl_ty -> string
+val full_decl :
+  ?msg:bool -> TypecheckerOptions.t -> Typing_defs.decl_ty -> string
 
 val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
 
@@ -111,13 +114,12 @@ val coeffects : env -> Typing_defs.locl_ty -> string
 val to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
-manipulate. Note that this function accesses the global state in
-`Decl_provider` to verify that certain type names exist. *)
+   manipulate. Note that this function accesses the global state in
+   `Decl_provider` to verify that certain type names exist. *)
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
   Provider_context.t ->
   Hh_json.json ->
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
-val set_deferred_member_inits :
-  (env -> Shallow_decl_defs.shallow_class -> SSet.t * SSet.t) -> unit
+val strip_ns : string -> string

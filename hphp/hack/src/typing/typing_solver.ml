@@ -15,7 +15,6 @@ module Reason = Typing_reason
 module Env = Typing_env
 module Inter = Typing_intersection
 module ITySet = Internal_type_set
-module Union = Typing_union
 module TL = Typing_logic
 module TUtils = Typing_utils
 module Utils = Typing_solver_utils
@@ -74,7 +73,6 @@ let rec freshen_inside_ty env ty =
   match ty_ with
   | Tany _
   | Tnonnull
-  | Terr
   | Tdynamic
   | Tprim _
   | Tneg _ ->
@@ -106,9 +104,9 @@ let rec freshen_inside_ty env ty =
     let (env, tyl) = List.map_env env tyl ~f:freshen_ty in
     (env, mk (r, Ttuple tyl))
   (* Shape data is covariant *)
-  | Tshape (shape_kind, fdm) ->
+  | Tshape (_, shape_kind, fdm) ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in
-    (env, mk (r, Tshape (shape_kind, fdm)))
+    (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
   (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
     let (env, ft_ret) = freshen_possibly_enforced_ty env ft.ft_ret in
@@ -118,6 +116,10 @@ let rec freshen_inside_ty env ty =
           (env, { p with fp_type }))
     in
     (env, mk (r, Tfun { ft with ft_ret; ft_params }))
+  | Tnewtype (name, _, ty)
+    when String.equal name Naming_special_names.Classes.cSupportDyn ->
+    let (env, ty) = freshen_inside_ty env ty in
+    (env, Typing_make_type.supportdyn r ty)
   | Tnewtype (name, tyl, ty) ->
     if List.is_empty tyl then
       default ()
@@ -153,7 +155,10 @@ let rec freshen_inside_ty env ty =
   | Tunapplied_alias _ -> default ()
 
 and freshen_ty env ty =
-  Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
+  if TUtils.is_tyvar_error env ty then
+    Env.fresh_type_error env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
+  else
+    Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
 
 and freshen_possibly_enforced_ty env ety =
   let (env, et_type) = freshen_ty env ety.et_type in
@@ -198,7 +203,9 @@ let bind env var (ty : locl_ty) =
    * nothing, as it will lead to type holes.
    *)
   let proj_ty_err_opt =
-    if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
+    if Typing_utils.is_tyvar_error env ty then
+      None
+    else if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
       let (_, ((proj_pos, tconst_name), _)) = SMap.choose tconsts
       and pos = Env.get_tyvar_pos env var in
       Some
@@ -329,44 +336,35 @@ let bind_to_upper_bound env r var upper_bounds =
 let ty_equal_shallow env ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (_env, ty2) = Env.expand_type env ty2 in
-  match (get_node ty1, get_node ty2) with
-  | (Tany _, Tany _)
-  | (Tnonnull, Tnonnull)
-  | (Terr, Terr)
-  | (Tdynamic, Tdynamic)
-  | (Ttuple _, Ttuple _) ->
+  if Typing_utils.is_tyvar_error env ty1 && Typing_utils.is_tyvar_error env ty2
+  then
     true
-  | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
-  | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
-    String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
-  | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
-  | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
-    equal_shape_kind shape_kind1 shape_kind2
-    && List.equal
-         (fun (k1, v1) (k2, v2) ->
-           TShapeField.equal k1 k2 && Bool.equal v1.sft_optional v2.sft_optional)
-         (ShapeFieldMap.elements fdm1)
-         (ShapeFieldMap.elements fdm2)
-  | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2
-  | (Tdependent (dep1, _), Tdependent (dep2, _)) ->
-    equal_dependent_type dep1 dep2
-  | _ -> false
-
-let union_any_if_any_in_lower_bounds env ty lower_bounds =
-  let r = Reason.none in
-  let any = LoclType (mk (r, Typing_defs.make_tany ()))
-  and err = LoclType (MakeType.err r) in
-  let (env, ty) =
-    match ITySet.find_opt any lower_bounds with
-    | Some (LoclType any) -> Union.union env ty any
-    | _ -> (env, ty)
-  in
-  let (env, ty) =
-    match ITySet.find_opt err lower_bounds with
-    | Some (LoclType err) -> Union.union env ty err
-    | _ -> (env, ty)
-  in
-  (env, ty)
+  else
+    match (get_node ty1, get_node ty2) with
+    | (Tany _, Tany _)
+    | (Tnonnull, Tnonnull)
+    | (Tdynamic, Tdynamic)
+    | (Ttuple _, Ttuple _) ->
+      true
+    | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
+    | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
+      String.equal (snd x_sub) (snd x_super)
+      && equal_exact exact_sub exact_super
+    | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
+    | (Tshape (_, shape_kind1, fdm1), Tshape (_, shape_kind2, fdm2)) ->
+      Bool.equal
+        (Typing_utils.is_nothing env shape_kind1)
+        (Typing_utils.is_nothing env shape_kind2)
+      && List.equal
+           (fun (k1, v1) (k2, v2) ->
+             TShapeField.equal k1 k2
+             && Bool.equal v1.sft_optional v2.sft_optional)
+           (ShapeFieldMap.elements fdm1)
+           (ShapeFieldMap.elements fdm2)
+    | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2
+    | (Tdependent (dep1, _), Tdependent (dep2, _)) ->
+      equal_dependent_type dep1 dep2
+    | _ -> false
 
 let try_bind_to_equal_bound ~freshen env r var =
   if Env.tyvar_is_solved_or_skip_global env var then
@@ -374,24 +372,39 @@ let try_bind_to_equal_bound ~freshen env r var =
   else
     let old_env = env in
     let env = Utils.remove_tyvar_from_bounds env var in
-    let expand_all tyset =
-      ITySet.map
-        (fun ty ->
-          let (_, ty) = Env.expand_internal_type env ty in
-          ty)
+    let expand_all ~strip_supportdyn env tyset =
+      ITySet.fold
+        (fun ty (env, res, sd_res) ->
+          let (env, ty) = Env.expand_internal_type env ty in
+          match ty with
+          | LoclType ty when strip_supportdyn ->
+            let (_, env, stripped_ty) = Typing_utils.strip_supportdyn env ty in
+            ( env,
+              ITySet.add (LoclType stripped_ty) res,
+              ITySet.add (LoclType ty) sd_res )
+          | _ -> (env, ITySet.add ty res, sd_res))
         tyset
+        (env, ITySet.empty, ITySet.empty)
     in
-    let lower_bounds = expand_all (Env.get_tyvar_lower_bounds env var) in
-    let upper_bounds = expand_all (Env.get_tyvar_upper_bounds env var) in
+    let (env, lower_bounds, sd_lower_bounds) =
+      expand_all ~strip_supportdyn:true env (Env.get_tyvar_lower_bounds env var)
+    in
+    let (env, upper_bounds, _) =
+      expand_all
+        ~strip_supportdyn:false
+        env
+        (Env.get_tyvar_upper_bounds env var)
+    in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
-    let any = LoclType (mk (Reason.none, Typing_defs.make_tany ()))
-    and err = LoclType (MakeType.err Reason.none) in
-    let equal_bounds = equal_bounds |> ITySet.remove any |> ITySet.remove err in
+    let equal_bounds =
+      if ITySet.is_empty equal_bounds then
+        ITySet.inter sd_lower_bounds upper_bounds
+      else
+        equal_bounds
+    in
     let (env, ty_err_opt) =
       match ITySet.choose_opt equal_bounds with
-      | Some (LoclType ty) ->
-        let (env, ty) = union_any_if_any_in_lower_bounds env ty lower_bounds in
-        bind env var ty
+      | Some (LoclType ty) -> bind env var ty
       | Some (ConstraintType _)
       | None ->
         if not freshen then
@@ -435,9 +448,6 @@ let try_bind_to_equal_bound ~freshen env r var =
             let (env, ty_sup_err_opt) =
               Typing_utils.sub_type env var_ty ty on_error
             in
-            let (env, ty) =
-              union_any_if_any_in_lower_bounds env ty lower_bounds
-            in
             let (env, bind_err_opt) = bind env var ty in
             let ty_err_opt =
               Typing_error.multiple_opt
@@ -451,11 +461,11 @@ let try_bind_to_equal_bound ~freshen env r var =
     (Env.log_env_change "bind_to_equal_bound" old_env env, ty_err_opt)
 
 (* Always solve a type variable.
-We are here because we eagerly solve a type variable to see
-whether certain operations are allowed on the type (e.g. a  method call).
-Therefore, we always force to the lower bounds (even contravariant variables),
-because it produces a "more specific" type, which is more likely to support
-the operation which we eagerly solved for in the first place.
+   We are here because we eagerly solve a type variable to see
+   whether certain operations are allowed on the type (e.g. a  method call).
+   Therefore, we always force to the lower bounds (even contravariant variables),
+   because it produces a "more specific" type, which is more likely to support
+   the operation which we eagerly solved for in the first place.
 *)
 let rec always_solve_tyvar_down ~freshen env r var =
   (* If there is a type that is both a lower and upper bound, force to that type *)
@@ -471,6 +481,21 @@ let rec always_solve_tyvar_down ~freshen env r var =
     in
     let (env, ty_err_opt2) =
       let lower_bounds = Env.get_tyvar_lower_bounds env var in
+      (* We cannot do more on (<expr#1> as C) than on simply C,
+       * so replace expression-dependent types with their bound.
+       * This avoids solving to a type so specific that it ends
+       * up hurting completeness. *)
+      let lower_bounds =
+        ITySet.map
+          (function
+            | LoclType lty as ity ->
+              let (_env, lty) = Env.expand_type env lty in
+              (match get_node lty with
+              | Tdependent (_, bnd) -> LoclType bnd
+              | _ -> ity)
+            | ity -> ity)
+          lower_bounds
+      in
       bind_to_lower_bound ~freshen env r var lower_bounds
     in
     let (env, ety) = Env.expand_var env r var in
@@ -636,8 +661,21 @@ let solve_all_unsolved_tyvars_gi env =
  *    vec<C> <: #1
  * will be solved by
  *    #1 := vec<#2>  where C <: #2
+ * The optional `default` parameter is used to solve a type variable
+ * if `widen_concrete_type` does not produce a result.
  *)
-let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
+let expand_type_and_solve
+    env ?default ?(freshen = true) ~description_of_expected p ty =
+  (* If we're checking an SDT method or function under dynamic assumptions,
+   * then attempt to solve to dynamic if we're left with a type variable *)
+  let default =
+    if Option.is_some default then
+      default
+    else if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
+      Some (MakeType.dynamic (Reason.Rwitness p))
+    else
+      None
+  in
   (* TODO: rather than writing to a ref cell from inside the `on_tyvar`
      function, modify `simplify_unions` to return the accumulated result
      from this function, if it is provided *)
@@ -656,25 +694,37 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
   in
   let (env', ety) = Env.expand_type env' ety in
   match (!vars_solved_to_nothing, get_node ety) with
-  | (_ :: _, Tunion []) ->
-    let env =
-      List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-          let ty_err =
-            Typing_error.(
-              primary
-              @@ Primary.Unknown_type
-                   {
-                     expected = description_of_expected;
-                     pos = p;
-                     reason = lazy (Reason.to_string "It is unknown" r);
-                   })
-          in
-          ty_errs := ty_err :: !ty_errs;
-          Env.set_tyvar_eager_solve_fail env v)
-    in
-    let ty_err_opt = Typing_error.multiple_opt !ty_errs in
-    ( (env, ty_err_opt),
-      TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
+  | (_ :: _, Tunion []) -> begin
+    match default with
+    | Some default_ty ->
+      let res =
+        Typing_utils.sub_type env ety default_ty
+        @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+      in
+      (res, default_ty)
+    | None ->
+      let env =
+        List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
+            match r with
+            | Reason.Rtype_variable_error _ -> env
+            | _ ->
+              let ty_err =
+                Typing_error.(
+                  primary
+                  @@ Primary.Unknown_type
+                       {
+                         expected = description_of_expected;
+                         pos = p;
+                         reason = lazy (Reason.to_string "It is unknown" r);
+                       })
+              in
+              ty_errs := ty_err :: !ty_errs;
+              Env.set_tyvar_eager_solve_fail env v)
+      in
+      let ty_err_opt = Typing_error.multiple_opt !ty_errs in
+      let (env, ty) = Env.fresh_type_error env p in
+      ((env, ty_err_opt), ty)
+  end
   | _ ->
     let ty_err_opt = Typing_error.multiple_opt !ty_errs in
     ((env', ty_err_opt), ety)
@@ -714,6 +764,11 @@ let widen env widen_concrete_type ty =
      *)
     | (_, Tgeneric ("this", [])) -> ((env, None), ty)
     (* For other abstract types, just widen to the bound, if possible *)
+    | (r, Tnewtype (name, [ty], _))
+      when String.equal name Naming_special_names.Classes.cSupportDyn ->
+      let ((env, err), ty) = widen env ty in
+      let (env, ty) = TUtils.make_supportdyn r env ty in
+      ((env, err), ty)
     | (_, Tdependent (_, ty))
     | (_, Tnewtype (_, _, ty)) ->
       widen env ty
@@ -767,6 +822,16 @@ let expand_type_and_narrow
     widen_concrete_type
     p
     ty =
+  (* If we're checking an SDT method or function under dynamic assumptions,
+   * then attempt to solve to dynamic if we're left with a type variable *)
+  let default =
+    if Option.is_some default then
+      default
+    else if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
+      Some (MakeType.dynamic (Reason.Rwitness p))
+    else
+      None
+  in
   let ((env, ty_err_opt), ty) =
     let ((env, ty_err_opt1), ty) = expand_type_and_solve_eq env ty in
     (* Deconstruct the type into union elements (if it's a union). For variables,

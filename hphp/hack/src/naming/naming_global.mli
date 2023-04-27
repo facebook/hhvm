@@ -40,6 +40,9 @@ val remove_decls :
   modules:string list ->
   unit
 
+(* Same as remove_decls but extracts definition identifiers from the file_info *)
+val remove_decls_using_file_info : Provider_backend.t -> FileInfo.t -> unit
+
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider
 (which is a wrapper for the reverse naming table). It handles "name already bound" errors as follows:
 - If any symbol from the FileInfo.t is already defined in a different file (with or without the

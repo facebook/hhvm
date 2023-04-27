@@ -1,5 +1,5 @@
-File "expected_sd_function.bad.php", line 15, characters 16-133:
-Function  `;anonymous` is not dynamically callable. (Typing[4402])
+File "expected_sd_function.bad.php", line 18, characters 13-14:
+Function  `;anonymous` is not dynamically callable. (Typing[4110])
   File "expected_sd_function.bad.php", line 18, characters 13-14:
   Invalid argument
   File "expected_sd_function.bad.php", line 12, characters 18-18:

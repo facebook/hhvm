@@ -6,10 +6,11 @@
  */
 
 class F {
-  public function g() {
+  public function g():dynamic {
+    return 3;
   }
 }
 
-function f() {
+function f():dynamic {
   return (new F())->g();
 }

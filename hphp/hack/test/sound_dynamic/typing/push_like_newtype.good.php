@@ -8,9 +8,9 @@ newtype N<T> as C = C;
 
 function makeN<T>(T $_):N<T> { return new C(); }
 
-newtype NC<+T as dynamic> as C = C;
+newtype NC<+T as supportdyn<mixed>> as C = C;
 
-function makeNC<T as dynamic>(T $_):NC<T> { return new C(); }
+function makeNC<T as supportdyn<mixed>>(T $_):NC<T> { return new C(); }
 
 ////file2.php
 <?hh
@@ -27,18 +27,7 @@ function return_n_direct(N<~int> $n):~N<int> {
 }
 
 function return_n():~N<int> {
-  // Currently, can't just write return makeN(get());
-  //
-  // Return constraint:
-  //   N<#1> <: ~N<int>
-  // iff #1=int \/ #1=~int (push likes)
-  //
-  // Parameter constraint:
-  //   ~int <: #1
-  //
-  // Problem is that we solve #1=int, and then we're stuck with ~int <: int
-  $x = makeN(get());
-  return $x;
+  return makeN(get());
 }
 
 function return_nc_direct(NC<~int> $n):~NC<int> {

@@ -1,6 +1,6 @@
 File "traversable_foreach3.php", line 13, characters 12-13:
 Invalid `foreach` (Typing[4110])
-File "traversable_foreach3.php", line 13, characters 12-13:
-Expected `KeyedTraversable<[unresolved], [unresolved]>` because this is used in a `foreach` statement
-File "traversable_foreach3.php", line 12, characters 15-33:
-But got `Traversable<string>`
+  File "traversable_foreach3.php", line 13, characters 12-13:
+  Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement
+  File "traversable_foreach3.php", line 12, characters 15-33:
+  But got `Traversable<string>`

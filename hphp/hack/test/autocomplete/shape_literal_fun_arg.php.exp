@@ -1,2 +1,6 @@
-foo literal
-foobar literal
+foo
+  INSERT foo
+  literal
+foobar
+  INSERT foobar
+  literal

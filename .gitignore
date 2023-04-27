@@ -6,7 +6,6 @@
 .mkdir
 .DS_Store
 hphp.log
-/build
 /_build
 hphp/hack/_build/
 hphp/hack/cargo_home/

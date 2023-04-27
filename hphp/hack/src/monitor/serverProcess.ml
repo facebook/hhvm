@@ -67,7 +67,7 @@ type server_process =
    * logic; so the only safe thing to do is enter the Died_config_changed
    * state until the *next* client that connects.
    *
-   * These transitions are centralized in ServerMonitor.kill_and_maybe_restart_server
+   * These transitions are centralized in MonitorMain.kill_and_maybe_restart_server
    * Don't do them elsewhere or you will screw it up.
    *
    * State transition looks sort of like:

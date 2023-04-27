@@ -50,6 +50,12 @@ val get_origin_class_name :
 val get_child_classes_files :
   Provider_context.t -> string -> Relative_path.Set.t
 
+val get_files_for_descendants_and_dependents_of_members_in_descendants :
+  Provider_context.t ->
+  class_name:string ->
+  Typing_deps.Dep.Member.t list ->
+  Relative_path.Set.t * Relative_path.Set.t
+
 val get_dependent_files_function :
   Provider_context.t ->
   MultiWorker.worker list option ->

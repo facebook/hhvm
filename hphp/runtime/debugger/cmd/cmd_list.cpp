@@ -195,8 +195,8 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
     funcInfo = funcInfo[s_methods].toArray()[key].toArray();
   }
   String file = funcInfo[s_file].toString();
-  int line1 = funcInfo[s_line1].toInt32();
-  int line2 = funcInfo[s_line2].toInt32();
+  auto line1 = (int)funcInfo[s_line1].toInt64();
+  auto line2 = (int)funcInfo[s_line2].toInt64();
   int line = line1 ? line1 : line2;
   if (file.empty() || !line) return false;
   client.setListLocation(file.data(), line - 1, false);

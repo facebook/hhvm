@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-20], "\\TestImmVector"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+      c_vars = [];
       c_methods =
       [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -20,23 +20,23 @@
          m_ret = ((void), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\k");
        fd_fun =
        { f_span = [7:1-39]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\k"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([7:12-26], (Happly (([7:12-21], "\\HH\\ImmVector"), [([7:22-25], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$k"; 
@@ -46,17 +46,16 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-24], "\\call_immvector");
        fd_fun =
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_name = ([9:10-24], "\\call_immvector"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([10:3-19], (Happly (([10:3-12], "\\HH\\ImmVector"), [([10:13-18], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:20-22]; param_name = "$k"; 
@@ -74,8 +73,9 @@
              ([15:3-30],
               (Expr
                  ((TestImmVector), [15:3-29],
-                  (Binop ((Eq None), ((TestImmVector), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestImmVector), [15:10-29], (New (((TestImmVector), [15:14-27], (CI ([15:14-27], "\\TestImmVector"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestImmVector), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestImmVector), [15:10-29], (New (((TestImmVector), [15:14-27], (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -87,18 +87,16 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-29], "\\call_immvector_cast");
        fd_fun =
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
-         f_name = ([21:10-29], "\\call_immvector_cast"); f_tparams = []; 
-         f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([22:3-19], (Happly (([22:3-12], "\\HH\\ImmVector"), [([22:13-18], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:20-22]; param_name = "$k"; 
@@ -125,8 +123,9 @@
              ([27:3-30],
               (Expr
                  ((TestImmVector), [27:3-29],
-                  (Binop ((Eq None), ((TestImmVector), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestImmVector), [27:10-29], (New (((TestImmVector), [27:14-27], (CI ([27:14-27], "\\TestImmVector"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestImmVector), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestImmVector), [27:10-29], (New (((TestImmVector), [27:14-27], (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))) }))));
              ([30:3-71],
               (Expr
                  ((void), [30:3-70],
@@ -147,4 +146,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -105,6 +105,8 @@ constexpr const bool using_coros = true;
 // run on their assigned executor.
 #define HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR \
   (co_await folly::coro::co_reschedule_on_current_executor)
+// Throw a folly::OperationCancelled if this coroutine has been cancelled
+#define HPHP_CORO_SAFE_POINT (co_await folly::coro::co_safe_point)
 
 // The actual arguments of these can be complex, so we just perfect
 // forward everything rather than replicating it here.
@@ -130,6 +132,13 @@ auto collect(Args&&... args) {
 template <typename T>
 auto collectRange(std::vector<T>&& ts) {
   return folly::coro::collectAllRange(std::move(ts));
+}
+
+// Like collectRange, but will only run up to a fixed number of tasks
+// simultaneously.
+template <typename T>
+auto collectRangeWindowed(std::vector<T>&& ts, std::size_t window) {
+  return folly::coro::collectAllWindowed(std::move(ts), window);
 }
 
 // Given a callable and a set of arguments, store the arguments, then
@@ -183,6 +192,9 @@ template <typename T> struct AsyncValue {
   }
 
   ~AsyncValue() {
+    // NB: It might seem useful here to access the m_try after
+    // waiting, to ensure that any exception is rethrown. However, we
+    // can't throw from a dtor anyways, so its pointless to check.
     folly::coro::blockingWait(m_scope.joinAsync());
   }
 
@@ -211,6 +223,15 @@ private:
   folly::coro::AsyncScope m_scope;
 };
 
+// Coro aware semaphore (runs a different task when blocks)
+struct Semaphore {
+  explicit Semaphore(uint32_t tokens) : m_sem{tokens} {}
+  void signal() { m_sem.signal(); }
+  Task<void> wait() { return m_sem.co_wait(); }
+private:
+  folly::fibers::Semaphore m_sem;
+};
+
 // Allows you to run coroutines asynchronously. Assign an executor to
 // a Task, then add it to the AsyncScope. The coroutine will start
 // running and will be automatically cleaned up when done. Since you
@@ -226,6 +247,8 @@ using AsyncScope = folly::coro::AsyncScope;
 //////////////////////////////////////////////////////////////////////
 
 #else
+
+#include <folly/synchronization/LifoSem.h>
 
 // Emulated coroutines. The coroutine is just the value itself. The
 // value is calculated eagerly when the coroutine is created (so
@@ -281,6 +304,7 @@ template <typename T> using TaskWithExecutor = detail::DummyTask<T>;
 // executor" if coroutines don't actually exist.
 #define HPHP_CORO_CURRENT_EXECUTOR ((folly::Executor*)nullptr)
 #define HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR
+#define HPHP_CORO_SAFE_POINT
 
 template <typename T>
 auto wait(Task<T>&& t) { return std::move(t).take(); }
@@ -314,6 +338,11 @@ auto collectRange(std::vector<Task<T>>&& ts) {
 
 inline auto collectRange(std::vector<Task<void>>&&) {
   return Task<void>{};
+}
+
+template <typename T>
+auto collectRangeWindowed(std::vector<Task<T>>&& ts, std::size_t) {
+  return collectRange(std::move(ts));
 }
 
 template <typename F, typename... Args> auto invoke(F&& f, Args&&... args) {
@@ -359,6 +388,14 @@ private:
 struct AsyncScope {
   void add(TaskWithExecutor<void>&&) {}
   Task<void> joinAsync() { return Task<void>{}; }
+};
+
+struct Semaphore {
+  explicit Semaphore(uint32_t tokens) : m_sem{tokens} {}
+  void signal() { m_sem.post(); }
+  Task<void> wait() { m_sem.wait(); return Task<void>{}; }
+private:
+  folly::LifoSem m_sem;
 };
 
 //////////////////////////////////////////////////////////////////////

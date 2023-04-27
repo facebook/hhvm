@@ -68,6 +68,7 @@ TRACE_SET_MOD(hhir);
 #define DLastKey          HasDest
 #define DLoggingArrLike   HasDest
 #define DStructDict    HasDest
+#define DTypeStructElem   HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -80,12 +81,13 @@ TRACE_SET_MOD(hhir);
 #define DMemoKey       HasDest
 #define DLvalOfPtr     HasDest
 #define DTypeCnsClsName HasDest
-#define DVerifyParamFail HasDest
+#define DVerifyCoerce  HasDest
 #define DPropLval      HasDest
 #define DElemLval      HasDest
 #define DElemLvalPos   HasDest
 #define DCOW           HasDest
 #define DStructTypeBound HasDest
+#define DSpecialIC     HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -145,6 +147,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetLastElem
 #undef DLoggingArrLike
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DAllocObj
 #undef DMulti
@@ -158,12 +161,13 @@ OpInfo g_opInfo[] = {
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
-#undef DVerifyParamFail
+#undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
+#undef DSpecialIC
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -245,7 +249,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPrepareChild:
   case AKExistsObj:
   case AllocObj:
-  case AllocObjReified:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:
@@ -264,6 +267,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CGetPropQ:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
+  case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
@@ -296,7 +300,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvObjToStr:
   case ConvObjToVec:
   case Count:
-  case CreateAAWH:
+  case CreateCCWH:
   case DictGet:
   case DictSet:
   case ElemDictD:
@@ -307,6 +311,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrLike:
   case EqObj:
   case GetMemoKey:
+  case GetClsRGProp:
   case GtArrLike:
   case GteArrLike:
   case GteObj:
@@ -333,6 +338,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdCoeffectFunParamNaive:
   case LdFunc:
   case LdFuncCached:
   case LdGblAddr:
@@ -380,6 +386,9 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseImplicitContextStateInvalid:
+  case RaiseModuleBoundaryViolation:
+  case RaiseModulePropertyViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -431,8 +440,10 @@ bool opcodeMayRaise(Opcode opc) {
   case UnsetElem:
   case UnsetProp:
   case VectorSet:
+  case VerifyParam:
   case VerifyParamCallable:
   case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
   case VerifyProp:
@@ -444,8 +455,10 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyPropFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
     return true;
@@ -453,7 +466,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AbsDbl:
   case AddDbl:
   case AddInt:
-  case AddIntO:
   case AddNewElemVec:
   case AddOffset:
   case AdvanceDictPtrIter:
@@ -487,6 +499,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case CallViolatesModuleBoundary:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
@@ -514,6 +527,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckVecBounds:
   case ChrInt:
   case ClassHasAttr:
+  case ClassHasReifiedGenerics:
   case CmpBool:
   case CmpDbl:
   case CmpInt:
@@ -553,6 +567,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CreateAGen:
   case CreateAGWH:
   case CreateGen:
+  case CreateSpecialImplicitContext:
   case CreateSSWH:
   case DbgAssertFunc:
   case DbgAssertRefCount:
@@ -571,12 +586,14 @@ bool opcodeMayRaise(Opcode opc) {
   case DefFP:
   case DefFrameRelSP:
   case DefFuncEntryFP:
+  case DefFuncEntryPrevFP:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
   case DefLabel:
   case DefRegSP:
+  case DeserializeLazyProp:
   case DictFirst:
   case DictFirstKey:
   case DictGetK:
@@ -597,6 +614,8 @@ bool opcodeMayRaise(Opcode opc) {
   case EndCatch:
   case EndGuards:
   case EndInlining:
+  case EnterFrame:
+  case EnterInlineFrame:
   case EnterPrologue:
   case EnterTCUnwind:
   case EnterTranslation:
@@ -617,6 +636,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Floor:
   case FuncCred:
   case FuncHasAttr:
+  case FuncHasReifiedGenerics:
   case GenericRetDecRefs:
   case LoadBCSP:
   case GetDictPtrIter:
@@ -632,7 +652,7 @@ bool opcodeMayRaise(Opcode opc) {
   case GteStr:
   case GtInt:
   case GtStr:
-  case HasReifiedGenerics:
+  case HasReifiedParent:
   case HasToString:
   case IncCallCounter:
   case IncProfCounter:
@@ -690,6 +710,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCachedSafe:
   case LdClsCns:
   case LdClsCnsVecLen:
+  case LdClsCtxCns:
   case LdClsFromClsMeth:
   case LdClsFromRClsMeth:
   case LdClsInitData:
@@ -723,6 +744,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdGenericsFromRFunc:
   case LdIfaceMethod:
   case LdImplicitContext:
+  case LdImplicitContextMemoKey:
   case LdInitPropAddr:
   case LdInitRDSAddr:
   case LdIterBase:
@@ -764,6 +786,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:
@@ -835,6 +859,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileArrayCOW:
   case ProfileArrLikeProps:
   case ProfileCall:
+  case ProfileCoeffectFunParam:
   case ProfileDecRef:
   case ProfileDictAccess:
   case ProfileGlobal:
@@ -871,7 +896,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StFrameFunc:
   case StFrameMeta:
   case StImplicitContext:
-  case StImplicitContextWH:
   case StIterBase:
   case StIterEnd:
   case StIterPos:
@@ -890,6 +914,9 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictSlot:
   case StructDictTypeBoundCheck:
   case StructDictUnset:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case StMROProp:
   case StPtrAt:
   case StTypeAt:
@@ -900,7 +927,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StTVInRDS:
   case SubDbl:
   case SubInt:
-  case SubIntO:
   case Unreachable:
   case UnwindCheckSideExit:
   case VecFirst:

@@ -12,9 +12,9 @@ import attr
 
 from .fanout_test_driver import (
     Binaries,
-    run_scenario_saved_state_init,
     run_scenario_incremental_no_old_decls,
     run_scenario_incremental_with_old_decls,
+    run_scenario_saved_state_init,
 )
 from .fanout_test_parser import FanoutTest
 

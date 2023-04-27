@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -200,8 +201,9 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      if (translator->sk == SrcKey{func, 0, SrcKey::FuncEntryTag{}} &&
-          func->numRequiredParams() == func->numNonVariadicParams()) {
+      auto const numParams = func->numNonVariadicParams();
+      if (translator->sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}} &&
+          func->numRequiredParams() == numParams) {
         func->setFuncEntry(tca);
       }
     } else {
@@ -633,6 +635,9 @@ void RegionTranslator::resetCached() {
 }
 
 void RegionTranslator::gen() {
+  // Per-request hardware counters (such as instructions, load/store) should not
+  // include the JIT.
+  UNUSED HardwareCounter::ExcludeScope stopCount;
   auto const srcRec = srcDB().find(sk);
   auto const emitInterpStub = [&] {
     FTRACE(1, "emitting dispatchBB interp request for failed "
@@ -670,7 +675,7 @@ void RegionTranslator::gen() {
   if (!region) return fail();
 
   INC_TPC(translate);
-  Timer timer(Timer::mcg_translate);
+  Timer timer(Timer::mcg_translate, nullptr);
 
   tracing::Block _{"translate", [&] {
 		return traceProps(sk.func())
@@ -742,8 +747,9 @@ void RegionTranslator::publishMetaImpl() {
   recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
 
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize(),
-      std::move(annotations), region, fixups.bcMap, hasLoop};
+              loc.coldCodeStart(), loc.coldCodeSize(),
+              loc.frozenCodeStart(), loc.frozenCodeSize(),
+              std::move(annotations), region, fixups.bcMap, hasLoop};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {

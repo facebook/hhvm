@@ -13,7 +13,7 @@ module Test = Integration_test_base
 
 let foo_contents =
   "<?hh
-function h($b): int {
+function h(dynamic $b): int {
   $v = vec[1];
   $a = $v[0];
   return $a + $b;

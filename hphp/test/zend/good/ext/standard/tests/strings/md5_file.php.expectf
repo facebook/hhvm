@@ -15,12 +15,12 @@ Warning: md5_file() expects at most 2 parameters, 3 given in %s/md5_file.php on 
 string(32) "d41d8cd98f00b204e9800998ecf8427e"
 
 *** Raw Binary Output for Empty file as Argument ***
-string(16) "%r\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98\xec\xf8%rB~"
+string(16) "%h{d4}%h{1d}%h{8c}%h{d9}%h{8f}%h{00}%h{b2}%h{04}%h{e9}%h{80}%t%h{98}%h{ec}%h{f8}B~"
 
 *** Hexadecimal Output for a valid file with some contents ***
 string(32) "7f28ec647825e2a70bf67778472cd4a2"
 
 *** Raw Binary Output for a valid file with some contents ***
-string(16) "%r\x7f%r(%r\xec%rdx%%r\xe2\xa7\x0b\xf6%rwxG,%r\xd4\xa2%r"
+string(16) "%h{7f}(%h{ec}dx%%%h{e2}%h{a7}%h{0b}%h{f6}wxG,%h{d4}%h{a2}"
 
 Done

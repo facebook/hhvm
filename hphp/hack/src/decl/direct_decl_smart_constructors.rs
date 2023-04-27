@@ -2,91 +2,144 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod direct_decl_smart_constructors_generated;
 
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
+use arena_collections::AssocListMut;
+use arena_collections::List;
+use arena_collections::MultiSetMut;
 use bstr::BStr;
-use bumpalo::{
-    collections::{String, Vec},
-    Bump,
-};
-
+use bumpalo::collections as bump;
+use bumpalo::Bump;
+use flatten_smart_constructors::FlattenSmartConstructors;
+use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
-use naming_special_names_rust as naming_special_names;
-
-use arena_collections::{AssocListMut, List, MultiSetMut};
-use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
-use oxidized_by_ref::{
-    aast,
-    ast_defs::{
-        Abstraction, Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance,
-        XhpEnumValue,
-    },
-    decl_parser_options::DeclParserOptions,
-    direct_decl_parser::Decls,
-    file_info::Mode,
-    method_flags::MethodFlags,
-    namespace_env::Env as NamespaceEnv,
-    nast,
-    pos::Pos,
-    prop_flags::PropFlags,
-    relative_path::RelativePath,
-    s_map::SMap,
-    shallow_decl_defs::{
-        self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
-    },
-    shape_map::ShapeField,
-    t_shape_map::TShapeField,
-    typing_defs::{
-        self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
-        Enforcement, EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
-        ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
-        TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint,
-    },
-    typing_defs_flags::{FunParamFlags, FunTypeFlags},
-    typing_reason::Reason,
-    xhp_attribute,
-};
-use parser_core_types::{
-    compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
-    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
-};
-
-mod direct_decl_smart_constructors_generated;
+use naming_special_names_rust as naming_special_names;
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized_by_ref::aast;
+use oxidized_by_ref::ast_defs::Abstraction;
+use oxidized_by_ref::ast_defs::Bop;
+use oxidized_by_ref::ast_defs::ClassishKind;
+use oxidized_by_ref::ast_defs::ConstraintKind;
+use oxidized_by_ref::ast_defs::FunKind;
+use oxidized_by_ref::ast_defs::Id;
+use oxidized_by_ref::ast_defs::ShapeFieldName;
+use oxidized_by_ref::ast_defs::Uop;
+use oxidized_by_ref::ast_defs::Variance;
+use oxidized_by_ref::ast_defs::XhpEnumValue;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::file_info::Mode;
+use oxidized_by_ref::method_flags::MethodFlags;
+use oxidized_by_ref::namespace_env::Env as NamespaceEnv;
+use oxidized_by_ref::nast;
+use oxidized_by_ref::pos::Pos;
+use oxidized_by_ref::prop_flags::PropFlags;
+use oxidized_by_ref::relative_path::RelativePath;
+use oxidized_by_ref::s_map::SMap;
+use oxidized_by_ref::shallow_decl_defs;
+use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::ShallowClassConst;
+use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
+use oxidized_by_ref::shallow_decl_defs::ShallowProp;
+use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst;
+use oxidized_by_ref::shape_map::ShapeField;
+use oxidized_by_ref::t_shape_map::TShapeField;
+use oxidized_by_ref::typing_defs;
+use oxidized_by_ref::typing_defs::AbstractTypeconst;
+use oxidized_by_ref::typing_defs::Capability::*;
+use oxidized_by_ref::typing_defs::ClassConstKind;
+use oxidized_by_ref::typing_defs::ClassRefinement;
+use oxidized_by_ref::typing_defs::ConcreteTypeconst;
+use oxidized_by_ref::typing_defs::ConstDecl;
+use oxidized_by_ref::typing_defs::Enforcement;
+use oxidized_by_ref::typing_defs::EnumType;
+use oxidized_by_ref::typing_defs::FunElt;
+use oxidized_by_ref::typing_defs::FunImplicitParams;
+use oxidized_by_ref::typing_defs::FunParam;
+use oxidized_by_ref::typing_defs::FunParams;
+use oxidized_by_ref::typing_defs::FunType;
+use oxidized_by_ref::typing_defs::IfcFunDecl;
+use oxidized_by_ref::typing_defs::ParamMode;
+use oxidized_by_ref::typing_defs::PosByteString;
+use oxidized_by_ref::typing_defs::PosId;
+use oxidized_by_ref::typing_defs::PosString;
+use oxidized_by_ref::typing_defs::PossiblyEnforcedTy;
+use oxidized_by_ref::typing_defs::RefinedConst;
+use oxidized_by_ref::typing_defs::RefinedConstBound;
+use oxidized_by_ref::typing_defs::RefinedConstBounds;
+use oxidized_by_ref::typing_defs::ShapeFieldType;
+use oxidized_by_ref::typing_defs::TaccessType;
+use oxidized_by_ref::typing_defs::Tparam;
+use oxidized_by_ref::typing_defs::TshapeFieldName;
+use oxidized_by_ref::typing_defs::Ty;
+use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::TypeOrigin;
+use oxidized_by_ref::typing_defs::Typeconst;
+use oxidized_by_ref::typing_defs::TypedefType;
+use oxidized_by_ref::typing_defs::WhereConstraint;
+use oxidized_by_ref::typing_defs_flags::FunParamFlags;
+use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
+use oxidized_by_ref::typing_reason::Reason;
+use oxidized_by_ref::xhp_attribute;
+use parser_core_types::compact_token::CompactToken;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use parser_core_types::token_kind::TokenKind;
 
 type SK = SyntaxKind;
 
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 'a>> {
+pub struct DirectDeclSmartConstructors<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
+    state: Rc<Impl<'a, 'o, 't, S>>,
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
+    previous_token_kind: TokenKind,
+}
 
-    pub source_text: IndexedSourceText<'text>,
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> std::ops::Deref
+    for DirectDeclSmartConstructors<'a, 'o, 't, S>
+{
+    type Target = Impl<'a, 'o, 't, S>;
+    fn deref(&self) -> &Self::Target {
+        &self.state
+    }
+}
+
+#[derive(Clone)]
+pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
+    pub source_text: IndexedSourceText<'t>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
-    // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
-    const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
-    opts: &'a DeclParserOptions<'a>,
+
+    // const_refs will accumulate all scope-resolution-expressions it
+    // encounters while it's "Some"
+    const_refs: Option<HashSet<typing_defs::ClassConstRef<'a>>>,
+
+    opts: &'o DeclParserOptions,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
-    type_parameters: Rc<Vec<'a, SSet<'a>>>,
+    type_parameters: Rc<Vec<SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
-    previous_token_kind: TokenKind,
+    under_no_auto_dynamic: bool,
+    inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
     module: Option<Id<'a>>,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     pub fn new(
-        opts: &'a DeclParserOptions<'a>,
-        src: &SourceText<'text>,
+        opts: &'o DeclParserOptions,
+        src: &SourceText<'t>,
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
@@ -96,41 +149,39 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
-        let path = String::from_str_in(path.path_str(), arena).into_bump_str();
+        let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
         let filename = RelativePath::make(prefix, path);
         Self {
-            token_factory: SimpleTokenFactoryImpl::new(),
-
-            source_text,
-            arena,
-            opts,
-            filename: arena.alloc(filename),
-            file_mode,
-            decls: Decls::empty(),
-            file_attributes: List::empty(),
-            const_refs: None,
-            namespace_builder: Rc::new(NamespaceBuilder::new_in(
-                opts.auto_namespace_map,
-                opts.disable_xhp_element_mangling,
-                elaborate_xhp_namespaces_for_facts,
+            state: Rc::new(Impl {
+                source_text,
                 arena,
-            )),
-            classish_name_builder: ClassishNameBuilder::new(),
-            type_parameters: Rc::new(Vec::new_in(arena)),
+                filename: arena.alloc(filename),
+                file_mode,
+                decls: Decls::empty(),
+                file_attributes: List::empty(),
+                const_refs: None,
+                namespace_builder: Rc::new(NamespaceBuilder::new_in(
+                    &opts.auto_namespace_map,
+                    opts.disable_xhp_element_mangling,
+                    elaborate_xhp_namespaces_for_facts,
+                    arena,
+                )),
+                opts,
+                classish_name_builder: ClassishNameBuilder::new(),
+                type_parameters: Rc::new(Vec::new()),
+                source_text_allocator,
+                retain_or_omit_user_attributes_for_facts,
+                under_no_auto_dynamic: false,
+                inside_no_auto_dynamic_class: false,
+                module: None,
+            }),
+            token_factory: SimpleTokenFactoryImpl::new(),
             // EndOfFile is used here as a None value (signifying "beginning of
             // file") to save space. There is no legitimate circumstance where
             // we would parse a token and the previous token kind would be
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
-            source_text_allocator,
-            retain_or_omit_user_attributes_for_facts,
-            module: None,
         }
-    }
-
-    #[inline(always)]
-    pub fn alloc<T>(&self, val: T) -> &'a T {
-        self.arena.alloc(val)
     }
 
     fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
@@ -158,7 +209,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             return Id(pos, qualified_name);
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
-        let mut qualified_name = String::with_capacity_in(len, self.arena);
+        let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
         for part in parts {
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(name),
@@ -178,6 +229,86 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         debug_assert_eq!(len, qualified_name.len());
         debug_assert_eq!(len, qualified_name.capacity());
         Id(pos, qualified_name.into_bump_str())
+    }
+
+    fn module_name_string_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> &'a str {
+        // Count the length of the qualified name, so that we can allocate
+        // exactly the right amount of space for it in our arena.
+        let mut len = 0;
+        for part in parts {
+            match part {
+                Node::Name(&(name, _)) => len += name.len(),
+                Node::ListItem(&(Node::Name(&(name, _)), _dot)) => len += name.len() + 1,
+                _ => {}
+            }
+        }
+        // If there's no internal trivia, then we can just reference the
+        // qualified name in the original source text instead of copying it.
+        let source_len = pos.end_offset() - pos.start_offset();
+        if source_len == len {
+            return self.str_from_utf8(self.source_text_at_pos(pos));
+        }
+        // Allocate `len` bytes and fill them with the fully qualified name.
+        let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
+        for part in parts {
+            match part {
+                Node::Name(&(name, _pos)) => qualified_name.push_str(name),
+                &Node::ListItem(&(Node::Name(&(name, _)), _)) => {
+                    qualified_name.push_str(name);
+                    qualified_name.push_str(".");
+                }
+                _ => {}
+            }
+        }
+        debug_assert_eq!(len, qualified_name.len());
+        debug_assert_eq!(len, qualified_name.capacity());
+        qualified_name.into_bump_str()
+    }
+
+    fn module_reference_from_parts(
+        &self,
+        module_name: &'a str,
+        parts: &'a [Node<'a>],
+    ) -> shallow_decl_defs::ModuleReference<'a> {
+        let mut s = bump::String::new_in(self.arena);
+
+        for part in parts.iter() {
+            match part {
+                Node::ListItem(&(item, _)) => {
+                    if !s.is_empty() {
+                        s += ".";
+                    }
+
+                    match item {
+                        Node::Name(&(n, _)) => {
+                            if n == "self" {
+                                s += module_name;
+                            } else {
+                                s += n;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                Node::Token(t) => match t.kind() {
+                    TokenKind::Global => {
+                        return shallow_decl_defs::ModuleReference::MRGlobal;
+                    }
+                    TokenKind::Star => {
+                        return shallow_decl_defs::ModuleReference::MRPrefix(s.into_bump_str());
+                    }
+                    _ => {}
+                },
+                Node::Name(&(n, _)) => {
+                    if !s.is_empty() {
+                        s += ".";
+                    }
+                    s += n;
+                }
+                _ => {}
+            }
+        }
+        shallow_decl_defs::ModuleReference::MRExact(s.into_bump_str())
     }
 
     /// If the given node is an identifier, XHP name, or qualified name,
@@ -250,60 +381,48 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         )
     }
 
-    fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
-        let mut result = match iter.size_hint().1 {
-            Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.arena),
-            None => Vec::new_in(self.arena),
-        };
-        for item in iter {
-            result.push(item);
-        }
-        result.into_bump_slice()
-    }
-
     fn start_accumulating_const_refs(&mut self) {
-        self.const_refs = Some(arena_collections::set::Set::empty());
+        let this = Rc::make_mut(&mut self.state);
+        this.const_refs = Some(Default::default());
     }
 
     fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
+        let this = Rc::make_mut(&mut self.state);
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).
-        // TODO: Hack is the wrong place to detect circularity (because we can never do it completely soundly,
-        // and because it's a cross-body problem). The right place to do it is in a linter. All this should be
-        // removed from here and put into a linter.
-        if let Some(const_refs) = self.const_refs {
+        // TODO: Hack is the wrong place to detect circularity (because we can never do
+        // it completely soundly, and because it's a cross-body problem). The right place
+        // to do it is in a linter. All this should be removed from here and put into a linter.
+        if let Some(const_refs) = &mut this.const_refs {
             match class_id.2 {
                 nast::ClassId_::CI(sid) => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(
-                            typing_defs::ClassConstFrom::From(sid.1),
-                            value_id.1,
-                        ),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::From(sid.1),
+                        value_id.1,
                     ));
                 }
                 nast::ClassId_::CIself => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, value_id.1),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::Self_,
+                        value_id.1,
                     ));
                 }
-                // Not allowed
                 nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {
+                    // Not allowed
                 }
             }
         }
     }
 
     fn stop_accumulating_const_refs(&mut self) -> &'a [typing_defs::ClassConstRef<'a>] {
-        let const_refs = self.const_refs;
-        self.const_refs = None;
-        match const_refs {
+        let this = Rc::make_mut(&mut self.state);
+        match this.const_refs.take() {
             Some(const_refs) => {
-                let mut elements: Vec<'_, typing_defs::ClassConstRef<'_>> =
-                    bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
+                let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
+                    bumpalo::collections::Vec::with_capacity_in(const_refs.len(), self.arena);
                 elements.extend(const_refs.into_iter());
+                elements.sort_unstable();
                 elements.into_bump_slice()
             }
             None => &[],
@@ -311,46 +430,46 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 }
 
-pub trait SourceTextAllocator<'text, 'target>: Clone {
-    fn alloc(&self, text: &'text str) -> &'target str;
+pub trait SourceTextAllocator<'s, 'd>: Clone {
+    fn alloc(&self, text: &'s str) -> &'d str;
 }
 
 #[derive(Clone)]
 pub struct NoSourceTextAllocator;
 
-impl<'text> SourceTextAllocator<'text, 'text> for NoSourceTextAllocator {
+impl<'t> SourceTextAllocator<'t, 't> for NoSourceTextAllocator {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'text str {
+    fn alloc(&self, text: &'t str) -> &'t str {
         text
     }
 }
 
 #[derive(Clone)]
-pub struct ArenaSourceTextAllocator<'arena>(pub &'arena bumpalo::Bump);
+pub struct ArenaSourceTextAllocator<'a>(pub &'a bumpalo::Bump);
 
-impl<'text, 'arena> SourceTextAllocator<'text, 'arena> for ArenaSourceTextAllocator<'arena> {
+impl<'t, 'a> SourceTextAllocator<'t, 'a> for ArenaSourceTextAllocator<'a> {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'arena str {
+    fn alloc(&self, text: &'t str) -> &'a str {
         self.0.alloc_str(text)
     }
 }
 
 fn prefix_slash<'a>(arena: &'a Bump, name: &str) -> &'a str {
-    let mut s = String::with_capacity_in(1 + name.len(), arena);
+    let mut s = bump::String::with_capacity_in(1 + name.len(), arena);
     s.push('\\');
     s.push_str(name);
     s.into_bump_str()
 }
 
 fn prefix_colon<'a>(arena: &'a Bump, name: &str) -> &'a str {
-    let mut s = String::with_capacity_in(1 + name.len(), arena);
+    let mut s = bump::String::with_capacity_in(1 + name.len(), arena);
     s.push(':');
     s.push_str(name);
     s.into_bump_str()
 }
 
 fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
-    let mut result = String::with_capacity_in(str1.len() + str2.len(), arena);
+    let mut result = bump::String::with_capacity_in(str1.len() + str2.len(), arena);
     result.push_str(str1);
     result.push_str(str2);
     result.into_bump_str()
@@ -404,19 +523,24 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
 #[derive(Clone, Debug)]
 struct NamespaceBuilder<'a> {
     arena: &'a Bump,
-    stack: Vec<'a, NamespaceEnv<'a>>,
-    #[allow(dead_code)]
-    auto_ns_map: &'a [(&'a str, &'a str)],
+    stack: Vec<NamespaceEnv<'a>>,
     elaborate_xhp_namespaces_for_facts: bool,
 }
 
 impl<'a> NamespaceBuilder<'a> {
     fn new_in(
-        auto_ns_map: &'a [(&'a str, &'a str)],
+        auto_ns_map: &[(String, String)],
         disable_xhp_element_mangling: bool,
         elaborate_xhp_namespaces_for_facts: bool,
         arena: &'a Bump,
     ) -> Self {
+        // Copy auto_namespace_map entries into the arena so decls can use them.
+        let auto_ns_map = arena.alloc_slice_fill_iter(
+            auto_ns_map
+                .iter()
+                .map(|(n, v)| (arena.alloc_str(n) as &str, arena.alloc_str(v) as &str)),
+        );
+
         let mut ns_uses = SMap::empty();
         for &alias in hh_autoimport::NAMESPACES {
             ns_uses = ns_uses.add(arena, alias, concat(arena, "HH\\", alias));
@@ -430,9 +554,9 @@ impl<'a> NamespaceBuilder<'a> {
             class_uses = class_uses.add(arena, alias, concat(arena, "HH\\", alias));
         }
 
-        NamespaceBuilder {
+        Self {
             arena,
-            stack: bumpalo::vec![in arena; NamespaceEnv {
+            stack: vec![NamespaceEnv {
                 ns_uses,
                 class_uses,
                 fun_uses: SMap::empty(),
@@ -442,7 +566,6 @@ impl<'a> NamespaceBuilder<'a> {
                 is_codegen: false,
                 disable_xhp_element_mangling,
             }],
-            auto_ns_map,
             elaborate_xhp_namespaces_for_facts,
         }
     }
@@ -452,10 +575,10 @@ impl<'a> NamespaceBuilder<'a> {
         let nsenv = self.stack.last().unwrap().clone(); // shallow clone
         if let Some(name) = name {
             let mut fully_qualified = match current {
-                None => String::with_capacity_in(name.len(), self.arena),
+                None => bump::String::with_capacity_in(name.len(), self.arena),
                 Some(current) => {
                     let mut fully_qualified =
-                        String::with_capacity_in(current.len() + name.len() + 1, self.arena);
+                        bump::String::with_capacity_in(current.len() + name.len() + 1, self.arena);
                     fully_qualified.push_str(current);
                     fully_qualified.push('\\');
                     fully_qualified
@@ -788,6 +911,12 @@ mod fixed_width_token {
 use fixed_width_token::FixedWidthToken;
 
 #[derive(Copy, Clone, Debug)]
+pub enum XhpChildrenKind {
+    Empty,
+    Other,
+}
+
+#[derive(Copy, Clone, Debug)]
 pub enum Node<'a> {
     // Nodes which are not useful in constructing a decl are ignored. We keep
     // track of the SyntaxKind for two reasons.
@@ -815,6 +944,7 @@ pub enum Node<'a> {
     XhpName(&'a (&'a str, &'a Pos<'a>)),
     Variable(&'a (&'a str, &'a Pos<'a>)),
     QualifiedName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
+    ModuleName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
     StringLiteral(&'a (&'a BStr, &'a Pos<'a>)), // For shape keys and const expressions.
     IntLiteral(&'a (&'a str, &'a Pos<'a>)),     // For const expressions.
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
@@ -822,8 +952,15 @@ pub enum Node<'a> {
     Ty(&'a Ty<'a>),
     XhpEnumTy(&'a (Option<&'a Pos<'a>>, &'a Ty<'a>, &'a [XhpEnumValue<'a>])),
     ListItem(&'a (Node<'a>, Node<'a>)),
-    Const(&'a ShallowClassConst<'a>), // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}", and also for consts via make_const_declaration
-    ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])), // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and class-const "public const int X=1".
+
+    // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}",
+    // and also for consts via make_const_declaration
+    Const(&'a ShallowClassConst<'a>),
+
+    // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and
+    // class-const "public const int X=1".
+    ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])),
+
     FunParam(&'a FunParamDecl<'a>),
     Attribute(&'a UserAttributeNode<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
@@ -835,6 +972,7 @@ pub enum Node<'a> {
     XhpClassAttributeDeclaration(&'a XhpClassAttributeDeclarationNode<'a>),
     XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
     XhpAttributeUse(&'a Node<'a>),
+    XhpChildrenDeclaration(XhpChildrenKind),
     TypeConstant(&'a ShallowTypeconst<'a>),
     ContextConstraint(&'a (ConstraintKind, Node<'a>)),
     RequireClause(&'a RequireClause<'a>),
@@ -846,14 +984,16 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
+    RefinedConst(&'a (&'a str, RefinedConst<'a>)),
+
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
 }
 
 impl<'a> smart_constructors::NodeType for Node<'a> {
-    type R = Node<'a>;
+    type Output = Node<'a>;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self
     }
 
@@ -987,6 +1127,17 @@ impl<'a> Node<'a> {
     fn is_present(&self) -> bool {
         !self.is_ignored()
     }
+
+    fn contains_marker_attribute(&self, name: &str) -> bool {
+        self.iter().any(|node| match node {
+            Node::Attribute(&UserAttributeNode {
+                name: Id(_pos, attr_name),
+                classname_params: [],
+                string_literal_params: [],
+            }) => attr_name == name,
+            _ => false,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -1009,33 +1160,67 @@ struct Attributes<'a> {
     can_call: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<Id<'a>>,
-    internal: bool,
+    safe_global_variable: bool,
+    cross_package: Option<&'a str>,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
+        self.under_no_auto_dynamic = false;
+        self.inside_no_auto_dynamic_class = false;
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
     fn add_fun(&mut self, name: &'a str, decl: &'a typing_defs::FunElt<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Fun(decl), self.arena);
     }
     fn add_typedef(&mut self, name: &'a str, decl: &'a typing_defs::TypedefType<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Typedef(decl), self.arena);
     }
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Const(decl), self.arena);
     }
     fn add_module(&mut self, name: &'a str, decl: &'a typing_defs::ModuleDefType<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Module(decl), self.arena)
     }
 
+    #[inline(always)]
+    pub fn alloc<T>(&self, val: T) -> &'a T {
+        self.arena.alloc(val)
+    }
+
+    fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
+        let mut result = match iter.size_hint().1 {
+            Some(upper_bound) => bump::Vec::with_capacity_in(upper_bound, self.arena),
+            None => bump::Vec::new_in(self.arena),
+        };
+        for item in iter {
+            result.push(item);
+        }
+        result.into_bump_slice()
+    }
+
+    fn user_attribute_to_decl(
+        &self,
+        attr: &UserAttributeNode<'a>,
+    ) -> &'a shallow_decl_defs::UserAttribute<'a> {
+        self.alloc(shallow_decl_defs::UserAttribute {
+            name: attr.name.into(),
+            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
+        })
+    }
+}
+
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     #[inline]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
         concat(self.arena, str1, str2)
     }
 
-    fn token_bytes(&self, token: &CompactToken) -> &'text [u8] {
+    fn token_bytes(&self, token: &CompactToken) -> &'t [u8] {
         self.source_text
             .source_text()
             .sub(token.start_offset(), token.width())
@@ -1044,11 +1229,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     // Check that the slice is valid UTF-8. If it is, return a &str referencing
     // the same data. Otherwise, copy the slice into our arena using
     // String::from_utf8_lossy_in, and return a reference to the arena str.
-    fn str_from_utf8(&self, slice: &'text [u8]) -> &'a str {
+    fn str_from_utf8(&self, slice: &'t [u8]) -> &'a str {
         if let Ok(s) = std::str::from_utf8(slice) {
             self.source_text_allocator.alloc(s)
         } else {
-            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+            bump::String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
         }
     }
 
@@ -1059,7 +1244,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         if let Ok(s) = std::str::from_utf8(slice) {
             s
         } else {
-            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+            bump::String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
         }
     }
 
@@ -1100,6 +1285,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             Node::Ty(ty) => return ty.get_pos(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
+            Node::ModuleName(&(_, pos)) => pos,
             Node::IntLiteral(&(_, pos))
             | Node::FloatingLiteral(&(_, pos))
             | Node::StringLiteral(&(_, pos))
@@ -1156,22 +1342,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.node_to_ty_(node, true)
     }
 
-    fn make_supportdynamic(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
+    fn make_supportdyn(&self, pos: &'a Pos<'a>, ty: Ty_<'a>) -> Ty_<'a> {
         Ty_::Tapply(self.alloc((
             (pos, naming_special_names::typehints::HH_SUPPORTDYN),
-            self.alloc([self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
-                Ty_::Tnonnull,
-            ))]),
+            self.alloc([self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), ty))]),
         )))
     }
+
+    fn implicit_sdt(&self) -> bool {
+        self.opts.everything_sdt && !self.under_no_auto_dynamic
+    }
+
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
         match node {
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tvoid))) if !allow_non_ret_ty => {
-                Some(self.alloc(Ty(reason, Ty_::Terr)))
+                Some(self.alloc(Ty(reason, Ty_::Tprim(self.alloc(aast::Tprim::Tnull)))))
             }
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tnoreturn))) if !allow_non_ret_ty => {
-                Some(self.alloc(Ty(reason, Ty_::Terr)))
+                Some(self.alloc(Ty(reason, Ty_::Tunion(&[]))))
             }
             Node::Ty(ty) => Some(ty),
             Node::Expr(expr) => {
@@ -1192,12 +1380,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
                         | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_) | Darray(_)
                         | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
-                        | ExpressionTree(_) | FunctionPointer(_) | FunId(_) | Id(_) | Import(_)
-                        | Is(_) | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_)
-                        | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
-                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Shape(_)
-                        | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) => None,
+                        | ExpressionTree(_) | FunctionPointer(_) | Id(_) | Import(_) | Is(_)
+                        | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
+                        | MethodCaller(_) | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_)
+                        | ReadonlyExpr(_) | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_)
+                        | Varray(_) | Xml(_) | Yield(_) | Invalid(_) | Package(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(
@@ -1266,20 +1453,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     match name {
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => {
-                            if self.opts.everything_sdt {
-                                self.make_supportdynamic(pos)
+                            if self.implicit_sdt() {
+                                self.make_supportdyn(pos, Ty_::Tnonnull)
                             } else {
                                 Ty_::Tnonnull
                             }
                         }
                         "dynamic" => Ty_::Tdynamic,
-                        "supportdynamic" => self.make_supportdynamic(pos),
                         "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
                             Ty_::TvecOrDict(self.alloc((key_type, value_type)))
                         }
-                        "_" => Ty_::Terr,
                         _ => {
                             let name = self.elaborate_raw_id(name);
                             Ty_::Tapply(self.alloc(((pos, name), &[][..])))
@@ -1334,19 +1519,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         _ => None,
                     }
                 }
-                fn create_vars_for_reinfer_types<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
-                    this: &DirectDeclSmartConstructors<'a, 'text, S>,
+                fn create_vars_for_reinfer_types<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
+                    this: &DirectDeclSmartConstructors<'a, 'o, 't, S>,
                     ty: &'a Ty<'a>,
                     tvar: &'a Ty<'a>,
                 ) -> &'a Ty<'a> {
                     let mk = |r, ty_| this.alloc(Ty(r, ty_));
                     let must_reinfer_type = |ty| match reinfer_type_to_string_opt(this.arena, ty) {
                         None => false,
-                        Some(ty_str) => this.opts.gi_reinfer_types.contains(&ty_str),
+                        Some(ty_str) => this.opts.gi_reinfer_types.iter().any(|t| t == ty_str),
                     };
                     match *ty {
                         Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
-                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, *ty1, tvar));
+                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, ty1, tvar));
                             mk(r, Ty_::Tapply(this.alloc((id, std::slice::from_ref(ty1)))))
                         }
                         Ty(r, Ty_::Toption(ty1)) => {
@@ -1378,6 +1563,58 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         Some(ty)
     }
 
+    fn partition_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+        match_constraint: impl Fn(Node<'a>) -> Option<(ConstraintKind, Node<'a>)>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        let append = |tys: &mut bump::Vec<'_, _>, ty: Option<_>| {
+            if let Some(ty) = ty {
+                tys.push(ty);
+            }
+        };
+        constraints.iter().fold(
+            (bump::Vec::new_in(self.arena), bump::Vec::new_in(self.arena)),
+            |(mut super_, mut as_), constraint| {
+                if let Some((kind, hint)) = match_constraint(*constraint) {
+                    use ConstraintKind::*;
+                    match kind {
+                        ConstraintAs => append(&mut as_, self.node_to_ty(hint)),
+                        ConstraintSuper => append(&mut super_, self.node_to_ty(hint)),
+                        _ => (),
+                    };
+                };
+                (super_, as_)
+            },
+        )
+    }
+
+    fn partition_type_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        self.partition_bounds_into_lower_and_upper(constraints, |constraint| {
+            if let Node::TypeConstraint(kind_hint) = constraint {
+                Some(*kind_hint)
+            } else {
+                None
+            }
+        })
+    }
+
+    fn partition_ctx_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        self.partition_bounds_into_lower_and_upper(constraints, |constraint| {
+            if let Node::ContextConstraint(kind_hint) = constraint {
+                Some(*kind_hint)
+            } else {
+                None
+            }
+        })
+    }
+
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
         let mut attributes = Attributes {
             deprecated: None,
@@ -1398,8 +1635,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             can_call: false,
             soft: false,
             support_dynamic_type: false,
-            module: self.module,
-            internal: false,
+            safe_global_variable: false,
+            cross_package: None,
         };
 
         let nodes = match node {
@@ -1468,6 +1705,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                             ));
                         ifc_already_policied = true;
                     }
+
                     "__InferFlows" => {
                         if !ifc_already_policied {
                             attributes.ifc_attribute = IfcFunDecl::FDInferFlows;
@@ -1485,8 +1723,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
                     }
-                    "__Internal" => {
-                        attributes.internal = true;
+                    "__SafeForGlobalAccessCheck" => {
+                        attributes.safe_global_variable = true;
+                    }
+                    "__CrossPackage" => {
+                        attributes.cross_package = attribute
+                            .string_literal_params
+                            .first()
+                            .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     _ => {}
                 }
@@ -1520,7 +1764,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     fn pop_type_params(&mut self, node: Node<'a>) -> &'a [&'a Tparam<'a>] {
         match node {
             Node::TypeParameters(tparams) => {
-                Rc::make_mut(&mut self.type_parameters).pop().unwrap();
+                let this = Rc::make_mut(&mut self.state);
+                Rc::make_mut(&mut this.type_parameters).pop().unwrap();
                 tparams
             }
             _ => &[],
@@ -1560,7 +1805,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn as_fun_implicit_params(
-        &mut self,
+        &self,
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
@@ -1670,6 +1915,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
         let ifc_decl = attributes.ifc_attribute;
 
+        let cross_package = attributes.cross_package;
+
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
 
@@ -1693,6 +1940,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             }),
             flags,
             ifc_decl,
+            cross_package,
         });
 
         let ty = self.alloc(Ty(
@@ -1708,8 +1956,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     ) -> Option<(&'a FunParams<'a>, &'a [ShallowProp<'a>], bool)> {
         match list {
             Node::List(nodes) => {
-                let mut params = Vec::with_capacity_in(nodes.len(), self.arena);
-                let mut properties = Vec::new_in(self.arena);
+                let mut params = bump::Vec::with_capacity_in(nodes.len(), self.arena);
+                let mut properties = bump::Vec::new_in(self.arena);
                 let mut ft_variadic = false;
                 for node in nodes.iter() {
                     match node {
@@ -1726,6 +1974,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         }) => {
                             let attributes = self.to_attributes(attributes);
 
+                            let type_ = self
+                                .rewrite_ty_for_global_inference(
+                                    self.node_to_ty(hint),
+                                    Reason::RglobalFunParam(pos),
+                                )
+                                .unwrap_or_else(|| self.tany_with_pos(pos));
                             if let Some(visibility) = visibility.as_visibility() {
                                 let name = name.unwrap_or("");
                                 let name = strip_dollar_prefix(name);
@@ -1737,27 +1991,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
-                                    type_: self.rewrite_ty_for_global_inference(
-                                        self.node_to_ty(hint),
-                                        Reason::RglobalFunParam(pos),
-                                    ),
-                                    visibility: if attributes.internal
-                                        && visibility == aast::Visibility::Public
-                                    {
-                                        aast::Visibility::Internal
-                                    } else {
-                                        visibility
-                                    },
+                                    type_,
+                                    visibility,
                                     flags,
                                 });
                             }
 
-                            let type_ = self
-                                .rewrite_ty_for_global_inference(
-                                    self.node_to_ty(hint),
-                                    Reason::RglobalFunParam(pos),
-                                )
-                                .unwrap_or_else(|| self.tany_with_pos(pos));
                             // These are illegal here--they can only be used on
                             // parameters in a function type hint (see
                             // make_closure_type_specifier and unwrap_mutability).
@@ -1865,7 +2104,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-    fn make_t_shape_field_name(&mut self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
+    fn make_t_shape_field_name(&self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
             ShapeFieldName::SFlitInt(&(pos, x)) => {
                 TshapeFieldName::TSFlitInt(self.alloc(PosString(pos, x)))
@@ -1943,7 +2182,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         ))
     }
 
-    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
+    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'t [u8] {
         let start = pos.start_offset();
         let end = pos.end_offset();
         self.source_text.source_text().sub(start, end - start)
@@ -1992,7 +2231,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     ..*fun_type
                 }))
             }
-            Ty_::Tshape(&(kind, fields)) => {
+            Ty_::Tshape(&(_, kind, fields)) => {
                 let mut converted_fields = AssocListMut::with_capacity_in(fields.len(), self.arena);
                 for (&name, ty) in fields.iter() {
                     converted_fields.insert(
@@ -2003,7 +2242,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         }),
                     );
                 }
-                Ty_::Tshape(self.alloc((kind, converted_fields.into())))
+                let origin = TypeOrigin::MissingOrigin;
+                Ty_::Tshape(self.alloc((origin, kind, converted_fields.into())))
             }
             Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
@@ -2015,7 +2255,65 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                 ),
             ),
-            _ => return ty,
+            Ty_::Tintersection(tys) => Ty_::Tintersection(
+                self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))),
+            ),
+            Ty_::Tunion(tys) => {
+                Ty_::Tunion(self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))))
+            }
+            Ty_::Trefinement(&(root_ty, class_ref)) => {
+                let convert_refined_const = |rc: &'a RefinedConst<'a>| {
+                    let RefinedConst { bound, is_ctx } = rc;
+                    let bound = match bound {
+                        RefinedConstBound::TRexact(ty) => {
+                            RefinedConstBound::TRexact(self.convert_tapply_to_tgeneric(ty))
+                        }
+                        RefinedConstBound::TRloose(bnds) => {
+                            let convert_tys = |tys: &'a [&'a Ty<'a>]| {
+                                self.slice(
+                                    tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty)),
+                                )
+                            };
+                            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                                lower: convert_tys(bnds.lower),
+                                upper: convert_tys(bnds.upper),
+                            }))
+                        }
+                    };
+                    RefinedConst {
+                        bound,
+                        is_ctx: *is_ctx,
+                    }
+                };
+                Ty_::Trefinement(
+                    self.alloc((
+                        self.convert_tapply_to_tgeneric(root_ty),
+                        ClassRefinement {
+                            cr_consts: arena_collections::map::Map::from(
+                                self.arena,
+                                class_ref
+                                    .cr_consts
+                                    .iter()
+                                    .map(|(id, ctr)| (*id, convert_refined_const(ctr))),
+                            ),
+                        },
+                    )),
+                )
+            }
+            Ty_::Taccess(_)
+            | Ty_::Tany(_)
+            | Ty_::Tclass(_)
+            | Ty_::Tdynamic
+            | Ty_::Tgeneric(_)
+            | Ty_::Tmixed
+            | Ty_::Tnonnull
+            | Ty_::Tprim(_)
+            | Ty_::Tthis => return ty,
+            Ty_::Tdependent(_)
+            | Ty_::Tneg(_)
+            | Ty_::Tnewtype(_)
+            | Ty_::Tvar(_)
+            | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),
         };
         self.alloc(Ty(ty.0, ty_))
     }
@@ -2051,34 +2349,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             ty_ => ty_,
         };
         self.alloc(Ty(r, ty_))
-    }
-
-    fn user_attribute_to_decl(
-        &self,
-        attr: &UserAttributeNode<'a>,
-    ) -> &'a shallow_decl_defs::UserAttribute<'a> {
-        self.alloc(shallow_decl_defs::UserAttribute {
-            name: attr.name.into(),
-            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
-        })
-    }
-
-    fn set_module_if_unset(&mut self, attributes: &Node<'a>) {
-        // TODO(T113116708) We shouldn't need this check here, really; it should be
-        // illegal to have more than one attribute named `__Module`, but file attrs are
-        // weird.
-        if self.module.is_none() {
-            for attr in attributes.iter() {
-                if let Node::Attribute(attr) = attr {
-                    if attr.name.1 == "__Module" {
-                        self.module = attr.string_literal_params.first().map(|&(p, m)| {
-                            oxidized_by_ref::ast::Id(p, self.str_from_utf8_for_bytes_in_arena(m))
-                        });
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
@@ -2119,19 +2389,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         }
     }
 
-    fn ctx_generic_for_generic_taccess_inner(&self, ty: &Ty<'_>, cst: &str) -> std::string::String {
+    fn ctx_generic_for_generic_taccess_inner(ty: &Ty<'_>, cst: &str) -> std::string::String {
         let left = match ty {
             Ty(_, Ty_::Tgeneric((name, &[]))) => name.to_string(),
             Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
-                self.ctx_generic_for_generic_taccess_inner(ty, cst.1)
+                Self::ctx_generic_for_generic_taccess_inner(ty, cst.1)
             }
             _ => panic!("Unexpected element in Taccess"),
         };
         format!("{}::{}", left, cst)
     }
+
     fn ctx_generic_for_generic_taccess(&self, ty: &Ty<'_>, cst: &str) -> &'a str {
-        bumpalo::format!(in self.arena, "T/[{}]", self.ctx_generic_for_generic_taccess_inner(ty, cst))
-            .into_bump_str()
+        bumpalo::format!(
+            in self.arena,
+            "T/[{}]",
+            Self::ctx_generic_for_generic_taccess_inner(ty, cst)
+        )
+        .into_bump_str()
     }
 
     // For a polymorphic context with form `ctx $f` (represented here as
@@ -2139,7 +2414,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
     fn rewrite_fun_ctx(
         &self,
-        tparams: &mut Vec<'_, &'a Tparam<'a>>,
+        tparams: &mut bump::Vec<'_, &'a Tparam<'a>>,
         ty: &Ty<'a>,
         param_name: &str,
     ) -> Ty<'a> {
@@ -2238,8 +2513,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // Then, for each polymorphic context with form `$g::C`,
         //   - add a type parameter `T/[$g::C]`
         //   - add a where constraint `T/[$g::C] = T$g :: C`
-        let rewrite_arg_ctx = |tparams: &mut Vec<'_, &'a Tparam<'a>>,
-                               where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
+        let rewrite_arg_ctx = |tparams: &mut bump::Vec<'_, &'a Tparam<'a>>,
+                               where_constraints: &mut bump::Vec<'_, &'a WhereConstraint<'a>>,
                                ty: &Ty<'a>,
                                param_pos: &'a Pos<'a>,
                                name: &str,
@@ -2293,9 +2568,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             rewritten_ty
         };
 
-        let mut tparams = Vec::from_iter_in(tparams.iter().copied(), self.arena);
+        let mut tparams = bump::Vec::from_iter_in(tparams.iter().copied(), self.arena);
         let mut where_constraints =
-            Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
+            bump::Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
 
         // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
         let mut ty_by_param: BTreeMap<&str, (Ty<'a>, &'a Pos<'a>)> = params
@@ -2454,12 +2729,12 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
-    for DirectDeclSmartConstructors<'a, 'text, S>
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
+    for DirectDeclSmartConstructors<'a, 'o, 't, S>
 {
-    type S = Node<'a>;
+    // type Output = Node<'a> in direct_decl_smart_constructors_generated.rs
 
-    fn flatten(&self, kind: SyntaxKind, lst: std::vec::Vec<Self::S>) -> Self::S {
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::Output>) -> Self::Output {
         let size = lst
             .iter()
             .map(|s| match s {
@@ -2473,7 +2748,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
                 }
             })
             .sum();
-        let mut r = Vec::with_capacity_in(size, self.arena);
+        let mut r = bump::Vec::with_capacity_in(size, self.arena);
         for s in lst.into_iter() {
             match s {
                 Node::List(children) => r.extend(children.iter().copied()),
@@ -2491,11 +2766,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
         }
     }
 
-    fn zero(kind: SyntaxKind) -> Self::S {
+    fn zero(kind: SyntaxKind) -> Node<'a> {
         Node::Ignored(kind)
     }
 
-    fn is_zero(s: &Self::S) -> bool {
+    fn is_zero(s: &Self::Output) -> bool {
         match s {
             Node::Token(token) => match token.kind() {
                 TokenKind::Yield | TokenKind::Required | TokenKind::Lateinit => false,
@@ -2505,13 +2780,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
             _ => true,
         }
     }
-}
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
-    FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a, 'text, S>>
-    for DirectDeclSmartConstructors<'a, 'text, S>
-{
-    fn make_token(&mut self, token: CompactToken) -> Self::R {
+    fn make_token(&mut self, token: CompactToken) -> Self::Output {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {
             let start = this
@@ -2540,12 +2810,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     || self.previous_token_kind == TokenKind::Interface
                 {
                     if let Some(current_class_name) = self.elaborate_defined_id(name) {
-                        self.classish_name_builder
+                        let previous_token_kind = self.previous_token_kind;
+                        let this = Rc::make_mut(&mut self.state);
+                        this.classish_name_builder
                             .lexed_name_after_classish_keyword(
-                                self.arena,
+                                this.arena,
                                 current_class_name.1,
                                 pos,
-                                self.previous_token_kind,
+                                previous_token_kind,
                             );
                     }
                 }
@@ -2620,22 +2892,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
-                if self.opts.everything_sdt {
-                    Node::Ty(self.alloc(Ty(
-                        self.alloc(Reason::hint(token_pos(self))),
-                        Ty_::Toption(self.alloc(Ty(
-                            self.alloc(Reason::hint(token_pos(self))),
-                            self.make_supportdynamic(token_pos(self)),
-                        ))),
-                    )))
+                let reason = self.alloc(Reason::hint(token_pos(self)));
+                if self.implicit_sdt() {
+                    let ty_ = self.make_supportdyn(token_pos(self), Ty_::Tmixed);
+                    Node::Ty(self.alloc(Ty(reason, ty_)))
                 } else {
-                    Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                    Node::Ty(self.alloc(Ty(reason, Ty_::Tmixed)))
                 }
             }
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
             TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
+            TokenKind::Class | TokenKind::Interface | TokenKind::Trait => {
+                if self.under_no_auto_dynamic {
+                    let this = Rc::make_mut(&mut self.state);
+                    this.inside_no_auto_dynamic_class = true;
+                }
+                Node::Token(FixedWidthToken::new(kind, token.start_offset()))
+            }
             TokenKind::NullLiteral
             | TokenKind::Darray
             | TokenKind::Varray
@@ -2683,7 +2958,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Final
             | TokenKind::Implements
             | TokenKind::Inout
-            | TokenKind::Interface
             | TokenKind::Newctx
             | TokenKind::Newtype
             | TokenKind::Type
@@ -2694,8 +2968,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Public
             | TokenKind::Reify
             | TokenKind::Static
-            | TokenKind::Class
-            | TokenKind::Trait
             | TokenKind::Lateinit
             | TokenKind::RightBrace
             | TokenKind::Enum
@@ -2706,7 +2978,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Required
             | TokenKind::Ctx
             | TokenKind::Readonly
-            | TokenKind::Internal => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Internal
+            | TokenKind::Global => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             _ if kind.fixed_width().is_some() => {
                 Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
             }
@@ -2716,7 +2989,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         result
     }
 
-    fn make_error(&mut self, error: Self::R) -> Self::R {
+    fn make_error(&mut self, error: Self::Output) -> Self::Output {
         // If it's a Token or IgnoredToken, we can use it for error recovery.
         // For instance, in `function using() {}`, the `using` keyword will be a
         // token wrapped in an error CST node, since the keyword isn't legal in
@@ -2724,11 +2997,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         error
     }
 
-    fn make_missing(&mut self, _: usize) -> Self::R {
+    fn make_missing(&mut self, _: usize) -> Self::Output {
         Node::Ignored(SK::Missing)
     }
 
-    fn make_list(&mut self, items: std::vec::Vec<Self::R>, _: usize) -> Self::R {
+    fn make_list(&mut self, mut items: Vec<Self::Output>, _: usize) -> Self::Output {
         if let Some(&yield_) = items
             .iter()
             .flat_map(|node| node.iter())
@@ -2736,24 +3009,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         {
             yield_
         } else {
-            let size = items.iter().filter(|node| node.is_present()).count();
-            let items_iter = items.into_iter();
-            let mut items = Vec::with_capacity_in(size, self.arena);
-            for node in items_iter {
-                if node.is_present() {
-                    items.push(node);
-                }
-            }
-            let items = items.into_bump_slice();
+            items.retain(|node| node.is_present());
             if items.is_empty() {
                 Node::Ignored(SK::SyntaxList)
             } else {
+                let items = self.arena.alloc_slice_fill_iter(items);
                 Node::List(self.alloc(items))
             }
         }
     }
 
-    fn make_qualified_name(&mut self, parts: Self::R) -> Self::R {
+    fn make_qualified_name(&mut self, parts: Self::Output) -> Self::Output {
         let pos = self.get_pos(parts);
         match parts {
             Node::List(nodes) => Node::QualifiedName(self.alloc((nodes, pos))),
@@ -2764,17 +3030,32 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_simple_type_specifier(&mut self, specifier: Self::R) -> Self::R {
+    fn make_module_name(&mut self, parts: Self::Output) -> Self::Output {
+        let pos = self.get_pos(parts);
+        match parts {
+            Node::List(nodes) => Node::ModuleName(self.alloc((nodes, pos))),
+            node if node.is_ignored() => Node::Ignored(SK::ModuleName),
+            node => Node::ModuleName(
+                self.alloc((bumpalo::vec![in self.arena; node].into_bump_slice(), pos)),
+            ),
+        }
+    }
+
+    fn make_simple_type_specifier(&mut self, specifier: Self::Output) -> Self::Output {
         // Return this explicitly because flatten filters out zero nodes, and
         // we treat most non-error nodes as zeroes.
         specifier
     }
 
-    fn make_literal_expression(&mut self, expression: Self::R) -> Self::R {
+    fn make_literal_expression(&mut self, expression: Self::Output) -> Self::Output {
         expression
     }
 
-    fn make_simple_initializer(&mut self, equals: Self::R, expr: Self::R) -> Self::R {
+    fn make_simple_initializer(
+        &mut self,
+        equals: Self::Output,
+        expr: Self::Output,
+    ) -> Self::Output {
         // If the expr is Ignored, bubble up the assignment operator so that we
         // can tell that *some* initializer was here. Useful for class
         // properties, where we need to enforce that properties without default
@@ -2784,55 +3065,59 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_anonymous_function(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_keyword: Self::R,
-        _function_keyword: Self::R,
-        _left_paren: Self::R,
-        _parameters: Self::R,
-        _right_paren: Self::R,
-        _ctx_list: Self::R,
-        _colon: Self::R,
-        _readonly_return: Self::R,
-        _type_: Self::R,
-        _use_: Self::R,
-        _body: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_keyword: Self::Output,
+        _function_keyword: Self::Output,
+        _left_paren: Self::Output,
+        _parameters: Self::Output,
+        _right_paren: Self::Output,
+        _ctx_list: Self::Output,
+        _colon: Self::Output,
+        _readonly_return: Self::Output,
+        _type_: Self::Output,
+        _use_: Self::Output,
+        _body: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AnonymousFunction)
     }
 
     fn make_lambda_expression(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_: Self::R,
-        _signature: Self::R,
-        _arrow: Self::R,
-        _body: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_: Self::Output,
+        _signature: Self::Output,
+        _arrow: Self::Output,
+        _body: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::LambdaExpression)
     }
 
     fn make_awaitable_creation_expression(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_: Self::R,
-        _compound_statement: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_: Self::Output,
+        _compound_statement: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AwaitableCreationExpression)
     }
 
     fn make_element_initializer(
         &mut self,
-        key: Self::R,
-        _arrow: Self::R,
-        value: Self::R,
-    ) -> Self::R {
+        key: Self::Output,
+        _arrow: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((key, value)))
     }
 
-    fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
+    fn make_prefix_unary_expression(
+        &mut self,
+        op: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(op, value);
         let op = match op.token_kind() {
             Some(TokenKind::Tilde) => Uop::Utild,
@@ -2855,7 +3140,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
+    fn make_postfix_unary_expression(
+        &mut self,
+        value: Self::Output,
+        op: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(value, op);
         let op = match op.token_kind() {
             Some(TokenKind::PlusPlus) => Uop::Upincr,
@@ -2873,7 +3162,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_binary_expression(&mut self, lhs: Self::R, op_node: Self::R, rhs: Self::R) -> Self::R {
+    fn make_binary_expression(
+        &mut self,
+        lhs: Self::Output,
+        op_node: Self::Output,
+        rhs: Self::Output,
+    ) -> Self::Output {
         let op = match op_node.token_kind() {
             Some(TokenKind::Plus) => Bop::Plus,
             Some(TokenKind::Minus) => Bop::Minus,
@@ -2918,16 +3212,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::Expr(self.alloc(aast::Expr(
             (),
             pos,
-            aast::Expr_::Binop(self.alloc((op, lhs, rhs))),
+            aast::Expr_::Binop(self.alloc(aast::Binop { bop: op, lhs, rhs })),
         )))
     }
 
     fn make_parenthesized_expression(
         &mut self,
-        _lparen: Self::R,
-        expr: Self::R,
-        _rparen: Self::R,
-    ) -> Self::R {
+        _lparen: Self::Output,
+        expr: Self::Output,
+        _rparen: Self::Output,
+    ) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::ParenthesizedExpression)
         } else {
@@ -2935,7 +3229,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
+    fn make_list_item(&mut self, item: Self::Output, sep: Self::Output) -> Self::Output {
         match (item.is_ignored(), sep.is_ignored()) {
             (true, true) => Node::Ignored(SK::ListItem),
             (false, true) => item,
@@ -2946,10 +3240,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_arguments(
         &mut self,
-        less_than: Self::R,
-        arguments: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        less_than: Self::Output,
+        arguments: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         Node::BracketedList(self.alloc((
             self.get_pos(less_than),
             arguments.as_slice(self.arena),
@@ -2959,9 +3253,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_generic_type_specifier(
         &mut self,
-        class_type: Self::R,
-        type_arguments: Self::R,
-    ) -> Self::R {
+        class_type: Self::Output,
+        type_arguments: Self::Output,
+    ) -> Self::Output {
         let class_id = match self.expect_name(class_type) {
             Some(id) => id,
             None => return Node::Ignored(SK::GenericTypeSpecifier),
@@ -3019,15 +3313,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_alias_declaration(
         &mut self,
-        attributes: Self::R,
-        keyword: Self::R,
-        name: Self::R,
-        generic_params: Self::R,
-        constraint: Self::R,
-        _equal: Self::R,
-        aliased_type: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        module_kw_opt: Self::Output,
+        keyword: Self::Output,
+        name: Self::Output,
+        generic_params: Self::Output,
+        constraint: Self::Output,
+        _equal: Self::Output,
+        aliased_type: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if name.is_ignored() {
             return Node::Ignored(SK::AliasDeclaration);
         }
@@ -3039,60 +3335,93 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(ty) => ty,
             None => return Node::Ignored(SK::AliasDeclaration),
         };
-        let constraint = match constraint {
-            Node::TypeConstraint(&(_kind, hint)) => self.node_to_ty(hint),
-            _ => None,
-        };
+        let mut as_constraint = None;
+        let mut super_constraint = None;
+        for c in constraint.iter() {
+            if let Node::TypeConstraint(&(kind, hint)) = c {
+                let ty = self.node_to_ty(hint);
+                match kind {
+                    ConstraintKind::ConstraintAs => as_constraint = ty,
+                    ConstraintKind::ConstraintSuper => super_constraint = ty,
+                    _ => {}
+                }
+            }
+        }
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
-        let parsed_attributes = self.to_attributes(attributes);
-        let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
-            self.slice(attributes.iter().rev().filter_map(|attribute| {
-                if let Node::Attribute(attr) = attribute {
+
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attributes.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
                 }
-            }))
-        } else {
-            &[][..]
-        };
-        let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
-            pos,
-            vis: if parsed_attributes.internal {
-                aast::TypedefVisibility::Tinternal
             } else {
-                match keyword.token_kind() {
-                    Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
-                    Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
-                    _ => aast::TypedefVisibility::Transparent,
+                None
+            }
+        }));
+
+        let mut docs_url = None;
+        for attribute in attributes.iter() {
+            match attribute {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
                 }
+                _ => {}
+            }
+        }
+
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let is_module_newtype = module_kw_opt.is_ignored_token_with_kind(TokenKind::Module);
+        let typedef = self.alloc(TypedefType {
+            module: self.module,
+            pos,
+            vis: match keyword.token_kind() {
+                Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+                Some(TokenKind::Newtype) if is_module_newtype => {
+                    aast::TypedefVisibility::OpaqueModule
+                }
+                Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
+                _ => aast::TypedefVisibility::Transparent,
             },
             tparams,
-            constraint,
+            as_constraint,
+            super_constraint,
             type_: ty,
             is_ctx: false,
             attributes: user_attributes,
+            internal,
+            docs_url,
         });
 
-        self.add_typedef(name, typedef);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
 
         Node::Ignored(SK::AliasDeclaration)
     }
 
     fn make_context_alias_declaration(
         &mut self,
-        attributes: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        generic_params: Self::R,
-        constraint: Self::R,
-        _equal: Self::R,
-        ctx_list: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        generic_params: Self::Output,
+        constraint: Self::Output,
+        _equal: Self::Output,
+        ctx_list: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if name.is_ignored() {
             return Node::Ignored(SK::ContextAliasDeclaration);
         }
@@ -3110,18 +3439,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         // lowerer ensures there is only one as constraint
         let mut as_constraint = None;
+        let mut super_constraint = None;
         for c in constraint.iter() {
             if let Node::ContextConstraint(&(kind, hint)) = c {
                 let ty = self.node_to_ty(hint);
                 match kind {
                     ConstraintKind::ConstraintAs => as_constraint = ty,
+                    ConstraintKind::ConstraintSuper => super_constraint = ty,
                     _ => {}
                 }
             }
         }
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
-        let parsed_attributes = self.to_attributes(attributes);
         let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
@@ -3134,26 +3464,139 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             &[][..]
         };
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.module,
             pos,
-            vis: if parsed_attributes.internal {
-                aast::TypedefVisibility::Tinternal
-            } else {
-                aast::TypedefVisibility::Opaque
-            },
+            vis: aast::TypedefVisibility::Opaque,
             tparams,
-            constraint: as_constraint,
+            as_constraint,
+            super_constraint,
             type_: ty,
             is_ctx: true,
             attributes: user_attributes,
+            internal: false,
+            docs_url: None,
         });
 
-        self.add_typedef(name, typedef);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
 
         Node::Ignored(SK::ContextAliasDeclaration)
     }
 
-    fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+    fn make_case_type_declaration(
+        &mut self,
+        attribute_spec: Self::Output,
+        modifiers: Self::Output,
+        _case_keyword: Self::Output,
+        _type_keyword: Self::Output,
+        name: Self::Output,
+        generic_parameter: Self::Output,
+        _as: Self::Output,
+        bounds: Self::Output,
+        _equal: Self::Output,
+        variants: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        if name.is_ignored() {
+            return Node::Ignored(SK::CaseTypeDeclaration);
+        }
+        let Id(pos, name) = match self.elaborate_defined_id(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::CaseTypeDeclaration),
+        };
+
+        let as_constraint = match bounds.len() {
+            0 => None,
+            1 => self.node_to_ty(*bounds.iter().next().unwrap()),
+            _ => {
+                let pos = self.get_pos(bounds);
+                let tys = self.slice(bounds.iter().filter_map(|x| match x {
+                    Node::ListItem(&(ty, _commas)) => self.node_to_ty(ty),
+                    &x => self.node_to_ty(x),
+                }));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tintersection(tys))))
+            }
+        };
+
+        let ty = match variants.len() {
+            0 => None,
+            1 => self.node_to_ty(*variants.iter().next().unwrap()),
+            _ => {
+                let pos = self.get_pos(variants);
+                let tys = self.slice(variants.iter().filter_map(|x| self.node_to_ty(*x)));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tunion(tys))))
+            }
+        };
+
+        let type_ = match ty {
+            Some(x) => x,
+            None => return Node::Ignored(SK::CaseTypeDeclaration),
+        };
+
+        // Pop the type params stack only after creating all inner types.
+        let tparams = self.pop_type_params(generic_parameter);
+
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attribute_spec.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }));
+
+        let mut docs_url = None;
+        for attribute in attribute_spec.iter() {
+            match attribute {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let typedef = self.alloc(TypedefType {
+            module: self.module,
+            pos,
+            vis: aast::TypedefVisibility::CaseType,
+            tparams,
+            as_constraint,
+            super_constraint: None,
+            type_,
+            is_ctx: false,
+            attributes: user_attributes,
+            internal,
+            docs_url,
+        });
+
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
+
+        Node::Ignored(SK::CaseTypeDeclaration)
+    }
+
+    fn make_case_type_variant(&mut self, _bar: Self::Output, type_: Self::Output) -> Self::Output {
+        if type_.is_ignored() {
+            Node::Ignored(SK::CaseTypeVariant)
+        } else {
+            type_
+        }
+    }
+
+    fn make_type_constraint(&mut self, kind: Self::Output, value: Self::Output) -> Self::Output {
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,
             Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
@@ -3162,7 +3605,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::TypeConstraint(self.alloc((kind, value)))
     }
 
-    fn make_context_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+    fn make_context_constraint(&mut self, kind: Self::Output, value: Self::Output) -> Self::Output {
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,
             Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
@@ -3173,13 +3616,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_parameter(
         &mut self,
-        user_attributes: Self::R,
-        reify: Self::R,
-        variance: Self::R,
-        name: Self::R,
-        tparam_params: Self::R,
-        constraints: Self::R,
-    ) -> Self::R {
+        user_attributes: Self::Output,
+        reify: Self::Output,
+        variance: Self::Output,
+        name: Self::Output,
+        tparam_params: Self::Output,
+        constraints: Self::Output,
+    ) -> Self::Output {
         let user_attributes = match user_attributes {
             Node::BracketedList((_, attributes, _)) => {
                 self.slice(attributes.iter().filter_map(|x| match x {
@@ -3231,9 +3674,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_type_parameters(&mut self, _lt: Self::R, tparams: Self::R, _gt: Self::R) -> Self::R {
+    fn make_type_parameters(
+        &mut self,
+        _lt: Self::Output,
+        tparams: Self::Output,
+        _gt: Self::Output,
+    ) -> Self::Output {
         let size = tparams.len();
-        let mut tparams_with_name = Vec::with_capacity_in(size, self.arena);
+        let mut tparams_with_name = bump::Vec::with_capacity_in(size, self.arena);
         let mut tparam_names = MultiSetMut::with_capacity_in(size, self.arena);
         for node in tparams.iter() {
             match *node {
@@ -3248,8 +3696,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 _ => {}
             }
         }
-        Rc::make_mut(&mut self.type_parameters).push(tparam_names.into());
-        let mut tparams = Vec::with_capacity_in(tparams_with_name.len(), self.arena);
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.type_parameters).push(tparam_names.into());
+        let mut tparams = bump::Vec::with_capacity_in(tparams_with_name.len(), self.arena);
         for (decl, name) in tparams_with_name.into_iter() {
             let &TypeParameterDecl {
                 name: _,
@@ -3286,14 +3735,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_parameter_declaration(
         &mut self,
-        attributes: Self::R,
-        visibility: Self::R,
-        inout: Self::R,
-        readonly: Self::R,
-        hint: Self::R,
-        name: Self::R,
-        initializer: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        visibility: Self::Output,
+        inout: Self::Output,
+        readonly: Self::Output,
+        hint: Self::Output,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         let (variadic, pos, name) = match name {
             Node::ListItem(&(ellipsis, id)) => {
                 let Id(pos, name) = match id.as_variable() {
@@ -3343,7 +3792,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_variadic_parameter(&mut self, _: Self::R, hint: Self::R, ellipsis: Self::R) -> Self::R {
+    fn make_variadic_parameter(
+        &mut self,
+        _: Self::Output,
+        hint: Self::Output,
+        ellipsis: Self::Output,
+    ) -> Self::Output {
         Node::FunParam(
             self.alloc(FunParamDecl {
                 attributes: Node::Ignored(SK::Missing),
@@ -3363,10 +3817,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_declaration(
         &mut self,
-        attributes: Self::R,
-        header: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        header: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let parsed_attributes = self.to_attributes(attributes);
         match header {
             Node::FunctionHeader(header) => {
@@ -3377,7 +3831,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         None => return Node::Ignored(SK::FunctionDeclaration),
                     };
                 let deprecated = parsed_attributes.deprecated.map(|msg| {
-                    let mut s = String::new_in(self.arena);
+                    let mut s = bump::String::new_in(self.arena);
                     s.push_str("The function ");
                     s.push_str(name.trim_start_matches('\\'));
                     s.push_str(" is deprecated: ");
@@ -3389,16 +3843,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     .iter()
                     .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
                 let fun_elt = self.alloc(FunElt {
-                    module: parsed_attributes.module,
-                    internal: parsed_attributes.internal || internal,
+                    module: self.module,
+                    internal,
                     deprecated,
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
-                    support_dynamic_type: self.opts.everything_sdt
+                    support_dynamic_type: self.implicit_sdt()
                         || parsed_attributes.support_dynamic_type,
+                    no_auto_dynamic: self.under_no_auto_dynamic,
                 });
-                self.add_fun(name, fun_elt);
+                let this = Rc::make_mut(&mut self.state);
+                this.add_fun(name, fun_elt);
                 Node::Ignored(SK::FunctionDeclaration)
             }
             _ => Node::Ignored(SK::FunctionDeclaration),
@@ -3407,10 +3863,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_contexts(
         &mut self,
-        left_bracket: Self::R,
-        tys: Self::R,
-        right_bracket: Self::R,
-    ) -> Self::R {
+        left_bracket: Self::Output,
+        tys: Self::Output,
+        right_bracket: Self::Output,
+    ) -> Self::Output {
         let tys = self.slice(tys.iter().filter_map(|ty| match ty {
             Node::ListItem(&(ty, _)) | &ty => {
                 // A wildcard is used for the context of a closure type on a
@@ -3466,9 +3922,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_ctx_type_specifier(
         &mut self,
-        ctx_keyword: Self::R,
-        variable: Self::R,
-    ) -> Self::R {
+        ctx_keyword: Self::Output,
+        variable: Self::Output,
+    ) -> Self::Output {
         match variable.as_variable() {
             Some(Id(pos, name)) => {
                 Node::Variable(self.alloc((name, self.merge(pos, self.get_pos(ctx_keyword)))))
@@ -3479,19 +3935,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_declaration_header(
         &mut self,
-        modifiers: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        type_params: Self::R,
-        left_paren: Self::R,
-        param_list: Self::R,
-        _right_paren: Self::R,
-        capability: Self::R,
-        _colon: Self::R,
-        readonly_return: Self::R,
-        ret_hint: Self::R,
-        where_constraints: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        type_params: Self::Output,
+        left_paren: Self::Output,
+        param_list: Self::Output,
+        _right_paren: Self::Output,
+        capability: Self::Output,
+        _colon: Self::Output,
+        readonly_return: Self::Output,
+        ret_hint: Self::Output,
+        where_constraints: Self::Output,
+    ) -> Self::Output {
         // Use the position of the left paren if the name is missing.
         // Keep the name if it's an IgnoredToken rather than an Ignored. An
         // IgnoredToken here should always be an error, but it's better to treat
@@ -3513,20 +3969,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_yield_expression(&mut self, keyword: Self::R, _operand: Self::R) -> Self::R {
+    fn make_yield_expression(
+        &mut self,
+        keyword: Self::Output,
+        _operand: Self::Output,
+    ) -> Self::Output {
         assert!(keyword.token_kind() == Some(TokenKind::Yield));
         keyword
     }
 
     fn make_const_declaration(
         &mut self,
-        _attributes: Self::R,
-        modifiers: Self::R,
-        const_keyword: Self::R,
-        hint: Self::R,
-        decls: Self::R,
-        semicolon: Self::R,
-    ) -> Self::R {
+        _attributes: Self::Output,
+        modifiers: Self::Output,
+        const_keyword: Self::Output,
+        hint: Self::Output,
+        decls: Self::Output,
+        semicolon: Self::Output,
+    ) -> Self::Output {
         match decls {
             // Class consts.
             Node::List(consts)
@@ -3580,7 +4040,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                                     .node_to_ty(hint)
                                     .or_else(|| self.infer_const(name, initializer))
                                     .unwrap_or_else(|| self.tany_with_pos(id_pos));
-                                self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
+                                let this = Rc::make_mut(&mut self.state);
+                                this.add_const(id, this.alloc(ConstDecl { pos, type_: ty }));
                             }
                         }
                         _ => {}
@@ -3596,7 +4057,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.start_accumulating_const_refs();
     }
 
-    fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+    fn make_constant_declarator(
+        &mut self,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         // The "X=1" part of either a member const "class C {const int X=1;}" or a top-level const "const int X=1;"
         // Note: the the declarator itself doesn't yet know whether a type was provided by the user;
         // that's only known in the parent, make_const_declaration
@@ -3608,47 +4073,59 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_namespace_declaration(&mut self, _name: Self::R, body: Self::R) -> Self::R {
+    fn make_namespace_declaration(
+        &mut self,
+        _name: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         if let Node::Ignored(SK::NamespaceBody) = body {
-            Rc::make_mut(&mut self.namespace_builder).pop_namespace();
+            let this = Rc::make_mut(&mut self.state);
+            Rc::make_mut(&mut this.namespace_builder).pop_namespace();
         }
         Node::Ignored(SK::NamespaceDeclaration)
     }
 
-    fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
+    fn make_namespace_declaration_header(
+        &mut self,
+        _keyword: Self::Output,
+        name: Self::Output,
+    ) -> Self::Output {
         let name = self.expect_name(name).map(|Id(_, name)| name);
         // if this is header of semicolon-style (one with NamespaceEmptyBody) namespace, we should pop
         // the previous namespace first, but we don't have the body yet. We'll fix it retroactively in
         // make_namespace_empty_body
-        Rc::make_mut(&mut self.namespace_builder).push_namespace(name);
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.namespace_builder).push_namespace(name);
         Node::Ignored(SK::NamespaceDeclarationHeader)
     }
 
     fn make_namespace_body(
         &mut self,
-        _left_brace: Self::R,
-        _declarations: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _left_brace: Self::Output,
+        _declarations: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::NamespaceBody)
     }
 
-    fn make_namespace_empty_body(&mut self, _semicolon: Self::R) -> Self::R {
-        Rc::make_mut(&mut self.namespace_builder).pop_previous_namespace();
+    fn make_namespace_empty_body(&mut self, _semicolon: Self::Output) -> Self::Output {
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.namespace_builder).pop_previous_namespace();
         Node::Ignored(SK::NamespaceEmptyBody)
     }
 
     fn make_namespace_use_declaration(
         &mut self,
-        _keyword: Self::R,
-        namespace_use_kind: Self::R,
-        clauses: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        namespace_use_kind: Self::Output,
+        clauses: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if let Some(import_kind) = Self::namespace_use_kind(&namespace_use_kind) {
             for clause in clauses.iter() {
                 if let Node::NamespaceUseClause(nuc) = clause {
-                    Rc::make_mut(&mut self.namespace_builder).add_import(
+                    let this = Rc::make_mut(&mut self.state);
+                    Rc::make_mut(&mut this.namespace_builder).add_import(
                         import_kind,
                         nuc.id.1,
                         nuc.as_,
@@ -3661,24 +4138,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_namespace_group_use_declaration(
         &mut self,
-        _keyword: Self::R,
-        _kind: Self::R,
-        prefix: Self::R,
-        _left_brace: Self::R,
-        clauses: Self::R,
-        _right_brace: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        _kind: Self::Output,
+        prefix: Self::Output,
+        _left_brace: Self::Output,
+        clauses: Self::Output,
+        _right_brace: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let Id(_, prefix) = match self.expect_name(prefix) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceGroupUseDeclaration),
         };
         for clause in clauses.iter() {
             if let Node::NamespaceUseClause(nuc) = clause {
-                let mut id = String::new_in(self.arena);
+                let mut id = bump::String::new_in(self.arena);
                 id.push_str(prefix);
                 id.push_str(nuc.id.1);
-                Rc::make_mut(&mut self.namespace_builder).add_import(
+                let this = Rc::make_mut(&mut self.state);
+                Rc::make_mut(&mut this.namespace_builder).add_import(
                     nuc.kind,
                     id.into_bump_str(),
                     nuc.as_,
@@ -3690,11 +4168,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_namespace_use_clause(
         &mut self,
-        clause_kind: Self::R,
-        name: Self::R,
-        as_: Self::R,
-        aliased_name: Self::R,
-    ) -> Self::R {
+        clause_kind: Self::Output,
+        name: Self::Output,
+        as_: Self::Output,
+        aliased_name: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceUseClause),
@@ -3714,16 +4192,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_where_clause(&mut self, _: Self::R, where_constraints: Self::R) -> Self::R {
+    fn make_where_clause(
+        &mut self,
+        _: Self::Output,
+        where_constraints: Self::Output,
+    ) -> Self::Output {
         where_constraints
     }
 
     fn make_where_constraint(
         &mut self,
-        left_type: Self::R,
-        operator: Self::R,
-        right_type: Self::R,
-    ) -> Self::R {
+        left_type: Self::Output,
+        operator: Self::Output,
+        right_type: Self::Output,
+    ) -> Self::Output {
         Node::WhereConstraint(self.alloc(WhereConstraint(
             self.node_to_ty(left_type).unwrap_or(TANY),
             match operator.token_kind() {
@@ -3737,19 +4219,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_classish_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        xhp_keyword: Self::R,
-        class_keyword: Self::R,
-        name: Self::R,
-        tparams: Self::R,
-        _extends_keyword: Self::R,
-        extends: Self::R,
-        _implements_keyword: Self::R,
-        implements: Self::R,
-        where_clause: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        xhp_keyword: Self::Output,
+        class_keyword: Self::Output,
+        name: Self::Output,
+        tparams: Self::Output,
+        _extends_keyword: Self::Output,
+        extends: Self::Output,
+        _implements_keyword: Self::Output,
+        implements: Self::Output,
+        where_clause: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let raw_name = match self.expect_name(name) {
             Some(Id(_, name)) => name,
             None => return Node::Ignored(SK::ClassishDeclaration),
@@ -3797,6 +4279,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut uses_len = 0;
         let mut xhp_attr_uses_len = 0;
         let mut xhp_enum_values = SMap::empty();
+        let mut xhp_marked_empty = false;
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
         let mut req_class_len = 0;
@@ -3830,6 +4313,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         xhp_enum_values = xhp_enum_values.add(self.arena, name, *values);
                     }
                 }
+                Node::XhpChildrenDeclaration(XhpChildrenKind::Empty) => {
+                    xhp_marked_empty = true;
+                }
                 Node::TypeConstant(..) => typeconsts_len += 1,
                 Node::RequireClause(require) => match require.require_type.token_kind() {
                     Some(TokenKind::Extends) => req_extends_len += 1,
@@ -3861,22 +4347,31 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let mut constructor = None;
 
-        let mut uses = Vec::with_capacity_in(uses_len, self.arena);
-        let mut xhp_attr_uses = Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
-        let mut req_extends = Vec::with_capacity_in(req_extends_len, self.arena);
-        let mut req_implements = Vec::with_capacity_in(req_implements_len, self.arena);
-        let mut req_class = Vec::with_capacity_in(req_class_len, self.arena);
-        let mut consts = Vec::with_capacity_in(consts_len, self.arena);
-        let mut typeconsts = Vec::with_capacity_in(typeconsts_len, self.arena);
-        let mut props = Vec::with_capacity_in(props_len, self.arena);
-        let mut sprops = Vec::with_capacity_in(sprops_len, self.arena);
-        let mut static_methods = Vec::with_capacity_in(static_methods_len, self.arena);
-        let mut methods = Vec::with_capacity_in(methods_len, self.arena);
+        let mut uses = bump::Vec::with_capacity_in(uses_len, self.arena);
+        let mut xhp_attr_uses = bump::Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
+        let mut req_extends = bump::Vec::with_capacity_in(req_extends_len, self.arena);
+        let mut req_implements = bump::Vec::with_capacity_in(req_implements_len, self.arena);
+        let mut req_class = bump::Vec::with_capacity_in(req_class_len, self.arena);
+        let mut consts = bump::Vec::with_capacity_in(consts_len, self.arena);
+        let mut typeconsts = bump::Vec::with_capacity_in(typeconsts_len, self.arena);
+        let mut props = bump::Vec::with_capacity_in(props_len, self.arena);
+        let mut sprops = bump::Vec::with_capacity_in(sprops_len, self.arena);
+        let mut static_methods = bump::Vec::with_capacity_in(static_methods_len, self.arena);
+        let mut methods = bump::Vec::with_capacity_in(methods_len, self.arena);
 
-        let mut user_attributes = Vec::with_capacity_in(user_attributes_len, self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(user_attributes_len, self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -3945,7 +4440,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if class_attributes.support_dynamic_type
+                    let method = if (self.implicit_sdt() || class_attributes.support_dynamic_type)
                         && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
                     {
                         let type_ = match method.type_.1 {
@@ -3990,6 +4485,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let uses = uses.into_bump_slice();
         let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
+        let xhp_enum_values = xhp_enum_values;
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
         let req_class = req_class.into_bump_slice();
@@ -4002,11 +4498,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type =
-            self.opts.everything_sdt || class_attributes.support_dynamic_type;
+        let support_dynamic_type = self.implicit_sdt() || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
-        let module = class_attributes.module;
+        let module = self.module;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -4024,6 +4519,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             uses,
             xhp_attr_uses,
             xhp_enum_values,
+            xhp_marked_empty,
             req_extends,
             req_implements,
             req_class,
@@ -4038,22 +4534,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             methods,
             user_attributes,
             enum_type: None,
+            docs_url,
         });
-        self.add_class(name, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(name, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SK::ClassishDeclaration)
     }
 
     fn make_property_declaration(
         &mut self,
-        attrs: Self::R,
-        modifiers: Self::R,
-        hint: Self::R,
-        declarators: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attrs: Self::Output,
+        modifiers: Self::Output,
+        hint: Self::Output,
+        declarators: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let (attrs, modifiers, hint) = (attrs, modifiers, hint);
         let modifiers = read_member_modifiers(modifiers.iter());
         let declarators = self.slice(declarators.iter().filter_map(
@@ -4070,14 +4568,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         self.node_to_non_ret_ty(hint),
                         Reason::RglobalClassProp(pos),
                     );
+                    let ty = ty.unwrap_or_else(|| self.tany_with_pos(pos));
                     let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {
-                            ty.map(|t| {
-                                self.alloc(Ty(
-                                    self.alloc(Reason::hint(self.get_pos(hint))),
-                                    Ty_::Tlike(t),
-                                ))
-                            })
+                            self.alloc(Ty(
+                                self.alloc(Reason::hint(self.get_pos(hint))),
+                                Ty_::Tlike(ty),
+                            ))
                         } else {
                             ty
                         }
@@ -4097,17 +4594,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     flags.set(PropFlags::ABSTRACT, modifiers.is_abstract);
                     flags.set(PropFlags::READONLY, modifiers.is_readonly);
                     flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
+                    flags.set(
+                        PropFlags::SAFE_GLOBAL_VARIABLE,
+                        attributes.safe_global_variable,
+                    );
                     Some(ShallowProp {
                         xhp_attr: None,
                         name: (pos, name),
                         type_: ty,
-                        visibility: if attributes.internal
-                            && modifiers.visibility == aast::Visibility::Public
-                        {
-                            aast::Visibility::Internal
-                        } else {
-                            modifiers.visibility
-                        },
+                        visibility: modifiers.visibility,
                         flags,
                     })
                 }
@@ -4120,13 +4615,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
+    fn make_xhp_children_declaration(
+        &mut self,
+        _keyword: Self::Output,
+        expression: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        match expression {
+            Node::IgnoredToken(token) if token.kind() == TokenKind::Empty => {
+                Node::XhpChildrenDeclaration(XhpChildrenKind::Empty)
+            }
+            _ => Node::XhpChildrenDeclaration(XhpChildrenKind::Other),
+        }
+    }
+
     fn make_xhp_class_attribute_declaration(
         &mut self,
-        _keyword: Self::R,
-        attributes: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        let mut xhp_attr_enum_values = Vec::new_in(self.arena);
+        _keyword: Self::Output,
+        attributes: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        let mut xhp_attr_enum_values = bump::Vec::new_in(self.arena);
 
         let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
             let node = match node {
@@ -4137,27 +4646,35 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             let name = prefix_colon(self.arena, name);
 
             let (like, type_, enum_values) = match node.hint {
-                Node::XhpEnumTy((like, ty, values)) => (*like, Some(*ty), Some(values)),
-                _ => (None, self.node_to_ty(node.hint), None),
+                Node::XhpEnumTy((like, ty, values)) => (*like, *ty, Some(values)),
+                _ => (
+                    None,
+                    self.node_to_ty(node.hint)
+                        .unwrap_or_else(|| self.tany_with_pos(pos)),
+                    None,
+                ),
             };
             if let Some(enum_values) = enum_values {
                 xhp_attr_enum_values.push((name, *enum_values));
             };
 
             let type_ = if node.nullable && node.tag.is_none() {
-                type_.and_then(|x| match x {
+                match type_ {
                     // already nullable
                     Ty(_, Ty_::Toption(_)) | Ty(_, Ty_::Tmixed) => type_,
                     // make nullable
-                    _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))),
-                })
+                    _ => self.alloc(Ty(
+                        self.alloc(Reason::hint(type_.get_pos()?)),
+                        Ty_::Toption(type_),
+                    )),
+                }
             } else {
                 type_
             };
-            let type_ = type_.map(|t| match like {
-                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(t))),
-                None => t,
-            });
+            let type_ = match like {
+                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(type_))),
+                None => type_,
+            };
 
             let mut flags = PropFlags::empty();
             flags.set(PropFlags::NEEDS_INIT, node.needs_init);
@@ -4193,12 +4710,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     ///   }
     fn make_xhp_enum_type(
         &mut self,
-        like: Self::R,
-        enum_keyword: Self::R,
-        _left_brace: Self::R,
-        xhp_enum_values: Self::R,
-        right_brace: Self::R,
-    ) -> Self::R {
+        like: Self::Output,
+        enum_keyword: Self::Output,
+        _left_brace: Self::Output,
+        xhp_enum_values: Self::Output,
+        right_brace: Self::Output,
+    ) -> Self::Output {
         // Infer the type hint from the first value.
         // TODO: T88207956 consider all the values.
         let ty = xhp_enum_values
@@ -4210,7 +4727,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 let ty_ = node_ty.1;
                 self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_))
             });
-        let mut values = Vec::new_in(self.arena);
+        let mut values = bump::Vec::new_in(self.arena);
         for node in xhp_enum_values.iter() {
             // XHP enum values may only be string or int literals.
             match node {
@@ -4219,7 +4736,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     values.push(XhpEnumValue::XEVInt(i));
                 }
                 Node::StringLiteral(&(s, _)) => {
-                    let owned_str = std::string::String::from_utf8_lossy(s);
+                    let owned_str = String::from_utf8_lossy(s);
                     values.push(XhpEnumValue::XEVString(self.arena.alloc_str(&owned_str)));
                 }
                 _ => {}
@@ -4236,11 +4753,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_xhp_class_attribute(
         &mut self,
-        type_: Self::R,
-        name: Self::R,
-        initializer: Self::R,
-        tag: Self::R,
-    ) -> Self::R {
+        type_: Self::Output,
+        name: Self::Output,
+        initializer: Self::Output,
+        tag: Self::Output,
+    ) -> Self::Output {
         let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::XHPClassAttribute),
@@ -4258,21 +4775,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_xhp_simple_class_attribute(&mut self, name: Self::R) -> Self::R {
+    fn make_xhp_simple_class_attribute(&mut self, name: Self::Output) -> Self::Output {
         Node::XhpAttributeUse(self.alloc(name))
     }
 
-    fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+    fn make_property_declarator(
+        &mut self,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((name, initializer)))
     }
 
     fn make_methodish_declaration(
         &mut self,
-        attrs: Self::R,
-        header: Self::R,
-        body: Self::R,
-        closer: Self::R,
-    ) -> Self::R {
+        attrs: Self::Output,
+        header: Self::Output,
+        body: Self::Output,
+        closer: Self::Output,
+    ) -> Self::Output {
         let header = match header {
             Node::FunctionHeader(header) => header,
             _ => return Node::Ignored(SK::MethodishDeclaration),
@@ -4290,7 +4811,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let attributes = self.to_attributes(attrs);
         let deprecated = attributes.deprecated.map(|msg| {
-            let mut s = String::new_in(self.arena);
+            let mut s = bump::String::new_in(self.arena);
             s.push_str("The method ");
             s.push_str(id.1);
             s.push_str(" is deprecated: ");
@@ -4313,41 +4834,34 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             MethodFlags::SUPPORT_DYNAMIC_TYPE,
             !is_constructor && attributes.support_dynamic_type,
         );
-        let visibility = match modifiers.visibility {
-            aast::Visibility::Public => {
-                if attributes.internal {
-                    aast::Visibility::Internal
-                } else {
-                    aast::Visibility::Public
-                }
-            }
-            _ => modifiers.visibility,
-        };
 
-        let mut user_attributes = Vec::new_in(self.arena);
-        if self.retain_or_omit_user_attributes_for_facts {
-            for attribute in attrs.iter() {
-                match attribute {
-                    Node::Attribute(attr) => {
-                        user_attributes.push(self.user_attribute_to_decl(attr))
-                    }
-                    _ => {}
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attrs.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
                 }
+            } else {
+                None
             }
-            // Match ordering of attributes produced by the OCaml decl parser (even
-            // though it's the reverse of the syntactic ordering).
-            user_attributes.reverse();
-        }
-        let user_attributes = user_attributes.into_bump_slice();
+        }));
 
         let method = self.alloc(ShallowMethod {
             name: id,
             type_: ty,
-            visibility,
+            visibility: modifiers.visibility,
             deprecated,
             flags,
             attributes: user_attributes,
         });
+        if !self.inside_no_auto_dynamic_class {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = false;
+        }
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))
         } else {
@@ -4360,26 +4874,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_classish_body(
         &mut self,
-        _left_brace: Self::R,
-        elements: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _left_brace: Self::Output,
+        elements: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         Node::ClassishBody(self.alloc(elements.as_slice(self.arena)))
     }
 
     fn make_enum_declaration(
         &mut self,
-        attributes: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        _colon: Self::R,
-        extends: Self::R,
-        constraint: Self::R,
-        _left_brace: Self::R,
-        use_clauses: Self::R,
-        enumerators: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        _colon: Self::Output,
+        extends: Self::Output,
+        constraint: Self::Output,
+        _left_brace: Self::Output,
+        use_clauses: Self::Output,
+        enumerators: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         let id = match self.elaborate_defined_id(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::EnumDeclaration),
@@ -4396,15 +4911,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(ty) => ty,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         let key = id.1;
         let consts = self.slice(enumerators.iter().filter_map(|node| match *node {
             Node::Const(const_) => Some(const_),
             _ => None,
         }));
-        let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(attributes.len(), self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4425,7 +4952,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 _ => {}
             }
         }
-        let mut includes = Vec::with_capacity_in(includes_len, self.arena);
+        let mut includes = bump::Vec::with_capacity_in(includes_len, self.arena);
         for element in use_clauses.iter() {
             match element {
                 Node::EnumUse(names) => {
@@ -4445,8 +4972,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: parsed_attributes.module,
-            internal: false, // TODO: enums should be denoteable as internal by keyword
+            module: self.module,
+            internal,
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4454,6 +4981,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             uses: &[],
             xhp_attr_uses: &[],
             xhp_enum_values: SMap::empty(),
+            xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
             req_class: &[],
@@ -4472,15 +5000,22 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 constraint,
                 includes,
             })),
+            docs_url,
         });
-        self.add_class(key, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(key, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SK::EnumDeclaration)
     }
 
-    fn make_enum_use(&mut self, _keyword: Self::R, names: Self::R, _semicolon: Self::R) -> Self::R {
+    fn make_enum_use(
+        &mut self,
+        _keyword: Self::Output,
+        names: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::EnumUse(self.alloc(names))
     }
 
@@ -4490,11 +5025,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enumerator(
         &mut self,
-        name: Self::R,
-        _equal: Self::R,
-        value: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        name: Self::Output,
+        _equal: Self::Output,
+        value: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let id = match self.expect_name(name) {
             Some(id) => id,
@@ -4515,26 +5050,34 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enum_class_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        _enum_keyword: Self::R,
-        _class_keyword: Self::R,
-        name: Self::R,
-        _colon: Self::R,
-        base: Self::R,
-        _extends_keyword: Self::R,
-        extends_list: Self::R,
-        _left_brace: Self::R,
-        elements: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _enum_keyword: Self::Output,
+        _class_keyword: Self::Output,
+        name: Self::Output,
+        _colon: Self::Output,
+        base: Self::Output,
+        _extends_keyword: Self::Output,
+        extends_list: Self::Output,
+        _left_brace: Self::Output,
+        elements: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         let name = match self.elaborate_defined_id(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
         };
+
+        let base_pos = self.get_pos(base);
         let base = self
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+
+        let base = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(base_pos)), Ty_::Tlike(base)))
+        } else {
+            base
+        };
 
         let mut is_abstract = false;
         let mut is_final = false;
@@ -4577,16 +5120,30 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             _ => None,
         }));
 
-        let mut extends = Vec::with_capacity_in(extends_list.len() + 1, self.arena);
+        let typeconsts = self.slice(elements.iter().filter_map(|node| match *node {
+            Node::TypeConstant(tconst) => Some(tconst),
+            _ => None,
+        }));
+
+        let mut extends = bump::Vec::with_capacity_in(extends_list.len() + 1, self.arena);
         extends.push(builtin_enum_class_ty);
         extends.extend(extends_list.iter().filter_map(|&n| self.node_to_ty(n)));
         let extends = extends.into_bump_slice();
         let includes = &extends[1..];
 
-        let mut user_attributes = Vec::with_capacity_in(attributes.len() + 1, self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(attributes.len() + 1, self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4603,6 +5160,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let user_attributes = user_attributes.into_bump_slice();
 
         let parsed_attributes = self.to_attributes(attributes);
+        let support_dynamic_type = self.implicit_sdt() || parsed_attributes.support_dynamic_type;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -4612,7 +5170,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             has_xhp_keyword: false,
             internal,
             kind: class_kind,
-            module: None, // TODO: grab module from attributes
+            module: self.module,
             name: name.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4620,13 +5178,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             uses: &[],
             xhp_attr_uses: &[],
             xhp_enum_values: SMap::empty(),
+            xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
             req_class: &[],
             implements: &[],
-            support_dynamic_type: parsed_attributes.support_dynamic_type,
+            support_dynamic_type,
             consts,
-            typeconsts: &[],
+            typeconsts,
             props: &[],
             sprops: &[],
             constructor: None,
@@ -4638,10 +5197,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 constraint: None,
                 includes,
             })),
+            docs_url,
         });
-        self.add_class(name.1, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(name.1, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SyntaxKind::EnumClassDeclaration)
     }
@@ -4652,12 +5213,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enum_class_enumerator(
         &mut self,
-        modifiers: Self::R,
-        type_: Self::R,
-        name: Self::R,
-        _initializer: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        type_: Self::Output,
+        name: Self::Output,
+        _initializer: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let name = match self.expect_name(name) {
             Some(name) => name,
@@ -4673,9 +5234,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         } else {
             ClassConstKind::CCConcrete
         };
+        let type_pos = self.get_pos(type_);
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+        let type_ = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(type_pos)), Ty_::Tlike(type_)))
+        } else {
+            type_
+        };
         let class_name = match self.classish_name_builder.get_current_classish_name() {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -4697,10 +5264,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_tuple_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = self.merge_positions(left_paren, right_paren);
@@ -4710,11 +5277,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_tuple_type_explicit_specifier(
         &mut self,
-        keyword: Self::R,
-        _left_angle: Self::R,
-        types: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        keyword: Self::Output,
+        _left_angle: Self::Output,
+        types: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = (self.get_pos(keyword), "\\tuple");
         // This is an error--tuple syntax is (A, B), not tuple<A, B>.
         // OCaml decl makes a Tapply rather than a Ttuple here.
@@ -4723,10 +5290,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_intersection_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _ampersand)) => self.node_to_ty(ty),
@@ -4737,10 +5304,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_union_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _bar)) => self.node_to_ty(ty),
@@ -4751,12 +5318,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_shape_type_specifier(
         &mut self,
-        shape: Self::R,
-        _lparen: Self::R,
-        fields: Self::R,
-        open: Self::R,
-        rparen: Self::R,
-    ) -> Self::R {
+        shape: Self::Output,
+        _lparen: Self::Output,
+        fields: Self::Output,
+        open: Self::Output,
+        rparen: Self::Output,
+    ) -> Self::Output {
         let fields = fields;
         let fields_iter = fields.iter();
         let mut fields = AssocListMut::new_in(self.arena);
@@ -4765,22 +5332,34 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
+        let pos = self.get_pos(open);
+        let reason = self.alloc(Reason::hint(pos));
         let kind = match open.token_kind() {
-            Some(TokenKind::DotDotDot) => ShapeKind::OpenShape,
-            _ => ShapeKind::ClosedShape,
+            // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
+            Some(TokenKind::DotDotDot) => self.alloc(Ty(
+                reason,
+                if self.implicit_sdt() {
+                    self.make_supportdyn(pos, Ty_::Tmixed)
+                } else {
+                    Ty_::Tmixed
+                },
+            )),
+            // Closed shapes are expressed using `nothing` (empty union) as the type of unknown fields
+            _ => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
         };
         let pos = self.merge_positions(shape, rparen);
-        self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into()))))
+        let origin = TypeOrigin::MissingOrigin;
+        self.hint_ty(pos, Ty_::Tshape(self.alloc((origin, kind, fields.into()))))
     }
 
     fn make_classname_type_specifier(
         &mut self,
-        classname: Self::R,
-        _lt: Self::R,
-        targ: Self::R,
-        _trailing_comma: Self::R,
-        gt: Self::R,
-    ) -> Self::R {
+        classname: Self::Output,
+        _lt: Self::Output,
+        targ: Self::Output,
+        _trailing_comma: Self::Output,
+        gt: Self::Output,
+    ) -> Self::Output {
         let id = match classname.as_id() {
             Some(id) => id,
             None => return Node::Ignored(SK::ClassnameTypeSpecifier),
@@ -4798,10 +5377,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_scope_resolution_expression(
         &mut self,
-        class_name: Self::R,
-        _operator: Self::R,
-        value: Self::R,
-    ) -> Self::R {
+        class_name: Self::Output,
+        _operator: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(class_name, value);
         let Id(class_name_pos, class_name_str) = match self.expect_name(class_name) {
             Some(id) => {
@@ -4811,7 +5390,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 {
                     // for facts, allow xhp class consts to be mangled later
                     // on even when xhp_element_mangling is disabled
-                    let mut qualified = String::with_capacity_in(id.1.len() + 1, self.arena);
+                    let mut qualified = bump::String::with_capacity_in(id.1.len() + 1, self.arena);
                     qualified.push_str("\\");
                     qualified.push_str(id.1);
                     Id(id.0, self.arena.alloc_str(&qualified))
@@ -4843,11 +5422,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_field_specifier(
         &mut self,
-        question_token: Self::R,
-        name: Self::R,
-        _arrow: Self::R,
-        type_: Self::R,
-    ) -> Self::R {
+        question_token: Self::Output,
+        name: Self::Output,
+        _arrow: Self::Output,
+        type_: Self::Output,
+    ) -> Self::Output {
         let optional = question_token.is_present();
         let ty = match self.node_to_ty(type_) {
             Some(ty) => ty,
@@ -4863,18 +5442,23 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_field_initializer(&mut self, key: Self::R, _arrow: Self::R, value: Self::R) -> Self::R {
+    fn make_field_initializer(
+        &mut self,
+        key: Self::Output,
+        _arrow: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((key, value)))
     }
 
     fn make_varray_type_specifier(
         &mut self,
-        varray_keyword: Self::R,
-        _less_than: Self::R,
-        tparam: Self::R,
-        _trailing_comma: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        varray_keyword: Self::Output,
+        _less_than: Self::Output,
+        tparam: Self::Output,
+        _trailing_comma: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         let tparam = match self.node_to_ty(tparam) {
             Some(ty) => ty,
             None => self.tany_with_pos(self.get_pos(varray_keyword)),
@@ -4893,14 +5477,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_darray_type_specifier(
         &mut self,
-        darray: Self::R,
-        _less_than: Self::R,
-        key_type: Self::R,
-        _comma: Self::R,
-        value_type: Self::R,
-        _trailing_comma: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        darray: Self::Output,
+        _less_than: Self::Output,
+        key_type: Self::Output,
+        _comma: Self::Output,
+        value_type: Self::Output,
+        _trailing_comma: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(darray, greater_than);
         let key_type = self.node_to_ty(key_type).unwrap_or(TANY);
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
@@ -4918,10 +5502,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_old_attribute_specification(
         &mut self,
-        ltlt: Self::R,
-        attrs: Self::R,
-        gtgt: Self::R,
-    ) -> Self::R {
+        ltlt: Self::Output,
+        attrs: Self::Output,
+        gtgt: Self::Output,
+    ) -> Self::Output {
+        if attrs.contains_marker_attribute("__NoAutoDynamic") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = true;
+        }
         match attrs {
             Node::List(nodes) => {
                 Node::BracketedList(self.alloc((self.get_pos(ltlt), nodes, self.get_pos(gtgt))))
@@ -4932,11 +5520,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_constructor_call(
         &mut self,
-        name: Self::R,
-        _left_paren: Self::R,
-        args: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        name: Self::Output,
+        _left_paren: Self::Output,
+        args: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         let unqualified_name = match self.expect_name(name) {
             Some(name) => name,
             None => return Node::Ignored(SK::ConstructorCall),
@@ -4964,7 +5552,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 {
                     // for facts, allow xhp class consts to be mangled later on
                     // even when xhp_element_mangling is disabled
-                    let mut qualified = String::with_capacity_in(class_name.len() + 1, self.arena);
+                    let mut qualified =
+                        bump::String::with_capacity_in(class_name.len() + 1, self.arena);
                     qualified.push_str("\\");
                     qualified.push_str(class_name);
                     Id(pos, self.arena.alloc_str(&qualified))
@@ -4977,7 +5566,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 if self.retain_or_omit_user_attributes_for_facts =>
             {
                 Some(ClassNameParam {
-                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(*name)),
+                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(name)),
                     full_pos,
                 })
             }
@@ -4991,15 +5580,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Module" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Docs"
+            | "__CrossPackage" => true,
             _ => false,
         } {
-            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
+            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {
                 match *expr {
                     aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
-                    aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
-                        fold_string_concat(e1, acc);
-                        fold_string_concat(e2, acc);
+                    aast::Expr(
+                        _,
+                        _,
+                        aast::Expr_::Binop(&aast::Binop {
+                            bop: Bop::Dot,
+                            lhs,
+                            rhs,
+                        }),
+                    ) => {
+                        fold_string_concat(lhs, acc);
+                        fold_string_concat(rhs, acc);
                     }
                     _ => {}
                 }
@@ -5008,7 +5606,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             self.slice(args.iter().filter_map(|expr| match expr {
                 Node::StringLiteral((x, p)) => Some((*p, *x)),
                 Node::Expr(e @ aast::Expr(_, p, aast::Expr_::Binop(_))) => {
-                    let mut acc = Vec::new_in(self.arena);
+                    let mut acc = bump::Vec::new_in(self.arena);
                     fold_string_concat(e, &mut acc);
                     Some((p, acc.into_bump_slice().into()))
                 }
@@ -5027,35 +5625,28 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_trait_use(
         &mut self,
-        _keyword: Self::R,
-        names: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        Node::TraitUse(self.alloc(names))
-    }
-
-    fn make_trait_use_conflict_resolution(
-        &mut self,
-        _keyword: Self::R,
-        names: Self::R,
-        _left_brace: Self::R,
-        _clauses: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        names: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::TraitUse(self.alloc(names))
     }
 
     fn make_require_clause(
         &mut self,
-        _keyword: Self::R,
-        require_type: Self::R,
-        name: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        require_type: Self::Output,
+        name: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::RequireClause(self.alloc(RequireClause { require_type, name }))
     }
 
-    fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
+    fn make_nullable_type_specifier(
+        &mut self,
+        question_mark: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(question_mark, hint);
         let ty = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5064,7 +5655,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.hint_ty(pos, Ty_::Toption(ty))
     }
 
-    fn make_like_type_specifier(&mut self, tilde: Self::R, hint: Self::R) -> Self::R {
+    fn make_like_type_specifier(
+        &mut self,
+        tilde: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(tilde, hint);
         let ty = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5075,27 +5670,32 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_closure_type_specifier(
         &mut self,
-        outer_left_paren: Self::R,
-        readonly_keyword: Self::R,
-        _function_keyword: Self::R,
-        _inner_left_paren: Self::R,
-        parameter_list: Self::R,
-        _inner_right_paren: Self::R,
-        capability: Self::R,
-        _colon: Self::R,
-        readonly_ret: Self::R,
-        return_type: Self::R,
-        outer_right_paren: Self::R,
-    ) -> Self::R {
+        outer_left_paren: Self::Output,
+        readonly_keyword: Self::Output,
+        _function_keyword: Self::Output,
+        _inner_left_paren: Self::Output,
+        parameter_list: Self::Output,
+        _inner_right_paren: Self::Output,
+        capability: Self::Output,
+        _colon: Self::Output,
+        readonly_ret: Self::Output,
+        return_type: Self::Output,
+        outer_right_paren: Self::Output,
+    ) -> Self::Output {
         let mut ft_variadic = false;
         let mut make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
 
-            match fp.kind {
-                ParamMode::FPinout => {
-                    flags |= FunParamFlags::INOUT;
+            let pos = self.get_pos(fp.hint);
+            let mut param_type = self.node_to_ty(fp.hint).unwrap_or(TANY);
+            if let ParamMode::FPinout = fp.kind {
+                flags |= FunParamFlags::INOUT;
+                // Pessimise type for inout
+                param_type = if self.implicit_sdt() {
+                    self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(param_type)))
+                } else {
+                    param_type
                 }
-                ParamMode::FPnormal => {}
             };
 
             if fp.readonly {
@@ -5106,11 +5706,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
 
             self.alloc(FunParam {
-                pos: self.get_pos(fp.hint),
+                pos,
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
                     enforced: Enforcement::Unenforced,
-                    type_: self.node_to_ty(fp.hint).unwrap_or(TANY),
+                    type_: param_type,
                 }),
                 flags,
             })
@@ -5139,29 +5739,38 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             flags |= FunTypeFlags::VARIADIC
         }
 
-        self.hint_ty(
-            pos,
-            Ty_::Tfun(self.alloc(FunType {
-                tparams: &[],
-                where_constraints: &[],
-                params,
-                implicit_params,
-                ret: self.alloc(PossiblyEnforcedTy {
-                    enforced: Enforcement::Unenforced,
-                    type_: ret,
-                }),
-                flags,
-                ifc_decl: default_ifc_fun_decl(),
-            })),
-        )
+        let pess_return_type = if self.implicit_sdt() {
+            self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
+        } else {
+            ret
+        };
+        let fty = Ty_::Tfun(self.alloc(FunType {
+            tparams: &[],
+            where_constraints: &[],
+            params,
+            implicit_params,
+            ret: self.alloc(PossiblyEnforcedTy {
+                enforced: Enforcement::Unenforced,
+                type_: pess_return_type,
+            }),
+            flags,
+            ifc_decl: default_ifc_fun_decl(),
+            cross_package: None,
+        }));
+
+        if self.implicit_sdt() {
+            self.hint_ty(pos, self.make_supportdyn(pos, fty))
+        } else {
+            self.hint_ty(pos, fty)
+        }
     }
 
     fn make_closure_parameter_type_specifier(
         &mut self,
-        inout: Self::R,
-        readonly: Self::R,
-        hint: Self::R,
-    ) -> Self::R {
+        inout: Self::Output,
+        readonly: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
         } else {
@@ -5182,22 +5791,23 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_const_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        _const_keyword: Self::R,
-        _type_keyword: Self::R,
-        name: Self::R,
-        _type_parameters: Self::R,
-        constraints: Self::R,
-        _equal: Self::R,
-        type_: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _const_keyword: Self::Output,
+        _type_keyword: Self::Output,
+        name: Self::Output,
+        _type_parameters: Self::Output,
+        constraints: Self::Output,
+        _equal: Self::Output,
+        type_: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let attributes = self.to_attributes(attributes);
         let has_abstract_keyword = modifiers
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
-        let reduce_bounds = |mut constraints: Vec<'a, &Ty<'a>>| {
+        let reduce_bounds = |mut constraints: bump::Vec<'a, &Ty<'a>>,
+                             f: fn(&'a [&Ty<'a>]) -> Ty_<'a>| {
             if constraints.len() == 1 {
                 constraints.pop().map(|ty| self.alloc(ty.clone()))
             } else {
@@ -5205,37 +5815,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 // map doesn't allow moving out of borrowed constraints
                 match constraints.first() {
                     None => None, // no bounds
-                    Some(fst) => Some(
-                        self.alloc(Ty(fst.0, Ty_::Tintersection(constraints.into_bump_slice()))),
-                    ),
+                    Some(fst) => Some(self.alloc(Ty(fst.0, f(constraints.into_bump_slice())))),
                 }
             }
         };
         let type_ = self.node_to_ty(type_);
         let kind = if has_abstract_keyword {
             // Abstract type constant in EBNF-like notation:
-            //     abstract const type T {as X} [= Z];
-            let as_constraint = reduce_bounds(constraints.iter().fold(
-                Vec::new_in(self.arena),
-                |mut tys, constraint| {
-                    if let Node::TypeConstraint(&(kind, hint)) = constraint {
-                        use ConstraintKind::*;
-                        match kind {
-                            ConstraintAs => {
-                                if let Some(ty) = self.node_to_ty(hint) {
-                                    tys.push(ty);
-                                }
-                            }
-                            ConstraintSuper => (/* TODO(leoo) implement later */),
-                            _ => (),
-                        };
-                    };
-                    tys
-                },
-            ));
+            //     abstract const type T {as U | super L} [= D];
+            let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
             Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
-                as_constraint,
-                super_constraint: None,
+                // `as T1 as T2 as ...` == `as (T1 & T2 & ...)`
+                as_constraint: reduce_bounds(upper, |tys| Ty_::Tintersection(tys)),
+                // `super T1 super T2 super ...` == `super (T1 | T2 | ...)`
+                super_constraint: reduce_bounds(lower, |tys| Ty_::Tunion(tys)),
                 default: type_,
             }))
         } else if let Some(tc_type) = type_ {
@@ -5264,16 +5857,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_context_const_declaration(
         &mut self,
-        modifiers: Self::R,
-        _const_keyword: Self::R,
-        _ctx_keyword: Self::R,
-        name: Self::R,
-        _type_parameters: Self::R,
-        constraints: Self::R,
-        _equal: Self::R,
-        ctx_list: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        _const_keyword: Self::Output,
+        _ctx_keyword: Self::Output,
+        name: Self::Output,
+        _type_parameters: Self::Output,
+        constraints: Self::Output,
+        _equal: Self::Output,
+        ctx_list: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::TypeConstDeclaration),
@@ -5317,16 +5910,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_decorated_expression(&mut self, decorator: Self::R, expr: Self::R) -> Self::R {
+    fn make_decorated_expression(
+        &mut self,
+        decorator: Self::Output,
+        expr: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((decorator, expr)))
     }
 
     fn make_type_constant(
         &mut self,
-        ty: Self::R,
-        _coloncolon: Self::R,
-        constant_name: Self::R,
-    ) -> Self::R {
+        ty: Self::Output,
+        _coloncolon: Self::Output,
+        constant_name: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(constant_name) {
             Some(id) => id,
             None => return Node::Ignored(SK::TypeConstant),
@@ -5364,7 +5961,117 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {
+    fn make_type_in_refinement(
+        &mut self,
+        _type_keyword: Self::Output,
+        type_constant_name: Self::Output,
+        _type_params: Self::Output,
+        constraints: Self::Output,
+        _equal_token: Self::Output,
+        type_specifier: Self::Output,
+    ) -> Self::Output {
+        let Id(_, id) = match self.expect_name(type_constant_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::TypeInRefinement),
+        };
+        let bound = if type_specifier.is_ignored() {
+            // A loose refinement, with bounds
+            let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
+            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                lower: lower.into_bump_slice(),
+                upper: upper.into_bump_slice(),
+            }))
+        } else {
+            // An exact refinement
+            let ty = match self.node_to_ty(type_specifier) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeInRefinement),
+            };
+            RefinedConstBound::TRexact(ty)
+        };
+        Node::RefinedConst(self.alloc((
+            id,
+            RefinedConst {
+                bound,
+                is_ctx: false,
+            },
+        )))
+    }
+
+    fn make_ctx_in_refinement(
+        &mut self,
+        _ctx_keyword: Self::Output,
+        ctx_constant_name: Self::Output,
+        _type_params: Self::Output,
+        constraints: Self::Output,
+        _equal_token: Self::Output,
+        ctx_list: Self::Output,
+    ) -> Self::Output {
+        let Id(_, id) = match self.expect_name(ctx_constant_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::TypeInRefinement),
+        };
+        let bound = if ctx_list.is_ignored() {
+            // A loose refinement, with bounds
+            let (lower, upper) = self.partition_ctx_bounds_into_lower_and_upper(constraints);
+            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                lower: lower.into_bump_slice(),
+                upper: upper.into_bump_slice(),
+            }))
+        } else {
+            // An exact refinement
+            let ty = match self.node_to_ty(ctx_list) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeInRefinement),
+            };
+            RefinedConstBound::TRexact(ty)
+        };
+        Node::RefinedConst(self.alloc((
+            id,
+            RefinedConst {
+                bound,
+                is_ctx: true,
+            },
+        )))
+    }
+
+    fn make_type_refinement(
+        &mut self,
+        root_type: Self::Output,
+        _with_keyword: Self::Output,
+        _left_brace: Self::Output,
+        members: Self::Output,
+        right_brace: Self::Output,
+    ) -> Self::Output {
+        let pos = self.merge_positions(root_type, right_brace);
+        let reason = self.alloc(Reason::hint(pos));
+        let root_type = match self.node_to_ty(root_type) {
+            Some(ty) => ty,
+            None => return Node::Ignored(SK::TypeRefinement),
+        };
+        let const_members = arena_collections::map::Map::from(
+            self.arena,
+            members.iter().filter_map(|node| match node {
+                Node::ListItem(&(node, _)) | &node => match node {
+                    Node::RefinedConst(&(id, ctr)) => Some((id, ctr)),
+                    _ => None,
+                },
+            }),
+        );
+        let class_ref = ClassRefinement {
+            cr_consts: const_members,
+        };
+        Node::Ty(self.alloc(Ty(
+            reason,
+            Ty_::Trefinement(self.alloc((root_type, class_ref))),
+        )))
+    }
+
+    fn make_soft_type_specifier(
+        &mut self,
+        at_token: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(at_token, hint);
         let hint = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5383,7 +6090,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )
     }
 
-    fn make_attribute_specification(&mut self, attributes: Self::R) -> Self::R {
+    fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
+        if attributes.contains_marker_attribute("__NoAutoDynamic") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = true;
+        }
         if self.retain_or_omit_user_attributes_for_facts {
             attributes
         } else {
@@ -5391,7 +6102,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_attribute(&mut self, _at: Self::R, attribute: Self::R) -> Self::R {
+    fn make_attribute(&mut self, _at: Self::Output, attribute: Self::Output) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             attribute
         } else {
@@ -5401,7 +6112,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     // A type specifier preceded by an attribute list. At the time of writing,
     // only the <<__Soft>> attribute is permitted here.
-    fn make_attributized_specifier(&mut self, attributes: Self::R, hint: Self::R) -> Self::R {
+    fn make_attributized_specifier(
+        &mut self,
+        attributes: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         match attributes {
             Node::BracketedList((
                 ltlt_pos,
@@ -5439,12 +6154,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_vector_type_specifier(
         &mut self,
-        vec: Self::R,
-        _left_angle: Self::R,
-        hint: Self::R,
-        _trailing_comma: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        vec: Self::Output,
+        _left_angle: Self::Output,
+        hint: Self::Output,
+        _trailing_comma: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(vec) {
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
@@ -5455,11 +6170,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_dictionary_type_specifier(
         &mut self,
-        dict: Self::R,
-        _left_angle: Self::R,
-        type_arguments: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        dict: Self::Output,
+        _left_angle: Self::Output,
+        type_arguments: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(dict) {
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
@@ -5470,12 +6185,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_keyset_type_specifier(
         &mut self,
-        keyset: Self::R,
-        _left_angle: Self::R,
-        hint: Self::R,
-        _trailing_comma: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        keyset: Self::Output,
+        _left_angle: Self::Output,
+        hint: Self::Output,
+        _trailing_comma: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(keyset) {
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
@@ -5484,105 +6199,169 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
-    fn make_variable_expression(&mut self, _expression: Self::R) -> Self::R {
+    fn make_variable_expression(&mut self, _expression: Self::Output) -> Self::Output {
         Node::Ignored(SK::VariableExpression)
     }
 
     fn make_file_attribute_specification(
         &mut self,
-        _left_double_angle: Self::R,
-        _keyword: Self::R,
-        _colon: Self::R,
-        attributes: Self::R,
-        _right_double_angle: Self::R,
-    ) -> Self::R {
+        _left_double_angle: Self::Output,
+        _keyword: Self::Output,
+        _colon: Self::Output,
+        attributes: Self::Output,
+        _right_double_angle: Self::Output,
+    ) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
-            self.file_attributes = List::empty();
+            let this = Rc::make_mut(&mut self.state);
+            this.file_attributes = List::empty();
             for attr in attributes.iter() {
                 match attr {
-                    Node::Attribute(attr) => self
+                    Node::Attribute(attr) => this
                         .file_attributes
-                        .push_front(self.user_attribute_to_decl(attr), self.arena),
+                        .push_front(this.user_attribute_to_decl(attr), this.arena),
                     _ => {}
                 }
             }
         }
-        self.set_module_if_unset(&attributes);
         Node::Ignored(SK::FileAttributeSpecification)
     }
 
     fn make_subscript_expression(
         &mut self,
-        _receiver: Self::R,
-        _left_bracket: Self::R,
-        _index: Self::R,
-        _right_bracket: Self::R,
-    ) -> Self::R {
+        _receiver: Self::Output,
+        _left_bracket: Self::Output,
+        _index: Self::Output,
+        _right_bracket: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::SubscriptExpression)
     }
 
     fn make_member_selection_expression(
         &mut self,
-        _object: Self::R,
-        _operator: Self::R,
-        _name: Self::R,
-    ) -> Self::R {
+        _object: Self::Output,
+        _operator: Self::Output,
+        _name: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::MemberSelectionExpression)
     }
 
     fn make_object_creation_expression(
         &mut self,
-        _new_keyword: Self::R,
-        _object: Self::R,
-    ) -> Self::R {
+        _new_keyword: Self::Output,
+        _object: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::ObjectCreationExpression)
     }
 
     fn make_safe_member_selection_expression(
         &mut self,
-        _object: Self::R,
-        _operator: Self::R,
-        _name: Self::R,
-    ) -> Self::R {
+        _object: Self::Output,
+        _operator: Self::Output,
+        _name: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::SafeMemberSelectionExpression)
     }
 
     fn make_function_call_expression(
         &mut self,
-        _receiver: Self::R,
-        _type_args: Self::R,
-        _left_paren: Self::R,
-        _argument_list: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        _receiver: Self::Output,
+        _type_args: Self::Output,
+        _left_paren: Self::Output,
+        _argument_list: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::FunctionCallExpression)
     }
 
     fn make_list_expression(
         &mut self,
-        _keyword: Self::R,
-        _left_paren: Self::R,
-        _members: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        _left_paren: Self::Output,
+        _members: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::ListExpression)
     }
 
     fn make_module_declaration(
         &mut self,
-        _attributes: Self::R,
-        _module_keyword: Self::R,
-        name: Self::R,
-        _left_brace: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _attributes: Self::Output,
+        _new_keyword: Self::Output,
+        _module_keyword: Self::Output,
+        name: Self::Output,
+        _left_brace: Self::Output,
+        exports: Self::Output,
+        imports: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
+        if let Node::ModuleName(&(parts, pos)) = name {
+            let module_name = self.module_name_string_from_parts(parts, pos);
+            let map_references = |references_list| match references_list {
+                Node::List(&references) => Some(self.slice(references.iter().filter_map(
+                    |reference| match reference {
+                        Node::ModuleName(&(name, _)) => {
+                            Some(self.module_reference_from_parts(module_name, name))
+                        }
+                        _ => None,
+                    },
+                ))),
+                _ => None,
+            };
+            let exports = map_references(exports);
+            let imports = map_references(imports);
+            let module = self.alloc(shallow_decl_defs::ModuleDefType {
+                pos,
+                exports,
+                imports,
+            });
+            let this = Rc::make_mut(&mut self.state);
+            this.add_module(module_name, module);
+        }
+        Node::Ignored(SK::ModuleDeclaration)
+    }
+
+    fn make_module_exports(
+        &mut self,
+        _exports_keyword: Self::Output,
+        _left_brace: Self::Output,
+        clauses: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
+        match clauses {
+            Node::List(_) => clauses,
+            _ => Node::List(self.alloc(bumpalo::vec![in self.arena;].into_bump_slice())),
+        }
+    }
+
+    fn make_module_imports(
+        &mut self,
+        _imports_keyword: Self::Output,
+        _left_brace: Self::Output,
+        clauses: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
+        match clauses {
+            Node::List(_) => clauses,
+            _ => Node::List(self.alloc(bumpalo::vec![in self.arena;].into_bump_slice())),
+        }
+    }
+
+    fn make_module_membership_declaration(
+        &mut self,
+        _module_keyword: Self::Output,
+        name: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         match name {
-            Node::Name(&(name, mdt_pos)) => {
-                let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
-                self.add_module(name, module);
+            Node::ModuleName(&(parts, pos)) => {
+                if self.module.is_none() {
+                    let name = self.module_name_string_from_parts(parts, pos);
+                    let this = Rc::make_mut(&mut self.state);
+                    this.module = Some(Id(pos, name));
+                }
             }
             _ => {}
         }
-        Node::Ignored(SK::ModuleDeclaration)
+        Node::Ignored(SK::ModuleMembershipDeclaration)
     }
 }

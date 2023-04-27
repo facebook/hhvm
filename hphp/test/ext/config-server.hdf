@@ -6,7 +6,7 @@ Log {
 
 Server {
   Port = 0
-  SourceRoot != echo $(pwd)/runtime/tmp
+  SourceRoot = runtime/tmp
   ThreadCount = 1
   AllowedFiles {
     0 = string

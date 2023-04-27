@@ -16,11 +16,8 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
-
-#include "hphp/util/optional.h"
-
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/util/optional.h"
 
@@ -28,7 +25,7 @@ namespace HPHP {
 namespace Facts {
 
 struct PathAndOptionalHash {
-  folly::fs::path m_path;
+  std::filesystem::path m_path;
   Optional<std::string> m_hash;
 };
 

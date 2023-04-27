@@ -35,11 +35,11 @@ OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
 }
 
 OutputFile::~OutputFile() {
-  OutputFile::closeImpl();
+  OutputFile::close();
 }
 
 void OutputFile::sweep() {
-  closeImpl();
+  OutputFile::close();
   File::sweep();
 }
 
@@ -47,12 +47,7 @@ bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
   raise_fatal_error("cannot open a php://output file ");
 }
 
-bool OutputFile::close() {
-  return closeImpl();
-}
-
-bool OutputFile::closeImpl() {
-  *s_pcloseRet = 0;
+bool OutputFile::close(int*) {
   if (!isClosed()) {
     setIsClosed(true);
     return true;

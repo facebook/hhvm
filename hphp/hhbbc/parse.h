@@ -15,19 +15,23 @@
 */
 #pragma once
 
-#include <vector>
 #include <memory>
 
+#include "hphp/hhbbc/representation.h"
+
 namespace HPHP { struct UnitEmitter; }
+
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace php { struct Program; }
-
-void parse_unit(php::Program& prog, const UnitEmitter* ue);
+struct ParsedUnit {
+  std::unique_ptr<php::Unit> unit;
+  std::vector<std::unique_ptr<php::Func>> funcs;
+  std::vector<std::unique_ptr<php::Class>> classes;
+};
+ParsedUnit parse_unit(const UnitEmitter& ue);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

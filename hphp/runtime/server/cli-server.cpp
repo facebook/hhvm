@@ -744,12 +744,7 @@ void check_cli_server_access(ucred& cred) {
     if (!s_allowedGroups.empty()) {
       FTRACE(2, "check_cli_server_access: starting slow check...\n");
 
-      // The signature for getgrouplist differs for Apple
-#ifdef __APPLE__
-      std::vector<int> groups;
-#else
       std::vector<gid_t> groups;
-#endif
       int ngroups = 0;
       UserInfo user(cred.uid);
       if (getgrouplist(user.pw->pw_name, cred.gid, nullptr, &ngroups) != -1) {
@@ -975,7 +970,7 @@ void CLIWorker::doJob(int client) {
 
     Array envArr;
 
-    int ret = 255;
+    int ret = 1;
     init_command_line_session(args.size(), buf.get());
 
     SCOPE_EXIT { Logger::FInfo("Completed command with return code {}", ret); };
@@ -1094,6 +1089,10 @@ void CLIWorker::doJob(int client) {
     }
   } catch (const Exception& ex) {
     Logger::Warning("CLI Job failed: %s", ex.what());
+  } catch (const std::exception& ex) {
+    Logger::FError("CLI Job failed with C++ exception: {}", ex.what());
+  } catch (...) {
+    Logger::Error("CLI Job failed with unknown exception");
   }
 
   if (close(client) == -1) {
@@ -1601,9 +1600,6 @@ Optional<int> cli_process_command_loop(int fd) {
       std::string xattr;
       cli_read(fd, path, xattr);
 
-#if !defined(__linux__)
-      cli_write(fd, false, std::string{});
-#else
       std::string buf;
       buf.resize(64);
 
@@ -1625,7 +1621,6 @@ Optional<int> cli_process_command_loop(int fd) {
         }
         cli_write(fd, false, std::string{});
       }();
-#endif
       continue;
     }
 
@@ -1713,7 +1708,7 @@ Optional<int> run_client(const char* sock_path,
       "It likely crashed. Check the HHVM error log and look for coredumps",
       ex.what()
     );
-    exit(255);
+    exit(HPHP_EXIT_FAILURE);
   }
 }
 
@@ -1858,6 +1853,15 @@ void run_command_on_cli_server(const char* sock_path,
     if (!r) return;
     ret = *r;
     count--;
+    if (count > 0) {
+      // If we're running an unit test with multiple runs, provide
+      // a separator between the runs.
+      if (auto const sep = getenv("HHVM_MULTI_COUNT_SEP")) {
+        fflush(stderr);
+        printf("%s", sep);
+        fflush(stdout);
+      }
+    }
   }
   hphp_process_exit();
   exit(ret);

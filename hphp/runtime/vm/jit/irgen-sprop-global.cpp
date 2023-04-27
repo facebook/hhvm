@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
@@ -33,13 +35,13 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy) {
   auto const prevValue = gen(env, LdMem, prevTy, ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
-  decRef(env, prevValue, DecRefProfileId::Default);
+  decRef(env, prevValue);
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
   if (env.irb->inUnreachableState()) return;
   assertx(name == topC(env));
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -80,6 +82,10 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
     } else {
       knownType -= TUninit;
     }
+  }
+
+  if (prop.attrs & AttrInternal) {
+    emitModuleBoundaryCheckKnown(env, &prop);
   }
 
   profileRDSAccess(env, handle);
@@ -189,7 +195,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (!ssaCls->hasConstVal()) return false;
     auto const cls = ssaCls->clsVal();
 
-    auto const lookup = cls->findSProp(curClass(env), propName);
+    auto const lookup = cls->findSProp(MemberLookupContext(curClass(env), curUnit(env)->moduleName()), propName);
 
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
@@ -209,8 +215,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (lookup.propPtr) return lookup;
   }
 
-  auto const ctxClass = curClass(env);
-  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
+  auto const ctxFunc = cns(env, curFunc(env));
   auto const data = ReadonlyData{ opts.readOnlyCheck };
   auto const knownType = opts.ignoreLateInit ? TCell : TInitCell;
   auto const propAddr = gen(
@@ -220,7 +225,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     knownType,
     ssaCls,
     ssaName,
-    ctxTmp,
+    ctxFunc,
     cns(env, opts.ignoreLateInit),
     cns(env, opts.writeMode)
   );
@@ -421,7 +426,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
 
   gen(env, StMem, lookup.propPtr, result);
   gen(env, IncRef, result);
-  decRef(env, oldVal, DecRefProfileId::Default);
+  decRef(env, oldVal);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -569,7 +569,7 @@ struct sparse_id_map {
   bool empty() const { return !size(); }
 
   /*
-   * Clear all members from the map.  O(1) if V is trivially destructable,
+   * Clear all members from the map.  O(1) if V is trivially destructible,
    * O(size()) if not.
    *
    * Post: empty()

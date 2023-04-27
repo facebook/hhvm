@@ -1,0 +1,271 @@
+'\" t
+.\"     Title: \fBmysql_config\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQL_CONFIG\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysql_config \- display options for compiling clients
+.SH "SYNOPSIS"
+.HP \w'\fBmysql_config\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBmysql_config \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBmysql_config\fR
+provides you with useful information for compiling your MySQL client and connecting it to MySQL\&. It is a shell script, so it is available only on Unix and Unix\-like systems\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fBpkg\-config\fR
+can be used as an alternative to
+\fBmysql_config\fR
+for obtaining information such as compiler flags or link libraries required to compile MySQL applications\&. For more information, see
+Section\ \&28.7.3.2, \(lqBuilding C API Client Programs Using pkg-config\(rq\&.
+.sp .5v
+.RE
+.PP
+\fBmysql_config\fR
+supports the following options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-cflags\fR
+.sp
+C Compiler flags to find include files and critical compiler flags and defines used when compiling the
+libmysqlclient
+library\&. The options returned are tied to the specific compiler that was used when the library was created and might clash with the settings for your own compiler\&. Use
+\fB\-\-include\fR
+for more portable options that contain only include paths\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-cxxflags\fR
+.sp
+Like
+\fB\-\-cflags\fR, but for C++ compiler flags\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-include\fR
+.sp
+Compiler options to find MySQL include files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-libs\fR
+.sp
+Libraries and options required to link with the MySQL client library\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-libs_r\fR
+.sp
+Libraries and options required to link with the thread\-safe MySQL client library\&. In MySQL 8\&.0, all client libraries are thread\-safe, so this option need not be used\&. The
+\fB\-\-libs\fR
+option can be used in all cases\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-plugindir\fR
+.sp
+The default plugin directory path name, defined when configuring MySQL\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port\fR
+.sp
+The default TCP/IP port number, defined when configuring MySQL\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket\fR
+.sp
+The default Unix socket file, defined when configuring MySQL\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-variable=\fR\fB\fIvar_name\fR\fR
+.sp
+Display the value of the named configuration variable\&. Permitted
+\fIvar_name\fR
+values are
+pkgincludedir
+(the header file directory),
+pkglibdir
+(the library directory), and
+plugindir
+(the plugin directory)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR
+.sp
+Version number for the MySQL distribution\&.
+.RE
+.PP
+If you invoke
+\fBmysql_config\fR
+with no options, it displays a list of all options that it supports, and their values:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql_config\fR
+Usage: /usr/local/mysql/bin/mysql_config [options]
+Options:
+  \-\-cflags         [\-I/usr/local/mysql/include/mysql \-mcpu=pentiumpro]
+  \-\-cxxflags       [\-I/usr/local/mysql/include/mysql \-mcpu=pentiumpro]
+  \-\-include        [\-I/usr/local/mysql/include/mysql]
+  \-\-libs           [\-L/usr/local/mysql/lib/mysql \-lmysqlclient
+                    \-lpthread \-lm \-lrt \-lssl \-lcrypto \-ldl]
+  \-\-libs_r         [\-L/usr/local/mysql/lib/mysql \-lmysqlclient_r
+                    \-lpthread \-lm \-lrt \-lssl \-lcrypto \-ldl]
+  \-\-plugindir      [/usr/local/mysql/lib/plugin]
+  \-\-socket         [/tmp/mysql\&.sock]
+  \-\-port           [3306]
+  \-\-version        [5\&.8\&.0\-m17]
+  \-\-variable=VAR   VAR is one of:
+          pkgincludedir [/usr/local/mysql/include]
+          pkglibdir     [/usr/local/mysql/lib]
+          plugindir     [/usr/local/mysql/lib/plugin]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+You can use
+\fBmysql_config\fR
+within a command line using backticks to include the output that it produces for particular options\&. For example, to compile and link a MySQL client program, use
+\fBmysql_config\fR
+as follows:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+gcc \-c `mysql_config \-\-cflags` progname\&.c
+gcc \-o progname progname\&.o `mysql_config \-\-libs`
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

@@ -99,6 +99,11 @@ The output backtrace has the following format:
         fp = (fp, rip)
 
         while fp:
+            # In the frame pointed to by `fp', the previous `$rbp' value is found
+            # at fp[0], and the saved `$rip` value is found 8 bytes
+            # after that, i.e. fp[1] (i.e. fp[0] + sizeof(uintptr_t)).
+            # Note that this also corresponds to the first two uint64_t fields
+            # of HPHP::ActRec.
             rip = fp[1]
             fp = fp[0].cast(fp_type)
 

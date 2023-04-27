@@ -1,0 +1,28 @@
+File "cast_non_primitive_bad.php", line 9, characters 3-19:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 13, characters 3-15:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 17, characters 3-17:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 26, characters 3-10:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 35, characters 3-10:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 44, characters 3-10:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 48, characters 3-13:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 73, characters 3-10:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 84, characters 3-11:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 85, characters 3-12:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 86, characters 3-14:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 87, characters 3-14:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 88, characters 3-14:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+File "cast_non_primitive_bad.php", line 89, characters 3-24:
+Casting a non-primitive to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])

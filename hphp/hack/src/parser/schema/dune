@@ -11,5 +11,5 @@
  (name parser_schema)
  (wrapped false)
  (modules full_fidelity_schema)
- (libraries parser_schema_def)
+ (libraries parser_schema_def core)
 )

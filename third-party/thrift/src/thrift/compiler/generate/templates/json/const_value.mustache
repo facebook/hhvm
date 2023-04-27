@@ -1,0 +1,27 @@
+<%={{ }}=%>
+{{#value:string?}}"{{value:value}}"{{/value:string?}}{{!
+}}{{^value:string?}}{{!
+  }}{{#value:value}}{{!
+    }}{{#value:string?}}"{{/value:string?}}{{value:value}}{{#value:string?}}"{{/value:string?}}{{!
+  }}{{/value:value}}{{!
+  }}{{#value:list?}}{{!
+    }}[{{!
+    }}{{#value:list_elements}}{{!
+      }}{{> const_value}}{{^last?}},{{/last?}}{{!
+    }}{{/value:list_elements}}{{!
+    }}]{{!
+  }}{{/value:list?}}{{!
+  }}{{#value:map?}}{{!
+    }}{{=<% %>=}}{<%={{ }}=%>{{!
+    }}{{#value:map_elements}}{{!
+      }}{{#element:key}}{{!
+        }}{{#value:value}}{{!
+          }}{{#value:string?}}"\"{{value:value}}\""{{/value:string?}}{{!
+          }}{{^value:string?}}"{{value:value}}"{{/value:string?}}{{!
+        }}{{/value:value}}{{! TODO(T20509094): support serialization of complex keys
+      }}{{/element:key}} : {{!
+      }}{{#element:value}}{{> const_value}}{{/element:value}}{{^last?}},{{/last?}}{{!
+    }}{{/value:map_elements}}{{!
+    }}{{=<% %>=}}}<%={{ }}=%>{{!
+  }}{{/value:map?}}{{!
+}}{{/value:string?}}

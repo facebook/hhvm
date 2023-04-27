@@ -1,6 +1,6 @@
 <?hh
 
-class Counter { static int $STATE = 1; static bool $CYCLE = true; }
+class Counter { public static int $STATE = 1; public static bool $CYCLE = true; }
 
 <<__NEVER_INLINE>> function update(string $caller): void {
   var_dump($caller."->".__FUNCTION__);

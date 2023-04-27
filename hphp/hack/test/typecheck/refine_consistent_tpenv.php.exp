@@ -1,0 +1,6 @@
+File "refine_consistent_tpenv.php", line 21, characters 9-9:
+Invalid argument (Typing[4110])
+  File "refine_consistent_tpenv.php", line 8, characters 39-42:
+  Expected `bool`
+  File "refine_consistent_tpenv.php", line 21, characters 9-9:
+  But got `int`

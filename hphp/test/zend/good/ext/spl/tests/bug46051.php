@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$x = new splfileinfo(__FILE__);
+$x = new SplFileInfo(__FILE__);
 
 try {
 $x->openFile(NULL, NULL, NULL);

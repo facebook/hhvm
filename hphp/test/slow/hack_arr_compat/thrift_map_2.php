@@ -66,6 +66,8 @@ class Mappish {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class Settish {
@@ -84,6 +86,8 @@ class Settish {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct {
@@ -100,6 +104,8 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function test() {
@@ -116,7 +122,7 @@ function test() {
 
   $p = new DummyProtocol();
   var_dump($v1);
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20, true);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
   $mappish_obj = thrift_protocol_read_compact($p, 'Mappish');
   var_dump($mappish_obj);
@@ -136,7 +142,7 @@ function test() {
 
   $p = new DummyProtocol();
   var_dump($v1);
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20, true);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
   $settish_obj = thrift_protocol_read_compact($p, 'Settish');
   var_dump($settish_obj);

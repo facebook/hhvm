@@ -432,7 +432,7 @@ void CompletionsCommand::addFuncConstantCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  NamedEntity::foreach_cached_func([&](Func* func) {
+  NamedFunc::foreach_cached_func([&](Func* func) {
     if (func->isGenerated()) return; //continue
     auto name = func->name()->toCppString();
     // Unit::getFunctions returns all lowercase names, lowercase here too.
@@ -451,7 +451,7 @@ void CompletionsCommand::addFuncConstantCompletions(
     );
   });
 
-  NamedEntity::foreach_cached_class([&](Class* c) {
+  NamedType::foreach_cached_class([&](Class* c) {
     if (!(c->attrs() & (AttrInterface | AttrTrait))) {
       auto const& name = c->name()->toCppString();
       addIfMatch(name, context.matchPrefix, CompletionTypeClass, targets);

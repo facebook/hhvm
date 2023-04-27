@@ -72,13 +72,6 @@ static MySQLStaticInitializer s_mysql_initializer;
 int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
                                  MySQLUtil::TimeoutType type,
                                  int ms) {
-#ifdef __APPLE__
-  // Work around a bug in webscalesql where setting a read or write timeout
-  // causes most mysql connections to fail (depending on the exact timing of
-  // packets). See https://github.com/webscalesql/webscalesql-5.6/issues/23
-  return 0;
-#endif
-
   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
 #ifdef MYSQL_MILLISECOND_TIMEOUT
   switch (type) {
@@ -138,8 +131,8 @@ MYSQL* MySQL::GetConn(const Variant& link_identifier,
     raise_warning("supplied argument is not a valid MySQL-Link resource");
   }
   // Don't return a connection where mysql_real_connect() failed to most
-  // f_mysql_* APIs (the ones that deal with errno where we do want to do this
-  // anyway use MySQL::Get instead) as mysqlclient doesn't support passing
+  // native mysql_* APIs (the ones that deal with errno where we do want to do
+  // this anyway use MySQL::Get instead) as mysqlclient doesn't support passing
   // connections in that state and it can crash.
   if (mySQL && mySQL->m_last_error_set) {
     ret = nullptr;
@@ -170,7 +163,7 @@ int MySQL::GetDefaultPort() {
     } else {
       Variant ret = HHVM_FN(getservbyname)("mysql", "tcp");
       if (!same(ret, false)) {
-        s_default_port = ret.toInt16();
+        s_default_port = (short)ret.toInt64();
       }
     }
   }

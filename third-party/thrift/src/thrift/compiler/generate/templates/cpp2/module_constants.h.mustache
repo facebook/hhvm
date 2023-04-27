@@ -1,0 +1,50 @@
+<%!
+
+  Copyright (c) Meta Platforms, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#pragma once
+
+#include <thrift/lib/cpp2/gen/module_constants_h.h>
+<%#program:interning?%>
+#include <thrift/lib/cpp2/gen/intern_list.h>
+<%/program:interning?%>
+
+#include "<%program:include_prefix%><%program:name%>_types.h"
+
+<% > common/namespace_cpp2_begin%>
+
+
+struct <%program:name%>_constants {
+
+<%#program:constants%><%#constant:type%><%#constant:value%>
+<%^constant:outline_init?%>
+  static constexpr <% > types/const_value_type%> const <%constant:name%>_ = <% > common/const_value%>;
+  static constexpr <% > types/const_value_type%> <%constant:name%>() {
+    return <%constant:name%>_;
+  }
+<%/constant:outline_init?%>
+<%#constant:outline_init?%>
+  static <%constant:cpp_type%> const& <%constant:name%>();
+<%/constant:outline_init?%>
+
+<%/constant:value%><%/constant:type%><%/program:constants%>
+<%#program:interning?%>
+
+  static const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId id);
+<%/program:interning?%>
+};
+
+<% > common/namespace_cpp2_end%>

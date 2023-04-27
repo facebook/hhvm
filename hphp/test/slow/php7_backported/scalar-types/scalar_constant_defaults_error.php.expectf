@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 passed to int_val() must be an instance of int, string given in %s/scalar_constant_defaults_error.php on line 9
+Catchable fatal error: Argument 1 passed to int_val() must be an instance of int, string given in %s/scalar_constant_defaults_error.php on line 7

@@ -17,16 +17,17 @@
 #pragma once
 
 #include <atomic>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <folly/Executor.h>
 #include <folly/SharedMutex.h>
 #include <folly/Synchronized.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 
@@ -55,9 +56,30 @@ namespace Facts {
 struct UpdateDBWorkItem {
   Clock m_since;
   Clock m_clock;
-  std::vector<folly::fs::path> m_alteredPaths;
-  std::vector<folly::fs::path> m_deletedPaths;
+  std::vector<std::filesystem::path> m_alteredPaths;
+  std::vector<std::filesystem::path> m_deletedPaths;
   std::vector<FileFacts> m_alteredPathFacts;
+};
+
+/**
+ * Stores a map from thread to AutoloadDB.
+ */
+struct AutoloadDBVault {
+  AutoloadDBVault(AutoloadDB::Handle handle);
+
+  /**
+   * Get the AutoloadDB associated with the thread that calls this method.
+   *
+   * Logically this is `const`, but it creates an AutoloadDB on first access.
+   */
+  std::shared_ptr<AutoloadDB> get() const;
+
+ private:
+  AutoloadDB::Handle m_dbHandle;
+  // Holds one AutoloadDB per thread. Creates an AutoloadDB on the first access.
+  mutable folly::Synchronized<
+      hphp_hash_map<std::thread::id, std::shared_ptr<AutoloadDB>>>
+      m_dbs;
 };
 
 /**
@@ -71,11 +93,10 @@ struct UpdateDBWorkItem {
  * information the DB doesn't have.
  */
 struct SymbolMap {
-
   explicit SymbolMap(
-      folly::fs::path root,
+      std::filesystem::path root,
       AutoloadDB::Handle dbHandle,
-      hphp_hash_set<std::string> indexedMethodAttributes = {});
+      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;
@@ -100,12 +121,16 @@ struct SymbolMap {
    * These methods may fill the map with information from the SQLite
    * DB, and as such may throw SQLite exceptions.
    */
+  Path getTypeOrTypeAliasFile(Symbol<SymKind::Type> type);
+  Path getTypeOrTypeAliasFile(const StringData& type);
   Path getTypeFile(Symbol<SymKind::Type> type);
   Path getTypeFile(const StringData& type);
   Path getFunctionFile(Symbol<SymKind::Function> function);
   Path getFunctionFile(const StringData& function);
   Path getConstantFile(Symbol<SymKind::Constant> constant);
   Path getConstantFile(const StringData& constant);
+  Path getModuleFile(Symbol<SymKind::Module> module);
+  Path getModuleFile(const StringData& module);
   Path getTypeAliasFile(Symbol<SymKind::Type> typeAlias);
   Path getTypeAliasFile(const StringData& typeAlias);
 
@@ -120,6 +145,7 @@ struct SymbolMap {
   std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypes();
   std::vector<std::pair<Symbol<SymKind::Function>, Path>> getAllFunctions();
   std::vector<std::pair<Symbol<SymKind::Constant>, Path>> getAllConstants();
+  std::vector<std::pair<Symbol<SymKind::Module>, Path>> getAllModules();
   std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypeAliases();
 
   /**
@@ -129,32 +155,40 @@ struct SymbolMap {
    * DB, and as such may throw SQLite exceptions.
    */
   std::vector<Symbol<SymKind::Type>> getFileTypes(Path path);
-  std::vector<Symbol<SymKind::Type>> getFileTypes(const folly::fs::path& path);
+  std::vector<Symbol<SymKind::Type>> getFileTypes(const std::filesystem::path&);
 
   std::vector<Symbol<SymKind::Function>> getFileFunctions(Path path);
-  std::vector<Symbol<SymKind::Function>>
-  getFileFunctions(const folly::fs::path& path);
+  std::vector<Symbol<SymKind::Function>> getFileFunctions(
+      const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Constant>> getFileConstants(Path path);
-  std::vector<Symbol<SymKind::Constant>>
-  getFileConstants(const folly::fs::path& path);
+  std::vector<Symbol<SymKind::Constant>> getFileConstants(
+      const std::filesystem::path& path);
+
+  std::vector<Symbol<SymKind::Module>> getFileModules(Path path);
+  std::vector<Symbol<SymKind::Module>> getFileModules(
+      const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
-  std::vector<Symbol<SymKind::Type>>
-  getFileTypeAliases(const folly::fs::path& path);
+  std::vector<Symbol<SymKind::Type>> getFileTypeAliases(
+      const std::filesystem::path& path);
 
   /**
    * Return inheritance data about the given type
    */
-  std::vector<Symbol<SymKind::Type>>
-  getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind);
-  std::vector<Symbol<SymKind::Type>>
-  getBaseTypes(const StringData& derivedType, DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getBaseTypes(
+      Symbol<SymKind::Type> derivedType,
+      DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getBaseTypes(
+      const StringData& derivedType,
+      DeriveKind kind);
 
-  std::vector<Symbol<SymKind::Type>>
-  getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind);
-  std::vector<Symbol<SymKind::Type>>
-  getDerivedTypes(const StringData& baseType, DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getDerivedTypes(
+      Symbol<SymKind::Type> baseType,
+      DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getDerivedTypes(
+      const StringData& baseType,
+      DeriveKind kind);
 
   /**
    * Return all types which transitively extend, implement, or use the given
@@ -181,42 +215,44 @@ struct SymbolMap {
   /**
    * Return the attributes of a type
    */
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfType(Symbol<SymKind::Type> type);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfType(const StringData& type);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfType(
+      Symbol<SymKind::Type> type);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfType(
+      const StringData& type);
 
   /**
    * Return the attributes decorating a type alias
    */
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfTypeAlias(const StringData& typeAlias);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfTypeAlias(
+      Symbol<SymKind::Type> typeAlias);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfTypeAlias(
+      const StringData& typeAlias);
 
   /**
    * Return the types decorated with a given attribute
    */
-  std::vector<Symbol<SymKind::Type>>
-  getTypesWithAttribute(Symbol<SymKind::Type> attr);
-  std::vector<Symbol<SymKind::Type>>
-  getTypesWithAttribute(const StringData& attr);
+  std::vector<Symbol<SymKind::Type>> getTypesWithAttribute(
+      Symbol<SymKind::Type> attr);
+  std::vector<Symbol<SymKind::Type>> getTypesWithAttribute(
+      const StringData& attr);
 
   /**
    * Return the type aliases decorated with a given attribute
    */
-  std::vector<Symbol<SymKind::Type>>
-  getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr);
-  std::vector<Symbol<SymKind::Type>>
-  getTypeAliasesWithAttribute(const StringData& attr);
+  std::vector<Symbol<SymKind::Type>> getTypeAliasesWithAttribute(
+      Symbol<SymKind::Type> attr);
+  std::vector<Symbol<SymKind::Type>> getTypeAliasesWithAttribute(
+      const StringData& attr);
 
   /**
    * Return the attributes of a method
    */
   std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Function> method);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfMethod(const StringData& type, const StringData& method);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Function> method);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
+      const StringData& type,
+      const StringData& method);
 
   /**
    * Return the methods with a given attribute
@@ -260,14 +296,18 @@ struct SymbolMap {
    * check that the type has the given attribute with `getAttributesOfType()`.
    */
   std::vector<folly::dynamic> getTypeAttributeArgs(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Type> attribute);
-  std::vector<folly::dynamic>
-  getTypeAttributeArgs(const StringData& type, const StringData& attribute);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Type> attribute);
+  std::vector<folly::dynamic> getTypeAttributeArgs(
+      const StringData& type,
+      const StringData& attribute);
 
   std::vector<folly::dynamic> getTypeAliasAttributeArgs(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Type> attribute);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Type> attribute);
   std::vector<folly::dynamic> getTypeAliasAttributeArgs(
-      const StringData& type, const StringData& attribute);
+      const StringData& type,
+      const StringData& attribute);
 
   std::vector<folly::dynamic> getMethodAttributeArgs(
       Symbol<SymKind::Type> type,
@@ -278,10 +318,12 @@ struct SymbolMap {
       const StringData& method,
       const StringData& attribute);
 
-  std::vector<folly::dynamic>
-  getFileAttributeArgs(Path path, Symbol<SymKind::Type> attribute);
-  std::vector<folly::dynamic>
-  getFileAttributeArgs(Path path, const StringData& attribute);
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      Path path,
+      Symbol<SymKind::Type> attribute);
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      Path path,
+      const StringData& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -297,6 +339,8 @@ struct SymbolMap {
 
   bool isTypeFinal(Symbol<SymKind::Type> type);
   bool isTypeFinal(const StringData& type);
+
+  bool isAttrIndexed(const StringData& attr);
 
   /**
    * Return a hash representing the given path's last-known checksum.
@@ -341,8 +385,8 @@ struct SymbolMap {
   void update(
       const Clock& since,
       const Clock& clock,
-      std::vector<folly::fs::path> alteredPaths,
-      std::vector<folly::fs::path> deletedPaths,
+      std::vector<std::filesystem::path> alteredPaths,
+      std::vector<std::filesystem::path> deletedPaths,
       std::vector<FileFacts> alteredPathFacts); // throws(SQLiteExc)
 
   /**
@@ -402,7 +446,6 @@ struct SymbolMap {
   std::shared_ptr<folly::Executor> m_exec;
 
   struct Data {
-
     Data();
 
     /**
@@ -425,6 +468,7 @@ struct SymbolMap {
     PathToSymbolsMap<SymKind::Type> m_typePath;
     PathToSymbolsMap<SymKind::Function> m_functionPath;
     PathToSymbolsMap<SymKind::Constant> m_constantPath;
+    PathToSymbolsMap<SymKind::Module> m_modulePath;
     PathToMethodsMap m_methodPath;
 
     /**
@@ -438,7 +482,10 @@ struct SymbolMap {
       using KindAndFlags = std::pair<TypeKind, int>;
 
       void setKindAndFlags(
-          Symbol<SymKind::Type> type, Path path, TypeKind kind, int flags) {
+          Symbol<SymKind::Type> type,
+          Path path,
+          TypeKind kind,
+          int flags) {
         auto& defs = m_map[type];
         for (auto& [existingPath, existingInfo] : defs) {
           if (existingPath == path) {
@@ -449,8 +496,9 @@ struct SymbolMap {
         defs.push_back({path, {kind, flags}});
       }
 
-      Optional<std::pair<TypeKind, int>>
-      getKindAndFlags(Symbol<SymKind::Type> type, Path path) const {
+      Optional<std::pair<TypeKind, int>> getKindAndFlags(
+          Symbol<SymKind::Type> type,
+          Path path) const {
         auto const it = m_map.find(type);
         if (it == m_map.end()) {
           return std::nullopt;
@@ -512,7 +560,7 @@ struct SymbolMap {
     void updatePath(
         Path path,
         FileFacts facts,
-        const hphp_hash_set<std::string>& indexedMethodAttrs);
+        const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs);
 
     /**
      * Remove the given path from the map, along with all data associated with
@@ -521,7 +569,7 @@ struct SymbolMap {
     void removePath(Path path);
   };
 
-private:
+ private:
   /**
    * Update the DB on the time interval beginning at `since` and
    * ending at `clock`.
@@ -532,8 +580,8 @@ private:
   void updateDB(
       const Clock& since,
       const Clock& clock,
-      const std::vector<folly::fs::path>& alteredPaths,
-      const std::vector<folly::fs::path>& deletedPaths,
+      const std::vector<std::filesystem::path>& alteredPaths,
+      const std::vector<std::filesystem::path>& deletedPaths,
       const std::vector<FileFacts>& alteredPathFacts) const; // throws
 
   /**
@@ -541,7 +589,7 @@ private:
    */
   void updateDBPath(
       AutoloadDB& db,
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       const FileFacts& facts) const;
 
   /**
@@ -561,12 +609,15 @@ private:
    * Load information from the DB about who the given `derivedType` inherits.
    */
   void loadBaseTypesFromDB(
-      AutoloadDB& db, Path path, Symbol<SymKind::Type> derivedType);
+      AutoloadDB& db,
+      Path path,
+      Symbol<SymKind::Type> derivedType);
 
   /**
    * Get all symbols of kind k
    */
-  template <SymKind k> std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
+  template <SymKind k>
+  std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
 
   /**
    * Helper function to read from and write to m_synchronizedData.
@@ -585,15 +636,16 @@ private:
   /**
    * Return a thread-local connection to the DB associated with this map.
    */
-  AutoloadDB& getDB() const;
+  std::shared_ptr<AutoloadDB> getDB() const;
 
   /**
    * Return the type's kind (class/interface/enum) along with an
    * abstract/final bitmask.
    */
   std::pair<TypeKind, TypeFlagMask> getKindAndFlags(Symbol<SymKind::Type> type);
-  std::pair<TypeKind, TypeFlagMask>
-  getKindAndFlags(Symbol<SymKind::Type> type, Path path);
+  std::pair<TypeKind, TypeFlagMask> getKindAndFlags(
+      Symbol<SymKind::Type> type,
+      Path path);
 
   std::atomic<bool> m_useDB = false;
   // Used to prioritize updates over caching. Pending updates increment this
@@ -602,10 +654,10 @@ private:
 
   folly::Synchronized<Data, folly::SharedMutexWritePriority> m_syncedData;
 
-  const folly::fs::path m_root;
+  const std::filesystem::path m_root;
   const std::string m_schemaHash;
-  AutoloadDB::Handle m_dbHandle;
-  const hphp_hash_set<std::string> m_indexedMethodAttrs;
+  AutoloadDBVault m_dbVault;
+  const hphp_hash_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
 };
 
 } // namespace Facts

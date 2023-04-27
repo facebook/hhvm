@@ -1,0 +1,24 @@
+File "as-only.php", line 25, characters 23-24:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "as-only.php", line 7, characters 29-31:
+  Expected `int`
+  File "as-only.php", line 25, characters 29-34:
+  But got `string`
+File "as-only.php", line 26, characters 23-24:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "as-only.php", line 8, characters 29-36:
+  Expected `arraykey`
+  File "as-only.php", line 26, characters 29-33:
+  But got `mixed`
+File "as-only.php", line 27, characters 23-25:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "as-only.php", line 9, characters 42-44:
+  Expected `int`
+  File "as-only.php", line 27, characters 30-35:
+  But got `string`
+File "as-only.php", line 28, characters 23-25:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "as-only.php", line 10, characters 30-43:
+  Expected `nothing`
+  File "as-only.php", line 28, characters 30-37:
+  But got `arraykey`

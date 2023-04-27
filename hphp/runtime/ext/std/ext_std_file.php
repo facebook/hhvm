@@ -277,7 +277,9 @@ function fputs(resource $handle, string $data, int $length = 0): mixed;
  *
  */
 <<__Native>>
-function fprintf(mixed $handle, string $format, ...$argv): mixed;
+function fprintf(mixed $handle, string $format, mixed... $argv): mixed;
+// TODO(T121572869): This function probably ought to take a format string
+// rather than a normal string.
 
 /**
  * Write a string produced according to format to the stream resource
@@ -373,7 +375,7 @@ function flock(resource $handle,
  */
 <<__Native>>
 function fputcsv(resource $handle,
-                 varray $fields,
+                 varray<string> $fields,
                  string $delimiter = ",",
                  string $enclosure = "\"",
                  string $escape_char = "\\"): mixed;

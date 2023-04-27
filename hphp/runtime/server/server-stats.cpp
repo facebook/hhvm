@@ -115,6 +115,12 @@ void ServerStats::StartRequest(const char* url, const char* clientIP,
   }
 }
 
+void ServerStats::SetEndpoint(const char* endpoint) {
+  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+    ServerStats::s_logger->setEndpoint(endpoint);
+  }
+}
+
 void ServerStats::SetThreadMode(ThreadMode mode) {
   ServerStats::s_logger->setThreadMode(mode);
 }
@@ -227,11 +233,12 @@ std::string ServerStats::Report(const std::string& keys,
     auto const udf = iter.second;
     auto viter = values.find(key);
     if (viter == values.end()) continue;
+    auto const value = viter->second;
     if ((udf & UDF_HIT) && ts.m_hits) {
-      values[key + "/hit"] = viter->second * PRECISION / ts.m_hits;
+      values[key + "/hit"] = value * PRECISION / ts.m_hits;
     }
     if ((udf & UDF_SEC) && sec) {
-      values[key + "/sec"] = viter->second * PRECISION / sec;
+      values[key + "/sec"] = value * PRECISION / sec;
     }
   }
 
@@ -384,6 +391,7 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
     if (ts.m_requestCount && (ts.m_mode != ThreadMode::Idling)) {
       w->writeEntry("vhost", ts.m_vhost);
       w->writeEntry("url", ts.m_url);
+      w->writeEntry("endpoint", ts.m_endpoint);
       w->writeEntry("client", ts.m_clientIP);
       w->writeEntry("start", req::make<DateTime>(ts.m_start.tv_sec)->
                     toString(DateTime::DateFormatCookie).data());
@@ -551,9 +559,15 @@ void ServerStats::startRequest(const char* url, const char* clientIP,
   m_threadStatus.m_ioStatuses.clear();
 
   safe_copy(m_threadStatus.m_url, url, sizeof(m_threadStatus.m_url));
+  safe_copy(m_threadStatus.m_endpoint, "", sizeof(m_threadStatus.m_endpoint));
   safe_copy(m_threadStatus.m_clientIP, clientIP,
             sizeof(m_threadStatus.m_clientIP));
   safe_copy(m_threadStatus.m_vhost, vhost, sizeof(m_threadStatus.m_vhost));
+}
+
+void ServerStats::setEndpoint(const char* endpoint) {
+  safe_copy(m_threadStatus.m_endpoint, endpoint,
+            sizeof(m_threadStatus.m_endpoint));
 }
 
 void ServerStats::setThreadIOStatus(const char* name, const char* addr,

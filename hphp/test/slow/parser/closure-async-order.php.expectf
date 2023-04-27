@@ -19,12 +19,7 @@ vec(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      object(Closure$%s) (1) {
-        ["parameter"]=>
-        dict(1) {
-          ["$x"]=>
-          string(10) "<required>"
-        }
+      object(Closure$%s) (0) {
       }
       ["defaultText"]=>
       string(24) "async function ($x) {

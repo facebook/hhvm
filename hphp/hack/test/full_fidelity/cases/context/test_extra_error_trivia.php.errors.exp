@@ -1,6 +1,6 @@
-(6,10)-(6,13) This token is not valid as part of a function declaration.
+(6,10)-(6,13) This token `sta` is not valid as part of a function declaration.
 (10,3)-(10,45) Redeclared method `C::f`
-(10,17)-(10,32) This token is not valid as part of a function declaration.
+(10,17)-(10,32) This token `meaninglessword` is not valid as part of a function declaration.
 (14,26)-(14,26) A variable name is expected here.
 (14,26)-(14,45) Redeclared method `C::f`
 (18,27)-(18,27) A variable name is expected here.

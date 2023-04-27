@@ -215,7 +215,6 @@ create_link(const char *pfilename,
 	    const char *linkname, mode_t linktype,
 	    const char *prevlinkname)
 {
-#ifndef _MSC_VER
     struct stat		stat_buf;
 
     if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
@@ -245,10 +244,6 @@ create_link(const char *pfilename,
                   pfilename, linkname);
         }
     }
-#else
-    fprintf(stderr, "Creating link from %s to %s not supported",
-            pfilename, linkname);
-#endif
 }
 
 /* Examine the log file name specifier for strftime conversion
@@ -539,7 +534,7 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
 
 	default:
 	    fprintf(stderr, "software fault in start_of_this_period()\n");
-	    exit(1);
+	    exit(HPHP_EXIT_FAILURE);
 	}
 
 	/* If the time of day is not equal to midnight then we need to
@@ -648,7 +643,7 @@ check_end(const char *p)
    it to eat all white space up to (and including) a newline, and
    the function fails (!) if there is no newline.
 
-   Let's hope all strptime-s use ` ' to skipp *all* whitespace
+   Let's hope all strptime-s use ` ' to skip *all* whitespace
    instead of just one (it works that way on all the systems I've
    tested it on). */
 

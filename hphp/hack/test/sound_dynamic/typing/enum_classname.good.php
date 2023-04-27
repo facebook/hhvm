@@ -9,9 +9,9 @@ enum E: string as string {
 class C { }
 
 <<__SupportDynamicType>>
-function foo<T  as dynamic>(classname<T> $class_name): void { }
+function foo<T as supportdyn<mixed>>(classname<T> $class_name): void { }
 
-function bar<T as dynamic>(T $x):void { }
+function bar<T as supportdyn<mixed>>(T $x):void { }
 
 <<__SupportDynamicType>>
 function testit(): void {

@@ -101,9 +101,10 @@ PreClass::TraitAliasRule::TraitAliasRule(const StringData* traitName,
 // PreClass::ClassRequirement.
 
 namespace {
-  uintptr_t packCR(const StringData* req, bool isExtends) {
+  inline uintptr_t
+  packCR(const StringData* req, PreClass::RequirementKind reqKind) {
     auto reqPtr = reinterpret_cast<uintptr_t>(req);
-    return isExtends ? (reqPtr | 0x1) : reqPtr;
+    return reqPtr | reqKind;
   }
 }
 
@@ -114,23 +115,19 @@ PreClass::ClassRequirement::ClassRequirement()
 
 inline
 PreClass::ClassRequirement::ClassRequirement(const StringData* req,
-                                             bool isExtends)
-  : m_word(packCR(req, isExtends))
+                                             PreClass::RequirementKind reqKind)
+  : m_word(packCR(req, reqKind))
 {}
 
 /*
  * Accessors.
  */
 inline const StringData* PreClass::ClassRequirement::name() const {
-  return reinterpret_cast<const StringData*>(m_word & ~0x1);
+  return reinterpret_cast<const StringData*>(m_word & ~0x3);
 }
 
-inline bool PreClass::ClassRequirement::is_extends() const {
-  return m_word & 0x1;
-}
-
-inline bool PreClass::ClassRequirement::is_implements() const {
-  return !is_extends();
+inline PreClass::RequirementKind PreClass::ClassRequirement::kind() const {
+  return static_cast<PreClass::RequirementKind>(m_word & 0x3);
 }
 
 inline bool PreClass::ClassRequirement::is_same(
@@ -149,9 +146,9 @@ template<class SerDe>
 typename std::enable_if<SerDe::deserializing>::type
 PreClass::ClassRequirement::serde(SerDe& sd) {
   const StringData* sd_name;
-  bool sd_is_extends;
-  sd(sd_name)(sd_is_extends);
-  m_word = packCR(sd_name, sd_is_extends);
+  RequirementKind sd_reqKind;
+  sd(sd_name)(sd_reqKind);
+  m_word = packCR(sd_name, sd_reqKind);
 }
 
 /*
@@ -160,7 +157,7 @@ PreClass::ClassRequirement::serde(SerDe& sd) {
 template<class SerDe>
 typename std::enable_if<!SerDe::deserializing>::type
 PreClass::ClassRequirement::serde(SerDe& sd) {
-  sd(name())(is_extends());
+  sd(name())(kind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

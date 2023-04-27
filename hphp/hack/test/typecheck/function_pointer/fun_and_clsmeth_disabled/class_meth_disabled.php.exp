@@ -1,2 +1,0 @@
-File "class_meth_disabled.php", line 5, characters 5-14:
-`class_meth()` is disabled; switch to first-class references like `C::bar<>` (Parsing[1002])

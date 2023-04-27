@@ -12,7 +12,7 @@ module Lint = Lints_core
 
 type result = Pos.absolute Lint.t list
 
-let output_json oc el =
+let output_json ?(pretty = false) oc el =
   let errors_json = List.map el ~f:Lint.to_json in
   let res =
     Hh_json.JSON_Object
@@ -21,7 +21,7 @@ let output_json oc el =
         ("version", Hh_json.JSON_String Hh_version.version);
       ]
   in
-  Out_channel.output_string oc (Hh_json.json_to_string res);
+  Out_channel.output_string oc (Hh_json.json_to_string ~pretty res);
   Out_channel.flush stderr
 
 let output_text oc el format =
@@ -33,7 +33,9 @@ let output_text oc el format =
     let f =
       match format with
       | Errors.Context -> Lint.to_contextual_string
-      | Errors.Raw -> Lint.to_string
+      | Errors.Raw
+      | Errors.Plain ->
+        Lint.to_string
       | Errors.Highlighted -> Lint.to_highlighted_string
     in
     let sl = List.map el ~f in

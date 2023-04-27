@@ -26,7 +26,8 @@ let is_magic =
 (* Class consts and typeconsts cannot be named "class" *)
 let error_if_is_named_class (pos, name) =
   if String.equal (String.lowercase name) "class" then
-    Errors.add_naming_error @@ Naming_error.Illegal_member_variable_class pos
+    Errors.add_error
+      Naming_error.(to_user_error @@ Illegal_member_variable_class pos)
 
 let handler =
   object
@@ -38,6 +39,11 @@ let handler =
       List.iter c.c_consts ~f:(fun cc -> error_if_is_named_class cc.cc_id)
 
     method! at_expr env (_, _, e) =
+      let func_name =
+        match env.function_name with
+        | None -> None
+        | Some sid -> Some (snd sid)
+      in
       match e with
       | Id (pos, const) ->
         let ck = env.classish_kind in
@@ -46,7 +52,7 @@ let handler =
         else if
           String.equal const SN.PseudoConsts.g__CLASS__ && Option.is_none ck
         then
-          Errors.add_naming_error @@ Naming_error.Illegal_CLASS pos
+          Errors.add_error Naming_error.(to_user_error @@ Illegal_CLASS pos)
         else if
           String.equal const SN.PseudoConsts.g__TRAIT__
           && not
@@ -55,15 +61,13 @@ let handler =
                   ck
                   (Some Ast_defs.Ctrait))
         then
-          Errors.add_naming_error @@ Naming_error.Illegal_TRAIT pos
+          Errors.add_error Naming_error.(to_user_error @@ Illegal_TRAIT pos)
       | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
-        when Option.equal String.equal env.function_name (Some m_name) ->
+        when Option.equal String.equal func_name (Some m_name) ->
         ()
       | Class_const (_, ((pos, meth_name) as mid))
         when is_magic mid
-             && not
-                  (Option.equal String.equal env.function_name (Some meth_name))
-        ->
+             && not (Option.equal String.equal func_name (Some meth_name)) ->
         Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
       | Obj_get (_, (_, _, Id s), _, _) when is_magic s ->
         let (pos, meth_name) = s in
@@ -73,8 +77,8 @@ let handler =
         Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
       | _ -> ()
 
-    method! at_fun_ _ f =
-      let (pos, fname) = f.f_name in
+    method! at_fun_def _ fd =
+      let (pos, fname) = fd.fd_name in
       let fname_lower = String.lowercase (strip_ns fname) in
       if
         String.equal fname_lower SN.Members.__construct

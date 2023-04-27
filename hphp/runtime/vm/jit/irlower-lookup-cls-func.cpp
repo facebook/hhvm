@@ -174,7 +174,7 @@ void cgLdFunc(IRLS& env, const IRInstruction* inst) {
 const Class* autoloadKnownPersistentType(rds::Handle h,
                                          const StringData* name) {
   assertx(rds::isPersistentHandle(h));
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name))
   );
   auto const ptr =
@@ -190,7 +190,7 @@ const Class* lookupKnownType(rds::Handle cache_handle,
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
 
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name))
   );
 
@@ -206,26 +206,24 @@ const Func* loadUnknownFunc(const StringData* name) {
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {
-  return loadUnknownFuncHelper(name, raise_resolve_undefined);
+  return loadUnknownFuncHelper(name, raise_resolve_func_undefined);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
-template<class T> rds::Handle handleFrom(
-  const NamedEntity* ne,
-  const StringData* name
-);
+template<class T> rds::Handle handleFrom(const StringData* name);
 
 template<>
-rds::Handle handleFrom<Func>(const NamedEntity* ne,
-                             const StringData* name) {
+rds::Handle handleFrom<Func>(const StringData* name) {
+  auto ne = NamedFunc::get(name);
   return ne->getFuncHandle(name);
 }
+
 template<>
-rds::Handle handleFrom<Class>(const NamedEntity* ne,
-                              const StringData* name) {
+rds::Handle handleFrom<Class>(const StringData* name) {
+  auto ne = NamedType::get(name);
   return ne->getClassHandle(name);
 }
 
@@ -233,7 +231,7 @@ template<class T, class SlowPath>
 void implLdCached(IRLS& env, const IRInstruction* inst,
                   const StringData* name, SlowPath fill_cache) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const ch = handleFrom<T>(NamedEntity::get(name), name);
+  auto const ch = handleFrom<T>(name);
   auto& v = vmain(env);
 
   if (rds::isNormalHandle(ch)) {
@@ -309,7 +307,7 @@ void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
 void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->src(0)->strVal();
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const ch = handleFrom<Class>(NamedEntity::get(name), name);
+  auto const ch = handleFrom<Class>(name);
   auto& v = vmain(env);
 
   if (rds::isNormalHandle(ch)) {

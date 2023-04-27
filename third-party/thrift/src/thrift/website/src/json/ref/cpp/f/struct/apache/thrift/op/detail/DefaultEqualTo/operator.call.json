@@ -1,0 +1,57 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator()",
+  "compoundname_html": "apache::thrift::op::detail::DefaultEqualTo::operator()",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultEqualTo_1ac07dfd66e54859aa08c33c7411dc9525",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "constexpr bool",
+      "definition_html": "constexpr bool apache::thrift::op::detail::DefaultEqualTo&lt; LTag, RTag, CompareWith, L, R &gt;::operator()",
+      "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const L &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const R &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "line": "242",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
+        "bodystart": "242",
+        "bodyend": "244"
+      },
+      "definition": {
+        "simple_html": "constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
+        "simple_raw": "constexpr bool operator()(const L& lhs, const R& rhs) const",
+        "detailed_html": "inline constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
+        "detailed_raw": "inline constexpr bool operator()(const L& lhs, const R& rhs) const",
+        "original_definition_html": "constexpr bool apache::thrift::op::detail::DefaultEqualTo&lt; LTag, RTag, CompareWith, L, R &gt;::operator()",
+        "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultEqualTo",
+      "compoundname_html": "apache::thrift::op::detail::DefaultEqualTo::operator()"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
+  "minprot": "public",
+  "displayname_html": "operator()",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call"
+}

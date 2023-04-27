@@ -1,8 +1,0 @@
-File "awaitable.bad.php", line 10, characters 25-27:
-Method  `box` in class `D` is not dynamically callable. (Typing[4402])
-  File "awaitable.bad.php", line 11, characters 12-22:
-  Invalid return type
-  File "awaitable.bad.php", line 10, characters 42-44:
-  Expected `dynamic` because method must be callable in a dynamic context
-  File "awaitable.bad.php", line 11, characters 16-18:
-  Type `Box` is not a subtype of `dynamic` under dynamic-aware subtyping

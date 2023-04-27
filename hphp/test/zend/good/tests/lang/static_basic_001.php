@@ -1,10 +1,10 @@
 <?hh
 
 class State {
-    static $a0=10;
-    static $counter=0;
-    static $a, $b=10, $c=20, $d, $e=30;
-    static $s, $k=10;
+    public static $a0=10;
+    public static $counter=0;
+    public static $a, $b=10, $c=20, $d, $e=30;
+    public static $s, $k=10;
 }
 
 function staticNonStatic() {

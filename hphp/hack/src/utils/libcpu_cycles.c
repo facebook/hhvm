@@ -16,10 +16,6 @@ CPU_CYCLES()
     high1 = (uint64_t) high;
     low1 = (uint64_t) low;
     return low1 | (high1 * 0x100000000 /* 2^32 */);
-#elif __powerpc64__
-    uint64_t tb;
-    asm volatile("mfspr %0, 268" : "=r"((tb)));
-    return tb;
 #elif _MSC_VER
     return (uint64_t) __rstdc();
 #elif __aarch64__

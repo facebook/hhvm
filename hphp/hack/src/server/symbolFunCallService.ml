@@ -75,12 +75,11 @@ class visitor =
       let method_fullname = combine_name (Some class_name) (Some method_name) in
       self#fun_call env target_type method_fullname pos
 
-    method! on_fun_ env f =
-      let name = snd f.Aast.f_name in
-      let is_anon = String.equal name ";anonymous" in
-      if not is_anon then cur_caller <- Some (Utils.strip_ns name);
-      let acc = super#on_fun_ env f in
-      if not is_anon then cur_caller <- None;
+    method! on_fun_def env fd =
+      let name = snd fd.Aast.fd_name in
+      cur_caller <- Some (Utils.strip_ns name);
+      let acc = super#on_fun_def env fd in
+      cur_caller <- None;
       acc
 
     method! on_method_ env m =
@@ -97,12 +96,6 @@ class visitor =
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
-        | Aast.Fun_id (pos, name) -> self#fun_call env Function name pos
-        | Aast.Smethod_id ((ty, _, _), mid)
-        | Aast.Method_id ((ty, _, _), mid) ->
-          Tast_env.get_class_ids env ty
-          |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
-          |> List.fold ~init:self#zero ~f:self#plus
         | Aast.Method_caller ((_, cid), mid) ->
           self#method_call env Method cid mid
         | _ -> self#zero
@@ -111,9 +104,6 @@ class visitor =
         let special_fun id = self#fun_call env Function id pos in
         let module SF = SN.AutoimportedFunctions in
         match expr_ with
-        | Aast.Fun_id _ -> special_fun SF.fun_
-        | Aast.Method_id _ -> special_fun SF.inst_meth
-        | Aast.Smethod_id _ -> special_fun SF.class_meth
         | Aast.Method_caller _ -> special_fun SF.meth_caller
         | _ -> self#zero
       in

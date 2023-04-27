@@ -6,7 +6,7 @@ class P { function __construct(public mixed $m)[] {} }
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 
 function unset_static(): void {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
@@ -24,7 +24,7 @@ function unset_static(): void {
 }
 
 function unset_dynamic(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
@@ -42,7 +42,7 @@ function unset_dynamic(): void {
 }
 
 function unset_inner() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
 
   // emptyish
   unset($cm[3][0]);

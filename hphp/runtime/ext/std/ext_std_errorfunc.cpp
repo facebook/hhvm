@@ -261,7 +261,7 @@ int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
   auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
-    id.setErrorReportingLevel(level.toInt32());
+    id.setErrorReportingLevel((int)level.toInt64());
   }
   return oldErrorReportingLevel;
 }
@@ -392,18 +392,6 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
   return g_context->releaseDeferredErrors();
 }
 
-Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
-  auto bt = dyn_cast<CompactTrace>(handle);
-  if (!bt) {
-    raise_invalid_argument_warning(
-        "__SystemLib\\extract_trace() expects parameter 1 "
-        "to be a CompactTrace resource.");
-    return Array::CreateVec();
-  }
-
-  return bt->extract();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initErrorFunc() {
@@ -425,7 +413,6 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
   HHVM_FALIAS(HH\\deferred_errors, HH_deferred_errors);
-  HHVM_FALIAS(__SystemLib\\extract_trace, SL_extract_trace);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,

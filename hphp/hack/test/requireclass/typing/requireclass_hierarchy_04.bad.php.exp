@@ -1,0 +1,6 @@
+File "requireclass_hierarchy_04.bad.php", line 19, characters 7-7:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "requireclass_hierarchy_04.bad.php", line 20, characters 7-8:
+  This requires to be exactly C
+  File "requireclass_hierarchy_04.bad.php", line 10, characters 17-17:
+  Required here

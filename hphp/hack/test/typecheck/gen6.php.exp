@@ -11,6 +11,6 @@ Invalid argument (Typing[4323])
   File "gen6.php", line 12, characters 14-17:
   This type constraint is violated
   File "gen6.php", line 12, characters 14-17:
-  Expected `A<[unresolved]>`
+  Expected `A<_>`
   File "gen6.php", line 26, characters 15-15:
   But got `Z`

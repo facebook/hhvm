@@ -1,9 +1,9 @@
-File "class_meth_interface_inherited.php", line 10, characters 3-33:
-Cannot create a class_meth of Child::bar; it is abstract. (Typing[4382])
+File "class_meth_interface_inherited.php", line 10, characters 10-12:
+Cannot create a function pointer to `Child::bar`; it is abstract (Typing[4391])
   File "class_meth_interface_inherited.php", line 4, characters 26-28:
   Declaration is here
-File "class_meth_interface_inherited.php", line 12, characters 3-28:
-Cannot create a class_meth of Child::bar; it is abstract. (Typing[4382])
+File "class_meth_interface_inherited.php", line 12, characters 10-12:
+Cannot create a function pointer to `Child::bar`; it is abstract (Typing[4391])
   File "class_meth_interface_inherited.php", line 4, characters 26-28:
   Declaration is here
 File "class_meth_interface_inherited.php", line 14, characters 10-12:

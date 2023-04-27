@@ -503,18 +503,20 @@ void RepoAuthType::serde(SerDe& sd) {
     if (tagHasArrData(t)) {
       m_data.set(t, RepoAuthType::Array::deserialize(sd));
     } else if (tagHasName(t)) {
-      LowStringPtr name;
+      const StringData* name;
       sd(name);
-      m_data.set(t, name.get());
+      always_assert(name);
+      m_data.set(t, name);
     } else {
       m_data.set(t, nullptr);
     }
   } else {
-    sd(tag());
+    auto const t = tag();
+    sd(t);
     if (auto const a = array()) {
       a->serialize(sd);
     } else if (auto const n = name()) {
-      sd(LowStringPtr{n});
+      sd(n);
     }
   }
 }

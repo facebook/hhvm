@@ -914,7 +914,7 @@ static Bigint * diff(Bigint *a, Bigint *b)
 static double ulp (double _x)
 {
   _double x;
-  register Long L;
+  Long L;
   _double a;
 
   value(x) = _x;

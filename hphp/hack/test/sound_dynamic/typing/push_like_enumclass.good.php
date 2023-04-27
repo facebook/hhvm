@@ -8,7 +8,7 @@ function expect_string(~string $_): void {}
 interface ExBox {}
 
 <<__SupportDynamicType>>
-class Box<T as dynamic > implements ExBox {
+class Box<T as supportdyn<mixed> > implements ExBox {
   public function __construct(public ~T $data)[] {}
 }
 
@@ -24,7 +24,7 @@ enum class E: ~ExBox {
 }
 
 <<__SupportDynamicType>>
-function e<T as dynamic >(~HH\MemberOf<E, Box<T>> $param): ~T {
+function e<T as supportdyn<mixed> >(~HH\MemberOf<E, Box<T>> $param): ~T {
   return $param->data;
 }
 

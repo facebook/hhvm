@@ -1,18 +1,18 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
-module B {}
+
+new module A {}
+new module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 class A {
-  <<__Internal>>
-  public function __construct() {}
+  internal function __construct() {}
 }
 
 function a(): void {
@@ -22,9 +22,10 @@ function a(): void {
 //// B.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
 
-<<__Module("B")>>
+module B;
+
+
 function b(): void {
   $a = new A(); // bad
 }

@@ -1,4 +1,6 @@
 File "abstract_type_in_concrete_class.php", line 7, characters 7-27:
 This class must be declared `abstract`, or provide an implementation for the abstract type constant `abstract_type` (Typing[4047])
-File "abstract_type_in_concrete_class.php", line 4, characters 23-35:
-Declaration is here
+  File "abstract_type_in_concrete_class.php", line 7, characters 37-61:
+  `ClassWithAbstractType` uses `AbstractClassWithAbstract`
+  File "abstract_type_in_concrete_class.php", line 4, characters 23-35:
+  The type constant is defined here

@@ -50,7 +50,6 @@ val load_state :
   ?local_changes:string list ->
   ?load_hhi_files:bool ->
   ?use_precheked_files:bool ->
-  ?load_decls_from_saved_state:bool ->
   ?enable_naming_table_fallback:bool ->
   ?custom_config:ServerConfig.t ->
   disk_state:disk_changes_type ->
@@ -190,13 +189,11 @@ val assert_ide_find_refs :
   string list ->
   unit
 
-val assert_refactor :
-  ('a, ServerCommandTypes.Refactor.result_or_retry) loop_outputs ->
-  string ->
-  unit
+val assert_rename :
+  ('a, ServerCommandTypes.Rename.result_or_retry) loop_outputs -> string -> unit
 
-val assert_ide_refactor :
-  ('a, ServerCommandTypes.Refactor.ide_result_or_retry) loop_outputs ->
+val assert_ide_rename :
+  ('a, ServerCommandTypes.Rename.ide_result_or_retry) loop_outputs ->
   string ->
   unit
 

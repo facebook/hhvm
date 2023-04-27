@@ -5,8 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
-type t = int option [@@deriving show]
+type t = int option [@@deriving show, sexp_of]
 
 external drop_tree_positioned : t -> unit = "drop_tree_positioned"
 

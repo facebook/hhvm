@@ -130,6 +130,10 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
       return static_cast<const c_AwaitAllWaitHandle*>(h)->scan(scanner);
+    case HeaderKind::ConcurrentWH:
+      // scan C++ properties after [ObjectData] header. should pick up
+      // unioned and bit-packed fields
+      return static_cast<const c_ConcurrentWaitHandle*>(h)->scan(scanner);
     case HeaderKind::AsyncFuncWH:
       return scanAFWH(static_cast<const c_Awaitable*>(h), scanner);
     case HeaderKind::NativeData: {
@@ -205,8 +209,14 @@ inline void c_AwaitAllWaitHandle::scan(type_scan::Scanner& scanner) const {
   ObjectData::scan(scanner); // in case of dynprops
 }
 
+inline void c_ConcurrentWaitHandle::scan(type_scan::Scanner& scanner) const {
+  scanner.scanByIndex(m_tyindex, this, heapSize());
+  ObjectData::scan(scanner); // in case of dynprops
+}
+
 inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
-  assertx(kind() != HeaderKind::AwaitAllWH);
+  assertx(kind() != HeaderKind::AwaitAllWH &&
+          kind() != HeaderKind::ConcurrentWH);
   auto const size =
     kind() == HeaderKind::AsyncFuncWH ? sizeof(c_AsyncFunctionWaitHandle) :
               asio_object_size(this);

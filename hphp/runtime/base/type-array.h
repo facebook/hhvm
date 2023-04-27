@@ -313,12 +313,8 @@ public:
   /*
    * Type conversions.
    */
-  bool toBoolean() const { return m_arr && !m_arr->empty(); }
-  int8_t  toByte()  const { return toBoolean() ? 1 : 0; }
-  int16_t toInt16() const { return toBoolean() ? 1 : 0; }
-  int32_t toInt32() const { return toBoolean() ? 1 : 0; }
-  int64_t toInt64() const { return toBoolean() ? 1 : 0; }
-  double toDouble() const { return toBoolean() ? 1.0 : 0.0; }
+  int64_t toInt64() const { return empty() ? 0 : 1; }
+  double toDouble() const { return empty() ? 0.0 : 1.0; }
   String toString() const;
 
   /*
@@ -449,8 +445,15 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
 
-  void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      const ArrayData* ad;
+      sd(ad);
+      m_arr = Ptr::attach(const_cast<ArrayData*>(ad));
+    } else {
+      sd(const_cast<const ArrayData*>(m_arr.get()));
+    }
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

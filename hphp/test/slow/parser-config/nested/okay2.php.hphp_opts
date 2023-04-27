@@ -1,0 +1,2 @@
+--inputs=__DIR__/inner.inc
+--inputs=__DIR__/nested3/inner.inc

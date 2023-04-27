@@ -7,6 +7,7 @@ Assorted utilities for HHVM GDB bindings.
 from compatibility import *
 
 import collections
+import collections.abc
 import functools
 import gdb
 import re
@@ -30,7 +31,7 @@ def memoized(func):
 
     @functools.wraps(func)
     def memoizer(*args):
-        if not isinstance(args, collections.Hashable):
+        if not isinstance(args, collections.abc.Hashable):
             return func(*args)
         if args not in cache:
             cache[args] = func(*args)
@@ -338,6 +339,13 @@ def rawptr(val):
     if name == 'HPHP::CompactSizedPtr':
         ptr = rawptr(val['m_data'])
 
+    if name == 'HPHP::LockFreePtrWrapper':
+        ptr = rawptr(val['val'])
+
+    if name == 'HPHP::TokenOrPtr':
+        inner = val['m_compact'].type
+        ptr = rawptr((val['m_compact'] >> 2).cast(inner.pointer()))
+
     if ptr is not None:
         return rawptr(ptr)
 
@@ -434,49 +442,52 @@ def pretty_tv(t, data):
     val = None
     name = None
 
-    if t == DT('HPHP::KindOfUninit') or t == DT('HPHP::KindOfNull'):
-        pass
+    try:
+        if t == DT('HPHP::DataType::Uninit') or t == DT('HPHP::DataType::Null'):
+            pass
 
-    elif t == DT('HPHP::KindOfBoolean'):
-        if data['num'] == 0:
-            val = False
-        elif data['num'] == 1:
-            val = True
+        elif t == DT('HPHP::DataType::Boolean'):
+            if data['num'] == 0:
+                val = False
+            elif data['num'] == 1:
+                val = True
+            else:
+                val = data['num']
+
+        elif t == DT('HPHP::DataType::Int64'):
+            val = int(data['num'])
+
+        elif t == DT('HPHP::DataType::Double'):
+            val = float(data['dbl'])
+
+        elif (t == DT('HPHP::DataType::String')
+              or t == DT('HPHP::DataType::PersistentString')):
+            val = '"%s"' % string_data_val(data['pstr'])
+
+        elif (t == V('HPHP::DataType::Dict')
+              or t == V('HPHP::DataType::PersistentDict')
+              or t == V('HPHP::DataType::Vec')
+              or t == V('HPHP::DataType::PersistentVec')
+              or t == V('HPHP::DataType::Keyset')
+              or t == V('HPHP::DataType::PersistentKeyset')):
+            val = data['parr']
+            if should_recurse():
+                recurse = True
+
+        elif t == DT('HPHP::DataType::Object'):
+            val = data['pobj']
+            if should_recurse():
+                recurse = True
+            name = nameof(val)
+
+        elif t == DT('HPHP::DataType::Resource'):
+            val = data['pres']
+
         else:
-            val = data['num']
-
-    elif t == DT('HPHP::KindOfInt64'):
-        val = int(data['num'])
-
-    elif t == DT('HPHP::KindOfDouble'):
-        val = float(data['dbl'])
-
-    elif (t == DT('HPHP::KindOfString')
-          or t == DT('HPHP::KindOfPersistentString')):
-        val = '"%s"' % string_data_val(data['pstr'])
-
-    elif (t == V('HPHP::KindOfDict')
-          or t == V('HPHP::KindOfPersistentDict')
-          or t == V('HPHP::KindOfVec')
-          or t == V('HPHP::KindOfPersistentVec')
-          or t == V('HPHP::KindOfKeyset')
-          or t == V('HPHP::KindOfPersistentKeyset')):
-        val = data['parr']
-        if should_recurse():
-            recurse = True
-
-    elif t == DT('HPHP::KindOfObject'):
-        val = data['pobj']
-        if should_recurse():
-            recurse = True
-        name = nameof(val)
-
-    elif t == DT('HPHP::KindOfResource'):
-        val = data['pres']
-
-    else:
-        t = 'Invalid(%d)' % t.cast(T('int8_t'))
-        val = "0x%x" % int(data['num'])
+            t = 'Invalid(%d)' % t.cast(T('int8_t'))
+            val = "0x%x" % int(data['num'])
+    except gdb.MemoryError:
+        val = '<Memory Corruption>'
 
     if recurse:
         num = int(data['num'])

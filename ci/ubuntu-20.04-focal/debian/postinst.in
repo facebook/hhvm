@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "********************************************************************"
+echo "* HHVM is installed."
+echo "*"
+echo "* The best way to get started is to use HHVM's built-in webserver: "
+echo "*"
+echo "* $ hhvm -m server -p 8080"
+echo "*"
+echo "* Running command-line scripts with HHVM requires no special setup:"
+echo "*"
+echo "* $ hhvm example.hack"
+echo "*"
+echo "* FastCGI is also supported; see https://docs.hhvm.com/hhvm/advanced-usage/fastCGI"
+echo "*"
+echo "********************************************************************"
+
+RUN_AS_USER="www-data"
+RUN_AS_GROUP="www-data"
+
+if [ -f /etc/default/hhvm ]; then
+    . /etc/default/hhvm
+fi
+
+install -d -m 755 -o $RUN_AS_USER -g $RUN_AS_GROUP /var/run/hhvm
+install -d -m 01733 /var/lib/hhvm/sessions
+
+if [ -f /usr/sbin/update-alternatives ]; then
+  UPDATE_ALTERNATIVES=/usr/sbin/update-alternatives
+fi
+if [ -f /usr/bin/update-alternatives ]; then
+  UPDATE_ALTERNATIVES=/usr/bin/update-alternatives
+fi
+if [ -n "$UPDATE_ALTERNATIVES" ]; then
+  "$UPDATE_ALTERNATIVES" \
+    --install /usr/bin/hhvm hhvm __PKGROOT__/bin/hhvm 10 \
+    --slave /usr/bin/hh_client hh_client __PKGROOT__/bin/hh_client \
+    --slave /usr/bin/hh_parse hh_parse __PKGROOT__/bin/hh_parse \
+    --slave /usr/bin/hh_server hh_server __PKGROOT__/bin/hh_server \
+    --slave /usr/bin/hackfmt hackfmt __PKGROOT__/bin/hackfmt
+fi
+
+if which invoke-rc.d >/dev/null 2>&1; then
+    invoke-rc.d hhvm start
+fi

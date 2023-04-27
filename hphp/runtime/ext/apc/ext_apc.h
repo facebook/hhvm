@@ -63,46 +63,12 @@ struct apcExtension final : Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(apc_add,
-                      const Variant& key_or_array,
-                      const Variant& var = uninit_variant,
-                      int64_t ttl = 0,
-                      int64_t bump_ttl = 0);
 Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
                       int64_t bump_ttl = 0);
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
-Variant HHVM_FUNCTION(apc_delete,
-                      const Variant& key);
-bool HHVM_FUNCTION(apc_clear_cache,
-                   const String& cache_type = "");
-Variant HHVM_FUNCTION(apc_inc,
-                      const String& key,
-                      int64_t step,
-                      bool& success);
-Variant HHVM_FUNCTION(apc_dec,
-                      const String& key,
-                      int64_t step,
-                      bool& success);
-bool HHVM_FUNCTION(apc_cas,
-                   const String& key,
-                   int64_t old_cas,
-                   int64_t new_cas);
-Variant HHVM_FUNCTION(apc_exists,
-                      const Variant& key);
-bool HHVM_FUNCTION(apc_extend_ttl,
-                   const String& key,
-                   int64_t new_ttl);
-TypedValue HHVM_FUNCTION(apc_size, const String& key);
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-Array HHVM_FUNCTION(apc_cache_info,
-                    const String& cache_type /* = "" */,
-                    bool limited /* = false */);
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files
@@ -125,33 +91,17 @@ struct apc_rfc1867_data {
 int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
 
-void const_load_impl(struct cache_info *info,
-                     const char **int_keys, long long *int_values,
-                     const char **char_keys, char *char_values,
-                     const char **strings, const char **objects,
-                     const char **thrifts, const char **others);
-
-void const_load_impl_compressed(
-  struct cache_info *info,
-  int *int_lens, const char *int_keys, long long *int_values,
-  int *char_lens, const char *char_keys, char *char_values,
-  int *string_lens, const char *strings,
-  int *object_lens, const char *objects,
-  int *thrift_lens, const char *thrifts,
-  int *other_lens, const char *others);
-
 static_assert(sizeof(int64_t) == sizeof(long long),
               "Must be able to cast an int64* to a long long*");
 
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value);
-inline String apc_serialize(const Variant& var) {
-  return apc_serialize(const_variant_ref{var});
+String apc_serialize(const_variant_ref value, bool pure);
+inline String apc_serialize(const Variant& var, bool pure) {
+  return apc_serialize(const_variant_ref{var}, pure);
 }
-Variant apc_unserialize(const char* data, int len);
-String apc_reserialize(const String& str);
+Variant apc_unserialize(const char* data, int len, bool pure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support

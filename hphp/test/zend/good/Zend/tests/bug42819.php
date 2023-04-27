@@ -28,53 +28,53 @@ class foo {
 }
 
 class bar1 {
-    static $a1 = darray[I => 0];
-    static $a2 = darray[foo\I => 0];
-    static $a3 = darray[foo\foo::I => 0];
-    static $a4 = darray[\foo\I => 0];
-    static $a5 = darray[\foo\foo::I => 0];
-    static $a6 = darray[RegexIterator::GET_MATCH => 0];
-    static $a7 = darray[\E_ERROR => 0];
+    public static $a1 = darray[I => 0];
+    public static $a2 = darray[foo\I => 0];
+    public static $a3 = darray[foo\foo::I => 0];
+    public static $a4 = darray[\foo\I => 0];
+    public static $a5 = darray[\foo\foo::I => 0];
+    public static $a6 = darray[RegexIterator::GET_MATCH => 0];
+    public static $a7 = darray[\E_ERROR => 0];
 }
 
 class bar2 {
-    static $a1 = darray[I => I];
-    static $a2 = darray[foo\I => I];
-    static $a3 = darray[foo\foo::I => I];
-    static $a4 = darray[\foo\I => I];
-    static $a5 = darray[\foo\foo::I => I];
-    static $a6 = darray[RegexIterator::GET_MATCH => I];
-    static $a7 = darray[\E_ERROR => I];
+    public static $a1 = darray[I => I];
+    public static $a2 = darray[foo\I => I];
+    public static $a3 = darray[foo\foo::I => I];
+    public static $a4 = darray[\foo\I => I];
+    public static $a5 = darray[\foo\foo::I => I];
+    public static $a6 = darray[RegexIterator::GET_MATCH => I];
+    public static $a7 = darray[\E_ERROR => I];
 }
 
 class bar3 {
-    static $a1 = darray[I => foo\I];
-    static $a2 = darray[foo\I => foo\I];
-    static $a3 = darray[foo\foo::I => foo\I];
-    static $a4 = darray[\foo\I => foo\I];
-    static $a5 = darray[\foo\foo::I => foo\I];
-    static $a6 = darray[RegexIterator::GET_MATCH => foo\I];
-    static $a7 = darray[\E_ERROR => foo\I];
+    public static $a1 = darray[I => foo\I];
+    public static $a2 = darray[foo\I => foo\I];
+    public static $a3 = darray[foo\foo::I => foo\I];
+    public static $a4 = darray[\foo\I => foo\I];
+    public static $a5 = darray[\foo\foo::I => foo\I];
+    public static $a6 = darray[RegexIterator::GET_MATCH => foo\I];
+    public static $a7 = darray[\E_ERROR => foo\I];
 }
 
 class bar4 {
-    static $a1 = darray[I => RegexIterator::GET_MATCH];
-    static $a2 = darray[foo\I => RegexIterator::GET_MATCH];
-    static $a3 = darray[foo\foo::I => RegexIterator::GET_MATCH];
-    static $a4 = darray[\foo\I => RegexIterator::GET_MATCH];
-    static $a5 = darray[\foo\foo::I => RegexIterator::GET_MATCH];
-    static $a6 = darray[RegexIterator::GET_MATCH => RegexIterator::GET_MATCH];
-    static $a7 = darray[\E_ERROR => RegexIterator::GET_MATCH];
+    public static $a1 = darray[I => RegexIterator::GET_MATCH];
+    public static $a2 = darray[foo\I => RegexIterator::GET_MATCH];
+    public static $a3 = darray[foo\foo::I => RegexIterator::GET_MATCH];
+    public static $a4 = darray[\foo\I => RegexIterator::GET_MATCH];
+    public static $a5 = darray[\foo\foo::I => RegexIterator::GET_MATCH];
+    public static $a6 = darray[RegexIterator::GET_MATCH => RegexIterator::GET_MATCH];
+    public static $a7 = darray[\E_ERROR => RegexIterator::GET_MATCH];
 }
 
 class bar5 {
-    static $a1 = darray[I => \E_ERROR];
-    static $a2 = darray[foo\I => \E_ERROR];
-    static $a3 = darray[foo\foo::I => \E_ERROR];
-    static $a4 = darray[\foo\I => \E_ERROR];
-    static $a5 = darray[\foo\foo::I => \E_ERROR];
-    static $a6 = darray[RegexIterator::GET_MATCH => \E_ERROR];
-    static $a7 = darray[\E_ERROR => \E_ERROR];
+    public static $a1 = darray[I => \E_ERROR];
+    public static $a2 = darray[foo\I => \E_ERROR];
+    public static $a3 = darray[foo\foo::I => \E_ERROR];
+    public static $a4 = darray[\foo\I => \E_ERROR];
+    public static $a5 = darray[\foo\foo::I => \E_ERROR];
+    public static $a6 = darray[RegexIterator::GET_MATCH => \E_ERROR];
+    public static $a7 = darray[\E_ERROR => \E_ERROR];
 }
 
 function oops($a = varray[foo\unknown]){}

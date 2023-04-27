@@ -81,7 +81,18 @@ const RegSet kSIMDRegs =
 const RegSet kSIMDCallerSaved = kSIMDRegs;
 const RegSet kSIMDCalleeSaved{};
 
-const RegSet kSIMDReserved;
+/*
+ * d8-d15 are currently marked as reserved. They're a bit tricky in that they're
+ * partially callee-saved, which would require saving/restoring them when
+ * entering/exiting the TC.  This would add overhead to enter/exit the TC and it
+ * doesn't sound worth it since there are 24 other SIMD registers available.  If
+ * SIMD register pressure really becomes an issue, we can revisit this decision
+ * to make d8-d15 available for register allocation.
+ */
+const RegSet kSIMDReserved =
+  vixl::d8 | vixl::d9 | vixl::d10 | vixl::d11 |
+  vixl::d12 | vixl::d13 | vixl::d14 | vixl::d15;
+
 const RegSet kSIMDUnreserved = kSIMDRegs - kSIMDReserved;
 
 const RegSet kCallerSaved = kGPCallerSaved | kSIMDCallerSaved;

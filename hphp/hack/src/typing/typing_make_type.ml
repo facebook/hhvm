@@ -13,7 +13,7 @@ module Reason = Typing_reason
 module Nast = Aast
 
 let class_type r name tyl =
-  mk (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
+  mk (r, Tclass ((Reason.to_pos r, name), nonexact, tyl))
 
 let classname r tyl = class_type r SN.Classes.cClassname tyl
 
@@ -33,8 +33,6 @@ let keyed_traversable r kty vty =
 
 let keyed_container r kty vty =
   class_type r SN.Collections.cKeyedContainer [kty; vty]
-
-let shape r kind map = mk (r, Tshape (kind, map))
 
 let awaitable r ty = class_type r SN.Classes.cAwaitable [ty]
 
@@ -76,11 +74,7 @@ let collection r ty = class_type r SN.Collections.cCollection [ty]
 let spliceable r ty1 ty2 ty3 =
   class_type r SN.Classes.cSpliceable [ty1; ty2; ty3]
 
-let varray_or_darray r kty vty = mk (r, Tvec_or_dict (kty, vty))
-
-let varray r ty = vec r ty
-
-let darray r kty vty = dict r kty vty
+let vec_or_dict r kty vty = mk (r, Tvec_or_dict (kty, vty))
 
 let int r = prim_type r Nast.Tint
 
@@ -104,18 +98,37 @@ let dynamic r = mk (r, Tdynamic)
 
 let like r ty = mk (r, Tlike ty)
 
-let locl_like r ty = mk (r, Tunion [dynamic r; ty])
+let locl_like r ty =
+  if is_dynamic ty then
+    ty
+  else
+    match get_node ty with
+    | Tprim Aast.Tnoreturn
+    | Tany _ ->
+      ty
+    | Tunion tys when List.exists Typing_defs.is_dynamic tys -> ty
+    | _ -> mk (r, Tunion [dynamic r; ty])
 
 let supportdyn r ty =
   match get_node ty with
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
+  | Tunion [] -> ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
 
-let supportdynamic r = supportdyn r (nonnull r)
+let supportdyn_nonnull r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
 
-let nullablesupportdynamic r = supportdyn r (mixed r)
+let nothing r = mk (r, Tunion [])
+
+let shape r kind map = mk (r, Tshape (Missing_origin, kind, map))
+
+let closed_shape r map = mk (r, Tshape (Missing_origin, nothing r, map))
+
+let open_shape r map = mk (r, Tshape (Missing_origin, mixed r, map))
+
+let supportdyn_mixed ?(mixed_reason = Reason.Rnone) r =
+  supportdyn r (mixed mixed_reason)
 
 let hh_formatstring r ty =
   mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))
@@ -127,8 +140,6 @@ let tyvar r v = mk (r, Tvar v)
 let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
 
 let this r = mk (r, Tgeneric (SN.Typehints.this, []))
-
-let err r = mk (r, Terr)
 
 let taccess r ty id = mk (r, Taccess (ty, id))
 
@@ -144,8 +155,6 @@ let nullable_locl r ty =
   | Toption _ as ty_ -> mk (r, ty_)
   | Tunion [] -> null r
   | _ -> mk (r, Toption ty)
-
-let nothing r = mk (r, Tunion [])
 
 let apply r id tyl = mk (r, Tapply (id, tyl))
 
@@ -213,7 +222,7 @@ let default_capability p : locl_ty =
         class_type r writeProperty [];
         class_type r accessGlobals [];
         class_type r rxLocal [];
-        class_type r system [];
+        class_type r systemLocal [];
         class_type r implicitPolicyLocal [];
         class_type r io [];
       ]

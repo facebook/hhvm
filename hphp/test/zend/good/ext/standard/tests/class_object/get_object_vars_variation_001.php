@@ -8,7 +8,7 @@
 class A {
     public static $var = 'hello';
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_object_vars_variation_001(): void {
 $a = new A;
 var_dump(get_object_vars($a));
 }

@@ -1,0 +1,76 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Called specifically when setting the result on a promise. It casts the Python
+value returned by the coroutine into the appropriate format to be returned
+to the client.
+
+}}{{#type:iobuf?}}{{!
+  }}{{#function:stack_arguments?}}deref{{/function:stack_arguments?}}{{!
+  }}((<_fbthrift_iobuf.IOBuf>result).c_clone()){{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[unique_ptr[_fbthrift_iobuf.cIOBuf]]({{/function:stack_arguments?}}{{!
+    }}((<_fbthrift_iobuf.IOBuf>result).c_clone()){{!
+  }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}{{#function:stack_arguments?}}{{> types/cython_cpp_type}}({{/function:stack_arguments?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}cmove(<string>result)){{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{#type:bool?}}<cbool> result{{/type:bool?}}{{!
+}}{{#type:byte?}}<cint8_t> result{{/type:byte?}}{{!
+}}{{#type:i16?}}<cint16_t> result{{/type:i16?}}{{!
+}}{{#type:i32?}}<cint32_t> result{{/type:i32?}}{{!
+}}{{#type:i64?}}<cint64_t> result{{/type:i64?}}{{!
+}}{{#type:double?}}<double> result{{/type:double?}}{{!
+}}{{#type:float?}}<float> result{{/type:float?}}{{!
+}}{{#type:string?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+    }}<string?> result.encode('UTF-8'){{!
+  }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
+}}{{/type:string?}}{{!
+}}{{#type:binary?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+    }}<string?> result{{!
+  }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
+}}{{/type:binary?}}{{!
+}}{{#type:struct}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+    }}deref((<{{> types/cython_python_type}}?> result)._cpp_obj){{!
+  }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
+}}{{/type:struct}}{{!
+}}{{#type:streamresponse?}}{{!
+  }}{{#type:stream_has_first_response?}}createResponseAndServerStream[{{!
+  }}{{#type:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/type:stream_first_response_type}},{{!
+  }}{{#type:stream_elem_type}}{{ >types/cython_cpp_type}}{{/type:stream_elem_type}}]({{!
+  }}{{#type:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/type:stream_first_response_type}}, {{!
+  }}{{/type:stream_has_first_response?}}{{!
+  }}cmove(deref((<ServerStream_{{#type:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/type:stream_elem_type}}?>result).cStream)){{!
+  }}{{#type:stream_has_first_response?}}){{/type:stream_has_first_response?}}{{!
+}}{{/type:streamresponse?}}{{!
+}}{{#type:container?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+    }}deref((<{{> types/cython_python_type}}?> result)._cpp_obj){{!
+  }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
+}}{{/type:container?}}{{!
+}}{{#type:void?}}c_unit{{/type:void?}}{{!
+}}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>result{{/type:enum?}}{{!
+}}{{/type:hasCustomTypeBehavior?}}

@@ -32,7 +32,7 @@ module Helpers : sig
 
   val assert_are_alias_for_another_var : env -> Ident.t list -> unit
 
-  val show_env : env -> unit
+  val show_env : env -> unit [@@warning "-unused-value-declaration"]
 end = struct
   let () = Typing_subtype.set_fun_refs ()
 

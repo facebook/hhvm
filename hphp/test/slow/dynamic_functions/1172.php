@@ -1,11 +1,11 @@
 <?hh
 <<__DynamicallyCallable>>
 function test($a) {
- print $a;
+  print $a;
 }
 
  <<__EntryPoint>>
 function main_1172() {
-$a = 'Test';
- $a('ok');
+  $a = 'test';
+  $a('ok');
 }

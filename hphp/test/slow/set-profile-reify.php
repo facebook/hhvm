@@ -1,5 +1,6 @@
 <?hh
 
+<<__NEVER_INLINE>>
 function rfunc1<reify Ta, reify Tb>() { echo __FUNCTION__."\n"; }
 function rfunc2<reify Ta, Tb>() { echo __FUNCTION__."\n"; }
 function rfunc3<Ta, reify Tb>() { echo __FUNCTION__."\n"; }

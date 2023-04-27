@@ -12,8 +12,8 @@ final class RenameStaticMethClass {
   public static function other_method(): int {
     self::static_test_method();
     RenameStaticMethClass::static_test_method();
-    class_meth(self::class, 'static_test_method');
-    class_meth(RenameStaticMethClass::class, 'static_test_method');
+    self::static_test_method<>;
+    RenameStaticMethClass::static_test_method<>;
     return 0;
   }
 }

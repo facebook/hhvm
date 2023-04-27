@@ -2,38 +2,85 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::borrow::Cow;
+use std::collections::BTreeMap;
+use std::iter;
+use std::str::FromStr;
 
-use class_expr::ClassExpr;
-use emit_pos::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, Env, Flags as EnvFlags};
-use error::{Error, Result};
-use ffi::{Slice, Str};
+use emit_pos::emit_pos;
+use emit_pos::emit_pos_then;
+use env::emitter::Emitter;
+use env::ClassExpr;
+use env::Env;
+use env::Flags as EnvFlags;
+use error::Error;
+use error::Result;
+use ffi::Slice;
+use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    hhas_symbol_refs::IncludePath, BareThisOp, CollectionType, FCallArgs, FCallArgsFlags,
-    HasGenericsOp, IncDecOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local,
-    MOpMode, MemberKey, MethodName, OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SpecialClsRef, StackIndex, TypeStructResolveOp, TypedValue,
-};
+use hhbc::BareThisOp;
+use hhbc::CollectionType;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::HasGenericsOp;
+use hhbc::IncDecOp;
+use hhbc::IncludePath;
+use hhbc::Instruct;
+use hhbc::IsLogAsDynamicCallOp;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::MethodName;
+use hhbc::OODeclExistsOp;
+use hhbc::ObjMethodOp;
+use hhbc::Opcode;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetOpOp;
+use hhbc::SetRangeOp;
+use hhbc::SpecialClsRef;
+use hhbc::StackIndex;
+use hhbc::TypeStructResolveOp;
+use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use itertools::Itertools;
 use lazy_static::lazy_static;
-use naming_special_names_rust::{
-    emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
-    special_idents, superglobals, typehints, user_attributes,
-};
-use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
-use oxidized::{
-    aast, aast_defs,
-    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
-    ast,
-    ast_defs::{self, ParamKind},
-    local_id,
-    pos::Pos,
-};
+use naming_special_names_rust::emitter_special_functions;
+use naming_special_names_rust::fb;
+use naming_special_names_rust::pseudo_consts;
+use naming_special_names_rust::pseudo_functions;
+use naming_special_names_rust::special_functions;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::superglobals;
+use naming_special_names_rust::typehints;
+use naming_special_names_rust::user_attributes;
+use oxidized::aast;
+use oxidized::aast_defs;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::ast_defs::ParamKind;
+use oxidized::local_id;
+use oxidized::pos::Pos;
 use regex::Regex;
-use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
+use serde_json::json;
+
+use super::TypeRefinementInHint;
+use crate::emit_adata;
+use crate::emit_fatal;
+use crate::emit_type_constant;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -69,10 +116,19 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 }
 
 mod inout_locals {
-    use crate::{Emitter, Env, Local, ParamKind};
-    use hash::HashMap;
-    use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast, ast_defs};
     use std::marker::PhantomData;
+
+    use hash::HashMap;
+    use oxidized::aast_defs::Lid;
+    use oxidized::aast_visitor;
+    use oxidized::aast_visitor::Node;
+    use oxidized::ast;
+    use oxidized::ast_defs;
+
+    use super::Emitter;
+    use super::Env;
+    use super::Local;
+    use super::ParamKind;
 
     pub(super) struct AliasInfo {
         first_inout: isize,
@@ -176,12 +232,13 @@ mod inout_locals {
         arg: &'ast ast::Expr,
         acc: &mut AliasInfoMap<'ast>,
     ) {
-        use ast::{Expr, Expr_};
+        use ast::Expr;
+        use ast::Expr_;
         let Expr(_, _, e) = arg;
         // inout $v
         if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
             let Lid(_, lid) = &**lid;
-            if !crate::is_local_this(env, lid) {
+            if !super::is_local_this(env, lid) {
                 add_use(&lid.1, acc);
                 return if is_top {
                     add_inout(lid.1.as_str(), i, acc);
@@ -237,7 +294,7 @@ mod inout_locals {
                 Ok(match p {
                     // lhs op= _
                     ast::Expr_::Binop(expr) => {
-                        let (bop, left, _) = &**expr;
+                        let ast::Binop { bop, lhs: left, .. } = &**expr;
                         if let ast_defs::Bop::Eq(_) = bop {
                             collect_lvars_hs(c, left)
                         }
@@ -264,10 +321,10 @@ mod inout_locals {
     // collect lvars on the left hand side of '=' operator
     fn collect_lvars_hs<'r, 'ast, 'arena>(ctx: &mut Ctx<'r, 'ast, 'arena>, expr: &'ast ast::Expr) {
         let ast::Expr(_, _, e) = expr;
-        match &*e {
+        match e {
             ast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
-                if !crate::is_local_this(ctx.env, lid) {
+                if !super::is_local_this(ctx.env, lid) {
                     add_use(lid.1.as_str(), ctx.state);
                     add_write(lid.1.as_str(), ctx.i, ctx.state);
                 }
@@ -278,10 +335,11 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub fn get_type_structure_for_hint<'arena, 'decl>(
+pub(crate) fn get_type_structure_for_hint<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
+    type_refinement_in_hint: TypeRefinementInHint,
     hint: &aast::Hint,
 ) -> Result<InstrSeq<'arena>> {
     let targ_map: BTreeMap<&str, i64> = targ_map
@@ -297,8 +355,9 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         hint,
         false,
         false,
+        type_refinement_in_hint,
     )?;
-    emit_adata::typed_value_to_instr(e, &tv)
+    emit_adata::typed_value_into_instr(e, tv)
 }
 
 pub struct SetRange {
@@ -369,83 +428,91 @@ pub fn emit_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::Expr_;
-    let ast::Expr(_, pos, expr) = expression;
-    if let Some(sl) = emitter.stack_limit.as_ref() {
-        sl.panic_if_exceeded()
-    }
-    match expr {
-        Expr_::Float(_)
-        | Expr_::String(_)
-        | Expr_::Int(_)
-        | Expr_::Null
-        | Expr_::False
-        | Expr_::True => emit_lit(emitter, env, pos, expression),
-        Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
-        Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
-        Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
-        Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
-        Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
-        Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
-        Expr_::Pipe(e) => emit_pipe(emitter, env, e),
-        Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
-        Expr_::As(e) => emit_as(emitter, env, pos, e),
-        Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
-        Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
-        Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
-        Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
-        Expr_::ObjGet(e) => emit_obj_get_expr(emitter, env, pos, e),
-        Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
-        Expr_::New(e) => emit_new(emitter, env, pos, e, false),
-        Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
-        Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
-        Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
-        Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
-        Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
-        Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
-        Expr_::KeyValCollection(e) => emit_keyval_collection_expr(emitter, env, pos, e, expression),
-        Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
-        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
-        Expr_::Await(e) => emit_await(emitter, env, pos, e),
-        Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
-        Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-        Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
-        Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
+    stack_limit::maybe_grow(|| {
+        use ast::Expr_;
+        let ast::Expr(_, pos, expr) = expression;
+        match expr {
+            Expr_::Float(_)
+            | Expr_::String(_)
+            | Expr_::Int(_)
+            | Expr_::Null
+            | Expr_::False
+            | Expr_::True => emit_lit(emitter, env, pos, expression),
+            Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
+            Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
+            Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
+            Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
+            Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
+            Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
+            Expr_::Pipe(e) => emit_pipe(emitter, env, e),
+            Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
+            Expr_::As(e) => emit_as(emitter, env, pos, e),
+            Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
+            Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
+            Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
+            Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
+            Expr_::ObjGet(e) => emit_obj_get_expr(emitter, env, pos, e),
+            Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
+            Expr_::New(e) => emit_new(emitter, env, pos, e, false),
+            Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
+            Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
+            Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
+            Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
+            Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
+            Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
+            Expr_::KeyValCollection(e) => {
+                emit_keyval_collection_expr(emitter, env, pos, e, expression)
+            }
+            Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
+            Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
+            Expr_::Await(e) => emit_await(emitter, env, pos, e),
+            Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
+            Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
+            Expr_::Efun(e) => Ok(emit_pos_then(
+                pos,
+                emit_lambda(emitter, env, &e.use_, &e.closure_class_name)?,
+            )),
+            Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
 
-        Expr_::String2(es) => emit_string2(emitter, env, pos, es),
-        Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
-        Expr_::Xml(_) => Err(Error::unrecoverable(
-            "emit_xhp: syntax should have been converted during rewriting",
-        )),
-        Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
-        Expr_::Omitted => Ok(instr::empty()),
-        Expr_::Lfun(_) => Err(Error::unrecoverable(
-            "expected Lfun to be converted to Efun during closure conversion emit_expr",
-        )),
-        Expr_::List(_) => Err(Error::fatal_parse(
-            pos,
-            "list() can only be used as an lvar. Did you mean to use tuple()?",
-        )),
-        Expr_::Tuple(e) => Ok(emit_pos_then(
-            pos,
-            emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
-        )),
+            Expr_::String2(es) => emit_string2(emitter, env, pos, es),
+            Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
+            Expr_::Xml(_) => Err(Error::unrecoverable(
+                "emit_xhp: syntax should have been converted during rewriting",
+            )),
+            Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
+            Expr_::Omitted => Err(Error::unrecoverable(
+                "emit_expr: Omitted should never be encountered by codegen",
+            )),
+            Expr_::Lfun(_) => Err(Error::unrecoverable(
+                "expected Lfun to be converted to Efun during closure conversion emit_expr",
+            )),
+            Expr_::List(_) => Err(Error::fatal_parse(
+                pos,
+                "list() can only be used as an lvar. Did you mean to use tuple()?",
+            )),
+            Expr_::Tuple(e) => Ok(emit_pos_then(
+                pos,
+                emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
+            )),
 
-        Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
-            unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
+            Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
+                unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
+            }
+            Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
+            Expr_::ETSplice(_) => Err(Error::unrecoverable(
+                "expression trees: splice should be erased during rewriting",
+            )),
+            Expr_::Invalid(_) => Err(Error::unrecoverable(
+                "emit_expr: Invalid should never be encountered by codegen",
+            )),
+            Expr_::MethodCaller(_) | Expr_::Hole(_) => {
+                unimplemented!("TODO(hrust)")
+            }
+            Expr_::Package(_) => Err(Error::unrecoverable(
+                "package should have been converted into package_exists during rewriting",
+            )),
         }
-        Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
-        Expr_::ETSplice(_) => Err(Error::unrecoverable(
-            "expression trees: splice should be erased during rewriting",
-        )),
-        Expr_::FunId(_)
-        | Expr_::MethodId(_)
-        | Expr_::MethodCaller(_)
-        | Expr_::SmethodId(_)
-        | Expr_::Hole(_) => {
-            unimplemented!("TODO(hrust)")
-        }
-    }
+    })
 }
 
 fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(
@@ -506,9 +573,10 @@ fn emit_id<'a, 'arena, 'decl>(
         pseudo_consts::G__FUNCTION_CREDENTIAL__ => {
             Ok(instr::instr(Instruct::Opcode(Opcode::FuncCred)))
         }
-        pseudo_consts::G__CLASS__ => {
-            Ok(InstrSeq::gather(vec![instr::selfcls(), instr::classname()]))
-        }
+        pseudo_consts::G__CLASS__ => Ok(InstrSeq::gather(vec![
+            instr::self_cls(),
+            instr::class_name(),
+        ])),
         pseudo_consts::G__COMPILER_FRONTEND__ => Ok(instr::string(alloc, "hackc")),
         pseudo_consts::G__LINE__ => Ok(instr::int(p.info_pos_extended().1.try_into().map_err(
             |_| Error::fatal_parse(p, "error converting end of line from usize to isize"),
@@ -556,7 +624,7 @@ fn emit_yield<'a, 'arena, 'decl>(
             emit_expr(e, env, k)?,
             emit_expr(e, env, v)?,
             emit_pos(pos),
-            instr::yieldk(),
+            instr::yield_k(),
         ]),
     })
 }
@@ -569,10 +637,10 @@ fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &ast::Expr) -> Include
     }
     fn split_var_lit(e: &ast::Expr) -> (String, String) {
         match &e.2 {
-            ast::Expr_::Binop(x) if x.0.is_dot() => {
-                let (v, l) = split_var_lit(&x.2);
+            ast::Expr_::Binop(x) if x.bop.is_dot() => {
+                let (v, l) = split_var_lit(&x.rhs);
                 if v.is_empty() {
-                    let (var, lit) = split_var_lit(&x.1);
+                    let (var, lit) = split_var_lit(&x.lhs);
                     (var, format!("{}{}", lit, l))
                 } else {
                     (v, String::new())
@@ -641,25 +709,25 @@ fn emit_import<'a, 'arena, 'decl>(
     use ast::ImportFlavor;
     let alloc = env.arena; // Should this be emitter.alloc?
     let inc = parse_include(alloc, expr);
-    e.add_include_ref(inc.clone());
+    let filepath = e.filepath.clone();
+    let resolved_inc = inc.resolve_include_roots(alloc, &e.options().hhvm.include_roots, &filepath);
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
-        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::inclonce()),
-        ImportFlavor::RequireOnce => {
-            match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
-                IncludePath::DocRootRelative(path) => {
-                    let expr = ast::Expr(
-                        (),
-                        pos.clone(),
-                        ast::Expr_::String(path.unsafe_as_str().into()),
-                    );
-                    (emit_expr(e, env, &expr)?, instr::reqdoc())
-                }
-                _ => (emit_expr(e, env, expr)?, instr::reqonce()),
+        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::incl_once()),
+        ImportFlavor::RequireOnce => match &resolved_inc {
+            IncludePath::DocRootRelative(path) => {
+                let expr = ast::Expr(
+                    (),
+                    pos.clone(),
+                    ast::Expr_::String(path.unsafe_as_str().into()),
+                );
+                (emit_expr(e, env, &expr)?, instr::req_doc())
             }
-        }
+            _ => (emit_expr(e, env, expr)?, instr::req_once()),
+        },
     };
+    e.add_include_ref(resolved_inc);
     Ok(InstrSeq::gather(vec![
         expr_instrs,
         emit_pos(pos),
@@ -689,7 +757,7 @@ fn emit_string2<'a, 'arena, 'decl>(
             emit_pos(pos),
             instr::concat(),
             InstrSeq::gather(
-                (&es[2..])
+                es[2..]
                     .iter()
                     .map(|expr| {
                         Ok(InstrSeq::gather(vec![
@@ -718,50 +786,54 @@ fn emit_clone<'a, 'arena, 'decl>(
 fn emit_lambda<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
-    fndef: &ast::Fun_,
-    ids: &[aast_defs::Lid],
+    ids: &[ast::CaptureLid],
+    closure_class_name: &Option<String>,
 ) -> Result<InstrSeq<'arena>> {
-    // Closure conversion puts the class number used for CreateCl in the "name"
-    // of the function definition
-    let fndef_name = &(fndef.name).1;
-    let cls_num = fndef_name
-        .parse::<isize>()
-        .map_err(|err| Error::unrecoverable(err.to_string()))?;
-    let explicit_use = e.emit_global_state().explicit_use_set.contains(fndef_name);
+    let closure_class_name = if let Some(n) = closure_class_name {
+        n
+    } else {
+        return Err(Error::unrecoverable(
+            "Closure conversion should have set closure_class_name",
+        ));
+    };
+
+    let explicit_use = e
+        .global_state()
+        .explicit_use_set
+        .contains(closure_class_name);
     let is_in_lambda = env.scope.is_in_lambda();
+
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(
             ids.iter()
-                .map(|ast::Lid(pos, id)| {
+                .map(|ast::CaptureLid(_, ast::Lid(pos, id))| {
                     match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                         Some((is_fun, i)) => {
                             if is_in_lambda {
                                 let name = string_utils::reified::reified_generic_captured_name(
                                     is_fun, i as usize,
                                 );
-                                Ok(instr::cgetl(e.named_local(name.as_str().into())))
+                                Ok(instr::c_get_l(e.named_local(name.as_str().into())))
                             } else {
-                                emit_reified_generic_instrs(
-                                    e,
-                                    &Pos::make_none(),
-                                    is_fun,
-                                    i as usize,
-                                )
+                                emit_reified_generic_instrs(e, &Pos::NONE, is_fun, i as usize)
                             }
                         }
                         None => Ok({
                             let lid = get_local(e, env, pos, local_id::get_name(id))?;
                             if explicit_use {
-                                instr::cgetl(lid)
+                                instr::c_get_l(lid)
                             } else {
-                                instr::cugetl(lid)
+                                instr::cu_get_l(lid)
                             }
                         }),
                     }
                 })
                 .collect::<Result<Vec<_>>>()?,
         ),
-        instr::createcl(ids.len() as u32, cls_num as u32),
+        instr::create_cl(
+            ids.len() as u32,
+            hhbc::ClassName::from_raw_string(e.alloc, closure_class_name),
+        ),
     ]))
 }
 
@@ -773,16 +845,12 @@ pub fn emit_await<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
 
-    let cant_inline_gen_functions = !emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    let cant_inline_gen_functions = !emitter.options().hhbc.jit_enable_rename_function;
     match e.as_call() {
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
                 && args.len() == 1
-                && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
+                && string_utils::strip_global_ns(&id.1) == "gena") =>
         {
             inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
         }
@@ -790,7 +858,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
             let after_await = emitter.label_gen_mut().next_regular();
             let instrs = match e {
                 ast::Expr_::Call(c) => {
-                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, &*c)?
+                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, c)?
                 }
                 _ => emit_expr(emitter, env, expr)?,
             };
@@ -798,8 +866,8 @@ pub fn emit_await<'a, 'arena, 'decl>(
                 instrs,
                 emit_pos(pos),
                 instr::dup(),
-                instr::istypec(IsTypeOp::Null),
-                instr::jmpnz(after_await.clone()),
+                instr::is_type_c(IsTypeOp::Null),
+                instr::jmp_nz(after_await.clone()),
                 instr::await_(),
                 instr::label(after_await),
             ]))
@@ -817,13 +885,13 @@ fn inline_gena_call<'a, 'arena, 'decl>(
 
     scope::with_unnamed_local(emitter, |e, arr_local| {
         let alloc = e.alloc;
-        let before = InstrSeq::gather(vec![load_arr, instr::cast_dict(), instr::popl(arr_local)]);
+        let before = InstrSeq::gather(vec![load_arr, instr::cast_dict(), instr::pop_l(arr_local)]);
 
         let inner = InstrSeq::gather(vec![
-            instr::nulluninit(),
-            instr::nulluninit(),
-            instr::cgetl(arr_local),
-            instr::fcallclsmethodd(
+            instr::null_uninit(),
+            instr::null_uninit(),
+            instr::c_get_l(arr_local),
+            instr::f_call_cls_method_d(
                 FCallArgs::new(
                     FCallArgsFlags::default(),
                     1,
@@ -838,23 +906,23 @@ fn inline_gena_call<'a, 'arena, 'decl>(
             ),
             instr::await_(),
             instr::label(async_eager_label),
-            instr::popc(),
-            emit_iter(e, instr::cgetl(arr_local), |val_local, key_local| {
+            instr::pop_c(),
+            emit_iter(e, instr::c_get_l(arr_local), |val_local, key_local| {
                 InstrSeq::gather(vec![
-                    instr::cgetl(val_local),
-                    instr::whresult(),
-                    instr::basel(
+                    instr::c_get_l(val_local),
+                    instr::wh_result(),
+                    instr::base_l(
                         arr_local,
                         MOpMode::Define,
                         ReadonlyOp::Any, // TODO, handle await assignment statements correctly
                     ),
-                    instr::setm(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
-                    instr::popc(),
+                    instr::set_m(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
+                    instr::pop_c(),
                 ])
             })?,
         ]);
 
-        let after = instr::pushl(arr_local);
+        let after = instr::push_l(arr_local);
 
         Ok((before, inner, after))
     })
@@ -878,16 +946,16 @@ fn emit_iter<'arena, 'decl, F: FnOnce(Local, Local) -> InstrSeq<'arena>>(
         };
         let iter_init = InstrSeq::gather(vec![
             collection,
-            instr::iterinit(iter_args.clone(), loop_end),
+            instr::iter_init(iter_args.clone(), loop_end),
         ]);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_next),
             f(val_id, key_id),
-            instr::iternext(iter_args, loop_next),
+            instr::iter_next(iter_args, loop_next),
         ]);
         let iter_done = InstrSeq::gather(vec![
-            instr::unsetl(val_id),
-            instr::unsetl(key_id),
+            instr::unset_l(val_id),
+            instr::unset_l(key_id),
             instr::label(loop_end),
         ]);
         Ok((iter_init, iterate, iter_done))
@@ -956,7 +1024,7 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match constant_folder::vec_to_typed_value(e, fields) {
         Ok(tv) => {
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, None, pos, instr)
         }
         Err(_) => {
@@ -975,17 +1043,17 @@ fn emit_named_collection<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let emit_vector_like = |e: &mut Emitter<'arena, 'decl>, collection_type| {
         Ok(if fields.is_empty() {
-            emit_pos_then(pos, instr::newcol(collection_type))
+            emit_pos_then(pos, instr::new_col(collection_type))
         } else {
             InstrSeq::gather(vec![
                 emit_vec_collection(e, env, pos, fields)?,
-                instr::colfromarray(collection_type),
+                instr::col_from_array(collection_type),
             ])
         })
     };
     let emit_map_or_set = |e: &mut Emitter<'arena, 'decl>, collection_type| {
         if fields.is_empty() {
-            Ok(emit_pos_then(pos, instr::newcol(collection_type)))
+            Ok(emit_pos_then(pos, instr::new_col(collection_type)))
         } else {
             emit_collection(e, env, expr, fields, Some(collection_type))
         }
@@ -1030,10 +1098,6 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
-        "vec" | "dict" | "keyset" => {
-            let instr = emit_collection(e, env, expr, fields, None)?;
-            return Ok(emit_pos_then(pos, instr));
-        }
         _ => {
             return Err(Error::unrecoverable(format!(
                 "collection: {} does not exist",
@@ -1044,18 +1108,13 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
     emit_named_collection(e, env, pos, expr, fields, ctype)
 }
 
-fn mk_afkvalues(es: &[(ast::Expr, ast::Expr)]) -> Vec<ast::Afield> {
-    es.to_owned()
-        .into_iter()
-        .map(|(e1, e2)| ast::Afield::mk_afkvalue(e1, e2))
+fn mk_afkvalues(es: impl Iterator<Item = (ast::Expr, ast::Expr)>) -> Vec<ast::Afield> {
+    es.map(|(e1, e2)| ast::Afield::mk_afkvalue(e1, e2))
         .collect()
 }
 
 fn mk_afvalues(es: &[ast::Expr]) -> Vec<ast::Afield> {
-    es.to_owned()
-        .into_iter()
-        .map(ast::Afield::mk_afvalue)
-        .collect()
+    es.iter().cloned().map(ast::Afield::mk_afvalue).collect()
 }
 
 fn emit_collection<'a, 'arena, 'decl>(
@@ -1066,12 +1125,9 @@ fn emit_collection<'a, 'arena, 'decl>(
     transform_to_collection: Option<CollectionType>,
 ) -> Result<InstrSeq<'arena>> {
     let pos = &expr.1;
-    match constant_folder::expr_to_typed_value_(
-        e, expr, true,  /*allow_map*/
-        false, /*force_class_const*/
-    ) {
+    match constant_folder::expr_to_typed_value_(e, expr, true /*allow_map*/) {
         Ok(tv) => {
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, transform_to_collection, pos, instr)
         }
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
@@ -1085,7 +1141,7 @@ fn emit_static_collection<'a, 'arena>(
     instr: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let transform_instr = match transform_to_collection {
-        Some(collection_type) => instr::colfromarray(collection_type),
+        Some(collection_type) => instr::col_from_array(collection_type),
         _ => instr::empty(),
     };
     Ok(InstrSeq::gather(vec![
@@ -1137,7 +1193,7 @@ fn emit_container<'a, 'arena, 'decl>(
                     env,
                     pos,
                     InstrSeq::<'arena>::clone(&add_elem_instr),
-                    instr::add_elemc(),
+                    instr::add_elem_c(),
                     f,
                 )
             })
@@ -1156,8 +1212,8 @@ fn emit_keyvalue_collection<'a, 'arena, 'decl>(
     ctype: CollectionType,
     constructor: Instruct<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let transform_instr = instr::colfromarray(ctype);
-    let add_elem_instr = InstrSeq::gather(vec![instr::dup(), instr::add_elemc()]);
+    let transform_instr = instr::col_from_array(ctype);
+    let add_elem_instr = InstrSeq::gather(vec![instr::dup(), instr::add_elem_c()]);
     let emitted_pos = emit_pos(pos);
     emit_container(
         e,
@@ -1178,7 +1234,7 @@ fn emit_array<'a, 'arena, 'decl>(
     fields: &[ast::Afield],
     constructor: Instruct<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let add_elem_instr = instr::add_new_elemc();
+    let add_elem_instr = instr::add_new_elem_c();
     let emitted_pos = emit_pos(pos);
     emit_container(
         e,
@@ -1194,7 +1250,7 @@ fn emit_array<'a, 'arena, 'decl>(
 
 fn non_numeric(s: &str) -> bool {
     // Note(hrust): OCaml Int64.of_string and float_of_string ignore underscores
-    let s = s.replace("_", "");
+    let s = s.replace('_', "");
     lazy_static! {
         static ref HEX: Regex = Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap();
         static ref OCTAL: Regex = Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap();
@@ -1223,7 +1279,7 @@ fn non_numeric(s: &str) -> bool {
         .map_err(|_| ())
     }
     fn float_from_str_radix(s: &str, radix: u32) -> Result<f64, ()> {
-        let i = i64::from_str_radix(&s.replace(".", ""), radix).map_err(|_| ())?;
+        let i = i64::from_str_radix(&s.replace('.', ""), radix).map_err(|_| ())?;
         Ok(match s.matches('.').count() {
             0 => i as f64,
             1 => {
@@ -1295,7 +1351,7 @@ fn is_struct_init<'arena, 'decl>(
         are_all_keys_non_numeric_strings = false;
     }
     let num_keys = fields.len();
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     Ok((allow_numerics || are_all_keys_non_numeric_strings)
         && uniq_keys.len() == num_keys
         && num_keys <= limit
@@ -1318,7 +1374,8 @@ fn emit_struct_array<
     fields: &[ast::Afield],
     ctor: C,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let (keys, value_instrs): (Vec<String>, _) = fields
         .iter()
@@ -1374,7 +1431,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
         if is_struct_init(e, fields, true)? {
             emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                Ok(instr::newstructdict(alloc, x))
+                Ok(instr::new_struct_dict(alloc, x))
             })
         } else {
             let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
@@ -1385,10 +1442,10 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         if is_struct_init(e, fields, true)? {
             Ok(InstrSeq::gather(vec![
                 emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                    Ok(instr::newstructdict(alloc, x))
+                    Ok(instr::new_struct_dict(alloc, x))
                 })?,
                 emit_pos(pos),
-                instr::colfromarray(ctype),
+                instr::col_from_array(ctype),
             ]))
         } else {
             let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
@@ -1397,49 +1454,40 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     };
     use ast::Expr_;
     match &expr.2 {
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
-        }
-        Expr_::Collection(v) if (v.0).1 == "vec" => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Vec => {
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::Tuple(_) => {
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Keyset => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, |v| {
                 Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
-        Expr_::Collection(v) if (v.0).1 == "keyset" => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcode::NewKeysetArray(v))
-            })
-        }
-        Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::Dict => emit_dict(e),
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::Dict => emit_dict(e),
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Set" => {
             emit_collection_helper(e, CollectionType::Set)
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Set => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Set => {
             emit_collection_helper(e, CollectionType::Set)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmSet" => {
             emit_collection_helper(e, CollectionType::ImmSet)
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::ImmSet => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::ImmSet => {
             emit_collection_helper(e, CollectionType::ImmSet)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Map" => {
             emit_collection_helper(e, CollectionType::Map)
         }
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::Map => {
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::Map => {
             emit_collection_helper(e, CollectionType::Map)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmMap" => {
             emit_collection_helper(e, CollectionType::ImmMap)
         }
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::ImmMap => {
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::ImmMap => {
             emit_collection_helper(e, CollectionType::ImmMap)
         }
         Expr_::Varray(_) => {
@@ -1451,7 +1499,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         Expr_::Darray(_) => {
             if is_struct_init(e, fields, false /* allow_numerics */)? {
                 let instrs = emit_struct_array(e, env, pos, fields, |alloc, _, arg| {
-                    let instr = instr::newstructdict(alloc, arg);
+                    let instr = instr::new_struct_dict(alloc, arg);
                     Ok(emit_pos_then(pos, instr))
                 });
                 Ok(instrs?)
@@ -1474,7 +1522,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(u32) -> Instruct<'are
     fields: &[ast::Afield],
     constructor: F,
 ) -> Result<InstrSeq<'arena>> {
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     let inline =
         |e: &mut Emitter<'arena, 'decl>, exprs: &[ast::Afield]| -> Result<InstrSeq<'arena>> {
             let mut instrs = vec![];
@@ -1493,7 +1541,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(u32) -> Instruct<'are
             let mut instrs = vec![];
             for expr in exprs.iter() {
                 instrs.push(emit_expr(e, env, expr.value())?);
-                instrs.push(instr::add_new_elemc());
+                instrs.push(instr::add_new_elem_c());
             }
             Ok(InstrSeq::gather(instrs))
         };
@@ -1562,23 +1610,23 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
                 emit_pos(outer_pos),
                 instr::string(alloc, string_utils::locals::strip_dollar(name)),
                 emit_pos(outer_pos),
-                instr::issetg(),
+                instr::isset_g(),
             ])
         } else if is_local_this(env, &lid.1) && !env.flags.contains(env::Flags::NEEDS_LOCAL_THIS) {
             InstrSeq::gather(vec![
                 emit_pos(outer_pos),
                 emit_local(e, env, BareThisOp::NoNotice, lid)?,
                 emit_pos(outer_pos),
-                instr::istypec(IsTypeOp::Null),
+                instr::is_type_c(IsTypeOp::Null),
                 instr::not(),
             ])
         } else {
-            emit_pos_then(outer_pos, instr::issetl(get_local(e, env, &lid.0, name)?))
+            emit_pos_then(outer_pos, instr::isset_l(get_local(e, env, &lid.0, name)?))
         });
     }
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        instr::istypec(IsTypeOp::Null),
+        instr::is_type_c(IsTypeOp::Null),
         instr::not(),
     ]))
 }
@@ -1608,8 +1656,8 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
                                 if i < exprs.len() - 1 {
                                     InstrSeq::gather(vec![
                                         instr::dup(),
-                                        instr::jmpz(its_done),
-                                        instr::popc(),
+                                        instr::jmp_z(its_done),
+                                        instr::pop_c(),
                                     ])
                                 } else {
                                     instr::empty()
@@ -1633,7 +1681,7 @@ fn emit_tag_provenance_here<'a, 'arena, 'decl>(
     let pop = if es.len() == 1 {
         instr::empty()
     } else {
-        instr::popc()
+        instr::pop_c()
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs_and_error_on_inout(e, env, es, "HH\\tag_provenance_here")?,
@@ -1721,7 +1769,7 @@ fn emit_call<'a, 'arena, 'decl>(
         Some(ast_defs::Id(_, id)) => {
             let fq = hhbc::FunctionName::<'arena>::from_ast_name(alloc, id);
             let lower_fq_name = fq.unsafe_as_str();
-            emit_special_function(e, env, pos, args, uarg, lower_fq_name)
+            emit_special_function(e, env, pos, targs, args, uarg, lower_fq_name)
                 .transpose()
                 .unwrap_or_else(|| {
                     emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
@@ -1753,9 +1801,9 @@ fn emit_call_default<'a, 'arena, 'decl>(
             instr::empty(),
             InstrSeq::gather(vec![
                 InstrSeq::gather(
-                    iter::repeat_with(instr::nulluninit)
+                    iter::repeat_with(instr::null_uninit)
                         .take(num_uninit as usize)
-                        .collect::<Vec<_>>(),
+                        .collect_vec(),
                 ),
                 lhs,
                 args,
@@ -1769,19 +1817,27 @@ fn emit_call_default<'a, 'arena, 'decl>(
     })
 }
 
-pub fn emit_reified_targs<'a, 'arena, 'decl>(
+fn is_soft(ual: &[ast::UserAttribute]) -> bool {
+    ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
+}
+
+pub fn emit_reified_targs<'a, 'arena, 'decl, I>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    targs: &[&ast::Hint],
-) -> Result<InstrSeq<'arena>> {
+    targs: I,
+) -> Result<InstrSeq<'arena>>
+where
+    I: Iterator<Item = &'a ast::Hint> + ExactSizeIterator + Clone,
+{
     let alloc = env.arena;
     let current_fun_tparams = env.scope.get_fun_tparams();
     let current_cls_tparams = env.scope.get_class_tparams();
     let is_in_lambda = env.scope.is_in_lambda();
-    let is_soft =
-        |ual: &Vec<ast::UserAttribute>| ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1));
-    let same_as_targs = |tparams: &[ast::Tparam]| {
+    fn same_as_targs<'a, I>(targs: I, tparams: &[ast::Tparam]) -> bool
+    where
+        I: Iterator<Item = &'a ast::Hint> + ExactSizeIterator + Clone,
+    {
         tparams.len() == targs.len()
             && tparams.iter().zip(targs).all(|(tp, ta)| {
                 ta.1.as_happly().map_or(false, |(id, hs)| {
@@ -1791,33 +1847,35 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                         && tp.reified.is_reified()
                 })
             })
-    };
-    Ok(if !is_in_lambda && same_as_targs(current_fun_tparams) {
-        instr::cgetl(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
-    } else if !is_in_lambda && same_as_targs(current_cls_tparams) {
-        InstrSeq::gather(vec![
-            instr::checkthis(),
-            instr::baseh(),
-            instr::querym(
-                0,
-                QueryMOp::CGet,
-                MemberKey::PT(
-                    hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                    ReadonlyOp::Any,
+    }
+    Ok(
+        if !is_in_lambda && same_as_targs(targs.clone(), current_fun_tparams) {
+            instr::c_get_l(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
+        } else if !is_in_lambda && same_as_targs(targs.clone(), current_cls_tparams) {
+            InstrSeq::gather(vec![
+                instr::check_this(),
+                instr::base_h(),
+                instr::query_m(
+                    0,
+                    QueryMOp::CGet,
+                    MemberKey::PT(
+                        hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                        ReadonlyOp::Any,
+                    ),
                 ),
-            ),
-        ])
-    } else {
-        InstrSeq::gather(vec![
-            InstrSeq::gather(
-                targs
-                    .iter()
-                    .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
-                    .collect::<Result<Vec<_>>>()?,
-            ),
-            instr::new_vec_array(targs.len() as u32),
-        ])
-    })
+            ])
+        } else {
+            let targs_len = targs.len() as u32;
+            InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    targs
+                        .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
+                        .collect::<Result<Vec<_>>>()?,
+                ),
+                instr::new_vec(targs_len),
+            ])
+        },
+    )
 }
 
 fn get_erased_tparams<'a, 'arena>(env: &'a Env<'a, 'arena>) -> Vec<&'a str> {
@@ -1877,7 +1935,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let ast::Expr(_, pos, expr_) = expr;
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let emit_generics =
         |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs<'arena>| {
@@ -1886,16 +1945,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 Ok(instr::empty())
             } else {
                 fcall_args.flags |= FCallArgsFlags::HasGenerics;
-                emit_reified_targs(
-                    e,
-                    env,
-                    pos,
-                    targs
-                        .iter()
-                        .map(|targ| &targ.1)
-                        .collect::<Vec<_>>()
-                        .as_slice(),
-                )
+                emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
             }
         };
 
@@ -1914,12 +1964,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         };
         Ok((
             InstrSeq::gather(vec![
-                instr::nulluninit(),
-                instr::nulluninit(),
+                instr::null_uninit(),
+                instr::null_uninit(),
                 res,
-                instr::popl(tmp),
+                instr::pop_l(tmp),
             ]),
-            InstrSeq::gather(vec![instr::pushl(tmp), instr::fcallfunc(fcall_args)]),
+            InstrSeq::gather(vec![instr::push_l(tmp), instr::f_call_func(fcall_args)]),
         ))
     };
 
@@ -1945,10 +1995,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
                 Ok((
-                    InstrSeq::gather(vec![obj, instr::nulluninit()]),
+                    InstrSeq::gather(vec![obj, instr::null_uninit()]),
                     InstrSeq::gather(vec![
                         generics,
-                        instr::fcallobjmethodd(fcall_args, name, null_flavor),
+                        instr::f_call_obj_method_d_(fcall_args, name, null_flavor),
                     ]),
                 ))
             };
@@ -1995,11 +2045,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                     let newobj_instrs = emit_new(e, env, pos, new_exp, true);
                                     Ok((
                                         InstrSeq::gather(vec![
-                                            instr::nulluninit(),
-                                            instr::nulluninit(),
+                                            instr::null_uninit(),
+                                            instr::null_uninit(),
                                             newobj_instrs?,
                                         ]),
-                                        InstrSeq::gather(vec![instr::fcallfuncd(
+                                        InstrSeq::gather(vec![instr::f_call_func_d(
                                             fcall_args,
                                             hhbc::FunctionName::<'arena>::from_ast_name(alloc, fid),
                                         )]),
@@ -2020,13 +2070,13 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     Ok((
                         InstrSeq::gather(vec![
                             obj,
-                            instr::nulluninit(),
+                            instr::null_uninit(),
                             emit_expr(e, env, method_expr)?,
-                            instr::popl(tmp),
+                            instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::pushl(tmp),
-                            instr::fcallobjmethod(fcall_args, null_flavor),
+                            instr::push_l(tmp),
+                            instr::f_call_obj_method(fcall_args, null_flavor),
                         ]),
                     ))
                 }
@@ -2049,35 +2099,34 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     e.add_class_ref(cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::fcallclsmethodd(fcall_args, method_name, cid),
+                            instr::f_call_cls_method_d(fcall_args, method_name, cid),
                         ]),
                     )
                 }
                 ClassExpr::Special(clsref) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::fcallclsmethodsd(fcall_args, clsref, method_name),
+                            instr::f_call_cls_method_sd(fcall_args, clsref, method_name),
                         ]),
                     )
                 }
                 ClassExpr::Expr(expr) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::string(alloc, method_name.unsafe_as_str()),
                             emit_expr(e, env, &expr)?,
-                            instr::classgetc(),
-                            instr::fcallclsmethod(
+                            instr::f_call_cls_method_m(
                                 IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                 fcall_args,
+                                method_name,
                             ),
                         ]),
                     )
@@ -2086,18 +2135,17 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
+                            instr::null_uninit(),
+                            instr::null_uninit(),
                             instrs,
-                            instr::popl(tmp),
+                            instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::string(alloc, method_name.unsafe_as_str()),
-                            instr::pushl(tmp),
-                            instr::classgetc(),
-                            instr::fcallclsmethod(
+                            instr::push_l(tmp),
+                            instr::f_call_cls_method_m(
                                 IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                 fcall_args,
+                                method_name,
                             ),
                         ]),
                     )
@@ -2115,7 +2163,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             }
             let emit_meth_name = |e: &mut Emitter<'arena, 'decl>| match &cls_get_expr {
                 ast::ClassGetExpr::CGstring((pos, id)) => {
-                    Ok(emit_pos_then(pos, instr::cgetl(e.named_local(id.into()))))
+                    Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id.into()))))
                 }
                 ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
@@ -2124,15 +2172,15 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
+                            instr::null_uninit(),
+                            instr::null_uninit(),
                             emit_meth_name(e)?,
-                            instr::popl(tmp),
+                            instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::pushl(tmp),
+                            instr::push_l(tmp),
                             emit_known_class_id(alloc, e, &cid),
-                            instr::fcallclsmethod(
+                            instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -2143,14 +2191,14 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
+                            instr::null_uninit(),
+                            instr::null_uninit(),
                             emit_meth_name(e)?,
-                            instr::popl(tmp),
+                            instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::pushl(tmp),
-                            instr::fcallclsmethods(fcall_args, clsref),
+                            instr::push_l(tmp),
+                            instr::f_call_cls_method_s(fcall_args, clsref),
                         ]),
                     )
                 }
@@ -2159,18 +2207,18 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
+                            instr::null_uninit(),
+                            instr::null_uninit(),
                             emit_expr(e, env, &expr)?,
-                            instr::popl(cls),
+                            instr::pop_l(cls),
                             emit_meth_name(e)?,
-                            instr::popl(meth),
+                            instr::pop_l(meth),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::pushl(meth),
-                            instr::pushl(cls),
-                            instr::classgetc(),
-                            instr::fcallclsmethod(
+                            instr::push_l(meth),
+                            instr::push_l(cls),
+                            instr::class_get_c(),
+                            instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -2182,18 +2230,18 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
+                            instr::null_uninit(),
+                            instr::null_uninit(),
                             instrs,
-                            instr::popl(cls),
+                            instr::pop_l(cls),
                             emit_meth_name(e)?,
-                            instr::popl(meth),
+                            instr::pop_l(meth),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::pushl(meth),
-                            instr::pushl(cls),
-                            instr::classgetc(),
-                            instr::fcallclsmethod(
+                            instr::push_l(meth),
+                            instr::push_l(cls),
+                            instr::class_get_c(),
+                            instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -2220,8 +2268,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
-                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
+                InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
+                InstrSeq::gather(vec![generics, instr::f_call_func_d(fcall_args, fq_id)]),
             ))
         }
         Expr_::String(s) => {
@@ -2229,8 +2277,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let fq_id = hhbc::FunctionName::new(Str::new_str(alloc, s.to_string().as_str()));
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
-                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
+                InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
+                InstrSeq::gather(vec![generics, instr::f_call_func_d(fcall_args, fq_id)]),
             ))
         }
         _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
@@ -2246,8 +2294,8 @@ fn get_reified_var_cexpr<'a, 'arena>(
     Ok(emit_reified_type_opt(e, env, pos, name)?.map(|instrs| {
         ClassExpr::Reified(InstrSeq::gather(vec![
             instrs,
-            instr::basec(0, MOpMode::Warn),
-            instr::querym(
+            instr::base_c(0, MOpMode::Warn),
+            instr::query_m(
                 1,
                 QueryMOp::CGet,
                 MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
@@ -2283,13 +2331,13 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                 let move_instrs = if !env.flags.contains(env::Flags::IN_TRY)
                     && inout_locals::should_move_local_value(e, local, aliases)
                 {
-                    InstrSeq::gather(vec![instr::null(), instr::popl(local)])
+                    InstrSeq::gather(vec![instr::null(), instr::pop_l(local)])
                 } else {
                     instr::empty()
                 };
                 Ok((
-                    InstrSeq::gather(vec![instr::cgetl(local), move_instrs]),
-                    instr::popl(local),
+                    InstrSeq::gather(vec![instr::c_get_l(local), move_instrs]),
+                    instr::pop_l(local),
                 ))
             }
             // inout $arr[...][...]
@@ -2325,8 +2373,8 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                         let setter = InstrSeq::gather(vec![
                             warninstr,
                             setter_base,
-                            instr::setm(0, mk),
-                            instr::popc(),
+                            instr::set_m(0, mk),
+                            instr::pop_c(),
                         ]);
                         (instrs, setter)
                     }
@@ -2336,10 +2384,10 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                             match local_kind_opt {
                                 None => ld.push(instr),
                                 Some((l, kind)) => {
-                                    let unset = instr::unsetl(l);
+                                    let unset = instr::unset_l(l);
                                     let set = match kind {
-                                        StoredValueKind::Expr => instr::setl(l),
-                                        _ => instr::popl(l),
+                                        StoredValueKind::Expr => instr::set_l(l),
+                                        _ => instr::pop_l(l),
                                     };
                                     ld.push(instr);
                                     ld.push(set);
@@ -2371,9 +2419,9 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         Ok((
             instr_args,
             InstrSeq::gather(vec![
-                instr::popl(retval),
+                instr::pop_l(retval),
                 instr_setters,
-                instr::pushl(retval),
+                instr::push_l(retval),
             ]),
         ))
     } else {
@@ -2486,19 +2534,15 @@ fn emit_special_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
+    targs: &[ast::Targ],
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
     lower_fq_name: &str,
 ) -> Result<Option<InstrSeq<'arena>>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
-    let fun_and_clsmeth_disabled = e
-        .options()
-        .hhvm
-        .hack_lang
-        .flags
-        .contains(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -2511,7 +2555,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         if i == nargs - 1 {
                             instr::empty()
                         } else {
-                            instr::popc()
+                            instr::pop_c()
                         },
                     ]))
                 })
@@ -2524,7 +2568,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 pos.clone(),
                 ast::Expr_::mk_id(ast_defs::Id(
                     pos.clone(),
-                    "\\hh\\invariant_violation".into(),
+                    "\\HH\\invariant_violation".into(),
                 )),
             );
             let call = ast::Expr(
@@ -2532,10 +2576,10 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 pos.clone(),
                 ast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
-            let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
+            let ignored_expr = emit_ignored_expr(e, env, &Pos::NONE, &call)?;
             Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(&args[0])?)?,
-                instr::jmpnz(l),
+                instr::jmp_nz(l),
                 ignored_expr,
                 emit_fatal::emit_fatal_runtime(alloc, pos, "invariant_violation"),
                 instr::label(l),
@@ -2564,7 +2608,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         instr::cast_bool(),
                     ])
                 },
-                instr::oodeclexists(class_kind),
+                instr::oo_decl_exists(class_kind),
             ])))
         }
         ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
@@ -2574,51 +2618,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 .map(error::expect_normal_paramkind)
                 .transpose()?,
         )?)),
-        ("HH\\fun", _) => {
-            if fun_and_clsmeth_disabled {
-                match args {
-                    [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
-                        Err(Error::fatal_parse(
-                            pos,
-                            format!(
-                                "`fun()` is disabled; switch to first-class references like `{}<>`",
-                                func_name
-                            ),
-                        ))
-                    }
-                    _ => Err(Error::fatal_runtime(
-                        pos,
-                        "Constant string expected in fun()",
-                    )),
-                }
-            } else if nargs != 1 {
-                Err(Error::fatal_runtime(
-                    pos,
-                    format!("fun() expects exactly 1 parameter, {} given", nargs),
-                ))
-            } else {
-                match args {
-                    // `inout` is dropped here, but it should be impossible to have an expression
-                    // like: `foo(inout "literal")`
-                    [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
-                        Ok(Some(emit_hh_fun(
-                            e,
-                            env,
-                            pos,
-                            &[],
-                            // FIXME: This is not safe--string literals are binary strings.
-                            // There's no guarantee that they're valid UTF-8.
-                            unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
-                        )?))
-                    }
-                    _ => Err(Error::fatal_runtime(
-                        pos,
-                        "Constant string expected in fun()",
-                    )),
-                }
-            }
-        }
-        ("__systemlib\\meth_caller", _) => {
+        ("__SystemLib\\meth_caller", _) => {
             // used by meth_caller() to directly emit func ptr
             if nargs != 1 {
                 return Err(Error::fatal_runtime(
@@ -2647,7 +2647,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 )),
             }
         }
-        ("__systemlib\\__debugger_is_uninit", _) => {
+        ("__SystemLib\\__debugger_is_uninit", _) => {
             if nargs != 1 {
                 Err(Error::fatal_runtime(
                     pos,
@@ -2661,7 +2661,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     // Calling convention is dropped here, but given this is meant for the debugger
                     // I don't think it particularly matters.
                     [(_, Expr(_, _, Expr_::Lvar(id)))] => {
-                        Ok(Some(instr::isunsetl(get_local(e, env, pos, id.name())?)))
+                        Ok(Some(instr::is_unset_l(get_local(e, env, pos, id.name())?)))
                     }
                     _ => Err(Error::fatal_runtime(
                         pos,
@@ -2682,63 +2682,17 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 )),
             }?;
             Ok(Some(InstrSeq::gather(vec![
-                instr::lateboundcls(),
-                instr::clscnsl(local),
+                instr::late_bound_cls(),
+                instr::cls_cns_l(local),
             ])))
         }
-        ("HH\\inst_meth", _) => match args {
-            [obj_expr, method_name] => Ok(Some(emit_inst_meth(
-                e,
-                env,
-                error::expect_normal_paramkind(obj_expr)?,
-                error::expect_normal_paramkind(method_name)?,
-            )?)),
-            _ => Err(Error::fatal_runtime(
-                pos,
-                format!("inst_meth() expects exactly 2 parameters, {} given", nargs),
-            )),
-        },
-        ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(Error::fatal_parse(
-            pos,
-            "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
-        )),
-        ("HH\\class_meth", &[(ref pk_cls, ref cls), (ref pk_meth, ref meth), ..]) if nargs == 2 => {
-            if meth.2.is_string() {
-                if cls.2.is_string()
-                    || cls
-                        .2
-                        .as_class_const()
-                        .map_or(false, |(_, (_, id))| string_utils::is_class(id))
-                    || cls
-                        .2
-                        .as_id()
-                        .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
-                {
-                    error::ensure_normal_paramkind(pk_cls)?;
-                    error::ensure_normal_paramkind(pk_meth)?;
-                    return Ok(Some(emit_class_meth(e, env, cls, meth)?));
-                }
-            }
-            Err(Error::fatal_runtime(
-                pos,
-                concat!(
-                    "class_meth() expects a literal class name or ::class constant, ",
-                    "followed by a constant string that refers to a static method ",
-                    "on that class"
-                ),
-            ))
-        }
-        ("HH\\class_meth", _) => Err(Error::fatal_runtime(
-            pos,
-            format!("class_meth() expects exactly 2 parameters, {} given", nargs),
-        )),
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
                 emit_expr(e, env, error::expect_normal_paramkind(gvalue)?)?,
                 emit_pos(pos),
-                instr::setg(),
-                instr::popc(),
+                instr::set_g(),
+                instr::pop_c(),
                 instr::null(),
             ]))),
             _ => Err(Error::fatal_runtime(
@@ -2750,7 +2704,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             [ref gkey] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
                 emit_pos(pos),
-                instr::unsetg(),
+                instr::unset_g(),
                 instr::null(),
             ]))),
             _ => Err(Error::fatal_runtime(
@@ -2766,8 +2720,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
         {
             error::ensure_normal_paramkind(pk)?;
             Ok(Some(InstrSeq::gather(vec![
-                instr::cgetl(e.named_local(local_id::get_name(&param.1).into())),
-                instr::whresult(),
+                instr::c_get_l(e.named_local(local_id::get_name(&param.1).into())),
+                instr::wh_result(),
             ])))
         }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
@@ -2779,9 +2733,58 @@ fn emit_special_function<'a, 'arena, 'decl>(
         ("HH\\tag_provenance_here", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
+        ("HH\\embed_type_decl", _)
+            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+            // The typechecker doesn't understand it anyhow.
+            if e.options().hhbc.enable_intrinsics_extension
+                && args.is_empty()
+                && targs.len() == 1
+                && e.decl_provider.is_some() =>
+        {
+            match (targs[0].1).1.as_ref() {
+                aast_defs::Hint_::Happly(ast_defs::Id(_, id), _) => {
+                    let str = match e.decl_provider.as_ref().unwrap().type_decl(id, 0) {
+                        Ok(decl_provider::TypeDecl::Class(cls)) => json!({
+                            "name": cls.name.1,
+                            "final": cls.final_,
+                            "abstract": cls.abstract_,
+                            "kind": (match cls.kind {
+                                ast_defs::ClassishKind::Cclass(_) => "class",
+                                ast_defs::ClassishKind::Cinterface => "interface",
+                                ast_defs::ClassishKind::Ctrait => "trait",
+                                ast_defs::ClassishKind::Cenum => "enum",
+                                ast_defs::ClassishKind::CenumClass(_) => "enum class",
+                            })
+                        })
+                        .to_string(),
+                        Ok(decl_provider::TypeDecl::Typedef(td)) => json!({
+                            "kind": (match td.vis {
+                                aast_defs::TypedefVisibility::Transparent => "type",
+                                aast_defs::TypedefVisibility::Opaque => "newtype",
+                                aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
+                                aast_defs::TypedefVisibility::CaseType => "case type",
+                            })
+                        })
+                        .to_string(),
+                        Err(e) => {
+                            let s = format!("Error: {}", e);
+                            serde_json::to_string(&s).unwrap()
+                        }
+                    };
+                    Ok(Some(emit_adata::typed_value_into_instr(
+                        e,
+                        TypedValue::string(e.alloc.alloc_str(str.as_ref())),
+                    )?))
+                }
+                // If we don't have a classish type hint, compile this as
+                // normal and let the call fail down the line (for now)
+                _ => Ok(None),
+            }
+        }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
-                (&[ref arg_expr], _, Some(ref h)) => {
+                ([arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, h)?;
                     Some(InstrSeq::gather(vec![
                         emit_expr(e, env, error::expect_normal_paramkind(arg_expr)?)?,
@@ -2795,14 +2798,14 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     Some(InstrSeq::gather(vec![
                         emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
                         emit_pos(pos),
-                        instr::istypec(i),
+                        instr::is_type_c(i),
                     ]))
                 }
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
                     if !is_local_this(env, &arg_id.1) =>
                 {
                     error::ensure_normal_paramkind(pk)?;
-                    Some(instr::istypel(
+                    Some(instr::is_type_l(
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
                         i,
                     ))
@@ -2812,7 +2815,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     Some(InstrSeq::gather(vec![
                         emit_expr(e, env, arg_expr)?,
                         emit_pos(pos),
-                        instr::istypec(i),
+                        instr::is_type_c(i),
                     ]))
                 }
                 _ => match get_call_builtin_func_info(e, lower_fq_name) {
@@ -2825,76 +2828,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 },
             },
         ),
-    }
-}
-
-fn emit_inst_meth<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    obj_expr: &ast::Expr,
-    method_name: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    let instrs = InstrSeq::gather(vec![
-        emit_expr(e, env, obj_expr)?,
-        emit_expr(e, env, method_name)?,
-        instr::new_vec_array(2),
-    ]);
-    Ok(instrs)
-}
-
-fn emit_class_meth<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    cls: &ast::Expr,
-    meth: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    use ast::Expr_;
-    let alloc = env.arena;
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
-    {
-        let method_name = match &meth.2 {
-            Expr_::String(method_name) => {
-                hhbc::MethodName::new(Str::new_str(alloc, method_name.to_string().as_str()))
-            }
-            _ => return Err(Error::unrecoverable("emit_class_meth: unhandled method")),
-        };
-        if let Some((cid, (_, id))) = cls.2.as_class_const() {
-            if string_utils::is_class(id) {
-                return emit_class_meth_native(e, env, &cls.1, cid, method_name, &[]);
-            }
-        }
-        if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
-            if s == pseudo_consts::G__CLASS__ {
-                return Ok(instr::resolveclsmethods(
-                    SpecialClsRef::SelfCls,
-                    method_name,
-                ));
-            }
-        }
-        if let Some(class_name) = cls.2.as_string() {
-            return Ok(instr::resolveclsmethodd(
-                hhbc::ClassName::new(Str::new_str(
-                    alloc,
-                    string_utils::strip_global_ns(
-                        // FIXME: This is not safe--string literals are binary strings.
-                        // There's no guarantee that they're valid UTF-8.
-                        unsafe { std::str::from_utf8_unchecked(class_name.as_slice()) },
-                    ),
-                )),
-                method_name,
-            ));
-        }
-        Err(Error::unrecoverable("emit_class_meth: unhandled method"))
-    } else {
-        let instrs = InstrSeq::gather(vec![
-            emit_expr(e, env, cls)?,
-            emit_expr(e, env, meth)?,
-            instr::new_vec_array(2),
-        ]);
-        Ok(instrs)
     }
 }
 
@@ -2915,42 +2848,37 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     }
     let has_generics = has_non_tparam_generics_targs(env, targs);
     let mut emit_generics = || -> Result<InstrSeq<'arena>> {
-        emit_reified_targs(
-            e,
-            env,
-            pos,
-            &targs.iter().map(|targ| &targ.1).collect::<Vec<_>>(),
-        )
+        emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
     };
     Ok(match cexpr {
-        ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolveclsmethodd(
+        ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolve_cls_method_d(
             hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
             method_name,
         ),
         ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
             emit_generics()?,
-            instr::resolverclsmethodd(
+            instr::resolve_r_cls_method_d(
                 hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
                 method_name,
             ),
         ]),
         ClassExpr::Special(clsref) if !has_generics => {
-            instr::resolveclsmethods(clsref, method_name)
+            instr::resolve_cls_method_s(clsref, method_name)
         }
         ClassExpr::Special(clsref) => InstrSeq::gather(vec![
             emit_generics()?,
-            instr::resolverclsmethods(clsref, method_name),
+            instr::resolve_r_cls_method_s(clsref, method_name),
         ]),
         ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(vec![
             instrs,
-            instr::classgetc(),
-            instr::resolveclsmethod(method_name),
+            instr::class_get_c(),
+            instr::resolve_cls_method(method_name),
         ]),
         ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
             instrs,
-            instr::classgetc(),
+            instr::class_get_c(),
             emit_generics()?,
-            instr::resolverclsmethod(method_name),
+            instr::resolve_r_cls_method(method_name),
         ]),
         ClassExpr::Expr(_) => {
             return Err(Error::unrecoverable(
@@ -2978,6 +2906,9 @@ fn get_call_builtin_func_info<'arena, 'decl>(
         "HH\\darray" => Some((1, Instruct::Opcode(Opcode::CastDict))),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
             Some((1, Instruct::Opcode(Opcode::SetImplicitContextByValue)))
+        }
+        "HH\\ImplicitContext\\_Private\\create_special_implicit_context" if e.systemlib() => {
+            Some((2, Instruct::Opcode(Opcode::CreateSpecialImplicitContext)))
         }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
@@ -3022,19 +2953,10 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let fname = string_utils::strip_global_ns(fname);
     if has_non_tparam_generics_targs(env, targs) {
-        let generics = emit_reified_targs(
-            e,
-            env,
-            pos,
-            targs
-                .iter()
-                .map(|targ| &targ.1)
-                .collect::<Vec<_>>()
-                .as_slice(),
-        )?;
+        let generics = emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))?;
         Ok(InstrSeq::gather(vec![
             generics,
-            instr::resolve_rfunc(hhbc::FunctionName::new(Str::new_str(alloc, fname))),
+            instr::resolve_r_func(hhbc::FunctionName::new(Str::new_str(alloc, fname))),
         ]))
     } else {
         Ok(instr::resolve_func(hhbc::FunctionName::new(Str::new_str(
@@ -3055,15 +2977,21 @@ fn emit_is<'a, 'arena, 'decl>(
             aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs)
                 if hs.is_empty() && string_utils::strip_hh_ns(id) == typehints::THIS =>
             {
-                instr::islateboundcls()
+                instr::is_late_bound_cls()
             }
             _ => InstrSeq::gather(vec![
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
-                instr::is_type_structc_resolve(),
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
+                instr::is_type_struct_c_resolve(),
             ]),
         }
     } else {
-        InstrSeq::gather(vec![ts_instrs, instr::is_type_structc_dontresolve()])
+        InstrSeq::gather(vec![ts_instrs, instr::is_type_struct_c_dontresolve()])
     })
 }
 
@@ -3094,8 +3022,8 @@ fn istype_op(id: impl AsRef<str>) -> Option<IsTypeOp> {
 fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<ast::Hint> {
     let h = |s: &str| {
         Some(ast::Hint::new(
-            Pos::make_none(),
-            ast::Hint_::mk_happly(ast::Id(Pos::make_none(), s.into()), vec![]),
+            Pos::NONE,
+            ast::Hint_::mk_happly(ast::Id(Pos::NONE, s.into()), vec![]),
         ))
     };
     match lower_fq_id.as_ref() {
@@ -3160,7 +3088,7 @@ fn emit_lit<'a, 'arena, 'decl>(
         .map_err(|_| Error::unrecoverable("expr_to_typed_value failed"))?;
     Ok(emit_pos_then(
         pos,
-        emit_adata::typed_value_to_instr(emitter, &tv)?,
+        emit_adata::typed_value_into_instr(emitter, tv)?,
     ))
 }
 
@@ -3213,7 +3141,7 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     e: &'a (
-        ast::KvcKind,
+        (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
     ),
@@ -3222,16 +3150,16 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
     let (kind, _, fields) = e;
     let fields = mk_afkvalues(
         fields
-            .to_owned()
-            .into_iter()
-            .map(|ast::Field(e1, e2)| (e1, e2))
-            .collect::<Vec<_>>()
-            .as_slice(),
+            .iter()
+            .map(|ast::Field(e1, e2)| (e1.clone(), e2.clone())),
     );
-    let collection_typ = match kind {
+    let collection_typ = match kind.1 {
+        aast_defs::KvcKind::Dict => {
+            let instr = emit_collection(emitter, env, expression, &fields, None)?;
+            return Ok(emit_pos_then(&kind.0, instr));
+        }
         aast_defs::KvcKind::Map => CollectionType::Map,
         aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
-        _ => return emit_collection(emitter, env, expression, &fields, None),
     };
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
@@ -3240,17 +3168,20 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &'a (ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    e: &'a ((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let (kind, _, es) = e;
     let fields = mk_afvalues(es);
-    let collection_typ = match kind {
+    let collection_typ = match kind.1 {
+        aast_defs::VcKind::Vec | aast_defs::VcKind::Keyset => {
+            let instr = emit_collection(emitter, env, expression, &fields, None)?;
+            return Ok(emit_pos_then(&kind.0, instr));
+        }
         aast_defs::VcKind::Vector => CollectionType::Vector,
         aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
         aast_defs::VcKind::Set => CollectionType::Set,
         aast_defs::VcKind::ImmSet => CollectionType::ImmSet,
-        _ => return emit_collection(emitter, env, expression, &fields, None),
     };
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
@@ -3294,7 +3225,13 @@ fn emit_darray<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
         pos,
-        emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
+        emit_collection(
+            emitter,
+            env,
+            expression,
+            &mk_afkvalues(e.1.iter().cloned()),
+            None,
+        )?,
     ))
 }
 
@@ -3331,8 +3268,8 @@ fn emit_label<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
 
-    // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
-    let create_opaque_value = "__Systemlib\\create_opaque_value".to_string();
+    // emitting E#A as __SystemLib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
+    let create_opaque_value = "__SystemLib\\create_opaque_value".to_string();
     let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
     let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
     let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);
@@ -3368,26 +3305,10 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let jit_enable_rename_function = e
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
-    use {ast::Expr, ast::Expr_};
+    let jit_enable_rename_function = e.options().hhbc.jit_enable_rename_function;
+    use ast::Expr;
+    use ast::Expr_;
     match (&expr.2, &args[..], uarg) {
-        (Expr_::Id(id), [(pk, Expr(_, _, Expr_::String(data)))], None)
-            if id.1 == special_functions::HHAS_ADATA =>
-        {
-            error::ensure_normal_paramkind(pk)?;
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            let tv = TypedValue::hhas_adata(
-                alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
-            );
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
-            Ok(emit_pos_then(pos, instr))
-        }
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
         }
@@ -3409,7 +3330,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
-                instr::popl(e.named_local("$86metadata".into())),
+                instr::pop_l(e.named_local("$86metadata".into())),
                 instr::null(),
             ]))
         }
@@ -3467,15 +3388,15 @@ pub fn emit_reified_generic_instrs<'arena>(
     index: usize,
 ) -> Result<InstrSeq<'arena>> {
     let base = if is_fun {
-        instr::basel(
+        instr::base_l(
             e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()),
             MOpMode::Warn,
             ReadonlyOp::Any,
         )
     } else {
         InstrSeq::gather(vec![
-            instr::checkthis(),
-            instr::baseh(),
+            instr::check_this(),
+            instr::base_h(),
             instr::dim_warn_pt(
                 hhbc::PropName::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
                 ReadonlyOp::Any,
@@ -3486,7 +3407,7 @@ pub fn emit_reified_generic_instrs<'arena>(
         pos,
         InstrSeq::gather(vec![
             base,
-            instr::querym(
+            instr::query_m(
                 0,
                 QueryMOp::CGet,
                 MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
@@ -3502,7 +3423,7 @@ fn emit_reified_type<'a, 'arena>(
     name: &str,
 ) -> Result<InstrSeq<'arena>> {
     emit_reified_type_opt(e, env, pos, name)?
-        .ok_or_else(|| Error::fatal_runtime(&Pos::make_none(), "Invalid reified param"))
+        .ok_or_else(|| Error::fatal_runtime(&Pos::NONE, "Invalid reified param"))
 }
 
 fn emit_reified_type_opt<'a, 'arena>(
@@ -3513,7 +3434,7 @@ fn emit_reified_type_opt<'a, 'arena>(
 ) -> Result<Option<InstrSeq<'arena>>> {
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |is_fun, i| {
-        instr::cgetl(
+        instr::c_get_l(
             e.named_local(
                 string_utils::reified::reified_generic_captured_name(is_fun, i)
                     .as_str()
@@ -3559,7 +3480,7 @@ fn emit_known_class_id<'arena, 'decl>(
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.unsafe_as_str());
     e.add_class_ref(cid);
-    InstrSeq::gather(vec![cid_string, instr::classgetc()])
+    InstrSeq::gather(vec![cid_string, instr::class_get_c()])
 }
 
 fn emit_load_class_ref<'a, 'arena, 'decl>(
@@ -3570,21 +3491,29 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let instrs = match cexpr {
-        ClassExpr::Special(SpecialClsRef::SelfCls) => instr::selfcls(),
-        ClassExpr::Special(SpecialClsRef::LateBoundCls) => instr::lateboundcls(),
-        ClassExpr::Special(SpecialClsRef::ParentCls) => instr::parentcls(),
+        ClassExpr::Special(SpecialClsRef::SelfCls) => instr::self_cls(),
+        ClassExpr::Special(SpecialClsRef::LateBoundCls) => instr::late_bound_cls(),
+        ClassExpr::Special(SpecialClsRef::ParentCls) => instr::parent_cls(),
         ClassExpr::Id(id) => emit_known_class_id(alloc, e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),
             emit_expr(e, env, &expr)?,
-            instr::classgetc(),
+            instr::class_get_c(),
         ]),
         ClassExpr::Reified(instrs) => {
-            InstrSeq::gather(vec![emit_pos(pos), instrs, instr::classgetc()])
+            InstrSeq::gather(vec![emit_pos(pos), instrs, instr::class_get_c()])
         }
         _ => panic!("Enum value does not match one of listed variants"),
     };
     Ok(emit_pos_then(pos, instrs))
+}
+
+enum NewObjOpInfo<'a, 'arena> {
+    /// true => top of stack contains type structure
+    /// false => top of stack contains class
+    NewObj(bool),
+    NewObjD(&'a hhbc::ClassName<'arena>, Option<&'a Vec<ast::Targ>>),
+    NewObjS(hhbc::SpecialClsRef),
 }
 
 fn emit_new<'a, 'arena, 'decl>(
@@ -3660,34 +3589,29 @@ fn emit_new<'a, 'arena, 'decl>(
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                 e.add_class_ref(id);
-                match has_generics {
-                    H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
-                    H::HasGenerics => InstrSeq::gather(vec![
-                        emit_pos(pos),
-                        emit_reified_targs(
-                            e,
-                            env,
-                            pos,
-                            &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
-                        )?,
-                        instr::newobjrd(id),
-                    ]),
+                let targs = match has_generics {
+                    H::NoGenerics => None,
+                    H::HasGenerics => Some(targs),
                     H::MaybeGenerics => {
                         return Err(Error::unrecoverable(
                             "Internal error: This case should have been transformed",
                         ));
                     }
-                }
+                };
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjD(&id, targs))?
             }
             ClassExpr::Special(cls_ref) => {
-                InstrSeq::gather(vec![emit_pos(pos), instr::newobjs(cls_ref)])
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjS(cls_ref))?
             }
             ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
-                InstrSeq::gather(vec![instrs, instr::classgetts(), instr::newobjr()])
+                InstrSeq::gather(vec![
+                    instrs,
+                    emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(true))?,
+                ])
             }
             _ => InstrSeq::gather(vec![
                 emit_load_class_ref(e, env, pos, cexpr)?,
-                instr::newobj(),
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(false))?,
             ]),
         };
         scope::with_unnamed_locals(e, |e| {
@@ -3702,11 +3626,11 @@ fn emit_new<'a, 'arena, 'decl>(
                 InstrSeq::gather(vec![
                     newobj_instrs,
                     instr::dup(),
-                    instr::nulluninit(),
+                    instr::null_uninit(),
                     instr_args,
                     instr_uargs,
                     emit_pos(pos),
-                    instr::fcallctor(get_fcall_args_no_inout(
+                    instr::f_call_ctor(get_fcall_args_no_inout(
                         alloc,
                         args,
                         uarg.as_ref(),
@@ -3716,13 +3640,209 @@ fn emit_new<'a, 'arena, 'decl>(
                         true,  // we do not need to enforce readonly return for constructors
                         false, // we do not need to enforce readonly this for constructors
                     )),
-                    instr::popc(),
-                    instr::lockobj(),
+                    instr::pop_c(),
+                    instr::lock_obj(),
                 ]),
                 instr::empty(),
             ))
         })
     }
+}
+
+fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    op: NewObjOpInfo<'b, 'arena>,
+) -> Result<InstrSeq<'arena>> {
+    use string_utils::reified::INIT_METH_NAME;
+
+    let call_reified_init = |obj, ts| -> InstrSeq<'_> {
+        InstrSeq::gather(vec![
+            obj,
+            instr::null_uninit(),
+            ts,
+            instr::f_call_obj_method_d(
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
+                hhbc::MethodName::from_raw_string(env.arena, INIT_METH_NAME),
+            ),
+            instr::pop_c(),
+        ])
+    };
+
+    scope::with_unnamed_locals(e, |e| {
+        let class_local = e.local_gen_mut().get_unnamed();
+        let ts_local = e.local_gen_mut().get_unnamed();
+        let obj_local = e.local_gen_mut().get_unnamed();
+
+        let no_reified_generics_passed_in_label = e.label_gen_mut().next_regular();
+        let try_parent_has_reified_generics_label = e.label_gen_mut().next_regular();
+        let end_label = e.label_gen_mut().next_regular();
+
+        let try_parent_has_reified_generics = InstrSeq::gather(vec![
+            instr::label(try_parent_has_reified_generics_label),
+            instr::c_get_l(class_local),
+            instr::has_reified_parent(),
+            instr::jmp_z(end_label),
+            call_reified_init(
+                instr::c_get_l(obj_local),
+                InstrSeq::gather(vec![
+                    instr::new_col(CollectionType::Vector),
+                    instr::cast_vec(),
+                ]),
+            ),
+            instr::jmp(end_label),
+        ]);
+
+        let is_ts_empty = InstrSeq::gather(vec![
+            instr::null_uninit(),
+            instr::null_uninit(),
+            instr::c_get_l(ts_local),
+            instr::f_call_func_d(
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
+                hhbc::FunctionName::from_raw_string(env.arena, "count"),
+            ),
+            instr::int(0),
+            instr::eq(),
+        ]);
+
+        let no_reified_generics_passed_in = InstrSeq::gather(vec![
+            instr::label(no_reified_generics_passed_in_label),
+            instr::c_get_l(class_local),
+            instr::class_has_reified_generics(),
+            instr::jmp_z(try_parent_has_reified_generics_label),
+            instr::c_get_l(class_local),
+            instr::check_cls_rg_soft(),
+            instr::jmp(end_label),
+        ]);
+
+        let reified_generics_passed_in = InstrSeq::gather(vec![
+            instr::c_get_l(class_local),
+            instr::class_has_reified_generics(),
+            instr::jmp_z(try_parent_has_reified_generics_label),
+            call_reified_init(instr::c_get_l(obj_local), instr::c_get_l(ts_local)),
+            instr::jmp(end_label),
+        ]);
+
+        let instrs = match op {
+            NewObjOpInfo::NewObj(false) => InstrSeq::gather(vec![
+                instr::set_l(class_local),
+                instr::new_obj(),
+                instr::pop_l(obj_local),
+                no_reified_generics_passed_in,
+                try_parent_has_reified_generics,
+            ]),
+            NewObjOpInfo::NewObj(true) => InstrSeq::gather(vec![
+                instr::class_get_ts(),
+                instr::pop_l(ts_local),
+                instr::set_l(class_local),
+                instr::new_obj(),
+                instr::pop_l(obj_local),
+                is_ts_empty,
+                instr::jmp_nz(no_reified_generics_passed_in_label),
+                reified_generics_passed_in,
+                no_reified_generics_passed_in,
+                try_parent_has_reified_generics,
+            ]),
+            NewObjOpInfo::NewObjD(id, targs) => {
+                let ts = match targs {
+                    Some(targs) => emit_reified_targs(e, env, pos, targs.iter().map(|t| &t.1))?,
+                    None => instr::empty(),
+                };
+                let store_cls_and_obj = InstrSeq::gather(vec![
+                    instr::resolve_class(*id),
+                    instr::pop_l(class_local),
+                    instr::new_obj_d(*id),
+                    instr::pop_l(obj_local),
+                ]);
+                if ts.is_empty() {
+                    InstrSeq::gather(vec![
+                        store_cls_and_obj,
+                        no_reified_generics_passed_in,
+                        try_parent_has_reified_generics,
+                    ])
+                } else {
+                    InstrSeq::gather(vec![
+                        ts,
+                        instr::pop_l(ts_local),
+                        store_cls_and_obj,
+                        reified_generics_passed_in,
+                        try_parent_has_reified_generics,
+                    ])
+                }
+            }
+            NewObjOpInfo::NewObjS(cls_ref) => {
+                let get_cls_instr = match cls_ref {
+                    SpecialClsRef::SelfCls => instr::self_cls(),
+                    SpecialClsRef::LateBoundCls => instr::late_bound_cls(),
+                    SpecialClsRef::ParentCls => instr::parent_cls(),
+                    _ => {
+                        return Err(Error::unrecoverable(
+                            "Internal error: This case should never occur",
+                        ));
+                    }
+                };
+                let store_cls_and_obj = InstrSeq::gather(vec![
+                    get_cls_instr,
+                    instr::pop_l(class_local),
+                    instr::new_obj_s(cls_ref),
+                    instr::pop_l(obj_local),
+                ]);
+                let store_ts_if_prop_set = InstrSeq::gather(vec![
+                    instr::c_get_l(class_local),
+                    instr::class_has_reified_generics(),
+                    instr::jmp_z(no_reified_generics_passed_in_label),
+                    instr::c_get_l(class_local),
+                    instr::get_cls_rg_prop(),
+                    instr::set_l(ts_local),
+                    instr::is_type_c(IsTypeOp::Null),
+                    instr::jmp_nz(no_reified_generics_passed_in_label),
+                ]);
+                InstrSeq::gather(vec![
+                    store_cls_and_obj,
+                    store_ts_if_prop_set,
+                    is_ts_empty,
+                    instr::jmp_nz(no_reified_generics_passed_in_label),
+                    reified_generics_passed_in,
+                    no_reified_generics_passed_in,
+                    try_parent_has_reified_generics,
+                ])
+            }
+        };
+
+        let unset_locals = InstrSeq::gather(vec![
+            instr::unset_l(class_local),
+            instr::unset_l(ts_local),
+            instr::unset_l(obj_local),
+        ]);
+
+        Ok((
+            instr::empty(),
+            InstrSeq::gather(vec![
+                emit_pos(pos),
+                instrs,
+                instr::label(end_label),
+                instr::c_get_l(obj_local),
+            ]),
+            unset_locals,
+        ))
+    })
 }
 
 fn emit_obj_get<'a, 'arena, 'decl>(
@@ -3802,7 +3922,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     } else {
         total_stack_size
     };
-    let final_instr = instr::querym(num_params as u32, query_op, mk);
+    let final_instr = instr::query_m(num_params as u32, query_op, mk);
     // Don't pop elems/props from the stack during the lookup for null
     // coalesce assignment in case we do a write later.
     let querym_n_unpopped = if null_coalesce_assignment {
@@ -3889,7 +4009,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
         MemberKey::PC(_, _) => (mk, emit_expr(e, env, prop)?, 1),
         MemberKey::PL(local, readonly_op) if null_coalesce_assignment => (
             MemberKey::PC(stack_index, readonly_op),
-            instr::cgetl(local),
+            instr::c_get_l(local),
             1,
         ),
         _ => (mk, instr::empty(), 0),
@@ -3904,7 +4024,8 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl>(
     s: &str,
     nullflavor: &ast_defs::OgNullFlavor,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let f = Expr(
         (),
         pos.clone(),
@@ -4014,10 +4135,10 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     if no_final {
                         instr::empty()
                     } else if null_coalesce_assignment {
-                        querym_n_unpopped = Some(total_stack_size as u32);
-                        instr::querym(0, query_op, memberkey)
+                        querym_n_unpopped = Some(total_stack_size);
+                        instr::query_m(0, query_op, memberkey)
                     } else {
-                        instr::querym(total_stack_size as u32, query_op, memberkey)
+                        instr::query_m(total_stack_size, query_op, memberkey)
                     }
                 };
             let instr = match (base_result, local_temp_kind) {
@@ -4032,7 +4153,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                         emit_pos(outer_pos),
                         base.setup_instrs,
                         make_final(
-                            base.base_stack_size + base.cls_stack_size + elem_stack_size as u32,
+                            base.base_stack_size + base.cls_stack_size + elem_stack_size,
                             memberkey,
                         ),
                     ]))
@@ -4072,7 +4193,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                             false,
                             ReadonlyOp::Any,
                         )?,
-                        instr::popc(),
+                        instr::pop_c(),
                     ]);
                     ArrayGetInstr::Inout { load, store }
                 }
@@ -4107,7 +4228,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                         None,
                     ));
                     let store =
-                        InstrSeq::gather(vec![store, instr::setm(0, memberkey), instr::popc()]);
+                        InstrSeq::gather(vec![store, instr::set_m(0, memberkey), instr::pop_c()]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
                         store,
@@ -4146,8 +4267,8 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     ));
                     let store = InstrSeq::gather(vec![
                         store,
-                        instr::setm(0, MemberKey::EL(local, ReadonlyOp::Any)),
-                        instr::popc(),
+                        instr::set_m(0, MemberKey::EL(local, ReadonlyOp::Any)),
+                        instr::pop_c(),
                     ]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
@@ -4186,12 +4307,12 @@ fn emit_elem<'a, 'arena, 'decl>(
             ast::Expr_::Lvar(x) if !is_local_this(env, &x.1) => {
                 if local_temp_kind.is_some() {
                     (
-                        instr::cgetquietl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
+                        instr::c_get_quiet_l(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         0,
                     )
                 } else if null_coalesce_assignment {
                     (
-                        instr::cgetl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
+                        instr::c_get_l(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         1,
                     )
                 } else {
@@ -4215,7 +4336,9 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
     elem: Option<&ast::Expr>,
     null_coalesce_assignment: bool,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>)> {
-    use ast::{ClassId_ as CI_, Expr, Expr_};
+    use ast::ClassId_ as CI_;
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     match elem {
         // ELement missing (so it's array append)
@@ -4269,17 +4392,10 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 };
                 let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname)
                     .unsafe_as_str();
-                if e.options().emit_class_pointers() > 0 {
-                    Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::raise_class_string_conversion_warning(),
-                    ))
-                } else {
-                    Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::empty(),
-                    ))
-                }
+                Ok((
+                    MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
+                    instr::raise_class_string_conversion_warning(),
+                ))
             }
             _ => {
                 // General case
@@ -4320,7 +4436,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
         if is_base {
             instr::dim(MOpMode::Define, memberkey)
         } else {
-            instr::setm(0, memberkey)
+            instr::set_m(0, memberkey)
         },
     ]))
 }
@@ -4347,8 +4463,8 @@ fn emit_class_get<'a, 'arena, 'decl>(
         cexpr_seq1,
         cexpr_seq2,
         match query_op {
-            QueryMOp::CGet => instr::cgets(readonly_op),
-            QueryMOp::Isset => instr::issets(),
+            QueryMOp::CGet => instr::c_get_s(readonly_op),
+            QueryMOp::Isset => instr::isset_s(),
             QueryMOp::CGetQuiet => {
                 return Err(Error::unrecoverable("emit_class_get: CGetQuiet"));
             }
@@ -4406,8 +4522,8 @@ fn emit_conditional_expr<'a, 'arena, 'decl>(
             InstrSeq::gather(vec![
                 etest_instr,
                 instr::dup(),
-                instr::jmpnz(end_label),
-                instr::popc(),
+                instr::jmp_nz(end_label),
+                instr::pop_c(),
                 efalse_instr,
                 instr::label(end_label),
             ])
@@ -4428,15 +4544,15 @@ fn emit_local<'a, 'arena, 'decl>(
         Ok(InstrSeq::gather(vec![
             instr::string(alloc, string_utils::locals::strip_dollar(id_name)),
             emit_pos(pos),
-            instr::cgetg(),
+            instr::c_get_g(),
         ]))
     } else {
         Ok(
             if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
-                emit_pos_then(pos, instr::barethis(notice))
+                emit_pos_then(pos, instr::bare_this(notice))
             } else {
                 let local = get_local(e, env, pos, id_name)?;
-                instr::cgetl(local)
+                instr::c_get_l(local)
             },
         )
     }
@@ -4459,46 +4575,31 @@ fn emit_class_const<'a, 'arena, 'decl>(
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
             let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &name);
-            let cname = cid.unsafe_as_str();
             Ok(if string_utils::is_class(&id.1) {
-                if e.options().emit_class_pointers() == 1 {
-                    emit_pos_then(&pos, instr::resolveclass(cid))
-                } else if e.options().emit_class_pointers() == 2 {
-                    emit_pos_then(&pos, instr::lazyclass(cid))
-                } else {
-                    emit_pos_then(&pos, instr::string(alloc, cname))
-                }
+                emit_pos_then(&pos, instr::lazy_class(cid))
             } else {
                 e.add_class_ref(cid.clone());
                 // TODO(hrust) enabel `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id =
                     hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
-                emit_pos_then(&pos, instr::clscnsd(const_id, cid))
+                emit_pos_then(&pos, instr::cls_cns_d(const_id, cid))
             })
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                if e.options().emit_class_pointers() == 2 {
-                    instr::lazyclassfromclass()
-                } else {
-                    instr::classname()
-                }
+                instr::lazy_class_from_class()
             } else {
                 // TODO(hrust) enable `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id =
                     hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
-                instr::clscns(const_id)
+                instr::cls_cns(const_id)
             };
-            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
-                emit_load_class_ref(e, env, pos, cexpr)
-            } else {
-                Ok(InstrSeq::gather(vec![
-                    emit_load_class_ref(e, env, pos, cexpr)?,
-                    load_const,
-                ]))
-            }
+            Ok(InstrSeq::gather(vec![
+                emit_load_class_ref(e, env, pos, cexpr)?,
+                load_const,
+            ]))
         }
     }
 }
@@ -4514,19 +4615,19 @@ fn emit_unop<'a, 'arena, 'decl>(
     match uop {
         Uop::Utild | Uop::Unot => Ok(InstrSeq::gather(vec![
             emit_expr(e, env, expr)?,
-            emit_pos_then(pos, from_unop(e.options(), uop)?),
+            emit_pos_then(pos, from_unop(uop)?),
         ])),
         Uop::Uplus | Uop::Uminus => Ok(InstrSeq::gather(vec![
             emit_pos(pos),
             instr::int(0),
             emit_expr(e, env, expr)?,
-            emit_pos_then(pos, from_unop(e.options(), uop)?),
+            emit_pos_then(pos, from_unop(uop)?),
         ])),
         Uop::Uincr | Uop::Udecr | Uop::Upincr | Uop::Updecr => emit_lval_op(
             e,
             env,
             pos,
-            LValOp::IncDec(unop_to_incdec_op(e.options(), uop)?),
+            LValOp::IncDec(unop_to_incdec_op(uop)?),
             expr,
             None,
             false,
@@ -4555,37 +4656,24 @@ fn emit_unop<'a, 'arena, 'decl>(
     }
 }
 
-fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncDecOp> {
+fn unop_to_incdec_op(op: &ast_defs::Uop) -> Result<IncDecOp> {
     use ast_defs::Uop;
-    let if_check_or = |op1, op2| Ok(if opts.check_int_overflow() { op1 } else { op2 });
     match op {
-        Uop::Uincr => if_check_or(IncDecOp::PreIncO, IncDecOp::PreInc),
-        Uop::Udecr => if_check_or(IncDecOp::PreDecO, IncDecOp::PreDec),
-        Uop::Upincr => if_check_or(IncDecOp::PostIncO, IncDecOp::PostInc),
-        Uop::Updecr => if_check_or(IncDecOp::PostDecO, IncDecOp::PostDec),
+        Uop::Uincr => Ok(IncDecOp::PreInc),
+        Uop::Udecr => Ok(IncDecOp::PreDec),
+        Uop::Upincr => Ok(IncDecOp::PostInc),
+        Uop::Updecr => Ok(IncDecOp::PostDec),
         _ => Err(Error::unrecoverable("invalid incdec op")),
     }
 }
 
-fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'arena>> {
+fn from_unop<'arena>(op: &ast_defs::Uop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Uop;
     Ok(match op {
-        Uop::Utild => instr::bitnot(),
+        Uop::Utild => instr::bit_not(),
         Uop::Unot => instr::not(),
-        Uop::Uplus => {
-            if opts.check_int_overflow() {
-                instr::addo()
-            } else {
-                instr::add()
-            }
-        }
-        Uop::Uminus => {
-            if opts.check_int_overflow() {
-                instr::subo()
-            } else {
-                instr::sub()
-            }
-        }
+        Uop::Uplus => instr::add(),
+        Uop::Uminus => instr::sub(),
         _ => {
             return Err(Error::unrecoverable(
                 "this unary operation cannot be translated",
@@ -4594,24 +4682,12 @@ fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'are
     })
 }
 
-fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
+fn binop_to_setopop(op: &ast_defs::Bop) -> Option<SetOpOp> {
     use ast_defs::Bop;
     match op {
-        Bop::Plus => Some(if opts.check_int_overflow() {
-            SetOpOp::PlusEqualO
-        } else {
-            SetOpOp::PlusEqual
-        }),
-        Bop::Minus => Some(if opts.check_int_overflow() {
-            SetOpOp::MinusEqualO
-        } else {
-            SetOpOp::MinusEqual
-        }),
-        Bop::Star => Some(if opts.check_int_overflow() {
-            SetOpOp::MulEqualO
-        } else {
-            SetOpOp::MulEqual
-        }),
+        Bop::Plus => Some(SetOpOp::PlusEqual),
+        Bop::Minus => Some(SetOpOp::MinusEqual),
+        Bop::Star => Some(SetOpOp::MulEqual),
         Bop::Slash => Some(SetOpOp::DivEqual),
         Bop::Starstar => Some(SetOpOp::PowEqual),
         Bop::Amp => Some(SetOpOp::AndEqual),
@@ -4626,53 +4702,33 @@ fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
 }
 
 fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
-    e.options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::OPTIMIZE_NULL_CHECKS)
+    e.options().compiler_flags.optimize_null_checks
 }
 
-fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
+fn from_binop<'arena>(op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Bop as B;
     Ok(match op {
-        B::Plus => {
-            if opts.check_int_overflow() {
-                instr::addo()
-            } else {
-                instr::add()
-            }
-        }
-        B::Minus => {
-            if opts.check_int_overflow() {
-                instr::subo()
-            } else {
-                instr::sub()
-            }
-        }
-        B::Star => {
-            if opts.check_int_overflow() {
-                instr::mulo()
-            } else {
-                instr::mul()
-            }
-        }
+        B::Plus => instr::add(),
+        B::Minus => instr::sub(),
+        B::Star => instr::mul(),
         B::Slash => instr::div(),
         B::Eqeq => instr::eq(),
         B::Eqeqeq => instr::same(),
         B::Starstar => instr::pow(),
         B::Diff => instr::neq(),
-        B::Diff2 => instr::nsame(),
+        B::Diff2 => instr::n_same(),
         B::Lt => instr::lt(),
         B::Lte => instr::lte(),
         B::Gt => instr::gt(),
         B::Gte => instr::gte(),
         B::Dot => instr::concat(),
-        B::Amp => instr::bitand(),
-        B::Bar => instr::bitor(),
+        B::Amp => instr::bit_and(),
+        B::Bar => instr::bit_or(),
         B::Ltlt => instr::shl(),
         B::Gtgt => instr::shr(),
         B::Cmp => instr::cmp(),
         B::Percent => instr::mod_(),
-        B::Xor => instr::bitxor(),
+        B::Xor => instr::bit_xor(),
         B::Eq(_) => {
             return Err(Error::unrecoverable("assignment is emitted differently"));
         }
@@ -4700,7 +4756,7 @@ fn emit_first_expr<'a, 'arena, 'decl>(
                 || superglobals::is_any_global(local_id::get_name(&l.1))) =>
         {
             (
-                instr::cgetl2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
+                instr::c_get_l_2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
                 true,
             )
         }
@@ -4758,7 +4814,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
 ) -> Result<(InstrSeq<'arena>, Option<StackIndex>)> {
     match &expr.2 {
         ast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
-            instr::cgetquietl(get_local(e, env, pos, local_id::get_name(&lid.1))?),
+            instr::c_get_quiet_l(get_local(e, env, pos, local_id::get_name(&lid.1))?),
             None,
         )),
         ast::Expr_::ArrayGet(x) => emit_array_get(
@@ -4800,23 +4856,23 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
     let (quiet_instr, querym_n_unpopped) = emit_quiet_expr(e, env, pos, e1, true)?;
     let emit_popc_n = |n_unpopped| match n_unpopped {
         Some(n) => InstrSeq::gather(
-            iter::repeat_with(instr::popc)
+            iter::repeat_with(instr::pop_c)
                 .take(n as usize)
-                .collect::<Vec<_>>(),
+                .collect_vec(),
         ),
         None => instr::empty(),
     };
     Ok(InstrSeq::gather(vec![
         quiet_instr,
         instr::dup(),
-        instr::istypec(IsTypeOp::Null),
-        instr::jmpnz(do_set_label),
-        instr::popl(l_nonnull),
+        instr::is_type_c(IsTypeOp::Null),
+        instr::jmp_nz(do_set_label),
+        instr::pop_l(l_nonnull),
         emit_popc_n(querym_n_unpopped),
-        instr::pushl(l_nonnull),
+        instr::push_l(l_nonnull),
         instr::jmp(end_label),
         instr::label(do_set_label),
-        instr::popc(),
+        instr::pop_c(),
         emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), true)?,
         instr::label(end_label),
     ]))
@@ -4862,7 +4918,11 @@ fn emit_binop<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (op, e1, e2) = expr.2.as_binop().unwrap();
+    let ast::Binop {
+        bop: op,
+        lhs: e1,
+        rhs: e2,
+    } = expr.2.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
         B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, expr),
@@ -4870,7 +4930,7 @@ fn emit_binop<'a, 'arena, 'decl>(
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
         }
-        B::Eq(Some(eop)) => match binop_to_setopop(e.options(), eop) {
+        B::Eq(Some(eop)) => match binop_to_setopop(eop) {
             None => Err(Error::unrecoverable("illegal eq op")),
             Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
         },
@@ -4880,10 +4940,10 @@ fn emit_binop<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(vec![
                 emit_quiet_expr(e, env, pos, e1, false)?.0,
                 instr::dup(),
-                instr::istypec(IsTypeOp::Null),
+                instr::is_type_c(IsTypeOp::Null),
                 instr::not(),
-                instr::jmpnz(end_label),
-                instr::popc(),
+                instr::jmp_nz(end_label),
+                instr::pop_c(),
                 rhs,
                 instr::label(end_label),
             ]))
@@ -4892,7 +4952,7 @@ fn emit_binop<'a, 'arena, 'decl>(
             let default = |e: &mut Emitter<'arena, 'decl>| {
                 Ok(InstrSeq::gather(vec![
                     emit_two_exprs(e, env, pos, e1, e2)?,
-                    from_binop(e.options(), op)?,
+                    from_binop(op)?,
                 ]))
             };
             if optimize_null_checks(e) {
@@ -4929,9 +4989,9 @@ fn emit_pipe<'a, 'arena, 'decl>(
         pipe_env.with_pipe_var(local);
         let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
         Ok((
-            InstrSeq::gather(vec![lhs_instrs, instr::popl(local)]),
+            InstrSeq::gather(vec![lhs_instrs, instr::pop_l(local)]),
             rhs_instrs,
-            instr::unsetl(local),
+            instr::unset_l(local),
         ))
     })
 }
@@ -4951,27 +5011,33 @@ fn emit_as<'a, 'arena, 'decl>(
         let main_block = |ts_instrs, resolve| {
             InstrSeq::gather(vec![
                 ts_instrs,
-                instr::setl(type_struct_local),
+                instr::set_l(type_struct_local),
                 match resolve {
-                    TypeStructResolveOp::Resolve => instr::is_type_structc_resolve(),
-                    TypeStructResolveOp::DontResolve => instr::is_type_structc_dontresolve(),
+                    TypeStructResolveOp::Resolve => instr::is_type_struct_c_resolve(),
+                    TypeStructResolveOp::DontResolve => instr::is_type_struct_c_dontresolve(),
                     _ => panic!("Enum value does not match one of listed variants"),
                 },
-                instr::jmpnz(then_label),
+                instr::jmp_nz(then_label),
                 if *is_nullable {
                     InstrSeq::gather(vec![instr::null(), instr::jmp(done_label)])
                 } else {
                     InstrSeq::gather(vec![
-                        instr::pushl(arg_local),
-                        instr::pushl(type_struct_local),
-                        instr::throwastypestructexception(),
+                        instr::push_l(arg_local),
+                        instr::push_l(type_struct_local),
+                        instr::throw_as_type_struct_exception(),
                     ])
                 },
             ])
         };
         let i2 = if is_static {
             main_block(
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
                 TypeStructResolveOp::Resolve,
             )
         } else {
@@ -4980,11 +5046,11 @@ fn emit_as<'a, 'arena, 'decl>(
         let i1 = emit_expr(e, env, expr)?;
         Ok(InstrSeq::gather(vec![
             i1,
-            instr::setl(arg_local),
+            instr::set_l(arg_local),
             i2,
             instr::label(then_label),
-            instr::pushl(arg_local),
-            instr::unsetl(type_struct_local),
+            instr::push_l(arg_local),
+            instr::unset_l(type_struct_local),
             instr::label(done_label),
         ]))
     })
@@ -5089,9 +5155,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         count_instrs,
         base_setup,
         instr::instr(Instruct::Opcode(Opcode::SetRangeM(
-            (base_stack + cls_stack)
-                .try_into()
-                .expect("StackIndex overflow"),
+            base_stack + cls_stack,
             kind.size.try_into().expect("SetRange size overflow"),
             kind.op,
         ))),
@@ -5104,9 +5168,6 @@ pub fn is_reified_tparam<'a, 'arena>(
     name: &str,
 ) -> Option<(usize, bool)> {
     let is = |tparams: &[ast::Tparam]| {
-        let is_soft = |ual: &Vec<ast::UserAttribute>| {
-            ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
-        };
         use ast::ReifyKind;
         tparams.iter().enumerate().find_map(|(i, tp)| {
             if (tp.reified == ReifyKind::Reified || tp.reified == ReifyKind::SoftReified)
@@ -5154,7 +5215,7 @@ pub fn is_reified_tparam<'a, 'arena>(
 ///   # Section 1, pushing the value of $ix+2 on the stack
 ///   Int 2
 ///   CGetL2 $ix
-///   AddO
+///   Add
 ///   # Section 2, constructing the base address of $arr[3]
 ///   BaseL $arr Warn
 ///   Dim Warn EI:3
@@ -5197,8 +5258,8 @@ fn emit_base<'a, 'arena, 'decl>(
             i.base_instrs,
             i.cls_instrs,
             i.setup_instrs,
-            i.base_stack_size as u32,
-            i.cls_stack_size as u32,
+            i.base_stack_size,
+            i.cls_stack_size,
         )),
         ArrayGetBase::Inout { .. } => Err(Error::unrecoverable("unexpected input")),
     }
@@ -5283,7 +5344,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         base_stack_size,
                         cls_stack_size,
                     },
-                    store: instr::basel(local, MOpMode::Define, ReadonlyOp::Any),
+                    store: instr::base_l(local, MOpMode::Define, ReadonlyOp::Any),
                 }
             }
             _ => ArrayGetBase::Regular(ArrayGetBaseData {
@@ -5302,12 +5363,12 @@ fn emit_base_<'a, 'arena, 'decl>(
         inner_expr: &ast::Expr, // expression inside of readonly expression
     | -> Option<Result<ArrayGetBase<'_>>> {
         // Readonly local variable requires a CheckROCOW
-        if let aast::Expr(_, _, Expr_::Lvar(x)) = &*inner_expr {
+        if let aast::Expr(_, _, Expr_::Lvar(x)) = inner_expr {
             if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
                 match get_local(e, env, &x.0, &(x.1).1) {
                     Ok(v) => {
                     let base_instr = if local_temp_kind.is_some() {
-                        instr::cgetquietl(v)
+                        instr::c_get_quiet_l(v)
                     } else {
                         instr::empty()
                     };
@@ -5315,7 +5376,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         e,
                         base_instr,
                         instr::empty(),
-                        instr::basel( v, MOpMode::Define, ReadonlyOp::CheckROCOW),
+                        instr::base_l( v, MOpMode::Define, ReadonlyOp::CheckROCOW),
                         0,
                         0,
                     )))
@@ -5339,7 +5400,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 base_expr_instrs,
                 instr::empty(),
-                emit_pos_then(pos, instr::basec(base_offset, base_mode)),
+                emit_pos_then(pos, instr::base_c(base_offset, base_mode)),
                 1,
                 0,
             ))
@@ -5379,18 +5440,18 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 base_instrs,
                 instr::empty(),
-                instr::basegc(base_offset, base_mode),
+                instr::base_gc(base_offset, base_mode),
                 1,
                 0,
             ))
         }
         Expr_::Lvar(x) if is_object && (x.1).1 == special_idents::THIS => {
-            let base_instrs = emit_pos_then(&x.0, instr::checkthis());
+            let base_instrs = emit_pos_then(&x.0, instr::check_this());
             Ok(emit_default(
                 e,
                 base_instrs,
                 instr::empty(),
-                instr::baseh(),
+                instr::base_h(),
                 0,
                 0,
             ))
@@ -5400,7 +5461,7 @@ fn emit_base_<'a, 'arena, 'decl>(
         {
             let v = get_local(e, env, &x.0, &(x.1).1)?;
             let base_instr = if local_temp_kind.is_some() {
-                instr::cgetquietl(v)
+                instr::c_get_quiet_l(v)
             } else {
                 instr::empty()
             };
@@ -5408,7 +5469,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 base_instr,
                 instr::empty(),
-                instr::basel(v, base_mode, ReadonlyOp::Any),
+                instr::base_l(v, base_mode, ReadonlyOp::Any),
                 0,
                 0,
             ))
@@ -5419,7 +5480,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 local,
                 instr::empty(),
-                instr::basec(base_offset, base_mode),
+                instr::base_c(base_offset, base_mode),
                 1,
                 0,
             ))
@@ -5574,7 +5635,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         e,
                         base_instrs,
                         instr::empty(),
-                        instr::basec(base_offset, base_mode),
+                        instr::base_c(base_offset, base_mode),
                         1,
                         0,
                     )
@@ -5638,7 +5699,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 cexpr_begin,
                 cexpr_end,
-                instr::basesc(base_offset + 1, rhs_stack_size, base_mode, readonly_op),
+                instr::base_sc(base_offset + 1, rhs_stack_size, base_mode, readonly_op),
                 1,
                 1,
             ))
@@ -5660,7 +5721,6 @@ pub fn emit_ignored_exprs<'a, 'arena, 'decl>(
         .map(InstrSeq::gather)
 }
 
-// TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -5669,7 +5729,7 @@ pub fn emit_ignored_expr<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     Ok(InstrSeq::gather(vec![
         emit_expr(emitter, env, expr)?,
-        emit_pos_then(pos, instr::popc()),
+        emit_pos_then(pos, instr::pop_c()),
     ]))
 }
 
@@ -5706,9 +5766,9 @@ fn emit_lval_op<'a, 'arena, 'decl>(
                         is_readonly_expr(expr2),
                     )?;
                     Ok((
-                        InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::popl(local)]),
+                        InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::pop_l(local)]),
                         instr_assign,
-                        instr::pushl(local),
+                        instr::push_l(local),
                     ))
                 })
             }
@@ -5721,9 +5781,9 @@ fn emit_lval_op<'a, 'arena, 'decl>(
                     (
                         InstrSeq::gather(vec![
                             emit_yield(e, env, pos, af)?,
-                            instr::setl(temp),
-                            instr::popc(),
-                            instr::pushl(temp),
+                            instr::set_l(temp),
+                            instr::pop_c(),
+                            instr::push_l(temp),
                         ]),
                         1,
                         false,
@@ -5770,6 +5830,8 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::Varray(_)
         | Expr_::Darray(_)
         | Expr_::Collection(_)
+        | Expr_::KeyValCollection(_)
+        | Expr_::ValCollection(_)
         | Expr_::Clone(_)
         | Expr_::Unop(_)
         | Expr_::As(_)
@@ -5779,12 +5841,12 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::ClassConst(_) => true,
         Expr_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).2)?,
         Expr_::Binop(b) => {
-            if let ast_defs::Bop::Eq(None) = &b.0 {
-                if (b.1).2.is_list() {
-                    return can_use_as_rhs_in_list_assignment(&(b.2).2);
+            if let ast_defs::Bop::Eq(None) = &b.bop {
+                if (b.lhs).2.is_list() {
+                    return can_use_as_rhs_in_list_assignment(&(b.rhs).2);
                 }
             }
-            b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq()
+            b.bop.is_plus() || b.bop.is_question_question() || b.bop.is_any_eq()
         }
         _ => false,
     })
@@ -5803,11 +5865,11 @@ fn emit_array_get_fixed<'arena>(
 ) -> InstrSeq<'arena> {
     let (base, stack_count) = if last_usage {
         (
-            InstrSeq::gather(vec![instr::pushl(local), instr::basec(0, MOpMode::Warn)]),
+            InstrSeq::gather(vec![instr::push_l(local), instr::base_c(0, MOpMode::Warn)]),
             1,
         )
     } else {
-        (instr::basel(local, MOpMode::Warn, ReadonlyOp::Any), 0)
+        (instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any), 0)
     };
     let indices = InstrSeq::gather(
         indices
@@ -5817,7 +5879,7 @@ fn emit_array_get_fixed<'arena>(
             .map(|(i, ix)| {
                 let mk = MemberKey::EI(*ix as i64, ReadonlyOp::Any);
                 if i == 0 {
-                    instr::querym(stack_count, QueryMOp::CGet, mk)
+                    instr::query_m(stack_count, QueryMOp::CGet, mk)
                 } else {
                     instr::dim(MOpMode::Warn, mk)
                 }
@@ -5849,9 +5911,8 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     rhs_readonly: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_;
-    use options::Php7Flags;
 
-    let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
+    let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
         Expr_::List(exprs) => {
             let last_non_omitted = if last_usage {
@@ -5903,9 +5964,9 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
                 (Some(loc), [_, ..]) => emit_array_get_fixed(last_usage, loc.to_owned(), indices),
                 (Some(loc), []) => {
                     if last_usage {
-                        instr::pushl(loc.to_owned())
+                        instr::push_l(loc.to_owned())
                     } else {
-                        instr::cgetl(loc.to_owned())
+                        instr::c_get_l(loc.to_owned())
                     }
                 }
                 (None, _) => instr::null(),
@@ -5926,12 +5987,12 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
             Ok(if is_ltr {
                 (
                     instr::empty(),
-                    InstrSeq::gather(vec![lhs_instrs, rhs_instrs, set_op, instr::popc()]),
+                    InstrSeq::gather(vec![lhs_instrs, rhs_instrs, set_op, instr::pop_c()]),
                 )
             } else {
                 (
                     lhs_instrs,
-                    InstrSeq::gather(vec![instr::empty(), rhs_instrs, set_op, instr::popc()]),
+                    InstrSeq::gather(vec![instr::empty(), rhs_instrs, set_op, instr::pop_c()]),
                 )
             })
         }
@@ -5966,10 +6027,10 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl>(
 pub fn emit_final_global_op<'arena>(pos: &Pos, op: LValOp) -> InstrSeq<'arena> {
     use LValOp as L;
     match op {
-        L::Set => emit_pos_then(pos, instr::setg()),
-        L::SetOp(op) => instr::setopg(op),
-        L::IncDec(op) => instr::incdecg(op),
-        L::Unset => emit_pos_then(pos, instr::unsetg()),
+        L::Set => emit_pos_then(pos, instr::set_g()),
+        L::SetOp(op) => instr::set_op_g(op),
+        L::IncDec(op) => instr::inc_dec_g(op),
+        L::Unset => emit_pos_then(pos, instr::unset_g()),
     }
 }
 
@@ -5978,10 +6039,10 @@ pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local) -> InstrSe
     emit_pos_then(
         pos,
         match op {
-            L::Set => instr::setl(lid),
-            L::SetOp(op) => instr::setopl(lid, op),
-            L::IncDec(op) => instr::incdecl(lid, op),
-            L::Unset => instr::unsetl(lid),
+            L::Set => instr::set_l(lid),
+            L::SetOp(op) => instr::set_op_l(lid, op),
+            L::IncDec(op) => instr::inc_dec_l(lid, op),
+            L::Unset => instr::unset_l(lid),
         },
     )
 }
@@ -5993,10 +6054,10 @@ fn emit_final_member_op<'arena>(
 ) -> InstrSeq<'arena> {
     use LValOp as L;
     match op {
-        L::Set => instr::setm(stack_size, mk),
-        L::SetOp(op) => instr::setopm(stack_size, op, mk),
-        L::IncDec(op) => instr::incdecm(stack_size, op, mk),
-        L::Unset => instr::unsetm(stack_size, mk),
+        L::Set => instr::set_m(stack_size, mk),
+        L::SetOp(op) => instr::set_op_m(stack_size, op, mk),
+        L::IncDec(op) => instr::inc_dec_m(stack_size, op, mk),
+        L::Unset => instr::unset_m(stack_size, mk),
     }
 }
 
@@ -6008,9 +6069,9 @@ fn emit_final_static_op<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     use LValOp as L;
     Ok(match op {
-        L::Set => instr::sets(ReadonlyOp::Any),
-        L::SetOp(op) => instr::setops(op),
-        L::IncDec(op) => instr::incdecs(op),
+        L::Set => instr::set_s(ReadonlyOp::Any),
+        L::SetOp(op) => instr::set_op_s(op),
+        L::IncDec(op) => instr::inc_dec_s(op),
         L::Unset => {
             let pos = match prop {
                 ast::ClassGetExpr::CGstring((pos, _))
@@ -6109,7 +6170,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     )?;
                     let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
                     let final_instr =
-                        emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
+                        emit_pos_then(pos, emit_final_member_op(total_stack_size, op, mk));
                     (
                         // Don't emit instructions for elems as these were not popped from
                         // the stack by the final member op during the lookup of a null
@@ -6190,7 +6251,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 )?;
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr =
-                    emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
+                    emit_pos_then(pos, emit_final_member_op(total_stack_size, op, mk));
                 (
                     // Don't emit instructions for props as these were not popped from
                     // the stack by the final member op during the lookup of a null
@@ -6235,7 +6296,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                         false,
                         false, // all unary operations (++, --, etc) are on primitives, so no HHVM readonly checks
                     )?,
-                    from_unop(e.options(), &uop.0)?,
+                    from_unop(&uop.0)?,
                 ]),
             ),
             _ => {
@@ -6287,7 +6348,7 @@ fn emit_class_expr<'a, 'arena, 'decl>(
                 InstrSeq::gather(vec![
                     cexpr_local,
                     scope::stash_top_in_unnamed_local(e, load_prop)?,
-                    instr::classgetc(),
+                    instr::class_get_c(),
                 ]),
             )
         }
@@ -6323,7 +6384,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) -> Result<(), Option<Error>> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h.1.as_ref() {
                 H_::Happly(Id(_, id), _)
                     if self.erased_tparams.contains(&id.as_str()) && self.isas =>
@@ -6340,7 +6402,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h: &ast::Hint_) -> Result<(), Option<Error>> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => Err(None),
                 _ => h.recurse(c, self.object()),
@@ -6364,7 +6427,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h: &mut ast::Hint_) -> Result<(), ()> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => {
                     Ok(*id = "_".into())
@@ -6419,7 +6483,8 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h_: &'ast ast::Hint_) -> Result<(), ()> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h_ {
                 H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),
                 H_::Habstr(name, h) | H_::Happly(Id(_, name), h) => {
@@ -6441,11 +6506,9 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         .scope
         .get_fun_tparams()
         .iter()
-        .fold(HashSet::<&str>::default(), |acc, t| f(acc, &*t));
+        .fold(HashSet::<&str>::default(), f);
     let class_tparams = env.scope.get_class_tparams();
-    let current_tags = class_tparams
-        .iter()
-        .fold(current_tags, |acc, t| f(acc, &*t));
+    let current_tags = class_tparams.iter().fold(current_tags, f);
     let mut collector = Collector {
         current_tags: &current_tags,
         acc: IndexSet::new(),
@@ -6458,7 +6521,18 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((emit_reified_type(e, env, pos, name)?, false))
         }
         _ => {
-            let ts = get_type_structure_for_hint(e, &[], &collector.acc, &hint)?;
+            let type_refinement_in_hint = if isas {
+                TypeRefinementInHint::Disallowed
+            } else {
+                TypeRefinementInHint::Allowed
+            };
+            let ts = get_type_structure_for_hint(
+                e,
+                &[],
+                &collector.acc,
+                type_refinement_in_hint,
+                &hint,
+            )?;
             let ts_list = if collector.acc.is_empty() {
                 ts
             } else {
@@ -6508,7 +6582,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if !is_local_this(env, id) {
-            return Ok(instr::istypel(
+            return Ok(instr::is_type_l(
                 get_local(e, env, pos, local_id::get_name(id))?,
                 IsTypeOp::Null,
             ));
@@ -6517,7 +6591,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
 
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        instr::istypec(IsTypeOp::Null),
+        instr::is_type_c(IsTypeOp::Null),
     ]))
 }
 
@@ -6546,13 +6620,14 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
             }
         }
         Err(_) => {
-            use {ast::Expr_, ast_defs::Uop};
+            use ast::Expr_;
+            use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.0.is_barbar() => {
-                    let r1 = emit_jmpnz(e, env, &bo.1, label)?;
+                Expr_::Binop(bo) if bo.bop.is_barbar() => {
+                    let r1 = emit_jmpnz(e, env, &bo.lhs, label)?;
                     if r1.is_fallthrough {
-                        let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6565,9 +6640,9 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         r1
                     }
                 }
-                Expr_::Binop(bo) if bo.0.is_ampamp() => {
+                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
                     let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpz(e, env, &bo.1, skip_label)?;
+                    let r1 = emit_jmpz(e, env, &bo.lhs, skip_label)?;
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
@@ -6582,7 +6657,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                             is_label_used: false,
                         }
                     } else {
-                        let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6598,28 +6673,46 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_eqeqeq() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_eqeqeq()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![is_null, instr::jmpnz(label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_diff2()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![is_null, instr::jmpz(label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -6630,7 +6723,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![instr, instr::jmpnz(label)]),
+                            InstrSeq::gather(vec![instr, instr::jmp_nz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -6666,12 +6759,13 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
             }
         }
         Err(_) => {
-            use {ast::Expr_, ast_defs::Uop};
+            use ast::Expr_;
+            use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpnz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.0.is_barbar() => {
+                Expr_::Binop(bo) if bo.bop.is_barbar() => {
                     let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpnz(e, env, &bo.1, skip_label)?;
+                    let r1 = emit_jmpnz(e, env, &bo.lhs, skip_label)?;
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
@@ -6686,7 +6780,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                             is_label_used: false,
                         }
                     } else {
-                        let r2 = emit_jmpz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6701,10 +6795,10 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         }
                     }
                 }
-                Expr_::Binop(bo) if bo.0.is_ampamp() => {
-                    let r1 = emit_jmpz(e, env, &bo.1, label)?;
+                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
+                    let r1 = emit_jmpz(e, env, &bo.lhs, label)?;
                     if r1.is_fallthrough {
-                        let r2 = emit_jmpz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6722,28 +6816,46 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_eqeqeq() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_eqeqeq()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![is_null, instr::jmpz(label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_diff2()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![is_null, instr::jmpnz(label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -6754,7 +6866,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
-                            InstrSeq::gather(vec![instr, instr::jmpz(label)]),
+                            InstrSeq::gather(vec![instr, instr::jmp_z(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,

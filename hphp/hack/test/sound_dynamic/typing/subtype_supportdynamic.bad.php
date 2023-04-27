@@ -1,6 +1,6 @@
 <?hh
 
-function e(supportdynamic $sd): void {}
+function e(supportdyn<nonnull> $sd): void {}
 
 class C {}
 

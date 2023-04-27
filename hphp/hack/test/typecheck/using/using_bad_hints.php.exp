@@ -1,3 +1,13 @@
+File "using_bad_hints.php", line 24, characters 14-19:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+File "using_bad_hints.php", line 38, characters 16-21:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+File "using_bad_hints.php", line 44, characters 16-21:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+File "using_bad_hints.php", line 50, characters 16-21:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+File "using_bad_hints.php", line 56, characters 16-21:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_hints.php", line 13, characters 22-23:
 Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
 File "using_bad_hints.php", line 14, characters 32-33:
@@ -10,21 +20,11 @@ File "using_bad_hints.php", line 20, characters 26-31:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 23, characters 49-65:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-File "using_bad_hints.php", line 24, characters 14-19:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_hints.php", line 28, characters 31-44:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 31, characters 42-59:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
 File "using_bad_hints.php", line 36, characters 22-27:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-File "using_bad_hints.php", line 38, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_hints.php", line 42, characters 28-44:
 Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-File "using_bad_hints.php", line 44, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-File "using_bad_hints.php", line 50, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-File "using_bad_hints.php", line 56, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])

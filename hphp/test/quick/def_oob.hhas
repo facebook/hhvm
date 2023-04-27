@@ -23,10 +23,10 @@
 .alias al = <"HH\\int"> """Y:1:{s:4:\"kind\";i:1;}""";
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
-  CreateCl 0 2
+  CreateCl 0 "C"
   PopC
 
-  CreateCl 0 5
+  CreateCl 0 "Foo"
   PopC
 
   Int 1

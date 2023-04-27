@@ -57,7 +57,8 @@ val descr_of_in_channel : in_channel -> Unix.file_descr
     [timeout] is only there to achieve a similar effect as Unix interval
     timers on Windows, but is ignored on Unix. On Windows,
     [select ~timeout read write exn select_timeout] runs with a timeout
-    that is the minimum of [timeout and select_timeout].*)
+    that is the minimum of [timeout and select_timeout] and throws
+    a Timeout exception on timeout.*)
 val select :
   ?timeout:t ->
   Unix.file_descr list ->

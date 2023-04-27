@@ -5,11 +5,11 @@
 int(1)
 
 -- Iteration 2 --
-hello%r\x00%rworld hello%r\x00%r 
+hello%h{00}world hello%h{00} 
 int(19)
 
 -- Iteration 3 --
-@#$%&* s,   UF %r\x01%r   
+@#$%%&* s,   UF %h{01}   
 int(19)
 
 -- Iteration 4 --
@@ -23,7 +23,7 @@ using heredoc. abcdef 123456 3993
 int(71)
 
 -- Iteration 6 --
-% %s s
+%% %s s
 int(6)
 
 -- Iteration 7 --

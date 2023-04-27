@@ -25,14 +25,31 @@ class LookupCommand(gdb.Command):
 
 LookupCommand()
 
+# TODO T136489519
+_first_lookup = True
+
 
 #------------------------------------------------------------------------------
 # `lookup func' command.
 
 def lookup_func(val):
+    """
+    Args:
+        val: gdb.Value[HPHP::FuncId].
+
+    Returns:
+        func: gdb.Value[HPHP::Func*]
+    """
     funcid = val.cast(T('HPHP::FuncId'))
     try:
         # Not LowPtr
+        # TODO T136489519
+        global _first_lookup
+        if _first_lookup:
+            gdb.execute("ptype HPHP::Func::s_funcVec", to_string=True)
+            gdb.execute("ptype HPHP::Func::s_funcVec", to_string=True)
+            gdb.execute("maint flush symbol-cache")
+            _first_lookup = False
         result = idx.atomic_low_ptr_vector_at(V('HPHP::Func::s_funcVec'), funcid['m_id'])
         return result.cast(T('HPHP::Func').pointer())
     except gdb.MemoryError:
@@ -43,6 +60,14 @@ def lookup_func(val):
 
 
 def lookup_func_from_fp(fp):
+    """ Get the function pointed to by the given frame pointer.
+
+    Args:
+        fp: gdb.Value[HPHP::ActRec].
+
+    Returns:
+        func: gdb.Value[HPHP::Func*]
+    """
     return lookup_func(fp['m_funcId'])
 
 

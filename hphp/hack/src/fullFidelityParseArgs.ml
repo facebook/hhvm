@@ -30,7 +30,6 @@ type t = {
   include_line_comments: bool;
   keep_errors: bool;
   quick_mode: bool;
-  fail_open: bool;
   (* Defining the input *)
   files: string list;
   disable_lval_as_an_expression: bool;
@@ -48,9 +47,8 @@ type t = {
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
   enable_xhp_class_modifier: bool;
-  disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  disallow_inst_meth: bool;
   ignore_missing_json: bool;
+  disallow_static_constants_in_default_func_args: bool;
 }
 
 let make
@@ -73,7 +71,6 @@ let make
     include_line_comments
     keep_errors
     quick_mode
-    fail_open
     show_file_name
     files
     disable_lval_as_an_expression
@@ -91,9 +88,8 @@ let make
     disable_xhp_element_mangling
     allow_unstable_features
     enable_xhp_class_modifier
-    disallow_fun_and_cls_meth_pseudo_funcs
-    disallow_inst_meth
-    ignore_missing_json =
+    ignore_missing_json
+    disallow_static_constants_in_default_func_args =
   {
     full_fidelity_json_parse_tree;
     full_fidelity_json;
@@ -114,7 +110,6 @@ let make
     include_line_comments;
     keep_errors;
     quick_mode;
-    fail_open;
     show_file_name;
     files;
     disable_lval_as_an_expression;
@@ -132,9 +127,8 @@ let make
     disable_xhp_element_mangling;
     allow_unstable_features;
     enable_xhp_class_modifier;
-    disallow_fun_and_cls_meth_pseudo_funcs;
-    disallow_inst_meth;
     ignore_missing_json;
+    disallow_static_constants_in_default_func_args;
   }
 
 let parse_args () =
@@ -174,7 +168,6 @@ let parse_args () =
   let keep_errors = ref true in
   let quick_mode = ref false in
   let enable_hh_syntax = ref false in
-  let fail_open = ref true in
   let show_file_name = ref false in
   let disable_lval_as_an_expression = ref false in
   let set_show_file_name () = show_file_name := true in
@@ -194,9 +187,8 @@ let parse_args () =
   let disable_xhp_element_mangling = ref false in
   let allow_unstable_features = ref false in
   let enable_xhp_class_modifier = ref false in
-  let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-  let disallow_inst_meth = ref false in
   let ignore_missing_json = ref false in
+  let disallow_static_constants_in_default_func_arg = ref false in
   let options =
     [
       (* modes *)
@@ -280,12 +272,8 @@ No errors are filtered out."
       ( "--no-quick-mode",
         Arg.Clear quick_mode,
         "Unset the quick_mode option for the parser." );
-      ( "--fail-open",
-        Arg.Set fail_open,
-        "Set the fail_open option for the parser." );
-      ( "--no-fail-open",
-        Arg.Clear fail_open,
-        "Unset the fail_open option for the parser." );
+      ("--fail-open", Arg.Unit (fun () -> ()), "Unused.");
+      ("--no-fail-open", Arg.Unit (fun () -> ()), "Unused");
       ("--force-hh-syntax", Arg.Set enable_hh_syntax, "Ignored. Do not use.");
       ( "--show-file-name",
         Arg.Unit set_show_file_name,
@@ -343,15 +331,12 @@ No errors are filtered out."
       ( "--allow-unstable-features",
         Arg.Set allow_unstable_features,
         "Enables the __EnableUnstableFeatures attribute" );
-      ( "--disallow-fun-and-cls-meth-pseudo-funcs",
-        Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        "Disables parsing of fun() and class_meth()" );
-      ( "--disallow-inst-meth",
-        Arg.Set disallow_inst_meth,
-        "Disabled parsing of inst_meth()" );
       ( "--ignore-missing-json",
         Arg.Set ignore_missing_json,
         "Ignore missing nodes in JSON output" );
+      ( "--disallow-static-constants-in-default-func-args",
+        Arg.Set disallow_static_constants_in_default_func_arg,
+        "Disallow `static::*` in default arguments for functions" );
     ]
   in
   Arg.parse options push_file usage;
@@ -391,7 +376,6 @@ No errors are filtered out."
     !include_line_comments
     !keep_errors
     !quick_mode
-    !fail_open
     !show_file_name
     (List.rev !files)
     !disable_lval_as_an_expression
@@ -409,9 +393,8 @@ No errors are filtered out."
     !disable_xhp_element_mangling
     !allow_unstable_features
     !enable_xhp_class_modifier
-    !disallow_fun_and_cls_meth_pseudo_funcs
-    !disallow_inst_meth
     !ignore_missing_json
+    !disallow_static_constants_in_default_func_arg
 
 let to_parser_options args =
   let popt = ParserOptions.default in
@@ -476,12 +459,9 @@ let to_parser_options args =
       args.enable_xhp_class_modifier
   in
   let popt =
-    ParserOptions.with_disallow_fun_and_cls_meth_pseudo_funcs
+    ParserOptions.with_disallow_static_constants_in_default_func_args
       popt
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-  in
-  let popt =
-    ParserOptions.with_disallow_inst_meth popt args.disallow_inst_meth
+      args.disallow_static_constants_in_default_func_args
   in
   popt
 
@@ -492,8 +472,5 @@ let to_parser_env args ~leak_rust_tree ~mode =
     ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
     ~leak_rust_tree
-    ~disallow_fun_and_cls_meth_pseudo_funcs:
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-    ~disallow_inst_meth:args.disallow_inst_meth
     ?mode
     ()

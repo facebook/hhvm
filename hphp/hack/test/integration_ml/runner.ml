@@ -18,7 +18,6 @@ let tests =
     ("ide/error_throttling_open_file", run Test_error_throttling_open_file.test);
     ("ide/exception_handling", run Test_exception_handling.test);
     ("ide/failed_naming", run Test_failed_naming.test);
-    ("ide/failed_parsing", run Test_failed_parsing.test);
     ("ide/hhi_phpstdlib", run Test_hhi_phpstdlib.test);
     ("ide/ide_check", run Test_ide_check.test);
     ("ide/ide_close", run Test_ide_close.test);
@@ -68,6 +67,7 @@ let tests =
     ("server_hover", run Test_server_hover.test);
     ("unbound_name", run Test_unbound_name.test);
     ("unbound_name_2", run Test_unbound_name_2.test);
+    ("unbound_name_3", run Test_unbound_name_3.test);
   ]
 
 let () = Runner_base.go tests

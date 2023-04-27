@@ -1,0 +1,10 @@
+File "trait_diamond_property_5.bad.php", line 17, characters 7-7:
+Class `D` inherits generic trait property `myprop` via multiple paths at different types. (Typing[4462])
+  File "trait_diamond_property_5.bad.php", line 10, characters 10-11:
+  Trait property is defined here
+  File "trait_diamond_property_5.bad.php", line 14, characters 7-19:
+  `D` uses `MyTrait1`
+  File "trait_diamond_property_5.bad.php", line 17, characters 17-17:
+  `D` uses `C`
+  File "trait_diamond_property_5.bad.php", line 14, characters 7-19:
+  `C` uses `MyTrait1`

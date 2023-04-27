@@ -24,7 +24,7 @@
   temp_file
   utils_core)
  (preprocess
-  (pps lwt_ppx ppx_let)))
+  (pps lwt_ppx ppx_let ppx_deriving.std)))
 
 (data_only_dirs
  cargo
@@ -41,11 +41,11 @@
 (rule
  (targets libhh_fanout_build_rust.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    hh_fanout_build_rust
    hh_fanout_build_rust)))
 
@@ -58,11 +58,11 @@
 (rule
  (targets libhh_fanout_dep_graph_is_subgraph_rust.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    hh_fanout_dep_graph_is_subgraph_rust
    hh_fanout_dep_graph_is_subgraph_rust)))
 
@@ -75,10 +75,10 @@
 (rule
  (targets libhh_fanout_dep_graph_stats_rust.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    hh_fanout_dep_graph_stats_rust
    hh_fanout_dep_graph_stats_rust)))

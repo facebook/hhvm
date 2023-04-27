@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 
+#include <hphp/runtime/vm/jit/ssa-tmp.h>
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
@@ -30,6 +31,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/tiny-vector.h"
@@ -62,6 +64,10 @@ SSATmp* emitProfiledGet(IRGS& env, SSATmp* arr, SSATmp* key,
       auto const slot = gen(env, StructDictSlot, taken, arr, key);
       auto const elem = gen(env, StructDictElemAddr, arr, key, slot, arr);
       return gen(env, LdMem, TCell, elem);
+    }
+    if (arr->type().arrSpec().is_type_structure()) {
+      if (key->isA(TInt)) return cns(env, TUninit);
+      return gen(env, LdTypeStructureVal, taken, arr, key);
     }
     auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
     return gen(env, BespokeGet, data, arr, key);
@@ -142,6 +148,29 @@ SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
         return cns(env, TBottom);
       }
     );
+  }
+
+  if (arr->type().arrSpec().is_type_structure()) {
+    if (key->isA(TInt)) {
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+
+    SSATmp* result;
+    ifThen(
+      env,
+      [&] (Block *taken) {
+        auto const val = gen(env, LdTypeStructureVal, taken, arr, key);
+        result = profiled
+          ? profiledType(env, val, [&] { finish(val); })
+          : val;
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowOutOfBounds, arr, key);
+      }
+    );
+    return result;
   }
 
   auto const val = gen(env, BespokeGetThrow, arr, key);
@@ -333,7 +362,7 @@ SSATmp* emitEscalateToVanilla(
   if (layout.bespoke()) {
     auto const str = cns(env, reason.get());
     auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
-    decRef(env, arr, DecRefProfileId::Default);
+    decRef(env, arr);
     return result;
   }
   return cond(
@@ -502,7 +531,7 @@ void structDictIncDec(IRGS& env, IncDecOp op, SSATmp* arr, SSATmp* key,
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return finish(gen(env, IncDecElem, IncDecData{op}, ldMBase(env), key));
   }
 
@@ -645,7 +674,7 @@ void emitBespokeSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto const key = memberKey(env, mk);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     mFinalImpl(env, nDiscard, result);
   };
 
@@ -761,9 +790,6 @@ void emitBespokeIdx(IRGS& env) {
   }
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, base, key);
     return;
   }
@@ -781,22 +807,16 @@ void emitBespokeIdx(IRGS& env) {
 }
 
 void emitBespokeAKExists(IRGS& env) {
-  auto const base = popC(env);
-  auto const origKey = popC(env);
+  auto const base = topC(env, BCSPRelOffset{0});
+  auto const origKey = topC(env, BCSPRelOffset{1});
   if (!origKey->type().isKnownDataType()) PUNT(Bespoke-AKExists-KeyNotKnown);
   auto const key = classConvertPuntOnRaise(env, origKey);
 
   auto const finish = [&](bool res) {
+    discard(env, 2);
     push(env, cns(env, res));
     decRef(env, base, DecRefProfileId::AKExistsArr);
     decRef(env, key, DecRefProfileId::AKExistsKey);
-  };
-
-  auto const throwBadKey = [&] {
-    finish(false);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-    gen(env, ThrowInvalidArrayKey, base, key);
   };
 
   auto const baseType = base->type();
@@ -804,7 +824,7 @@ void emitBespokeAKExists(IRGS& env) {
     finish(false);
     return;
   } else if (!key->type().subtypeOfAny(TInt, TStr)) {
-    throwBadKey();
+    gen(env, ThrowInvalidArrayKey, base, key);
     return;
   }
 
@@ -909,7 +929,7 @@ void emitBespokeAddElemC(IRGS& env) {
   auto const arrLoc = ldStkAddr(env, BCSPRelOffset{0});
   auto const arr = gen(env, LdMem, arrType, arrLoc);
 
-  auto const finish = [&] (SSATmp*) { decRef(env, key, DecRefProfileId::Default); };
+  auto const finish = [&] (SSATmp*) { decRef(env, key); };
   emitSet(env, arr, key, value, arrLoc, finish);
 }
 
@@ -990,7 +1010,7 @@ void emitBespokeClassGetTS(IRGS& env) {
   );
 
   auto const cls = ldCls(env, className);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, cls);
   push(env, cns(env, TInitNull));
 }
@@ -1080,17 +1100,17 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   if (sk.funcEntry()) return std::nullopt;
   if (sk.op() != Op::FCallClsMethodD) return std::nullopt;
 
-  auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
-  auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+  auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
+  auto const meth = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
 
   if (!cls->isame(s_HH_Shapes.get()) &&
       !cls->isame(s_HH_Readonly_Shapes.get())) {
     return std::nullopt;
   }
 
-  if (func->isame(s_at.get()))        return LayoutSensitiveCall::ShapesAt;
-  if (func->isame(s_idx.get()))       return LayoutSensitiveCall::ShapesIdx;
-  if (func->isame(s_keyExists.get())) return LayoutSensitiveCall::ShapesExists;
+  if (meth == s_at.get())        return LayoutSensitiveCall::ShapesAt;
+  if (meth == s_idx.get())       return LayoutSensitiveCall::ShapesIdx;
+  if (meth == s_keyExists.get()) return LayoutSensitiveCall::ShapesExists;
 
   return std::nullopt;
 }
@@ -1123,8 +1143,8 @@ jit::vector<Location> guardsForLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
 
   auto const readonlyOkay = [&]{
     auto const callee = [&]() -> Func* {
-      auto const className  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
-      auto const funcName = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+      auto const className  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
+      auto const funcName = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
       auto const cls = Class::lookup(className);
       if (!cls) return nullptr;
       return cls->lookupMethod(funcName);
@@ -1302,12 +1322,14 @@ Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 // emitting a check if necessary to refine the array's type to that layout.
 jit::ArrayLayout guardToLayout(
     IRGS& env, const NormalizedInstruction& ni, Location loc,
-    Type type, std::function<void(IRGS&)> emitVanilla) {
+    Type type, std::function<void(IRGS&)> emitVanilla,
+    const bespoke::SinkLayouts& sinkLayouts) {
+  assertx(sinkLayouts.layouts.size() == 1);
+
   auto const kind = env.context.kind;
-  assertx(!env.irb->guardFailBlock());
   if (kind != TransKind::Optimize) return type.arrSpec().layout();
 
-  auto const sl = bespoke::layoutForSink(env.profTransIDs, ni.source);
+  auto const sl = sinkLayouts.layouts[0];
   auto const target = TArrLike.narrowToLayout(sl.layout);
   if (type <= target || !type.maybe(target)) {
     // If the type test would be trivial (either always taken or never taken),
@@ -1315,8 +1337,8 @@ jit::ArrayLayout guardToLayout(
     return type.arrSpec().layout();
   }
 
-  if (sl.sideExit && !RO::EvalBespokeEscalationSampleRate) {
-    checkType(env, loc, target, curSrcKey(env));
+  if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+    checkType(env, loc, target, makeExit(env));
     return sl.layout;
   }
 
@@ -1325,9 +1347,7 @@ jit::ArrayLayout guardToLayout(
   ifThen(
     env,
     [&](Block* taken) {
-      env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, target, curSrcKey(env));
-      env.irb->resetGuardFailBlock();
+      checkType(env, loc, target, taken);
     },
     [&]{
       hint(env, Block::Hint::Unlikely);
@@ -1344,11 +1364,11 @@ jit::ArrayLayout guardToLayout(
       }
 
       // Side exit or do codegen as needed. Use emitVanilla if we have it.
-      if (sl.sideExit) {
+      if (sinkLayouts.sideExit) {
         assertx(RO::EvalBespokeEscalationSampleRate);
         auto const arr = loadLocation(env, loc);
         gen(env, LogGuardFailure, target, arr);
-        gen(env, Jmp, makeExit(env, curSrcKey(env)));
+        gen(env, Jmp, makeExit(env));
       } else {
         if (emitVanilla && target == bespoke) {
           emitVanilla(env);
@@ -1364,6 +1384,98 @@ jit::ArrayLayout guardToLayout(
     }
   );
   return sl.layout;
+}
+
+// In optimized translations, use the layouts passed in to guard and emit
+// translations. Each layout will be checked to refine the array's type and
+// translation will be emitted accordingly.
+void guardToMultipleLayoutsAndEmit(
+    IRGS& env, const NormalizedInstruction& ni, Location loc,
+    Type type, std::function<void(IRGS&)> emitVanilla,
+    const bespoke::SinkLayouts& sinkLayouts) {
+  assertx(sinkLayouts.layouts.size() > 1);
+
+  auto const emitTranslation = [&](const bool vanilla){
+    vanilla && emitVanilla ?
+      emitVanilla(env) :
+      translateDispatchBespoke(env, ni);
+  };
+
+  auto const kind = env.context.kind;
+  if (kind != TransKind::Optimize) {
+    emitTranslation(type.arrSpec().layout().vanilla());
+    return;
+  }
+
+  for (auto const& sl: sinkLayouts.layouts) {
+    auto target = TArrLike.narrowToLayout(sl.layout);
+    if (type <= target || !type.maybe(target)) {
+      // If the type test would be trivial (either always taken or never taken),
+      // skip it and just emit code that works for the current layout.
+      emitTranslation(type.arrSpec().layout().vanilla());
+      return;
+    }
+
+    if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+      checkType(env, loc, target, makeExit(env));
+      emitTranslation(sl.layout.vanilla());
+      return;
+    }
+  }
+
+  auto const vanilla = TArrLike.narrowToLayout(ArrayLayout::Vanilla());
+  auto const bespoke = TArrLike.narrowToLayout(ArrayLayout::Bespoke());
+
+  // Generic fallback for taken branch.
+  auto const fallback = [&](const jit::Type& target){
+    hint(env, Block::Hint::Unlikely);
+    IRUnit::Hinter hinter(env.irb->unit(), Block::Hint::Unlikely);
+
+    // If the type check was for "vanilla" or "bespoke", we know we have
+    // the other kind in the taken branch, so assert that information.
+    if (target == vanilla) {
+      assertTypeLocation(env, loc, bespoke);
+    } else if (target == bespoke) {
+      assertTypeLocation(env, loc, vanilla);
+    }
+
+    // Side exit or do codegen as needed. Use emitVanilla if we have it.
+    if (sinkLayouts.sideExit) {
+      assertx(RO::EvalBespokeEscalationSampleRate);
+      auto const arr = loadLocation(env, loc);
+      gen(env, LogGuardFailure, target, arr);
+      gen(env, Jmp, makeExit(env, curSrcKey(env)));
+    } else {
+      emitTranslation(target == bespoke);
+      auto const next = getBlock(env, nextSrcKey(env));
+      gen(env, Jmp, next);
+    }
+  };
+
+  // Check each layout, otherwise fallback
+  MultiCond mc{env};
+  Type target;
+  for (auto const& sl : sinkLayouts.layouts) {
+    target = TArrLike.narrowToLayout(sl.layout);
+
+    mc.ifThen(
+      [&](Block* taken) {
+        checkType(env, loc, target, taken);
+        // Dead-code, but needed to satisfy MultiCond
+        return cns(env, staticEmptyString());
+      },
+      [&](SSATmp* /* unused */) {
+        emitTranslation(target == vanilla);
+        // Dead-code, but needed to satisfy MultiCond
+        return cns(env, staticEmptyString());
+      });
+  }
+
+  mc.elseDo([&]{
+    fallback(target);
+    // Dead-code, but needed to satisfy MultiCond
+    return cns(env, staticEmptyString());
+  });
 }
 
 void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
@@ -1386,7 +1498,6 @@ void emitLoggingDiamond(
     IRGS& env, const NormalizedInstruction& ni, Location loc,
     std::function<void(IRGS&)> emitVanilla) {
   assertx(env.context.kind == TransKind::Profile);
-  assertx(!env.irb->guardFailBlock());
 
   auto const dropArrSpec = [&](Type type) {
     return type.arrSpec() ? type.unspecialize() : type;
@@ -1396,9 +1507,7 @@ void emitLoggingDiamond(
   ifThen(
     env,
     [&](Block* taken) {
-      env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, TVanillaArrLike, curSrcKey(env));
-      env.irb->resetGuardFailBlock();
+      checkType(env, loc, TVanillaArrLike, taken);
 
       emitVanilla(env);
 
@@ -1508,7 +1617,9 @@ void profileArrLikeProps(IRGS& env) {
     auto const tv = cls->declPropInit()[index].val.tv();
     if (!tvIsArrayLike(tv)) continue;
     if (!arrayTypeCouldBeBespoke(tv.val().parr->toDataType())) continue;
-    auto const profile = bespoke::getLoggingProfile(cls, slot, false);
+    auto const profile = bespoke::getLoggingProfile(
+      cls, slot, bespoke::LocationType::InstanceProperty
+    );
     if (!profile) continue;
 
     auto const arr = gen(
@@ -1552,7 +1663,7 @@ void skipTrivialCast(IRGS& env, Op op) {
 
   auto const next = getBlock(env, nextSrcKey(env));
   if (input->isA(type)) gen(env, Jmp, next);
-  ifThen(env,
+  ifElse(env,
     [&](Block* taken) { gen(env, CheckType, type, taken, input); },
     [&]{ gen(env, Jmp, next); }
   );
@@ -1730,11 +1841,18 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 
   emitLogArrayReach(env, loc, sk);
 
+  auto const sinkLayouts = bespoke::layoutsForSink(env.profTransIDs, ni.source);
+
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
   } else if (isFCall(sk.op()) || sk.op() == OpUnsetM) {
-    guardToLayout(env, ni, loc, type, nullptr);
-    translateDispatchBespoke(env, ni);
+    assertx(sinkLayouts.layouts.size() > 0);
+    if (sinkLayouts.layouts.size() == 1) {
+      guardToLayout(env, ni, loc, type, nullptr, sinkLayouts);
+      translateDispatchBespoke(env, ni);
+    } else {
+      guardToMultipleLayoutsAndEmit(env, ni, loc, type, nullptr, sinkLayouts);
+    }
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
     // array-likes on one side and bespoke array-likes on the other.
@@ -1746,11 +1864,17 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
   } else {
     // In an optimized or live translation, we guard to a specialized layout
     // and then emit either vanilla or bespoke code.
-    auto const layout = guardToLayout(env, ni, loc, type, emitVanilla);
-    if (layout.vanilla()) {
-      emitVanilla(env);
+    assertx(sinkLayouts.layouts.size() > 0);
+    if (sinkLayouts.layouts.size() == 1) {
+      auto const layout =
+        guardToLayout(env, ni, loc, type, emitVanilla, sinkLayouts);
+      if (layout.vanilla()) {
+        emitVanilla(env);
+      } else {
+        translateDispatchBespoke(env, ni);
+      }
     } else {
-      translateDispatchBespoke(env, ni);
+      guardToMultipleLayoutsAndEmit(env, ni, loc, type, emitVanilla, sinkLayouts);
     }
   }
 }
@@ -1852,7 +1976,8 @@ void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
   present->append(jmp);
 
   auto const val = inst->dst();
-  if (val->type().maybe(TUninit)) {
+  auto const origType = val->type();
+  if (origType.maybe(TUninit)) {
     notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
   } else {
     notPresent->append(unit.gen(Unreachable, inst->bcctx(), ASSERT_REASON));
@@ -1861,7 +1986,7 @@ void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
   auto const defLabel = unit.defLabel(1, join, inst->bcctx());
   val->setInstruction(defLabel);
   defLabel->setDst(val, 0);
-  val->setType(elemType.first);
+  val->setType(origType);
 
   auto iter = block->iteratorTo(inst);
   ++iter;
@@ -1956,6 +2081,130 @@ void lowerStructBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
 
   block->erase(inst);
   block->append(slot);
+}
+
+void lowerTypeStructureBespokeGet(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGet));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+
+  assertx(arr->type().arrSpec().is_type_structure());
+  assertx(key->isA(TStr));
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:InitCell = BespokeGet t2:Dict, t1:Str
+   *   Bar
+   *
+   * After:
+   *
+   * B1:
+   *   Foo
+   *   t4:InitCell = LdTypeStructureVal t2:Dict, t1:Str -> B2, B3
+   *
+   * B2:
+   *   Jmp B4 t4
+   *
+   * B3:
+   *   Jmp B4 Uninit
+   *
+   * B4:
+   *   t5:Uninit|InitCell = DefLabel
+   *   Bar
+   */
+  auto const present = unit.defBlock(block->profCount(), block->hint());
+  auto const notPresent = unit.defBlock(block->profCount(), block->hint());
+  auto const join = unit.defBlock(block->profCount(), block->hint());
+
+  auto const tsVal = unit.gen(
+    LdTypeStructureVal,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  tsVal->setNext(present);
+
+  auto const jmp = unit.gen(Jmp, inst->bcctx(), join, tsVal->dst());
+  present->append(jmp);
+
+  auto const val = inst->dst();
+  if (val->type().maybe(TUninit)) {
+    notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
+  } else {
+    notPresent->append(unit.gen(Unreachable, inst->bcctx(), ASSERT_REASON));
+  }
+
+  auto const defLabel = unit.defLabel(1, join, inst->bcctx());
+  val->setInstruction(defLabel);
+  defLabel->setDst(val, 0);
+  retypeDests(tsVal, &unit);
+
+  auto iter = block->iteratorTo(inst);
+  ++iter;
+  join->splice(join->end(), block, iter, block->end());
+  block->erase(inst);
+  block->append(tsVal);
+  inst->convertToNop();
+}
+
+
+void lowerTypeStructureBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGetThrow));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+  auto const catchBlock = inst->taken();
+  auto const next = inst->next();
+
+  assertx(arr->type().arrSpec().is_type_structure());
+  assertx(key->isA(TStr));
+  assertx(catchBlock->isCatch());
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:InitCell = BespokeGetThrow t2:Dict, t1:Str -> B2, B3<Catch>
+   *
+   * After:
+   *
+   * B1:
+   *   t3:InitCell = LdTypeStructureVal t2:Dict, t1:Str -> B2, B4
+   *
+   * B4:
+   *   ThrowOutOfBounds -> B3<Catch>
+   */
+  auto const notPresent =
+    unit.defBlock(block->profCount(), Block::Hint::Unlikely);
+
+  auto const tsVal = unit.gen(
+    LdTypeStructureVal,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  tsVal->setNext(next);
+
+  auto const val = inst->dst();
+  val->setInstruction(tsVal);
+  tsVal->setDst(val);
+  retypeDests(tsVal, &unit);
+
+  notPresent->append(
+    unit.gen(ThrowOutOfBounds, inst->bcctx(), catchBlock, arr, key)
+  );
+
+  block->erase(inst);
+  block->append(tsVal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

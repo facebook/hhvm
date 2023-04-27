@@ -27,19 +27,9 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-let err_not_found (file : Relative_path.t) (name : string) : 'a =
-  let err_str =
-    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
-  in
-  raise (Decl_defs.Decl_not_found err_str)
+let err_not_found = Typedef_provider.err_not_found
 
-let direct_decl_parse_and_cache ctx filename name =
-  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
-  | None -> err_not_found filename name
-  | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
-
-let use_direct_decl_parser ctx =
-  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
 
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
@@ -55,30 +45,28 @@ module Cache =
       let capacity = 1000
     end)
 
-let declare_folded_class_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
+let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
     Decl_defs.decl_class_type * Decl_store.class_members option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | _ ->
     (match
-       Errors.run_in_decl_mode file (fun () ->
+       Errors.run_in_decl_mode (fun () ->
            Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
      with
-    | None -> err_not_found file name
+    | None -> err_not_found None name
     | Some decl_and_members -> decl_and_members)
 
 let lookup_or_populate_class_cache class_name populate =
   match Cache.get class_name with
   | Some _ as result -> result
-  | None ->
-    begin
-      match populate class_name with
-      | None -> None
-      | Some v as result ->
-        Cache.add class_name v;
-        result
-    end
+  | None -> begin
+    match populate class_name with
+    | None -> None
+    | Some v as result ->
+      Cache.add class_name v;
+      result
+  end
 
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -86,97 +74,126 @@ let get_class
     (class_name : type_key) : class_decl option =
   Decl_counters.count_decl ?tracing_info Decl_counters.Class class_name
   @@ fun counter ->
-  (* There's a confusing matrix of possibilities:
-     SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
-       just a small shim that does memoization; further accessors on it
-       like "get_method" will lazily call Linearization_provider and Shallow_classes_provider
-       to get more information
-     EAGER - in this case, the Typing_classes_heap.class_t we get back is
-       an "folded" object which keeps an intire index of all members, although
-       those members are fetched lazily via Lazy.t.
-
-     and
-
+  (* There are several possibilities:
      LOCAL BACKEND - the class_t is cached in the local backend.
      SHAREDMEM BACKEND - the class_t is cached in the worker-local 'Cache' heap.
        Note that in the case of eager, the class_t is really just a fairly simple
        derivation of the decl_class_type that lives in shmem.
      DECL BACKEND - the class_t is cached in the worker-local 'Cache' heap *)
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis ->
-    begin
-      match
-        lookup_or_populate_class_cache class_name (fun class_name ->
-            Decl_store.((get ()).get_class class_name)
-            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
-      with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
-  | Provider_backend.Shared_memory
-  | Provider_backend.Decl_service _ ->
-    begin
-      match
-        lookup_or_populate_class_cache class_name (fun class_name ->
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file)
-      with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
-  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    let result : Obj.t option =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
-        ~default:(fun () ->
-          let v : Typing_classes_heap.class_t option =
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
-          in
-          Option.map v ~f:Obj.repr)
-    in
-    (match result with
+  | Provider_backend.Analysis -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Decl_store.((get ()).get_class class_name)
+          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+    with
     | None -> None
-    | Some obj ->
-      let v : Typing_classes_heap.class_t = Obj.obj obj in
-      Some (counter, v, Some ctx))
+    | Some v -> Some (counter, v, Some ctx)
+  end
+  | Provider_backend.Pessimised_shared_memory _ -> begin
+    (* No pessimisation needs to be done here directly. All pessimisation is
+     * done on the shallow classes within [Shallow_classes_provider] that the
+     * [Typing_classes_heap.Api.t] returned here is constructed from
+     * Crucially, we do not use the [Cache] here, which would contain
+     * outdated member types once we update its members during
+     * pessimisation. *)
+    match Typing_classes_heap.get ctx class_name declare_folded_class with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
+  | Provider_backend.Shared_memory
+  | Provider_backend.Decl_service _ -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Typing_classes_heap.get ctx class_name declare_folded_class)
+    with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    let open Option.Monad_infix in
+    Typing_classes_heap.get_class_with_cache
+      ctx
+      class_name
+      decl_cache
+      declare_folded_class
+    >>| fun cls -> (counter, cls, Some ctx)
+  | Provider_backend.Rust_provider_backend backend -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Rust_provider_backend.Decl.get_folded_class
+            backend
+            (Naming_provider.rust_backend_ctx_proxy ctx)
+            class_name
+          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+    with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
 
-let declare_fun_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
-    Typing_defs.fun_elt =
-  match Ast_provider.find_fun_in_file ctx file name with
-  | Some f ->
-    let (_name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
-    decl
-  | None -> err_not_found file name
+let maybe_pessimise_fun_decl ctx fun_decl =
+  if Provider_context.implicit_sdt_for_fun ctx fun_decl then
+    Typing_defs.
+      {
+        fun_decl with
+        fe_type =
+          Decl_enforceability.(
+            pessimise_fun_type
+              ~fun_kind:Function
+              ~this_class:None
+              ctx
+              fun_decl.fe_pos
+              fun_decl.fe_type);
+      }
+  else
+    fun_decl
 
 let get_fun
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (fun_name : fun_key) : fun_decl option =
-  Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
+  let open Option.Let_syntax in
+  Option.map ~f:(maybe_pessimise_fun_decl ctx)
+  @@ Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_fun fun_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        let* original_ft =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
+        in
+        let ft =
+          info.Provider_backend.pessimise_fun
+            filename
+            ~name:fun_name
+            original_ft
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_fun) fun_name ft;
+        Some ft
+      | None -> None))
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_fun_path ctx fun_name with
       | Some filename ->
-        if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename fun_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Fun decl, _)
-                   when String.equal fun_name name ->
-                   Some decl
-                 | _ -> None)
-        else
-          let ft =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_fun_in_file_DEPRECATED ctx filename fun_name)
-          in
-          Decl_store.((get ()).add_fun fun_name ft);
-          Some ft
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          fun_name
+          Shallow_decl_defs.to_fun_decl_opt
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -185,60 +202,81 @@ let get_fun
       ~default:(fun () ->
         match Naming_provider.get_fun_path ctx fun_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename fun_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Fun decl, _)
-                     when String.equal fun_name name ->
-                     Some decl
-                   | _ -> None)
-          else
-            let ft =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_fun_in_file_DEPRECATED ctx filename fun_name)
-            in
-            Some ft
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_fun
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      fun_name
 
-let declare_typedef_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
-    Typing_defs.typedef_type =
-  match Ast_provider.find_typedef_in_file ctx file name with
-  | Some t ->
-    let (_name, decl) = Decl_nast.typedef_naming_and_decl_DEPRECATED ctx t in
-    decl
-  | None -> err_not_found file name
+let maybe_pessimise_typedef_decl ctx typedef_decl =
+  if
+    TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx)
+    && not
+         (Typing_defs.Attributes.mem
+            Naming_special_names.UserAttributes.uaNoAutoDynamic
+            typedef_decl.Typing_defs.td_attributes)
+  then
+    (* TODO: deal with super constraint *)
+    match typedef_decl.Typing_defs.td_as_constraint with
+    | Some _ -> typedef_decl
+    | None ->
+      let open Typing_defs in
+      let pos = typedef_decl.td_pos in
+      {
+        typedef_decl with
+        td_as_constraint =
+          Some
+            (Decl_enforceability.supportdyn_mixed
+               pos
+               (Reason.Rwitness_from_decl pos));
+      }
+  else
+    typedef_decl
 
 let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (typedef_name : type_key) : typedef_decl option =
-  Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
+  let open Option.Let_syntax in
+  Option.map ~f:(maybe_pessimise_typedef_decl ctx)
+  @@ Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
+    Typedef_provider.get_typedef ctx typedef_name
+  | Provider_backend.Pessimised_shared_memory info ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_typedef_path ctx typedef_name with
       | Some filename ->
-        if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename typedef_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Typedef decl, _)
-                   when String.equal typedef_name name ->
-                   Some decl
-                 | _ -> None)
-        else
-          let tdecl =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
-          in
-          Decl_store.((get ()).add_typedef typedef_name tdecl);
-          Some tdecl
+        let* original_typedef =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
+        in
+        let typedef =
+          info.Provider_backend.pessimise_typedef
+            filename
+            ~name:typedef_name
+            original_typedef
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_typedef) typedef_name typedef;
+        Some typedef
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -247,60 +285,66 @@ let get_typedef
       ~default:(fun () ->
         match Naming_provider.get_typedef_path ctx typedef_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename typedef_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Typedef decl, _)
-                     when String.equal typedef_name name ->
-                     Some decl
-                   | _ -> None)
-          else
-            let tdecl =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
-            in
-            Some tdecl
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
-
-let declare_const_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
-    gconst_decl =
-  match Ast_provider.find_gconst_in_file ctx file name with
-  | Some cst ->
-    let (_name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
-    decl
-  | None -> err_not_found file name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_typedef
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      typedef_name
 
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (gconst_name : gconst_key) : gconst_decl option =
+  let open Option.Let_syntax in
   Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_gconst gconst_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_const_path ctx gconst_name with
+      | Some filename ->
+        let* original_gconst =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
+        in
+        let gconst =
+          info.Provider_backend.pessimise_gconst
+            filename
+            ~name:gconst_name
+            original_gconst
+        in
+        (if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_gconst gconst_name gconst));
+        Some gconst
+      | None -> None))
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_const_path ctx gconst_name with
       | Some filename ->
-        if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename gconst_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Const decl, _)
-                   when String.equal gconst_name name ->
-                   Some decl
-                 | _ -> None)
-        else
-          let gconst =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_const_in_file_DEPRECATED ctx filename gconst_name)
-          in
-          Decl_store.((get ()).add_gconst gconst_name gconst);
-          Some gconst
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          gconst_name
+          Shallow_decl_defs.to_const_decl_opt
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -309,48 +353,20 @@ let get_gconst
       ~default:(fun () ->
         match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename gconst_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Const decl, _)
-                     when String.equal gconst_name name ->
-                     Some decl
-                   | _ -> None)
-          else
-            let gconst =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_const_in_file_DEPRECATED ctx filename gconst_name)
-            in
-            Some gconst
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
-
-let prepare_for_typecheck
-    (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
-    unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis
-  | Provider_backend.Shared_memory
-  | Provider_backend.Local_memory _ ->
-    ()
-  (* When using the decl service, before typechecking the file, populate our
-     decl caches with the symbols declared within that file. If we leave this to
-     the decl service, then in longer files, the decls declared later in the
-     file may be evicted by the time we attempt to typecheck them, forcing the
-     decl service to re-parse the file. This can lead to many re-parses in
-     extreme cases. *)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.parse_and_cache_decls_in decl path content
-
-let declare_module_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : module_key) :
-    module_decl =
-  match Ast_provider.find_module_in_file ctx file name with
-  | Some md ->
-    let (_name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
-    decl
-  | None -> err_not_found file name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_gconst
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      gconst_name
 
 let get_module
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -361,27 +377,20 @@ let get_module
   let fetch_from_backing_store () =
     Naming_provider.get_module_path ctx module_name
     |> Option.bind ~f:(fun filename ->
-           if use_direct_decl_parser ctx then
-             direct_decl_parse_and_cache ctx filename module_name
-             |> List.find_map ~f:(function
-                    | (name, Shallow_decl_defs.Module decl, _)
-                      when String.equal module_name name ->
-                      Some decl
-                    | _ -> None)
-           else
-             let module_ =
-               Errors.run_in_decl_mode filename (fun () ->
-                   declare_module_in_file_DEPRECATED ctx filename module_name)
-             in
-             Decl_store.((get ()).add_module module_name module_);
-             Some module_)
+           find_in_direct_decl_parse
+             ~cache_results:true
+             ctx
+             filename
+             module_name
+             Shallow_decl_defs.to_module_decl_opt)
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
-    Option.first_some
-      Decl_store.((get ()).get_module module_name)
-      (fetch_from_backing_store ())
+    (match Decl_store.((get ()).get_module module_name) with
+    | Some m -> Some m
+    | None -> fetch_from_backing_store ())
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -389,6 +398,17 @@ let get_module
       ~default:fetch_from_backing_store
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_module decl module_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_module
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      module_name
+
+let get_overridden_method ctx ~class_name ~method_name ~is_static :
+    Typing_defs.class_elt option =
+  let open Option.Monad_infix in
+  get_class ctx class_name >>= fun cls ->
+  Class.overridden_method cls ~method_name ~is_static ~get_class
 
 let local_changes_push_sharedmem_stack () =
   Decl_store.((get ()).push_local_changes ())
@@ -396,5 +416,5 @@ let local_changes_push_sharedmem_stack () =
 let local_changes_pop_sharedmem_stack () =
   Decl_store.((get ()).pop_local_changes ())
 
-let declare_folded_class_in_file_FOR_TESTS_ONLY ctx fn cid =
-  fst (declare_folded_class_in_file ctx fn cid)
+let declare_folded_class_in_file_FOR_TESTS_ONLY ctx cid =
+  fst (declare_folded_class ctx cid)

@@ -1,0 +1,37 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  For the Thrift field foo, this generates the field name:
+    foo
+  if it's non-optional or
+    foo_ref().ref_unchecked()
+  if it's optional.
+
+  Cython doesn't handle references very well, so we have two variants of
+  optional_field_ref::value_unchecked() in the Cython wrapper, value_unchecked()
+  that returns a copy and ref_unchecked() that returns a reference. The latter
+  is only used when we need to take an address.
+
+}}{{#field:has_ref_accessor?}}{{!
+}}{{#field:optional?}}{{!
+}}{{#field:boxed_ref?}}{{field:py_name}}_ref().ref(){{/field:boxed_ref?}}{{!
+}}{{^field:boxed_ref?}}{{field:py_name}}_ref().ref_unchecked(){{/field:boxed_ref?}}{{!
+}}{{/field:optional?}}{{!
+}}{{^field:optional?}}{{field:py_name}}_ref().ref(){{/field:optional?}}{{!
+}}{{/field:has_ref_accessor?}}{{!
+}}{{^field:has_ref_accessor?}}{{field:py_name}}{{/field:has_ref_accessor?}}

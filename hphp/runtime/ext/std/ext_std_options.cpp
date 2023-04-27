@@ -132,7 +132,7 @@ static void HHVM_FUNCTION(restore_include_path) {
 }
 
 static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
-  String s = f_get_include_path();
+  String s = HHVM_FN(get_include_path)();
   IniSetting::SetUser("include_path", new_include_path.toString());
   return s;
 }
@@ -629,15 +629,11 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
 
 static bool HHVM_FUNCTION(clock_getres,
                           int64_t clk_id, int64_t& sec, int64_t& nsec) {
-#if defined(__APPLE__)
-  throw_not_supported(__func__, "feature not supported on OSX");
-#else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
   sec = ts.tv_sec;
   nsec = ts.tv_nsec;
   return ret == 0;
-#endif
 }
 
 static bool HHVM_FUNCTION(clock_gettime,
@@ -695,7 +691,7 @@ static void HHVM_FUNCTION(ini_restore, const String& varname) {
 
 Variant HHVM_FUNCTION(ini_set,
                       const String& varname, const Variant& newvalue) {
-  auto oldvalue = f_ini_get(varname);
+  auto oldvalue = HHVM_FN(ini_get)(varname);
   auto ret = IniSetting::SetUser(varname, newvalue);
   if (!ret) {
     return false;

@@ -19,13 +19,11 @@ val set_glean_options : t -> GleanOptions.t -> t
 
 val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
 
-val filename : Relative_path.t
+val repo_config_path : Relative_path.t
 
-val load :
-  silent:bool ->
-  Relative_path.t ->
-  ServerArgs.options ->
-  t * ServerLocalConfig.t
+val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
+
+val load : silent:bool -> ServerArgs.options -> t * ServerLocalConfig.t
 
 val is_compatible : t -> t -> bool
 
@@ -54,6 +52,10 @@ val config_hash : t -> string option
 val version : t -> Config_file.version
 
 val warn_on_non_opt_build : t -> bool
+
+val ide_fall_back_to_full_index : t -> bool
+
+val ide_process_changes_sync : t -> bool
 
 val convert_auto_namespace_to_map : string -> (string * string) list
 

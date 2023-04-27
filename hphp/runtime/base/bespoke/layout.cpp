@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -127,6 +128,8 @@ BespokeArray* Layout::coerce(ArrayData* ad) const {
     return maybeMonoify(ad);
   } else if (layout.is_struct()) {
     return StructDict::MakeFromVanilla(ad, StructLayout::As(this));
+  } else if (layout.is_type_structure()) {
+    return TypeStructure::MakeFromVanilla(ad);
   }
   always_assert(false);
 }
@@ -489,6 +492,7 @@ struct Layout::Initializer {
     LoggingArray::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
     EmptyMonotypeDict::InitializeLayouts();
+    TypeStructure::InitializeLayouts();
   }
 };
 Layout::Initializer Layout::s_initializer;

@@ -13,11 +13,11 @@ from typing import Any, Dict, List
 
 from hphp.hack.src.hh_codesynthesis import agentGenerator
 from hphp.hack.src.hh_codesynthesis.agentGraphGenerator import (
-    AgentGraphGenerator,
     AgentGraphClingoContext,
+    AgentGraphGenerator,
     generating_an_agent_graph,
 )
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
+from hphp.hack.src.hh_codesynthesis.codeGenerator import ClingoContext, CodeGenerator
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 
 

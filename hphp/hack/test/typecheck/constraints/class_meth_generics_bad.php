@@ -17,18 +17,18 @@ class C<T as arraykey> {
 }
 
 function testindirect1(bool $b): bool {
-  $f = class_meth(C::class, 'nongeneric');
+  $f = C::nongeneric<>;
   $fr = $f($b);
   return $fr;
 }
 
 function testindirect2(float $f, vec<int> $v): (float, vec<int>) {
-  $g = class_meth(C::class, 'generic');
+  $g = C::generic<>;
   $gr = $g($f, $v);
   return $gr;
 }
 function testindirect3(float $f, vec<int> $v): (float, vec<int>) {
-  $g = class_meth(C::class, 'genericConstrained');
+  $g = C::genericConstrained<>;
   $gr = $g($f, $v);
   return $gr;
 }

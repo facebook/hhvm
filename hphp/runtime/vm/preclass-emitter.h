@@ -44,7 +44,7 @@ struct BuiltinObjExtents {
 };
 
 struct PreClassEmitter {
-  typedef std::vector<FuncEmitter*> MethodVec;
+  using MethodVec = std::vector<FuncEmitter*>;
   using UpperBoundVec = CompactVector<TypeConstraint>;
   using UpperBoundMap =
     std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
@@ -194,10 +194,10 @@ struct PreClassEmitter {
     bool m_fromTrait;
   };
 
-  typedef IndexedStringMap<Prop, Slot> PropMap;
-  typedef IndexedStringMap<Const, Slot> ConstMap;
+  using PropMap = IndexedStringMap<Prop, Slot>;
+  using ConstMap = IndexedStringMap<Const, Slot>;
 
-  PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name);
+  PreClassEmitter(UnitEmitter& ue, const std::string& name);
   ~PreClassEmitter();
 
   void init(int line1, int line2, Attr attrs,
@@ -209,7 +209,6 @@ struct PreClassEmitter {
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
-  Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
   bool hasMethod(const StringData* name) const {
@@ -241,7 +240,6 @@ struct PreClassEmitter {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
-  void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
                    Attr attrs,
                    const StringData* userType,
@@ -271,19 +269,11 @@ struct PreClassEmitter {
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);
   }
-  void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
-  void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
   const std::vector<LowStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
   const std::vector<PreClass::ClassRequirement>& requirements() const {
     return m_requirements;
-  }
-  const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
-    return m_traitAliasRules;
-  }
-  const std::vector<PreClass::TraitPrecRule>& traitPrecRules() const {
-    return m_traitPrecRules;
   }
 
   void setUserAttributes(UserAttributeMap map) {
@@ -307,10 +297,9 @@ struct PreClassEmitter {
   }
 
  private:
-  typedef hphp_hash_map<LowStringPtr,
-                        FuncEmitter*,
-                        string_data_hash,
-                        string_data_isame> MethodMap;
+  using MethodMap = hphp_hash_map<
+    LowStringPtr, FuncEmitter*, string_data_hash, string_data_same
+  >;
 
   UnitEmitter& m_ue;
   int m_line1;
@@ -320,7 +309,6 @@ struct PreClassEmitter {
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
   TypeConstraint m_enumBaseTy;
-  Id m_id;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
 
@@ -328,8 +316,6 @@ struct PreClassEmitter {
   std::vector<LowStringPtr> m_enumIncludes;
   std::vector<LowStringPtr> m_usedTraits;
   std::vector<PreClass::ClassRequirement> m_requirements;
-  std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
-  std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   MethodVec m_methods;
   MethodMap m_methodMap;

@@ -168,12 +168,11 @@ let is_open = function
 let unique_pos_of_prop =
   let is_real pos = not @@ Pos.equal pos Pos.none in
   function
-  | Cflow (posset, _, _) ->
-    begin
-      match PosSet.elements posset with
-      | [pos] when is_real pos -> Some pos
-      | _ -> None
-    end
+  | Cflow (posset, _, _) -> begin
+    match PosSet.elements posset with
+    | [pos] when is_real pos -> Some pos
+    | _ -> None
+  end
   | Ccond ((pos, _, _), _, _) when is_real pos -> Some pos
   | Chole (pos, _) when not @@ is_real pos -> Some pos
   | _ -> None

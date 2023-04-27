@@ -24,7 +24,6 @@ type env = {
    * until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  fail_open: bool;
   parser_options: ParserOptions.t;
   file: Relative_path.t;
   disable_global_state_mutation: bool;
@@ -40,7 +39,6 @@ let make_env
     ?(keep_errors = true)
     ?(quick_mode = false)
     ?(show_all_errors = false)
-    ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
     ?(disable_global_state_mutation = false)
     ?(is_systemlib = false)
@@ -55,7 +53,6 @@ let make_env
     quick_mode = (not codegen) && quick_mode;
     show_all_errors;
     parser_options;
-    fail_open;
     file;
     disable_global_state_mutation;
     is_systemlib;
@@ -87,6 +84,8 @@ let pos_of_error path source_text error =
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
   List.iter sc.sc_error_pos ~f:(fun pos ->
       Errors.add_parsing_error @@ Parsing_error.Fixme_format pos);
+  List.iter sc.sc_bad_ignore_pos ~f:(fun pos ->
+      Errors.add_parsing_error @@ Parsing_error.Hh_ignore_comment pos);
   if (not env.disable_global_state_mutation) && env.keep_errors then (
     Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
     if env.quick_mode then
@@ -95,13 +94,14 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
       Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
   )
 
-let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
+let process_lowerer_parsing_errors
+    (env : env) (lowerer_parsing_errors : (Pos.t * string) list) =
   if should_surface_errors env then
     List.iter
       ~f:(fun (pos, msg) ->
         Errors.add_parsing_error
         @@ Parsing_error.Parsing_error { pos; msg; quickfixes = [] })
-      lowpri_errors
+      lowerer_parsing_errors
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error errors
@@ -115,6 +115,7 @@ external rust_from_text_ffi :
   (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
   = "from_text"
 
+(** Note: this doesn't respect deregister_php_stdlib *)
 external parse_ast_and_decls_ffi :
   Rust_aast_parser_types.env ->
   SourceText.t ->
@@ -157,18 +158,21 @@ let make_rust_env (env : env) : Rust_aast_parser_types.env =
       keep_errors = env.keep_errors;
       quick_mode = env.quick_mode;
       show_all_errors = env.show_all_errors;
-      fail_open = env.fail_open;
       is_systemlib = env.is_systemlib;
       parser_options = env.parser_options;
+      scour_comments = true;
     }
 
 let unwrap_rust_parser_result
+    st
     (rust_result :
       (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result) :
     Rust_aast_parser_types.result =
   match rust_result with
   | Ok r -> r
-  | Error Rust_aast_parser_types.NotAHackFile -> failwith "Not a Hack file"
+  | Error Rust_aast_parser_types.NotAHackFile ->
+    failwith
+      ("Not a Hack file: " ^ Relative_path.to_absolute (SourceText.file_path st))
   | Error (Rust_aast_parser_types.ParserFatal (e, p)) ->
     raise @@ SyntaxError.ParserFatal (e, p)
   | Error (Rust_aast_parser_types.Other msg) -> failwith msg
@@ -176,13 +180,16 @@ let unwrap_rust_parser_result
 let from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result =
   let rust_env = make_rust_env env in
-  unwrap_rust_parser_result (rust_from_text_ffi rust_env source_text)
+  unwrap_rust_parser_result
+    source_text
+    (rust_from_text_ffi rust_env source_text)
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result * Direct_decl_parser.parsed_file_with_hashes =
   let rust_env = make_rust_env env in
   let (ast_result, decls) = parse_ast_and_decls_ffi rust_env source_text in
-  let ast_result = unwrap_rust_parser_result ast_result in
+  let ast_result = unwrap_rust_parser_result source_text ast_result in
   (ast_result, decls)
 
 let process_lowerer_result
@@ -191,26 +198,24 @@ let process_lowerer_result
   Rust_aast_parser_types.(
     process_scour_comments env r.scoured_comments;
     process_syntax_errors env source_text r.syntax_errors;
-    process_lowpri_errors env r.lowpri_errors;
+    process_lowerer_parsing_errors env r.lowerer_parsing_errors;
     process_non_syntax_errors env r.errors;
     process_lint_errors env r.lint_errors;
-    match r.aast with
-    | Error msg -> failwith msg
-    | Ok aast ->
-      {
-        fi_mode = r.file_mode;
-        ast = aast;
-        content =
-          (if env.codegen then
-            ""
-          else
-            SourceText.text source_text);
-        comments = r.scoured_comments;
-      })
+    {
+      fi_mode = r.file_mode;
+      ast = r.aast;
+      content =
+        (if env.codegen then
+          ""
+        else
+          SourceText.text source_text);
+      comments = r.scoured_comments;
+    })
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   process_lowerer_result env source_text (from_text_rust env source_text)
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_text (env : env) (source_text : SourceText.t) :
     aast_result * Direct_decl_parser.parsed_file_with_hashes =
   let (ast_result, decls) = ast_and_decls_from_text_rust env source_text in
@@ -237,6 +242,7 @@ let from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) : Parser_return.t =
   legacy @@ from_text env source_text
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) :
     Parser_return.t * Direct_decl_parser.parsed_file_with_hashes =
@@ -257,8 +263,6 @@ let from_file_with_legacy env = legacy (from_file env)
 let defensive_program
     ?(quick = false)
     ?(show_all_errors = false)
-    ?(fail_open = false)
-    ?(keep_errors = false)
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
     parser_options
@@ -266,14 +270,12 @@ let defensive_program
     content =
   try
     let source = Full_fidelity_source_text.make fn content in
-    (* If we fail open, we don't want errors. *)
     let env =
       make_env
-        ~fail_open
         ~quick_mode:quick
         ~show_all_errors
         ~elaborate_namespaces
-        ~keep_errors:(keep_errors || not fail_open)
+        ~keep_errors:true
         ~parser_options
         ~include_line_comments
         fn
@@ -312,6 +314,7 @@ let defensive_from_file ?quick ?show_all_errors popt fn =
   in
   defensive_program ?quick ?show_all_errors popt fn content
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_file
     ?(quick = false) ?(show_all_errors = false) parser_options fn =
   let content =
@@ -322,7 +325,6 @@ let ast_and_decls_from_file
     let source = Full_fidelity_source_text.make fn content in
     let env =
       make_env
-        ~fail_open:false
         ~quick_mode:quick
         ~show_all_errors
         ~elaborate_namespaces:true

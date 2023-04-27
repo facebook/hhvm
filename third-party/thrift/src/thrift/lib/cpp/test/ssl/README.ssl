@@ -1,0 +1,67 @@
+This file contains instructions for generating SSL certificates for use in unit
+tests. In general, you shouldn't have to do this other than if one of the
+certificates has expired.
+
+All comments must be run from the thrift/lib/cpp/test/ssl directory.
+
+o CREATING A NEW ROOT CA
+
+1. Generate a CA certificate at ca-{key,cert}.pem
+
+  $ openssl req -config openssl.cnf -new -x509 -keyout ca-key.pem \
+      -out ca-cert.pem -passout pass:password
+    Generating a 2048 bit RSA private key
+    .........................................................+++
+    ..........................+++
+    writing new private key to 'ca-key.pem'
+    -----
+    You are about to be asked to enter information that will be incorporated
+    into your certificate request.
+    What you are about to enter is what is called a Distinguished Name or a DN.
+    There are quite a few fields but you can leave some blank
+    For some fields there will be a default value,
+    If you enter '.', the field will be left blank.
+    -----
+    Common Name (eg, your name or your server's hostname) []:Thrift Test CA
+
+o CREATING A NEW CERTIFICATE
+
+1. Generate a signing request
+
+  $ openssl req -config openssl.cnf -new -nodes -out tests-req.pem \
+      -keyout tests-key.pem
+    Generating a 2048 bit RSA private key
+    .............................................................+++
+    ....................................................................+++
+    writing new private key to 'tests-key.pem'
+    -----
+    You are about to be asked to enter information that will be incorporated
+    into your certificate request.
+    What you are about to enter is what is called a Distinguished Name or a DN.
+    There are quite a few fields but you can leave some blank
+    For some fields there will be a default value,
+    If you enter '.', the field will be left blank.
+    -----
+    Common Name (eg, your name or your server's hostname) []:test.thrift.org
+
+2. Generate the certificate
+
+  $ openssl ca -config openssl.cnf -passin pass:password \
+      -in tests-req.pem -out tests-cert.pem
+    Using configuration from openssl.cnf
+    Check that the request matches the signature
+    Signature ok
+    The Subject's Distinguished Name is as follows
+    commonName            :PRINTABLE:'test.thrift.org'
+    Certificate is to be certified until Mar  9 21:44:42 2015 GMT (365 days)
+    Sign the certificate? [y/n]:y
+
+
+    1 out of 1 certificate requests certified, commit? [y/n]y
+    Write out database with 1 new entries
+    Data Base Updated
+
+  If this step fails, you may need to re-initialize the CA database. To do
+  this, remove ca.db.*.
+
+  $ rm -f ca.db* ; touch ca.db

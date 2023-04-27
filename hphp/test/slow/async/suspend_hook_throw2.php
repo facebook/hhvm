@@ -2,7 +2,7 @@
 
 function thrower($why, $what) {
   if ($why == 'exit' && $what == 'foo') {
-    throw new exception;
+    throw new Exception;
   }
 }
 
@@ -23,7 +23,7 @@ async function thing() {
 function get($y) {
   try {
     HH\Asio\join(foo($y));
-  } catch (exception $ex) {
+  } catch (Exception $ex) {
     echo "caught in get\n";
   }
   echo "leaving get\n";

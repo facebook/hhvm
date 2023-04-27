@@ -1,4 +1,4 @@
-File "consistent_construct_self.php", line 5, characters 7-7:
-This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. (Typing[4312])
 File "consistent_construct_self.php", line 7, characters 5-16:
 Cannot call `new static` because the current class has reified generics (Typing[4310])
+File "consistent_construct_self.php", line 5, characters 7-7:
+This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. (Typing[4312])

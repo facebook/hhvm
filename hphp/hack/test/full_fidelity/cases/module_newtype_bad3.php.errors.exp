@@ -1,0 +1,5 @@
+(4,7)-(4,7) The `function` keyword is expected here.
+(4,15)-(4,15) A left parenthesis `(` is expected here.
+(4,19)-(4,19) A variable name is expected here.
+(4,24)-(4,24) A right parenthesis `)` is expected here.
+(4,24)-(4,25) Non-native functions must have a body

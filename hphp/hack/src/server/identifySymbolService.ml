@@ -11,6 +11,7 @@ open Hh_prelude
 open SymbolOccurrence
 open Typing_defs
 module SN = Naming_special_names
+module FFP = Full_fidelity_positioned_syntax
 
 module Result_set = Caml.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
@@ -124,7 +125,7 @@ let process_arg_names recv (args : Tast.expr list) : Result_set.t =
 
        greet_user("John Doe");
                 //^ Hover shows: Parameter: $name
- *)
+*)
 let process_callee_arg_names
     enclosing_class
     (recv : Tast.expr)
@@ -138,7 +139,7 @@ let process_callee_arg_names
 
        new User("John Doe");
               //^ Hover shows: Parameter: $name
- *)
+*)
 let process_constructor_arg_names
     enclosing_class
     (parent_class_hint : Aast.hint option)
@@ -309,6 +310,8 @@ let visitor =
         match expr_ with
         | Aast.Hole (_e, _ty, _ty2, Aast.UnsafeCast _) ->
           process_fun_id (pos, SN.PseudoFunctions.unsafe_cast)
+        | Aast.Hole (_e, _ty, _ty2, Aast.UnsafeNonnullCast) ->
+          process_fun_id (pos, SN.PseudoFunctions.unsafe_nonnull_cast)
         | Aast.New ((ty, p, _), _, _, _, _) -> typed_constructor env ty p
         | Aast.Obj_get ((ty, _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid
@@ -319,19 +322,10 @@ let visitor =
           let class_id = process_class_id cid in
           let xhp_attributes = process_xml_attrs (snd cid) attrs in
           self#plus class_id xhp_attributes
-        | Aast.Fun_id id ->
-          process_fun_id (pos, SN.AutoimportedFunctions.fun_)
-          + process_fun_id (remove_apostrophes_from_function_eval id)
         | Aast.FunctionPointer (Aast.FP_id id, _targs) -> process_fun_id id
         | Aast.FunctionPointer (Aast.FP_class_const ((ty, _, _cid), mid), _targs)
           ->
           typed_method env ty mid
-        | Aast.Method_id ((ty, _, _), mid) ->
-          process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
-          + typed_method env ty (remove_apostrophes_from_function_eval mid)
-        | Aast.Smethod_id ((ty, _, _), mid) ->
-          process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
-          + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.meth_caller)
           + process_class_id pcid
@@ -340,41 +334,54 @@ let visitor =
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
-        | Aast.ValCollection (kind, _, _) ->
-          let type_name = Aast.show_vc_kind kind in
+        | Aast.ValCollection ((_, kind), _, _) ->
+          let type_name =
+            match kind with
+            | Aast_defs.Vector -> "Vector"
+            | Aast_defs.ImmVector -> "ImmVector"
+            | Aast_defs.Set -> "Set"
+            | Aast_defs.ImmSet -> "ImmSet"
+            | Aast_defs.Keyset -> "keyset"
+            | Aast_defs.Vec -> "vec"
+          in
           process_class_id (pos, "\\HH\\" ^ type_name)
-        | Aast.KeyValCollection (kind, _, _) ->
-          let type_name = Aast.show_kvc_kind kind in
+        | Aast.KeyValCollection ((_, kind), _, _) ->
+          let type_name =
+            match kind with
+            | Aast_defs.Map -> "Map"
+            | Aast_defs.ImmMap -> "ImmMap"
+            | Aast_defs.Dict -> "dict"
+          in
           process_class_id (pos, "\\HH\\" ^ type_name)
-        | Aast.EnumClassLabel (enum_name, label_name) ->
-          begin
-            match enum_name with
-            | None ->
-              let (ety, _, _) = expr in
-              let ty = Typing_defs_core.get_node ety in
-              (match ty with
-              | Tnewtype (_, [ty_enum_class; _], _) ->
-                (match get_node ty_enum_class with
-                | Tclass ((_, enum_class_name), _, _)
-                | Tgeneric (enum_class_name, _) ->
-                  Result_set.singleton
-                    {
-                      name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
-                      type_ = EnumClassLabel (enum_class_name, label_name);
-                      is_declaration = false;
-                      pos;
-                    }
-                | _ -> self#zero)
+        | Aast.EnumClassLabel (enum_name, label_name) -> begin
+          match enum_name with
+          | None ->
+            let (ety, _, _) = expr in
+            let ty = Typing_defs_core.get_node ety in
+            (match ty with
+            | Tnewtype (_, [ty_enum_class; _], _) ->
+              (match get_node ty_enum_class with
+              | Tclass ((_, enum_class_name), _, _)
+              | Tgeneric (enum_class_name, _) ->
+                Result_set.singleton
+                  {
+                    name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
+                    type_ = EnumClassLabel (enum_class_name, label_name);
+                    is_declaration = false;
+                    pos;
+                  }
               | _ -> self#zero)
-            | Some (_, enum_name) ->
-              Result_set.singleton
+            | _ -> self#zero)
+          | Some ((_, enum_name) as enum_id) ->
+            process_class_id enum_id
+            + Result_set.singleton
                 {
                   name = Utils.strip_ns enum_name ^ "#" ^ label_name;
                   type_ = EnumClassLabel (enum_name, label_name);
                   is_declaration = false;
                   pos;
                 }
-          end
+        end
         | _ -> self#zero
       in
       acc + super#on_expr env expr
@@ -398,7 +405,7 @@ let visitor =
 
       (* We're overriding super#on_expression_tree, so we need to
          update the environment. *)
-      let env = Tast_env.set_in_expr_tree env true in
+      let env = Tast_env.inside_expr_tree env et_hint in
       let acc = self#plus acc (self#on_Block env et_function_pointers) in
 
       let (_, _, virtualized_expr_) = et_virtualized_expr in
@@ -408,12 +415,15 @@ let visitor =
             ( ( _,
                 _,
                 Aast.Efun
-                  ( {
-                      Aast.f_body =
-                        { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
-                      _;
-                    },
-                    _ ) ),
+                  {
+                    Aast.ef_fun =
+                      {
+                        Aast.f_body =
+                          { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
+                        _;
+                      };
+                    _;
+                  } ),
               _,
               _,
               _ ) ->
@@ -445,6 +455,11 @@ let visitor =
         typed_class_id ~class_id_type:Other env ty p
       | Aast.CI _ -> typed_class_id env ty p
 
+    method! on_If env cond then_block else_block : Result_set.t =
+      match ServerUtils.resugar_invariant_call env cond then_block with
+      | Some e -> self#on_expr env e
+      | None -> super#on_If env cond then_block else_block
+
     method! on_Call env ((_, _, expr_) as e) tal el unpacked_element =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a
@@ -452,21 +467,48 @@ let visitor =
        * So instead of invoking super#on_Call, we reimplement it here, omitting
        * `self#on_expr env e` when necessary. *)
       let ( + ) = self#plus in
+
       let ea =
-        match expr_ with
-        | Aast.Call
-            ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
-          when Tast_env.is_in_expr_tree env
-               && String.equal methName SN.ExpressionTrees.symbolType ->
-          (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
-          self#on_expr env arg
-        | Aast.Id id -> process_fun_id id
-        | Aast.Obj_get (((ty, _, _) as obj), (_, _, Aast.Id mid), _, _) ->
-          self#on_expr env obj + typed_method env ty mid
-        | Aast.Class_const (((ty, _, _) as cid), mid) ->
-          self#on_class_id env cid + typed_method env ty mid
-        | _ -> self#on_expr env e
+        if Tast_env.is_in_expr_tree env then
+          (* In an expression tree, we desugar function calls and
+             method calls to calls to ::symbolType(). Any other
+             function call is just calling typing helpers, and isn't
+             useful in hover or go-to-definition.
+
+             This ensures that when a user hovers over a literal "abc" we only
+             show the inferred type, and don't show
+             MyVisitor::stringType() information. *)
+          match expr_ with
+          | Aast.Call
+              ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
+            when String.equal methName SN.ExpressionTrees.symbolType ->
+            (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
+            self#on_expr env arg
+          | _ -> self#zero
+        else
+          let expr_ =
+            match expr_ with
+            | Aast.ReadonlyExpr (_, _, e) -> e
+            | _ -> expr_
+          in
+          match expr_ with
+          | Aast.Id id ->
+            (* E.g. foo() *)
+            process_fun_id id
+          | Aast.Obj_get
+              (((ty, _, _) as obj), (_, _, Aast.Id mid), _, Aast.Is_method) ->
+            (* E.g. $bar->foo() *)
+            self#on_expr env obj + typed_method env ty mid
+          | Aast.Obj_get
+              (((ty, _, _) as obj), (_, _, Aast.Id mid), _, Aast.Is_prop) ->
+            (* E.g. ($bar->foo)() *)
+            self#on_expr env obj + typed_property env ty mid
+          | Aast.Class_const (((ty, _, _) as cid), mid) ->
+            (* E.g. Bar::foo() *)
+            self#on_class_id env cid + typed_method env ty mid
+          | _ -> self#on_expr env e
       in
+
       let tala = self#on_list self#on_targ env tal in
       let ela = self#on_list self#on_expr env (List.map ~f:snd el) in
       let arg_names = process_callee_arg_names !class_name e el in
@@ -492,6 +534,21 @@ let visitor =
       in
       self#plus acc (super#on_Haccess env root ids)
 
+    method! on_Hrefinement env root refs =
+      let process_refinement acc r =
+        let id =
+          match r with
+          | Aast.Rctx (id, _)
+          | Aast.Rtype (id, _) ->
+            id
+        in
+        Tast_env.referenced_typeconsts env root [id]
+        |> List.map ~f:process_typeconst
+        |> List.fold ~init:acc ~f:self#plus
+      in
+      let acc = List.fold ~init:self#zero ~f:process_refinement refs in
+      self#plus acc (super#on_Hrefinement env root refs)
+
     method! on_tparam env tp =
       let (pos, name) = tp.Aast.tp_name in
       let acc =
@@ -508,6 +565,9 @@ let visitor =
           Result_set.empty
       in
       self#plus acc (super#on_Lvar env (pos, id))
+
+    method! on_capture_lid _env (_, (pos, id)) =
+      process_lvar_id (pos, Local_id.get_name id)
 
     method! on_hint env h =
       let acc =
@@ -573,12 +633,15 @@ let visitor =
               pos;
             }
         | (pos, Aast.Hoption _) ->
+          (* Narrow the position to just the '?', not the whole ?Foo<Complicated<Bar>>. *)
+          let (_start_line, start_column) = Pos.line_column pos in
+          let qmark_pos = Pos.set_col_end (start_column + 1) pos in
           Result_set.singleton
             {
               name = "?";
               type_ = BuiltInType BIoption;
               is_declaration = false;
-              pos;
+              pos = qmark_pos;
             }
         | _ -> Result_set.empty
       in
@@ -709,9 +772,12 @@ let visitor =
       parent_class_hint := None;
       acc
 
+    method! on_fun_def env fd =
+      let acc = process_fun_id ~is_declaration:true fd.Aast.fd_name in
+      self#plus acc (super#on_fun_def env fd)
+
     method! on_fun_ env fun_ =
-      let acc = process_fun_id ~is_declaration:true fun_.Aast.f_name in
-      self#plus acc (super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None })
+      super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None }
 
     method! on_typedef env typedef =
       let acc = process_class_id ~is_declaration:true typedef.Aast.t_name in
@@ -749,49 +815,364 @@ let visitor =
     method! on_user_attribute env ua =
       let acc = process_attribute ua.Aast.ua_name !class_name !method_name in
       self#plus acc (super#on_user_attribute env ua)
+
+    method! on_SetModule env sm =
+      let (pos, id) = sm in
+      let acc =
+        Result_set.singleton
+          { name = id; type_ = Module; is_declaration = false; pos }
+      in
+      self#plus acc (super#on_SetModule env sm)
+
+    method! on_module_def env md =
+      let (pos, id) = md.Aast.md_name in
+      let acc =
+        Result_set.singleton
+          { name = id; type_ = Module; is_declaration = false; pos }
+      in
+      self#plus acc (super#on_module_def env md)
   end
 
 (* Types of decls used in keyword extraction.*)
-type decl_kind =
+type classish_decl_kind =
   | DKclass
   | DKinterface
+  | DKenumclass
+
+type module_decl_kind =
+  | DKModuleDeclaration
+  | DKModuleMembershipDeclaration
 
 type keyword_context =
-  | Decl of decl_kind
+  | ClassishDecl of classish_decl_kind
   | Method
   | Parameter
   | ReturnType
+  | TypeConst
   | AsyncBlockHeader
+  | ModuleDecl of module_decl_kind
+
+let trivia_pos (t : Full_fidelity_positioned_trivia.t) : Pos.t =
+  let open Full_fidelity_positioned_trivia in
+  let open Full_fidelity_source_text in
+  relative_pos
+    t.source_text.file_path
+    t.source_text
+    t.offset
+    (t.offset + t.width)
+
+let fixme_elt (t : Full_fidelity_positioned_trivia.t) : Result_set.elt option =
+  match t.Full_fidelity_positioned_trivia.kind with
+  | Full_fidelity_trivia_kind.FixMe ->
+    let pos = trivia_pos t in
+    Some { name = "HH_FIXME"; type_ = HhFixme; is_declaration = false; pos }
+  | _ -> None
+
+let fixmes (tree : Full_fidelity_positioned_syntax.t) : Result_set.elt list =
+  let open Full_fidelity_positioned_syntax in
+  let rec aux acc s =
+    let trivia_list = leading_trivia s in
+    let fixme_elts = List.map trivia_list ~f:fixme_elt |> List.filter_opt in
+    List.fold (children s) ~init:(fixme_elts @ acc) ~f:aux
+  in
+
+  aux [] tree
+
+let token_pos (t : FFP.Token.t) : Pos.t =
+  let offset = t.FFP.Token.offset + t.FFP.Token.leading_width in
+  Full_fidelity_source_text.relative_pos
+    t.FFP.Token.source_text.Full_fidelity_source_text.file_path
+    t.FFP.Token.source_text
+    offset
+    (offset + t.FFP.Token.width)
+
+let syntax_pos (s : FFP.t) : Pos.t =
+  let open Full_fidelity_positioned_syntax in
+  let offset = start_offset s + leading_width s in
+  let source = source_text s in
+  Full_fidelity_source_text.relative_pos
+    source.Full_fidelity_source_text.file_path
+    source
+    offset
+    (offset + width s)
 
 (** Get keyword positions from the FFP for every keyword that has hover
     documentation. **)
-let keywords ctx entry : Result_set.elt list =
-  let cst = Ast_provider.compute_cst ~ctx ~entry in
-  let tree = Provider_context.PositionedSyntaxTree.root cst in
-
+let keywords (tree : FFP.t) : Result_set.elt list =
   let open Full_fidelity_positioned_syntax in
-  let token_pos (t : Token.t) =
-    let offset = t.Token.offset + t.Token.leading_width in
-    Full_fidelity_source_text.relative_pos
-      entry.Provider_context.path
-      t.Token.source_text
-      offset
-      (offset + t.Token.width)
+  let elt_of_token (ctx : keyword_context option) (t : FFP.Token.t) :
+      Result_set.elt option =
+    match t.Token.kind with
+    | Token.TokenKind.Class ->
+      (match ctx with
+      | Some (ClassishDecl DKenumclass) ->
+        Some
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+      | _ ->
+        Some
+          {
+            name = "class";
+            type_ = Keyword Class;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+    | Token.TokenKind.Interface ->
+      Some
+        {
+          name = "interface";
+          type_ = Keyword Interface;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Trait ->
+      Some
+        {
+          name = "trait";
+          type_ = Keyword Trait;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Enum ->
+      (match ctx with
+      | Some (ClassishDecl DKenumclass) ->
+        Some
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+      | _ ->
+        Some
+          {
+            name = "enum";
+            type_ = Keyword Enum;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+    | Token.TokenKind.Type ->
+      Some
+        {
+          name = "type";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some TypeConst -> ConstType
+              | _ -> Type);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Newtype ->
+      Some
+        {
+          name = "newtype";
+          type_ = Keyword Newtype;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Attribute ->
+      Some
+        {
+          name = "attribute";
+          type_ = Keyword XhpAttribute;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Children ->
+      Some
+        {
+          name = "children";
+          type_ = Keyword XhpChildren;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Const ->
+      Some
+        {
+          name = "const";
+          type_ =
+            Keyword
+              (match ctx with
+              | None -> ConstGlobal
+              | Some TypeConst -> ConstType
+              | _ -> ConstOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Static ->
+      Some
+        {
+          name = "static";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> StaticOnMethod
+              | _ -> StaticOnProperty);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Use ->
+      Some
+        {
+          name = "use";
+          type_ = Keyword Use;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Function ->
+      Some
+        {
+          name = "function";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> FunctionOnMethod
+              | _ -> FunctionGlobal);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Extends ->
+      Some
+        {
+          name = "extends";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (ClassishDecl DKclass) -> ExtendsOnClass
+              | Some (ClassishDecl DKinterface) -> ExtendsOnInterface
+              | _ -> ExtendsOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Abstract ->
+      Some
+        {
+          name = "abstract";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> AbstractOnMethod
+              | _ -> AbstractOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Final ->
+      Some
+        {
+          name = "final";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> FinalOnMethod
+              | _ -> FinalOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Public ->
+      Some
+        {
+          name = "public";
+          type_ = Keyword Public;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Protected ->
+      Some
+        {
+          name = "protected";
+          type_ = Keyword Protected;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Private ->
+      Some
+        {
+          name = "private";
+          type_ = Keyword Private;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Async ->
+      Some
+        {
+          name = "async";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some AsyncBlockHeader -> AsyncBlock
+              | _ -> Async);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Await ->
+      Some
+        {
+          name = "await";
+          type_ = Keyword Await;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Concurrent ->
+      Some
+        {
+          name = "concurrent";
+          type_ = Keyword Concurrent;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Readonly ->
+      Some
+        {
+          name = "readonly";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> ReadonlyOnMethod
+              | Some Parameter -> ReadonlyOnParameter
+              | Some ReturnType -> ReadonlyOnReturnType
+              | _ -> ReadonlyOnExpression);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Internal ->
+      Some
+        {
+          name = "internal";
+          type_ = Keyword Internal;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Module ->
+      Some
+        {
+          name = "module";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (ModuleDecl DKModuleDeclaration) ->
+                ModuleInModuleDeclaration
+              | Some (ModuleDecl DKModuleMembershipDeclaration) ->
+                ModuleInModuleMembershipDeclaration
+              | _ -> ModuleInModuleDeclaration);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | _ -> None
   in
 
-  let syntax_pos s =
-    let offset = start_offset s + leading_width s in
-    Full_fidelity_source_text.relative_pos
-      entry.Provider_context.path
-      (source_text s)
-      offset
-      (offset + width s)
-  in
-
-  let rec aux ctx acc s =
+  (* Walk FFP syntax node [s], tracking the current context [ctx]
+     (e.g. are we in an interface?) and accumulate hover items. *)
+  let rec aux
+      (ctx : keyword_context option) (acc : Result_set.elt list) (s : FFP.t) :
+      Result_set.elt list =
     match s.syntax with
     | ClassishDeclaration cd ->
-      let decl_kind =
+      let classish_decl_kind =
         match cd.classish_keyword.syntax with
         | Token t ->
           (match t.Token.kind with
@@ -800,21 +1181,68 @@ let keywords ctx entry : Result_set.elt list =
           | _ -> DKclass)
         | _ -> DKclass
       in
-      let ctx = Some (Decl decl_kind) in
+      let ctx = Some (ClassishDecl classish_decl_kind) in
       List.fold (children s) ~init:acc ~f:(aux ctx)
+    | EnumClassDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ClassishDecl DKenumclass)))
     | MethodishDeclaration _ ->
       List.fold (children s) ~init:acc ~f:(aux (Some Method))
-    | FunctionDeclarationHeader fdh ->
-      let acc = aux ctx acc fdh.function_modifiers in
-      let acc = aux ctx acc fdh.function_parameter_list in
-      let acc = aux ctx acc fdh.function_contexts in
-      aux (Some ReturnType) acc fdh.function_readonly_return
-    | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
-    | AwaitableCreationExpression ace ->
-      let acc = aux ctx acc ace.awaitable_attribute_spec in
-      let acc = aux (Some AsyncBlockHeader) acc ace.awaitable_async in
-      aux ctx acc ace.awaitable_compound_statement
+    | FunctionDeclarationHeader
+        {
+          function_modifiers;
+          function_keyword;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_contexts;
+          function_colon;
+          function_readonly_return;
+          function_type;
+          function_where_clause;
+        } ->
+      let acc = aux ctx acc function_modifiers in
+      let acc = aux ctx acc function_keyword in
+      let acc = aux ctx acc function_name in
+      let acc = aux ctx acc function_type_parameter_list in
+      let acc = aux ctx acc function_left_paren in
+      let acc = aux ctx acc function_parameter_list in
+      let acc = aux ctx acc function_right_paren in
+      let acc = aux ctx acc function_contexts in
+      let acc = aux ctx acc function_colon in
+      let acc = aux (Some ReturnType) acc function_readonly_return in
+      let acc = aux ctx acc function_type in
+      let acc = aux ctx acc function_where_clause in
+      acc
+    | ParameterDeclaration _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some Parameter))
+    | AwaitableCreationExpression
+        {
+          awaitable_attribute_spec;
+          awaitable_async;
+          awaitable_compound_statement;
+        } ->
+      let acc = aux ctx acc awaitable_attribute_spec in
+      let acc = aux (Some AsyncBlockHeader) acc awaitable_async in
+      aux ctx acc awaitable_compound_statement
+    | ModuleDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ModuleDecl DKModuleDeclaration)))
+    | ModuleMembershipDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ModuleDecl DKModuleMembershipDeclaration)))
+    | TypeConstDeclaration _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some TypeConst))
     | Contexts c ->
+      let acc = List.fold (children s) ~init:acc ~f:(aux ctx) in
       let is_empty =
         match c.contexts_types.syntax with
         | Missing -> true
@@ -831,117 +1259,15 @@ let keywords ctx entry : Result_set.elt list =
       else
         acc
     | Token t ->
-      (match t.Token.kind with
-      | Token.TokenKind.Extends ->
-        {
-          name = "extends";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some (Decl DKclass) -> ExtendsOnClass
-              | Some (Decl DKinterface) -> ExtendsOnInterface
-              | _ -> ExtendsOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Abstract ->
-        {
-          name = "abstract";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> AbstractOnMethod
-              | _ -> AbstractOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Final ->
-        {
-          name = "final";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> FinalOnMethod
-              | _ -> FinalOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Public ->
-        {
-          name = "public";
-          type_ = Keyword Public;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Protected ->
-        {
-          name = "protected";
-          type_ = Keyword Protected;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Private ->
-        {
-          name = "private";
-          type_ = Keyword Private;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Async ->
-        {
-          name = "async";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some AsyncBlockHeader -> AsyncBlock
-              | _ -> Async);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Await ->
-        {
-          name = "await";
-          type_ = Keyword Await;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Concurrent ->
-        {
-          name = "concurrent";
-          type_ = Keyword Concurrent;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Readonly ->
-        {
-          name = "readonly";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> ReadonlyOnMethod
-              | Some Parameter -> ReadonlyOnParameter
-              | Some ReturnType -> ReadonlyOnReturnType
-              | _ -> ReadonlyOnExpression);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | _ -> acc)
+      (match elt_of_token ctx t with
+      | Some elt -> elt :: acc
+      | None -> acc)
     | _ -> List.fold (children s) ~init:acc ~f:(aux ctx)
   in
 
   aux None [] tree
 
-let all_symbols ctx tast =
+let all_symbols ctx tast : Result_set.elt list =
   Errors.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)
 
 let all_symbols_ctx
@@ -949,11 +1275,16 @@ let all_symbols_ctx
     Result_set.elt list =
   match entry.Provider_context.symbols with
   | None ->
-    let keyword_symbols = keywords ctx entry in
+    let cst = Ast_provider.compute_cst ~ctx ~entry in
+    let tree = Provider_context.PositionedSyntaxTree.root cst in
+
+    let fixme_symbols = fixmes tree in
+    let keyword_symbols = keywords tree in
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
-    let symbols = keyword_symbols @ all_symbols ctx tast in
+
+    let symbols = fixme_symbols @ keyword_symbols @ all_symbols ctx tast in
     entry.Provider_context.symbols <- Some symbols;
     symbols
   | Some symbols -> symbols

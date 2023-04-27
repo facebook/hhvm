@@ -1,0 +1,31 @@
+{
+  "macros": {
+    "pool": {
+      "type": "macroDef",
+      "params": [ "name" ],
+      "result": {
+        "type": "select",
+        "key": "%name%",
+        "dictionary": {
+          "type": "merge",
+          "params": [
+            {
+              "%name%": "PoolRoute|%name%"
+            },
+            "@import(test_shadow_with_file_config.json)"
+          ]
+        }
+      }
+    }
+  },
+  "pools": {
+    "foo": {
+      "server_timeout": 3500,
+      "servers": [
+        "127.0.0.1:%PORT_1%",
+        "127.0.0.1:%PORT_2%"
+      ]
+    }
+  },
+  "route": "@pool(foo)"
+}

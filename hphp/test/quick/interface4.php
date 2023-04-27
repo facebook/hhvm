@@ -10,13 +10,13 @@ interface K {
   function foo($x, $y=0, varray $z);
 }
 interface L {
-  function foo($x, $y, varray $z=null);
+  function foo($x, $y, ?varray $z=null);
 }
 interface M {
   function foo($x, $y=0, varray $z=varray[]);
 }
 class C implements I, J, K, L, M {
-  public function foo($x, $y=0, varray $z=null, AnyArray $a=null) {
+  public function foo($x, $y=0, ?varray $z=null, ?AnyArray $a=null) {
     $x = HH\is_any_array($x) ? 'Array' : $x;
     $y = HH\is_any_array($y) ? 'Array' : $y;
     $z = HH\is_any_array($z) ? 'Array' : $z;

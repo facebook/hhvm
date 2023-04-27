@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-14], "\\TestVec"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+      c_vars = [];
       c_methods =
       [{ m_span = [4:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -20,23 +20,23 @@
          m_ret = ((void), (Some ([4:35-39], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\e");
        fd_fun =
        { f_span = [7:1-33]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:26-30], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\e"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:26-30], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\vec"), [([7:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:21-23]; param_name = "$e"; 
@@ -46,17 +46,16 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-18], "\\call_vec");
        fd_fun =
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_name = ([9:10-18], "\\call_vec"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (vec<float>); param_type_hint = ((vec<float>), (Some ([10:3-13], (Happly (([10:3-6], "\\HH\\vec"), [([10:7-12], (Hprim Tfloat))]))))); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$e"; 
@@ -74,7 +73,9 @@
              ([15:3-24],
               (Expr
                  ((TestVec), [15:3-23],
-                  (Binop ((Eq None), ((TestVec), [15:3-7], (Lvar ([15:3-7], $foo))), ((TestVec), [15:10-23], (New (((TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVec), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestVec), [15:10-23], (New (((TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -86,17 +87,16 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-23], "\\call_vec_cast");
        fd_fun =
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
-         f_name = ([21:10-23], "\\call_vec_cast"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (vec<float>); param_type_hint = ((vec<float>), (Some ([22:3-13], (Happly (([22:3-6], "\\HH\\vec"), [([22:7-12], (Hprim Tfloat))]))))); 
             param_is_variadic = false; param_pos = [22:14-16]; param_name = "$e"; 
@@ -122,7 +122,9 @@
              ([27:3-24],
               (Expr
                  ((TestVec), [27:3-23],
-                  (Binop ((Eq None), ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo))), ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, (_)))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([30:3-59],
               (Expr
                  ((void), [30:3-58],
@@ -142,4 +144,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

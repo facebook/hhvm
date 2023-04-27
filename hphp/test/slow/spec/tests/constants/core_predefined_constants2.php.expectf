@@ -7,7 +7,7 @@ PHP_EXTRA_VERSION: string(%d) "%S"
 PHP_DEBUG: %s
 PHP_MAXPATHLEN: int(%d)
 PHP_OS: string(%d) "%s"
-PHP_SAPI: string(3) "%r(cli|srv)%r"
+PHP_SAPI: string(3) "%|{cli|srv}"
 PHP_EOL: string(1) "
 "
 DEFAULT_INCLUDE_PATH: string(%d) "%S"

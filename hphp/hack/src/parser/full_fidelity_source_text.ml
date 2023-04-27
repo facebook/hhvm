@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * This is an abstraction over source files used by the full-fidelity lexer.
@@ -42,7 +43,7 @@ type t = {
   text: string; [@opaque]
   offset_map: OffsetMap.t;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 type pos = t * int
 

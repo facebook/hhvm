@@ -1,0 +1,20 @@
+File "methods_philippe_02.bad.php", line 21, characters 28-37:
+Some members in class `Pajoux` are incompatible with those declared in type `PajouxBase` (Typing[4341])
+  File "methods_philippe_02.bad.php", line 26, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "methods_philippe_02.bad.php", line 21, characters 28-37:
+  Some members in class `Pajoux` are incompatible with those declared in type `PajouxBase`
+  File "methods_philippe_02.bad.php", line 26, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "methods_philippe_02.bad.php", line 26, characters 19-21:
+  Too few arguments (required 2 but got 1)
+  File "methods_philippe_02.bad.php", line 18, characters 19-21:
+  Because of this definition
+  File "methods_philippe_02.bad.php", line 26, characters 19-21:
+  This declaration was inherited from an object of type `TPajoux`. Redeclare this member in `Pajoux` with a compatible signature.
+File "methods_philippe_02.bad.php", line 26, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "methods_philippe_02.bad.php", line 26, characters 19-21:
+  Too few arguments (required 2 but got 1)
+  File "methods_philippe_02.bad.php", line 14, characters 19-21:
+  Because of this definition

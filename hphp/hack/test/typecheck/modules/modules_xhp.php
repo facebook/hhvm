@@ -1,9 +1,12 @@
+//// modules.php
+<?hh
+
+new module A {}
 //// A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+module A;
 
-module A {}
 
 class :my-xhp-base {
   public function __construct(
@@ -14,8 +17,7 @@ class :my-xhp-base {
   ) {}
 }
 
-<<__Internal>>
-class :my-xhp extends :my-xhp-base {}
+internal class :my-xhp extends :my-xhp-base {}
 
 class :other-xhp extends :my-xhp-base {}
 

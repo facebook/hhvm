@@ -1,4 +1,0 @@
-File "trait_require_cycle.php", line 12, characters 7-9:
-Cyclic class definition : `Tr1` `C`  (Typing[4013])
-File "trait_require_cycle.php", line 16, characters 7-7:
-Cyclic class definition : `Tr1` `C`  (Typing[4013])

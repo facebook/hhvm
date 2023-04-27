@@ -15,8 +15,6 @@ class type ['a] decl_type_visitor_type =
   object
     method on_tany : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_terr : 'a -> decl_phase Reason.t_ -> 'a
-
     method on_tmixed : 'a -> decl_phase Reason.t_ -> 'a
 
     method on_tnonnull : 'a -> decl_phase Reason.t_ -> 'a
@@ -55,19 +53,23 @@ class type ['a] decl_type_visitor_type =
     method on_tshape :
       'a ->
       decl_phase Reason.t_ ->
-      shape_kind ->
+      decl_ty ->
       decl_phase shape_field_type TShapeMap.t ->
       'a
 
     method on_taccess :
       'a -> decl_phase Reason.t_ -> decl_phase taccess_type -> 'a
+
+    method on_trefinement :
+      'a -> decl_phase Reason.t_ -> decl_ty -> decl_class_refinement -> 'a
+
+    method on_tnewtype :
+      'a -> decl_phase Reason.t_ -> string -> decl_ty list -> decl_ty -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
   object (this)
     method on_tany acc _ = acc
-
-    method on_terr acc _ = acc
 
     method on_tmixed acc _ = acc
 
@@ -112,6 +114,10 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_tapply acc _ _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
+    method on_trefinement acc _ ty rs =
+      let acc = this#on_type acc ty in
+      Class_refinement.fold rs ~init:acc ~f:this#on_type
+
     method on_taccess acc _ (root, _ids) = this#on_type acc root
 
     method on_ttuple acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
@@ -121,15 +127,20 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ _ fdm =
+    method on_tshape acc _ kind fdm =
+      let acc = this#on_type acc kind in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
+
+    method on_tnewtype acc _ _ tyl ty =
+      let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
+      let acc = this#on_type acc ty in
+      acc
 
     method on_type acc ty =
       let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
-      | Terr -> this#on_terr acc r
       | Tmixed -> this#on_tmixed acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
@@ -142,18 +153,18 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
       | Tapply (s, tyl) -> this#on_tapply acc r s tyl
+      | Trefinement (ty, rs) -> this#on_trefinement acc r ty rs
       | Taccess aty -> this#on_taccess acc r aty
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tnewtype (name, tyl, ty) -> this#on_tnewtype acc r name tyl ty
   end
 
 class type ['a] locl_type_visitor_type =
   object
     method on_tany : 'a -> Reason.t -> 'a
-
-    method on_terr : 'a -> Reason.t -> 'a
 
     method on_tnonnull : 'a -> Reason.t -> 'a
 
@@ -189,13 +200,11 @@ class type ['a] locl_type_visitor_type =
     method on_tvec_or_dict : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
 
     method on_tshape :
-      'a ->
-      Reason.t ->
-      shape_kind ->
-      locl_phase shape_field_type TShapeMap.t ->
-      'a
+      'a -> Reason.t -> locl_ty -> locl_phase shape_field_type TShapeMap.t -> 'a
 
     method on_tclass : 'a -> Reason.t -> pos_id -> exact -> locl_ty list -> 'a
+
+    method on_class_refinement : 'a -> locl_class_refinement -> 'a
 
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
 
@@ -209,8 +218,6 @@ class type ['a] locl_type_visitor_type =
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
   object (this)
     method on_tany acc _ = acc
-
-    method on_terr acc _ = acc
 
     method on_tnonnull acc _ = acc
 
@@ -259,12 +266,29 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ _ fdm =
+    method on_tshape acc _ kind fdm =
+      let acc = this#on_type acc kind in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 
-    method on_tclass acc _ _ _ tyl =
+    method on_tclass acc _ _ exact tyl =
+      let acc =
+        match exact with
+        | Exact -> acc
+        | Nonexact cr -> this#on_class_refinement acc cr
+      in
       List.fold_left tyl ~f:this#on_type ~init:acc
+
+    method on_class_refinement acc { cr_consts } =
+      SMap.fold
+        (fun _const_name { rc_bound; rc_is_ctx = _ } acc ->
+          match rc_bound with
+          | TRexact ty -> this#on_type acc ty
+          | TRloose { tr_lower = l; tr_upper = u } ->
+            let on_tlist acc = List.fold_left ~f:this#on_type ~init:acc in
+            on_tlist (on_tlist acc u) l)
+        cr_consts
+        acc
 
     method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
@@ -275,7 +299,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_neg_type acc r neg_ty =
       match neg_ty with
       | Neg_prim p -> this#on_tprim acc r p
-      | Neg_class c -> this#on_tclass acc r c Nonexact []
+      | Neg_class c -> this#on_tclass acc r c nonexact []
 
     method on_tunapplied_alias acc _ _ = acc
 
@@ -285,7 +309,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
-      | Terr -> this#on_terr acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
       | Toption ty -> this#on_toption acc r ty
@@ -298,7 +321,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
@@ -324,6 +347,18 @@ class type ['a] internal_type_visitor_type =
 
     method on_has_member : 'a -> Reason.t -> has_member -> 'a
 
+    method on_thas_type_member : 'a -> Reason.t -> has_type_member -> 'a
+
+    method on_has_type_member : 'a -> Reason.t -> has_type_member -> 'a
+
+    method on_tcan_index : 'a -> Reason.t -> can_index -> 'a
+
+    method on_tcan_traverse : 'a -> Reason.t -> can_traverse -> 'a
+
+    method on_can_index : 'a -> Reason.t -> can_index -> 'a
+
+    method on_can_traverse : 'a -> Reason.t -> can_traverse -> 'a
+
     method on_tdestructure : 'a -> Reason.t -> destructure -> 'a
 
     method on_destructure : 'a -> Reason.t -> destructure -> 'a
@@ -345,6 +380,9 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       let (r, ty) = deref_constraint_type ty in
       match ty with
       | Thas_member hm -> this#on_thas_member acc r hm
+      | Thas_type_member htm -> this#on_thas_type_member acc r htm
+      | Tcan_index ci -> this#on_tcan_index acc r ci
+      | Tcan_traverse ct -> this#on_tcan_traverse acc r ct
       | Tdestructure des -> this#on_tdestructure acc r des
       | TCunion (lty, cty) -> this#on_tcunion acc r lty cty
       | TCintersection (lty, cty) -> this#on_tcintersection acc r lty cty
@@ -364,6 +402,27 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
         hm
       in
       this#on_locl_type acc hm_type
+
+    method on_thas_type_member acc r htm = this#on_has_type_member acc r htm
+
+    method on_has_type_member acc _r htm =
+      let { htm_id = _; htm_lower; htm_upper } = htm in
+      let acc = this#on_locl_type acc htm_lower in
+      let acc = this#on_locl_type acc htm_upper in
+      acc
+
+    method on_tcan_index acc r hm = this#on_can_index acc r hm
+
+    method on_tcan_traverse acc r hm = this#on_can_traverse acc r hm
+
+    method on_can_index acc _r ci =
+      let acc = this#on_locl_type acc ci.ci_key in
+      this#on_locl_type acc ci.ci_val
+
+    method on_can_traverse acc _r ct =
+      let acc = this#on_locl_type_option acc ct.ct_key in
+      let acc = this#on_locl_type acc ct.ct_val in
+      acc
 
     method on_tdestructure acc r des = this#on_destructure acc r des
 

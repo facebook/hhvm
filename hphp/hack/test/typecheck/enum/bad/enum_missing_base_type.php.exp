@@ -1,0 +1,4 @@
+File "enum_missing_base_type.php", line 3, characters 6-6:
+Enums must have a base type, such as `arraykey` or `int`. (Parsing[1002])
+File "enum_missing_base_type.php", line 3, characters 8-8:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])

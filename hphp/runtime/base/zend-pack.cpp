@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 
+#include <folly/Singleton.h>
+
 #include <algorithm>
 
 namespace HPHP {
@@ -32,6 +34,13 @@ namespace HPHP {
   outputpos += (a)*(b);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static folly::Singleton<ZendPack> zend_pack;
+ZendPack* ZendPack::getInstance() {
+  // ZendPack caches maps based on endianness
+  // so only needs to be instantiated once
+  return zend_pack.get();
+}
 
 ZendPack::ZendPack() {
   int machine_endian_check = 1;

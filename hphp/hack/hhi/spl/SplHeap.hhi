@@ -8,11 +8,7 @@
  *
  */
 
-abstract class SplHeap<T>
-  implements
-    Iterator<T>,
-    Countable,
-    Traversable<T> {
+abstract class SplHeap<T> implements Iterator<T>, Countable, Traversable<T> {
 
   // Methods
   public function __construct();

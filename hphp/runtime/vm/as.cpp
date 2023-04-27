@@ -86,12 +86,9 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/coeffects.h"
-#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -772,18 +769,6 @@ struct AsmState {
   UnitEmitter* ue;
   Input in;
 
-  /*
-   * Map of adata identifiers to their serialized contents
-   * Needed because, when instrumenting array provenance, we're unable
-   * to initialize their static arrays until the adata is first referenced
-   *
-   * There's also some painful maneuvering around keeping either the serialized
-   * or unserialized array in request heap until it can be made static since
-   * this could potentially confusingly OOM a request that autoloads a large
-   * unit
-   */
-  std::unordered_map<std::string, std::vector<char>> adataDecls;
-
   // Map of adata identifiers to their associated static arrays.
   std::map<std::string, ArrayData*> adataMap;
 
@@ -958,29 +943,11 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
     as.error("expected name of .adata literal");
   }
 
-  auto adata = [&]() -> ArrayData* {
-    auto const it = as.adataMap.find(name);
-    if (it != as.adataMap.end()) return it->second;
-    auto const decl = as.adataDecls.find(name);
-    if (decl == as.adataDecls.end()) return nullptr;
-    auto& buf = decl->second;
-    return suppressOOM([&] {
-      auto var = parse_php_serialized(buf);
-      if (!var.isArray()) {
-        as.error(".adata only supports serialized arrays");
-      }
-
-      auto data = var.detach().m_data.parr;
-      ArrayData::GetScalarArray(&data);
-      as.adataMap[name] = data;
-      as.adataDecls.erase(decl);
-      return data;
-    });
-  }();
-
-  if (!adata) as.error("unknown array data literal name " + name);
-
-  return {adata, std::move(name)};
+  auto const it = as.adataMap.find(name);
+  if (it == as.adataMap.end()) {
+    as.error("unknown array data literal name " + name);
+  }
+  return {it->second, std::move(name)};
 }
 
 RepoAuthType read_repo_auth_type(folly::StringPiece parse, AsmState* as) {
@@ -1063,7 +1030,7 @@ std::vector<std::string> read_jmpvector(AsmState& as) {
   return ret;
 }
 
-typedef std::vector<std::pair<Id, std::string>> SSwitchJmpVector;
+using SSwitchJmpVector = std::vector<std::pair<Id, std::string>>;
 
 SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
   SSwitchJmpVector ret;
@@ -1305,7 +1272,7 @@ NamedLocal read_named_local(AsmState& as) {
     return NamedLocal { .name = id, .id = id };
   }
   if (as.in.tryConsume('_')) {
-    return NamedLocal { .name = kInvalidId, .id = id };
+    return NamedLocal { .name = kInvalidLocalName, .id = id };
   }
   std::string name;
   if (!as.in.readQuotedStr(name)) {
@@ -1974,120 +1941,11 @@ void parse_func_doccomment(AsmState& as) {
 }
 
 /*
- * fixup_default_values: This function does a *rough* match of the default value
- * initializers for a function and attempts to construct corresponding default
- * TypedValues for them. It will also attempt to normalize the phpCode using a
- * variable serializer.
- */
-void fixup_default_values(AsmState& as, FuncEmitter* fe) {
-  using Atom = BCPattern::Atom;
-  using Captures = BCPattern::CaptureVec;
-
-  auto end = fe->bc() + fe->bcPos();
-  for (uint32_t paramIdx = 0; paramIdx < fe->params.size(); ++paramIdx) {
-    auto& pi = fe->params[paramIdx];
-    if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;
-    auto inst = fe->bc() + pi.funcletOff;
-
-    // Check that the DV intitializer is actually setting the local for the
-    // parameter being initialized.
-    auto checkloc = [&] (PC pc, const Captures&) {
-      auto const UNUSED op = decode_op(pc);
-      assertx(op == OpSetL || op == OpPopL);
-      auto const loc = decode_iva(pc);
-      return loc == paramIdx;
-    };
-
-    // Look for DV initializers which push a primitive value onto the stack and
-    // then immediately use it to set the parameter local and pop it from the
-    // stack. Currently the following relatively limited sequences are accepted:
-    //
-    // Int | String | Double | Null | True | False | Vec | Dict | Keyset
-    // SetL loc, PopC | PopL loc
-    auto result = BCPattern {
-      Atom::alt(
-        Atom(OpInt), Atom(OpString), Atom(OpDouble), Atom(OpNull),
-        Atom(OpTrue), Atom(OpFalse), Atom(OpVec), Atom(OpDict), Atom(OpKeyset)
-      ).capture(),
-      Atom::alt(
-        Atom(OpPopL).onlyif(checkloc),
-        Atom::seq(Atom(OpSetL).onlyif(checkloc), Atom(OpPopC))
-      ),
-    }.ignore({OpAssertRATL, OpAssertRATStk}).matchAnchored(inst, end);
-
-    // Verify that the pattern we matched is either for the last DV initializer,
-    // in which case it must end with a JmpNS that targets the function entry,
-    // or is immediately followed by the next DV initializer.
-    if (!result.found() || result.getEnd() >= end) continue;
-    auto pc = result.getEnd();
-    auto off = pc - fe->bc();
-    auto const valid = [&] {
-      for (uint32_t next = paramIdx + 1; next < fe->params.size(); ++next) {
-        auto& npi = fe->params[next];
-        if (!npi.hasDefaultValue() || npi.funcletOff == kInvalidOffset) {
-          continue;
-        }
-        return npi.funcletOff == off;
-      }
-      auto const orig = pc;
-      auto const base = fe->bc();
-      return decode_op(pc) == OpJmpNS && orig + decode_raw<Offset>(pc) == base;
-    }();
-    if (!valid) continue;
-
-    // Use the captured initializer bytecode to construct the default value for
-    // this parameter.
-    auto capture = result.getCapture(0);
-    assertx(capture);
-
-    TypedValue dv = make_tv<KindOfUninit>();
-    auto const decode_array = [&] {
-      if (auto const arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
-        dv.m_type = arr->toPersistentDataType();
-        dv.m_data.parr = const_cast<ArrayData*>(arr);
-      }
-    };
-
-    switch (decode_op(capture)) {
-    case OpNull:   dv = make_tv<KindOfNull>();           break;
-    case OpTrue:   dv = make_tv<KindOfBoolean>(true);    break;
-    case OpFalse:  dv = make_tv<KindOfBoolean>(false);   break;
-    case OpVec:    decode_array(); break;
-    case OpDict:   decode_array(); break;
-    case OpKeyset: decode_array(); break;
-    case OpInt:
-      dv = make_tv<KindOfInt64>(decode_raw<int64_t>(capture));
-      break;
-    case OpDouble:
-      dv = make_tv<KindOfDouble>(decode_raw<double>(capture));
-      break;
-    case OpString:
-      if (auto str = as.litstrMap[decode_raw<uint32_t>(capture)]) {
-        dv = make_tv<KindOfPersistentString>(str);
-      }
-      break;
-    default:
-      always_assert(false);
-    }
-
-    // Use the variable serializer to construct a serialized version of the
-    // default value, matching the behavior of hphpc.
-    if (dv.m_type != KindOfUninit) {
-      VariableSerializer vs(VariableSerializer::Type::PHPOutput);
-      auto str = vs.serialize(tvAsCVarRef(&dv), true);
-      pi.defaultValue = dv;
-      pi.phpCode = makeStaticString(str.get());
-    }
-  }
-}
-
-/*
  * function-body :  fbody-line* '}'
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
  *            |  ".declvars" directive-declvars
- *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
  *            |  ".try" directive-try-catch
  *            |  ".ismemoizewrapper"
@@ -2454,38 +2312,7 @@ void parse_parameter_list(AsmState& as,
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
-        param.phpCode = makeStaticString(str);
-        TypedValue tv;
-        tvWriteUninit(tv);
-        if (str.size() == 4) {
-          if (!strcasecmp("null", str.data())) {
-            tvWriteNull(tv);
-          } else if (!strcasecmp("true", str.data())) {
-            tv = make_tv<KindOfBoolean>(true);
-          }
-        } else if (str.size() == 5 && !strcasecmp("false", str.data())) {
-          tv = make_tv<KindOfBoolean>(false);
-        }
-        auto utype = param.typeConstraint.underlyingDataType();
-        if (tv.m_type == KindOfUninit &&
-            (!utype || *utype == KindOfInt64 || *utype == KindOfDouble)) {
-          int64_t ival;
-          double dval;
-          int overflow = 0;
-          auto dt = str.get()->isNumericWithVal(ival, dval, false, &overflow);
-          if (overflow == 0) {
-            if (dt == KindOfInt64) {
-              if (utype == KindOfDouble) tv = make_tv<KindOfDouble>(ival);
-              else tv = make_tv<KindOfInt64>(ival);
-            } else if (dt == KindOfDouble &&
-                       (!utype || utype == KindOfDouble)) {
-              tv = make_tv<KindOfDouble>(dval);
-            }
-          }
-        }
-        if (tv.m_type != KindOfUninit) {
-          param.defaultValue = tv;
-        }
+        parse_default_value(param, makeStaticString(str));
         as.in.expectWs(')');
         as.in.skipWhitespace();
         ch = as.in.getc();
@@ -2541,39 +2368,13 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
 
 static StaticString s_native("__Native");
 
-MaybeDataType type_constraint_to_data_type(
-  LowStringPtr user_type,
-  const TypeConstraint& tc
-) {
-    if (auto type = tc.typeName()) {
-      // in type_annotation.cpp this code uses m_typeArgs
-      // as indicator that type can represent one of collection types
-      // when we extract data from the constraint we know if type is one of
-      // collection types but we don't have direct way to figure out if
-      // type used to have type arguments - do it indirectly by checking
-      // if name of user type contains '>' character as in "Vector<int>"
-      auto const has_type_args =
-        user_type && user_type->slice().rfind('>') != std::string::npos;
-      return get_datatype(
-        type->toCppString(),
-        has_type_args,
-        tc.isNullable(),
-        tc.isSoft());
-    }
-    return std::nullopt;
-}
-
 /*
  * Checks whether the current function is native by looking at the user
  * attribute map and sets the isNative flag accoringly
  * If the give function is op code implementation, then isNative is not set
  */
-void check_native(AsmState& as, bool is_construct) {
+void check_native(AsmState& as) {
   if (as.fe->userAttributes.count(s_native.get())) {
-    as.fe->hniReturnType = is_construct
-      ? KindOfNull
-      : type_constraint_to_data_type(as.fe->retUserType,
-        as.fe->retTypeConstraint);
 
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
@@ -2592,11 +2393,6 @@ void check_native(AsmState& as, bool is_construct) {
       }
     }
     if (!SystemLib::s_inited) as.fe->attrs |= AttrBuiltin;
-
-    for (auto& pi : as.fe->params) {
-      pi.builtinType =
-        type_constraint_to_data_type(pi.userType, pi.typeConstraint);
-    }
   }
 }
 
@@ -2649,7 +2445,7 @@ void parse_function(AsmState& as) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, false);
+  check_native(as);
 
   as.in.expectWs('{');
 
@@ -2717,7 +2513,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, name == "__construct");
+  check_native(as);
 
   as.in.expectWs('{');
 
@@ -2927,13 +2723,7 @@ void parse_default_ctor(AsmState& as) {
 
 /*
  * directive-use :  identifier+ ';'
- *               |  identifier+ '{' use-line* '}'
  *               ;
- *
- * use-line : use-name-ref "insteadof" identifier+ ';'
- *          | use-name-ref "as" attribute-list identifier ';'
- *          | use-name-ref "as" attribute-list ';'
- *          ;
  */
 void parse_use(AsmState& as) {
   std::vector<std::string> usedTraits;
@@ -2950,78 +2740,7 @@ void parse_use(AsmState& as) {
     as.pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
   as.in.skipWhitespace();
-  if (as.in.peek() != '{') {
-    as.in.expect(';');
-    return;
-  }
-  as.in.getc();
-
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.peek() == '}') break;
-
-    std::string traitName;
-    std::string identifier;
-    if (!as.in.readword(traitName)) {
-      as.error("expected identifier for line in .use block");
-    }
-    as.in.skipWhitespace();
-    if (as.in.peek() == ':') {
-      as.in.getc();
-      as.in.expect(':');
-      if (!as.in.readword(identifier)) {
-        as.error("expected identifier after ::");
-      }
-    } else {
-      identifier = traitName;
-      traitName.clear();
-    }
-
-    if (as.in.tryConsume("as")) {
-      Attr attrs = parse_attribute_list(as, AttrContext::TraitImport);
-      std::string alias;
-      if (!as.in.readword(alias)) {
-        if (attrs != AttrNone) {
-          alias = identifier;
-        } else {
-          as.error("expected identifier or attribute list after "
-                   "`as' in .use block");
-        }
-      }
-
-      as.pce->addTraitAliasRule(PreClass::TraitAliasRule(
-        makeStaticString(traitName),
-        makeStaticString(identifier),
-        makeStaticString(alias),
-        attrs));
-    } else if (as.in.tryConsume("insteadof")) {
-      if (traitName.empty()) {
-        as.error("Must specify TraitName::name when using a trait insteadof");
-      }
-
-      PreClass::TraitPrecRule precRule(
-        makeStaticString(traitName),
-        makeStaticString(identifier));
-
-      bool addedOtherTraits = false;
-      std::string whom;
-      while (as.in.readword(whom)) {
-        precRule.addOtherTraitName(makeStaticString(whom));
-        addedOtherTraits = true;
-      }
-      if (!addedOtherTraits) {
-        as.error("one or more trait names expected after `insteadof'");
-      }
-
-      as.pce->addTraitPrecRule(precRule);
-    } else {
-      as.error("expected `as' or `insteadof' in .use block");
-    }
-
-    as.in.expectWs(';');
-  }
-
-  as.in.expect('}');
+  as.in.expect(';');
 }
 
 /*
@@ -3041,18 +2760,27 @@ void parse_enum_ty(AsmState& as) {
 }
 
 /*
- * directive-require : 'extends' '<' indentifier '>' ';'
- *                   | 'implements' '<' indentifier '>' ';'
+ * directive-require : 'extends' '<' identifier '>' ';'
+ *                   | 'implements' '<' identifier '>' ';'
+ *                   | 'class' '<' identifier '>;  ';'
  *                   ;
  *
  */
 void parse_require(AsmState& as) {
   as.in.skipWhitespace();
 
-  bool extends = as.in.tryConsume("extends");
-  if (!extends && !as.in.tryConsume("implements")) {
-    as.error(".require should be extends or implements");
-  }
+  auto const reqKind = [&] {
+    if (as.in.tryConsume("implements"))  {
+      return PreClass::RequirementKind::RequirementImplements;
+    } else if (as.in.tryConsume("extends")) {
+      return PreClass::RequirementKind::RequirementExtends;
+    } else if (as.in.tryConsume("class")) {
+      return PreClass::RequirementKind::RequirementClass;
+    } else {
+      as.error(".require should be extends, implements, or class");
+      not_reached();
+    }
+  }();
 
   as.in.expectWs('<');
   std::string name;
@@ -3062,7 +2790,7 @@ void parse_require(AsmState& as) {
   as.in.expectWs('>');
 
   as.pce->addClassRequirement(PreClass::ClassRequirement(
-    makeStaticString(name), extends
+    makeStaticString(name), reqKind
   ));
 
   as.in.expectWs(';');
@@ -3210,6 +2938,70 @@ void parse_class(AsmState& as) {
 }
 
 /*
+ * directive-doccomment : long-string-literal ';'
+ *                      ;
+ *
+ */
+StringData* parse_module_doccomment(AsmState& as) {
+  auto const doc = parse_long_string(as);
+  as.in.expectWs(';');
+
+  return makeDocComment(doc);
+}
+
+void parse_rulename(AsmState& as, VMCompactVector<LowStringPtr>& names) {
+  std::string name;
+
+  if (!as.in.readword(name)) {
+    as.error("expected name for rule");
+  }
+
+  std::vector<std::string> str_names;
+  folly::split('.', name, str_names);
+
+  for (auto& s : str_names) {
+    names.push_back(makeStaticString(s));
+  }
+}
+
+Module::RuleSet parse_ruleset(AsmState& as) {
+  Module::RuleSet ruleset;
+
+  as.in.expectWs('[');
+  std::string kind;
+  while (as.in.readname(kind)) {
+    if (kind == "global") {
+      ruleset.global_rule = true;
+    } else if (kind == "prefix") {
+      as.in.expectWs('(');
+
+      Module::RuleSet::NameRule rule;
+      rule.prefix = true;
+      parse_rulename(as, rule.names);
+      ruleset.name_rules.push_back(rule);
+
+      as.in.expectWs(')');
+    } else if (kind == "exact") {
+      as.in.expectWs('(');
+
+      Module::RuleSet::NameRule rule;
+      rule.prefix = false;
+      parse_rulename(as, rule.names);
+      ruleset.name_rules.push_back(rule);
+
+      as.in.expectWs(')');
+    } else {
+      as.error("Unexpected rule kind '" + kind + "'.");
+    }
+  }
+
+  as.in.expectWs(']');
+  as.in.expectWs(';');
+
+  return ruleset;
+}
+
+/*
  * directive-module : attribute-list identifier '{}'
  *                  ;
  */
@@ -3227,15 +3019,33 @@ void parse_module(AsmState& as) {
   int line0;
   int line1;
   parse_line_range(as, line0, line1);
+
   as.in.expectWs('{');
+
+  StringData* docComment = nullptr;
+  std::string directive;
+  Optional<Module::RuleSet> exports;
+  Optional<Module::RuleSet> imports;
+
+  while (as.in.readword(directive)) {
+    if (directive == ".doc") { docComment = parse_module_doccomment(as); continue; }
+    if (directive == ".exports") { exports = parse_ruleset(as); continue; }
+    if (directive == ".imports") { imports = parse_ruleset(as); continue; }
+
+    as.error("unrecognized directive `" + directive + "' in module");
+  }
+
   as.in.expectWs('}');
 
   as.ue->addModule(std::move(Module{
     makeStaticString(name),
+    docComment,
     line0,
     line1,
     attrs,
-    userAttrs
+    userAttrs,
+    exports,
+    imports
   }));
 }
 
@@ -3264,7 +3074,16 @@ void parse_adata(AsmState& as) {
   }
 
   as.in.expectWs('=');
-  as.adataDecls[dataLabel] = parse_long_string_raw(as);
+  suppressOOM([&] {
+    auto var = parse_php_serialized(as);
+    if (!var.isArray()) {
+      as.error(".adata only supports serialized arrays");
+    }
+    auto data = var.detach().m_data.parr;
+    ArrayData::GetScalarArray(&data);
+    as.ue->mergeArray(data);
+    as.adataMap[dataLabel] = data;
+  });
   as.in.expectWs(';');
 }
 
@@ -3518,8 +3337,8 @@ void parse(AsmState& as) {
 
   if (RuntimeOption::EvalAssemblerFoldDefaultValues) {
     for (auto& fe : as.ue->fevec()) fixup_default_values(as, fe.get());
-    for (size_t n = 0; n < as.ue->numPreClasses(); ++n) {
-      for (auto fe : as.ue->pce(n)->methods()) fixup_default_values(as, fe);
+    for (auto const pce : as.ue->preclasses()) {
+      for (auto fe : pce->methods()) fixup_default_values(as, fe);
     }
   }
 }
@@ -3534,6 +3353,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
+  const PackageInfo& packageInfo,
   bool swallowErrors
 ) {
   tracing::Block _{
@@ -3546,7 +3366,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 
@@ -3585,6 +3405,41 @@ std::unique_ptr<UnitEmitter> assemble_string(
   }
 
   return ue;
+}
+
+void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
+  param.phpCode = str;
+  TypedValue tv;
+  tvWriteUninit(tv);
+  if (str->size() == 4) {
+    if (!strcasecmp("null", str->data())) {
+      tvWriteNull(tv);
+    } else if (!strcasecmp("true", str->data())) {
+      tv = make_tv<KindOfBoolean>(true);
+    }
+  } else if (str->size() == 5 && !strcasecmp("false", str->data())) {
+    tv = make_tv<KindOfBoolean>(false);
+  }
+  auto utype = param.typeConstraint.underlyingDataType();
+  if (tv.m_type == KindOfUninit &&
+      (!utype || *utype == KindOfInt64 || *utype == KindOfDouble)) {
+    int64_t ival;
+    double dval;
+    int overflow = 0;
+    auto dt = str->isNumericWithVal(ival, dval, false, &overflow);
+    if (overflow == 0) {
+      if (dt == KindOfInt64) {
+        if (utype == KindOfDouble) tv = make_tv<KindOfDouble>(ival);
+        else tv = make_tv<KindOfInt64>(ival);
+      } else if (dt == KindOfDouble &&
+                  (!utype || utype == KindOfDouble)) {
+        tv = make_tv<KindOfDouble>(dval);
+      }
+    }
+  }
+  if (tv.m_type != KindOfUninit) {
+    param.defaultValue = tv;
+  }
 }
 
 void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output) {

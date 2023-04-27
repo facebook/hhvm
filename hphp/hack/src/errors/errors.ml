@@ -13,7 +13,6 @@ open Reordered_argument_collections
 type error_code = int
 
 type phase =
-  | Init
   | Parsing
   | Naming
   | Decl
@@ -37,9 +36,10 @@ let phases_up_to_excl : phase -> phase list =
   |> List.map ~f:(fun enum -> Option.value_exn (phase_of_enum enum))
 
 type format =
-  | Context
-  | Raw
-  | Highlighted
+  | Context  (** Underlined references and color *)
+  | Raw  (** Compact format with color but no references *)
+  | Highlighted  (** Numbered and colored references *)
+  | Plain  (** Verbose positions and no color *)
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
@@ -59,7 +59,6 @@ module PhaseMap = struct
     type t = phase
 
     let rank = function
-      | Init -> 0
       | Parsing -> 1
       | Naming -> 2
       | Decl -> 3
@@ -79,23 +78,43 @@ type 'a file_t = 'a list PhaseMap.t [@@deriving eq, show]
 (** Results of multi-file analysis. *)
 type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq, show]
 
+type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
+[@@deriving eq, ord, show]
+
+type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
+
+type per_file_errors = error file_t
+
+type t = error files_t [@@deriving eq, show]
+
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc ->
       PhaseMap.fold v ~init:acc ~f:(fun phase v acc -> f path phase v acc))
 
 let files_t_map v ~f = Relative_path.Map.map v ~f:(fun v -> PhaseMap.map v ~f)
 
-let files_t_merge ~f x y =
+(** [files_t_merge f x y] is a merge by [file] & [phase], i.e. given "x:t" and "y:t" it
+goes through every (file * phase) mentioned in either of them, and combines
+the error-lists using the provided callback. Cost is O(x). *)
+let files_t_merge
+    ~(f :
+       phase ->
+       Relative_path.t ->
+       error list option ->
+       error list option ->
+       error list option)
+    (x : t)
+    (y : t) : t =
   (* Using fold instead of merge to make the runtime proportional to the size
    * of first argument (like List.rev_append ) *)
-  Relative_path.Map.fold x ~init:y ~f:(fun k x acc ->
+  Relative_path.Map.fold x ~init:y ~f:(fun path x acc ->
       let y =
-        Option.value (Relative_path.Map.find_opt y k) ~default:PhaseMap.empty
+        Option.value (Relative_path.Map.find_opt y path) ~default:PhaseMap.empty
       in
       Relative_path.Map.add
         acc
-        ~key:k
-        ~data:(PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y)))
+        ~key:path
+        ~data:(PhaseMap.merge x y ~f:(fun phase x y -> f phase path x y)))
 
 let files_t_to_list x =
   files_t_fold x ~f:(fun _ _ x acc -> List.rev_append x acc) ~init:[]
@@ -124,15 +143,6 @@ let get_last error_map =
     (match List.rev error_list with
     | [] -> None
     | e :: _ -> Some e)
-
-type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
-[@@deriving eq, ord, show]
-
-type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
-
-type per_file_errors = error file_t
-
-type t = error files_t [@@deriving eq, show]
 
 module Error = struct
   type t = error [@@deriving ord]
@@ -183,8 +193,9 @@ let (error_map : error files_t ref) = ref Relative_path.Map.empty
 
 let accumulate_errors = ref false
 
-(* Some filename when declaring *)
-let in_lazy_decl = ref None
+(* Are we in the middle of folding a decl? ("lazy" means it happens on-demand
+   during the course of the typecheck, rather than all upfront). *)
+let in_lazy_decl = ref false
 
 let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
@@ -210,15 +221,15 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
       ~f:
         begin
           fun () ->
-          let result = f1 () in
-          (result, !error_map)
+            let result = f1 () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   match get_last errors with
@@ -250,15 +261,15 @@ let try_with_result_pure ~fail f g =
       ~f:
         begin
           fun () ->
-          let result = f () in
-          (result, !error_map)
+            let result = f () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   match get_last errors with
@@ -279,15 +290,15 @@ let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
       ~f:
         begin
           fun () ->
-          let result = f () in
-          (result, !error_map)
+            let result = f () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   let out_errors = files_t_map ~f:List.rev out_errors in
@@ -328,7 +339,6 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (*****************************************************************************)
 let phase_to_string (phase : phase) : string =
   match phase with
-  | Init -> "Init"
   | Parsing -> "Parsing"
   | Naming -> "Naming"
   | Decl -> "Decl"
@@ -336,26 +346,24 @@ let phase_to_string (phase : phase) : string =
 
 let phase_of_string (value : string) : phase option =
   match Caml.String.lowercase_ascii value with
-  | "init" -> Some Init
   | "parsing" -> Some Parsing
   | "naming" -> Some Naming
   | "decl" -> Some Decl
   | "typing" -> Some Typing
   | _ -> None
 
-let sort : error list -> error list =
- fun err ->
-  let compare_reasons = List.compare (Message.compare Pos_or_decl.compare) in
-  let compare
-      User_error.
+let compare_internal (x : error) (y : error) ~compare_code : int =
+  let User_error.
         {
           code = x_code;
           claim = x_claim;
           reasons = x_messages;
           quickfixes = _;
           is_fixmed = _;
-        }
-      User_error.
+        } =
+    x
+  in
+  let User_error.
         {
           code = y_code;
           claim = y_claim;
@@ -363,44 +371,59 @@ let sort : error list -> error list =
           quickfixes = _;
           is_fixmed = _;
         } =
-    (* The primary sort order is by file *)
-    let comparison =
-      Relative_path.compare
-        (fst x_claim |> Pos.filename)
-        (fst y_claim |> Pos.filename)
-    in
-    (* Then within each file, sort by phase *)
-    let comparison =
-      if comparison = 0 then
-        Int.compare (x_code / 1000) (y_code / 1000)
-      else
-        comparison
-    in
-    (* If the error codes are the same, sort by position *)
-    let comparison =
-      if comparison = 0 then
-        Pos.compare (fst x_claim) (fst y_claim)
-      else
-        comparison
-    in
-    (* If the primary positions are also the same, sort by message text *)
-    let comparison =
-      if comparison = 0 then
-        String.compare (snd x_claim) (snd y_claim)
-      else
-        comparison
-    in
-    (* Finally, if the message text is also the same, then continue comparing
-       the reason messages (which indicate the reason why Hack believes
-       there is an error reported in the claim message) *)
+    y
+  in
+  (* The primary sort order is by file *)
+  let comparison =
+    Relative_path.compare
+      (fst x_claim |> Pos.filename)
+      (fst y_claim |> Pos.filename)
+  in
+  (* Then within each file, sort by phase *)
+  let comparison =
     if comparison = 0 then
-      compare_reasons x_messages y_messages
+      compare_code x_code y_code
     else
       comparison
   in
-  let equal x y = compare x y = 0 in
-  List.sort ~compare:(fun x y -> compare x y) err
-  |> List.remove_consecutive_duplicates ~equal:(fun x y -> equal x y)
+  (* If the error codes are the same, sort by position *)
+  let comparison =
+    if comparison = 0 then
+      Pos.compare (fst x_claim) (fst y_claim)
+    else
+      comparison
+  in
+  (* If the primary positions are also the same, sort by message text *)
+  let comparison =
+    if comparison = 0 then
+      String.compare (snd x_claim) (snd y_claim)
+    else
+      comparison
+  in
+  (* Finally, if the message text is also the same, then continue comparing
+     the reason messages (which indicate the reason why Hack believes
+     there is an error reported in the claim message) *)
+  if comparison = 0 then
+    (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
+  else
+    comparison
+
+let compare (x : error) (y : error) : int =
+  compare_internal x y ~compare_code:Int.compare
+
+let sort (err : error list) : error list =
+  let compare_exact_code = Int.compare in
+  let compare_phase x_code y_code =
+    Int.compare (x_code / 1000) (y_code / 1000)
+  in
+  (* Sort using the exact code to ensure sort stability, but use the phase to deduplicate *)
+  let equal x y = compare_internal ~compare_code:compare_phase x y = 0 in
+  List.sort
+    ~compare:(fun x y -> compare_internal ~compare_code:compare_exact_code x y)
+    err
+  |> List.remove_consecutive_duplicates
+       ~equal:(fun x y -> equal x y)
+       ~which_to_keep:`First (* Match Rust dedup_by *)
 
 let get_sorted_error_list ?(drop_fixmed = true) err =
   sort (files_t_to_list (drop_fixmes_if err drop_fixmed))
@@ -434,9 +457,9 @@ let do_with_context ?(drop_fixmed = true) path phase f =
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,
     since we collect it later in do_with_lazy_decls_ *)
-let run_in_decl_mode filename f =
+let run_in_decl_mode f =
   let old_in_lazy_decl = !in_lazy_decl in
-  in_lazy_decl := Some filename;
+  in_lazy_decl := true;
   Utils.try_finally ~f ~finally:(fun () -> in_lazy_decl := old_in_lazy_decl)
 
 let read_lines path =
@@ -469,47 +492,72 @@ let combining_sort (xs : 'a list) ~(f : 'a -> string) : _ list =
   List.concat_map (List.rev keys) ~f:(fun fn -> String.Map.find_exn grouped fn)
 
 (* E.g. "10 errors found." *)
-let format_summary format errors dropped_count max_errors : string option =
+let format_summary format ~displayed_count ~dropped_count ~max_errors :
+    string option =
   match format with
   | Context
   | Highlighted ->
-    let total = List.length errors + dropped_count in
-    let formatted_total =
+    let found_count = displayed_count + Option.value dropped_count ~default:0 in
+    let found_message =
       Printf.sprintf
         "%d error%s found"
-        total
-        (if total = 1 then
+        found_count
+        (if found_count = 1 then
           ""
         else
           "s")
     in
-    let truncated =
-      match max_errors with
-      | Some max_errors when dropped_count > 0 ->
+    let truncated_message =
+      match (max_errors, dropped_count) with
+      | (Some max_errors, Some dropped_count) when dropped_count > 0 ->
         Printf.sprintf
           " (only showing first %d, dropped %d).\n"
           max_errors
           dropped_count
+      | (Some max_errors, None) when displayed_count >= max_errors ->
+        Printf.sprintf
+          " (max-errors is %d; more errors may exist).\n"
+          max_errors
       | _ -> ".\n"
     in
-    Some (formatted_total ^ truncated)
-  | Raw -> None
+    Some (found_message ^ truncated_message)
+  | Raw
+  | Plain ->
+    None
 
 let report_pos_from_reason = ref false
 
 let to_string error = User_error.to_string !report_pos_from_reason error
 
+let log_unexpected error path desc =
+  HackEventLogger.invariant_violation_bug
+    desc
+    ~path
+    ~pos:
+      (error
+      |> User_error.to_absolute
+      |> User_error.get_pos
+      |> Pos.show_absolute);
+  Hh_logger.log
+    "UNEXPECTED: %s\n%s"
+    desc
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  ()
+
 let add_error_impl error =
+  let () =
+    match !current_context with
+    | (path, Decl) ->
+      log_unexpected error path "didn't expect to see Errors.Decl"
+    | _ -> ()
+  in
   if !accumulate_errors then
     let () =
       match !current_context with
       | (path, _)
         when Relative_path.equal path Relative_path.default
              && not !allow_errors_in_default_path ->
-        Hh_logger.log
-          "WARNING: adding an error in default path\n%s\n"
-          (Caml.Printexc.raw_backtrace_to_string
-             (Caml.Printexc.get_callstack 100))
+        log_unexpected error path "adding an error in default path"
       | _ -> ()
     in
     (* Cheap test to avoid duplicating most recent error *)
@@ -520,14 +568,12 @@ let add_error_impl error =
   else
     (* We have an error, but haven't handled it in any way *)
     let msg = error |> User_error.to_absolute |> to_string in
-    match !in_lazy_decl with
-    | Some _ ->
+    if !in_lazy_decl then
       lazy_decl_error_logging msg error_map User_error.to_absolute to_string
-    | None ->
-      if error.User_error.is_fixmed then
-        ()
-      else
-        Utils.assert_false_log_backtrace (Some msg)
+    else if error.User_error.is_fixmed then
+      ()
+    else
+      Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
 let currently_has_errors () = not (List.is_empty (get_current_list !error_map))
@@ -536,7 +582,7 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
-module GlobalWriteCheck = Error_codes.GlobalWriteCheck
+module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 
 (*****************************************************************************)
 (* Types *)
@@ -571,23 +617,17 @@ let hard_banned_codes =
 
 let allowed_fixme_codes_strict = ref ISet.empty
 
-let allowed_fixme_codes_partial = ref ISet.empty
-
-let codes_not_raised_partial = ref ISet.empty
-
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_allowed_code_strict code = ISet.mem code !allowed_fixme_codes_strict
-
-let is_allowed_code_partial code = ISet.mem code !allowed_fixme_codes_partial
-
-let is_not_raised_partial code = ISet.mem code !codes_not_raised_partial
 
 let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)
 
 let (is_hh_fixme_disallowed : (Pos.t -> error_code -> bool) ref) =
   ref (fun _ _ -> false)
+
+let code_agnostic_fixme = ref false
 
 (*****************************************************************************)
 (* Errors accumulator. *)
@@ -668,26 +708,19 @@ and add_error (error : error) =
 
   let pos = fst claim in
 
-  if ISet.mem code hard_banned_codes then
-    if fixme_present pos code then
-      let explanation =
-        Printf.sprintf
-          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
-          code
-      in
-      add_error_with_fixme_error error explanation
-    else
-      add_error_impl error
-  else if
-    is_not_raised_partial code && Relative_path.is_partial (Pos.filename pos)
-  then
-    ()
-  else if not (fixme_present pos code) then
+  if not (fixme_present pos code) then
     (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
      * the position information after the fact. This is the default case, where an HH_FIXME
      * comment is not present. Therefore, the remaining cases are variations on behavior when
      * a fixme is present *)
     add_error_impl error
+  else if ISet.mem code hard_banned_codes then
+    let explanation =
+      Printf.sprintf
+        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
+        code
+    in
+    add_error_with_fixme_error error explanation
   else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
     add_applied_fixme error
   else if !report_pos_from_reason && Pos.get_from_reason pos then
@@ -702,25 +735,15 @@ and add_error (error : error) =
         code
     in
     add_error_with_fixme_error error explanation
+  else if is_allowed_code_strict code then
+    add_applied_fixme error
   else
-    let whitelist =
-      if
-        (not (ISet.is_empty !allowed_fixme_codes_partial))
-        && Relative_path.is_partial (Pos.filename pos)
-      then
-        is_allowed_code_partial
-      else
-        is_allowed_code_strict
+    let explanation =
+      Printf.sprintf
+        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
+        code
     in
-    if whitelist code then
-      add_applied_fixme error
-    else
-      let explanation =
-        Printf.sprintf
-          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
-          code
-      in
-      add_error_with_fixme_error error explanation
+    add_error_with_fixme_error error explanation
 
 and merge err' err =
   let append _ _ x y =
@@ -730,10 +753,24 @@ and merge err' err =
   in
   files_t_merge ~f:append err' err
 
-and incremental_update old new_ fold phase =
+and incremental_update
+    ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t) (phase : phase) :
+    t =
+  (* Helper to detect coding oversight *)
+  let assert_path_is_real (path : Relative_path.t) (phase : phase) : unit =
+    if Relative_path.equal path Relative_path.default then
+      Utils.assert_false_log_backtrace
+        (Some
+           ("Default (untracked) error sources should not get into incremental "
+           ^ "mode. There might be a missing call to `Errors.do_with_context`/"
+           ^ "`run_in_context` somwhere or incorrectly used `Errors.from_error_list`."
+           ^ "Phase: "
+           ^ show_phase phase))
+  in
+
   (* Helper to remove acc[path][phase]. If acc[path] becomes empty afterwards,
    * remove it too (i.e do not store empty maps or lists ever). *)
-  let remove path phase acc =
+  let remove (path : Relative_path.t) (phase : phase) (acc : t) : t =
     let new_phase_map =
       match Relative_path.Map.find_opt acc path with
       | None -> None
@@ -748,40 +785,29 @@ and incremental_update old new_ fold phase =
     | None -> Relative_path.Map.remove acc path
     | Some x -> Relative_path.Map.add acc ~key:path ~data:x
   in
+
   (* Replace old errors with new *)
-  let res =
+  let res : t =
     files_t_merge new_ old ~f:(fun phase path new_ old ->
-        (if Relative_path.equal path Relative_path.default then
-          let phase =
-            match phase with
-            | Init -> "Init"
-            | Parsing -> "Parsing"
-            | Naming -> "Naming"
-            | Decl -> "Decl"
-            | Typing -> "Typing"
-          in
-          Utils.assert_false_log_backtrace
-            (Some
-               ("Default (untracked) error sources should not get into incremental "
-               ^ "mode. There might be a missing call to `Errors.do_with_context`/"
-               ^ "`run_in_context` somwhere or incorrectly used `Errors.from_error_list`."
-               ^ "Phase: "
-               ^ phase)));
+        assert_path_is_real path phase;
         match new_ with
         | Some new_ -> Some (List.rev new_)
         | None -> old)
   in
   (* For files that were rechecked, but had no errors - remove them from maps *)
-  fold res (fun path acc ->
-      let has_errors =
-        match Relative_path.Map.find_opt new_ path with
-        | None -> false
-        | Some phase_map -> PhaseMap.mem phase_map phase
-      in
-      if has_errors then
-        acc
-      else
-        remove path phase acc)
+  let res : t =
+    Relative_path.Set.fold rechecked ~init:res ~f:(fun path acc ->
+        let has_errors =
+          match Relative_path.Map.find_opt new_ path with
+          | None -> false
+          | Some phase_map -> PhaseMap.mem phase_map phase
+        in
+        if has_errors then
+          acc
+        else
+          remove path phase acc)
+  in
+  res
 
 and from_error_list err = list_to_files_t err
 
@@ -795,8 +821,6 @@ let is_empty ?(drop_fixmed = true) err =
   Relative_path.Map.is_empty (drop_fixmes_if err drop_fixmed)
 
 let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
-
-let add_naming_error err = add_error @@ Naming_error.to_user_error err
 
 let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
 
@@ -826,10 +850,10 @@ let log_exception_occurred pos e =
 let log_invariant_violation ~desc pos telemetry =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
   HackEventLogger.invariant_violation_bug
+    desc
     ~path:(Pos.filename pos)
     ~pos:pos_str
-    ~desc
-    telemetry;
+    ~telemetry;
   Hh_logger.error
     "Invariant violation at position %s\n%s"
     pos_str
@@ -849,19 +873,6 @@ let add_typing_error err =
     Eval_result.iter ~f:add_error
     @@ Eval_result.suppress_intersection ~is_suppressed
     @@ to_user_error err ~current_span:!current_span)
-
-let incremental_update ~old ~new_ ~rechecked phase =
-  let fold init g =
-    Relative_path.Set.fold
-      ~f:
-        begin
-          fun path acc ->
-          g path acc
-        end
-      ~init
-      rechecked
-  in
-  incremental_update old new_ fold phase
 
 and empty = Relative_path.Map.empty
 
@@ -937,13 +948,13 @@ let fold_errors ?(drop_fixmed = true) ?phase err ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in
   match phase with
   | None ->
-    files_t_fold err ~init ~f:(fun source _ errors acc ->
-        List.fold_right errors ~init:acc ~f:(f source))
+    files_t_fold err ~init ~f:(fun source phase errors acc ->
+        List.fold_right errors ~init:acc ~f:(f source phase))
   | Some phase ->
     Relative_path.Map.fold err ~init ~f:(fun source phases acc ->
         match PhaseMap.find_opt phases phase with
         | None -> acc
-        | Some errors -> List.fold_right errors ~init:acc ~f:(f source))
+        | Some errors -> List.fold_right errors ~init:acc ~f:(f source phase))
 
 let fold_errors_in ?(drop_fixmed = true) ?phase err ~file ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in
@@ -1050,15 +1061,16 @@ let ambiguous_inheritance
   apply_error_from_reasons_callback
     on_error
     ~code
-    ~reasons:(lazy (claim_as_reason claim :: reasons @ [(pos, message)]))
+    ~reasons:(lazy ((claim_as_reason claim :: reasons) @ [(pos, message)]))
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
-let function_is_not_dynamically_callable pos function_name error =
+let function_is_not_dynamically_callable function_name error =
   let function_name = Markdown_lite.md_codify (Render.strip_ns function_name) in
   let nested_error_reason = User_error.to_list_ error in
   add_list
-    (Typing.err_code Typing.ImplementsDynamic)
-    (pos, "Function  " ^ function_name ^ " is not dynamically callable.")
+    (User_error.get_code error)
+    ( User_error.get_pos error,
+      "Function  " ^ function_name ^ " is not dynamically callable." )
     nested_error_reason
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
@@ -1072,10 +1084,13 @@ let method_is_not_dynamically_callable
   let method_name = Markdown_lite.md_codify (Render.strip_ns method_name) in
   let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
 
-  let nested_error_reason =
+  let (code, pos, nested_error_reason) =
     match error_opt with
-    | None -> []
-    | Some e -> User_error.to_list_ e
+    | None -> (Typing.err_code Typing.ImplementsDynamic, pos, [])
+    | Some error ->
+      ( User_error.get_code error,
+        User_error.get_pos error,
+        User_error.to_list_ error )
   in
 
   let parent_class_reason =
@@ -1112,7 +1127,7 @@ let method_is_not_dynamically_callable
   in
 
   add_list
-    (Typing.err_code Typing.ImplementsDynamic)
+    code
     ( pos,
       "Method  "
       ^ method_name
@@ -1121,19 +1136,9 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
-let global_var_write_error pos fun_name =
-  add
-    (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableWrite)
-    pos
-    ("[" ^ fun_name ^ "] A global variable is written.")
-
-let global_var_in_fun_call_error pos fun_name =
-  add
-    (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableInFunctionCall)
-    pos
-    ("["
-    ^ fun_name
-    ^ "] A global variable is passed to (or returned from) a function call.")
+(* Raise different types of error for accessing global variables. *)
+let global_access_error error_code pos message =
+  add (GlobalAccessCheck.err_code error_code) pos message
 
 (*****************************************************************************)
 (* Printing *)

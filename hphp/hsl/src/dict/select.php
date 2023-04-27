@@ -97,7 +97,7 @@ function filter<Tk as arraykey, Tv>(
  *
  * To use an async predicate, see `Dict\filter_with_key_async()`.
  *
- * Time complexity: O(n * p), where p is the complexity of `$value_predicate`
+ * Time complexity: O(n * p), where p is the complexity of `$predicate`
  * (which is O(1) if not provided explicitly)
  * Space complexity: O(n)
  */
@@ -118,7 +118,7 @@ function filter_with_key<Tk as arraykey, Tv>(
  * Returns a new dict containing only the keys for which the given predicate
  * returns `true`. The default predicate is casting the key to boolean.
  *
- * Time complexity: O(n * p), where p is the complexity of `$value_predicate`
+ * Time complexity: O(n * p), where p is the complexity of `$key_predicate`
  * (which is O(1) if not provided explicitly)
  * Space complexity: O(n)
  */

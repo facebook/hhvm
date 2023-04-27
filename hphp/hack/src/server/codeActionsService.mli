@@ -11,4 +11,4 @@ val go :
   entry:Provider_context.entry ->
   path:string ->
   range:Ide_api_types.range ->
-  Lsp.CodeAction.command_or_action list
+  Lsp.CodeAction.result

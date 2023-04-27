@@ -3,14 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::BStr;
 use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
+use std::fmt;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::slice::from_raw_parts;
+
+use bstr::BStr;
+use serde::Serialize;
+use serde::Serializer;
 
 /// Maybe<T> is similar to C++ `std::option`. It is just like Rust `Option<T>`
 /// but has repr(C) for use with with cbindgen.
-#[derive(Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+#[derive(Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Serialize)]
 #[repr(C)]
 pub enum Maybe<T> {
     Just(T),
@@ -64,6 +69,13 @@ impl<U> Maybe<U> {
         matches!(self, Just(_))
     }
 
+    pub fn into_option(self) -> Option<U> {
+        match self {
+            Just(t) => Some(t),
+            Nothing => None,
+        }
+    }
+
     #[inline]
     pub const fn is_nothing(&self) -> bool {
         matches!(self, Nothing)
@@ -82,6 +94,24 @@ impl<U> Maybe<U> {
         match self {
             Just(t) => f(t),
             Nothing => default,
+        }
+    }
+
+    pub fn map_or_else<T, D, F>(self, default: D, f: F) -> T
+    where
+        F: FnOnce(U) -> T,
+        D: FnOnce() -> T,
+    {
+        match self {
+            Just(t) => f(t),
+            Nothing => default(),
+        }
+    }
+
+    pub fn unwrap(self) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => panic!("Expected Just(_)"),
         }
     }
 
@@ -119,7 +149,7 @@ impl<U> std::convert::From<Maybe<U>> for Option<U> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Serialize)]
 #[repr(C)]
 /// A tuple of two elements.
 pub struct Pair<U, V>(pub U, pub V);
@@ -129,7 +159,7 @@ impl<U, V> std::convert::From<(U, V)> for Pair<U, V> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Serialize)]
 #[repr(C)]
 /// A tuple of three elements.
 pub struct Triple<U, V, W>(pub U, pub V, pub W);
@@ -156,7 +186,6 @@ impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
 // `from_raw_parts_mut`/`from_raw_parts`. We rely on this in the
 // implementation of traits such as `Eq` and friends.
 
-#[derive(Clone, Copy, Debug)]
 #[repr(C)]
 /// A type to substitute for `&'a[T]`.
 // Safety: Must be initialized from an `&[T]`. Use `Slice<'a,
@@ -166,6 +195,81 @@ pub struct Slice<'a, T> {
     len: usize,
     marker: std::marker::PhantomData<&'a ()>,
 }
+
+// A Slice can be cloned even if the underlying data is non-clonable.
+impl<'a, T> Clone for Slice<'a, T> {
+    fn clone(&self) -> Slice<'a, T> {
+        Slice {
+            data: self.data,
+            len: self.len,
+            marker: self.marker,
+        }
+    }
+}
+
+impl<'a, T> Copy for Slice<'a, T> {}
+
+impl<'a, T: serde::Serialize> Serialize for Slice<'a, T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_arena_ref().serialize(serializer)
+    }
+}
+// Send+Sync Safety: Slice is no more mutable than T
+unsafe impl<'a, T: Sync> Sync for Slice<'a, T> {}
+unsafe impl<'a, T: Send> Send for Slice<'a, T> {}
+
+impl<'a, T: fmt::Debug> Slice<'a, T> {
+    fn generic_debug_fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Slice")?;
+        f.debug_list().entries(self.as_ref().iter()).finish()
+    }
+}
+
+impl<'a, T: fmt::Debug> fmt::Debug for Slice<'a, T> {
+    #[cfg(UNSTABLE_DEBUG_SLICE)]
+    default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.generic_debug_fmt(f)
+    }
+
+    #[cfg(not(UNSTABLE_DEBUG_SLICE))]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.generic_debug_fmt(f)
+    }
+}
+
+#[cfg(UNSTABLE_DEBUG_SLICE)]
+impl<'a> fmt::Debug for Slice<'a, u8> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = String::new();
+        for &ch in self.as_ref() {
+            match ch {
+                b'\"' => {
+                    s.push('\\');
+                    s.push('\"');
+                }
+                b'\\' => {
+                    s.push('\\');
+                    s.push('\\');
+                }
+                ch => {
+                    if !ch.is_ascii_graphic() {
+                        s.push_str(&format!("\\{ch:03o}"));
+                    } else {
+                        s.push(ch as char);
+                    }
+                }
+            }
+        }
+
+        f.write_str("Str(b\"")?;
+        f.write_str(&s)?;
+        f.write_str("\")")
+    }
+}
+
 impl<'a, T: 'a> Default for Slice<'a, T> {
     fn default() -> Self {
         Slice::empty()
@@ -173,10 +277,7 @@ impl<'a, T: 'a> Default for Slice<'a, T> {
 }
 impl<'a, T> AsRef<[T]> for Slice<'a, T> {
     fn as_ref(&self) -> &[T] {
-        // Safety: Assumes `self` has been constructed via `Slice<'a,
-        // T>::new()` from some `&'a [T]` and so the call to
-        // `from_raw_parts` is a valid.
-        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+        self.as_arena_ref()
     }
 }
 
@@ -189,12 +290,21 @@ impl<'a, T> std::ops::Deref for Slice<'a, T> {
 }
 
 impl<'a, T: 'a> Slice<'a, T> {
-    pub fn new(t: &'a [T]) -> Self {
+    pub const fn new(t: &'a [T]) -> Self {
         Slice {
             data: t.as_ptr(),
             len: t.len(),
             marker: std::marker::PhantomData,
         }
+    }
+
+    /// Like `as_ref()` but reflects the fact that the underlying ref has a
+    /// lifetime of `arena and not the same lifetime as `self`.
+    pub fn as_arena_ref(&self) -> &'a [T] {
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a [T]` and so the call to
+        // `from_raw_parts` is a valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
 
     pub fn fill_iter<I>(alloc: &'a bumpalo::Bump, iter: I) -> Slice<'a, T>
@@ -253,11 +363,9 @@ impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
     fn eq(&self, other: &Self) -> bool {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.eq(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.eq(right)
     }
 }
 impl<'a, T: Eq> Eq for Slice<'a, T> {}
@@ -265,32 +373,26 @@ impl<'a, T: Hash> Hash for Slice<'a, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let me = from_raw_parts(self.data, self.len);
-            me.hash(state);
-        }
+        let me = unsafe { from_raw_parts(self.data, self.len) };
+        me.hash(state);
     }
 }
 impl<'a, T: Ord> Ord for Slice<'a, T> {
     fn cmp(&self, other: &Self) -> Ordering {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.cmp(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.cmp(right)
     }
 }
 impl<'a, T: PartialOrd> PartialOrd for Slice<'a, T> {
     // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
     // safety].
     fn partial_cmp(&self, other: &Self) -> std::option::Option<Ordering> {
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.partial_cmp(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.partial_cmp(right)
     }
 }
 
@@ -308,6 +410,11 @@ impl<'a> Str<'a> {
         Slice::new(alloc.alloc_str(src.as_ref()).as_bytes())
     }
 
+    /// Make a copy of a slice of bytes in an `'a Bump' and return it as a `Str<'a>`.
+    pub fn new_slice(alloc: &'a bumpalo::Bump, src: &[u8]) -> Str<'a> {
+        Slice::new(alloc.alloc_slice_copy(src))
+    }
+
     /// Cast a `Str<'a>` back into a `&'a str`.
     pub fn unsafe_as_str(&self) -> &'a str {
         // Safety: Assumes `self` has been constructed via `Slice<'a,
@@ -322,6 +429,12 @@ impl<'a> Str<'a> {
         // T>::new()` from some `&'a BStr` and so the call to
         // `from_raw_parts` is valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len).into() }
+    }
+}
+
+impl std::borrow::Borrow<[u8]> for Str<'_> {
+    fn borrow(&self) -> &[u8] {
+        self.as_ref()
     }
 }
 
@@ -360,7 +473,7 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
 pub struct BumpSliceMut<'a, T> {
     data: *mut T,
     len: usize,
-    alloc: usize, // *const bumpalo::Bump,
+    alloc: &'a bumpalo::Bump,
     marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T> BumpSliceMut<'a, T> {
@@ -369,7 +482,7 @@ impl<'a, T> BumpSliceMut<'a, T> {
         BumpSliceMut {
             data: t.as_mut_ptr(),
             len: t.len(),
-            alloc: alloc as *const bumpalo::Bump as usize,
+            alloc,
             marker: std::marker::PhantomData,
         }
     }
@@ -377,6 +490,10 @@ impl<'a, T> BumpSliceMut<'a, T> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.as_ref().is_empty()
+    }
+
+    pub fn alloc(&self) -> &'a bumpalo::Bump {
+        self.alloc
     }
 
     #[inline]
@@ -413,6 +530,20 @@ impl<'a, T> std::ops::IndexMut<usize> for BumpSliceMut<'a, T> {
         &mut self.as_mut()[i]
     }
 }
+impl<'a, T: PartialEq> PartialEq for BumpSliceMut<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().zip(other.iter()).all(|(a, b)| a == b)
+    }
+}
+impl<'a, T: Eq> Eq for BumpSliceMut<'a, T> {}
+impl<'a, T: Hash> Hash for BumpSliceMut<'a, T> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        for i in self.iter() {
+            i.hash(hasher);
+        }
+    }
+}
+
 impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
     fn as_ref<'r>(&'r self) -> &'r [T] {
         // Safety:
@@ -435,10 +566,7 @@ impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
 }
 impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
     fn clone(&self) -> Self {
-        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-        // safety].
-        let alloc: &'arena bumpalo::Bump =
-            unsafe { (self.alloc as *const bumpalo::Bump).as_ref().unwrap() };
+        let alloc = self.alloc();
         BumpSliceMut::new(alloc, alloc.alloc_slice_clone(self.as_ref()))
     }
 }

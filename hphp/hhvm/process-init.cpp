@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -75,8 +76,19 @@ const StaticString s_DynMethCallerHelper("\\__SystemLib\\DynMethCallerHelper");
 
 void ProcessInitNoSystemLib() {
   assertx(!RuntimeOption::RepoAuthoritative);
-  StringData::markSymbolsLoaded();
   Stack::ValidateStackSize();
+}
+
+std::string get_and_check_systemlib() {
+  auto const slib = get_systemlib();
+
+  if (slib.empty()) {
+    // Die a horrible death.
+    Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
+                  " or export HHVM_SYSTEMLIB to your ENV");
+    _exit(HPHP_EXIT_FAILURE);
+  }
+  return slib;
 }
 
 void ProcessInit() {
@@ -96,18 +108,9 @@ void ProcessInit() {
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
-  StringData::markSymbolsLoaded();
 
   rds::requestInit();
-  std::string hhas;
-  auto const slib = get_systemlib(&hhas);
-
-  if (slib.empty()) {
-    // Die a horrible death.
-    Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
-                  " or export HHVM_SYSTEMLIB to your ENV");
-    _exit(1);
-  }
+  auto const slib = get_and_check_systemlib();
 
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.
@@ -123,35 +126,17 @@ void ProcessInit() {
     Logger::Error("Check all of your changes to hphp/system/php");
     Logger::Error("HipHop Parse Error: %s %d",
                   info->m_fatalMsg.c_str(), info->m_fatalLoc.line1);
-    _exit(1);
-  }
-
-  if (!hhas.empty()) {
-    SystemLib::s_hhas_unit = compile_systemlib_string(
-      hhas.c_str(), hhas.size(), "/:systemlib.hhas",
-      Native::s_systemNativeFuncs);
-    if (auto const info = SystemLib::s_hhas_unit->getFatalInfo()) {
-      Logger::Error("An error has been introduced in the hhas portion of "
-                    "systemlib.");
-      Logger::Error("Check all of your changes to hhas files in "
-                    "hphp/system/php");
-      Logger::Error("HipHop Parse Error: %s", info->m_fatalMsg.c_str());
-      _exit(1);
-    }
+    _exit(HPHP_EXIT_FAILURE);
   }
 
   // Load the systemlib unit to build the Class objects
   SystemLib::s_unit->merge();
-  if (SystemLib::s_hhas_unit) {
-    SystemLib::s_hhas_unit->merge();
-  }
-
   SystemLib::s_nullFunc =
     Func::lookup(makeStaticString("__SystemLib\\__86null"));
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
-    Class *cls = NamedEntity::get(s_##cls.get())->clsList();            \
+    Class *cls = NamedType::get(s_##cls.get())->clsList();              \
     assert(cls);                                                        \
     SystemLib::s_##cls##Class = cls;                                    \
   }
@@ -169,7 +154,7 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(MethCallerHelper)
   INIT_SYSTEMLIB_CLASS_FIELD(DynMethCallerHelper)
 
-  // Stash a pointer to the VM Classes for stdclass, Exception,
+  // Stash a pointer to the VM Classes for stdClass, Exception,
   // pinitSentinel and resource
   SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 
@@ -177,7 +162,7 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_HH_CLASS_FIELD(cls)                              \
   {                                                                     \
-    Class *cls = NamedEntity::get(s_HH_##cls.get())->clsList();         \
+    Class *cls = NamedType::get(s_HH_##cls.get())->clsList();           \
     assert(cls);                                                        \
     SystemLib::s_HH_##cls##Class = cls;                                 \
   }

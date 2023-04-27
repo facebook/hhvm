@@ -8,7 +8,7 @@ function foo() {
 class foo {
     const C = "const ok\n";
     const C2 = namespace\C;
-    static $var = "var ok\n";
+    public static $var = "var ok\n";
     function __construct() {
         echo "class ok\n";
     }

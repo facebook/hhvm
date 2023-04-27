@@ -50,11 +50,12 @@ function main() {
   test(new C1());
   print "--- C2 ---\n";
   test(new C2());
-  print "--- C3 ---\n";
-  test(new C3());
 
   print "--- C4 ---\n";
   test(new C4());
   print "--- C5 ---\n";
   test(new C5());
+
+  print "--- C3 ---\n";
+  test(new C3());
 }

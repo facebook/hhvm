@@ -33,6 +33,7 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function test($name, $list, $map, $set) {
@@ -43,7 +44,7 @@ function test($name, $list, $map, $set) {
 
   echo "---- $name: compact ----\n";
   $p = new DummyProtocol();
-  thrift_protocol_write_compact($p, 'foo', 2, $s, 20);
+  thrift_protocol_write_compact2($p, 'foo', 2, $s, 20);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
 
   echo "---- $name: binary ----\n";

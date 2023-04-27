@@ -11,7 +11,6 @@ open Hh_prelude
 open Option.Monad_infix
 module Bucket = Hack_bucket
 open Typing_service_types
-open Typing_check_job
 
 (*
 ####
@@ -121,6 +120,8 @@ module Delegate = Typing_service_delegate
 
 type seconds_since_epoch = float
 
+type log_message = string
+
 let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
 let should_enable_deferring (file : check_file_workitem) =
@@ -130,16 +131,6 @@ type process_file_results = {
   file_errors: Errors.t;
   deferred_decls: Deferred_decl.deferment list;
 }
-
-let process_files_remote_execution
-    (re_env : ReEnv.t)
-    (ctx : Provider_context.t)
-    (files : check_file_workitem list)
-    (recheck_id : string option) : process_file_results =
-  let fns = List.map files ~f:(fun file -> file.path) in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  let file_errors = Re.process_files re_env fns deps_mode recheck_id in
-  { file_errors; deferred_decls = [] }
 
 let scrape_class_names (ast : Nast.program) : SSet.t =
   let names = ref SSet.empty in
@@ -157,6 +148,7 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (file : check_file_workitem)
+    ~(log_errors : bool)
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
@@ -167,48 +159,68 @@ let process_file
     let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_check_typedef opts fn name =
-      ignore (check_typedef opts fn name)
+      ignore (Typing_check_job.check_typedef opts fn name)
     in
-    let ignore_check_const opts fn name = ignore (check_const opts fn name) in
-    let ignore_check_module opts fn name = ignore (check_module opts fn name) in
+    let ignore_check_const opts fn name =
+      ignore (Typing_check_job.check_const opts fn name)
+    in
+    let ignore_check_module opts fn name =
+      ignore (Typing_check_job.check_module opts fn name)
+    in
     try
       let result =
         Deferred_decl.with_deferred_decls
           ~enable:(should_enable_deferring file)
           ~declaration_threshold_opt:
-            (GlobalOptions.tco_defer_class_declaration_threshold opts)
+            (TypecheckerOptions.defer_class_declaration_threshold opts)
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
-        Errors.do_with_context fn Errors.Typing @@ fun () ->
-        let snd (_, x, _) = x in
+        Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
         let (fun_tasts, fun_global_tvenvs) =
-          List.map funs ~f:snd
-          |> List.filter_map ~f:(type_fun ctx fn)
+          List.map funs ~f:FileInfo.id_name
+          |> List.filter_map ~f:(Typing_check_job.type_fun ctx fn)
           |> List.unzip
         in
+        let fun_tasts = List.concat fun_tasts in
         let (class_tasts, class_global_tvenvs) =
-          List.map classes ~f:snd
-          |> List.filter_map ~f:(type_class ctx fn)
+          List.map classes ~f:FileInfo.id_name
+          |> List.filter_map ~f:(Typing_check_job.type_class ctx fn)
           |> List.unzip
         in
         let class_global_tvenvs = List.concat class_global_tvenvs in
-        List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
-        List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
-        List.map modules ~f:snd |> List.iter ~f:(ignore_check_module ctx fn);
+        List.map typedefs ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_typedef ctx fn);
+        List.map gconsts ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_const ctx fn);
+        List.map modules ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_module ctx fn);
         (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
       in
       match result with
       | Ok (file_errors, (tasts, global_tvenvs)) ->
-        if GlobalOptions.tco_global_inference opts then
+        if TypecheckerOptions.global_inference opts then
           Typing_global_inference.StateSubConstraintGraphs.build_and_save
             ctx
             tasts
             global_tvenvs;
+        if log_errors then
+          List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
+              let { User_error.claim; code; _ } = error in
+              let (pos, msg) = claim in
+              let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
+              Hh_logger.log
+                "%s(%d:%d-%d:%d) [%d] %s"
+                (Relative_path.suffix fn)
+                l1
+                c1
+                l2
+                c2
+                code
+                msg);
         { file_errors; deferred_decls = [] }
       | Error () ->
         let deferred_decls =
-          ast
-          |> Naming.program ctx
+          Errors.ignore_ (fun () -> Naming.program ctx ast)
           |> scrape_class_names
           |> SSet.elements
           |> List.filter_map ~f:(fun class_name ->
@@ -294,8 +306,6 @@ let get_stats ~include_slightly_costly_stats tally :
     ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
     telemetry
 
-let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
-
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 let process_one_workitem
@@ -304,7 +314,7 @@ let process_one_workitem
     ~batch_info
     ~memory_cap
     ~longlived_workers
-    ~remote_execution
+    ~error_count_at_start_of_batch
     ~progress
     ~errors
     ~stats
@@ -325,7 +335,14 @@ let process_one_workitem
   let (file, decl, mid_stats, file_errors, deferred, tally) =
     match fn with
     | Check file ->
-      let result = process_file ctx file ~decl_cap_mb in
+      (* We'll show at least the first five errors in the project. Maybe more,
+         if this file has more in it, or if other concurrent workers race to print
+         the first five errors before us. *)
+      let log_errors =
+        check_info.log_errors
+        && error_count_at_start_of_batch + Errors.count errors < 5
+      in
+      let result = process_file ctx file ~decl_cap_mb ~log_errors in
       let mid_stats =
         if type_check_twice then
           Some (get_stats ~include_slightly_costly_stats:false tally)
@@ -366,7 +383,7 @@ let process_one_workitem
         ProcessFilesTally.incr_prefetches tally )
   in
   let errors = Errors.merge file_errors errors in
-  let workitem_ends_under_cap = get_heap_size () <= workitem_cap_mb in
+  let workitem_ends_under_cap = Gc_utils.get_heap_size () <= workitem_cap_mb in
   let final_stats =
     get_stats
       ~include_slightly_costly_stats:
@@ -379,37 +396,12 @@ let process_one_workitem
     | Some mid_stats -> (mid_stats, Some final_stats)
   in
 
-  (* This code doesn't belong here. This function should only process one file,
-     not filtering the list of remaining files. *)
-  let (fns, check_fns, errors) =
-    match remote_execution with
-    | None -> (List.tl_exn progress.remaining, [], errors)
-    | Some re_env ->
-      let (check_workitems, other_workitems) =
-        List.partition_map (List.tl_exn progress.remaining) ~f:(function
-            | Check file -> First file
-            | other -> Second other)
-      in
-      if List.is_empty check_workitems then
-        (other_workitems, [], errors)
-      else
-        let result =
-          process_files_remote_execution
-            re_env
-            ctx
-            check_workitems
-            check_info.recheck_id
-        in
-        let check_workitems = List.map check_workitems ~f:(fun f -> Check f) in
-        ( other_workitems,
-          check_workitems,
-          Errors.merge errors result.file_errors )
-  in
+  let (fns, check_fns, errors) = (List.tl_exn progress.remaining, [], errors) in
 
   (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
      by flushing the parser cache and doing a major GC; (2) if this fails, we decline to typecheck
      the remaining files.
-     We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
+     We use [quick_stat] instead of [stat] in Gc_utils.get_heap_size in order to avoid walking the major heap,
      and we don't change the minor heap because it's small and fixed-size.
      This test is performed after we've processed at least one item, to ensure we make at least some progress. *)
   let tally = ProcessFilesTally.record_caps ~workitem_ends_under_cap tally in
@@ -421,27 +413,26 @@ let process_one_workitem
       HackEventLogger.flush ();
       Gc.compact ();
       hh_malloc_trim ();
-      get_heap_size () <= workitem_cap_mb
+      Gc_utils.get_heap_size () <= workitem_cap_mb
     end
   in
 
-  if Option.is_none remote_execution then
-    HackEventLogger.ProfileTypeCheck.process_workitem
-      ~batch_info
-      ~workitem_index:(ProcessFilesTally.count tally)
-      ~file:(Option.map file ~f:(fun file -> file.path))
-      ~file_was_already_deferred:
-        (Option.map file ~f:(fun file -> file.was_already_deferred))
-      ~decl
-      ~error_code:(Errors.choose_code_opt file_errors)
-      ~workitem_ends_under_cap
-      ~workitem_start_stats:stats
-      ~workitem_end_stats
-      ~workitem_end_second_stats;
+  HackEventLogger.ProfileTypeCheck.process_workitem
+    ~batch_info
+    ~workitem_index:(ProcessFilesTally.count tally)
+    ~file:(Option.map file ~f:(fun file -> file.path))
+    ~file_was_already_deferred:
+      (Option.map file ~f:(fun file -> file.was_already_deferred))
+    ~decl
+    ~error_code:(Errors.choose_code_opt file_errors)
+    ~workitem_ends_under_cap
+    ~workitem_start_stats:stats
+    ~workitem_end_stats
+    ~workitem_end_second_stats;
 
   let progress =
     {
-      completed = fn :: check_fns @ progress.completed;
+      completed = (fn :: check_fns) @ progress.completed;
       remaining = fns;
       deferred = List.concat [deferred; progress.deferred];
     }
@@ -455,10 +446,10 @@ let process_workitems
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
+    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * typing_progress =
   Decl_counters.set_mode
@@ -484,9 +475,9 @@ let process_workitems
       ~ctx
       ~check_info
       ~batch_info
+      ~error_count_at_start_of_batch
       ~memory_cap
       ~longlived_workers
-      ~remote_execution
   in
 
   let rec process_workitems_loop ~progress ~errors ~stats ~tally =
@@ -517,6 +508,11 @@ let process_workitems
     Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
   in
   let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+  if
+    Provider_context.get_tcopt ctx
+    |> TypecheckerOptions.record_fine_grained_dependencies
+  then
+    Typing_pessimisation_deps.finalize (Provider_context.get_deps_mode ctx);
 
   (* Gather up our various forms of telemetry... *)
   let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
@@ -539,10 +535,10 @@ let load_and_process_workitems
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
+    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * typing_progress =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
@@ -559,10 +555,10 @@ let load_and_process_workitems
     progress
     ~memory_cap
     ~longlived_workers
-    ~remote_execution
     ~check_info
     ~worker_id
     ~batch_number
+    ~error_count_at_start_of_batch
     ~typecheck_info
 
 (*****************************************************************************)
@@ -604,6 +600,8 @@ let possibly_push_new_errors_to_lsp_client :
 let merge
     ~(should_prefetch_deferred_files : bool)
     ~(batch_counts_by_worker_id : int SMap.t ref)
+    ~(errors_so_far : int ref)
+    ~(check_info : check_info)
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_initial_count : int)
@@ -628,6 +626,9 @@ let merge
     | DelegateProgress _ -> ()
     | SimpleDelegateProgress _ -> ()
   end;
+
+  (* And error count *)
+  errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
 
   (* Merge in remote-worker results *)
   begin
@@ -670,12 +671,11 @@ let merge
       ~init:0
       ~f:(fun acc workitem ->
         match Hash_set.Poly.strict_remove workitems_in_progress workitem with
-        | Ok () ->
-          begin
-            match workitem with
-            | Check _ -> acc + 1
-            | _ -> acc
-          end
+        | Ok () -> begin
+          match workitem with
+          | Check _ -> acc + 1
+          | _ -> acc
+        end
         | _ -> acc)
       progress.completed
   in
@@ -693,16 +693,17 @@ let merge
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
-  let delegate_progress =
-    Typing_service_delegate.get_progress !delegate_state
-  in
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:workitems_initial_count
     ~unit:"files"
-    ~extra:delegate_progress;
+    ~extra:(Typing_service_delegate.get_progress !delegate_state);
 
+  (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
+  if check_info.log_errors then
+    ServerProgress.ErrorsWrite.report produced_by_job.errors;
+  (* Handle errors paradigm (2) - push updates to lsp as well *)
   let (diag_pusher, time_errors_pushed) =
     possibly_push_new_errors_to_lsp_client
       ~progress
@@ -727,22 +728,16 @@ let next
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_in_progress : workitem Hash_set.Poly.t)
+    (workitems_processed_count : int ref)
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
-    (remote_execution : ReEnv.t option)
-    (hulk_lite : bool)
-    (hulk_heavy : bool) : unit -> job_progress Bucket.bucket =
-  let max_size =
-    match remote_execution with
-    | Some _ -> 25000
-    | _ -> Bucket.max_size ()
-  in
+    (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
   let num_workers =
     match workers with
     | Some w -> List.length w
     | None -> 1
   in
-  let return_bucket_job kind ~current_bucket ~remaining_jobs =
+  let return_bucket_job (kind : progress_kind) ~current_bucket ~remaining_jobs =
     (* Update our shared mutable state, because hey: it's not like we're
        writing OCaml or anything. *)
     workitems_to_process := remaining_jobs;
@@ -756,47 +751,59 @@ let next
   fun () ->
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
+    let controller_started = Delegate.controller_started !delegate_state in
     let delegate_job =
-      if hulk_lite || hulk_heavy then (
-        (*
-        This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
-        or in other words the local typechecker is done with its work. We'll try and download all the remote
-        worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
-        remote worker and have the local worker "steal" the work.
-       *)
-        let (workitems, controller, payloads, job) =
-          Typing_service_delegate.collect
-            !delegate_state
-            !workitems_to_process
-            workitems_to_process_length
-            !remote_payloads
-            hulk_heavy
-        in
-        workitems_to_process := workitems;
-        delegate_state := controller;
-        remote_payloads := payloads;
-        job
-      ) else
-        None
-    in
-
-    let (state, delegate_job) =
-      if hulk_lite || hulk_heavy then
-        (!delegate_state, delegate_job)
-      else
-        Typing_service_delegate.next
-          !workitems_to_process
-          workitems_in_progress
+      (*
+          This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
+          or in other words the local typechecker is done with its work. We'll try and download all the remote
+          worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
+          remote worker and have the local worker "steal" the work.
+        *)
+      let remote_workitems_to_process_length =
+        List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
+            acc + BigList.length payload.payload)
+      in
+      let ( remaining_local_workitems_to_process,
+            controller,
+            remaining_payloads,
+            job,
+            _telemetry ) =
+        Typing_service_delegate.collect
+          ~telemetry
           !delegate_state
-    in
-    delegate_state := state;
+          !workitems_to_process
+          workitems_to_process_length
+          !remote_payloads
+      in
+      (* Update the total workitems_processed_count after remote workers
+         have made progress, so we can update the progress bar with the
+         correct number of files typechecked.
+      *)
+      (if List.length !remote_payloads > List.length remaining_payloads then
+        let remaining_remote_workitems_to_process =
+          List.fold ~init:0 remaining_payloads ~f:(fun acc payload ->
+              acc + BigList.length payload.payload)
+        in
+        let local_processed_count =
+          !workitems_processed_count
+          - BigList.length remaining_local_workitems_to_process
+        in
+        let remote_processed_count =
+          remote_workitems_to_process_length
+          - remaining_remote_workitems_to_process
+        in
+        workitems_processed_count :=
+          local_processed_count + remote_processed_count);
 
-    let (stolen, state) =
-      if hulk_lite || hulk_heavy then
-        ([], !delegate_state)
-      else
-        Typing_service_delegate.steal state max_size
+      workitems_to_process := remaining_local_workitems_to_process;
+      delegate_state := controller;
+      remote_payloads := remaining_payloads;
+
+      job
     in
+
+    let (state, delegate_job) = (!delegate_state, delegate_job) in
+    delegate_state := state;
 
     (* If a delegate job is returned, then that means that it should be done
        by the next MultiWorker worker (the one for whom we're creating a job
@@ -804,7 +811,7 @@ let next
        type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
-      if hulk_lite || hulk_heavy then
+      if controller_started then
         return_bucket_job
           (SimpleDelegateProgress job)
           ~current_bucket
@@ -814,29 +821,11 @@ let next
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
          out as the size of the entire repo, and we're traversing the entire list. *)
-      (match (workitems_to_process_length, stolen) with
-      | (0, []) when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
-      | (0, []) -> Bucket.Wait
-      | (_, stolen_jobs) ->
-        let jobs =
-          if workitems_to_process_length > List.length stolen_jobs then
-            !workitems_to_process
-          else begin
-            Hh_logger.log
-              "Steal payload from local workers: %d jobs"
-              (List.length stolen_jobs);
-            delegate_state := state;
-            let stolen_jobs =
-              List.map stolen_jobs ~f:(fun job ->
-                  Hash_set.Poly.remove workitems_in_progress job;
-                  match job with
-                  | Check { path; was_already_deferred = _ } ->
-                    Check { path; was_already_deferred = true }
-                  | _ -> failwith "unexpected state")
-            in
-            BigList.rev_append stolen_jobs !workitems_to_process
-          end
-        in
+      (match workitems_to_process_length with
+      | 0 when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
+      | 0 -> Bucket.Wait
+      | _ ->
+        let jobs = !workitems_to_process in
         begin
           match num_workers with
           (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
@@ -847,7 +836,7 @@ let next
               Bucket.calculate_bucket_size
                 ~num_jobs:workitems_to_process_length
                 ~num_workers
-                ~max_size
+                ()
             in
             let (current_bucket, remaining_jobs) =
               BigList.split_n jobs bucket_size
@@ -873,6 +862,173 @@ let on_cancelled
   in
   add_next []
 
+let rec drain_events (done_count, total_count, handle, check_info) =
+  match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
+  | Some (Hh_distc_types.Errors errors) ->
+    if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
+    drain_events (done_count, total_count, handle, check_info)
+  | Some (Hh_distc_types.TypingStart total_count) ->
+    drain_events (done_count, total_count, handle, check_info)
+  | Some (Hh_distc_types.TypingProgress n) ->
+    let done_count = done_count + n in
+    drain_events (done_count, total_count, handle, check_info)
+  | None -> (done_count, total_count)
+
+(**
+  This is the event loop that powers hh_distc. It keeps looping and calling
+  select on a series of fds including ones from watchman, hh_distc, hh_client, etc.
+
+  When one of the fds activate, the loops continues one iteration and decides what to
+  do.
+
+  Most of the time the main fd that will be selected is the hh_distc one as it reports
+  progress events on a very frequent interval. We can then use these progress events
+  to stream errors and report progress back to the user.
+*)
+let rec event_loop
+    ~(done_count : int)
+    ~(total_count : int)
+    ~(interrupt : 'env MultiThreadedCall.interrupt_config)
+    ~(handlers :
+       (Unix.file_descr * 'env MultiThreadedCall.interrupt_handler) list)
+    ~(fd_distc : Unix.file_descr)
+    ~(handle : Hh_distc_ffi.handle)
+    ~(check_info : check_info)
+    ~(hhdg_path : string) :
+    [> `Success of typing_result * 'env
+    | `Error of log_message
+    | `Cancel of 'env * MultiThreadedCall.cancel_reason
+    ] =
+  let handler_fds = List.map handlers ~f:fst in
+  (* hh_distc sends a byte each time new events are ready. *)
+  let (ready_fds, _, _) =
+    Sys_utils.select_non_intr (handler_fds @ [fd_distc]) [] [] (-1.)
+  in
+  if List.mem ~equal:Poly.( = ) ready_fds fd_distc then (
+    match Sys_utils.read_non_intr fd_distc 1 with
+    | None ->
+      ServerProgress.write "hh_distc done";
+      (match Hh_distc_ffi.join handle with
+      | Ok errors ->
+        (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
+        Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
+        `Success
+          ( {
+              errors;
+              dep_edges = Typing_deps.dep_edges_make ();
+              telemetry = Telemetry.create ();
+            },
+            interrupt.MultiThreadedCall.env )
+      | Error error -> `Error error)
+    | Some _ ->
+      let (done_count, total_count) =
+        drain_events (done_count, total_count, handle, check_info)
+      in
+      ServerProgress.write_percentage
+        ~operation:"hh_distc checking"
+        ~done_count
+        ~total_count
+        ~unit:"files"
+        ~extra:None;
+      event_loop
+        ~done_count
+        ~total_count
+        ~interrupt
+        ~handlers
+        ~fd_distc
+        ~handle
+        ~check_info
+        ~hhdg_path
+  ) else
+    let (env, decision, handlers) =
+      List.fold
+        handlers
+        ~init:
+          (interrupt.MultiThreadedCall.env, MultiThreadedCall.Continue, handlers)
+        ~f:(fun (env, decision, handlers) (fd, handler) ->
+          match (decision, not @@ List.mem ~equal:Poly.( = ) ready_fds fd) with
+          | (_, false) ->
+            (* skip handlers whose fd isn't ready *)
+            (env, decision, handlers)
+          | (MultiThreadedCall.Cancel _, _) ->
+            (* if a previous handler has decided to cancel, skip further handlers *)
+            (env, decision, handlers)
+          | (MultiThreadedCall.Continue, true) ->
+            let (env, decision) = handler env in
+            (* running a handler could have changed the handlers,
+               * so need to regenerate them based on new environment *)
+            let handlers =
+              interrupt.MultiThreadedCall.handlers
+                interrupt.MultiThreadedCall.env
+            in
+            (env, decision, handlers))
+    in
+    let interrupt = { interrupt with MultiThreadedCall.env } in
+    match decision with
+    | MultiThreadedCall.Cancel reason ->
+      let () = Hh_distc_ffi.cancel handle in
+      `Cancel (interrupt.MultiThreadedCall.env, reason)
+    | MultiThreadedCall.Continue ->
+      event_loop
+        ~done_count
+        ~total_count
+        ~interrupt
+        ~handlers
+        ~fd_distc
+        ~handle
+        ~check_info
+        ~hhdg_path
+
+(**
+  This is the main process function that triggers a full init via hh_distc.
+
+  We FFI into rustland to activate hh_distc to get back an opaque handle. We
+  can then use this handle to poll for progress and eventually join the handle
+  to get all the errors we need to return to the user.
+
+  This also works with the existing hh_server incrementality paradigm because
+  after each typecheck, we generate a full dep graph, which we then use to replace
+  the existing hh_server dep graph.
+
+  We return a result where Ok represents a completed typecheck and Error represents
+  a cancelled typecheck. Any errors from hh_distc are considered fatal and results in
+  a call to failwith, which will terminate hh_server.
+*)
+let process_with_hh_distc
+    ~(root : Path.t option)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
+    ~(check_info : check_info) :
+    [> `Success of typing_result * 'env
+    | `Error of log_message
+    | `Cancel of 'env * MultiThreadedCall.cancel_reason
+    ] =
+  (* TODO: Plumb extra --config name=value args through to spawn() *)
+  (* We don't want to use with_tempdir because we need to keep the folder around
+     for subseqent typechecks that will read the dep graph in the folder *)
+  let root = Option.value_exn root in
+  let ss_dir = Tempfile.mkdtemp ~skip_mocking:false in
+  let hhdg_path =
+    Path.(to_string @@ concat ss_dir "hh_mini_saved_state.hhdg")
+  in
+  let hh_distc_handle =
+    Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir) hhdg_path
+    |> Result.ok_or_failwith
+  in
+  let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
+  ServerProgress.write "hh_distc running";
+  let handlers =
+    interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
+  in
+  event_loop
+    ~done_count:0
+    ~total_count:0
+    ~interrupt
+    ~handlers
+    ~fd_distc
+    ~handle:hh_distc_handle
+    ~check_info
+    ~hhdg_path
+
 (**
   `next` and `merge` both run in the master process and update mutable
   state in order to track work in progress and work remaining.
@@ -885,19 +1041,16 @@ let process_in_parallel
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (workitems : workitem BigList.t)
-    ~(interrupt : 'a MultiWorker.interrupt_config)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
     * Delegate.state
     * Telemetry.t
     * _
-    * Relative_path.t list
+    * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
     * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let record = Measure.create () in
   (* [record] is used by [next] *)
@@ -909,30 +1062,30 @@ let process_in_parallel
   let remote_payloads = ref [] in
   let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
-  let delegate_progress =
-    Typing_service_delegate.get_progress !delegate_state
-  in
+  let errors_so_far = ref 0 in
+  let controller_started = Delegate.controller_started !delegate_state in
   let batch_counts_by_worker_id = ref SMap.empty in
-  ServerProgress.send_percentage_progress
-    ~operation:"typechecking"
-    ~done_count:0
-    ~total_count:workitems_initial_count
-    ~unit:"files"
-    ~extra:delegate_progress;
 
-  if hulk_lite || hulk_heavy then (
-    Hh_logger.log "Dispatch hulk lite initial payloads";
-    let workitems_to_process_length = BigList.length !workitems_to_process in
-    let (payloads, workitems, controller) =
-      Typing_service_delegate.dispatch
-        !delegate_state
-        !workitems_to_process
-        workitems_to_process_length
-    in
-    remote_payloads := payloads;
-    workitems_to_process := workitems;
-    delegate_state := controller
-  );
+  let (telemetry, telemetry_start_t) : Telemetry.t * float option =
+    if controller_started then (
+      Hh_logger.log "Dispatch hulk lite initial payloads";
+      let workitems_to_process_length = BigList.length !workitems_to_process in
+      let ( payloads,
+            workitems,
+            controller,
+            (dispatch_telemetry, hulk_dispatch_start_t) ) =
+        Typing_service_delegate.dispatch
+          !delegate_state
+          !workitems_to_process
+          workitems_to_process_length
+      in
+      remote_payloads := payloads;
+      workitems_to_process := workitems;
+      delegate_state := controller;
+      (dispatch_telemetry, Some hulk_dispatch_start_t)
+    ) else
+      (telemetry, None)
+  in
 
   let next =
     next
@@ -940,11 +1093,10 @@ let process_in_parallel
       delegate_state
       workitems_to_process
       workitems_in_progress
+      workitems_processed_count
       remote_payloads
       record
-      remote_execution
-      hulk_lite
-      hulk_heavy
+      telemetry
   in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
@@ -953,7 +1105,8 @@ let process_in_parallel
   in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
-  let job (typing_result : typing_result) (progress : job_progress) =
+  let job (typing_result : typing_result) (progress : job_progress) :
+      string * typing_result * job_progress =
     let worker_id = Option.value ~default:"main" (Hh_logger.get_id ()) in
     let (typing_result, computation_progress) =
       match progress.kind with
@@ -962,10 +1115,10 @@ let process_in_parallel
           ctx
           ~memory_cap
           ~longlived_workers
-          ~remote_execution
           ~check_info
           ~typecheck_info
           ~worker_id
+          ~error_count_at_start_of_batch:!errors_so_far
           ~batch_number:
             (SMap.find_opt worker_id !batch_counts_by_worker_id
             |> Option.value ~default:0)
@@ -985,6 +1138,8 @@ let process_in_parallel
         (merge
            ~should_prefetch_deferred_files
            ~batch_counts_by_worker_id
+           ~errors_so_far
+           ~check_info
            delegate_state
            workitems_to_process
            workitems_initial_count
@@ -997,14 +1152,7 @@ let process_in_parallel
         (on_cancelled next workitems_to_process workitems_in_progress)
       ~interrupt
   in
-  let telemetry =
-    telemetry
-    |> Typing_service_delegate.add_telemetry !delegate_state
-    |> Telemetry.object_
-         ~key:"next"
-         ~value:(Measure.stats_to_telemetry ~record ())
-  in
-  let paths_of (cancelled_results : job_progress list) : Relative_path.t list =
+  let paths_of (unfinished : job_progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : job_progress) =
       let cancelled_computations = cancelled_progress.progress.remaining in
       let paths_of paths (cancelled_workitem : workitem) =
@@ -1014,51 +1162,37 @@ let process_in_parallel
       in
       List.fold cancelled_computations ~init:[] ~f:paths_of
     in
-    List.concat (List.map cancelled_results ~f:paths_of)
+    List.concat (List.map unfinished ~f:paths_of)
   in
+  let cancelled_results =
+    Option.map cancelled_results ~f:(fun (unfinished, reason) ->
+        (paths_of unfinished, reason))
+  in
+  let _ =
+    if controller_started then
+      HackEventLogger.hulk_type_check_end
+        telemetry
+        workitems_initial_count
+        ~start_t:
+          (Option.value_exn
+             telemetry_start_t
+             ~message:"Unexpected missing telemetry start time for Hulk Lite")
+    else
+      ()
+  in
+
+  (* We want to ensure controller state is reset for the recheck *)
+  delegate_state := Typing_service_delegate.stop !delegate_state;
+
   ( typing_result,
     !delegate_state,
     telemetry,
     env,
-    paths_of cancelled_results,
+    cancelled_results,
     (!diagnostic_pusher, !time_first_error) )
 
-let process_sequentially
-    ?diagnostic_pusher
-    ctx
-    fnl
-    ~longlived_workers
-    ~remote_execution
-    ~check_info
-    ~typecheck_info :
-    typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
-  let progress =
-    { completed = []; remaining = BigList.as_list fnl; deferred = [] }
-  in
-  (* Since we're running sequentially here, we don't want 'process_files' to activate its own memtracing: *)
-  let check_info = { check_info with memtrace_dir = None } in
-  let (typing_result, progress) =
-    process_workitems
-      ctx
-      (neutral ())
-      progress
-      ~memory_cap:None
-      ~longlived_workers
-      ~remote_execution
-      ~check_info
-      ~worker_id:"master"
-      ~batch_number:(-1)
-      ~typecheck_info
-  in
-  let push_result =
-    possibly_push_new_errors_to_lsp_client
-      ~progress
-      typing_result.errors
-      diagnostic_pusher
-  in
-  (typing_result, push_result)
-
-type 'a job_result = 'a * Relative_path.t list
+type 'a job_result =
+  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -1082,7 +1216,9 @@ module TestMocking = struct
 
   let is_cancelled x = Relative_path.Set.mem !cancelled x
 
-  let with_test_mocking fnl f =
+  let with_test_mocking
+      (fnl : workitem BigList.t) (f : workitem BigList.t -> 'a job_result) :
+      'a job_result =
     let (mock_cancelled, fnl) =
       List.partition_map (BigList.as_list fnl) ~f:(fun computation ->
           match computation with
@@ -1095,29 +1231,28 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, cancelled) = f (BigList.create fnl) in
-    (res, mock_cancelled @ cancelled)
+    let (res, unfinished_and_reason) = f (BigList.create fnl) in
+    let unfinished_and_reason =
+      match unfinished_and_reason with
+      | None when List.is_empty mock_cancelled -> None
+      | None ->
+        Some
+          ( mock_cancelled,
+            {
+              MultiThreadedCall.user_message = "mock cancel";
+              log_message = "mock cancel";
+              timestamp = 0.0;
+            } )
+      | Some (cancelled, reason) -> Some (mock_cancelled @ cancelled, reason)
+    in
+    (res, unfinished_and_reason)
 end
 
 module Mocking =
-(val if Injector_config.use_test_stubbing then
-       (module TestMocking : Mocking_sig)
-     else
-       (module NoMocking : Mocking_sig))
-
-let should_process_sequentially
-    (opts : TypecheckerOptions.t) (workitems : workitem BigList.t) : bool =
-  (* If decls can be deferred, then we should process in parallel, since
-     we are likely to have more computations than there are files to type check. *)
-  let defer_threshold =
-    TypecheckerOptions.defer_class_declaration_threshold opts
-  in
-  let parallel_threshold =
-    TypecheckerOptions.parallel_type_checking_threshold opts
-  in
-  match (defer_threshold, BigList.length workitems) with
-  | (None, file_count) when file_count < parallel_threshold -> true
-  | _ -> false
+  (val if Injector_config.use_test_stubbing then
+         (module TestMocking : Mocking_sig)
+       else
+         (module NoMocking : Mocking_sig))
 
 type result = {
   errors: Errors.t;
@@ -1133,12 +1268,12 @@ let go_with_interrupt
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
-    ~(interrupt : 'a MultiWorker.interrupt_config)
+    ~(root : Path.t option)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
+    ~(use_hh_distc_instead_of_hulk : bool)
+    ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
@@ -1155,15 +1290,10 @@ let go_with_interrupt
       ~config:check_info.per_file_profiling
   in
   let opts = Provider_context.get_tcopt ctx in
-  let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
-  let fnl =
-    if hulk_lite || hulk_heavy then
-      (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
-      List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
-    else
-      fnl
-  in
+  let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
+  let original_fnl = fnl in
   let fnl = BigList.create fnl in
+  ServerProgress.write "typechecking %d files" (BigList.length fnl);
   let fnl =
     if Float.(sample_rate >= 1.0) then
       fnl
@@ -1187,47 +1317,59 @@ let go_with_interrupt
     BigList.map fnl ~f:(fun path ->
         Check { path; was_already_deferred = false })
   in
+  let num_workers = TypecheckerOptions.num_local_workers opts in
+  let workers =
+    match (workers, num_workers) with
+    | (Some workers, Some num_local_workers) ->
+      let (workers, _) = List.split_n workers num_local_workers in
+      Some workers
+    | (None, _)
+    | (_, None) ->
+      workers
+  in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let ( typing_result,
         delegate_state,
         telemetry,
         env,
-        cancelled_fnl,
+        cancelled_fnl_and_reason,
         diagnostic_pusher ) =
-    if should_process_sequentially opts fnl then begin
-      Hh_logger.log "Type checking service will process files sequentially";
-      let (typing_result, diagnostic_pusher) =
-        process_sequentially
-          ?diagnostic_pusher
-          ctx
-          fnl
-          ~longlived_workers
-          ~remote_execution
-          ~check_info
-          ~typecheck_info
-      in
-      ( typing_result,
-        delegate_state,
-        telemetry,
-        interrupt.MultiThreadedCall.env,
-        [],
-        diagnostic_pusher )
-    end else begin
-      Hh_logger.log "Type checking service will process files in parallel";
-      let num_workers =
-        match remote_execution with
-        | Some _ -> Some 1
-        | _ -> TypecheckerOptions.num_local_workers opts
-      in
-      let workers =
-        match (workers, num_workers) with
-        | (Some workers, Some num_local_workers) ->
-          let (workers, _) = List.split_n workers num_local_workers in
-          Some workers
-        | (None, _)
-        | (_, None) ->
-          workers
-      in
+    let will_use_distc =
+      use_hh_distc_instead_of_hulk
+      && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
+    in
+    let results_via_distc =
+      if will_use_distc then (
+        match process_with_hh_distc ~root ~interrupt ~check_info with
+        | `Success (typing_result, env) ->
+          Some
+            (typing_result, delegate_state, telemetry, env, None, (None, None))
+        | `Cancel (env, reason) ->
+          (* Typecheck is cancelled due to interrupt *)
+          Some
+            ( {
+                errors = Errors.empty;
+                dep_edges = Typing_deps.dep_edges_make ();
+                telemetry = Telemetry.create ();
+              },
+              delegate_state,
+              telemetry,
+              env,
+              Some (original_fnl, reason),
+              (None, None) )
+        | `Error msg ->
+          Hh_logger.log "Error with hh_distc: %s" msg;
+          HackEventLogger.invariant_violation_bug
+            "Unexpected hh_distc error"
+            ~data:msg;
+          None
+      ) else
+        None
+    in
+    (* None means either we didn't attempt distc, or we did but it failed and we'll fall back to parallel... *)
+    match results_via_distc with
+    | Some results -> results
+    | None ->
       process_in_parallel
         ?diagnostic_pusher
         ctx
@@ -1238,12 +1380,8 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~longlived_workers
-        ~hulk_lite
-        ~hulk_heavy
-        ~remote_execution
         ~check_info
         ~typecheck_info
-    end
   in
   let { errors; dep_edges; telemetry = typing_telemetry } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
@@ -1252,7 +1390,7 @@ let go_with_interrupt
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
   in
   ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
-    cancelled_fnl )
+    cancelled_fnl_and_reason )
 
 let go
     (ctx : Provider_context.t)
@@ -1260,14 +1398,14 @@ let go
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
+    ~(root : Path.t option)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
+    ~(use_hh_distc_instead_of_hulk : bool)
+    ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (((), result), cancelled) =
+  let (((), result), unfinished_and_reason) =
     go_with_interrupt
       ?diagnostic_pusher:None
       ctx
@@ -1275,13 +1413,13 @@ let go
       delegate_state
       telemetry
       fnl
+      ~root
       ~interrupt
       ~memory_cap
       ~longlived_workers
-      ~hulk_lite
-      ~hulk_heavy
-      ~remote_execution
+      ~use_hh_distc_instead_of_hulk
+      ~hh_distc_fanout_threshold
       ~check_info
   in
-  assert (List.is_empty cancelled);
+  assert (Option.is_none unfinished_and_reason);
   result

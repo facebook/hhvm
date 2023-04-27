@@ -169,7 +169,7 @@ int low_arena_flags = 0;
 int lower_arena_flags = 0;
 int low_cold_arena_flags = 0;
 int high_cold_arena_flags = 0;
-__thread int high_arena_flags = 0;
+int high_arena_flags = 0;
 __thread int local_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -178,20 +178,6 @@ __thread int local_arena_flags = 0;
 std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::BumpFileMapper* cold_file_mapper = nullptr;
-
-// Customized hooks to use 1g pages for jemalloc metadata.
-static extent_hooks_t huge_page_metadata_hooks;
-static extent_alloc_t* orig_alloc = nullptr;
-
-static bool enableArenaMetadata1GPage = false;
-static bool enableNumaArenaMetadata1GPage = false;
-// jemalloc metadata is allocated through the internal base allocator, which
-// expands memory with an increasingly larger sequence.  The default reserved
-// space (216MB)is a sum of the sequence, from 2MB to 40MB.
-static size_t a0MetadataReservedSize = 0;
-static std::atomic<bool> jemallocMetadataCanUseHuge(false);
-static void* a0ReservedBase = nullptr;
-static std::atomic<size_t> a0ReservedLeft(0);
 
 // Explicit per-thread tcache arenas needing it.
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
@@ -298,7 +284,7 @@ void setup_low_arena(PageSpec s) {
                    true,                // 4K
                    numa_node_set, 1);
   auto emergencyMapper =
-    new BumpEmergencyMapper([]{kill(getpid(), SIGTERM);}, emergencyRange);
+    new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, emergencyRange);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
   emergencyRange.setLowMapper(emergencyMapper);
@@ -344,6 +330,8 @@ void setup_high_arena(PageSpec s) {
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
   high_arena = arena->id();
+  // The flag will be combined with thread-local tcache
+  high_arena_flags = MALLOCX_ARENA(high_arena);
 
   auto& fileRange = getRange(AddrRangeClass::UncountedCold);
   cold_file_mapper = new BumpFileMapper(fileRange);
@@ -431,93 +419,9 @@ DefaultArena* next_extra_arena(int node) {
   return s_extra_arenas[n].first[next % s_extra_arena_per_node];
 }
 
-void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
-                             size_t size, size_t alignment, bool* zero,
-                             bool* commit, unsigned arena_ind) {
-  // This is used for arena 0's extent_alloc.  No malloc / free allowed within
-  // this function since reentrancy is not supported for a0's extent hooks.
-
-  // Note that, only metadata will use 2M alignment (size will be multiple of 2M
-  // as well). Aligned allocation doesn't require alignment by default, because
-  // of the way virtual memory is expanded with opt.retain (which is the
-  // default).  The current extent hook API has no other way to tell if the
-  // allocation is for metadata.  The next major jemalloc release will include
-  // this information in the API.
-  if (!jemallocMetadataCanUseHuge.load() || alignment != size2m) {
-    goto default_alloc;
-  }
-
-  assert(a0ReservedBase != nullptr && (size & (size2m - 1)) == 0);
-  if (arena_ind == 0) {
-    size_t oldValue;
-    while (size <= (oldValue = a0ReservedLeft.load())) {
-      // Try placing a0 metadata on 1G huge pages.
-      if (a0ReservedLeft.compare_exchange_weak(oldValue, oldValue - size)) {
-        assert((oldValue & (size2m - 1)) == 0);
-        return
-          reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(a0ReservedBase) +
-                                   (a0MetadataReservedSize - oldValue));
-      }
-    }
-  } else if (auto ma = alloc::highArena()) {
-    // For non arena 0: malloc / free allowed in this branch.
-    void* ret = ma->extent_alloc(extent_hooks, addr, size, alignment, zero,
-                                 commit, high_arena);
-    if (ret != nullptr) return ret;
-  }
-default_alloc:
-  return orig_alloc(extent_hooks, addr, size, alignment, zero,
-                    commit, arena_ind);
-}
-
-/*
- * Customize arena 0's extent hook to use 1g pages for metadata.
- */
-void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
-                                         size_t reserved) {
-#if !JEMALLOC_METADATA_1G_PAGES
-  return;
-#endif
-  assert(!jemallocMetadataCanUseHuge.load());
-  enableArenaMetadata1GPage = enable;
-  enableNumaArenaMetadata1GPage = enable_numa_arena;
-  a0MetadataReservedSize = reserved;
-
-  auto ma = alloc::highArena();
-  if (!ma) return;
-  bool retain_enabled = false;
-  mallctlRead("opt.retain", &retain_enabled);
-  if (!enableArenaMetadata1GPage || !retain_enabled) return;
-
-  bool zero = true, commit = true;
-  void* ret = ma->extent_alloc(nullptr, nullptr, a0MetadataReservedSize, size2m,
-                               &zero, &commit, high_arena);
-  if (!ret) return;
-
-  a0ReservedBase = ret;
-  a0ReservedLeft.store(a0MetadataReservedSize);
-
-  extent_hooks_t* orig_hooks;
-  int err = mallctlRead<extent_hooks_t*, true>("arena.0.extent_hooks",
-                                               &orig_hooks);
-  if (err) return;
-
-  orig_alloc = orig_hooks->alloc;
-  huge_page_metadata_hooks = *orig_hooks;
-  huge_page_metadata_hooks.alloc = &huge_page_extent_alloc;
-
-  err = mallctlWrite<extent_hooks_t*, true>("arena.0.extent_hooks",
-                                            &huge_page_metadata_hooks);
-  if (err) return;
-
-  jemallocMetadataCanUseHuge.store(true);
-}
-
 void arenas_thread_init() {
   if (high_arena_tcache == -1) {
     mallctlRead<int, true>("tcache.create", &high_arena_tcache);
-    high_arena_flags =
-      MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
   }
   if (local_arena_tcache == -1) {
     local_arena = get_local_arena(s_numaNode);
@@ -549,8 +453,6 @@ void arenas_thread_exit() {
   if (high_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
     high_arena_tcache = -1;
-    // Ideally we shouldn't read high_arena_flags any more, but just in case.
-    high_arena_flags = MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE_NONE;
   }
   if (local_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.destroy", local_arena_tcache);
@@ -689,7 +591,7 @@ struct JEMallocInitializer {
     setenv("GLIBCXX_FORCE_NEW", "1", false /* no overwrite*/);
 
     // Now we need to make the setenv 'stick', which it may not do since
-    // the env is flakey before main() is called.  But luckily stl only
+    // the env is flaky before main() is called.  But luckily stl only
     // looks at this env var the first time it tries to do an alloc, and
     // caches what it finds.  So we just cause an stl alloc here.
     std::string dummy("I need to be allocated");
@@ -816,7 +718,7 @@ struct JEMallocInitializer {
   }
 };
 
-#if defined(__GNUC__) && !defined(__APPLE__)
+#if defined(__GNUC__) && !defined(__clang__)
 // Construct this object before any others.
 // 101 is the highest priority allowed by the init_priority attribute.
 // http://gcc.gnu.org/onlinedocs/gcc-4.0.4/gcc/C_002b_002b-Attributes.html
@@ -858,6 +760,14 @@ void set_cold_file_dir(const char* dir) {
     cold_file_mapper->setDirectory(dir);
   }
 #endif
+}
+
+static SwappableReadonlyArena* s_swappable_readonly_arena = nullptr;
+void setup_swappable_readonly_arena(uint32_t chunk_size) {
+  s_swappable_readonly_arena = new SwappableReadonlyArena(chunk_size);
+}
+SwappableReadonlyArena* get_swappable_readonly_arena() {
+  return s_swappable_readonly_arena;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

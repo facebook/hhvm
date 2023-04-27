@@ -1,0 +1,8 @@
+File "access_on_nothing.php", line 12, characters 10-11:
+A `where` type constraint is violated here (Typing[4323])
+  File "access_on_nothing.php", line 7, characters 10-11:
+  This is the method with `where` type constraints
+  File "access_on_nothing.php", line 7, characters 54-54:
+  You are trying to access the type constant `T` but this is an undefined value
+  File "access_on_nothing.php", line 7, characters 51-54:
+  Definition is here

@@ -40,9 +40,8 @@ SocketData::SocketData(int port, int type, bool nonblocking)
 {}
 
 bool SocketData::closeImpl() {
-  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
-    *s_pcloseRet = ::close(getFd());
+    ::close(getFd());
     setIsClosed(true);
     setFd(-1);
   }
@@ -107,7 +106,7 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
 Socket::~Socket() { }
 
 void Socket::sweep() {
-  Socket::closeImpl();
+  File::close();
   File::sweep();
   m_data = nullptr;
 }
@@ -120,10 +119,6 @@ void Socket::setError(int err) {
 
 bool Socket::open(const String& /*filename*/, const String& /*mode*/) {
   throw_not_supported(__func__, "cannot open socket this way");
-}
-
-bool Socket::close() {
-  return closeImpl();
 }
 
 void Socket::internalSetTimeout(struct timeval &tv) {

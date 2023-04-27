@@ -57,10 +57,13 @@ RuntimeCoeffects RuntimeCoeffects::globals_leak_safe() {
   return c;
 }
 
-#define COEFFECTS     \
-  X(pure)             \
-  X(zoned_with)       \
-  X(write_this_props)
+#define COEFFECTS      \
+  X(pure)              \
+  X(zoned_with)        \
+  X(zoned)             \
+  X(leak_safe_shallow) \
+  X(write_this_props)  \
+  X(write_props)
 
 #define X(x)                                                             \
 RuntimeCoeffects RuntimeCoeffects::x() {                                 \
@@ -173,7 +176,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
   if (!tvIsObject(tv)) {
     raise_error(folly::sformat("Coeffect rule requires parameter at "
                                "position {} to be an object or null",
-                               paramIdx + 1));
+                                paramIdx + 1));
   }
   auto const cls = tv->m_data.pobj->getVMClass();
   return *cls->clsCtxCnsGet(name, true);
@@ -233,12 +236,8 @@ RuntimeCoeffects emitCCReified(const Func* f,
   return *cls->clsCtxCnsGet(name, true);
 }
 
-RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
-                              uint32_t paramIdx) {
-  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
-  auto const index =
-    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
-  auto const tv = vmStack().indC(index);
+RuntimeCoeffects getFunParamHelper(const TypedValue* tv, uint32_t paramIdx) {
+  assertx(tv);
   auto const handleFunc = [&](const Func* func) {
     if (func->hasCoeffectRules()) {
       raiseCoeffectsFunParamCoeffectRulesViolation(func);
@@ -252,7 +251,8 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
   };
   if (tvIsNull(tv))     return RuntimeCoeffects::none();
   if (tvIsFunc(tv)) {
-    auto const func = tv->m_data.pfunc->isMethCaller()
+    auto const func = RO::EvalEmitMethCallerFuncPointers &&
+                      tv->m_data.pfunc->isMethCaller()
       ? getFuncFromMethCallerFunc(tv->m_data.pfunc) : tv->m_data.pfunc;
     return handleFunc(func);
   }
@@ -264,8 +264,8 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
     auto const cls = obj->getVMClass();
     if (cls->isClosureClass()) {
       if (!cls->hasClosureCoeffectsProp()) {
-        assertx(!cls->getCachedInvoke()->hasCoeffectRules());
-        return cls->getCachedInvoke()->requiredCoeffects();
+        assertx(!cls->getRegularInvoke()->hasCoeffectRules());
+        return cls->getRegularInvoke()->requiredCoeffects();
       }
       return c_Closure::fromObject(obj)->getCoeffects();
     }
@@ -278,6 +278,15 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
     return error();
   }
   return error();
+}
+
+RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
+                              uint32_t paramIdx) {
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
+  auto const index =
+    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
+  auto const tv = vmStack().indC(index);
+  return getFunParamHelper(tv, paramIdx);
 }
 
 RuntimeCoeffects emitClosureParentScope(const Func* f,
@@ -406,6 +415,11 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
   not_reached();
 }
 
+uint64_t CoeffectRule::getFunParam(TypedValue tv, uint32_t paramIdx) {
+  assertx(tvIsPlausible(tv));
+  return getFunParamHelper(&tv, paramIdx).value();
+}
+
 bool CoeffectRule::isClosureParentScope() const {
   return m_type == Type::ClosureParentScope;
 }
@@ -459,6 +473,29 @@ bool CoeffectRule::operator==(const CoeffectRule& o) const {
          m_index == o.m_index &&
          m_types == o.m_types &&
          m_name == o.m_name;
+}
+
+bool CoeffectRule::operator<(const CoeffectRule& o) const {
+  if (m_type != o.m_type) return m_type < o.m_type;
+  if (m_name != o.m_name) return m_name < o.m_name;
+  if (m_isClass != o.m_isClass) return m_isClass < o.m_isClass;
+  if (m_index != o.m_index) return m_index < o.m_index;
+  return m_types < o.m_types;
+}
+
+size_t CoeffectRule::hash() const {
+  auto const hash = folly::hash::hash_combine(
+    m_type,
+    m_isClass,
+    m_index,
+    pointer_hash<StringData>{}(m_name)
+  );
+  return folly::hash::hash_range(
+    m_types.begin(),
+    m_types.end(),
+    hash,
+    pointer_hash<StringData>{}
+  );
 }
 
 template<class SerDe>

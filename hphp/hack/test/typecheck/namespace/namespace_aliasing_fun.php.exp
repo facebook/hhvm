@@ -1,6 +1,0 @@
-File "namespace_aliasing_fun.php", line 11, characters 14-23:
-Unbound global function: `Dict\foo` is not a valid name for fun() (Naming[2105])
-File "namespace_aliasing_fun.php", line 11, characters 14-23:
-Unbound name: `Dict\foo` (a global function) (Naming[2049])
-File "namespace_aliasing_fun.php", line 11, characters 14-23:
-Unbound name (typing): `Dict\foo` (Typing[4107])

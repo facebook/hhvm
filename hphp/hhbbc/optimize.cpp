@@ -115,12 +115,10 @@ Optional<Bytecode> makeAssert(ArgType arg, Type t) {
   if (t.subtypeOf(BBottom)) return std::nullopt;
   auto const rat = make_repo_type(t);
   using T = RepoAuthType::Tag;
-  if (options.FilterAssertions) {
-    // Cell and InitCell don't add any useful information, so leave them
-    // out entirely.
-    if (rat == RepoAuthType{T::Cell})     return std::nullopt;
-    if (rat == RepoAuthType{T::InitCell}) return std::nullopt;
-  }
+  // Cell and InitCell don't add any useful information, so leave them
+  // out entirely.
+  if (rat == RepoAuthType{T::Cell})     return std::nullopt;
+  if (rat == RepoAuthType{T::InitCell}) return std::nullopt;
   return Bytecode { TyBC { arg, rat } };
 }
 
@@ -135,18 +133,14 @@ void insert_assertions_step(const php::Func& func,
 
   for (LocalId i = 0; i < state.locals.size(); ++i) {
     if (func.locals[i].killed) continue;
-    if (options.FilterAssertions) {
-      // Do not emit assertions for untracked locals.
-      if (i >= mayReadLocalSet.size()) break;
-      if (!mayReadLocalSet.test(i)) continue;
-    }
+    // Do not emit assertions for untracked locals.
+    if (i >= mayReadLocalSet.size()) break;
+    if (!mayReadLocalSet.test(i)) continue;
     if (ignoresReadLocal(bcode, i)) continue;
     auto const realT = state.locals[i];
     auto const op = makeAssert<bc::AssertRATL>(i, realT);
     if (op) gen(*op);
   }
-
-  if (!options.InsertStackAssertions) return;
 
   assertx(obviousStackOutputs.size() == state.stack.size());
 
@@ -157,9 +151,7 @@ void insert_assertions_step(const php::Func& func,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
-      return;
-    }
+    if (!realT.strictSubtypeOf(flav)) return;
 
     auto const op =
       makeAssert<bc::AssertRATStk>(
@@ -260,6 +252,8 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeStructC:
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
+  case Op::ClassHasReifiedGenerics:
+  case Op::HasReifiedParent:
   case Op::InstanceOf:
   case Op::Print:
   case Op::Exit:
@@ -271,6 +265,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeC:
   case Op::IsTypeL:
   case Op::OODeclExists:
+  case Op::CreateCl:
     return true;
 
   case Op::This:
@@ -322,12 +317,12 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
   auto interp = Interp { index, ctx, visit.collect, bid, cblk.get(), state };
 
   for (auto& op : cblk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(func, op));
+    FTRACE(2, "  == {}\n", show(*func, op));
 
     auto gen = [&] (const Bytecode& newb) {
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(func, newBCs.back()));
+      FTRACE(2, "   + {}\n", show(*func, newBCs.back()));
     };
 
     if (state.unreachable) {
@@ -467,7 +462,7 @@ struct OptimizeIterState {
       if (!eligible.any()) break;
 
       auto const& op = blk->hhbcs[opIdx];
-      FTRACE(2, "  == {}\n", show(func, op));
+      FTRACE(2, "  == {}\n", show(*func, op));
 
       if (state.unreachable) break;
 
@@ -603,7 +598,7 @@ void optimize_iterators(VisitContext& visit) {
 
     if (!state.eligible[fixup.init]) {
       // This iteration loop isn't eligible, so don't apply the fixup
-      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(func, op));
+      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(*func, op));
       continue;
     }
 
@@ -649,11 +644,11 @@ void optimize_iterators(VisitContext& visit) {
 
     FTRACE(
       2, "   ({}): {} ==> {}\n",
-      fixup.show(*func), show(func, op),
+      fixup.show(*func), show(*func, op),
       [&] {
         using namespace folly::gen;
         return from(newOps)
-          | map([&] (const Bytecode& bc) { return show(func, bc); })
+          | map([&] (const Bytecode& bc) { return show(*func, bc); })
           | unsplit<std::string>(",");
       }()
     );
@@ -665,28 +660,6 @@ void optimize_iterators(VisitContext& visit) {
   }
 
   FTRACE(10, "{}", show(*func));
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Use the information in the index to resolve a type-constraint to its
- * underlying type, if possible.
- */
-void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
-  if (!tc.isUnresolved()) return;
-
-  auto const resolved = index.resolve_type_name(tc.typeName());
-  if (resolved.type == AnnotType::Unresolved) return;
-
-  if (resolved.type == AnnotType::Object) {
-    tc.resolveType(resolved.type, resolved.nullable, resolved.value->name());
-    if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
-  } else {
-    tc.resolveType(resolved.type, resolved.nullable, nullptr);
-  }
-
-  FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -713,27 +686,23 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
      */
     remove_unreachable_blocks(ainfo, func);
 
-    if (options.LocalDCE) {
-      visit_blocks("local DCE", *visit, local_dce);
-    }
-    if (options.GlobalDCE) {
-      split_critical_edges(index, ainfo, func);
-      if (global_dce(index, ainfo, func)) again = true;
-      if (control_flow_opts(ainfo, func)) again = true;
-      assertx(check(*func));
-      /*
-       * Global DCE can change types of locals across blocks.  See
-       * dce.cpp for an explanation.
-       *
-       * We need to perform a final type analysis before we do
-       * anything else.
-       */
-      auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-      ainfo = analyze_func(index, ctx, CollectionOpts{});
-      update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
-      collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
-      visit.emplace(index, ainfo, *collect, func);
-    }
+    visit_blocks("local DCE", *visit, local_dce);
+    split_critical_edges(index, ainfo, func);
+    if (global_dce(index, ainfo, func)) again = true;
+    if (control_flow_opts(ainfo, func)) again = true;
+    assertx(check(*func));
+    /*
+     * Global DCE can change types of locals across blocks.  See
+     * dce.cpp for an explanation.
+     *
+     * We need to perform a final type analysis before we do
+     * anything else.
+     */
+    auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
+    ainfo = analyze_func(index, ctx, CollectionOpts{});
+    update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
+    collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+    visit.emplace(index, ainfo, *collect, func);
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
@@ -746,20 +715,24 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
         blk.hhbcs[0].op == Op::Null &&
         blk.hhbcs[1].op == Op::RetC) {
       FTRACE(2, "Erasing {}::{}\n", func->cls->name, func->name);
-      func->cls->methods.erase(
-        std::find_if(func->cls->methods.begin(),
-                     func->cls->methods.end(),
-                     [&](const std::unique_ptr<php::Func>& f) {
-                       return f.get() == func;
-                     }));
+      auto const it = std::find_if(
+        func->cls->methods.begin(),
+        func->cls->methods.end(),
+        [&](const std::unique_ptr<php::Func>& f) {
+          return f.get() == func;
+        }
+      );
+      assertx(it != func->cls->methods.end());
+      // Don't actually remove it from the methods table, as that
+      // would invalidate any indices in the table. Just null out the
+      // entry.
       func.release();
+      it->reset();
       return;
     }
   }
 
-  if (options.InsertAssertions) {
-    visit_blocks("insert assertions", *visit, insert_assertions);
-  }
+  visit_blocks("insert assertions", *visit, insert_assertions);
 
   // NOTE: We shouldn't duplicate blocks that are shared between two Funcs
   // in this loop. We shrink BytecodeVec at the time we parse the function,
@@ -770,9 +743,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
     if (block->hhbcs.capacity() == block->hhbcs.size()) continue;
     func.blocks()[bid].mutate()->hhbcs.shrink_to_fit();
   }
-
-  for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
-  fixTypeConstraint(index, func->retTypeConstraint);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -898,20 +868,6 @@ void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
     }
   }
   blockUpdates.clear();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void optimize_class_prop_type_hints(const Index& index, Context ctx) {
-  assertx(!ctx.func);
-  auto const bump = trace_bump_for(ctx.cls, nullptr);
-  Trace::Bump bumper{Trace::hhbbc, bump};
-  for (auto& prop : ctx.cls->properties) {
-    fixTypeConstraint(
-      index,
-      const_cast<TypeConstraint&>(prop.typeConstraint)
-    );
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

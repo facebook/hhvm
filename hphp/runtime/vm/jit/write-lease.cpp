@@ -99,10 +99,13 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   if (amOwner()) return true;
   if (!threadCanAcquire && !blocking) return false;
 
-  auto const expireDiff = m_hintExpire - Timer::GetCurrentTimeMicros();
-  if (!blocking && (m_held.load(std::memory_order_acquire) ||
-                    (expireDiff > 0 && m_owner != pthread_self()))) {
-    return false;
+  if (!blocking) {
+    if (m_held.load(std::memory_order_acquire)) {
+      return false;
+    }
+    if ((m_hintExpire - Timer::GetCurrentTimeMicros()) > 0 && m_owner != pthread_self()) {
+      return false;
+    }
   }
 
   checkRank(RankWriteLease);

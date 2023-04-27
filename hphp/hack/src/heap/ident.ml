@@ -25,8 +25,6 @@ let tmp () =
     trace := IMap.add res ("__tmp" ^ string_of_int res) !trace;
   res
 
-[@@@warning "-3"]
-
 let to_string x =
   match IMap.find_opt x !trace with
   | Some res -> res

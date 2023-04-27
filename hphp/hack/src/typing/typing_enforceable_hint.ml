@@ -21,9 +21,6 @@ let validator =
     (* Only comes about because naming has reported an error and left Hany *)
     method! on_tany acc _ = acc
 
-    (* Already reported an error *)
-    method! on_terr acc _ = acc
-
     method! on_tprim acc r prim =
       match prim with
       | Aast.Tvoid -> this#invalid acc r "the `void` type"
@@ -65,9 +62,9 @@ let validator =
       else
         this#check_generic acc r name
 
-    method! on_newtype acc r sid _ ty _ =
+    method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then
-        this#on_type acc ty
+        this#on_type acc as_cstr
       else if acc.Type_validator.like_context then
         acc
       else

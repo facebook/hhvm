@@ -14,6 +14,7 @@ val empty : unit -> t
 
 val print_to_stderr : t -> unit
 
+(** Apply overrides using provided overrides. *)
 val apply_overrides : from:string option -> config:t -> overrides:t -> t
 
 val parse_contents : string -> t
@@ -34,6 +35,8 @@ module type Getters_S = sig
   val string_ : string -> default:string -> t -> string
 
   val int_ : string -> default:int -> t -> int
+
+  val int_opt_result : string -> t -> (int, string) result option
 
   val int_opt : string -> t -> int option
 

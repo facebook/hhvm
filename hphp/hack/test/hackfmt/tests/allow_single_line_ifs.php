@@ -42,7 +42,7 @@ if (true) print('hi');
 
 if ($a)
 f();
-elseif ($b)
+else if ($b)
 g();
 else
 h();
@@ -53,7 +53,7 @@ else h();
 
 if ($a)
 f();
-elseif ($b) {
+else if ($b) {
 g();
 } else
 h();
@@ -68,7 +68,7 @@ h();
 
 if ($a)
 f();
-elseif ($b) {
+else if ($b) {
 g();
 g2();
 } else

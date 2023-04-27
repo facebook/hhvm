@@ -1113,7 +1113,7 @@ let find_large_type env v =
     if ISet.is_empty lower_vars then
       find_small_type env v
     else
-      (env, Typing_make_type.err r)
+      Env.fresh_type_error env Pos.none
   else
     let bounds = TySet.elements @@ Utils.filter_locl_types bounds in
     let (env, ty) = Typing_intersection.intersect_list env r bounds in

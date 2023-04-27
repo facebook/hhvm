@@ -31,58 +31,7 @@ namespace HPHP {
 Class* c_Closure::cls_Closure;
 
 const StaticString
-  s_Closure("Closure"),
-  s_this("this"),
-  s_varprefix("$"),
-  s_parameter("parameter"),
-  s_required("<required>"),
-  s_optional("<optional>");
-
-static Array HHVM_METHOD(Closure, __debugInfo) {
-  auto closure = c_Closure::fromObject(this_);
-
-  Array ret = Array::CreateDict();
-
-  // Serialize 'use' parameters.
-  auto cls = this_->getVMClass();
-  if (auto nProps = cls->numDeclProperties()) {
-    DictInit useVars(nProps);
-
-    auto propsInfos = cls->declProperties();
-    auto idx = 0;
-    closure->props()->foreach(nProps, [&](tv_rval rval){
-      useVars.set(StrNR(propsInfos[idx++].name), *rval);
-    });
-
-    ret.set(s_static, make_array_like_tv(useVars.toArray().get()));
-  }
-
-  auto const func = closure->getInvokeFunc();
-
-  // Serialize function parameters.
-  if (auto nParams = func->numParams()) {
-   Array params = Array::CreateDict();
-
-   auto lNames = func->localNames();
-   for (int i = 0; i < nParams; ++i) {
-      auto str = String::attach(
-        StringData::Make(s_varprefix.get(), lNames[i])
-      );
-
-      bool optional = func->params()[i].phpCode;
-      params.set(str, optional ? s_optional : s_required);
-    }
-
-    ret.set(s_parameter, params);
-  }
-
-  // Serialize 'this' object.
-  if (closure->hasThis()) {
-    ret.set(s_this, Object(closure->getThis()));
-  }
-
-  return ret;
-}
+  s_Closure("Closure");
 
 struct ClosurePropHandler: Native::BasePropHandler {
   static bool isPropSupported(const String&, const String&) {
@@ -113,16 +62,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    */
   auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
   DEBUG_ONLY auto const numProps = cls->numDeclProperties();
-  //assertx(numProps == numArgs + (hasCoeffectsProp ? 1 : 0));
-  always_assert_flog(
-    numProps == numArgs + (hasCoeffectsProp ? 1 : 0),
-    "{} {} {} {} {}",
-    cls->name(),
-    cls->preClass()->unit()->origFilepath(),
-    numProps,
-    numArgs,
-    hasCoeffectsProp
-  );
+  assertx(numProps == numArgs + (hasCoeffectsProp ? 1 : 0));
 
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.
@@ -147,9 +87,8 @@ void c_Closure::initActRecFromClosure(ActRec* ar) {
   auto const func = ar->func();
   assertx(func->isClosureBody());
 
-  // Request pointer so that we decref once we are done.
-  auto const closure = req::ptr<c_Closure>::attach(
-    c_Closure::fromObject(ar->getThisInPrologue()));
+  auto const closure = c_Closure::fromObject(ar->getThisInPrologue());
+
   assertx(func->implCls() == closure->getVMClass());
 
   // Put in the correct context
@@ -174,11 +113,25 @@ void c_Closure::initActRecFromClosure(ActRec* ar) {
   assertx((hasCoeffectsProp ? 1 : 0) + func->numClosureUseLocals() ==
           cls->numDeclProperties());
   auto loc = reinterpret_cast<TypedValue*>(ar) - func->firstClosureUseLocalId();
-  closure->props()->foreach(
-    hasCoeffectsProp ? 1 : 0,
-    func->numClosureUseLocals(),
-    [&](tv_rval rval) { tvDup(*rval, *--loc); }
-  );
+
+  auto const iterProps = [&](auto&& assignFunc){
+    closure->props()->foreach(
+      hasCoeffectsProp ? 1 : 0,
+      func->numClosureUseLocals(),
+      assignFunc
+    );
+  };
+
+  // Closure properties can be moved rather than duplicated when closure has
+  // exactly 1 reference. After moving props, closure can be freed.
+  if (closure->hasExactlyOneRef()) {
+    iterProps([&](tv_rval rval) {tvCopy(*rval, *--loc);});
+    releaseShallow(closure);
+  } else {
+    iterProps([&](tv_rval rval) {tvDup(*rval, *--loc);});
+    closure->decRefCount();
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -196,6 +149,17 @@ void c_Closure::instanceDtor(ObjectData* obj, const Class* cls) {
   if (auto t = closure->getThis()) decRefObj(t);
 
   closure->props()->release(cls->countablePropsEnd());
+  auto hdr = closure->hdr();
+  tl_heap->objFree(hdr, hdr->size());
+}
+
+void c_Closure::releaseShallow(ObjectData* obj) {
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)obj);
+  }
+
+  auto closure = c_Closure::fromObject(obj);
+  if (auto t = closure->getThis()) decRefObj(t);
 
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());
@@ -238,7 +202,7 @@ ObjectData* createClosure(Class* cls) {
    * instead, but only in non-repo-auth mode.
    */
   if (!rds::isHandleInit(cls->classHandle())) {
-    cls->preClass()->namedEntity()->clsList()->setCached();
+    cls->preClass()->namedType()->clsList()->setCached();
   }
   return createClosureRepoAuth(cls);
 }
@@ -288,7 +252,6 @@ ObjectData* c_Closure::clone() {
 
 void StandardExtension::loadClosure() {
   Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
-  HHVM_SYS_ME(Closure, __debugInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

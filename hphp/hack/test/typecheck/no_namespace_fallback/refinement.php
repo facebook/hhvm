@@ -18,13 +18,6 @@ function returns_int(mixed $in): ?int {
   return null;
 }
 
-function returns_array(mixed $in): ?varray_or_darray<mixed> {
-  if (\HH\is_php_array($in)) {
-    return $in;
-  }
-  return null;
-}
-
 function returns_vec(mixed $in): ?vec<mixed> {
   if ($in is vec<_>) {
     return $in;

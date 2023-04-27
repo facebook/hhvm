@@ -68,13 +68,23 @@ public:
 
   explicit Object(Class* cls)
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
+    // Needed for serialization
+    if (cls->hasReifiedParent()) {
+      m_obj->setReifiedGenerics(cls, ArrayData::CreateVec());
+    }
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
     assertx(!m_obj || m_obj->checkCount());
   }
 
   explicit Object(Class* cls, ArrayData* reifiedTypes)
-    : m_obj(ObjectData::newInstanceReified(cls, reifiedTypes), NoIncRef{}) {
+    : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
+    // Needed for serialization
+    if (cls->hasReifiedGenerics()) {
+      m_obj->setReifiedGenerics(cls, reifiedTypes);
+    } else if (cls->hasReifiedParent()) {
+      m_obj->setReifiedGenerics(cls, ArrayData::CreateVec());
+    }
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
     assertx(!m_obj || m_obj->checkCount());
@@ -129,10 +139,6 @@ public:
   /**
    * Type conversions
    */
-  bool    toBoolean() const { return m_obj ? m_obj->toBoolean() : false; }
-  char    toByte   () const { return toInt64(); }
-  int16_t toInt16  () const { return toInt64(); }
-  int32_t toInt32  () const { return toInt64(); }
   int64_t toInt64  () const { return m_obj ? m_obj->toInt64() : 0; }
   double  toDouble () const { return m_obj ? m_obj->toDouble() : 0; }
   String  toString () const;

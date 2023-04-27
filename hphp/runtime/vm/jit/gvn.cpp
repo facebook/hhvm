@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/perf-warning.h"
@@ -189,8 +190,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case Shr:
   case Floor:
   case Ceil:
-  case AddIntO:
-  case SubIntO:
   case MulIntO:
   case XorBool:
   case ConvDblToBool:
@@ -278,8 +277,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:
-  case LdClsPropAddrOrNull:
-  case LdClsPropAddrOrRaise:
   case LdObjClass:
   case LdClsName:
   case LdLazyCls:
@@ -301,6 +298,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case Select:
   case StrictlyIntegerConv:
   case LookupSPropSlot:
@@ -331,13 +330,17 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdTVFromRDS:
   case StructDictSlot:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
     return true;
 
   case EqArrLike:
   case NeqArrLike:
     // Keyset equality comparisons never re-enter or throw
     return inst->src(0)->type() <= TKeyset && inst->src(1)->type() <= TKeyset;
-
 
   case IsTypeStruct:
     // Resources can change type without generating a new SSATmp,

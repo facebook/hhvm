@@ -111,6 +111,7 @@ template <int N> struct EmptyHeader {
   // Always non-empty
   size_t startHash() const { always_assert(false); }
   void moved() {}
+  bool needsMixing() const { return false; }
 };
 // Shared, fixed size case. The head just stores a FuncId (to distinguish
 // different functions), but the number of keys is a constant.
@@ -126,6 +127,7 @@ template <int N> struct FuncIdHeader {
   // Always non-empty
   size_t startHash() const { always_assert(false); }
   void moved() {}
+  bool needsMixing() const { return true; }
   FuncId funcId;
 };
 // Generic case. Both the function and key count are stored (and are
@@ -141,6 +143,7 @@ struct GenericHeader {
   }
   size_t startHash() const { return id.asParam(); }
   void moved() { id.setKeyCount(0); }
+  bool needsMixing() const { return true; }
   GenericMemoId id;
 };
 
@@ -339,15 +342,23 @@ template <typename S> struct Key {
     auto hash = storage.header().startHash(
       storage.elem(0).hash(storage.isString(0))
     );
-    // And then combine it with the rest of the hashes for the other key
-    // elements.
-    for (size_t i = 1; i < storage.size(); ++i) {
-      hash = combineHashes(
-        hash,
-        storage.elem(i).hash(storage.isString(i))
-      );
+    if (storage.size() > 1) {
+      // And then combine it with the rest of the hashes for the other key
+      // elements.
+      for (size_t i = 1; i < storage.size(); ++i) {
+        hash = combineHashes(
+          hash,
+          storage.elem(i).hash(storage.isString(i))
+        );
+      }
+      // Need to do the bit mix explicitly.
+      hash = hash_int64(hash);
+    } else if (storage.header().needsMixing() || !storage.isString(0)) {
+      // Single element, and the element itself is combined with another key,
+      // or the element is an int, so needs a final mix.
+      hash = hash_int64(hash);
     }
-    return hash;
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   TYPE_SCAN_CUSTOM() {
@@ -370,7 +381,7 @@ using UnboundKey = Key<UnboundStorage>;
  * KeyProxy is a wrapper around the pointer to the TypedValue array passed into the
  * get/set function. It allows us to do lookups in the memo cache without having
  * to move or transform those Cells. It comes in two flavors: KeyProxy, where
- * the key types are not known and must be checked at runtme, and
+ * the key types are not known and must be checked at runtime, and
  * KeyProxyWithTypes, where the key types are known statically.
  */
 struct KeyProxy {
@@ -389,10 +400,18 @@ struct KeyProxy {
     // Otherwise, combine the hash from the header and the first element, and
     // then combine that with the rest of the element hashes.
     auto hash = header.startHash(getHash(keys[0]));
-    for (size_t i = 1; i < header.size(); ++i) {
-      hash = combineHashes(hash, getHash(keys[i]));
+    if (header.size() > 1) {
+      for (size_t i = 1; i < header.size(); ++i) {
+        hash = combineHashes(hash, getHash(keys[i]));
+      }
+      // Need to explicitly mix.
+      hash = hash_int64(hash);
+    } else if (header.needsMixing() || isIntType(keys[0].m_type)) {
+      // Single element, and the element itself is combined with another key,
+      // or the element is an int, so needs a final mix.
+      hash = hash_int64(hash);
     }
-    return hash;
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -438,7 +457,11 @@ struct KeyProxyWithTypes {
   template <typename H>
   size_t hash(H header) const {
     assertx(header.size() == Size);
-    return Next{keys}.template hashRec<1>(header.startHash(hashAt<0>()));
+    auto hash = Next{keys}.template hashRec<1>(header.startHash(hashAt<0>()));
+    // Need to explicitly mix since there's at least 2 elements, so hashCombine
+    // hash been called.
+    hash = hash_int64(hash);
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -523,7 +546,11 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
   template <typename H>
   size_t hash(H header) const {
     assertx(header.size() == 1);
-    return header.startHash(hashAt<0>());
+    auto hash = header.startHash(hashAt<0>());
+    if (header.needsMixing() || !IsStr) {
+      hash = hash_int64(hash);
+    }
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -615,6 +642,8 @@ template <typename K> struct KeyEquals {
 
 template <typename K> struct KeyHasher {
   using is_transparent = void;
+  using folly_is_avalanching = std::true_type;
+  using folly_assume_32bit_hash = std::true_type;
 
   template <typename P>
   size_t operator()(std::tuple<typename K::Header, P> k) const {
@@ -625,6 +654,9 @@ template <typename K> struct KeyHasher {
 
 // The SharedOnlyKey has already been hashed, so its an identity here.
 struct SharedOnlyKeyHasher {
+  using folly_is_avalanching = std::true_type;
+  using folly_assume_32bit_hash = std::true_type;
+
   size_t operator()(SharedOnlyKey k) const { return k; }
 };
 
@@ -646,26 +678,6 @@ struct TVWrapper {
   ~TVWrapper() { tvDecRefGen(value); }
   TypedValue value;
 };
-
-////////////////////////////////////////////////////////////
-
-}
-
-}
-
-namespace folly {
-
-// Mark the SharedOnlyKeyHasher as avalanching so that F14 doesn't use the bit
-// mixer on it.
-template <typename K>
-struct IsAvalanchingHasher<HPHP::memoCacheDetail::SharedOnlyKeyHasher, K>
-  : std::true_type {};
-
-}
-
-namespace HPHP {
-
-namespace memoCacheDetail {
 
 ////////////////////////////////////////////////////////////
 

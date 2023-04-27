@@ -1,10 +1,10 @@
-File "test_consts10.php", line 6, characters 16-16:
-Cannot reference abstract constant `C1::X` directly (Typing[4129])
-File "test_consts10.php", line 4, characters 22-22:
-Declaration is here
 File "test_consts10.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
-File "test_consts10.php", line 5, characters 24-29:
-Expected `string`
-File "test_consts10.php", line 4, characters 18-20:
-But got `int`
+  File "test_consts10.php", line 5, characters 24-29:
+  Expected `string`
+  File "test_consts10.php", line 4, characters 18-20:
+  But got `int`
+File "test_consts10.php", line 6, characters 16-16:
+Cannot reference abstract constant `C1::X` directly (Typing[4129])
+  File "test_consts10.php", line 4, characters 22-22:
+  Declaration is here

@@ -2,7 +2,7 @@
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// changed-a-decl.php
 <?hh
@@ -12,39 +12,39 @@ module A {}
 
 //// base-a-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-class FooA {}
+internal class FooA {}
 
 //// changed-a-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-class FooA {}
+internal class FooA {}
 //// base-b-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-function foobar(): void {}
+internal function foobar(): void {}
 //// changed-b-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-function foobar(): void {}
+internal function foobar(): void {}
 
 //// base-c-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-newtype Foo = int;
+internal newtype Foo = int;
 //// changed-c-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
-<<__Internal>>
-newtype Foo = int;
+internal newtype Foo = int;

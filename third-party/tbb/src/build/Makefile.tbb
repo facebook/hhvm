@@ -1,0 +1,135 @@
+# Copyright (c) 2005-2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+#
+
+#------------------------------------------------------------------------------
+# Define rules for making the TBB shared library.
+#------------------------------------------------------------------------------
+
+tbb_root ?= "$(TBBROOT)"
+BUILDING_PHASE=1
+include $(tbb_root)/build/common.inc
+CPLUS_FLAGS += $(SDL_FLAGS)
+DEBUG_SUFFIX=$(findstring _debug,_$(cfg))
+
+TBB.STATIC = $(LIB_OUTPUT_KEY)libtbb$(CPF_SUFFIX)$(DEBUG_SUFFIX).a
+
+#------------------------------------------------------------
+# Define static pattern rules dealing with .cpp source files
+#------------------------------------------------------------
+$(warning CONFIG: cfg=$(cfg) arch=$(arch) compiler=$(compiler) target=$(target) runtime=$(runtime))
+
+ifneq ($(BUILD_SHARED),no)
+default_tbb: $(TBB.DLL) $(TBB.STATIC)
+else
+default_tbb: $(TBB.STATIC)
+endif
+.PHONY: default_tbb tbbvars clean
+.PRECIOUS: %.$(OBJ)
+
+VPATH = $(tbb_root)/src/tbb/$(ASSEMBLY_SOURCE) $(tbb_root)/src/tbb $(tbb_root)/src/old $(tbb_root)/src/rml/client
+
+CPLUS_FLAGS += $(PIC_KEY) $(DSE_KEY) $(DEFINE_KEY)__TBB_BUILD=1
+
+# Object files (that were compiled from C++ code) that gmake up TBB
+TBB_CPLUS.OBJ = concurrent_hash_map.$(OBJ) \
+		concurrent_queue.$(OBJ) \
+		concurrent_vector.$(OBJ) \
+		dynamic_link.$(OBJ) \
+		itt_notify.$(OBJ) \
+		cache_aligned_allocator.$(OBJ) \
+		pipeline.$(OBJ) \
+		queuing_mutex.$(OBJ) \
+		queuing_rw_mutex.$(OBJ) \
+		reader_writer_lock.$(OBJ) \
+		spin_rw_mutex.$(OBJ) \
+		x86_rtm_rw_mutex.$(OBJ) \
+		spin_mutex.$(OBJ) \
+		critical_section.$(OBJ) \
+		mutex.$(OBJ) \
+		recursive_mutex.$(OBJ) \
+		condition_variable.$(OBJ) \
+		tbb_thread.$(OBJ) \
+		concurrent_monitor.$(OBJ) \
+		semaphore.$(OBJ) \
+		private_server.$(OBJ) \
+		rml_tbb.$(OBJ) \
+		tbb_misc.$(OBJ) \
+		tbb_misc_ex.$(OBJ) \
+		task.$(OBJ) \
+		task_group_context.$(OBJ) \
+		governor.$(OBJ) \
+		market.$(OBJ) \
+		arena.$(OBJ) \
+		scheduler.$(OBJ) \
+		observer_proxy.$(OBJ) \
+		tbb_statistics.$(OBJ) \
+		tbb_main.$(OBJ)
+
+# OLD/Legacy object files for backward binary compatibility
+ifeq (,$(findstring $(DEFINE_KEY)TBB_NO_LEGACY,$(CPLUS_FLAGS)))
+TBB_CPLUS_OLD.OBJ = \
+		concurrent_vector_v2.$(OBJ) \
+		concurrent_queue_v2.$(OBJ) \
+		spin_rw_mutex_v2.$(OBJ) \
+		task_v2.$(OBJ)
+endif
+
+# Object files that gmake up TBB (TBB_ASM.OBJ is platform-specific)
+TBB.OBJ = $(TBB_CPLUS.OBJ) $(TBB_CPLUS_OLD.OBJ) $(TBB_ASM.OBJ)
+
+# Suppress superfluous warnings for TBB compilation
+WARNING_KEY += $(WARNING_SUPPRESS)
+
+include $(tbb_root)/build/common_rules.inc
+
+ifneq (,$(TBB.DEF))
+tbb.def: $(TBB.DEF) $(TBB.LST)
+	$(CPLUS) $(PREPROC_ONLY) $< $(CPLUS_FLAGS) $(INCLUDES) > $@
+
+LIB_LINK_FLAGS += $(EXPORT_KEY)tbb.def
+$(TBB.DLL): tbb.def
+endif
+
+tbbvars.sh:
+	$(MAKE_TBBVARS)
+
+$(TBB.DLL): BUILDING_LIBRARY = $(TBB.DLL)
+$(TBB.DLL): $(TBB.OBJ) $(TBB.RES) tbbvars.sh $(TBB_NO_VERSION.DLL)
+	$(LIB_LINK_CMD) $(LIB_OUTPUT_KEY)$(TBB.DLL) $(TBB.OBJ) $(TBB.RES) $(LIB_LINK_LIBS) $(LIB_LINK_FLAGS)
+
+$(TBB.STATIC): $(TBB.OBJ) $(TBB.RES) tbbvars.sh
+	# The makefile, as-is, will not build a static lib for libtbb.
+	# (http://threadingbuildingblocks.org/wiki/index.php?title=Using_TBB#
+	# Is_there_a_version_of_TBB_that_provides_statically_linked_libraries.3F).
+	# This is a port of iproctor's method for getting a static lib
+	# built:
+	#   https://phabricator.fb.com/diffusion/E/browse/externals/cpp/hphp/
+	#        downloads/Makefile;384196$508
+	echo ar -rcs $@ $(TBB.OBJ)
+	ar -rcs $@ $(TBB.OBJ)
+
+ifneq (,$(TBB_NO_VERSION.DLL))
+$(TBB_NO_VERSION.DLL):
+	ln -sfT $(TBB_NO_VERSION.DLL) $(TBB.DLL)
+endif
+
+#clean:
+#	$(RM) *.$(OBJ) *.$(DLL) *.res *.map *.ilk *.pdb *.exp *.manifest *.tmp *.d core core.*[0-9][0-9] *.ver
+
+# Include automatically generated dependencies
+-include *.d

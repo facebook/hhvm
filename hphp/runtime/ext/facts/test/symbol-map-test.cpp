@@ -15,6 +15,7 @@
 */
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -38,11 +39,15 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
 
+using ::testing::_;
 using ::testing::AllOf;
 using ::testing::Contains;
 using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::SaveArg;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
@@ -54,18 +59,18 @@ using ::testing::UnorderedElementsAre;
  * HPHP::StringData for production use.
  */
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 
 struct StringData {
-public:
+ public:
   // These two constructions allow implicit construction for convenience
   // in unit tests.
   /* implicit */ StringData(const char* s) : m_impl{s} {};
-  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {
-  }
+  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {}
 
-  explicit StringData(std::string_view s) : m_impl{s} {
-  }
+  explicit StringData(std::string_view s) : m_impl{s} {}
 
   std::string* impl() const {
     return &m_impl;
@@ -96,7 +101,7 @@ public:
     return lower(m_impl) == lower(o.m_impl);
   }
 
-private:
+ private:
   mutable std::string m_impl;
 };
 
@@ -176,24 +181,40 @@ std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
   return os << *s.get()->impl();
 }
 
-template <SymKind k> void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
+template <SymKind k>
+void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
   *os << symbol.slice();
 }
 
-template <SymKind k> bool operator==(const Symbol<k>& symbol, const char* str) {
+template <SymKind k>
+bool operator==(const Symbol<k>& symbol, const char* str) {
   return symbol.slice() == str;
 }
 
 template <SymKind k, typename T, typename U>
 void PrintTo(
-    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, ::std::ostream* os) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo,
+    ::std::ostream* os) {
   *os << std::get<0>(typeInfo).slice();
+}
+
+void PrintTo(const Path& path, ::std::ostream* os) {
+  if (path.m_path == nullptr) {
+    *os << "<unset>";
+  } else {
+    *os << path.slice();
+  }
 }
 
 template <SymKind k, typename T, typename U>
 bool operator==(
-    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, const char* str) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo,
+    const char* str) {
   return std::get<0>(typeInfo) == str;
+}
+
+bool operator==(const Path& path, const std::string& other) {
+  return (path == std::string_view(other));
 }
 
 namespace {
@@ -201,7 +222,278 @@ namespace {
 constexpr int kTypeFlagAbstractBit = 1;
 constexpr int kTypeFlagFinalBit = 2;
 
-auto constexpr kSHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+struct MockAutoloadDB : public AutoloadDB {
+  MOCK_METHOD(bool, isReadOnly, (), (const override));
+  MOCK_METHOD(void, commit, (), (override));
+
+  MOCK_METHOD(
+      void,
+      insertPath,
+      (const std::filesystem::path& path),
+      (override));
+  MOCK_METHOD(void, erasePath, (const std::filesystem::path& path), (override));
+
+  MOCK_METHOD(
+      void,
+      insertSha1Hex,
+      (const std::filesystem::path& path, const Optional<std::string>& sha1hex),
+      (override));
+  MOCK_METHOD(
+      std::string,
+      getSha1Hex,
+      (const std::filesystem::path& path),
+      (override));
+
+  // Types
+  MOCK_METHOD(
+      void,
+      insertType,
+      (std::string_view type,
+       const std::filesystem::path& path,
+       TypeKind kind,
+       TypeFlagMask flags),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getTypePath,
+      (std::string_view type),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathTypes,
+      (const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      KindAndFlags,
+      getKindAndFlags,
+      (std::string_view type, const std::filesystem::path& path),
+      (override));
+
+  // Inheritance
+  MOCK_METHOD(
+      void,
+      insertBaseType,
+      (const std::filesystem::path& path,
+       std::string_view derivedType,
+       DeriveKind kind,
+       std::string_view baseType),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getBaseTypes,
+      (const std::filesystem::path& path,
+       std::string_view derivedType,
+       DeriveKind kind),
+      (override));
+
+  /**
+   * Return all types extending the given baseType, along with the paths which
+   * claim the derived type extends this baseType.
+   *
+   * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
+   */
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getDerivedTypes,
+      (std::string_view baseType, DeriveKind kind),
+      (override));
+
+  // Attributes
+
+  MOCK_METHOD(
+      void,
+      insertTypeAttribute,
+      (const std::filesystem::path& path,
+       std::string_view type,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      void,
+      insertMethodAttribute,
+      (const std::filesystem::path& path,
+       std::string_view type,
+       std::string_view method,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      void,
+      insertFileAttribute,
+      (const std::filesystem::path& path,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfType,
+      (std::string_view type, const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfMethod,
+      (std::string_view type,
+       std::string_view method,
+       const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfFile,
+      (const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getTypeAttributeArgs,
+      (std::string_view type,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getTypeAliasAttributeArgs,
+      (std::string_view typeAlias,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getMethodAttributeArgs,
+      (std::string_view type,
+       std::string_view method,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getFileAttributeArgs,
+      (std::string_view path, std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getTypesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getTypeAliasesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<MethodPath>,
+      getPathMethods,
+      (std::string_view path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<MethodPath>,
+      getMethodsWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getFilesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  // Functions
+  MOCK_METHOD(
+      void,
+      insertFunction,
+      (std::string_view function, const std::filesystem::path& path),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getFunctionPath,
+      (std::string_view function),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathFunctions,
+      (const std::filesystem::path& path),
+      (override));
+
+  // Constants
+  MOCK_METHOD(
+      void,
+      insertConstant,
+      (std::string_view constant, const std::filesystem::path& path),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getConstantPath,
+      (std::string_view constant),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathConstants,
+      (const std::filesystem::path& path),
+      (override));
+
+  // Modules
+  MOCK_METHOD(
+      void,
+      insertModule,
+      (std::string_view, const std::filesystem::path&),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getModulePath,
+      (std::string_view),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathModules,
+      (const std::filesystem::path&),
+      (override));
+
+  /**
+   * Return a list of all paths defined in the given root, as absolute paths.
+   *
+   * Paths come paired with the last known SHA1 hash of the file.
+   *
+   * Returns results in the form of a lazy generator.
+   */
+  MOCK_METHOD(MultiResult<PathAndHash>, getAllPathsAndHashes, (), (override));
+
+  /**
+   * Return a list of all symbols and paths defined in the given root.
+   *
+   * Returns results in the form of a lazy generator.
+   */
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllTypePaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllFunctionPaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllConstantPaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllModulePaths, (), (override));
+
+  MOCK_METHOD(void, insertClock, (const Clock& clock), (override));
+  MOCK_METHOD(Clock, getClock, (), (override));
+  MOCK_METHOD(void, runPostBuildOptimizations, (), (override));
+
+  void DelegateToFake() {
+    ON_CALL(*this, isReadOnly()).WillByDefault(Return(false));
+    ON_CALL(*this, insertClock(_)).WillByDefault(SaveArg<0>(&clock_));
+    ON_CALL(*this, getClock()).WillByDefault(Return(clock_));
+  }
+
+ private:
+  Clock clock_;
+};
 
 /**
  * RAII wrapper which ensures we finish draining the given
@@ -209,7 +501,8 @@ auto constexpr kSHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
  */
 struct SymbolMapWrapper {
   SymbolMapWrapper(
-      std::unique_ptr<SymbolMap> m, std::shared_ptr<folly::ManualExecutor> exec)
+      std::unique_ptr<SymbolMap> m,
+      std::shared_ptr<folly::ManualExecutor> exec)
       : m_exec{exec}, m_map{std::move(m)} {
     if (m_exec) {
       m_map->m_exec = m_exec;
@@ -225,8 +518,7 @@ struct SymbolMapWrapper {
   SymbolMapWrapper(const SymbolMapWrapper&) = delete;
   SymbolMapWrapper& operator=(const SymbolMapWrapper&) = delete;
   SymbolMapWrapper(SymbolMapWrapper&& old) noexcept
-      : m_exec{std::move(old.m_exec)}, m_map{std::move(old.m_map)} {
-  }
+      : m_exec{std::move(old.m_exec)}, m_map{std::move(old.m_map)} {}
   SymbolMapWrapper& operator=(SymbolMapWrapper&& old) noexcept = delete;
 
   std::shared_ptr<folly::ManualExecutor> m_exec;
@@ -243,13 +535,28 @@ void waitForDB(SymbolMap& m, std::shared_ptr<folly::ManualExecutor>& exec) {
   m.waitForDBUpdate();
 }
 
+std::string getSha1Hex(const FileFacts& ff) {
+  return SHA1{
+      folly::hash::hash_combine(
+          folly::hash::hash_range(ff.m_types.begin(), ff.m_types.end()),
+          folly::hash::hash_range(ff.m_functions.begin(), ff.m_functions.end()),
+          folly::hash::hash_range(ff.m_constants.begin(), ff.m_constants.end()),
+          folly::hash::hash_range(
+              ff.m_attributes.begin(), ff.m_attributes.end())
+          /* Don't include m_sha1hex */)}
+      .toString();
+}
+
 void update(
     SymbolMap& m,
     std::string_view since,
     std::string_view clock,
-    std::vector<folly::fs::path> alteredPaths,
-    std::vector<folly::fs::path> deletedPaths,
+    std::vector<fs::path> alteredPaths,
+    std::vector<fs::path> deletedPaths,
     std::vector<FileFacts> facts) {
+  for (auto& ff : facts) {
+    ff.m_sha1hex = getSha1Hex(ff);
+  }
   m.update(
       Clock{.m_clock = std::string{since}},
       Clock{.m_clock = std::string{clock}},
@@ -261,7 +568,7 @@ void update(
 } // namespace
 
 class SymbolMapTest : public ::testing::TestWithParam<bool> {
-protected:
+ protected:
   void SetUp() override {
     m_tmpdir = std::make_unique<folly::test::TemporaryDirectory>(
         folly::test::TemporaryDirectory{"autoload"});
@@ -281,17 +588,41 @@ protected:
   SymbolMap& make(
       std::string root,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
-      hphp_hash_set<std::string> indexedMethodAttributes = {}) {
+      std::vector<std::string> indexedMethodAttributesVec = {}) {
     auto dbPath = m_tmpdir->path() /
-                  folly::to<std::string>(
+        folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
+    for (auto& attr : indexedMethodAttributesVec) {
+      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
+    }
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
-            [dbPath]() -> AutoloadDB& {
-              return SQLiteAutoloadDB::getThreadLocal(
-                  SQLiteKey::readWrite(dbPath, static_cast<::gid_t>(-1), 0644));
+            [dbPath]() -> std::shared_ptr<AutoloadDB> {
+              return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
+                  fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
             },
+            std::move(indexedMethodAttributes)),
+        std::move(exec)});
+    return *m_wrappers.back().m_map;
+  }
+
+  SymbolMap& make(
+      std::string root,
+      std::shared_ptr<MockAutoloadDB> db,
+      std::shared_ptr<folly::ManualExecutor> exec = nullptr,
+      std::vector<std::string> indexedMethodAttributesVec = {}) {
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
+    for (auto& attr : indexedMethodAttributesVec) {
+      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
+    }
+    m_wrappers.push_back(SymbolMapWrapper{
+        std::make_unique<SymbolMap>(
+            std::move(root),
+            [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
             std::move(indexedMethodAttributes)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
@@ -302,6 +633,159 @@ protected:
   std::shared_ptr<folly::ManualExecutor> m_exec2;
   std::vector<SymbolMapWrapper> m_wrappers;
 };
+
+TEST_F(SymbolMapTest, NewModules) {
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+
+  FileFacts ff{
+      .m_modules = {
+          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
+
+  EXPECT_CALL(*db, insertModule("some_module", path1));
+  EXPECT_CALL(*db, insertModule("some_other_module", path1));
+  update(m, "", "1:2:3", {path1}, {}, {ff});
+
+  // We didn't actually write to any database, so if the symbol map is working,
+  // we should still get the results.
+  EXPECT_THAT(m.getModuleFile("some_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_other_module"), Eq(path1));
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_module", "some_other_module"));
+
+  m_wrappers.clear();
+}
+
+TEST_F(SymbolMapTest, ModulesFromDB) {
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  EXPECT_CALL(*db, insertPath(_)).Times(0);
+
+  EXPECT_CALL(*db, getModulePath("some_new_module"))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(*db, getModulePath("some_other_new_module"))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(*db, getModulePath("some_new_third_module"))
+      .WillOnce(Return(std::vector<fs::path>{path2}));
+
+  EXPECT_CALL(*db, getPathModules(path1))
+      .WillOnce(Return(std::vector<std::string>{
+          "some_new_module", "some_other_new_module"}));
+  EXPECT_CALL(*db, getPathModules(path2))
+      .WillOnce(Return(std::vector<std::string>{"some_new_third_module"}));
+
+  EXPECT_THAT(m.getModuleFile("some_new_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_other_new_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_new_third_module"), Eq(path2));
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_new_module", "some_other_new_module"));
+  EXPECT_THAT(
+      m.getFileModules(path2), UnorderedElementsAre("some_new_third_module"));
+
+  m_wrappers.clear();
+}
+
+TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
+  const char* kFirstPath1 = "k-1-1";
+  const char* kFirstPath2 = "k-1-2";
+  const char* kFirstPath3 = "k-1-3";
+  const char* kSecondPath1 = "k-2-1";
+  const char* kSecondPath2 = "k-2-2";
+  const char* kSecondPath3 = "k-2-3";
+
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  // These paths won't be in memory, so the symbol map will try to get
+  // them from the database.
+  EXPECT_CALL(*db, getModulePath(kFirstPath1))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(*db, getModulePath(kFirstPath2))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(*db, getModulePath(kFirstPath3))
+      .WillOnce(Return(std::vector<fs::path>{path2}));
+
+  EXPECT_CALL(*db, getPathModules(path1))
+      .WillOnce(Return(std::vector<std::string>{kFirstPath1, kFirstPath2}));
+  EXPECT_CALL(*db, getPathModules(path2))
+      .WillOnce(Return(std::vector<std::string>{kFirstPath3}));
+
+  // Everything should be read from the database.
+  EXPECT_THAT(m.getModuleFile(kFirstPath1), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kFirstPath2), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kFirstPath3), Eq(path2));
+  EXPECT_THAT(
+      m.getFileModules(path1), UnorderedElementsAre(kFirstPath1, kFirstPath2));
+  EXPECT_THAT(m.getFileModules(path2), UnorderedElementsAre(kFirstPath3));
+
+  // Now we overwrite it with new information.  The new information should
+  // be returned by the symbol map and the db should get updated.
+  FileFacts ff1{.m_modules = {{.m_name = kSecondPath1}}};
+  FileFacts ff2{
+      .m_modules = {{.m_name = kSecondPath2}, {.m_name = kSecondPath3}}};
+
+  EXPECT_CALL(*db, erasePath(path1));
+  EXPECT_CALL(*db, erasePath(path2));
+  EXPECT_CALL(*db, insertModule(kSecondPath1, path1));
+  EXPECT_CALL(*db, insertModule(kSecondPath2, path2));
+  EXPECT_CALL(*db, insertModule(kSecondPath3, path2));
+
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
+
+  // TODO:  This doesn't seem right.  It seems like it should happen for the old
+  // values
+  /*
+  EXPECT_CALL(db, getModulePath(kSecondPath1))
+      .WillOnce(Return(std::vector<fs::path>{}));
+  EXPECT_CALL(db, getModulePath(kSecondPath2))
+      .WillOnce(Return(std::vector<fs::path>{}));
+  EXPECT_CALL(db, getModulePath(kSecondPath3))
+      .WvillOnce(Return(std::vector<fs::path>{}));
+  */
+
+  // The in memory map should already know these were blown away.
+  Path empty_path{nullptr};
+  EXPECT_CALL(*db, getModulePath(kFirstPath1)).Times(0);
+  EXPECT_CALL(*db, getModulePath(kFirstPath2)).Times(0);
+  EXPECT_CALL(*db, getModulePath(kFirstPath3)).Times(0);
+  EXPECT_THAT(m.getModuleFile(kFirstPath1), Eq(empty_path));
+  EXPECT_THAT(m.getModuleFile(kFirstPath2), Eq(empty_path));
+  EXPECT_THAT(m.getModuleFile(kFirstPath3), Eq(empty_path));
+
+  std::vector<fs::path> empty_path_list{};
+  EXPECT_CALL(*db, getModulePath(kSecondPath1))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(*db, getModulePath(kSecondPath2))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(*db, getModulePath(kSecondPath3))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(*db, getPathModules(path1)).Times(0);
+  EXPECT_CALL(*db, getPathModules(path2)).Times(0);
+  EXPECT_THAT(m.getModuleFile(kSecondPath1), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kSecondPath2), Eq(path2));
+  EXPECT_THAT(m.getModuleFile(kSecondPath3), Eq(path2));
+
+  EXPECT_THAT(m.getFileModules(path1), UnorderedElementsAre(kSecondPath1));
+  EXPECT_THAT(
+      m.getFileModules(path2),
+      UnorderedElementsAre(kSecondPath2, kSecondPath3));
+
+  m_wrappers.clear();
+}
 
 TEST_F(SymbolMapTest, addPaths) {
   auto& m = make("/var/www");
@@ -315,10 +799,11 @@ TEST_F(SymbolMapTest, addPaths) {
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"some_fn"},
       .m_constants = {"SOME_CONSTANT"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_modules = {
+          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
 
   // Define symbols in path
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
   update(m, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
@@ -327,6 +812,7 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFunctionFile("some_fn"), path1.native());
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path1.native());
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path1.native());
+  EXPECT_EQ(m.getModuleFile("some_module"), path1.native());
 
   // Types and type aliases are still different
   EXPECT_EQ(m.getTypeAliasFile("SomeClass"), nullptr);
@@ -338,19 +824,25 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFileFunctions(path1).at(0), "some_fn");
   EXPECT_EQ(m.getFileConstants(path1).at(0), "SOME_CONSTANT");
   EXPECT_EQ(m.getFileTypeAliases(path1).at(0), "SomeTypeAlias");
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_module", "some_other_module"));
 
-  // Check for case insensitivity (constants are case-sensitive, nothing else
-  // is)
+  // Check for case insensitivity
   EXPECT_EQ(m.getTypeFile("someclass"), path1.native());
   EXPECT_EQ(m.getFunctionFile("SOME_FN"), path1.native());
-  EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
   EXPECT_EQ(m.getTypeAliasFile("sometypealias"), path1.native());
+
+  // Check for case sensitivity
+  EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
+  EXPECT_EQ(m.getModuleFile("Some_Module"), nullptr);
 
   // Check for undefined symbols
   EXPECT_EQ(m.getTypeFile("UndefinedClass"), nullptr);
   EXPECT_EQ(m.getFunctionFile("undefined_fn"), nullptr);
   EXPECT_EQ(m.getConstantFile("UNDEFINED_CONSTANT"), nullptr);
   EXPECT_EQ(m.getTypeAliasFile("UndefinedTypeAlias"), nullptr);
+  EXPECT_EQ(m.getModuleFile("undefined_module"), nullptr);
 
   // Check inheritance
   EXPECT_EQ(
@@ -361,7 +853,7 @@ TEST_F(SymbolMapTest, addPaths) {
       m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0), "SomeClass");
 
   // Define duplicate symbols in path2
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   update(m, "1:2:3", "1:2:4", {path2}, {}, {ff});
@@ -374,6 +866,7 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFunctionFile("some_fn"), path2.native());
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path2.native());
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path2.native());
+  EXPECT_EQ(m.getModuleFile("some_module"), path2.native());
 
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -395,17 +888,17 @@ TEST_F(SymbolMapTest, duplicateSymbols) {
           {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
   update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
 
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
-  // Remove the duplicate definition and verify that we're back in a sane state
+  // Remove the duplicate definition and verify that we're back in a sane
+  // state
   update(m, "1:2:3", "1:2:4", {}, {path1}, {});
   EXPECT_EQ(m.getTypeFile("SomeClass"), path2.native());
   EXPECT_EQ(m.getFunctionFile("some_fn"), path2.native());
@@ -425,10 +918,9 @@ TEST_F(SymbolMapTest, DBFill) {
            {.m_name = "BaseClass", .m_kind = TypeKind::Class},
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
 
@@ -487,10 +979,9 @@ TEST_F(SymbolMapTest, DBFill) {
 TEST_F(SymbolMapTest, ChangeSymbolCase) {
   auto& m = make("/var/www");
   FileFacts ff{
-      .m_types = {{.m_name = "HTTPDNSURL", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {{.m_name = "HTTPDNSURL", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HTTPDNSURL");
@@ -521,18 +1012,16 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
 TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
   auto& m = make("/var/www");
   FileFacts ff1{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"baseclass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"baseclass"}}}};
 
   FileFacts ff2{
-      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
+      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -564,10 +1053,9 @@ TEST_F(SymbolMapTest, MaintainCorrectCase) {
           {{.m_name = "CamelCasedType", .m_kind = TypeKind::Class},
            {.m_name = "CamelCasedTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {{"CamelCasedFunction"}},
-      .m_constants = {{"CamelCasedConstant"}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_constants = {{"CamelCasedConstant"}}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   update(m1, "", "1:2:3", {path}, {}, {ff});
   m1.waitForDBUpdate();
 
@@ -592,12 +1080,10 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
   auto& m1 = make("/var/www");
   auto& m2 = make("/var/www");
 
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   update(m1, "", "1:2:3", {path1, path2}, {}, {ff, ff});
@@ -624,10 +1110,9 @@ TEST_F(SymbolMapTest, getAllSymbols) {
           {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"SomeFunction"},
-      .m_constants = {"SOME_CONSTANT"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m, "", "1", {p}, {}, {ff});
 
@@ -655,8 +1140,8 @@ TEST_F(SymbolMapTest, getAllSymbols) {
 TEST_F(SymbolMapTest, CopiedFile) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path path1 = {"some/path.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
@@ -665,8 +1150,7 @@ TEST_F(SymbolMapTest, CopiedFile) {
            {.m_name = "OtherClass", .m_kind = TypeKind::Class},
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"SomeFunction"},
-      .m_constants = {"SomeConstant"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_constants = {"SomeConstant"}};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   m1.waitForDBUpdate();
@@ -691,10 +1175,8 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   auto& m2 = make("/var/www", m_exec);
   auto& m3 = make("/var/www", m_exec);
 
-  folly::fs::path path = {"some/path.php"};
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  fs::path path = {"some/path.php"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   waitForDB(m1, m_exec);
@@ -715,10 +1197,8 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
   update(m, "", "1:2:3", {}, {}, {});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
-  folly::fs::path path = {"some/path.php"};
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  fs::path path = {"some/path.php"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   // since token is "4:5:6" but needs to be "1:2:3". It's not, so
   // `update()` throws and we don't change any data in `m`.
@@ -730,17 +1210,16 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
 TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
   auto& m = make("/var/www");
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}},
+          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
   update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
@@ -778,15 +1257,14 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
 TEST_F(SymbolMapTest, GetKind) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path p = {"some/path1.php"};
+  fs::path p = {"some/path1.php"};
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "C1", .m_kind = TypeKind::Class},
-           {.m_name = "I1", .m_kind = TypeKind::Interface},
-           {.m_name = "T1", .m_kind = TypeKind::Trait},
-           {.m_name = "E1", .m_kind = TypeKind::Enum}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "C1", .m_kind = TypeKind::Class},
+          {.m_name = "I1", .m_kind = TypeKind::Interface},
+          {.m_name = "T1", .m_kind = TypeKind::Trait},
+          {.m_name = "E1", .m_kind = TypeKind::Enum}}};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
 
@@ -809,21 +1287,19 @@ TEST_F(SymbolMapTest, GetKind) {
 }
 
 TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
-
   FileFacts ff{
-      .m_types =
-          {{.m_name = "Abstract",
-            .m_kind = TypeKind::Class,
-            .m_flags = kTypeFlagAbstractBit},
-           {.m_name = "Final",
-            .m_kind = TypeKind::Class,
-            .m_flags = kTypeFlagFinalBit},
-           {.m_name = "AbstractFinal",
-            .m_kind = TypeKind::Trait,
-            .m_flags = kTypeFlagAbstractBit | kTypeFlagFinalBit}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "Abstract",
+           .m_kind = TypeKind::Class,
+           .m_flags = kTypeFlagAbstractBit},
+          {.m_name = "Final",
+           .m_kind = TypeKind::Class,
+           .m_flags = kTypeFlagFinalBit},
+          {.m_name = "AbstractFinal",
+           .m_kind = TypeKind::Trait,
+           .m_flags = kTypeFlagAbstractBit | kTypeFlagFinalBit}}};
 
-  folly::fs::path p = {"some/path1.php"};
+  fs::path p = {"some/path1.php"};
 
   auto& m1 = make("/var/www");
   update(m1, "", "1:2:3", {p}, {}, {ff});
@@ -854,17 +1330,13 @@ TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
 TEST_F(SymbolMapTest, OverwriteKind) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path p1 = {"some/path1.php"};
-  folly::fs::path p2 = {"some/path2.php"};
+  fs::path p1 = {"some/path1.php"};
+  fs::path p2 = {"some/path2.php"};
   ASSERT_NE(p1.native(), p2.native());
 
-  FileFacts ff1{
-      .m_types = {{.m_name = "Foo", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff1{.m_types = {{.m_name = "Foo", .m_kind = TypeKind::Class}}};
 
-  FileFacts ff2{
-      .m_types = {{.m_name = "Foo", .m_kind = TypeKind::Interface}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
+  FileFacts ff2{.m_types = {{.m_name = "Foo", .m_kind = TypeKind::Interface}}};
 
   // Duplicate declaration
   update(m1, "", "1:2:3", {p1, p2}, {}, {ff1, ff2});
@@ -885,18 +1357,16 @@ TEST_F(SymbolMapTest, OverwriteKind) {
 TEST_F(SymbolMapTest, DeriveKinds) {
   auto& m1 = make("/var/www1");
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   FileFacts ff{
-      .m_types =
-          {TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
-           TypeDetails{
-               .m_name = "BaseInterface", .m_kind = TypeKind::Interface},
-           TypeDetails{
-               .m_name = "SomeTrait",
-               .m_kind = TypeKind::Trait,
-               .m_requireExtends = {"BaseClass"},
-               .m_requireImplements = {"BaseInterface"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
+          TypeDetails{.m_name = "BaseInterface", .m_kind = TypeKind::Interface},
+          TypeDetails{
+              .m_name = "SomeTrait",
+              .m_kind = TypeKind::Trait,
+              .m_requireExtends = {"BaseClass"},
+              .m_requireImplements = {"BaseInterface"}}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -918,17 +1388,43 @@ TEST_F(SymbolMapTest, DeriveKinds) {
   ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
   someTraitFacts.m_requireExtends = {};
   someTraitFacts.m_requireImplements = {};
-  ff.m_sha1hex[39] = 'b';
+  update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
+}
+
+TEST_F(SymbolMapTest, DeriveKindsRequireClass) {
+  auto& m1 = make("/var/www1");
+
+  fs::path path = {"some/path.php"};
+  FileFacts ff{
+      .m_types = {
+          TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
+          TypeDetails{
+              .m_name = "SomeTrait",
+              .m_kind = TypeKind::Trait,
+              .m_requireClass = {"BaseClass"}}}};
+
+  update(m1, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
+  EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::Extends).empty());
+  EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends).empty());
+  EXPECT_THAT(
+      m1.getBaseTypes("SomeTrait", DeriveKind::RequireClass),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m1.getDerivedTypes("BaseClass", DeriveKind::RequireClass),
+      ElementsAre("SomeTrait"));
+
+  auto& someTraitFacts = ff.m_types[1];
+  ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
+  someTraitFacts.m_requireClass = {};
   update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
 }
 
 TEST_F(SymbolMapTest, MultipleRoots) {
   auto& m1 = make("/var/www1");
 
-  folly::fs::path path = {"some/path.php"};
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  fs::path path = {"some/path.php"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -950,11 +1446,9 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
 
-  FileFacts ff{
-      .m_functions = {"some_fn"},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_functions = {"some_fn"}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -980,14 +1474,13 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}},
+          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = "some/path1.php";
+  fs::path path = "some/path1.php";
   update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(
@@ -1008,19 +1501,17 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}}}};
 
   FileFacts ff2{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
+      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = "some/path1.php";
-  folly::fs::path path2 = "some/path2.php";
-  folly::fs::path path3 = "some/path3.php";
+  fs::path path1 = "some/path1.php";
+  fs::path path2 = "some/path2.php";
+  fs::path path3 = "some/path3.php";
   ASSERT_NE(path1, path2);
   ASSERT_NE(path1, path3);
   ASSERT_NE(path2, path3);
@@ -1047,15 +1538,14 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   auto& m2 = make("/var/www", m_exec2);
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}},
+          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   // The repo looks like this at timestamps "1:2:3" and "1:2:4":
@@ -1121,22 +1611,19 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
   auto& m = make("/var/www");
 
   FileFacts ffWithAttr{
-      .m_types =
-          {{.m_name = "C1",
-            .m_kind = TypeKind::Class,
-            .m_attributes = {{.m_name = "A1"}}}},
-      .m_sha1hex = kSHA};
-  folly::fs::path p1{"p1.php"};
+      .m_types = {
+          {.m_name = "C1",
+           .m_kind = TypeKind::Class,
+           .m_attributes = {{.m_name = "A1"}}}}};
+  fs::path p1{"p1.php"};
 
   update(m, "", "1", {p1}, {}, {ffWithAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), ElementsAre("A1"));
   EXPECT_THAT(m.getTypesWithAttribute("A1"), ElementsAre("C1"));
 
-  FileFacts ffEmpty{.m_sha1hex = kSHA};
-  FileFacts ffNoAttr{
-      .m_types = {{.m_name = "C1", .m_kind = TypeKind::Class}},
-      .m_sha1hex = kSHA};
-  folly::fs::path p2{"p2.php"};
+  FileFacts ffEmpty{};
+  FileFacts ffNoAttr{.m_types = {{.m_name = "C1", .m_kind = TypeKind::Class}}};
+  fs::path p2{"p2.php"};
 
   update(m, "1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
@@ -1146,13 +1633,11 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
 TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
   auto& m = make("/var/www");
 
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  FileFacts emptyFF{.m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
+  FileFacts emptyFF{};
 
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
 
   update(m, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
@@ -1164,15 +1649,13 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  FileFacts emptyFF{.m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
+  FileFacts emptyFF{};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
-  folly::fs::path path3 = {"some/path3.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+  fs::path path3 = {"some/path3.php"};
 
   // Initialize m2 as dependent on the DB
   update(m1, "", "1:2:3", {path1}, {}, {ff});
@@ -1192,16 +1675,15 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 
 TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   auto& m1 = make("/var/www", m_exec);
-  folly::fs::path p = "foo.php";
+  fs::path p = "foo.php";
   FileFacts ffTypeAliasWithAttr{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_attributes = {{.m_name = "ClassAttr"}}},
-           {.m_name = "SomeTypeAlias",
-            .m_kind = TypeKind::TypeAlias,
-            .m_attributes = {{.m_name = "AliasAttr"}}}},
-      .m_sha1hex = kSHA};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_attributes = {{.m_name = "ClassAttr"}}},
+          {.m_name = "SomeTypeAlias",
+           .m_kind = TypeKind::TypeAlias,
+           .m_attributes = {{.m_name = "AliasAttr"}}}}};
   update(m1, "", "1", {p}, {}, {ffTypeAliasWithAttr});
 
   EXPECT_THAT(m1.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
@@ -1232,20 +1714,18 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ffSomeClassDerivesBaseClass{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}}}};
 
   FileFacts ffBaseClass{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
+      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path pSomeClass1 = "src/SomeClass1.php";
-  folly::fs::path pSomeClass2 = "src/SomeClass2.php";
+  fs::path pSomeClass1 = "src/SomeClass1.php";
+  fs::path pSomeClass2 = "src/SomeClass2.php";
   ASSERT_NE(pSomeClass1, pSomeClass2);
-  folly::fs::path pBaseClass = "src/BaseClass.php";
+  fs::path pBaseClass = "src/BaseClass.php";
   ASSERT_NE(pBaseClass, pSomeClass1);
   ASSERT_NE(pBaseClass, pSomeClass2);
 
@@ -1268,8 +1748,7 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   };
 
   FileFacts ffSomeClassDerivesNobody{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
+      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   // pSomeClass1 now believes that SomeClass doesn't extend BaseClass
   update(m, "1:2:3", "1:2:4", {pSomeClass1}, {}, {ffSomeClassDerivesBaseClass});
@@ -1303,50 +1782,44 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   waitForDB(m1, m_exec);
-  EXPECT_EQ(
-      m1.getAllPathsWithHashes().at(Path{path1}),
-      SHA1{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"});
+  auto oldHash = getSha1Hex(ff);
+  EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
 
-  ff.m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  ff.m_types[0].m_name = "OtherClass";
+  auto newHash = getSha1Hex(ff);
+  ASSERT_NE(oldHash, newHash);
 
   update(m2, "1:2:3", "1:2:4", {path1}, {}, {ff});
-  EXPECT_EQ(
-      m2.getAllPathsWithHashes().at(Path{path1}),
-      SHA1{"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"});
+  EXPECT_EQ(m2.getAllPathsWithHashes().at(Path{path1}).toString(), newHash);
 }
 
 TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}}}};
 
   FileFacts ff2{
-      .m_types =
-          {{.m_name = "OtherClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
+      .m_types = {
+          {.m_name = "OtherClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}}}};
 
   FileFacts ff3{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Interface}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac"};
+      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Interface}}};
 
-  folly::fs::path p1 = "some/path1.php";
-  folly::fs::path p2 = "some/path2.php";
-  folly::fs::path p3 = "some/path3.php";
+  fs::path p1 = "some/path1.php";
+  fs::path p2 = "some/path2.php";
+  fs::path p3 = "some/path3.php";
 
   update(m1, "", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
   waitForDB(m1, m_exec);
@@ -1359,8 +1832,8 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
       m2.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("BaseClass"));
 
-  // Now query the subtypes of BaseClass. We should remember that SomeClass is a
-  // subtype of BaseClass, but we should also fetch information from the DB
+  // Now query the subtypes of BaseClass. We should remember that SomeClass is
+  // a subtype of BaseClass, but we should also fetch information from the DB
   // about OtherClass being a subtype of BaseClass.
   EXPECT_THAT(
       m2.getDerivedTypes("BaseClass", DeriveKind::Extends),
@@ -1371,31 +1844,27 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}}}};
 
   FileFacts ff2{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"baseclass"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"baseclass"}}}};
 
   FileFacts ff3{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac"};
+      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
   FileFacts ff4{
-      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad"};
+      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p1 = "some/path1.php";
-  folly::fs::path p2 = "some/path2.php";
-  folly::fs::path p3 = "some/path3.php";
-  folly::fs::path p4 = "some/path4.php";
+  fs::path p1 = "some/path1.php";
+  fs::path p2 = "some/path2.php";
+  fs::path p3 = "some/path3.php";
+  fs::path p4 = "some/path4.php";
 
   // Define both "baseclass" and "BaseClass"
   update(m1, "", "1", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
@@ -1426,14 +1895,13 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}},
+          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p1 = "some/path1.php";
+  fs::path p1 = "some/path1.php";
 
   update(m, "", "1", {p1}, {}, {ff1});
   EXPECT_EQ(m.getTypeFile("SomeClass").slice(), p1.native());
@@ -1446,12 +1914,11 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 
   // Replace "SomeClass" with "SOMECLASS"
   FileFacts ff2{
-      .m_types =
-          {{.m_name = "SOMECLASS",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SOMECLASS",
+           .m_kind = TypeKind::Class,
+           .m_baseTypes = {"BaseClass"}},
+          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
   update(m, "1", "2", {p1}, {}, {ff2});
 
   EXPECT_EQ(m.getTypeFile("SOMECLASS"), p1.native());
@@ -1467,12 +1934,11 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
-           {.m_name = "OtherClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          {.m_name = "SomeClass", .m_kind = TypeKind::Class},
+          {.m_name = "OtherClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = {"some/path1.php"};
+  fs::path path = {"some/path1.php"};
 
   auto testMap = [&path](auto& map) {
     // getTypeFile() and getFileTypes() both fill in-memory maps from the DB.
@@ -1497,11 +1963,9 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 TEST_F(SymbolMapTest, ErasePathStoredInDB) {
   auto& m1 = make("/var/www", m_exec);
 
-  FileFacts ff{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
@@ -1517,25 +1981,24 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types =
-          {TypeDetails{
-               .m_name = "SomeClass",
-               .m_kind = TypeKind::Class,
-               .m_attributes =
-                   {{.m_name = "Foo", .m_args = {"apple", 38}},
-                    {.m_name = "Bar", .m_args = {nullptr}},
-                    {.m_name = "Baz", .m_args = {}}}},
-           TypeDetails{
-               .m_name = "OtherClass",
-               .m_kind = TypeKind::Class,
-               .m_attributes = {{.m_name = "Bar"}}},
-           TypeDetails{
-               .m_name = "SomeTypeAlias",
-               .m_kind = TypeKind::TypeAlias,
-               .m_attributes = {{.m_name = "Foo", .m_args = {42, "a"}}}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          TypeDetails{
+              .m_name = "SomeClass",
+              .m_kind = TypeKind::Class,
+              .m_attributes =
+                  {{.m_name = "Foo", .m_args = {"apple", 38}},
+                   {.m_name = "Bar", .m_args = {nullptr}},
+                   {.m_name = "Baz", .m_args = {}}}},
+          TypeDetails{
+              .m_name = "OtherClass",
+              .m_kind = TypeKind::Class,
+              .m_attributes = {{.m_name = "Bar"}}},
+          TypeDetails{
+              .m_name = "SomeTypeAlias",
+              .m_kind = TypeKind::TypeAlias,
+              .m_attributes = {{.m_name = "Foo", .m_args = {42, "a"}}}}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   auto testMap = [&p](auto& map) {
     EXPECT_EQ(map.getTypeFile("SomeClass"), p.native());
@@ -1575,21 +2038,19 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   auto& m1 = make("/var/www");
 
   FileFacts ff1{
-      .m_types =
-          {
-              TypeDetails{
-                  .m_name = "C1",
-                  .m_methods =
-                      {MethodDetails{
-                           .m_name = "m1",
-                           .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-                       MethodDetails{
-                           .m_name = "m2",
-                           .m_attributes = {{.m_name = "A1", .m_args = {2}}},
-                       }}},
-          },
-      .m_sha1hex = kSHA};
-  folly::fs::path p1{"some/path1.php"};
+      .m_types = {
+          TypeDetails{
+              .m_name = "C1",
+              .m_methods =
+                  {MethodDetails{
+                       .m_name = "m1",
+                       .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
+                   MethodDetails{
+                       .m_name = "m2",
+                       .m_attributes = {{.m_name = "A1", .m_args = {2}}},
+                   }}},
+      }};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
@@ -1624,14 +2085,12 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
   FileFacts ff1{
       .m_types = {TypeDetails{
           .m_name = "C1",
-          .m_methods =
-              {
-                  MethodDetails{
-                      .m_name = "m1",
-                      .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-              }}},
-      .m_sha1hex = kSHA};
-  folly::fs::path p1{"some/path1.php"};
+          .m_methods = {
+              MethodDetails{
+                  .m_name = "m1",
+                  .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
+          }}}};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   {
@@ -1651,13 +2110,11 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
   FileFacts ff2{
       .m_types = {TypeDetails{
           .m_name = "C1",
-          .m_methods =
-              {
-                  MethodDetails{
-                      .m_name = "m2",
-                      .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-              }}},
-      .m_sha1hex = kSHA};
+          .m_methods = {
+              MethodDetails{
+                  .m_name = "m2",
+                  .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
+          }}}};
 
   update(m2, "1", "2", {p1}, {}, {ff2});
 
@@ -1677,14 +2134,12 @@ TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
   FileFacts ff1{
       .m_types = {TypeDetails{
           .m_name = "C1",
-          .m_methods =
-              {
-                  MethodDetails{
-                      .m_name = "m1",
-                      .m_attributes = {{.m_name = "A1"}, {.m_name = "A2"}}},
-              }}},
-      .m_sha1hex = kSHA};
-  folly::fs::path p1{"some/path1.php"};
+          .m_methods = {
+              MethodDetails{
+                  .m_name = "m1",
+                  .m_attributes = {{.m_name = "A1"}, {.m_name = "A2"}}},
+          }}}};
+  fs::path p1{"some/path1.php"};
 
   auto check = [&](SymbolMap& m) {
     auto attrs = m.getAttributesOfMethod("C1", "m1");
@@ -1713,11 +2168,10 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   auto& m1 = make("/var/www");
 
   FileFacts ff1{
-      .m_attributes =
-          {Attribute{.m_name = "A1", .m_args = {1}},
-           Attribute{.m_name = "A2", .m_args = {}}},
-      .m_sha1hex = kSHA};
-  folly::fs::path p1{"some/path1.php"};
+      .m_attributes = {
+          Attribute{.m_name = "A1", .m_args = {1}},
+          Attribute{.m_name = "A2", .m_args = {}}}};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
@@ -1748,35 +2202,30 @@ TEST_F(SymbolMapTest, TransitiveSubtypes) {
   auto& m1 = make("/var/www");
 
   FileFacts ff{
-      .m_types =
-          {TypeDetails{.m_name = "C0", .m_kind = TypeKind::Class},
-           TypeDetails{
-               .m_name = "C1",
-               .m_kind = TypeKind::Class,
-               .m_baseTypes = {"C0"}},
-           TypeDetails{
-               .m_name = "C2",
-               .m_kind = TypeKind::Class,
-               .m_baseTypes = {"C1", "T0"}},
-           TypeDetails{
-               .m_name = "I1",
-               .m_kind = TypeKind::Interface,
-               .m_baseTypes = {"C1"}},
-           TypeDetails{
-               .m_name = "C3",
-               .m_kind = TypeKind::Class,
-               .m_baseTypes = {"I1"}},
-           TypeDetails{
-               .m_name = "T0",
-               .m_kind = TypeKind::Trait,
-               .m_requireExtends = {"C0"}},
-           TypeDetails{
-               .m_name = "T1",
-               .m_kind = TypeKind::Trait,
-               .m_requireImplements = {"I1"}}},
-      .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+      .m_types = {
+          TypeDetails{.m_name = "C0", .m_kind = TypeKind::Class},
+          TypeDetails{
+              .m_name = "C1", .m_kind = TypeKind::Class, .m_baseTypes = {"C0"}},
+          TypeDetails{
+              .m_name = "C2",
+              .m_kind = TypeKind::Class,
+              .m_baseTypes = {"C1", "T0"}},
+          TypeDetails{
+              .m_name = "I1",
+              .m_kind = TypeKind::Interface,
+              .m_baseTypes = {"C1"}},
+          TypeDetails{
+              .m_name = "C3", .m_kind = TypeKind::Class, .m_baseTypes = {"I1"}},
+          TypeDetails{
+              .m_name = "T0",
+              .m_kind = TypeKind::Trait,
+              .m_requireExtends = {"C0"}},
+          TypeDetails{
+              .m_name = "T1",
+              .m_kind = TypeKind::Trait,
+              .m_requireImplements = {"I1"}}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
 
@@ -1807,13 +2256,13 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
     return folly::sformat("Class{}", i);
   };
 
-  auto makePath = [](size_t i) -> folly::fs::path {
+  auto makePath = [](size_t i) -> fs::path {
     return folly::sformat("some/path{}.php", i);
   };
 
   size_t const numSymbols = 100;
 
-  std::vector<folly::fs::path> paths;
+  std::vector<fs::path> paths;
   std::vector<FileFacts> facts;
   for (auto i = 0; i < numSymbols; ++i) {
     FileFacts ff;
@@ -1826,7 +2275,6 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
         {.m_name = makeSym(i),
          .m_kind = TypeKind::Class,
          .m_baseTypes = std::move(baseTypes)}};
-    ff.m_sha1hex = folly::sformat("{:a>40x}", i);
 
     paths.push_back(makePath(i));
     facts.push_back(std::move(ff));

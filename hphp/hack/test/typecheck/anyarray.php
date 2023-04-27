@@ -66,8 +66,6 @@ function m(mixed $m): void {
     takes_any_array($m);
   } else if (HH\is_vec_or_varray($m)) {
     takes_any_array($m);
-  } else if (HH\is_php_array($m)) {
-    takes_any_array($m);
   } else if ($m is dict<_,_>) {
     takes_any_array($m);
   } else if ($m is vec<_>) {

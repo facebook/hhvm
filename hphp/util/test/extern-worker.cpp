@@ -21,11 +21,17 @@
 #include <folly/init/Init.h>
 #include <folly/executors/GlobalExecutor.h>
 
+#include <filesystem>
+
+#include <boost/filesystem.hpp>
+
 #include <gtest/gtest.h>
 
 namespace HPHP {
 
 using namespace extern_worker;
+
+namespace fs = std::filesystem;
 
 namespace {
 
@@ -239,15 +245,15 @@ TEST(ExternWorker, Blobs) {
 }
 
 TEST(ExternWorker, Files) {
-  auto const tmpDir = folly::fs::temp_directory_path();
+  auto const tmpDir = fs::temp_directory_path();
   auto const base = tmpDir / "hphp-extern-worker-test";
   auto const root =
     base / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%").native();
 
-  folly::fs::create_directory(base, tmpDir);
-  folly::fs::create_directory(root, base);
+  fs::create_directory(base, tmpDir);
+  fs::create_directory(root, base);
 
-  auto const makeString = [] (folly::fs::path p) {
+  auto const makeString = [] (fs::path p) {
     return folly::sformat("This file is called: \"{}\"", p.native());
   };
   auto const makeFile = [&] {
@@ -268,36 +274,26 @@ TEST(ExternWorker, Files) {
   auto const p1 = makeFile();
   auto const p2 = makeFile();
   auto const p3 = makeFile();
-  std::vector<folly::fs::path> ps;
+  std::vector<fs::path> ps;
   for (size_t i = 0; i < 5; ++i) ps.emplace_back(makeFile());
 
-  bool read1;
-  bool read2;
-  bool uploaded1;
-  bool uploaded2;
-
-  Ref<std::string> r1 = coro::wait(client.storeFile(p1, &read1, &uploaded1));
-  EXPECT_TRUE(read1);
-  EXPECT_TRUE(uploaded1);
+  Ref<std::string> r1 = coro::wait(client.storeFile(p1));
+  EXPECT_EQ(client.getStats().files.load(), 1);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
 
   std::tuple<Ref<std::string>, Ref<std::string>> t1 = coro::wait(coro::collect(
-    client.storeFile(p2, &read1, &uploaded1),
-    client.storeFile(p3, &read2, &uploaded2)
+    client.storeFile(p2),
+    client.storeFile(p3)
   ));
-  EXPECT_TRUE(read1);
-  EXPECT_TRUE(uploaded1);
-  EXPECT_TRUE(read2);
-  EXPECT_TRUE(uploaded2);
+  EXPECT_EQ(client.getStats().files.load(), 3);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
   Ref<std::string> r2 = std::get<0>(t1);
   Ref<std::string> r3 = std::get<1>(t1);
 
-  size_t readCount;
-  size_t uploadedCount;
-  std::vector<Ref<std::string>> refs =
-    coro::wait(client.storeFile(ps, &readCount, &uploadedCount));
+  std::vector<Ref<std::string>> refs = coro::wait(client.storeFile(ps));
   EXPECT_EQ(refs.size(), ps.size());
-  EXPECT_EQ(readCount, ps.size());
-  EXPECT_EQ(uploadedCount, ps.size());
+  EXPECT_EQ(client.getStats().files.load(), 3 + ps.size());
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
 
   std::string s1 = coro::wait(client.load(r1));
   EXPECT_EQ(s1, makeString(p1));
@@ -313,7 +309,7 @@ TEST(ExternWorker, Files) {
     EXPECT_EQ(strs[i], makeString(ps[i]));
   }
 
-  folly::fs::remove_all(root);
+  fs::remove_all(root);
 }
 
 namespace {
@@ -435,10 +431,24 @@ struct Test13 {
   run(const std::tuple<int, std::string>& x) { return x; }
 };
 
+struct Test14 {
+  static std::string name() { return "test-job14"; }
+  static std::vector<int> fini() { return s_fini; }
+  static void init() {}
+  static int run() {
+    auto const i = s_fini.size();
+    s_fini.emplace_back(i + 100);
+    return i + 200;
+  }
+
+  static std::vector<int> s_fini;
+};
+
 int Test3::s_add{0};
 std::string Test4::s_add;
 std::string Test5::s_add;
 std::string Test6::s_add;
+std::vector<int> Test14::s_fini;
 
 Job<Test1> s_test1;
 Job<Test2> s_test2;
@@ -453,6 +463,7 @@ Job<Test10> s_test10;
 Job<Test11> s_test11;
 Job<Test12> s_test12;
 Job<Test13> s_test13;
+Job<Test14> s_test14;
 
 }
 
@@ -845,6 +856,50 @@ TEST(ExternWorker, Exec) {
   testJob13();
 }
 
+TEST(ExternWorker, Fini) {
+  Options options;
+  options.setUseSubprocess(Options::UseSubprocess::Always);
+
+  Client client{folly::getGlobalCPUExecutor(), options};
+
+  EXPECT_TRUE(client.usingSubprocess());
+  EXPECT_EQ(client.implName(), "subprocess");
+
+  auto const testJob14Empty = [&] {
+    std::tuple<std::vector<Ref<int>>, Ref<std::vector<int>>> refs =
+      coro::wait(client.exec(s_test14, {}, {}));
+    ASSERT_TRUE(std::get<0>(refs).empty());
+
+    std::vector<int> fini = coro::wait(client.load(std::get<1>(refs)));
+    ASSERT_TRUE(fini.empty());
+  };
+  testJob14Empty();
+
+  auto const testJob14NotEmpty = [&] {
+    std::vector<std::tuple<>> inputs;
+    inputs.resize(3);
+
+    std::tuple<std::vector<Ref<int>>, Ref<std::vector<int>>> refs =
+      coro::wait(client.exec(s_test14, {}, inputs));
+    std::vector<Ref<int>> outputRefs = std::get<0>(refs);
+    ASSERT_EQ(outputRefs.size(), 3);
+
+    std::vector<int> outputs = coro::wait(client.load(outputRefs));
+    ASSERT_EQ(outputs.size(), 3);
+
+    EXPECT_EQ(outputs[0], 200);
+    EXPECT_EQ(outputs[1], 201);
+    EXPECT_EQ(outputs[2], 202);
+
+    std::vector<int> fini = coro::wait(client.load(std::get<1>(refs)));
+    ASSERT_EQ(fini.size(), 3);
+    EXPECT_EQ(fini[0], 100);
+    EXPECT_EQ(fini[1], 101);
+    EXPECT_EQ(fini[2], 102);
+  };
+  testJob14NotEmpty();
+}
+
 TEST(ExternWorker, RefCache) {
   Options options;
   options.setUseSubprocess(Options::UseSubprocess::Always);
@@ -911,15 +966,15 @@ TEST(ExternWorker, Fallback) {
   auto [str7, int3] = std::move(tuples[1]);
   auto [str8, int4] = std::move(tuples[2]);
 
-  auto const tmpDir = folly::fs::temp_directory_path();
+  auto const tmpDir = fs::temp_directory_path();
   auto const base = tmpDir / "hphp-extern-worker-test";
   auto const root =
     base / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%").native();
 
-  folly::fs::create_directory(base, tmpDir);
-  folly::fs::create_directory(root, base);
+  fs::create_directory(base, tmpDir);
+  fs::create_directory(root, base);
 
-  auto const makeString = [] (folly::fs::path p) {
+  auto const makeString = [] (fs::path p) {
     return folly::sformat("This file is called: \"{}\"", p.native());
   };
   auto const makeFile = [&] {
@@ -935,7 +990,7 @@ TEST(ExternWorker, Fallback) {
 
   auto str9 = coro::wait(client.storeFile(file1));
   auto strs2 = coro::wait(
-    client.storeFile(std::vector<folly::fs::path>{file2, file3})
+    client.storeFile(std::vector<fs::path>{file2, file3})
   );
   ASSERT_EQ(strs2.size(), 2);
   auto str10 = std::move(strs2[0]);
@@ -958,7 +1013,7 @@ TEST(ExternWorker, Fallback) {
   auto const file5 = makeFile();
 
   auto strs3 = coro::wait(
-    client.storeFile(std::vector<folly::fs::path>{file4, file5})
+    client.storeFile(std::vector<fs::path>{file4, file5})
   );
   ASSERT_EQ(strs3.size(), 2);
   auto str15 = std::move(strs3[0]);

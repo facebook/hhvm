@@ -64,13 +64,9 @@ struct HashCollection : ObjectData {
       always_assert(false);
     }
 
-    if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
     assertx(m_size);
     return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
-
-  Array toVArray();
-  Array toDArray();
 
   Array toKeysArray();
   Array toValuesArray();
@@ -622,12 +618,6 @@ struct HashCollection : ObjectData {
   [[noreturn]] void throwTooLarge();
   [[noreturn]] void throwReserveTooLarge();
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
-
-  /**
-   * Raises a warning if the set contains an int and a string with the same
-   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
-   */
-  void warnOnStrIntDup() const;
 
   void scan(type_scan::Scanner& scanner) const {
     scanner.scan(m_arr);

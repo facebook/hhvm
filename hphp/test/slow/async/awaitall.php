@@ -27,28 +27,18 @@ function t(Awaitable $wh, $a): void {
 
 
 function get_handles() {
-  $vectors = Vector {};
-  $maps = Vector {};
   $vecs = Vector {};
   $dicts = Vector {};
 
   // single element
-  $vectors[] = Vector {reschedule()};
-  $maps[] = Map {0 => reschedule()};
   $vecs[] = vec[reschedule()];
   $dicts[] = dict[0 => reschedule()];
 
   // empty
-  $vectors[] = Vector {};
-  $maps[] = Map {};
   $vecs[] = vec[];
   $dicts[] = dict[];
-  $vectors[] = ImmVector {};
-  $maps[] = ImmMap {};
 
   // multiple elements
-  $vectors[] = Vector {reschedule(), answer()};
-  $maps[] = Map {0 => reschedule(), 1 => answer() };
   $vecs[] = vec[reschedule(), answer()];
   $dicts[] = dict[0 => reschedule(), 1 => answer()];
   $dicts[] = dict[0 => reschedule(), 2 => answer()];
@@ -68,14 +58,12 @@ function get_handles() {
     range(0, 30),
   ));
 
-  return tuple($vectors, $maps, $vecs, $dicts);
+  return tuple($vecs, $dicts);
 }
 
 function get_wrapped_handles() {
-  list($vectors, $maps, $vecs, $dicts) = get_handles();
+  list($vecs, $dicts) = get_handles();
   return tuple(
-    $vectors->map($v ==> AwaitAllWaitHandle::fromVector($v)),
-    $maps->map($m ==> AwaitAllWaitHandle::fromMap($m)),
     $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
     $dicts->map($d ==> AwaitAllWaitHandle::fromDict($d))
   );
@@ -84,16 +72,8 @@ function get_wrapped_handles() {
 <<__EntryPoint>>
 function main_awaitall() {
   echo "children only\n";
-  list($vectors, $maps, $vecs, $dicts) = get_handles();
+  list($vecs, $dicts) = get_handles();
 
-  foreach ($vectors as $v) {
-    $wh = AwaitAllWaitHandle::fromVector($v);
-    t($wh, $v);
-  }
-  foreach ($maps as $m) {
-    $wh = AwaitAllWaitHandle::fromMap($m);
-    t($wh, $m);
-  }
   foreach ($vecs as $v) {
     $wh = AwaitAllWaitHandle::fromVec($v);
     t($wh, $v);
@@ -104,13 +84,7 @@ function main_awaitall() {
   }
 
   echo "parents\n";
-  list($vectors, $maps, $vecs, $dicts) = get_wrapped_handles();
-
-  $wh = AwaitAllWaitHandle::fromVector($vectors);
-  t($wh, $vectors);
-
-  $wh = AwaitAllWaitHandle::fromMap(new ImmMap($maps));
-  t($wh, $maps);
+  list($vecs, $dicts) = get_wrapped_handles();
 
   $wh = AwaitAllWaitHandle::fromVec(vec($vecs));
   t($wh, $vecs);
@@ -119,13 +93,11 @@ function main_awaitall() {
   t($wh, $dicts);
 
   echo "grandchildren\n";
-  list($vectors, $maps, $vecs, $dicts) = $handles = get_wrapped_handles();
+  list($vecs, $dicts) = $handles = get_wrapped_handles();
 
   $top = vec[
-    AwaitAllWaitHandle::fromVector($vectors),
-    AwaitAllWaitHandle::fromVector($maps),
-    AwaitAllWaitHandle::fromVector($vecs),
-    AwaitAllWaitHandle::fromVector($dicts)
+    AwaitAllWaitHandle::fromVec(vec($vecs)),
+    AwaitAllWaitHandle::fromVec(vec($dicts))
   ];
   $wh = AwaitAllWaitHandle::fromVec($top);
 

@@ -27,6 +27,13 @@ struct SrcKey;
 namespace jit::svcreq {
 
 /*
+ * A helper that initializes unpassed default arguments to KindOfUninit.
+ * This is needed when coming to C++ from JIT, as the JIT may optimize away
+ * uninit writes for default arguments.
+ */
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+                       uint32_t numNonVariadicParams) noexcept;
+/*
  * Handle a request to initially translate the code at the given current
  * location. Reached from translations at other SrcKeys when these translations
  * are unable or unwilling to continue due to insufficient type information or
@@ -35,7 +42,7 @@ namespace jit::svcreq {
  * The smash targets of a translate are stored in SrcRec::m_incomingBranches.
  */
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
-TCA handleTranslateFuncEntry(Offset bcOff) noexcept;
+TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept;
 
 /*
  * Handle a request to retranslate the code at the given current location.
@@ -45,15 +52,15 @@ TCA handleTranslateFuncEntry(Offset bcOff) noexcept;
  * The smash targets of a retranslate are stored in SrcRec::m_tailFallbackJumps.
  */
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept;
-TCA handleRetranslateFuncEntry(Offset bcOff) noexcept;
+TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept;
 
 /*
  * Handle a request to retranslate the current function, leveraging profiling
  * data to produce a set of larger, more optimized translations. Only used when
- * PGO is enabled. Execution will resume at `bcOff' whether or not retranslation
- * is successful.
+ * PGO is enabled. Execution will resume at the func entry for `numArgs'
+ * whether or not retranslation is successful.
  */
-TCA handleRetranslateOpt(Offset bcOff) noexcept;
+TCA handleRetranslateOpt(uint32_t numArgs) noexcept;
 
 /*
  * Handle a situation where the translated code in the TC executes a return

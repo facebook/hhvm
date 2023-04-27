@@ -21,6 +21,6 @@ function foo2<T2>(T2 $x): T2 {
 function foo3(int $x): int { return 0; }
 
 function test<T3>(bool $b): (function(T3): T3) {
-  $x = $b? fun('foo1'): fun('foo2');
+  $x = $b? foo1<>: foo2<>;
   return $x;
 }

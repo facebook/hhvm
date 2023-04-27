@@ -11,7 +11,7 @@ if(!$xsl) {
   echo "Error while parsing the document\n";
   exit;
 }
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 if(!$proc) {
   echo "Error while making xsltprocessor object\n";
   exit;

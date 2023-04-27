@@ -41,6 +41,13 @@ function main_trusted_autoload(): void {
         : 'FAIL';
       print "      $constant => $is_correct\n";
     }
+    print "    Modules:\n";
+    foreach (sorted(HH\autoload_path_to_modules($path)) as $module) {
+      $is_correct = $path === HH\autoload_module_to_path($module)
+        ? 'PASS'
+        : 'FAIL';
+      print "      $module => $is_correct\n";
+    }
     print "    TypeAliases:\n";
     foreach (sorted(HH\autoload_path_to_type_aliases($path)) as $type_alias) {
       $is_correct = $path === HH\autoload_type_alias_to_path($type_alias)
@@ -50,10 +57,8 @@ function main_trusted_autoload(): void {
     }
   }
 
-  print "Overriding: ".(string)(HH\autoload_set_paths(
-    darray['class' => darray[]],
-    __DIR__,
-  ))."\n";
-
-  print_enabled_stats();
+  print "Decorated methods:\n";
+  foreach (HH\Facts\methods_with_attribute(A1::class) as list($class, $method)) {
+    print "  $class::$method\n";
+  }
 }

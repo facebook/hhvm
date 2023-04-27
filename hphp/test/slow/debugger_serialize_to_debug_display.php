@@ -9,7 +9,7 @@ class D {
 }
 
 class E {
-  public function __toDebugDisplay() { throw new Error(2.0); }
+  public function __toDebugDisplay() { throw new Error("err"); }
 }
 
 class F {

@@ -98,6 +98,40 @@ async function map_async<Tv1, Tv2>(
 }
 
 /**
+ * Returns a new vec where each value is the result of calling the given
+ * async function on the original key and value.
+ *
+ * For non-async functions, see `Vec\map_with_key()`.
+ *
+ * Time complexity: O(n * f), where `f` is the complexity of the synchronous
+ * portions of `$value_func`
+ * Space complexity: O(n)
+ *
+ * The IO operations for each of calls to `$value_func` will happen in
+ * parallel.
+ */
+async function map_with_key_async<Tk as arraykey, Tv1, Tv2>(
+  KeyedTraversable<Tk, Tv1> $traversable,
+  (function(Tk, Tv1)[_]: Awaitable<Tv2>) $value_func,
+)[ctx $value_func]: Awaitable<vec<Tv2>> {
+  $vec = vec[];
+  foreach ($traversable as $key => $value) {
+    $vec[] = $value_func($key, $value);
+  }
+
+  /* HH_FIXME[4110] Okay to pass in Awaitable */
+  /* HH_FIXME[4390] Magic Function */
+  await AwaitAllWaitHandle::fromVec($vec);
+  foreach ($vec as $index => $value) {
+    /* HH_FIXME[4110] Reuse the existing vec to reduce peak memory. */
+    /* HH_FIXME[4390] Magic Function */
+    $vec[$index] = \HH\Asio\result($value);
+  }
+  /* HH_FIXME[4110] Reuse the existing vec to reduce peak memory. */
+  return $vec;
+}
+
+/**
  * Returns a 2-tuple containing vecs for which the given async
  * predicate returned `true` and `false`, respectively.
  *

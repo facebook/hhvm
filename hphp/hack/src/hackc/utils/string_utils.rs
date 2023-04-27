@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use escaper::*;
-use lazy_static::lazy_static;
-use naming_special_names_rust::{classes as ns_classes, members};
-use regex::Regex;
 use std::borrow::Cow;
 use std::cell::Cell;
+
+use escaper::*;
+use lazy_static::lazy_static;
+use naming_special_names_rust::classes as ns_classes;
+use naming_special_names_rust::members;
+use regex::Regex;
 
 lazy_static! {
     static ref HH_NS_RE: Regex = Regex::new(r"^\\?HH\\").unwrap();
@@ -79,7 +81,7 @@ pub fn mangle_xhp_id(mut name: String) -> String {
         if is_xhp(&name) {
             name.replace_range(..1, "xhp_")
         }
-        name.replace(":", "__").replace("-", "_")
+        name.replace(':', "__").replace('-', "_")
     } else {
         name
     }
@@ -89,10 +91,10 @@ fn unmangle_xhp_id(name: &str) -> String {
     if name.starts_with("xhp_") {
         format!(
             ":{}",
-            lstrip(name, "xhp_").replace("__", ":").replace("_", "-")
+            lstrip(name, "xhp_").replace("__", ":").replace('_', "-")
         )
     } else {
-        name.replace("__", ":").replace("_", "-")
+        name.replace("__", ":").replace('_', "-")
     }
 }
 

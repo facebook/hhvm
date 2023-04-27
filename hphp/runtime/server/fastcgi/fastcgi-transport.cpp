@@ -26,7 +26,6 @@
 
 namespace HPHP {
 
-using folly::IOBuf;
 using folly::IOBufQueue;
 using folly::io::Cursor;
 

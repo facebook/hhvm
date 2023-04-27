@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -68,6 +69,12 @@ void exactClsCns(IRGS& env,
                 const StringData* cnsNameStr,
                 const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
+
+  if (cls && will_symbol_raise_module_boundary_violation(cls, curFunc(env))) {
+    auto const cns = gen(env, InitClsCns, TInitCell, clsCnsName);
+    pushIncRef(env, cns);
+    return;
+  }
 
   // If the class is already defined in this request, the class is persistent
   // or a parent of the current context, and this constant is a scalar
@@ -195,7 +202,7 @@ void emitClsCnsL(IRGS& env, int32_t id) {
     emitClsCns(env, cnsName->strVal());
   } else {
     auto const cns = gen(env, LookupClsCns, cls, cnsName);
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     pushIncRef(env, cns);
   }
 }

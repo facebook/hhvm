@@ -1,0 +1,32 @@
+{
+  "named_handles": [
+    {
+      "hash": {
+        "salt": "gut.texas"
+      },
+      "name" : "B",
+      "pool": {
+        "name" : "B4",
+        "inherit" : "smc:twmemcache.gut.texas",
+        "protocol": "thrift",
+        "security_mech": "tls_to_plain",
+        "port_override": 11322,
+        "port_override_cross_dc": 11322,
+        "qos": {
+          "class": 2,
+          "path": 2
+        },
+        "port_override_within_dc": 11322
+      },
+      "type": "PoolRoute"
+    }
+  ],
+
+  "route": {
+    "type": "FailoverRoute",
+    "children": [
+      "D",
+      "B"
+     ]
+  }
+}

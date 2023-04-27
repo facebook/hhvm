@@ -5,37 +5,33 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast::Expr_ as E_;
+use hash::HashMap;
+use hash::HashSet;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use oxidized::{
-    aast,
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast::*,
-    ast_defs, local_id,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
-use std::collections::{HashMap, HashSet};
+use oxidized::aast;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::local_id;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
 
 // Local environment which keeps track of how many readonly values it has
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Default)]
 struct Lenv {
     pub lenv: HashMap<String, Rty>,
     pub num_readonly: u32,
 }
 
 impl Lenv {
-    pub fn new() -> Lenv {
-        Lenv {
-            lenv: HashMap::new(),
-            num_readonly: 0,
-        }
-    }
     pub fn insert(&mut self, var_name: String, rty: Rty) {
         let result = self.lenv.insert(var_name, rty);
         match (rty, result) {
@@ -75,10 +71,10 @@ struct Context {
 impl Context {
     fn new(readonly_ret: Rty, this_ty: Rty, is_typechecker: bool) -> Self {
         Self {
-            locals: Lenv::new(),
+            locals: Lenv::default(),
             readonly_return: readonly_ret,
             this_ty,
-            inout_params: HashSet::new(),
+            inout_params: HashSet::default(),
             is_typechecker,
         }
     }
@@ -129,7 +125,7 @@ fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
 }
 
 fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
-    let aast::Expr(_, _, exp) = &*expr;
+    let aast::Expr(_, _, exp) = expr;
     use aast::Expr_::*;
     match exp {
         ReadonlyExpr(_) => Rty::Readonly,
@@ -196,7 +192,9 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 // Primitives are always mutable
                 // Unfortunately, we don't make Hprim as a hint type until naming
                 // so we have to look at Happly
-                aast::Hint_::Happly(cn, _) if typehints::is_primitive_type_hint(cn.name()) => {
+                aast::Hint_::Happly(cn, _)
+                    if typehints::PRIMITIVE_TYPEHINTS.contains(cn.name()) =>
+                {
                     Rty::Mutable
                 }
                 _ => rty_expr(context, exp),
@@ -230,6 +228,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let (expr, _, _, _) = &**h;
             rty_expr(context, expr)
         }
+        Invalid(_e) => Rty::Mutable,
         Cast(_) => Rty::Mutable, // Casts are only valid on primitive types, so its always mutable
         New(_) => Rty::Mutable,
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
@@ -249,7 +248,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Id(_) => Rty::Mutable,
         Dollardollar(lid) => {
             let (id, dollardollar) = &lid.1;
-            let var_name = format!("{}{}", dollardollar.clone(), id);
+            let var_name = format!("{}{}", dollardollar, id);
             context.get_rty(&var_name)
         }
         // First put it in typechecker, then HHVM
@@ -277,7 +276,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
         Binop(b) => {
-            let (bop, e1, e2) = &**b;
+            let aast::Binop {
+                bop,
+                lhs: e1,
+                rhs: e2,
+            } = &**b;
             match bop {
                 ast_defs::Bop::QuestionQuestion => {
                     match (rty_expr(context, e1), rty_expr(context, e2)) {
@@ -302,7 +305,8 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
-        MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
+        MethodCaller(_) => Rty::Mutable,
+        Package(_) => Rty::Mutable,
     }
 }
 
@@ -328,6 +332,7 @@ fn is_special_builtin(f_name: &str) -> bool {
         | "HH\\darray"
         | "HH\\vec"
         | "hphp_array_idx"
+        | "HH\\FIXME\\UNSAFE_NONNULL_CAST"
         | "HH\\FIXME\\UNSAFE_CAST" => true,
         /* all other special builtins listed in emit_expresion.rs return mutable:
         specifically, these:
@@ -347,7 +352,8 @@ fn explicit_readonly(expr: &mut Expr) {
     match &expr.2 {
         aast::Expr_::ReadonlyExpr(_) => {}
         _ => {
-            expr.2 = aast::Expr_::ReadonlyExpr(Box::new(expr.clone()));
+            let tmp = std::mem::replace(expr, Expr(expr.0, expr.1.clone(), Expr_::Null));
+            expr.2 = aast::Expr_::ReadonlyExpr(Box::new(tmp));
         }
     }
 }
@@ -583,6 +589,16 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            if let Some(rhs) = &p.expr {
+                let ro_rhs = rty_expr(&mut context, rhs);
+                self.subtype(
+                    &rhs.1,
+                    &ro_rhs,
+                    &ro_kind_to_rty(p.readonly),
+                    "this parameter is not marked readonly",
+                );
+            }
+
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter);
@@ -619,6 +635,15 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            if let Some(rhs) = &p.expr {
+                let ro_rhs = rty_expr(&mut new_context, rhs);
+                self.subtype(
+                    &rhs.1,
+                    &ro_rhs,
+                    &ro_kind_to_rty(p.readonly),
+                    "this parameter is not marked readonly",
+                );
+            }
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter)
@@ -643,13 +668,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
         // Pipe expressions have their own recursion method due to their weird evaluation rules
-        if !self.is_typechecker || !p.2.is_pipe() {
+        if !p.2.is_pipe() {
             // recurse on inner members first, then assign to value
             p.recurse(context, self.object())?;
         }
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
-                let (bop, e_lhs, e_rhs) = x.as_mut();
+                let aast::Binop {
+                    bop,
+                    lhs: e_lhs,
+                    rhs: e_rhs,
+                } = x.as_mut();
                 if let Bop::Eq(_) = bop {
                     check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
                 }
@@ -684,18 +713,34 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (lid, left, right) = &mut **p;
                 // The only time the id number matters is for Dollardollar
                 let (_, dollardollar) = &lid.1;
-                if self.is_typechecker {
-                    self.visit_expr(context, left)?;
-                }
+                // Go left first, get the readonlyness, then go right
+                self.visit_expr(context, left)?;
                 let left_rty = rty_expr(context, left);
                 context.add_local(dollardollar, left_rty);
-                // Since pipe expressions are in reverse for evaluation,
-                // we need to recurse on the inner values again to check
-                // for readonlyness calls
+                self.visit_expr(context, right)?;
+            }
+            aast::Expr_::Yield(y) => {
+                // TODO: T128042708 Remove once typechecker change is landed
                 if self.is_typechecker {
-                    self.visit_expr(context, right)?;
+                    let mut expect_mutable = |expr| match rty_expr(context, expr) {
+                        Rty::Readonly => {
+                            self.add_error(expr.pos(), syntax_error::yield_readonly);
+                        }
+                        Rty::Mutable => (),
+                    };
+
+                    match &**y {
+                        aast::Afield::AFkvalue(k, v) => {
+                            expect_mutable(k);
+                            expect_mutable(v);
+                        }
+                        aast::Afield::AFvalue(v) => {
+                            expect_mutable(v);
+                        }
+                    };
                 }
             }
+
             _ => {}
         }
         Ok(())
@@ -872,6 +917,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                         let var_name = local_id::get_name(&lid.1).to_string();
                         let rhs_rty = rty_expr(context, &i.1);
                         context.add_local(&var_name, rhs_rty);
+                        i.recurse(context, self.object())?;
                     }
                 }
                 block.recurse(context, self.object())

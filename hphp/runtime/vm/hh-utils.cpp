@@ -16,8 +16,7 @@
 #include "hphp/runtime/vm/hh-utils.h"
 
 #include <atomic>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -41,17 +40,13 @@ void checkHHConfig(const Unit* unit) {
   }
 
   const std::string &s = unit->filepath()->toCppString();
-  boost::filesystem::path p(s);
+  std::filesystem::path p(s);
 
   while (p != "/" && p != "") {
-    p.remove_filename();
+    p = p.parent_path();
     p /= ".hhconfig";
-
-    if (boost::filesystem::exists(p)) {
-      break;
-    }
-
-    p.remove_filename();
+    if (std::filesystem::exists(p)) break;
+    p = p.parent_path();
   }
 
   if (p == "/" || p == "") {

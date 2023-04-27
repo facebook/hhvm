@@ -40,7 +40,6 @@ class A {
   public int $double = 1;
   public int $echo = 1;
   public int $else = 1;
-  public int $elseif = 1;
   public int $empty = 1;
   public int $enddeclare = 1;
   public int $endfor = 1;
@@ -150,8 +149,6 @@ class A {
     $this->double = 1;
     $this->echo = 1;
     $this->else = 1;
-    $this->elseif = 1;
-    $this->empty = 1;
     $this->enddeclare = 1;
     $this->endfor = 1;
     $this->endforeach = 1;
@@ -261,9 +258,7 @@ $a->do = 1;
 $a->double = 1;
 $a->echo = 1;
 $a->else = 1;
-$a->elseif = 1;
 $a->empty = 1;
-$a->enddeclare = 1;
 $a->endfor = 1;
 $a->endforeach = 1;
 $a->endif = 1;

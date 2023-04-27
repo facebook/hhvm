@@ -62,6 +62,8 @@ module DISALLOWED_FIXMES =
 let get_fixmes filename =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     (match HH_FIXMES.get filename with
     | None -> DECL_HH_FIXMES.get filename
@@ -75,6 +77,8 @@ let get_fixmes filename =
 let get_hh_fixmes filename =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     HH_FIXMES.get filename
   | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -84,6 +88,8 @@ let get_hh_fixmes filename =
 let get_decl_hh_fixmes filename =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     DECL_HH_FIXMES.get filename
   | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -93,6 +99,8 @@ let get_decl_hh_fixmes filename =
 let get_disallowed_fixmes filename =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     DISALLOWED_FIXMES.get filename
   | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -103,6 +111,8 @@ let provide_hh_fixmes filename fixme_map =
   if not (IMap.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
+    | Provider_backend.Rust_provider_backend _
+    | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       HH_FIXMES.add filename fixme_map
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -113,6 +123,8 @@ let provide_decl_hh_fixmes filename fixme_map =
   if not (IMap.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
+    | Provider_backend.Rust_provider_backend _
+    | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       DECL_HH_FIXMES.add filename fixme_map
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -123,6 +135,8 @@ let provide_disallowed_fixmes filename fixme_map =
   if not (IMap.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
+    | Provider_backend.Rust_provider_backend _
+    | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       DISALLOWED_FIXMES.add filename fixme_map
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
@@ -132,6 +146,8 @@ let provide_disallowed_fixmes filename fixme_map =
 let remove_batch paths =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     HH_FIXMES.remove_batch paths;
     DECL_HH_FIXMES.remove_batch paths;
@@ -239,6 +255,8 @@ let is_disallowed pos code =
   let fixme_map_opt =
     match Provider_backend.get () with
     | Provider_backend.Analysis
+    | Provider_backend.Rust_provider_backend _
+    | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       DISALLOWED_FIXMES.get filename
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
@@ -254,7 +272,14 @@ let is_disallowed pos code =
 let () =
   (Errors.get_hh_fixme_pos :=
      fun err_pos err_code ->
-       get_fixmes_for_pos err_pos |> IMap.find_opt err_code);
+       get_fixmes_for_pos err_pos |> fun imap ->
+       if !Errors.code_agnostic_fixme then
+         if IMap.is_empty imap then
+           None
+         else
+           Some err_pos
+       else
+         IMap.find_opt err_code imap);
   (Errors.is_hh_fixme :=
      fun err_pos err_code ->
        Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code));

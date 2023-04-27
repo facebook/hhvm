@@ -1,6 +1,6 @@
 <?hh
 
-function no_type() {}
+function no_type():dynamic { return 3; }
 
 function test(): void {
   $s = shape();

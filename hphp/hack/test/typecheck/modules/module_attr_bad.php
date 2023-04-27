@@ -1,14 +1,14 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
+
+new module here {}
 
 //// main.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__Module('here')>>
+module here;
 
 function foo():void { }
 

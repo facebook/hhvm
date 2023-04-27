@@ -104,7 +104,7 @@ let test_eviction _test_ctxt =
   ()
 
 let () =
-  "lru_cache_test"
+  "lfu_cache_test"
   >::: [
          "test_insert" >:: test_insert;
          "test_insert_many" >:: test_insert_many;

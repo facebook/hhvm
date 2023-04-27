@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -31,6 +32,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/req-heap-sanitizer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -51,7 +53,6 @@
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h" // @donotremove
-#include "hphp/util/file-cache.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
@@ -68,13 +69,14 @@
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
-#include <sstream>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
@@ -86,14 +88,9 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
-#if defined (__linux__) && defined (__aarch64__)
+#ifdef __aarch64__
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
-#endif
-
-#ifdef __APPLE__
-#define st_mtim st_mtimespec
-#define st_ctim st_ctimespec
 #endif
 
 namespace HPHP {
@@ -221,15 +218,21 @@ struct CachedRepoOptions {
     return *this;
   }
 
-  static bool isChanged(const RepoOptions* opts, struct stat s) {
-    auto const o = opts->stat();
-    return
-      s.st_mtim.tv_sec  != o.st_mtim.tv_sec ||
-      s.st_mtim.tv_nsec != o.st_mtim.tv_nsec ||
-      s.st_ctim.tv_sec  != o.st_ctim.tv_sec ||
-      s.st_ctim.tv_nsec != o.st_ctim.tv_nsec ||
-      s.st_dev != o.st_dev ||
-      s.st_ino != o.st_ino;
+  static bool isChanged(const RepoOptions* opts, const RepoOptionStats& st) {
+    auto const compare = [&] (Optional<struct stat> o,
+                              Optional<struct stat> s) {
+      if (!o.has_value() && !s.has_value()) return false;
+      if (o.has_value() != s.has_value()) return true;
+      return
+        s->st_mtim.tv_sec  != o->st_mtim.tv_sec ||
+        s->st_mtim.tv_nsec != o->st_mtim.tv_nsec ||
+        s->st_ctim.tv_sec  != o->st_ctim.tv_sec ||
+        s->st_ctim.tv_nsec != o->st_ctim.tv_nsec ||
+        s->st_dev != o->st_dev ||
+        s->st_ino != o->st_ino;
+    };
+    return compare(opts->stat().m_configStat, st.m_configStat)
+           || compare(opts->stat().m_packageStat, st.m_packageStat);
   }
 
   const RepoOptions* update(RepoOptions&& opts) const {
@@ -239,7 +242,7 @@ struct CachedRepoOptions {
     return val;
   }
 
-  const RepoOptions* fetch(struct stat st) const {
+  const RepoOptions* fetch(const RepoOptionStats& st) const {
     auto const opts = options.load(std::memory_order_relaxed);
     return opts && !isChanged(opts, st) ? opts : nullptr;
   }
@@ -267,15 +270,17 @@ using RepoOptionCache = tbb::concurrent_hash_map<
 >;
 RepoOptionCache s_repoOptionCache;
 
+constexpr char* kHhvmConfigHdf = ".hhvmconfig.hdf";
+constexpr char* kPackagesToml = "PACKAGES.toml";
+
 template<class F>
 bool walkDirTree(std::string fpath, F func) {
-  const char* filename = ".hhvmconfig.hdf";
   do {
     auto const off = fpath.rfind('/');
     if (off == std::string::npos) return false;
     fpath.resize(off);
     fpath += '/';
-    fpath += filename;
+    fpath += kHhvmConfigHdf;
 
     if (func(fpath)) return true;
 
@@ -288,6 +293,29 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
 }
 
+RepoOptionStats::RepoOptionStats(const std::string& configPath,
+                                 Stream::Wrapper* wrapper)
+  : m_configStat(std::nullopt)
+  , m_packageStat(std::nullopt)
+{
+  auto const wrapped_stat = [&](const char* path, struct stat* st) {
+    if (wrapper) return wrapper->stat(path, st);
+    return ::stat(path, st);
+  };
+  struct stat config;
+  if (wrapped_stat(configPath.data(), &config) == 0) m_configStat = config;
+  // Same directory
+  auto const repo =
+    configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
+  auto const packagePath = repo / kPackagesToml;
+  if (std::filesystem::exists(packagePath)) {
+    struct stat package;
+    if (wrapped_stat(packagePath.string().data(), &package) == 0) {
+      m_packageStat = package;
+    }
+  }
+}
+
 ParserEnv RepoOptionsFlags::getParserEnvironment() const {
   return ParserEnv {
       true // codegen
@@ -297,95 +325,79 @@ ParserEnv RepoOptionsFlags::getParserEnvironment() const {
     , EnableXHPClassModifier
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
-    , DisallowFunAndClsMethPseudoFuncs
     , true  // interpret_soft_types_as_like_types
     };
 }
 
-// Mapping must match HHBCFlags in compile.rs
-std::uint32_t RepoOptionsFlags::getCompilerFlags() const {
-  std::uint32_t hhbc_flags = 0;
-
-  #define HHBC_FLAGS()                                          \
-    SETFLAGS(LTRAssign, 0)                                      \
-    SETFLAGS(UVS, 1)                                            \
-    SETFLAGS(RuntimeOption::RepoAuthoritative, 4)               \
-    SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
-    SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \
-    SETFLAGS(RuntimeOption::EnableIntrinsicsExtension, 7)       \
-    SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
-    SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
-    SETFLAGS(RuntimeOption::EvalEnableImplicitContext, 12)      \
-    SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)
-
-  #define SETFLAGS(flag, n)                                     \
-    if (flag) {hhbc_flags |= 1 << n;}
-    HHBC_FLAGS()
-  #undef SETFLAGS
-  return hhbc_flags;
+void RepoOptionsFlags::initAliasedNamespaces(hackc::NativeEnv& env) const {
+  for (auto& [k, v] : AliasedNamespaces) {
+    env.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});
+  }
 }
 
-std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
-  folly::dynamic m_config = folly::dynamic::object();
-  m_config["hhvm.aliased_namespaces"] =
-    folly::dynamic::object("global_value", folly::toDynamic(AliasedNamespaces));
-  return folly::toJson(m_config);
+void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
+  for (auto& [k, v] : AliasedNamespaces) {
+    config.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});
+  }
+  config.disable_xhp_element_mangling = DisableXHPElementMangling;
+  config.interpret_soft_types_as_like_types = true;
+  config.allow_new_attribute_syntax = AllowNewAttributeSyntax;
+  config.enable_xhp_class_modifier = EnableXHPClassModifier;
+  config.php5_compat_mode = true;
+  config.hhvm_compat_mode = true;
 }
 
-std::uint32_t RepoOptionsFlags::getFactsFlags() const {
-  int32_t flags =
-    1 << 0 |  //php5_compat_mode
-    1 << 1 |  //hhvm_compat_mode
-    AllowNewAttributeSyntax   << 2 |
-    EnableXHPClassModifier    << 3 |
-    DisableXHPElementMangling << 4;
-  return flags;
+void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
+  flags.ltr_assign = LTRAssign;
+  flags.uvs = UVS;
+  flags.readonly_nonlocal_infer = ReadonlyNonlocalInference;
+  flags.optimize_reified_param_checks = OptimizeReifiedParamChecks;
+  flags.stress_shallow_decl_deps = StressShallowDeclDeps;
+  flags.stress_folded_decl_deps = StressFoldedDeclDeps;
 }
 
-std::uint32_t RepoOptionsFlags::getDeclFlags() const {
-  int32_t flags =
-    DisableXHPElementMangling << 0 |
-    1 << 1 | // interpret_soft_types_as_like_types
-    AllowNewAttributeSyntax   << 2 |
-    EnableXHPClassModifier    << 3 |
-    1 << 4 |  //php5_compat_mode
-    1 << 5;   //hhvm_compat_mode
-  return flags;
+void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
+  flags.abstract_static_props = AbstractStaticProps;
+  flags.allow_new_attribute_syntax = AllowNewAttributeSyntax;
+  flags.allow_unstable_features = AllowUnstableFeatures;
+  flags.const_default_func_args = ConstDefaultFuncArgs;
+  flags.const_static_props = ConstStaticProps;
+  flags.disable_lval_as_an_expression = DisableLvalAsAnExpression;
+  flags.disable_xhp_element_mangling = DisableXHPElementMangling;
+  flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
+  flags.enable_enum_classes = EnableEnumClasses;
+  flags.enable_xhp_class_modifier = EnableXHPClassModifier;
 }
 
-// Mapping must match ParserFlags in compile.rs
-std::uint32_t RepoOptionsFlags::getParserFlags() const {
-  std::uint32_t parser_flags = 0;
-
-  #define PARSER_FLAGS()                                       \
-    SETFLAGS(AbstractStaticProps, 0)                           \
-    SETFLAGS(AllowNewAttributeSyntax, 1)                       \
-    SETFLAGS(AllowUnstableFeatures, 2)                         \
-    SETFLAGS(ConstDefaultFuncArgs, 3)                          \
-    SETFLAGS(ConstStaticProps, 4)                              \
-    SETFLAGS(DisableLvalAsAnExpression, 8)                     \
-    SETFLAGS(DisallowInstMeth, 10)                             \
-    SETFLAGS(DisableXHPElementMangling, 11)                    \
-    SETFLAGS(DisallowFunAndClsMethPseudoFuncs, 12)             \
-    SETFLAGS(DisallowFuncPtrsInConstants, 13)                  \
-    SETFLAGS(EnableEnumClasses,16)                             \
-    SETFLAGS(EnableXHPClassModifier,17)                        \
-    SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \
-
-  #define SETFLAGS(flag, n)                                    \
-    if (flag) {parser_flags |= 1 << n;}
-    PARSER_FLAGS()
-  #undef SETFLAGS
-  return parser_flags;
-}
-
-const RepoOptions& RepoOptions::forFile(const char* path) {
+const RepoOptions& RepoOptions::forFile(const std::string& path) {
   tracing::BlockNoTrace _{"repo-options"};
-
-  if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
 
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
+
+  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
+    return boost::starts_with(
+      std::filesystem::path{p2},
+      std::filesystem::path{p1}.parent_path()
+    );
+  };
+
+  // Fast path: we have an active request and it has cached a RepoOptions
+  // which has not been modified. It can cause us to miss out on
+  // configs that were added between the current directory and the source file.
+  // (Loading these configs would result in a fatal anyway with this option)
+  if (!g_context.isNull()) {
+    if (auto const opts = g_context->getRepoOptionsForRequest()) {
+      // If path() is empty we have the default() options, which means we have
+      // negatively cached the existence of a .hhvmconfig.hdf for this request.
+      if (opts->path().empty()) return *opts;
+
+      // Don't bother checking if the file is changed. This cache is request
+      // local and within any given request we want to use a consistent version
+      // of the RepoOptions anyway.
+      if (isParentOf(opts->path(), fpath)) return *opts;
+    }
+  }
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
@@ -393,11 +405,6 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
-  auto const wrapped_stat = [&](const char* path, struct stat* st) {
-    if (wrapper) return wrapper->stat(path, st);
-    return ::stat(path, st);
-  };
-
   auto const wrapped_open = [&](const char* path) -> Optional<String> {
     if (wrapper) {
       if (auto const file = wrapper->open(path, "r", 0, nullptr)) {
@@ -413,37 +420,10 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
   };
 
-  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
-    return boost::starts_with(
-      boost::filesystem::path{p2},
-      boost::filesystem::path{p1}.parent_path()
-    );
-  };
-
-  // Fast path: we have an active request and it has cached a RepoOptions
-  // which has not been modified. This only works when the runtime option
-  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
-  // configs that were added between the current directory and the source file.
-  // (Loading these configs would result in a fatal anyway with this option)
-  if (!g_context.isNull()) {
-    if (auto const opts = g_context->getRepoOptionsForRequest()) {
-      // If path() is empty we have the default() options, which means we have
-      // negatively cached the existence of a .hhvmconfig.hdf for this request.
-      if (opts->path().empty()) return *opts;
-
-      if (isParentOf(opts->path(), fpath)) {
-        struct stat st;
-        if (wrapped_stat(opts->path().data(), &st) == 0) {
-          if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
-        }
-      }
-    }
-  }
-
   auto const set = [&] (
     RepoOptionCache::const_accessor& rpathAcc,
     const std::string& path,
-    const struct stat& st
+    const RepoOptionStats& st
   ) -> const RepoOptions* {
     *s_lastSeenRepoConfig = path;
     if (auto const opts = rpathAcc->second.fetch(st)) {
@@ -457,11 +437,11 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   };
 
   auto const test = [&] (const std::string& path) -> const RepoOptions* {
-    struct stat st;
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     if (!s_repoOptionCache.find(rpathAcc, key)) return nullptr;
-    if (wrapped_stat(path.data(), &st) != 0) {
+    RepoOptionStats st(path, wrapper);
+    if (st.missing()) {
       s_repoOptionCache.erase(rpathAcc);
       return nullptr;
     }
@@ -494,8 +474,8 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   if (ret) return *ret;
 
   walkDirTree(fpath, [&] (const std::string& path) {
-    struct stat st;
-    if (wrapped_stat(path.data(), &st) != 0) return false;
+    RepoOptionStats st(path, wrapper);
+    if (st.missing()) return false;
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     s_repoOptionCache.insert(rpathAcc, key);
@@ -518,38 +498,8 @@ AUTOLOADFLAGS()
 #undef P
 #undef H
 #undef E
+  mangleForKey(packageInfo().mangleForCacheKey(), raw);
   m_flags.m_sha1 = SHA1{string_sha1(raw)};
-}
-
-std::string RepoOptions::toJSON() const {
-  return folly::toJson(toDynamic());
-}
-
-void RepoOptions::calcDynamic() {
-  m_cachedDynamic = folly::dynamic::object();
-#define OUT(key, var)                                \
-  {                                                  \
-    auto const ini_name = Config::IniName(key);      \
-    auto const ini_value = toIniValue(var);          \
-    folly::dynamic entry = folly::dynamic::object(); \
-    entry["global_value"] = ini_value;               \
-    entry["local_value"] = ini_value;                \
-    entry["access"] = 4;                             \
-    m_cachedDynamic[ini_name] = entry;               \
-  }
-
-#define N(_, n, ...) OUT(#n, m_flags.n)
-#define P(_, n, ...) OUT("PHP7." #n, m_flags.n)
-#define H(_, n, ...) OUT("Hack.Lang." #n, m_flags.n)
-#define E(_, n, ...) OUT("Eval." #n, m_flags.n)
-PARSERFLAGS()
-AUTOLOADFLAGS();
-#undef N
-#undef P
-#undef H
-#undef E
-
-#undef OUT
 }
 
 const RepoOptions& RepoOptions::defaults() {
@@ -603,9 +553,13 @@ AUTOLOADFLAGS();
 #undef H
 #undef E
 
+  hdfExtract(autoloadConfig, "CacheBreaker", m_flags.m_factsCacheBreaker,
+             "2b024904a67752dc492e64ad21ae88b707464bd1");
+
   filterNamespaces();
+  if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
+  m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
   calcCacheKey();
-  calcDynamic();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -622,6 +576,7 @@ AUTOLOADFLAGS()
 
   filterNamespaces();
   m_path.clear();
+  m_flags.m_packageInfo = PackageInfo::defaults();
   calcCacheKey();
 }
 
@@ -654,7 +609,8 @@ bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
-uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
+uint32_t RuntimeOption::EvalInitialTypeTableSize = 30000;
+uint32_t RuntimeOption::EvalInitialFuncTableSize = 3000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::ProfDataTag;
@@ -725,7 +681,6 @@ int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
-bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
@@ -816,6 +771,8 @@ bool RuntimeOption::PathDebug = false;
 
 int64_t RuntimeOption::RequestBodyReadLimit = -1;
 
+bool RuntimeOption::AllowNonBlockingPosts = true;
+
 bool RuntimeOption::EnableSSL = false;
 int RuntimeOption::SSLPort = 443;
 int RuntimeOption::SSLPortFd = -1;
@@ -859,9 +816,13 @@ std::set<std::string> RuntimeOption::XboxPasswords;
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
-std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
+int RuntimeOption::AutoloadUserlandDisabled;
+int RuntimeOption::AutoloadUserlandDisabledSampleRate;
+bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;
+bool RuntimeOption::AutoloadDBCanCreate;
+std::string RuntimeOption::AutoloadUpdateSuppressionPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
@@ -1001,7 +962,6 @@ std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 int RuntimeOption::CheckCLIClientCommands = 0;
 
-int RuntimeOption::CheckIntOverflow = 0;
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF;
 
@@ -1069,7 +1029,7 @@ static inline bool alignMacroFusionPairs() {
 }
 
 static inline bool armLseDefault() {
-#if defined (__linux__) && defined (__aarch64__) && defined (HWCAP_ATOMICS)
+#if defined (__aarch64__) && defined (HWCAP_ATOMICS)
   return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
 #else
   return false;
@@ -1077,11 +1037,7 @@ static inline bool armLseDefault() {
 }
 
 static inline bool evalJitDefault() {
-#ifdef _MSC_VER
-  return false;
-#else
   return true;
-#endif
 }
 
 static inline bool reuseTCDefault() {
@@ -1141,31 +1097,30 @@ static inline bool layoutPrologueSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 
-Optional<folly::fs::path> RuntimeOption::GetHomePath(
-  const folly::StringPiece user) {
+Optional<std::filesystem::path> RuntimeOption::GetHomePath(
+    const folly::StringPiece user) {
+  namespace fs = std::filesystem;
 
-  auto homePath = folly::fs::path{RuntimeOption::SandboxHome}
-    / folly::fs::path{user};
-  if (folly::fs::is_directory(homePath)) {
-    return {std::move(homePath)};
+  auto homePath = fs::path{RO::SandboxHome} / fs::path{std::string{user}};
+  if (fs::is_directory(homePath)) {
+    return make_optional(std::move(homePath));
   }
 
   if (!RuntimeOption::SandboxFallback.empty()) {
-    homePath = folly::fs::path{RuntimeOption::SandboxFallback}
-      / folly::fs::path{user};
-    if (folly::fs::is_directory(homePath)) {
-      return {std::move(homePath)};
+    homePath = fs::path{RO::SandboxFallback} / fs::path{std::string{user}};
+    if (fs::is_directory(homePath)) {
+      return make_optional(std::move(homePath));
     }
   }
 
-  return {};
+  return std::nullopt;
 }
 
 std::string RuntimeOption::GetDefaultUser() {
   if (SandboxDefaultUserFile.empty()) return {};
 
-  folly::fs::path file{SandboxDefaultUserFile};
-  if (!folly::fs::is_regular_file(file)) return {};
+  std::filesystem::path file{RO::SandboxDefaultUserFile};
+  if (!std::filesystem::is_regular_file(file)) return {};
 
   std::string user;
   if (!folly::readFile(file.c_str(), user) || user.empty()) return {};
@@ -1173,7 +1128,7 @@ std::string RuntimeOption::GetDefaultUser() {
   return user;
 }
 
-bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
+bool RuntimeOption::ReadPerUserSettings(const std::filesystem::path& confFileName,
                                         IniSettingMap& ini, Hdf& config) {
   try {
     Config::ParseConfigFile(confFileName.native(), ini, config, false);
@@ -1234,8 +1189,6 @@ bool RuntimeOption::RepoDebugInfo = true;
 bool RuntimeOption::RepoLitstrLazyLoad = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
-bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
-int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
@@ -1276,7 +1229,7 @@ std::string RuntimeOption::DebuggerSessionAuthScriptBin;
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
-int64_t RuntimeOption::PregBacktraceLimit = 1000000;
+int64_t RuntimeOption::PregBacktrackLimit = 1000000;
 int64_t RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
@@ -1450,20 +1403,32 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
   }
 
   auto const checkPatterns = [&] (Hdf hdf) {
-    // Check the patterns using "&" rather than "&&" so they all get
-    // evaluated; otherwise with multiple patterns, if an earlier
-    // one fails to match, the later one is reported as unused.
-    return
-      Config::matchHdfPattern(hostname, ini, hdf, "machine") &
-      Config::matchHdfPattern(tier, ini, hdf, "tier") &
-      Config::matchHdfPattern(task, ini, hdf, "task") &
-      Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
-      Config::matchHdfPattern(tags, ini, hdf, "tags", "m") &
-      Config::matchHdfPattern(cpu, ini, hdf, "cpu");
+    // Check the patterns one by one so they all get evaluated; otherwise, when
+    // using "&&" in a single expression with multiple patterns, if an earlier
+    // one fails to match, the later one would be reported as unused.
+    auto matched = true;
+    matched &= Config::matchHdfPattern(hostname, ini, hdf, "machine");
+    matched &= Config::matchHdfPattern(tier, ini, hdf, "tier");
+    matched &= Config::matchHdfPattern(task, ini, hdf, "task");
+    matched &= Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m");
+    matched &= Config::matchHdfPattern(tags, ini, hdf, "tags", "m");
+    matched &= Config::matchHdfPattern(cpu, ini, hdf, "cpu");
+    return matched;
   };
 
   std::vector<std::string> messages;
   auto enableShards = true;
+
+  auto const matchesTier = [&] (Hdf hdf) {
+    // Check the patterns one by one so they all get evaluated; otherwise, when
+    // using "&&" in a single expression with multiple patterns, if an earlier
+    // one fails to match, the later one would be reported as unused.
+    auto matched = true;
+    matched &= checkPatterns(hdf);
+    matched &= !hdf.exists("exclude") || !checkPatterns(hdf["exclude"]);
+    matched &= matchShard(enableShards, hostname, ini, hdf, messages);
+    return matched;
+  };
 
   // Tier overwrites
   {
@@ -1476,12 +1441,7 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
                                 "cpu='{}', tiers='{}', tags='{}'",
                                 hostname, tier, task, cpu, tiers, tags));
       }
-      // Check the patterns using "&" rather than "&&" so they all get
-      // evaluated; otherwise with multiple patterns, if an earlier
-      // one fails to match, the later one is reported as unused.
-      if (checkPatterns(hdf) &
-          (!hdf.exists("exclude") || !checkPatterns(hdf["exclude"])) &
-          matchShard(enableShards, hostname, ini, hdf, messages)) {
+      if (matchesTier(hdf)) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
         if (enableShards && hdf["DisableShards"].configGetBool()) {
@@ -1915,10 +1875,6 @@ void RuntimeOption::Load(
                  RepoLitstrLazyLoad);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
                  RepoAuthoritative);
-    Config::Bind(RepoLocalReadaheadRate, ini, config,
-                 "Repo.LocalReadaheadRate", 0);
-    Config::Bind(RepoLocalReadaheadConcurrent, ini, config,
-                 "Repo.LocalReadaheadConcurrent", false);
     Config::Bind(RepoBusyTimeoutMS, ini, config,
                  "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
 
@@ -1956,9 +1912,17 @@ void RuntimeOption::Load(
                  true);
     Config::Bind(CheckFlushOnUserClose, ini, config,
                  "Eval.CheckFlushOnUserClose", true);
-    Config::Bind(EvalInitialNamedEntityTableSize, ini, config,
+    Config::Bind(EvalInitialTypeTableSize, ini, config,
                  "Eval.InitialNamedEntityTableSize",
-                 EvalInitialNamedEntityTableSize);
+                 EvalInitialTypeTableSize);
+    Config::Bind(EvalInitialFuncTableSize, ini, config,
+                 "Eval.InitialFuncTableSize",
+                 EvalInitialTypeTableSize);
+    if (EvalInitialTypeTableSize / 200 > EvalInitialTypeTableSize) {
+      // Assume InitialFuncTableSize was not provided; compute initial func
+      // table size from a conservative type/func ratio.
+      EvalInitialFuncTableSize = EvalInitialTypeTableSize / 200;
+    }
     Config::Bind(EvalInitialStaticStringTableSize, ini, config,
                  "Eval.InitialStaticStringTableSize",
                  EvalInitialStaticStringTableSize);
@@ -2046,6 +2010,10 @@ void RuntimeOption::Load(
       DumpPreciseProfData = false;
     }
     EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
+    if (EvalSanitizeReqHeap) {
+      HeapObjectSanitizer::install_signal_handler();
+    }
+
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
@@ -2139,8 +2107,6 @@ void RuntimeOption::Load(
   }
   {
     // Hack Language
-    Config::Bind(CheckIntOverflow, ini, config,
-                 "Hack.Lang.CheckIntOverflow", 0);
     Config::Bind(StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys", HackStrictOption::ON);
 
@@ -2241,7 +2207,6 @@ void RuntimeOption::Load(
                  "Server.ThreadJobMaxQueuingMilliSeconds", -1);
     Config::Bind(ServerThreadDropStack, ini, config, "Server.ThreadDropStack");
     Config::Bind(ServerHttpSafeMode, ini, config, "Server.HttpSafeMode");
-    Config::Bind(ServerStatCache, ini, config, "Server.StatCache", false);
     Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);
@@ -2370,6 +2335,8 @@ void RuntimeOption::Load(
                  "");
     Config::Bind(RequestBodyReadLimit, ini, config,
                  "Server.RequestBodyReadLimit", -1);
+    Config::Bind(AllowNonBlockingPosts, ini, config,
+                 "Server.AllowNonBlockingPosts", true);
     Config::Bind(EnableSSL, ini, config, "Server.EnableSSL");
     Config::Bind(SSLPort, ini, config, "Server.SSLPort", 443);
     Config::Bind(SSLCertificateFile, ini, config, "Server.SSLCertificateFile");
@@ -2444,7 +2411,6 @@ void RuntimeOption::Load(
     if (SourceRoot.empty()) {
       SourceRoot = defSourceRoot;
     }
-    FileCache::SourceRoot = SourceRoot;
 
     Config::Bind(IncludeSearchPaths, ini, config, "Server.IncludeSearchPaths");
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
@@ -2452,8 +2418,33 @@ void RuntimeOption::Load(
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
+    Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", true);
+    Config::Bind(AutoloadUserlandDisabled, ini, config, "Autoload.UserlandDisabled", 1);
+    Config::Bind(AutoloadUserlandDisabledSampleRate, ini, config,
+                 "Autoload.UserlandDisabledSampleRate", 1);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
+    Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
+
+    /**
+     * If this option is nonempty, Facts will check if a file exists at the
+     * given path. If such a file does exist, Facts will not update.
+     */
+    Config::Bind(AutoloadUpdateSuppressionPath, ini, config,
+      "Autoload.UpdateSuppressionPath", "");
+
+    /**
+     * If true, and if a Facts DB doesn't already exist, native Facts will
+     * attempt to load the repo from scratch and create the DB. If the repo is
+     * very large, this may not be practical. Setting up the DB could grind the
+     * system to a halt, and you may have some other system to download a DB
+     * from saved state. You may rather prefer that requests fail until the
+     * saved state DB has been set up. Setting `AutoloadDBCanCreate=false`
+     * will prevent us from creating the DB if none exists, causing requests
+     * to fail in the meantime.
+     */
+    Config::Bind(AutoloadDBCanCreate, ini, config,
+      "Autoload.DB.CanCreate", true);
+
     Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
     Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",
@@ -2700,7 +2691,7 @@ void RuntimeOption::Load(
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    // Binding default dependenant on whether we are using an OSS build or
+    // Binding default dependent on whether we are using an OSS build or
     // not, and that is set at initialization time of CoreDumpReportDirectory.
     Config::Bind(CoreDumpReportDirectory, ini, config,
                  "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
@@ -2774,8 +2765,12 @@ void RuntimeOption::Load(
   }
   {
     // Preg
-    Config::Bind(PregBacktraceLimit, ini, config, "Preg.BacktraceLimit",
-                 1000000);
+    // TODO: T58241504 delete this default once config is migrated.
+    auto const backtrackDefault = Config::GetInt64(
+        ini, config, "Preg.BacktraceLimit", 1000000
+    );
+    Config::Bind(PregBacktrackLimit, ini, config, "Preg.BacktrackLimit",
+                 backtrackDefault);
     Config::Bind(PregRecursionLimit, ini, config, "Preg.RecursionLimit",
                  100000);
     Config::Bind(EnablePregErrorLog, ini, config, "Preg.ErrorLog", true);
@@ -2825,7 +2820,7 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
-  // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
+  // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
 
@@ -2854,9 +2849,9 @@ void RuntimeOption::Load(
                      nullptr,
                      []() {
                        return VirtualHost::GetMaxPostSize();
-                     }
-                   ),
-                   &RuntimeOption::MaxPostSize);
+                     },
+                     &RuntimeOption::MaxPostSize
+                   ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "always_populate_raw_post_data",
                    &RuntimeOption::AlwaysPopulateRawPostData);
@@ -2920,8 +2915,10 @@ void RuntimeOption::Load(
   IniSetting::Bind(
     IniSetting::CORE, IniSetting::PHP_INI_NONE, "hphp.build_id",
     IniSetting::SetAndGet<std::string>(
-      [](const std::string& /*value*/) { return false; }, nullptr),
-    &RuntimeOption::BuildId);
+      [](const std::string& /*value*/) { return false; },
+      nullptr,
+      &RuntimeOption::BuildId)
+  );
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",
                    &RuntimeOption::NoticeFrequency);

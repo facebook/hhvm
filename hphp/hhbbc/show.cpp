@@ -353,6 +353,7 @@ std::string show(const Class& cls) {
     folly::toAppend("  implements ", i->data(), "\n", &ret);
   }
   for (auto& m : cls.methods) {
+    if (!m) continue;
     folly::toAppend(
       "  method ",
       m->name->data(), ":\n",
@@ -363,21 +364,23 @@ std::string show(const Class& cls) {
   return ret;
 }
 
-std::string show(const Unit& unit) {
+std::string show(const Unit& unit,
+                 const std::vector<const php::Class*>& classes,
+                 const std::vector<const php::Func*>& funcs) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
     &ret
   );
 
-  for (auto& c : unit.classes) {
+  for (auto const c : classes) {
     folly::toAppend(
       indent(2, show(*c)),
       &ret
     );
   }
 
-  for (auto& f : unit.funcs) {
+  for (auto const f : funcs) {
     folly::toAppend(
       "  function ", f->name->data(), ":\n",
       indent(4, show(*f)),
@@ -389,10 +392,52 @@ std::string show(const Unit& unit) {
   return ret;
 }
 
-std::string show(const Program& p) {
+std::string show(const Unit& unit, const Index& index) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) { classes.emplace_back(&c); }
+  );
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { funcs.emplace_back(&f); }
+  );
+
+  std::sort(
+    begin(classes), end(classes),
+    [] (const php::Class* a, const php::Class* b) {
+      return string_data_lti{}(a->name, b->name);
+    }
+  );
+  std::sort(
+    begin(funcs), end(funcs),
+    [] (const php::Func* a, const php::Func* b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Unit& unit, const Program& p) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  for (auto const& c : p.classes) {
+    if (c->unit != unit.filename) continue;
+    classes.emplace_back(c.get());
+  }
+  for (auto const& f : p.funcs) {
+    if (f->unit != unit.filename) continue;
+    funcs.emplace_back(f.get());
+  }
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Program& p, const Index& index) {
   using namespace folly::gen;
   return from(p.units)
-    | map([] (const std::unique_ptr<php::Unit>& u) { return show(*u); })
+    | map([&] (const std::unique_ptr<php::Unit>& u) { return show(*u, index); })
     | unsplit<std::string>("--------------\n")
     ;
 }
@@ -572,38 +617,50 @@ std::string show(const Type& t) {
       return std::make_pair(ret, specMatches + restMatches);
     };
 
-    switch (t.m_dataTag) {
-    case DataTag::Obj: {
+    auto const showDCls = [&] (const DCls& dcls, bool isObj) {
+      auto const lt = [&] {
+        assertx(!dcls.isExact());
+        if (!isObj && !dcls.containsNonRegular()) {
+          if (dcls.isIsect()) return "<!";
+          if (!dcls.cls().mightBeRegular()) return "<";
+          if (dcls.cls().mightContainNonRegular()) return "<!";
+        }
+        return "<=";
+      };
+
       std::string ret;
-      switch (t.m_data.dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
-        break;
+      if (dcls.isExact()) {
+        folly::toAppend("=", show(dcls.cls()), &ret);
+      } else if (dcls.isSub()) {
+        folly::toAppend(lt(), show(dcls.cls()), &ret);
+      } else {
+        folly::toAppend(
+          lt(),
+          "{",
+          [&] {
+            using namespace folly::gen;
+            return from(dcls.isect())
+              | map([] (res::Class c) { return show(c); })
+              | unsplit<std::string>("&");
+          }(),
+          "}",
+          &ret
+        );
       }
-      if (t.m_data.dobj.isCtx) folly::toAppend(" this", &ret);
-      return impl(BObj, ret);
-    }
+      if (dcls.isCtx()) folly::toAppend(" this", &ret);
+      return ret;
+    };
+
+    switch (t.m_dataTag) {
+    case DataTag::Obj:
+      return impl(BObj, showDCls(t.m_data.dobj, true));
     case DataTag::WaitHandle:
       return impl(
         BObj,
-        folly::sformat("=WaitH<{}>", show(*t.m_data.dwh.inner))
+        folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
-    case DataTag::Cls: {
-      std::string ret;
-      switch (t.m_data.dcls.type) {
-      case DCls::Exact:
-        folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
-        break;
-      case DCls::Sub:
-        folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
-        break;
-      }
-      if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
-      return impl(BCls, ret);
-    }
+    case DataTag::Cls:
+      return impl(BCls, showDCls(t.m_data.dcls, false));
     case DataTag::ArrLikePacked:
       return impl(
         BArrLikeN,

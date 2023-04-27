@@ -10,8 +10,6 @@
 open Ifc_types
 open Aast
 open Base
-module Env = Tast_env
-module Cls = Decl_provider.Class
 
 let options : options =
   {
@@ -66,12 +64,6 @@ let check_errors_from_callable_result result =
     SMap.iter (Ifc.check_valid_flow options) simplified_results
   | None -> ()
 
-let has_attr (name : string) (attrs : Tast.user_attribute list) : bool =
-  let matches_name { ua_name = (_, attr_name); _ } =
-    String.equal attr_name name
-  in
-  List.exists ~f:matches_name attrs
-
 (* Run IFC on a single method, catching exceptions *)
 let handle_method
     (class_name : string)
@@ -104,8 +96,8 @@ let handle_method
 
 (* Run IFC on a single toplevel function, catching exceptions *)
 let handle_fun (ctx : Provider_context.t) (fd : Tast.fun_def) =
+  let (_, name) = fd.fd_name in
   let {
-    f_name = (_, name);
     f_annotation = saved_env;
     f_params = params;
     f_body = body;
@@ -132,8 +124,7 @@ let handle_fun (ctx : Provider_context.t) (fd : Tast.fun_def) =
 let ifc_enabled_on_file tcopt file =
   let ifc_enabled_paths = TypecheckerOptions.ifc_enabled tcopt in
   let path = "/" ^ Relative_path.suffix file in
-  List.exists ifc_enabled_paths ~f:(fun prefix ->
-      String_utils.string_starts_with path prefix)
+  List.exists ifc_enabled_paths ~f:(fun prefix -> String.is_prefix path ~prefix)
 
 let should_run_ifc tcopt file =
   match

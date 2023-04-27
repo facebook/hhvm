@@ -1,7 +1,7 @@
 <?hh
 
 abstract final class C {
-  static darray<string, mixed> $cache = darray[];
+  public static darray<string, mixed> $cache = darray[];
 }
 
 <<__NEVER_INLINE>>

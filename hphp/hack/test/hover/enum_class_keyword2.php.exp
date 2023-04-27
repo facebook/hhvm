@@ -1,0 +1,27 @@
+enum class
+An `enum class` is a fixed set of values that can be used as typed constants.
+
+Enum classes enable you to write generic getter and setter methods.
+
+```
+enum class PersonFields: BaseField {
+  Field<string> name = Field::string();
+  Field<string> email = Field::string();
+  Field<int> age = Field::int();
+}
+```
+
+You can refer to items within an enum class by name (using the `#` syntax), and Hack knows the exact type.
+
+```
+function person_get(
+  Person $p,
+  HH\EnumClass\Label<PersonFields, Field<T>> $field_name
+  ): T {
+  // ... implementation here ...
+}
+
+person_get($a_person, #email); // string
+```
+
+See also `HH\EnumClass\Label` and `HH\MemberOf`.

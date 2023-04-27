@@ -89,7 +89,31 @@ module Codes = struct
 
   let invalid_disjointness_check = 5638
 
-  let inferred_variance = 5639
+  let inferred_variance = 5639 (* DEPRECATED *)
 
   let switch_nonexhaustive = 5640
+
+  let bad_xhp_enum_attribute_value = 5641
+
+  let unreachable_method_in_trait = 5642
+
+  let comparing_booleans = 5643
+
+  let pointless_booleans_expression = 5644
+
+  let unconditional_recursion = 5645
+
+  let branch_return_same_value = 5646
+
+  let redundant_unsafe_cast = 5647
+
+  let redundant_cast = 5648
+
+  let internal_classname = 5649
+
+  let async_lambda = 5650
+
+  let awaitable_awaitable = 5651
+
+  let cast_non_primitive = 5652
 end

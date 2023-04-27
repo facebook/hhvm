@@ -136,7 +136,7 @@ let test_jget_string () =
           abs
           non
     in
-    let failed = String_utils.is_substring "false" results in
+    let failed = String.is_substring ~substring:"false" results in
     if failed then Printf.eprintf "%s" results;
     not failed)
 
@@ -172,7 +172,7 @@ let test_jget_number () =
           ffloat
           fstring
     in
-    let failed = String_utils.is_substring "false" results in
+    let failed = String.is_substring ~substring:"false" results in
     if failed then Printf.eprintf "%s" results;
     not failed)
 

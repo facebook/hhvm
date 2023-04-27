@@ -23,7 +23,8 @@ namespace HPHP {
 struct ArrayData;
 struct Class;
 struct Func;
-struct NamedEntity;
+struct NamedType;
+struct NamedFunc;
 struct StringData;
 struct Unit;
 
@@ -43,7 +44,8 @@ namespace data_map {
 void register_start(const ArrayData*);
 void register_start(const Class*);
 void register_start(const Func*);
-void register_start(const NamedEntity*);
+void register_start(const NamedType*);
+void register_start(const NamedFunc*);
 void register_start(const StringData*);
 void register_start(const Unit*);
 
@@ -56,7 +58,8 @@ void register_start(const Unit*);
 void deregister(const ArrayData*);
 void deregister(const Class*);
 void deregister(const Func*);
-void deregister(const NamedEntity*);
+void deregister(const NamedType*);
+void deregister(const NamedFunc*);
 void deregister(const StringData*);
 void deregister(const Unit*);
 
@@ -73,7 +76,8 @@ using result = folly::DiscriminatedPtr<
   ArrayData,
   Class,
   Func,
-  NamedEntity,
+  NamedType,
+  NamedFunc,
   StringData,
   Unit
 >;

@@ -120,7 +120,7 @@ bool runRelative(std::string suffix, String cmd,
   );
   if (cwd.isNull()) return false;
   do {
-    cwd = f_dirname(cwd);
+    cwd = HHVM_FN(dirname)(cwd);
     auto const f = String::attach(
       StringData::Make(cwd.data(), suffix.data())
     );

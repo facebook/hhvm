@@ -1,1 +1,1 @@
-Catchable fatal error: Argument 1 passed to test() must be an instance of float, int given in %s/test/slow/php7_backported/scalar-types/scalar_float_with_integer_default_weak.php on line 8
+Catchable fatal error: Argument 1 passed to test() must be an instance of float, int given in %s/test/slow/php7_backported/scalar-types/scalar_float_with_integer_default_weak.php on line 6

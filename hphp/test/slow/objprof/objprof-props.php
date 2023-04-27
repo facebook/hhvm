@@ -38,8 +38,8 @@ class EmptyClass {}
 
 
 // TEST: sizes of classes (including private props)
-class SimpleProps { // 51:48
-  private string $prop1 = "one"; // 19:16
+class SimpleProps { // 48:48
+  private string $prop1 = "one"; // 16:16
   protected int $prop2 = 2; // 16:16
   public bool $prop3 = true; // 16:16
 }
@@ -47,16 +47,19 @@ class SimpleProps { // 51:48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
-  public darray $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (23:16) = 46:32
-    321 => 3, // 2 * (16:16) = 32:32
+  public varray $arrEmpty = varray[]; // 16 (tv)
+  public darray $arrMixed = darray[ // 16 (tv)
+    "somekey" => "someval",
+    321 => 3,
   ];
-  public varray<int> $arrNums = varray[
-    2012, // 16:16
-    2013, // 16:16
-    2014 // 16:16
-  ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  public varray<int> $arrNums = varray[];
+  function __construct() {
+    $this->arrNums = varray[
+      2012, // 16:16
+      2013, // 16:16
+      rand(1,2) // 16:16
+    ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  }
 }
 
 
@@ -76,9 +79,9 @@ class SimpleClassForExclude {
   public ExlcudeClass $fooCls1;
   public ExlcudeClass $fooCls2;
   public function __construct() {
-    $this->map = Map{ // $MapSize + 39:36 + 43:40
-      'foo' => getStr(4), // 19:16 + 20:20 = 39:36
-      'bar' => getStr(8), // 19:16 + 24:24 = 43:40
+    $this->map = Map{ // $MapSize + 36:36 + 40:40
+      'foo' => getStr(4), // 16:16 + 20:20 = 36:36
+      'bar' => getStr(8), // 16:16 + 24:24 = 40:40
     };
     $this->fooCls1 = new ExlcudeClass(); // $ObjSize
     $this->fooCls2 = new ExlcudeClass(); // $ObjSize
@@ -102,7 +105,7 @@ __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleProps::prop1', $objs) == 1 &&
      get_instances('SimpleProps::prop2', $objs) == 1 &&
      get_instances('SimpleProps::prop3', $objs) == 1 &&
-     get_bytes('SimpleProps::prop1', $objs) == 19 &&
+     get_bytes('SimpleProps::prop1', $objs) == 16 &&
      get_bytes('SimpleProps::prop2', $objs) == 16 &&
      get_bytes('SimpleProps::prop2', $objs) == 16 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps::prop1', $objs), 16) &&
@@ -119,19 +122,19 @@ __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleArrays::arrEmpty', $objs) == 1 &&
      get_instances('SimpleArrays::arrMixed', $objs) == 1 &&
      get_instances('SimpleArrays::arrNums', $objs) == 1 &&
-     get_bytes('SimpleArrays::arrEmpty', $objs) == 32 &&
-     get_bytes('SimpleArrays::arrMixed', $objs) == 110 &&
+     get_bytes('SimpleArrays::arrEmpty', $objs) == 16 &&
+     get_bytes('SimpleArrays::arrMixed', $objs) == 16 &&
      get_bytes('SimpleArrays::arrNums', $objs) == 80 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrEmpty', $objs), 16) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrMixed', $objs), 16) &&
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrNums', $objs), 16) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrNums', $objs), 80) ?
       "(GOOD) Bytes (arrays) works\n" :
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
 $objs = null;
 $myClass = new DynamicClass();
-$dynamic_field = 'abcd'; // 20:16
-$dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
+$dynamic_field = 'abcd'; // 16:16
+$dynamic_field2 = 1234;  // 16:16
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
 __hhvm_intrinsics\launder_value($myClass);
@@ -139,8 +142,8 @@ $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('DynamicClass::abcd', $objs) == 1 &&
      get_instances('DynamicClass::1234', $objs) == 1 &&
-     get_bytes('DynamicClass::abcd', $objs) == 36 &&
-     get_bytes('DynamicClass::1234', $objs) == 36 &&
+     get_bytes('DynamicClass::abcd', $objs) == 32 &&
+     get_bytes('DynamicClass::1234', $objs) == 32 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass::abcd', $objs), 32) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass::1234', $objs), 32) ?
       "(GOOD) Bytes (dynamic) works\n" :
@@ -155,8 +158,8 @@ __hhvm_intrinsics\launder_value($myClass);
 
 // TEST: map with int and string keys (Mixed). DEFAULT mode.
 $myClass = Map {
-  "abc" => 1, // 35:32
-  1 => "22", // 34:32
+  "abc" => 1, // 32:32
+  1 => getStr(2), // 34:34
   1234123 => 3 // 32:32
 };
 __hhvm_intrinsics\launder_value($myClass);
@@ -165,11 +168,11 @@ __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Map::abc', $objs) == 1 &&
      get_instances('HH\Map::1', $objs) == 1 &&
      get_instances('HH\Map::1234123', $objs) == 1 &&
-     get_bytes('HH\Map::abc', $objs) == 35 &&
+     get_bytes('HH\Map::abc', $objs) == 32 &&
      get_bytes('HH\Map::1', $objs) == 34 &&
      get_bytes('HH\Map::1234123', $objs) == 32 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::abc', $objs), 32) &&
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::1', $objs), 32) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::1', $objs), 34) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::1234123', $objs), 32) ?
       "(GOOD) Bytes (Mixed Map) works in default mode\n" :
       "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
@@ -179,8 +182,8 @@ $objs = null;
 
 // TEST: map with int and string keys (Mixed). USER_TYPES_ONLY mode.
 $myClass = Map {
-  "abc" => 1, // 3 + 16 + 16 = 35
-  1 => "22", // 16 + 16 + 2 = 34
+  "abc" => 1, // 16 + 16 = 32
+  1 => getStr(2), // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
 __hhvm_intrinsics\launder_value($myClass);
@@ -198,14 +201,14 @@ $objs = null;
 
 // TEST: vector with int and string vals (Packed). DEFAULT mode.
 $myClass = Vector {
-  "abc", // 19:16
+  "abc", // 16:16
   1, // 16:16
 };
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Vector::<index>', $objs) == 2 &&
-     get_bytes('HH\Vector::<index>', $objs) == 35 &&
+     get_bytes('HH\Vector::<index>', $objs) == 32 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Vector::<index>', $objs), 32) ?
       "(GOOD) Bytes (Vector) works in default mode\n" :
       "(BAD) Bytes (Vector) failed: " . var_export($objs, true) . "\n";
@@ -215,7 +218,7 @@ $objs = null;
 
 // TEST: vector with int and string vals (Packed). USER_TYPES_ONLY mode.
 $myClass = Vector {
-  "abc", // 19:16
+  "abc", // 16:16
   1, // 16:16
 };
 __hhvm_intrinsics\launder_value($myClass);
@@ -261,8 +264,8 @@ echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_bytes('SimpleClassForExclude::map', $objs) == 16 /* (tv) */ &&
      get_bytes('SimpleClassForExclude::fooCls1', $objs) == 16 /* (tv) */ &&
      get_bytes('SimpleClassForExclude::fooCls2', $objs) == 16 /* (tv) */ &&
-     get_bytes('HH\Map::foo', $objs) == 39 &&
-     get_bytes('HH\Map::bar', $objs) == 43 &&
+     get_bytes('HH\Map::foo', $objs) == 36 &&
+     get_bytes('HH\Map::bar', $objs) == 40 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::map', $objs), 16) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls1', $objs), 16) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls2', $objs), 16) &&
@@ -281,7 +284,7 @@ __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls1', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls2', $objs) == 1 &&
-     get_bytes('SimpleClassForExclude::map', $objs) == (16+$MapSize+39+43) &&
+     get_bytes('SimpleClassForExclude::map', $objs) == (16+$MapSize+36+40) &&
      get_bytes('SimpleClassForExclude::fooCls1', $objs) == 16 /* (tv) */  &&
      get_bytes('SimpleClassForExclude::fooCls2', $objs) == 16 /* (tv) */  &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::map', $objs), (16+$MapSize+36+40)) &&

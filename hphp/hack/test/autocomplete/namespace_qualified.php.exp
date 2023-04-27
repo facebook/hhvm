@@ -1,1 +1,3 @@
-my_fun_function (function(): void)
+my_fun_function
+  INSERT my_fun_function()
+  (function(): void)

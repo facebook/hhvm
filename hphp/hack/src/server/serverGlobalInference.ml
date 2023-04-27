@@ -372,15 +372,15 @@ let get_patches
               >>= fun type_str ->
               position_exclusive file function_type >>| fun pos ->
               if is_missing function_type then
-                ServerRefactorTypes.Insert
-                  ServerRefactorTypes.
+                ServerRenameTypes.Insert
+                  ServerRenameTypes.
                     {
                       pos = Pos.to_absolute pos;
                       text = Printf.sprintf ": <<__Soft>> %s " type_str;
                     }
               else
-                ServerRefactorTypes.Replace
-                  ServerRefactorTypes.
+                ServerRenameTypes.Replace
+                  ServerRenameTypes.
                     {
                       pos = Pos.to_absolute pos;
                       text = Printf.sprintf "<<__Soft>> %s" type_str;
@@ -452,16 +452,16 @@ let get_patches
                         position_exclusive file parameter_type
                     in
                     pos >>| fun pos ->
-                    ServerRefactorTypes.Insert
-                      ServerRefactorTypes.
+                    ServerRenameTypes.Insert
+                      ServerRenameTypes.
                         {
                           pos = Pos.to_absolute pos;
                           text = "<<__Soft>> " ^ type_str ^ " ";
                         }
                   else
                     position_exclusive file parameter_type >>| fun pos ->
-                    ServerRefactorTypes.Replace
-                      ServerRefactorTypes.
+                    ServerRenameTypes.Replace
+                      ServerRenameTypes.
                         {
                           pos = Pos.to_absolute pos;
                           text = "<<__Soft>> " ^ type_str;
@@ -524,7 +524,7 @@ let get_patches
           (if is_missing property_attribute_spec then
             position file modifier >>| fun pos ->
             [
-              ServerRefactorTypes.(
+              ServerRenameTypes.(
                 Insert { pos = Pos.to_absolute pos; text = "<<__Soft>> " });
             ]
           else (
@@ -538,10 +538,10 @@ let get_patches
           position_exclusive file property_type >>| fun pos ->
           let patch =
             if is_missing property_type then
-              ServerRefactorTypes.(
+              ServerRenameTypes.(
                 Insert { pos = Pos.to_absolute pos; text = type_str ^ " " })
             else
-              ServerRefactorTypes.(
+              ServerRenameTypes.(
                 Replace { pos = Pos.to_absolute pos; text = type_str })
           in
           patch :: soft_patch
@@ -577,7 +577,7 @@ module Mode_rewrite = struct
 
   let get_patches
       ?(files_contents : string Relative_path.Map.t option)
-      (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list =
+      (graph : StateSolvedGraph.t) : ServerRenameTypes.patch list =
     let (env, errors, type_map) = graph in
     let positions_map =
       build_positions_map (Tast_env.typing_env_as_tast_env env) type_map

@@ -1,0 +1,10 @@
+File "name_order1.php", line 16, characters 13-13:
+Class `C` inherits trait method `foo` via multiple traits.  Remove the multiple paths or override the method (Typing[4439])
+  File "name_order1.php", line 9, characters 22-24:
+  Trait method is defined here
+  File "name_order1.php", line 18, characters 7-8:
+  `C` uses `E1`
+  File "name_order1.php", line 13, characters 7-7:
+  `E1` uses `E`
+  File "name_order1.php", line 17, characters 7-7:
+  `C` uses `E`

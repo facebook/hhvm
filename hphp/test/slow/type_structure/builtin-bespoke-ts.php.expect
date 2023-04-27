@@ -1,0 +1,88 @@
+int(2)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+string(4) "TNum"
+NULL
+dict(2) {
+  ["a"]=>
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+  ["b"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+string(12) "not in shape"
+bool(false)
+vec(2) {
+  dict(1) {
+    ["kind"]=>
+    int(9)
+  }
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+string(1) "T"
+string(9) "TBoolDict"
+dict(1) {
+  ["T"]=>
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}
+vec(2) {
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}
+string(14) "not in generic"
+string(1) "C"
+string(16) "no generic types"
+bool(true)
+dict(1) {
+  ["kind"]=>
+  int(2)
+}
+vec(1) {
+  dict(2) {
+    ["kind"]=>
+    int(24)
+    ["generic_types"]=>
+    vec(2) {
+      dict(1) {
+        ["kind"]=>
+        int(4)
+      }
+      dict(1) {
+        ["kind"]=>
+        int(9)
+      }
+    }
+  }
+}
+dict(1) {
+  ["kind"]=>
+  int(1)
+}
+dict(1) {
+  ["kind"]=>
+  int(0)
+}
+vec(0) {
+}

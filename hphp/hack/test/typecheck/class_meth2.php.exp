@@ -1,4 +1,2 @@
-File "class_meth2.php", line 13, characters 19-21:
+File "class_meth2.php", line 13, characters 8-8:
 Unbound name: `A` (an object type) (Naming[2049])
-File "class_meth2.php", line 13, characters 19-21:
-Unbound name (typing): `A` (Typing[4107])

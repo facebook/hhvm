@@ -12,7 +12,7 @@ open SearchUtils
 let register_namespace ~(sienv : si_env) ~(namespace : string) : unit =
   let elem_list = String.split_on_char '\\' namespace in
   let _ =
-    Core_kernel.List.fold
+    Core.List.fold
       elem_list
       ~init:sienv.nss_root_namespace
       ~f:(fun current_node leaf_name ->
@@ -52,7 +52,7 @@ let find_exact_match ~(sienv : si_env) ~(namespace : string) : nss_node =
     let elem_list =
       String.split_on_char '\\' (String.lowercase_ascii namespace)
     in
-    Core_kernel.List.fold
+    Core.List.fold
       elem_list
       ~init:sienv.nss_root_namespace
       ~f:(fun current_node leaf_name ->
@@ -95,7 +95,7 @@ let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
     let current_node = ref sienv.nss_root_namespace in
     let reached_end = ref false in
     let matches = ref [] in
-    Core_kernel.List.iter elem_list ~f:(fun leaf_name ->
+    Core.List.iter elem_list ~f:(fun leaf_name ->
         (* If we've already reached the end of matches, offer no more *)
         if !reached_end then
           matches := []
@@ -109,7 +109,7 @@ let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
             matches := [];
             Hashtbl.iter
               (fun key _ ->
-                if Core_kernel.String.is_substring key ~substring:leaf_name then
+                if Core.String.is_substring key ~substring:leaf_name then
                   let node = Hashtbl.find !current_node.nss_children key in
                   matches :=
                     {

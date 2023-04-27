@@ -4,6 +4,7 @@
 namespace foo;
 
 xhp class bar {}
+
 //// xhp_modifier_extend_colon_syntax_usage.php
 <?hh // strict
 

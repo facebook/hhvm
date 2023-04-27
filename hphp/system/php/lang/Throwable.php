@@ -6,7 +6,7 @@ interface Throwable {
   public function getCode()[]: int;
   public function getFile()[]: string;
   public function getLine()[]: int;
-  public function getTrace()[]: \HH\Container;
+  public function getTrace()[]: \HH\Container<mixed>;
   public function getTraceAsString()[]: string;
   public function getPrevious()[]: ?Throwable;
   public function __toString(): string;

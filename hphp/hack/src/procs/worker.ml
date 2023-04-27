@@ -137,10 +137,8 @@ let read_and_process_job ic oc : job_outcome =
             ^^ "If you are sending closures, double-check to ensure that "
             ^^ "they have not captured large values in their environment.")
             len;
-          HackEventLogger.invariant_violation_bug
+          HackEventLogger.worker_large_data_send
             ~path:Relative_path.default
-            ~pos:""
-            ~desc:"WORKER_LARGE_DATA_SEND"
             (Telemetry.create () |> Telemetry.int_ ~key:"len" ~value:len)
         );
 
@@ -175,7 +173,7 @@ let read_and_process_job ic oc : job_outcome =
     start_major_collections := gc.Gc.major_collections;
     start_wall_time := Unix.gettimeofday ();
     start_proc_fs_status :=
-      ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+      ProcFS.status_for_pid (Unix.getpid ()) |> Core.Result.ok;
     HackEventLogger.deserialize_globals log_globals;
     Mem_profile.start ();
     do_process { send = send_result };

@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-<<__PolicyShardedMemoize>>
+<<__Memoize(#KeyedByIC)>>
 function test()[] {
   echo "ok\n";
 }

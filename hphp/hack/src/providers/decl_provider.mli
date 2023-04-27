@@ -30,9 +30,6 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-val prepare_for_typecheck :
-  Provider_context.t -> Relative_path.t -> string -> unit
-
 val get_fun :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
@@ -63,6 +60,16 @@ val get_module :
   module_key ->
   module_decl option
 
+(** This assumes that [class_name] defines and overrides [method_name]
+  and returns the method from an ancestor of [class_name] that would
+  have been inherited by [class_name] had it not overridden it. *)
+val get_overridden_method :
+  Provider_context.t ->
+  class_name:type_key ->
+  method_name:string ->
+  is_static:bool ->
+  Typing_defs.class_elt option
+
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
@@ -73,4 +80,4 @@ val lookup_or_populate_class_cache :
   Typing_classes_heap.class_t option
 
 val declare_folded_class_in_file_FOR_TESTS_ONLY :
-  Provider_context.t -> Relative_path.t -> type_key -> Decl_defs.decl_class_type
+  Provider_context.t -> type_key -> Decl_defs.decl_class_type

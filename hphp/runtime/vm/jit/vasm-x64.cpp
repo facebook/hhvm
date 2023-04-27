@@ -121,6 +121,7 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a.frontier());
   }
+  void emit(const restoreripm& i);
   void emit(const phpret& i);
   void emit(const contenter& i);
 
@@ -751,6 +752,11 @@ void Vgen<X64Asm>::emit(const tailcallstubr& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class X64Asm>
+void Vgen<X64Asm>::emit(const restoreripm& i) {
+  emit(pushm{i.s});
+}
+
+template<class X64Asm>
 void Vgen<X64Asm>::emit(const phpret& i) {
   a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
@@ -1241,7 +1247,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_DCE",    removeDeadCode);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
-  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false); });
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false, true); });
 
   assertx(checkWidths(unit));
 
@@ -1267,7 +1273,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_BRANCH", fuseBranches);
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false); });
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false, false); });
     doPass("VOPT_DCE", removeDeadCode);
 
     if (regalloc) {
@@ -1294,7 +1300,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   // We can add side-exiting instructions now
   doPass("VOPT_EXIT", optimizeExits);
-  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true); });
+  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true, false); });
 }
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,

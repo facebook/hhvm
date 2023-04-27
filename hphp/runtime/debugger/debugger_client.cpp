@@ -186,10 +186,23 @@ void DebuggerClient::onSignal(int /*sig*/) {
     } else {
       usageLogEvent("signal quit");
       error("Debugger is quitting.");
-      if (!getStaticDebuggerClient().isLocal()) {
+      if (!isLocal()) {
         error("  Note: the program may still be running on the server.");
       }
-      quit(); // NB: the machine is running, so can't send a real CmdQuit.
+      // NB: the machine is running, so can't send commands. We're
+      // running in a signal handler, so we also can't throw exceptions.
+      // Closing all connections should wake the client and we set m_stopped
+      // to get it to bail out of the event loop.
+      closeAllConnections();
+      m_stopped = true;
+      // If we're debugging locally, the debugger won't be doing anything
+      // useful any more, but the script being debugged may continue to run
+      // (and so this process will continue to occupy the terminal).
+      // Unregister the debugger_signal_handler now so that a further ^C
+      // will terminate this process and release the terminal back to the user.
+      if (isLocal()) {
+        signal(SIGINT, SIG_DFL);
+      }
       return;
     }
 
@@ -1122,6 +1135,9 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
     DebuggerCommandPtr cmd;
     if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, caller)) {
       if (!cmd) {
+        if (m_stopped) {
+          throw DebuggerClientExitException();
+        }
         Logger::Error("Unable to communicate with server. Server's down?");
         throw DebuggerServerLostException();
       }
@@ -2143,7 +2159,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   const Array& frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
     String file = frame[s_file].toString();
-    int line = frame[s_line].toInt32();
+    auto line = (int)frame[s_line].toInt64();
     if (!file.empty() && line) {
       if (m_frame == 0) {
         m_listFile.clear();
@@ -2193,7 +2209,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
         func.data() ? func.data() : "",
         args.data() ? args.data() : "");
   if (!frame[s_file].isNull()) {
-    int line = (int)frame[s_line].toInt32();
+    auto line = (int)frame[s_line].toInt64();
     auto fileLineInfo =
       folly::stringPrintf(" %s  at %s",
                           String("           ").substr(0, sindex.size()).data(),

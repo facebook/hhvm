@@ -109,7 +109,8 @@ void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .ssa(1 /* methodName */)
-    .immPtr(inst->extra<OptClassData>()->cls);
+    .immPtr(inst->extra<OptClassAndFuncData>()->cls)
+    .immPtr(inst->extra<OptClassAndFuncData>()->func); // callerFunc
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -130,8 +131,9 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(MethodCache::handleStaticCall);
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
-    .immPtr(inst->extra<FuncNameData>()->name)
-    .immPtr(inst->extra<FuncNameData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->name)
+    .immPtr(inst->extra<FuncNameCtxData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->func) // callerFunc
     .imm(safe_cast<int32_t>(handle))
     .ssa(1 /* smashable */);
 
@@ -150,7 +152,8 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
     .ssa(0)
-    .ssa(1);
+    .ssa(1)
+    .immPtr(inst->marker().func());
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
                kVoidDest, SyncOptions::None, args);
@@ -160,8 +163,10 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const char* ctxName(const Class* ctx) {
-  return ctx ? ctx->name()->data() : ":anonymous:";
+StaticString s_anonymous(":anonymous:");
+
+const StringData* ctxName(const Class* ctx) {
+  return ctx ? ctx->name() : s_anonymous.get();
 }
 
 }
@@ -182,19 +187,21 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
   if (false) { // typecheck
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch,
-      extra->namedEntity,
+      extra->namedType,
       extra->clsName,
       extra->methodName,
-      extra->context
+      extra->context,
+      extra->callerFunc
     );
   }
 
   auto const args = argGroup(env, inst)
     .imm(ch)
-    .immPtr(extra->namedEntity)
+    .immPtr(extra->namedType)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
-    .immPtr(extra->context);
+    .immPtr(extra->context)
+    .immPtr(extra->callerFunc);
 
   // May raise an error if the class is undefined.
   cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
@@ -253,14 +260,15 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, const Class*) =
+                        const StringData*, const Class*, const Func*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)
    .imm(ch)
    .immPtr(cls)
    .immPtr(extra->methodName)
-   .immPtr(extra->context);
+   .immPtr(extra->context)
+   .immPtr(extra->callerFunc);
 
   cgCallHelper(v, env, CallSpec::direct(lookup),
                callDest(dst), SyncOptions::Sync, args);

@@ -8,9 +8,6 @@ class SomeClass {
 }
 class :foo extends XHPTest {
   attribute
-    // Using GenericClass without type parameters is disallowed in strict mode
-    /* HH_FIXME[4101] */
-    GenericClass yo @required,
     // Check to make sure that "->:" parses correctly when chained
     // together in a larger expression.
     SomeClass some-obj @required,

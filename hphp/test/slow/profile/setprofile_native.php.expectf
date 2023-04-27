@@ -17,4 +17,10 @@ fb_setprofile_this this_obj=1
 fb_setprofile_this mine=4
 fb_setprofile_this this_obj=0
 fb_setprofile_this mine=
+fb_setprofile_file_line name=SetProfileSimpleObject::test file=setprofile_native.php line=99
+fb_setprofile_file_line name=SetProfileSimpleObject::bar file=setprofile_native.php line=20
+fb_setprofile_file_line name=SetProfileSimpleObject::foo file=setprofile_native.php line=21
+fb_setprofile_file_line name=SetProfileSimpleObject::testStatic file=setprofile_native.php line=100
+fb_setprofile_file_line name=SetProfileSimpleObject::foo file=setprofile_native.php line=26
+fb_setprofile_file_line name=SetProfileSimpleObject::bar file=setprofile_native.php line=27
 test done

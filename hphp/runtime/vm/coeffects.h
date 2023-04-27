@@ -42,8 +42,11 @@ struct RuntimeCoeffects {
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
   static RuntimeCoeffects zoned_with();
+  static RuntimeCoeffects zoned();
   static RuntimeCoeffects write_this_props();
+  static RuntimeCoeffects write_props();
   static RuntimeCoeffects globals_leak_safe();
+  static RuntimeCoeffects leak_safe_shallow();
 
   // This function is a placeholder to indicate that the correct coeffect needs
   // to be indentified and passed in its place
@@ -56,6 +59,13 @@ struct RuntimeCoeffects {
   uint16_t value() const { return m_data; }
 
   const std::string toString() const;
+
+  bool operator==(const RuntimeCoeffects& o) const {
+    return value() == o.value();
+  }
+  bool operator!=(const RuntimeCoeffects& o) const {
+    return !(*this == o);
+  }
 
   // Checks whether provided coeffects in `this` can call
   // required coeffects in `o`
@@ -70,6 +80,15 @@ struct RuntimeCoeffects {
   // This operator is equivalent to & of [coeffectA & coeffectB]
   RuntimeCoeffects& operator|=(const RuntimeCoeffects);
 
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(m_data);
+  }
+  template <typename SerDe>
+  static RuntimeCoeffects makeForSerde(SerDe& sd) {
+    storage_t s;
+    sd(s);
+    return RuntimeCoeffects{s};
+  }
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
   storage_t m_data;
@@ -193,6 +212,8 @@ struct CoeffectRule final {
     : m_type(Type::Caller)
   {}
 
+  static uint64_t getFunParam(TypedValue, uint32_t);
+
   RuntimeCoeffects emit(const Func*, uint32_t, void*, RuntimeCoeffects) const;
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*,
                        uint32_t, jit::SSATmp*, jit::SSATmp*) const;
@@ -205,6 +226,9 @@ struct CoeffectRule final {
   std::string getDirectiveString() const;
 
   bool operator==(const CoeffectRule&) const;
+  bool operator<(const CoeffectRule&) const;
+
+  size_t hash() const;
 
   template<class SerDe>
   void serde(SerDe&);
@@ -229,4 +253,28 @@ struct CoeffectRule final {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<>
+struct hash<HPHP::RuntimeCoeffects> {
+  size_t operator()(HPHP::RuntimeCoeffects c) const {
+    return c.value();
+  }
+};
+
+template<>
+struct hash<HPHP::CoeffectRule> {
+  size_t operator()(const HPHP::CoeffectRule& r) const {
+    return r.hash();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
 }

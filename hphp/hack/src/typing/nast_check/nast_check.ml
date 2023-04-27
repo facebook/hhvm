@@ -4,8 +4,8 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-let visitor =
-  Nast_visitor.iter_with
+let visitor ctx =
+  let handlers =
     [
       Const_prohibited_check.handler;
       Prop_modifier_prohibited_check.handler;
@@ -22,16 +22,33 @@ let visitor =
       Global_const_check.handler;
       Duplicate_class_member_check.handler;
       Shape_name_check.handler;
-      Fun_pointer_name_check.handler;
       Php_lambda_check.handler;
       Duplicate_xhp_attribute_check.handler;
       Attribute_nast_checks.handler;
       Enum_supertyping_check.handler;
       List_rvalue_check.handler;
       Private_final_check.handler;
-      Internal_outside_module.handler;
       Well_formed_internal_trait.handler;
+      Type_structure_leak_check.handler;
     ]
+  in
+  let handlers =
+    if
+      TypecheckerOptions.record_fine_grained_dependencies
+        (Provider_context.get_tcopt ctx)
+    then
+      Pessimisation_node_recording.handler :: handlers
+    else
+      handlers
+  in
+
+  let handlers =
+    if TypecheckerOptions.skip_tast_checks (Provider_context.get_tcopt ctx) then
+      []
+    else
+      handlers
+  in
+  Nast_visitor.iter_with handlers
 
 let stateful_visitor ctx =
   Stateful_aast_visitor.checker
@@ -40,11 +57,11 @@ let stateful_visitor ctx =
        Function_pointer_check.handler)
 
 let program ctx p =
-  let () = visitor#go ctx p in
+  let () = (visitor ctx)#go ctx p in
   let v = stateful_visitor ctx in
   v#on_program v#initial_state p
 
 let def ctx d =
-  let () = visitor#go_def ctx d in
+  let () = (visitor ctx)#go_def ctx d in
   let v = stateful_visitor ctx in
   v#on_def v#initial_state d

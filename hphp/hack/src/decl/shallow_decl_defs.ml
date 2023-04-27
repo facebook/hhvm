@@ -32,6 +32,7 @@ module PropFlags = struct
   let needs_init_bit  = 1 lsl 4
   let php_std_lib_bit = 1 lsl 5
   let readonly_bit    = 1 lsl 6
+  let safe_global_variable_bit = 1 lsl 7
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
@@ -40,6 +41,7 @@ module PropFlags = struct
   let get_needs_init  = is_set needs_init_bit
   let get_php_std_lib = is_set php_std_lib_bit
   let get_readonly = is_set readonly_bit
+  let get_safe_global_variable = is_set safe_global_variable_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
@@ -48,6 +50,7 @@ module PropFlags = struct
   let set_needs_init  = set_bit needs_init_bit
   let set_php_std_lib = set_bit php_std_lib_bit
   let set_readonly    = set_bit readonly_bit
+  let set_safe_global_variable = set_bit safe_global_variable_bit
 
   let make
       ~abstract
@@ -57,6 +60,7 @@ module PropFlags = struct
       ~needs_init
       ~php_std_lib
       ~readonly
+      ~safe_global_variable
       =
     empty
     |> set_abstract abstract
@@ -66,6 +70,7 @@ module PropFlags = struct
     |> set_needs_init needs_init
     |> set_php_std_lib php_std_lib
     |> set_readonly readonly
+    |> set_safe_global_variable safe_global_variable
 
   let pp fmt t =
     if t = empty then
@@ -85,6 +90,7 @@ module PropFlags = struct
       if get_needs_init t then print "needs_init";
       if get_php_std_lib t then print "php_std_lib";
       if get_readonly t then print "readonly";
+      if get_safe_global_variable t then print "safe_global_variable";
       Format.fprintf fmt "@,@]"
     )
 
@@ -185,7 +191,7 @@ type shallow_typeconst = {
 type shallow_prop = {
   sp_name: Typing_defs.pos_id;
   sp_xhp_attr: xhp_attr option;
-  sp_type: decl_ty option;
+  sp_type: decl_ty;
   sp_visibility: Ast_defs.visibility;
   sp_flags: PropFlags.t;
 }
@@ -200,6 +206,8 @@ type shallow_method = {
   sm_attributes: user_attribute list;
 }
 [@@deriving eq, show]
+
+type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
 
 type shallow_class = {
   sc_mode: FileInfo.mode;
@@ -217,6 +225,7 @@ type shallow_class = {
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;
   sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  sc_xhp_marked_empty: bool;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_req_class: decl_ty list;
@@ -231,6 +240,7 @@ type shallow_class = {
   sc_methods: shallow_method list;
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
+  sc_docs_url: string option;
 }
 [@@deriving eq, show]
 
@@ -247,6 +257,8 @@ let sp_needs_init sp = PropFlags.get_needs_init sp.sp_flags
 let sp_php_std_lib sp = PropFlags.get_php_std_lib sp.sp_flags
 
 let sp_readonly sp = PropFlags.get_readonly sp.sp_flags
+
+let sp_safe_global_variable sp = PropFlags.get_safe_global_variable sp.sp_flags
 
 let sm_abstract sm = MethodFlags.get_abstract sm.sm_flags
 
@@ -278,3 +290,23 @@ type decl =
   | Const of const_decl
   | Module of module_decl
 [@@deriving show]
+
+let to_class_decl_opt = function
+  | Class decl -> Some decl
+  | _ -> None
+
+let to_fun_decl_opt = function
+  | Fun decl -> Some decl
+  | _ -> None
+
+let to_typedef_decl_opt = function
+  | Typedef decl -> Some decl
+  | _ -> None
+
+let to_const_decl_opt = function
+  | Const decl -> Some decl
+  | _ -> None
+
+let to_module_decl_opt = function
+  | Module decl -> Some decl
+  | _ -> None

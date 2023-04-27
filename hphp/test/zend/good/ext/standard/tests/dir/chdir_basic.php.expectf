@@ -6,5 +6,5 @@ string(%d) "%slevel1_one"
 
 -- Testing chdir() with relative paths: --
 bool(true)
-string(%d) "%slevel1_one%elevel1_two"
+string(%d) "%slevel1_one/level1_two"
 ===DONE===

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -38,6 +39,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
@@ -96,6 +98,9 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
     if (arr->isDictType()) {
+      if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+        return VariableSerializer::ArrayKind::BespokeTypeStructure;
+      }
       return VariableSerializer::ArrayKind::Dict;
     } else if (arr->isVecType()) {
       return VariableSerializer::ArrayKind::Vec;
@@ -144,7 +149,12 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   }
 
-  if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isDictType()) {
+    if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+      return VariableSerializer::ArrayKind::BespokeTypeStructure;
+    }
+    return VariableSerializer::ArrayKind::Dict;
+  }
   if (arr->isVecType())  return VariableSerializer::ArrayKind::Vec;
   assertx(arr->isKeysetType());
   return VariableSerializer::ArrayKind::Keyset;
@@ -859,6 +869,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("Dict\n");
         break;
       case ArrayKind::Vec:
@@ -902,6 +913,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("dict [\n");
         break;
       case ArrayKind::Vec:
@@ -950,6 +962,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       auto const header = [&]() {
         switch (kind) {
           case ArrayKind::Dict:
+          case ArrayKind::BespokeTypeStructure:
             return "dict";
           case ArrayKind::Vec:
             return "vec";
@@ -1028,6 +1041,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::DArray:
         m_buf->append("Y:");
+        break;
+      case ArrayKind::BespokeTypeStructure:
+        m_buf->append(m_type == Type::Internal ? "T:" : "D:");
         break;
       }
       m_buf->append(size);
@@ -1342,6 +1358,7 @@ void VariableSerializer::writeArrayFooter(
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append(']');
         break;
       case ArrayKind::PHP:
@@ -1588,6 +1605,11 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (RuntimeOption::EvalClassAsStringPrintR) {
+        write(StrNR(cls->name()));
+        break;
+      }
+      // fall-through
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(cls->name());
@@ -1629,6 +1651,11 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (RuntimeOption::EvalClassAsStringPrintR) {
+        write(StrNR(lcls.name()));
+        break;
+      }
+      // fall-through
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(lcls.name());
@@ -2225,7 +2252,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        auto const lookup = obj_cls->getDeclPropSlot(ctx, memberName.get());
+        // TODO(T126821336): Populate with module name. Do we know ctx is nonnull here always?
+        auto const propCtx = MemberLookupContext(ctx);
+        auto const lookup = obj_cls->getDeclPropSlot(propCtx, memberName.get());
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {
@@ -2324,7 +2353,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
 
         // If we have a DebugDisplay prop saved, use it.
-        auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
+        auto const debugDisp = obj->getProp(nullctx, s_PHP_DebugDisplay.get());
         if (debugDisp) {
           serializeVariant(debugDisp, false, false, true);
           return;
@@ -2345,7 +2374,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
            type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {
         auto const cname = obj->getProp(
-          nullptr,
+          nullctx,
           s_PHP_Incomplete_Class_Name.get()
         );
         if (cname && isStringType(cname.type())) {

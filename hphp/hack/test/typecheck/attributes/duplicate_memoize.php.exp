@@ -1,0 +1,4 @@
+File "duplicate_memoize.php", line 4, characters 5-13:
+Methods cannot be both `__Memoize` and `__MemoizeLSB`. (NastCheck[3100])
+  File "duplicate_memoize.php", line 4, characters 16-27:
+  Conflicting memoize attribute is here

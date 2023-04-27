@@ -10,7 +10,7 @@ newtype Foo = dynamic;
 function bar(Something $x, Foo $y): void {}
 
 class C {
-  static vec<dynamic> $z;
+  public static vec<dynamic> $z;
   const type T = dynamic;
 
 }

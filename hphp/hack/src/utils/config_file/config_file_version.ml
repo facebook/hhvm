@@ -31,20 +31,19 @@ let version_re = Str.regexp version_re_str
 
 let parse_version (version : string option) =
   match version with
-  | Some version when Str.string_match version_re version 0 ->
-    begin
-      try
-        let major = int_of_string (Str.matched_group 1 version) in
-        let minor = int_of_string (Str.matched_group 2 version) in
-        let build = int_of_string (Str.matched_group 3 version) in
-        Version_components { major; minor; build }
-      with
-      | _ ->
-        Hh_logger.log
-          "Failed to parse server version '%s', treating it as an opaque string"
-          version;
-        Opaque_version (Some version)
-    end
+  | Some version when Str.string_match version_re version 0 -> begin
+    try
+      let major = int_of_string (Str.matched_group 1 version) in
+      let minor = int_of_string (Str.matched_group 2 version) in
+      let build = int_of_string (Str.matched_group 3 version) in
+      Version_components { major; minor; build }
+    with
+    | _ ->
+      Hh_logger.log
+        "Failed to parse server version '%s', treating it as an opaque string"
+        version;
+      Opaque_version (Some version)
+  end
   | Some version ->
     Hh_logger.log
       "Server version '%s' does not match version pattern %s, treating it as an opaque string"

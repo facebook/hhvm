@@ -1,5 +1,6 @@
 use std::mem;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use std::time::Instant;
 
 /// Gets CPU times for this and all child processes.
 /// Returns
@@ -73,8 +74,9 @@ pub fn time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::time::Instant;
+
+    use super::*;
 
     #[test]
     fn test_profile_longer_than() {

@@ -6,7 +6,7 @@ function init() {
   require __DIR__ . '/../Adoy/Client.php';
 
   ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
-  ServerUtilServerTests::$request = fun('fastcgi_request');
+  ServerUtilServerTests::$request = fastcgi_request<>;
 }
 
 function runTest($testController, $customArgs = '') {

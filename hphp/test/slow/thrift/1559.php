@@ -84,6 +84,7 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 function test() {
   $p = new DummyProtocol();
@@ -100,7 +101,7 @@ function test() {
   $v1->anI16 = 1234;
   $v1->aFloat = 1.25;
   $v1->bFloat = 3.14159265358979323846264;
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
 }
 

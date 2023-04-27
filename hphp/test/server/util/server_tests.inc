@@ -22,7 +22,7 @@ abstract final class ServerUtilServerTests {
     if (self::$request !== null) {
       return self::$request;
     }
-    return fun('http_request');
+    return http_request<>;
   }
 }
 
@@ -69,6 +69,29 @@ function dumpLogFilesToStdoutAndDie() {
   readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
+
+  $log_data = file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
+  $hits = null;
+  if (
+    preg_match_with_matches(
+      '#\nStack trace in ([a-zA-Z0-9._/-]+)\n#',
+      $log_data,
+      inout $hits,
+    ) !== 0
+  ) {
+    for ($i = 1; $i < count($hits); $i++) {
+      if (is_readable($hits[$i])) {
+        echo "\n";
+        error_log('-------------------------------------------');
+        error_log("Contents of '{$hits[$i]}'");
+        readfile($hits[$i]);
+        echo "\n";
+        error_log('-------------------------------------------');
+      } else {
+        error_log("Unable to read {$hits[$i]}");
+      }
+    }
+  }
   throw new Exception("test failed");
 }
 
@@ -129,7 +152,10 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     if (!isset(ServerUtilServerTests::$repo_builds[$repoKey])) {
       ServerUtilServerTests::$repo_builds[$repoKey] =
         "{$LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
-      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+      $cmd = "$hhvm --hphp -l1 -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+        " -vParserThreadCount=1" .
+        " -vRuntime.ResourceLimit.CoreFileSize=0" .
+        " -vRuntime.Eval.EnableLogBridge=false" .
         " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);
@@ -295,7 +321,8 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
 }
 
 <<__DynamicallyCallable>>
-function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '',
+                      $host_prefix = 'hphpd.debugger') {
 
   if (is_array($path)) {
     $headers = $path[2] ?? null;
@@ -317,7 +344,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     $headers = implode(" ", $s);
   }
   $url = "http://$host:$port/$path";
-  $host_name = "hphpd.debugger.".\php_uname('n');
+  $host_name = "$host_prefix.".\php_uname('n');
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::test_run_id();

@@ -41,7 +41,7 @@ struct MemFile : File {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
@@ -61,8 +61,6 @@ protected:
   int64_t m_len;      // length of the memory file
   int64_t m_cursor;   // m_data's read position
   bool m_malloced;    // whether to free m_data on delete
-
-  bool closeImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

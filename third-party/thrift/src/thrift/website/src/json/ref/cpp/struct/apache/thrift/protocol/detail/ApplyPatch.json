@@ -1,0 +1,1073 @@
+{
+  "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch",
+  "includes": {
+    "refid": "protocol_2Patch_8h",
+    "local": "no",
+    "text_html": "Patch.h"
+  },
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1ac116f0ed29a337e29b91bcef9692add0",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, Value &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "Value &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "31",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, Value& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, Value& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, Value &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a92121d6dd4608cbf5824776a4c0697d5",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, bool &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "bool &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "32",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, bool& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, bool& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, bool &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a28df17c5a37e14596a71f5046f61f25f",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "int8_t &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "33",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, int8_t& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, int8_t& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a99b0efbe226375cdb7c86be809dd6a36",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "int16_t &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "34",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, int16_t& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, int16_t& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a64f8fab2b4bc5edcbea42a06e540e2da",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "int32_t &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "35",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, int32_t& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, int32_t& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a356320c0a08804385e6ab66872dd5777",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "int64_t &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "36",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, int64_t& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, int64_t& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a48ccd1fe850c276b4e18abfd816c14c8",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, float &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "float &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "37",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, float&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, float& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, float&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, float& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, float &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1aa2378f52c7e9a00defc889a0428ac4eb",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, double &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "double &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "38",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, double&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, double& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, double&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, double& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, double &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1aa3dc926d86ff117788f5fe266f3ab0a3",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "folly::IOBuf &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "39",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, folly::IOBuf& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, folly::IOBuf& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a83c069abc6397a3dfe693ad4473973b6",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "std::vector&lt; Value &gt; &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "40",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, std::vector<Value>& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, std::vector<Value>& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a0cdd597ebd8289857562e61fa38a3bd3",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "std::set&lt; Value &gt; &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "41",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a8ada7a410db73a74b60e870ce206c262",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "std::map&lt; Value, Value &gt; &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "42",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1ae20d5880d9bda637acb144df2b4d3591",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+      "argsstring_html": "(const Object &amp;patch, Object &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "Object &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "43",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "void operator()(const Object&amp; patch, Object&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, Object& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, Object&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, Object& value) const",
+        "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+        "original_argsstring_html": "(const Object &amp;patch, Object &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "line": "29",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "bodystart": "29",
+    "bodyend": "44"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "detail",
+    "ApplyPatch"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "struct ApplyPatch;",
+  "declaration_html": "struct ApplyPatch;",
+  "filepath": "struct/apache/thrift/protocol/detail/ApplyPatch",
+  "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ApplyPatch",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1ac116f0ed29a337e29b91bcef9692add0",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, Value &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "Value &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "31",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, Value& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, Value& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, Value &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a92121d6dd4608cbf5824776a4c0697d5",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, bool &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "bool &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "32",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, bool& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, bool& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, bool &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a28df17c5a37e14596a71f5046f61f25f",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "int8_t &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "33",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, int8_t& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, int8_t& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a99b0efbe226375cdb7c86be809dd6a36",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "int16_t &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "34",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, int16_t& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, int16_t& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a64f8fab2b4bc5edcbea42a06e540e2da",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "int32_t &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "35",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, int32_t& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, int32_t& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a356320c0a08804385e6ab66872dd5777",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "int64_t &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "36",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, int64_t& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, int64_t& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a48ccd1fe850c276b4e18abfd816c14c8",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, float &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "float &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "37",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, float&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, float& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, float&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, float& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, float &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1aa2378f52c7e9a00defc889a0428ac4eb",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, double &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "double &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "38",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, double&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, double& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, double&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, double& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, double &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1aa3dc926d86ff117788f5fe266f3ab0a3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "folly::IOBuf &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "39",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, folly::IOBuf& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, folly::IOBuf& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a83c069abc6397a3dfe693ad4473973b6",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "std::vector&lt; Value &gt; &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "40",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, std::vector<Value>& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, std::vector<Value>& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a0cdd597ebd8289857562e61fa38a3bd3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "std::set&lt; Value &gt; &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "41",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a8ada7a410db73a74b60e870ce206c262",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "std::map&lt; Value, Value &gt; &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "42",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1ae20d5880d9bda637acb144df2b4d3591",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+              "argsstring_html": "(const Object &amp;patch, Object &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "Object &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "43",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "void operator()(const Object&amp; patch, Object&amp; value) const",
+                "simple_raw": "void operator()(const Object& patch, Object& value) const",
+                "detailed_html": "void operator()(const Object&amp; patch, Object&amp; value) const",
+                "detailed_raw": "void operator()(const Object& patch, Object& value) const",
+                "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
+                "original_argsstring_html": "(const Object &amp;patch, Object &amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch",
+              "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
+          "refid": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

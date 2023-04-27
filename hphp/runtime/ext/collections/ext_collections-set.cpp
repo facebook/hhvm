@@ -579,8 +579,6 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toVArray,      &BaseSet::toVArray);
-  BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);
   BASE_ME(toValuesArray, &BaseSet::toValuesArray);
   BASE_ME(getIterator,   &BaseSet::getIterator);
@@ -617,14 +615,16 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\ImmSet, toImmMap,    materialize<c_ImmMap>);
   HHVM_NAMED_ME(HH\\ImmSet, toSet,       materialize<c_Set>);
 
-  HHVM_NAMED_ME(HH\\Set, add,            &c_Set::php_add);
-  HHVM_NAMED_ME(HH\\Set, addAll,         &c_Set::php_addAll);
-  HHVM_NAMED_ME(HH\\Set, addAllKeysOf,   &c_Set::php_addAllKeysOf);
-  HHVM_NAMED_ME(HH\\Set, clear,          &c_Set::php_clear);
-  HHVM_NAMED_ME(HH\\Set, remove,         &c_Set::php_remove);
-  HHVM_NAMED_ME(HH\\Set, removeAll,      &c_Set::php_removeAll);
-  HHVM_NAMED_ME(HH\\Set, reserve,        &c_Set::php_reserve);
-  HHVM_NAMED_ME(HH\\Set, toImmSet,       &c_Set::getImmutableCopy);
+  // We don't need a wrapper function for `clear` as it's not overloaded.
+  HHVM_NAMED_ME(HH\\Set, clearNative,         &c_Set::clear);
+  HHVM_NAMED_ME(HH\\Set, removeNative,        &c_Set::php_remove);
+  HHVM_NAMED_ME(HH\\Set, removeAllNative,     &c_Set::php_removeAll);
+  HHVM_NAMED_ME(HH\\Set, addNative,           &c_Set::php_add);
+  HHVM_NAMED_ME(HH\\Set, addAllNative,        &c_Set::php_addAll);
+  HHVM_NAMED_ME(HH\\Set, addAllKeysOfNative,  &c_Set::php_addAllKeysOf);
+
+  HHVM_NAMED_ME(HH\\Set, reserve,  &c_Set::php_reserve);
+  HHVM_NAMED_ME(HH\\Set, toImmSet, &c_Set::getImmutableCopy);
 
   Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Set);
   Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmSet);

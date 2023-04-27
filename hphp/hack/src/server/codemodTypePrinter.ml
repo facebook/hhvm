@@ -25,7 +25,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tprim p -> Aast_defs.string_of_tprim p
   | Tunion [] when allow_nothing -> "nothing"
   | Tany _
-  | Terr
   | Tvar _
   | Tdependent _
   | Tunion _
@@ -36,12 +35,11 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tdynamic -> "dynamic"
   | Tgeneric (s, []) -> s
   | Tgeneric (s, targs) -> Utils.strip_ns s ^ "<" ^ print_tyl_exn targs ^ ">"
-  | Toption ty ->
-    begin
-      match get_node ty with
-      | Tnonnull -> "mixed"
-      | _ -> "?" ^ print_ty_exn ty
-    end
+  | Toption ty -> begin
+    match get_node ty with
+    | Tnonnull -> "mixed"
+    | _ -> "?" ^ print_ty_exn ty
+  end
   | Tfun ft ->
     let params = List.map ft.ft_params ~f:print_fun_param_exn in
     let params =
@@ -55,12 +53,13 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       (String.concat ~sep:", " params)
       (print_ty_exn ft.ft_ret.et_type)
   | Ttuple tyl -> "(" ^ print_tyl_exn tyl ^ ")"
-  | Tshape (shape_kind, fdm) ->
+  | Tshape (_, shape_kind, fdm) ->
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =
-      match shape_kind with
-      | Closed_shape -> fields
-      | Open_shape -> fields @ ["..."]
+      if is_nothing shape_kind then
+        fields
+      else
+        fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
   | Tunapplied_alias name

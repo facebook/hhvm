@@ -6,10 +6,9 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use crate::common::gen_helpers;
-
 use super::visitor_trait_generator;
 use super::Context;
+use crate::common::gen_helpers;
 
 pub fn gen(ctx: &Context) -> TokenStream {
     let uses = gen_helpers::gen_module_uses(ctx.modules());

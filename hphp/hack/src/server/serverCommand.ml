@@ -10,29 +10,28 @@
 open Hh_prelude
 open Utils
 open ServerCommandTypes
-open ServerEnv
 
 exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 
-(* Some client commands require full check to be run in order to update global
- * state that they depend on *)
+(** Some client commands require full check to be run in order to update global
+state that they depend on *)
 let rpc_command_needs_full_check : type a. a t -> bool =
  fun msg ->
   match msg with
   (* global error list is not updated during small checks *)
   | STATUS _ -> true
-  | LIST_FILES_WITH_ERRORS -> true (* Same as STATUS *)
-  | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
+  | LIST_FILES_WITH_ERRORS
+  | REMOVE_DEAD_FIXMES _
+  | REMOVE_DEAD_UNSAFE_CASTS
+  | CODEMOD_SDT _ ->
+    true (* need same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   | REWRITE_TYPE_PARAMS_TYPE _ -> true
-  (* some Ai stuff - calls to those will likely never be interleaved with IDE
-   * file sync commands (and resulting small checks), but putting it here just
-   * to be safe *)
-  | AI_QUERY _ -> true
   (* Finding references/implementations uses global dependency table *)
   | FIND_REFS _ -> true
   | GO_TO_IMPL _ -> true
   | IDE_FIND_REFS _ -> true
+  | IDE_FIND_REFS_BY_SYMBOL _ -> true
   | IDE_GO_TO_IMPL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_NAMING _ -> false
@@ -41,27 +40,28 @@ let rpc_command_needs_full_check : type a. a t -> bool =
    * during interruptions *)
   | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
-  | REFACTOR _ -> true
-  | IDE_REFACTOR _ -> true
+  | RENAME _ -> true
+  | RENAME_CHECK_SD _ -> true
+  | IDE_RENAME _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true
   | RETRIEVE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
-  (* Dump codebase-wide dependency graph information *)
-  | GEN_HOT_CLASSES _ -> true
   | GEN_PREFETCH_DIR _ -> false
+  | GEN_REMOTE_DECLS_FULL -> false
+  | GEN_REMOTE_DECLS_INCREMENTAL -> false
+  | GEN_SHALLOW_DECLS_DIR _ -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
-  | STATUS_SINGLE_REMOTE_EXECUTION _ -> true
-  | STATUS_REMOTE_EXECUTION _ -> true
-  | STATUS_MULTI_REMOTE_EXECUTION _ -> true
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
+  | IS_SUBTYPE _ -> false
   | TAST_HOLES _ -> false
+  | TAST_HOLES_BATCH _ -> false
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false
@@ -79,7 +79,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | IDE_AUTOCOMPLETE _ -> false
-  | IDE_FFP_AUTOCOMPLETE _ -> false
   | CODE_ACTIONS _ -> false
   | OUTLINE _ -> false
   | IDE_IDLE -> false
@@ -90,17 +89,21 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | CLOSE_FILE _ -> false
   | EDIT_FILE _ -> false
   | FUN_DEPS_BATCH _ -> false
+  | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
   | CONCATENATE_ALL _ -> true
   | GO_TO_DEFINITION _ -> false
-  | BIGCODE _ -> false
+  | PREPARE_CALL_HIERARCHY _ -> false
+  | CALL_HIERARCHY_INCOMING_CALLS _ -> true
+  | CALL_HIERARCHY_OUTGOING_CALLS _ -> false
   | PAUSE true -> false
   (* when you unpause, then it will catch up *)
   | PAUSE false -> true
   | GLOBAL_INFERENCE _ -> true
   | VERBOSE _ -> false
+  | DEPS_IN_BATCH _ -> true
 
 let command_needs_full_check = function
   | Rpc (_metadata, x) -> rpc_command_needs_full_check x
@@ -110,17 +113,22 @@ let is_edit : type a. a command -> bool = function
   | Rpc (_metadata, EDIT_FILE _) -> true
   | _ -> false
 
-let rpc_command_needs_writes : type a. a t -> bool = function
-  | OPEN_FILE _ -> true
-  | EDIT_FILE _ -> true
-  | CLOSE_FILE _ -> true
-  (* DISCONNECT involves CLOSE-ing all previously opened files *)
-  | DISCONNECT -> true
-  | _ -> false
-
-let commands_needs_writes = function
-  | Rpc (_metadata, x) -> rpc_command_needs_writes x
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
+let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
+    bool =
+  match command with
+  | _ when rpc_command_needs_full_check command -> false
+  | OPEN_FILE (path, _)
+  | EDIT_FILE (path, _)
+  | CLOSE_FILE path ->
+    HackEventLogger.invariant_violation_bug
+      "Asked whether to use priority-pipe for persistent-connection-only command"
+      ~data:path;
+    false
+  | DISCONNECT ->
+    HackEventLogger.invariant_violation_bug
+      "Asked whether to use priority-pipe for persistent-connection-only command";
+    false
+  | _ -> true
 
 let full_recheck_if_needed' genv env reason profiling =
   if
@@ -142,36 +150,6 @@ let full_recheck_if_needed' genv env reason profiling =
 let force_remote = function
   | Rpc (_metadata, STATUS status) -> status.remote
   | _ -> false
-
-let rpc_files : type a. a t -> Relative_path.Set.t = function
-  | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
-    Relative_path.Set.singleton (Relative_path.create_detect_prefix file_name)
-  | STATUS_MULTI_REMOTE_EXECUTION fns ->
-    List.fold fns ~init:Relative_path.Set.empty ~f:(fun acc fn ->
-        Relative_path.Set.add acc (Relative_path.create_detect_prefix fn))
-  | _ -> Relative_path.Set.empty
-
-let force_remote_execution_files = function
-  | Rpc (_metadata, x) -> rpc_files x
-  | _ -> Relative_path.Set.empty
-
-let rpc_remote_execution : type a. a t -> ReEnv.t option = function
-  | STATUS_REMOTE_EXECUTION { mode; _ } ->
-    let re_env =
-      if String.equal mode "warm" then
-        Re.initialize_lease false ~num_re_workers_opt:None
-      else if String.equal mode "cold" then
-        Re.initialize_lease true ~num_re_workers_opt:None
-      else
-        failwith
-          "Invalid argument to --remote-execution. Please specify \"cold\" or \"warm\""
-    in
-    Some re_env
-  | _ -> None
-
-let force_remote_execution = function
-  | Rpc (_metadata, x) -> rpc_remote_execution x
-  | _ -> None
 
 let ignore_ide = function
   | Rpc (_metadata, STATUS status) -> status.ignore_ide
@@ -284,12 +262,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
 
     ClientProvider.send_response_to_client client response;
 
-    if genv.local_config.ServerLocalConfig.hulk_lite then (
-      Hh_logger.log
-        "Killing hh_server since hulk lite hh_servers can't be reused";
-      exit 0
-    );
-
     if
       ServerCommandTypes.is_disconnect_rpc cmd
       || (not @@ ClientProvider.is_persistent client)
@@ -316,6 +288,21 @@ let handle
 
   let msg = ClientProvider.read_client_msg client in
 
+  (* This is a helper to update progress.json to things like "[hh_client:idle done]" or "[HackAst:--type-at-pos check]"
+     or "[HackAst:--type-at-pos]". We try to balance something useful to the user, with something that helps the hack
+     team know what's going on and who is to blame.
+     The form is [FROM:CMD PHASE].
+     FROM is the --from argument passed at the command-line, or "hh_client" in case of LSP requests.
+     CMD is the "--type-at-pos" or similar command-line argument that gave rise to serverRpc, or something sensible for LSP.
+     PHASE is empty at the start, "done" once we've finished handling, "write" if Needs_writes, "check" if Needs_full_recheck. *)
+  let send_progress phase =
+    ServerProgress.write
+      ~include_in_logs:false
+      "%s%s"
+      (ServerCommandTypesUtils.status_describe_cmd msg)
+      phase
+  in
+
   (* Once again, it's expected that [Server_got_cmd] happens a long time
      after we started waiting for one! *)
   ClientProvider.track
@@ -328,17 +315,6 @@ let handle
          (ServerCommandTypesUtils.debug_describe_cmd msg)
          (ClientProvider.priority_to_string client))
     ~long_delay_okay:(ClientProvider.is_persistent client);
-  ServerProgress.send_progress
-    ~include_in_logs:false
-    "%s"
-    (ServerCommandTypesUtils.status_describe_cmd msg);
-  let env =
-    {
-      env with
-      ServerEnv.remote_execution_files = force_remote_execution_files msg;
-      ServerEnv.remote_execution = force_remote_execution msg;
-    }
-  in
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale =
@@ -346,24 +322,107 @@ let handle
   in
 
   let handle_command =
-    actually_handle genv client msg full_recheck_needed ~is_stale
+    send_progress "";
+    let r = actually_handle genv client msg full_recheck_needed ~is_stale in
+    send_progress " done";
+    r
   in
 
-  if commands_needs_writes msg then
-    (* IDE edits can come in quick succession and be immediately followed
-     * by time sensitivie queries (like autocomplete). There is a constant cost
-     * to stopping and resuming the global typechecking jobs, which leads to
-     * flaky experience. To avoid this, we don't restart the global rechecking
-     * after IDE edits - you need to save the file again to restart it. *)
+  (* The sense of [command_needs_writes] is a little confusing.
+     Recall that for editor_open_files, hh_server deems that the IDE is the
+     source of truth for the contents of those files. Thus, the act of
+     opening/closing/editing an IDE file is equivalent to altering ("writing")
+     the content of the file.
+
+     With these IDE actions, in order to avoid races, we will have the
+     current typecheck stop [MultiThreadedCall.Cancel] before processing
+     the open/edit/close command. That way, in case the current typecheck
+     had previously read one version of the file contents, we'll be sure that
+     the same typecheck won't read the new version of the file contents.
+     Note that "cancel" in this context means cancel remaining fanout-typechecking
+     work in the current round of [ServerTypeCheck.type_check], but don't throw
+     away results from the files we've already typechecked; as soon as we've
+     cancelled and handled this command, then continue on to the next round
+     of [ServerTypeCheck.type_check] i.e. recalculate naming table and fanout
+     and then typecheck this new fanout.
+
+     (It's interesting to compare these to watchman, which does have races...
+     all that watchman allows us is to get a notification *after the fact* that
+     the file content has changed. The typecheck still gets cancelled, but it
+     might have read conflicting file contents prior to cancellation.) *)
+  let command_needs_writes (type a) (msg : a command) : bool =
+    match msg with
+    | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
+    | Rpc (_metadata, OPEN_FILE (path, ide_content)) ->
+      (* If the [ide_content] we're about to open is the same as what might have
+         previously been read from disk in the current typecheck (i.e. the typical case),
+         then this command won't end up altering file content and doesn't need to cancel
+         the current typecheck. (Why might they ever be different? Well, it's up to
+         VSCode what content it picks when the user opens a file. It'd be weird but
+         permissable say for VSCode to replace newlines upon open. *)
+      let disk_content = ServerFileSync.get_file_content_from_disk path in
+      let is_content_changed = not (String.equal ide_content disk_content) in
+      Hh_logger.log "OPEN_FILE is_content_changed? %b" is_content_changed;
+      is_content_changed
+    | Rpc (_metadata, EDIT_FILE _) ->
+      (* If the user is editing a file, it will necessary change file content,
+         and hence will necessarily cancel the current typecheck. Also we want
+         it to cancel the current typecheck so we can start a new Lazy_check
+         and get out squiggles for the just-edited file as soon as possible. *)
+      true
+    | Rpc (_metadata, CLOSE_FILE path) ->
+      (* If the [ide_content] we're closing is the same as what might be read
+         from disk in the current typecheck, then this command won't end up altering
+         file content and doesn't need to cancel the current typecheck.
+         The [ide_content] is necessarily what's in the File_provider for this path.
+         (Why might they ever be different? Well, if there were unsaved modifications
+         then the will be different.) *)
+      let ide_content =
+        ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
+      in
+      let disk_content = ServerFileSync.get_file_content_from_disk path in
+      let is_content_changed = not (String.equal ide_content disk_content) in
+      Hh_logger.log "CLOSE_FILE is_content_changed? %b" is_content_changed;
+      is_content_changed
+    | Rpc (_metadata, DISCONNECT) ->
+      (* DISCONNECT involves CLOSE-ing all previously opened files.
+         We could be fancy and use the same logic as [CLOSE_FILE] above, but it's
+         not worth it; we're okay with cancelling the current typecheck in this
+         rare case. *)
+      true
+    | Rpc (_metadata, _) -> false
+  in
+  if command_needs_writes msg then begin
+    send_progress " write";
     ServerUtils.Needs_writes
       {
         env;
         finish_command_handling = handle_command;
         recheck_restart_is_needed = not (is_edit msg);
+        (* What is [recheck_restart_is_needed] for? ...
+           IDE edits can come in quick succession and be immediately followed
+           by time sensitivie queries (like autocomplete). There is a constant cost
+           to stopping and resuming the global typechecking jobs, which leads to
+           flaky experience. Here we set the flag [recheck_restart_is_needed] to [false] for
+           Edit, meaning that after we've finished handling the edit then
+           [ServerMain.persistent_client_interrupt_handler] will stop the natural
+           full check from taking place (by setting [env.full_check_status = Full_check_needed]).
+           The flag only has effect in the "false" direction which stops the full check
+           from taking place; setting it to "true" won't force an already-stopped full check to resume.
+
+           So what does cause a full check to resume? There are two heuristics, both of them crummy,
+           aimed at making a decentishuser experience where (1) we don't resume so aggressively
+           that we pay the heavy cost of starting+stopping, (2) the user is rarely too perplexed
+           at why things don't seem to be proceeding.
+           * In [ServerMain.watchman_interrupt_handler], if a file on disk is modified, then
+             the typecheck will resume.
+           * In [ServerMain.recheck_until_no_changes_left], if it's been 5.0s or more since the last Edit,
+             then the typecheck will resume. *)
         reason = ServerCommandTypesUtils.debug_describe_cmd msg;
       }
-  else if full_recheck_needed then
+  end else if full_recheck_needed then begin
+    send_progress " typechecking";
     ServerUtils.Needs_full_recheck
       { env; finish_command_handling = handle_command; reason = reason msg }
-  else
+  end else
     ServerUtils.Done (handle_command env)

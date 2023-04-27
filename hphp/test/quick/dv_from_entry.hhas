@@ -21,7 +21,7 @@ DV2:
   Int 33
   SetL $c
   PopC
-  JmpNS L0
+  Enter L0
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {

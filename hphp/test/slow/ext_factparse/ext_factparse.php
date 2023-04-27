@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures("modules", "require_class")>>
 // !!! Please contact devx_www oncall if this breaks. !!!
 //
 // "Fact parsing" is a core part of www infrastructure on devservers.
@@ -59,7 +59,15 @@ trait TR2 implements I0, I1<int> {
   use TR0, TR1<int>;
   require extends CL1;
   require implements I2;
+  require class CL3;
 }
+
+abstract final class CL3 extends CL1 implements I2 {
+  use TR2;
+}
+
+new module m0 {}
+new module m1 {}
 
 enum E0 : int {
   EV0 = 0;
@@ -106,10 +114,10 @@ function entrypoint_ext_factparse(): void {
       false, // useThreads
     );
     var_dump($res);
-    if ($res[__FILE__]['md5sum0'] === $res[$namespace_file1]['md5sum0']) {
-      print "FAILED md5sum\n";
+    if ($res[__FILE__]['sha1sum'] === $res[$namespace_file1]['sha1sum']) {
+      print "FAILED sha1sum\n";
     } else {
-      print "PASSED md5sum\n";
+      print "PASSED sha1sum\n";
     }
   } finally {
     unlink($namespace_file1);

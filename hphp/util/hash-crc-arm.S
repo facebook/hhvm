@@ -4,8 +4,7 @@
 #  include "hphp/util/hphp-config.h"
 #endif
 
-#if defined(ENABLE_AARCH64_CRC) && !defined(NO_HWCRC) && \
-    !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
+#if defined(ENABLE_AARCH64_CRC) && !defined(NO_HWCRC)
 
 .file   "hphp/util/hash-crc-arm.S"
 

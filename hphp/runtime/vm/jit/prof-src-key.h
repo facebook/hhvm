@@ -48,7 +48,7 @@ struct ProfSrcKey::Hasher {
   }
 };
 
-typedef hphp_hash_set<ProfSrcKey, ProfSrcKey::Hasher> ProfSrcKeySet;
+using ProfSrcKeySet = hphp_hash_set<ProfSrcKey, ProfSrcKey::Hasher>;
 
 } }
 

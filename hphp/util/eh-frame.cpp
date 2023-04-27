@@ -26,10 +26,6 @@
 #include <memory>
 #include <vector>
 
-#ifdef _MSC_VER
-void __register_frame(const void*) {}
-void __deregister_frame(const void*) {}
-#else
 /*
  * libgcc exports these for registering EH information for dynamically-loaded
  * objects.  The argument is a pointer to data in the format you find in an
@@ -37,7 +33,6 @@ void __deregister_frame(const void*) {}
  */
 extern "C" void __register_frame(const void*);
 extern "C" void __deregister_frame(const void*);
-#endif
 
 namespace HPHP {
 

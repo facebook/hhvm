@@ -21,7 +21,6 @@ val make_env (* Optional parts *) :
   ?keep_errors:bool ->
   ?quick_mode:bool ->
   ?show_all_errors:bool ->
-  ?fail_open:bool ->
   ?parser_options:ParserOptions.t (* Required parts *) ->
   ?disable_global_state_mutation:bool ->
   ?is_systemlib:bool ->
@@ -42,8 +41,6 @@ val from_file_with_legacy : env -> Parser_return.t
 val defensive_program :
   ?quick:bool ->
   ?show_all_errors:bool ->
-  ?fail_open:bool ->
-  ?keep_errors:bool ->
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->
   ParserOptions.t ->
@@ -64,6 +61,7 @@ val defensive_from_file :
 val from_text_rust :
   env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.result
 
+(** note: this doesn't respect deregister_php_stdlib *)
 val ast_and_decls_from_file :
   ?quick:bool ->
   ?show_all_errors:bool ->

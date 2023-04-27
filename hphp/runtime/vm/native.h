@@ -98,6 +98,8 @@ struct Extension;
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), nativeFuncs())
 #define HHVM_FALIAS(fn, falias)\
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias), nativeFuncs())
+#define HHVM_FALIAS_FE_STR(fn, falias)\
+  HHVM_NAMED_FE_STR(fn, HHVM_FN(falias), nativeFuncs())
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.
@@ -448,7 +450,9 @@ void getFunctionPointers(const NativeFunctionInfo& info,
 
 /**
  * registerNativeFunc() and getNativeFunction() use a provided
- * FuncTable that is a case insensitive map of "name" to function pointer.
+ * FuncTable that is a case sensitive map of "name" to function pointer.
+ * We require case-correct symbols for the purpose of binding native impls
+ * to their PHP decls, regardless of how the language treats the symbols.
  *
  * Extensions should generally add items to this map using the HHVM_FE/ME
  * macros above. The function name (key) must be a static string.
@@ -564,7 +568,7 @@ NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
 //////////////////////////////////////////////////////////////////////////////
 // Global constants
 
-typedef std::map<const StringData*,TypedValueAux> ConstantMap;
+using ConstantMap = std::map<const StringData*,TypedValueAux>;
 extern ConstantMap s_constant_map;
 
 inline
@@ -605,8 +609,8 @@ bool registerConstant(const StringData*, ConstantCallback);
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 
-typedef hphp_hash_map<const StringData*, ConstantMap,
-                      string_data_hash, string_data_isame> ClassConstantMapMap;
+using ClassConstantMapMap = hphp_hash_map<const StringData*, ConstantMap,
+                      string_data_hash, string_data_isame>;
 extern ClassConstantMapMap s_class_constant_map;
 
 inline

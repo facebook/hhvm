@@ -18,7 +18,9 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
@@ -28,29 +30,6 @@
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
-
-MethodLookupCallContext::MethodLookupCallContext(const Class* cls,
-                                                 const Func* func)
-  : MethodLookupCallContext(cls, func->unit()->moduleName())
-  {}
-
-MethodLookupCallContext::MethodLookupCallContext(const Class* cls,
-                                                 const StringData* moduleName) {
-  if (cls) {
-    m_data = cls;
-  } else {
-    m_data = moduleName;
-  }
-}
-
-const Class* MethodLookupCallContext::cls() const {
-  return m_data.left();
-}
-
-const StringData* MethodLookupCallContext::moduleName() const {
-  if (m_data.left()) return m_data.left()->preClass()->unit()->moduleName();
-  return m_data.right();
-}
 
 namespace {
 
@@ -109,7 +88,7 @@ const Func* lookupIfaceMethod(const Class* cls, const StringData* methodName) {
 
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
-                            const MethodLookupCallContext& callCtx,
+                            const MemberLookupContext& callCtx,
                             CallType callType,
                             MethodLookupErrorOptions raise) {
   auto const ctx = callCtx.cls();
@@ -132,6 +111,14 @@ const Func* lookupMethodCtx(const Class* cls,
   }
   assertx(method);
   bool accessible = true;
+
+  // Check module boundary
+  if (raise != MethodLookupErrorOptions::NoErrorOnModule &&
+      will_symbol_raise_module_boundary_violation(method, &callCtx)) {
+    if (!shouldRaise(raise)) return nullptr;
+    raiseModuleBoundaryViolation(cls, method, callCtx.moduleName());
+  }
+
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
@@ -221,7 +208,7 @@ const Func* lookupMethodCtx(const Class* cls,
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise) {
   f = lookupMethodCtx(cls, methodName, callCtx, CallType::ObjMethod, raise);
   if (!f) return LookupResult::MethodNotFound;
@@ -234,14 +221,14 @@ LookupResult lookupObjMethod(const Func*& f,
 ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls,
                          const StringData* name,
-                         const MethodLookupCallContext& callCtx,
+                         const MemberLookupContext& callCtx,
                          bool exactClass) {
   auto constexpr notFound = ImmutableObjMethodLookup {
     ImmutableObjMethodLookup::Type::NotFound,
     nullptr
   };
   if (!cls) return notFound;
-  exactClass |= cls->attrs() & AttrNoOverride;
+  exactClass |= cls->attrs() & AttrNoOverrideRegular;
 
   if (isInterface(cls)) {
     if (auto const func = lookupIfaceMethod(cls, name)) {
@@ -277,7 +264,7 @@ LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              ObjectData* obj,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise) {
   f = lookupMethodCtx(cls, methodName, callCtx, CallType::ClsMethod, raise);
   if (!f) {
@@ -292,7 +279,7 @@ LookupResult lookupClsMethod(const Func*& f,
 
 const Func* lookupImmutableClsMethod(const Class* cls,
                                      const StringData* name,
-                                     const MethodLookupCallContext& callCtx,
+                                     const MemberLookupContext& callCtx,
                                      bool exactClass) {
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
@@ -309,7 +296,7 @@ const Func* lookupImmutableClsMethod(const Class* cls,
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
-                              const MethodLookupCallContext& callCtx,
+                              const MemberLookupContext& callCtx,
                               MethodLookupErrorOptions raise) {
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
@@ -325,7 +312,7 @@ LookupResult lookupCtorMethod(const Func*& f,
 }
 
 const Func* lookupImmutableCtor(const Class* cls,
-                                const MethodLookupCallContext& callCtx) {
+                                const MemberLookupContext& callCtx) {
   if (!cls) return nullptr;
 
   auto const ctx = callCtx.cls();
@@ -344,9 +331,8 @@ const Func* lookupImmutableCtor(const Class* cls,
   return func;
 }
 
-ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
-                                        const StringData* name) {
-  auto const ne = NamedEntity::get(name);
+ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
+  auto const ne = NamedFunc::get(name);
   if (auto const f = ne->getCachedFunc()) {
     if (f->isUnique()) {
       // We have an unique function. However, it may be interceptable, which means
@@ -360,11 +346,8 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
       if (f->isMethCaller() && !RO::RepoAuthoritative) return {nullptr, true};
 
       // We can use this function. If its persistent (which means its unit's
-      // pseudo-main is trivial), its safe to use unconditionally. If its defined
-      // in the same unit as the caller, its also safe to use unconditionally. By
-      // virtue of the fact that we're already in the unit, we know its already
-      // defined.
-      if (f->isPersistent() || f->unit() == unit) {
+      // pseudo-main is trivial), its safe to use unconditionally.
+      if (f->isPersistent()) {
         if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
           return {f, false};
         }
@@ -376,30 +359,6 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
     }
   }
 
-  // Trust nothing if we can rename functions
-  if (RuntimeOption::EvalJitEnableRenameFunction) return {nullptr, true};
-
-  // There's no unique function currently known for this name. However, if the
-  // current unit defines a single top-level function with this name, we can use
-  // it. Why? When this unit is loaded, either it successfully defined the
-  // function, in which case its the correct function, or it fataled, which
-  // means this code won't run anyways.
-
-  Func* found = nullptr;
-  for (auto& f : unit->funcs()) {
-    if (!f->name()->isame(name)) continue;
-    if (found) {
-      // Function with duplicate name
-      found = nullptr;
-      break;
-    }
-    found = f;
-  }
-
-  if (found && !found->isInterceptable() &&
-      (RO::RepoAuthoritative || !found->isMethCaller())) {
-    return {found, false};
-  }
   return {nullptr, true};
 }
 

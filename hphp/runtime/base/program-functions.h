@@ -28,15 +28,10 @@ namespace HPHP {
 struct Transport;
 struct Unit;
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-extern const void* __hot_start;
-extern const void* __hot_end;
-#else
 extern "C" {
 void __attribute__((__weak__)) __hot_start();
 void __attribute__((__weak__)) __hot_end();
 }
-#endif
 
 /**
  * Main entry point of the entire program.
@@ -128,8 +123,7 @@ void hphp_memory_cleanup();
 void hphp_session_exit(Transport* transport = nullptr);
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(std::string* hhas = nullptr,
-                          const std::string &section = "systemlib",
+std::string get_systemlib(const std::string &section = "systemlib",
                           const std::string &filename = "");
 
 // Helper function for stats tracking with exceptions.

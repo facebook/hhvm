@@ -23,7 +23,7 @@ static Variant HHVM_METHOD(PairIterator, current) {
   return Native::data<PairIterator>(this_)->current();
 }
 
-static Variant HHVM_METHOD(PairIterator, key) {
+static int64_t HHVM_METHOD(PairIterator, key) {
   return Native::data<PairIterator>(this_)->key();
 }
 
@@ -62,14 +62,6 @@ int64_t c_Pair::linearSearch(const Variant& value) const {
 Array c_Pair::toPHPArrayImpl() const {
   return make_dict_array(0, tvAsCVarRef(&elm0),
                          1, tvAsCVarRef(&elm1));
-}
-
-Array c_Pair::toVArrayImpl() const {
-  return make_vec_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
-}
-
-Array c_Pair::toDArrayImpl() const {
-  return make_dict_array(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
@@ -137,9 +129,6 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, at,             &c_Pair::php_at);
   HHVM_NAMED_ME(HH\\Pair, get,            &c_Pair::php_get);
   HHVM_NAMED_ME(HH\\Pair, linearSearch,   &c_Pair::linearSearch);
-  HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, getIterator,    &c_Pair::getIterator);
 
   HHVM_NAMED_ME(HH\\Pair, toVector,       materialize<c_Vector>);

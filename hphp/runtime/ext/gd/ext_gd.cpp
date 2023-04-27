@@ -2663,10 +2663,10 @@ static bool php_imagepolygon(const Resource& image,
 
   for (i = 0; i < num_points; i++) {
     if (points.exists(i * 2)) {
-      pts[i].x = points[i * 2].toInt32();
+      pts[i].x = (int)points[i * 2].toInt64();
     }
     if (points.exists(i * 2 + 1)) {
-      pts[i].y = points[i * 2 + 1].toInt32();
+      pts[i].y = (int)points[i * 2 + 1].toInt64();
     }
   }
 
@@ -3084,7 +3084,7 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   return Variant(req::make<Image>(im));
 }
 
-bool f_imageistruecolor(const Resource& image) {
+bool HHVM_FUNCTION(imageistruecolor, const Resource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return im->trueColor;

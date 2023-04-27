@@ -1,0 +1,22 @@
+1	YYYY	null !== true	
+2	YYYY	null !== false	
+3	YYYY	null !== 1	
+4	YYYY	null !== 0	
+5	YYYY	null !== -1	
+6	YYYY	null !== '1'	
+7	YYYY	null !== '0'	
+8	YYYY	null !== '-1'	
+9	NNNN	null !== null	
+10	YYYY	null !== array()	
+11	YYYY	null !== array(1)	
+12	YYYY	null !== array(2)	
+13	YYYY	null !== array('1')	
+14	YYYY	null !== array('0' => '1')	
+15	YYYY	null !== array('a')	
+16	YYYY	null !== array('a' => 1)	
+17	YYYY	null !== array('b' => 1)	
+18	YYYY	null !== array('a' => 1, 'b' => 2)	
+19	YYYY	null !== array(array('a' => 1))	
+20	YYYY	null !== array(array('b' => 1))	
+21	YYYY	null !== 'php'	
+22	YYYY	null !== ''

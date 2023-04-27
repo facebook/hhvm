@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "context",
+  "compoundname_html": "apache::thrift::op::DeterministicAccumulator::context",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1ae6acfedfd85beb5604223c7505203d78",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "constexpr auto &amp;",
+      "definition_html": "constexpr auto&amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
+      "argsstring_html": "()",
+      "name_html": "context",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
+        "line": "150",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
+        "bodystart": "150",
+        "bodyend": "155"
+      },
+      "definition": {
+        "simple_html": "constexpr auto&amp; context()",
+        "simple_raw": "constexpr auto& context()",
+        "detailed_html": "private inline constexpr auto&amp; context()",
+        "detailed_raw": "private inline constexpr auto& context()",
+        "original_definition_html": "constexpr auto&amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/DeterministicAccumulator/context",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/DeterministicAccumulator/context",
+      "parentid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator",
+      "compoundname_html": "apache::thrift::op::DeterministicAccumulator::context"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/DeterministicAccumulator/context",
+  "minprot": "private",
+  "displayname_html": "context",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/context",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/context"
+}

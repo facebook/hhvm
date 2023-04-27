@@ -27,18 +27,19 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/bump-mapper.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -54,7 +55,6 @@
 #include <signal.h>
 #include <fstream>
 
-#ifdef __linux__
 void DisableFork() __attribute__((__weak__));
 void EnableForkLogging() __attribute__((__weak__));
 // GCC GCOV API
@@ -62,7 +62,6 @@ extern "C" void __gcov_flush() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_write_file() __attribute__((__weak__));
 extern "C" void __llvm_profile_set_filename(const char* filename) __attribute__((__weak__));
-#endif
 
 namespace HPHP {
 
@@ -184,8 +183,6 @@ HttpServer::HttpServer() {
     }
   }
 
-  StaticContentCache::TheCache.load();
-
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
@@ -194,13 +191,12 @@ HttpServer::HttpServer() {
       counters["queued_requests"] = queued_requests;
       counters["queued_requests_high"] =
         queued_requests > RuntimeOption::ServerHighQueueingThreshold;
-
-
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;
       counters["satellite_queued_requests"] = sat_requests.second;
-      auto const uptime = f_server_uptime();
+      auto const uptime = HHVM_FN(server_uptime)();
       counters["uptime"] = uptime;
+      counters["stopping_soon"] = HHVM_FN(server_is_prepared_to_stop)();
 
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
@@ -237,6 +233,17 @@ void HttpServer::onServerShutdown() {
   SparseHeap::PrepareToStop();
 #ifdef USE_JEMALLOC
   shutdown_slab_managers();
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (HPHP::alloc::BumpEmergencyMapper::
+      s_emergencyFlag.load(std::memory_order_acquire)) {
+    // Server is shutting down when it almost exhausted low memory.
+    if (StructuredLog::enabled()) {
+      auto record = StructuredLogEntry{};
+      record.setInt("low_mapped", alloc::getLowMapped());
+      StructuredLog::log("hhvm_emergency_restart", record);
+    }
+  }
+#endif
 #endif
   InitFiniNode::ServerFini();
 
@@ -308,52 +315,14 @@ HttpServer::~HttpServer() {
   stop();
 }
 
-static StaticString s_file{"file"}, s_line{"line"};
-
 void HttpServer::runOrExitProcess() {
-  if (StaticContentCache::TheFileCache &&
-      StructuredLog::enabled() &&
-      StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
-    CacheManager::setLogger([](bool existsCheck, const std::string& name) {
-        auto record = StructuredLogEntry{};
-        record.setInt("existsCheck", existsCheck);
-        record.setStr("file", name);
-        bool needsCppStack = true;
-        if (!g_context.isNull()) {
-          VMRegAnchor _;
-          if (vmfp()) {
-            auto const bt =
-              createBacktrace(BacktraceArgs().withArgValues(false));
-            std::vector<std::string> frameStrings;
-            std::vector<folly::StringPiece> frames;
-            for (int i = 0; i < bt.size(); i++) {
-              auto f = tvCastToArrayLike(bt.lookup(i));
-              if (f.exists(s_file)) {
-                auto s = tvCastToString(f.lookup(s_file)).toCppString();
-                if (f.exists(s_line)) {
-                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
-                }
-                frameStrings.emplace_back(std::move(s));
-                frames.push_back(frameStrings.back());
-              }
-            }
-            record.setVec("stack", frames);
-            needsCppStack = false;
-          }
-        }
-        if (needsCppStack) {
-          record.setStackTrace("stack", StackTrace{StackTrace::Force{}});
-        }
-        StructuredLog::log("hhvm_file_cache", record);
-      });
-  }
   auto startupFailure = [] (const std::string& msg) {
     Logger::Error(msg);
     Logger::Error("Shutting down due to failure(s) to bind in "
                   "HttpServer::runAndExitProcess");
     // Logger flushes itself---we don't need to run any atexit handlers
     // (historically we've mostly just SEGV'd while trying) ...
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   };
 
   if (!RuntimeOption::InstanceId.empty()) {
@@ -419,7 +388,6 @@ void HttpServer::runOrExitProcess() {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
     if (!RuntimeOption::ServerForkEnabled) {
-#ifdef __linux__
       if (DisableFork) {
         // We should not fork from the server process.  Use light process
         // instead.  This will intercept subsequent fork() calls and make them
@@ -430,10 +398,6 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Enabled=false");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Enabled=false "
-                      "as it only works on Linux");
-#endif
     } else {
 #if FOLLY_HAVE_PTHREAD_ATFORK
       pthread_atfork(nullptr, nullptr,
@@ -443,7 +407,6 @@ void HttpServer::runOrExitProcess() {
 #endif
     }
     if (RuntimeOption::ServerForkLogging) {
-#ifdef __linux__
       if (EnableForkLogging) {
         EnableForkLogging();
       } else {
@@ -451,10 +414,6 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Log=true");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Log=true "
-                      "as it only works on Linux");
-#endif
     }
     if (RuntimeOption::EvalServerOOMAdj < 0) {
       // Avoid HHVM getting killed when a forked process uses too much memory.
@@ -464,7 +423,11 @@ void HttpServer::runOrExitProcess() {
     }
     createPid();
     Lock lock(this);
-    BootStats::done();
+    BootStats::markFromStart("start_server");
+    if (!jit::mcgen::retranslateAllPending()) {
+      BootStats::done();
+    } // else we log after retranslateAll finishes
+
     // Play extended warmup requests after server starts running.
     if (isJitSerializing() &&
         RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&
@@ -515,7 +478,6 @@ void HttpServer::waitForServers() {
 }
 
 void HttpServer::ProfileFlush() {
-  #ifdef __linux__
   if (__gcov_flush) {
     Logger::Info("Flushing profile");
     __gcov_flush();
@@ -525,7 +487,6 @@ void HttpServer::ProfileFlush() {
     __llvm_profile_write_file();
     __llvm_profile_set_filename("/dev/null");
   }
-  #endif
 }
 
 void HttpServer::stop(const char* stopReason) {
@@ -557,15 +518,12 @@ void HttpServer::stop(const char* stopReason) {
       // the main thread returns before that, the killer thread will
       // exit.  So don't do join() on this thread.
       auto killer = std::thread([totalWait] {
-#ifdef __linux__
           sched_param param{};
           param.sched_priority = 5;
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
-          // It is OK if we fail to increase thread priority.
-#endif
           /* sleep override */
           std::this_thread::sleep_for(std::chrono::seconds{totalWait});
-          _Exit(1);
+          _Exit(HPHP_EXIT_FAILURE);
         });
       killer.detach();
     }
@@ -760,7 +718,7 @@ void HttpServer::CheckMemAndWait(bool final) {
 
     auto const rssMb = Process::GetMemUsageMb();
     MemInfo memInfo;
-    if (!Process::GetMemoryInfo(memInfo)) {
+    if (!Process::GetMemoryInfo(memInfo, RO::EvalMemInfoCheckCgroup2)) {
       Logger::Error("Failed to obtain memory information");
       HttpServer::StopOldServer();
       return;
@@ -787,7 +745,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   if (!RuntimeOption::EvalLogServerRestartStats) return;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
-  Process::GetMemoryInfo(mem);
+  Process::GetMemoryInfo(mem, RO::EvalMemInfoCheckCgroup2);
   auto const rss = Process::GetMemUsageMb();
   auto const requests = requestCount();
   if (event == ShutdownEvent::SHUTDOWN_PREPARE) {

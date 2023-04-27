@@ -1,0 +1,5 @@
+<?hh
+
+
+
+new module a {}

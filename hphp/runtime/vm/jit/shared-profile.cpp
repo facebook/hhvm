@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
-#include <folly/SharedMutex.h>
-
 namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -99,7 +97,7 @@ void write_value(ProfDataSerializer& ser, SharedProfileType type, char* data) {
 #define X(name)                                                             \
     case SharedProfileType::name: {                                         \
       auto const entry = reinterpret_cast<SharedProfileEntry<name>*>(data); \
-      std::lock_guard<std::mutex> _(entry->mutex);                          \
+      std::lock_guard<folly::SharedMutex> _(entry->mutex);                  \
       return entry->value.serialize(ser);                                   \
     }
   SHARED_PROFILE_TYPES

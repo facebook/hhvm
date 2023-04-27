@@ -1,0 +1,8 @@
+File "typeconst_expected_union.php", line 23, characters 12-42:
+Invalid argument (Typing[4110])
+  File "typeconst_expected_union.php", line 23, characters 7-7:
+  Expected `~_` because a type could not be determined here
+  File "typeconst_expected_union.php", line 15, characters 32-32:
+    via this generic `T`
+  File "typeconst_expected_union.php", line 20, characters 33-41:
+  But got `SomeClass`

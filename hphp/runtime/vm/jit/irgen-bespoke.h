@@ -51,6 +51,8 @@ void translateDispatchBespoke(IRGS&, const NormalizedInstruction&,
 // string keys into more optimized sequences, post-irgen.
 void lowerStructBespokeGet(IRUnit&, IRInstruction*);
 void lowerStructBespokeGetThrow(IRUnit&, IRInstruction*);
+void lowerTypeStructureBespokeGet(IRUnit&, IRInstruction*);
+void lowerTypeStructureBespokeGetThrow(IRUnit&, IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

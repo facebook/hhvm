@@ -168,6 +168,7 @@ private:
 struct Vauto {
   explicit Vauto(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta& fixups, CodeKind kind = CodeKind::Helper,
+                 const char* name = nullptr,
                  bool relocate = false, bool* wasFull = nullptr)
     : m_text{main, cold, data}
     , m_fixups(fixups)
@@ -178,6 +179,7 @@ struct Vauto {
     , m_wasFull{wasFull}
   {
     m_unit.entry = Vlabel(this->main());
+    m_unit.name = name;
   }
 
   Vunit& unit() { return m_unit; }
@@ -201,6 +203,7 @@ namespace detail {
   template<class GenFunc>
   TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta* meta, GenFunc gen,
+                 const char* name,
                  CodeKind kind = CodeKind::CrossTrace,
                  bool relocate = true,
                  bool nullOnFull = false);
@@ -216,25 +219,29 @@ namespace detail {
  */
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
+          const char* name = nullptr,
           CodeKind kind = CodeKind::CrossTrace, bool relocate = true) {
   return detail::vwrap_impl(cb, cb, data, &meta,
-                            [&] (Vout& v, Vout&) { gen(v); }, kind, relocate);
+                            [&] (Vout& v, Vout&) { gen(v); }, name,
+                            kind, relocate);
 }
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen,
+          const char* name = nullptr,
           bool relocate = true, bool nullOnFull = false) {
   return detail::vwrap_impl(cb, cb, data, nullptr,
                             [&] (Vout& v, Vout&) { gen(v); },
-                            CodeKind::CrossTrace, relocate, nullOnFull);
+                            name, CodeKind::CrossTrace, relocate, nullOnFull);
 }
 template<class GenFunc>
 TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-           CGMeta& meta, GenFunc gen) {
-  return detail::vwrap_impl(main, cold, data, &meta, gen);
+           CGMeta& meta, GenFunc gen, const char* name = nullptr) {
+  return detail::vwrap_impl(main, cold, data, &meta, gen, name);
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
-  return detail::vwrap_impl(main, cold, data, nullptr, gen);
+TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen,
+           const char* name = nullptr) {
+  return detail::vwrap_impl(main, cold, data, nullptr, gen, name);
 }
 
 /*

@@ -33,7 +33,12 @@ namespace HPHP {
 // avoid having ifdefs everywhere.
 extern uintptr_t lowArenaMinAddr();
 
-constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kLowArenaMaxAddr =
+#ifdef USE_LOWPTR
+  1ull << 32;
+#else
+  64ull << 30;
+#endif
 constexpr size_t kLowEmergencySize = 128 << 20;
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
@@ -41,20 +46,21 @@ constexpr size_t kHighColdCap = 4ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
-// Areans for request heap starts at kLocalArenaMinAddr.
+// Arenas for request heap starts at kLocalArenaMinAddr.
 constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
 constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
+constexpr uintptr_t kDebugAddr = 3ull << 39;
 
 namespace alloc {
 
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
   VeryLow = 0,                     // below 2G, 31-bit address
-  Low,                             // [2G, 4G - kLowEmergencySize)
-  LowEmergency,                    // [4G - kLowEmergencySize, 4G)
-  Uncounted,                       // [4G, kHighArenaMaxAddr)
+  Low,                             // [2G,  kLowArenaMaxAddr - kLowEmergencySize)
+  LowEmergency,                    // below kLowArenaMaxAddr
+  Uncounted,                       // [kLowArenaMaxAddr, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
 };
 
@@ -140,12 +146,8 @@ struct RangeState {
     return high() - low();
   }
 
-  void lock() {
-    low_internal.lock_for_update();
-  }
-
-  void unlock() {
-    low_internal.unlock();
+  LockFreePtrWrapper<char*>::ScopedLock lock() {
+    return low_internal.lock_for_update();
   }
 
   // Whether it is possible (but not guaranteed when multiple threads are

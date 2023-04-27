@@ -71,7 +71,6 @@ void test_function(Lcodegen lcodegen, Ltest ltest) {
 }
 
 TEST(Vasm, Move128ARM) {
-#if !defined(__powerpc64__)
   // A long double will use simd 128 bit registers for arguments and return
   // types on ARM.  __m128 will do the same on x86.
   // This code checks that we actually copy a full 128 bit value when copying
@@ -101,7 +100,6 @@ TEST(Vasm, Move128ARM) {
     EXPECT_EQ(r.t, 0x256b36bd8ef79236);
     EXPECT_EQ(r.v, 0x63f4b85d224d9dfb);
   });
-#endif
 }
 
 TEST(Vasm, PrintVptr) {

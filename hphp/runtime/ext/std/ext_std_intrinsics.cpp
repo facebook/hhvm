@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -24,6 +25,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/super-inlining-bros.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
@@ -52,6 +54,10 @@ void HHVM_FUNCTION(trigger_crash) {
 
 TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
   return tvReturn(val);
+}
+
+void HHVM_FUNCTION(launder_value_inout, Variant& val) {
+  return;
 }
 
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
@@ -372,6 +378,10 @@ Object HHVM_FUNCTION(dummy_dict_await) {
   return Object{ev->getWaitHandle()};
 }
 
+int64_t HHVM_FUNCTION(dummy_int_upper_bound) {
+  return 42;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(create_class_pointer, StringArg name) {
@@ -390,6 +400,10 @@ Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
   return Variant{ClsMethDataRef::create(c, m)};
 }
 
+bool HHVM_FUNCTION(is_lazy_class, TypedValue val) {
+  return tvIsLazyClass(val);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(is_unit_loaded, StringArg path) {
@@ -401,43 +415,57 @@ void HHVM_FUNCTION(drain_unit_prefetcher) {
   drainUnitPrefetcher();
 }
 
-Array HHVM_FUNCTION(non_repo_unit_cache_info) {
-  auto const paths = nonRepoUnitCacheUnits();
-  auto const hashes = nonRepoUnitHashCacheUnits();
+///////////////////////////////////////////////////////////////////////////////
 
-  VecInit pathsInit{paths.size()};
-  for (auto const& p : paths) {
-    auto const perRequest = p.second->perRequestFilepath();
-    pathsInit.append(
-      make_dict_array(
-        "path", StrNR{p.first},
-        "orig-filepath", StrNR{p.second->origFilepath()},
-        "per-request-filepath", perRequest ? StrNR{perRequest} : empty_string(),
-        "sha1", String{p.second->sha1().toString()},
-        "bc-sha1", String{p.second->bcSha1().toString()},
-        "addr", (uintptr_t)p.second
-      )
-    );
-  }
+String HHVM_FUNCTION(debug_get_bytecode) {
+  return fromCaller([] (const BTFrame& frame) {
+    std::ostringstream ss;
+    frame.func()->prettyPrint(ss);
+    return String(ss.str());
+  });
+}
 
-  VecInit hashesInit{hashes.size()};
-  for (auto const& p : hashes) {
-    auto const perRequest = p.second->perRequestFilepath();
-    hashesInit.append(
-      make_dict_array(
-        "sha1", String{p.first.toString()},
-        "bc-sha1", String{p.second->bcSha1().toString()},
-        "orig-filepath", StrNR{p.second->origFilepath()},
-        "per-request-filepath", perRequest ? StrNR{perRequest} : empty_string(),
-        "addr", (uintptr_t)p.second
-      )
-    );
-  }
+Array HHVM_FUNCTION(debug_file_deps) {
+  return fromCaller([] (const BTFrame& frame) {
+    auto const& deps = frame.func()->unit()->deps();
+    VecInit vinit{deps.size()};
+    for (auto const& [name, sha] : deps) {
+      vinit.append(String(name));
+    }
+    return vinit.toArray();
+  });
+}
 
-  return make_dict_array(
-    "path-to-unit", pathsInit.toArray(),
-    "hash-to-unit", hashesInit.toArray()
-  );
+///////////////////////////////////////////////////////////////////////////////
+
+bool HHVM_FUNCTION(is_module_in_deployment, StringArg module,
+                                            StringArg deployment) {
+  auto const& packageInfo = g_context->getPackageInfo();
+  auto const it =
+    packageInfo.deployments().find(deployment.get()->toCppString());
+  if (it == end(packageInfo.deployments())) return false;
+  return packageInfo.moduleInDeployment(module.get(), it->second);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+struct DummyNativeData {
+  int64_t dummy;
+};
+
+namespace {
+
+const StaticString s_DummyNativeData("DummyNativeData");
+
+void
+HHVM_METHOD(ExtensibleNewableClassWithNativeData, setDummyValue, int64_t v) {
+  Native::data<DummyNativeData>(this_)->dummy = v;
+}
+
+int64_t HHVM_METHOD(ExtensibleNewableClassWithNativeData, getDumyValue) {
+  return Native::data<DummyNativeData>(this_)->dummy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -455,6 +483,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_break, trigger_break);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
+  HHVM_FALIAS(__hhvm_intrinsics\\launder_value_inout, launder_value_inout);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
@@ -469,6 +498,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
 
   HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
   HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);
@@ -489,10 +520,23 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
   HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
               create_clsmeth_pointer);
+  HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);
 
   HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
   HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
-  HHVM_FALIAS(__hhvm_intrinsics\\non_repo_unit_cache_info, non_repo_unit_cache_info);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
+  HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
+
+  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                setDummyValue,
+                HHVM_MN(ExtensibleNewableClassWithNativeData, setDummyValue));
+  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                getDumyValue,
+                HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
+  Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
 
   loadSystemlib("std_intrinsics");
 }

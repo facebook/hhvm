@@ -3,26 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebd7a3a41cd7ff39793f2466615cbcad>>
+// @generated SignedSource<<3d43cb90da9a165ed8be598c0f8e9f7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+pub use oxidized::file_info::Mode;
+pub use oxidized::file_info::NameType;
+pub use prim_defs::*;
 use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use prim_defs::*;
-
-pub use oxidized::file_info::Mode;
-
-pub use oxidized::file_info::NameType;
 
 /// We define two types of positions establishing the location of a given name:
 /// a Full position contains the exact position of a name in a file, and a
@@ -43,11 +40,13 @@ pub use oxidized::file_info::NameType;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum Pos<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Full(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     File(
         &'a (
             oxidized::file_info::NameType,
@@ -75,6 +74,7 @@ pub use oxidized::file_info::Names;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sn_")]
 #[repr(C)]
 pub struct SavedNames<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

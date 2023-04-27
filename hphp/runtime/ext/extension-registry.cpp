@@ -236,6 +236,13 @@ void moduleInit() {
   s_initialized = true;
 }
 
+void moduleDeclInit() {
+  assertx(s_sorted);
+  for (auto& ext : s_ordered) {
+    ext->loadDecls();
+  }
+}
+
 void cliClientInit() {
   assertx(s_sorted);
   for (auto& ext : s_ordered) {

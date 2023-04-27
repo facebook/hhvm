@@ -57,6 +57,8 @@ const StaticString
   s_parent_frame_ptr("parent_frame_ptr"),
   s_this_ptr("this_ptr"),
   s_this_obj("this_obj"),
+  s_file("file"),
+  s_line("line"),
   s_enter("enter"),
   s_exit("exit"),
   s_suspend("suspend"),
@@ -171,6 +173,7 @@ Array getReifiedClasses(const ActRec* ar) {
   for (auto const& pinfo : tparams.m_typeParamInfo) {
     if (!pinfo.m_isReified) {
       clist.append(init_null());
+      idx++;
       continue;
     }
     auto const ts = generics->at(idx++);
@@ -233,8 +236,8 @@ Array getReifiedClasses(const ActRec* ar) {
 }
 
 ALWAYS_INLINE
-ActRec* getParentFrame(const ActRec* ar) {
-  return g_context->getPrevVMStateSkipFrame(ar);
+ActRec* getParentFrame(const ActRec* ar, Offset* prevPc = nullptr) {
+  return g_context->getPrevVMStateSkipFrame(ar, prevPc);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
@@ -260,6 +263,17 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
   ActRec* parent_ar = getParentFrame(ar);
   if (parent_ar != nullptr) {
     frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
+  }
+}
+
+void addFileLine(const ActRec* ar, Array& frameinfo) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFileLine) != 0) {
+    Offset offset;
+    ActRec* parent_ar = getParentFrame(ar, &offset);
+    if (parent_ar != nullptr) {
+      frameinfo.set(s_file, Variant(const_cast<StringData*>(parent_ar->func()->filename())));
+      frameinfo.set(s_line, Variant(parent_ar->func()->getLineNumber(offset)));
+    }
   }
 }
 
@@ -290,6 +304,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   }
 
   addFramePointers(ar, frameinfo, !isResume);
+  if (!isResume) {
+    addFileLine(ar, frameinfo);
+  }
 
   if (!isResume && ar->func()->hasReifiedGenerics()) {
     // Add reified generics only if this is a function call.
@@ -676,8 +693,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Run callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
   if (RequestInfo::s_requestInfo->m_pendingException == nullptr
-      && (!unwind || phpException)) {
+      && (!unwind || phpException)
+      && ar->func()->name() != s_86cinit.get()) {
 
     // Memory Threhsold
     if (flags & MemThresholdFlag) {
@@ -740,6 +761,12 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
     return 0;
   }
 
+  // We may have entered with the CLEAN_VERIFY state set by the JIT, but
+  // the functionEnterHelper is going to return to the parent frame, bypassing
+  // the JIT logic that resets this state. Set the state to DIRTY so it won't
+  // leak to other C++ calls.
+  regState() = VMRegState::DIRTY;
+
   // If we entered this frame from the interpreter, use the resumeHelper,
   // as the retHelper logic has been already performed and the frame has
   // been overwritten by the return value.
@@ -768,17 +795,22 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
     }
   }
 
-  // Memory Threhsold
-  if (flags & MemThresholdFlag) {
-    DoMemoryThresholdCallback();
-  }
-  // Time Thresholds
-  if (flags & TimedOutFlag) {
-    RID().invokeUserTimeoutCallback();
-  }
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
+  if (ar->func()->name() != s_86cinit.get()) {
+    // Memory Threhsold
+    if (flags & MemThresholdFlag) {
+      DoMemoryThresholdCallback();
+    }
+    // Time Thresholds
+    if (flags & TimedOutFlag) {
+      RID().invokeUserTimeoutCallback();
+    }
 
-  if (flags & IntervalTimerFlag) {
-    IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    if (flags & IntervalTimerFlag) {
+      IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    }
   }
 
   onFunctionEnter(ar, funcType, flags, false);
@@ -926,6 +958,7 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
   assertx(suspending->func()->isAsync());
   assertx(isResumed(suspending));
   assertx(child->isWaitHandle());
+  assertx(!static_cast<c_Awaitable*>(child)->isFinished());
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
@@ -946,6 +979,12 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
         );
       }
     }
+  }
+
+  if (UNLIKELY(static_cast<c_Awaitable*>(child)->isFinished())) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "The suspend await event hook entered a new asio scheduler context and "
+      "awaited the same child, revoking the reason for suspension.");
   }
 }
 

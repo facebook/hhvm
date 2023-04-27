@@ -189,6 +189,20 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     return TranslationResult::Scope::Transient;
   }
 
+  // Never translate functions in user-supplied blocklist.
+  if (!RO::EvalJitFuncBlockList.empty()) {
+    // Calling func->fullName() could create a static string. So do our own
+    // concatenation here to avoid wasting low memory.
+    std::string fullName;
+    if (auto cls = func->cls()) {
+      fullName = cls->name()->toCppString() + "::";
+    }
+    fullName.append(func->name()->data());
+    if (RO::EvalJitFuncBlockList.count(fullName)) {
+      return TranslationResult::Scope::Process;
+    }
+  }
+
   // Refuse to JIT Live translations if Eval.JitPGOOnly is enabled.
   if (RuntimeOption::EvalJitPGOOnly &&
       (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
@@ -567,7 +581,7 @@ Translator::translate(Optional<CodeCache::View> view) {
   // TODO: categorize failure
   if (!vunit) return TranslationResult::failTransiently();
 
-  Timer timer(Timer::mcg_finishTranslation);
+  Timer timer(Timer::mcg_finishTranslation, nullptr);
 
   tracing::Block _b{
     "emit-translation",
@@ -634,7 +648,7 @@ Translator::translate(Optional<CodeCache::View> view) {
     profData()->setProfiling(sk.func());
   }
 
-  Timer metaTimer(Timer::mcg_finishTranslation_metadata);
+  Timer metaTimer(Timer::mcg_finishTranslation_metadata, nullptr);
   if (unit && unit->logEntry()) {
     auto metaLock = lockMetadata();
     logTranslation(this, transMeta->range);

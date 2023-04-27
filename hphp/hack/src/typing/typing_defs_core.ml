@@ -26,13 +26,10 @@ type ifc_fun_decl =
   | FDInferFlows
 [@@deriving eq, ord]
 
+type cross_package_decl = string option [@@deriving eq, ord]
+
 (* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
 let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
-
-type exact =
-  | Exact
-  | Nonexact
-[@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -65,9 +62,9 @@ type fun_tparams_kind =
       explicit type argument must be reified. *)
 [@@deriving eq]
 
-type shape_kind =
-  | Closed_shape
-  | Open_shape
+type type_origin =
+  | Missing_origin
+  | From_alias of string
 [@@deriving eq, ord, show]
 
 type pos_string = Pos_or_decl.t * string [@@deriving eq, ord, show]
@@ -115,7 +112,7 @@ module TShapeField = struct
     | (TSFlit_str (_, s1), TSFlit_str (_, s2)) -> String.compare s1 s2
     | (TSFclass_const ((_, s1), (_, s1')), TSFclass_const ((_, s2), (_, s2')))
       ->
-      Core_kernel.Tuple.T2.compare
+      Core.Tuple.T2.compare
         ~cmp1:String.compare
         ~cmp2:String.compare
         (s1, s1')
@@ -125,7 +122,7 @@ module TShapeField = struct
     | (TSFlit_str _, _) -> -1
     | (TSFclass_const _, _) -> 1
 
-  let equal x y = Core_kernel.Int.equal 0 (compare x y)
+  let equal x y = Core.Int.equal 0 (compare x y)
 end
 
 module TShapeMap = struct
@@ -185,7 +182,7 @@ type 'ty tparam = {
   tp_name: pos_id;
   tp_tparams: 'ty tparam list;
   tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
-  tp_reified: Aast.reify_kind;
+  tp_reified: Ast_defs.reify_kind;
   tp_user_attributes: user_attribute list;
 }
 [@@deriving eq, show]
@@ -205,7 +202,7 @@ and decl_ty = decl_phase ty
 and locl_ty = locl_phase ty
 
 and neg_type =
-  | Neg_prim of Aast.tprim
+  | Neg_prim of Ast_defs.tprim
   | Neg_class of pos_id
 
 (** A shape may specify whether or not fields are required. For example, consider
@@ -228,6 +225,8 @@ and _ ty_ =
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
   | Tapply : pos_id * decl_ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
+  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
+      (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
   | Tmixed : decl_phase ty_
       (** "Any" is the type of a variable with a missing annotation, and "mixed" is
        * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -259,7 +258,6 @@ and _ ty_ =
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
-  | Terr
   | Tnonnull
   | Tdynamic
       (** A dynamic type is a special type which sometimes behaves as if it were a
@@ -274,14 +272,16 @@ and _ ty_ =
        *)
   | Toption : 'phase ty -> 'phase ty_
       (** Nullable, called "option" in the ML parlance. *)
-  | Tprim : Aast.tprim -> 'phase ty_
+  | Tprim : Ast_defs.tprim -> 'phase ty_
       (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
       (** A wrapper around fun_type, which contains the full type information for a
        * function, method, lambda, etc. *)
   | Ttuple : 'phase ty list -> 'phase ty_
       (** Tuple, with ordered list of the types of the elements of the tuple. *)
-  | Tshape : shape_kind * 'phase shape_field_type TShapeMap.t -> 'phase ty_
+  | Tshape :
+      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
+      -> 'phase ty_
       (** Whether all fields of this shape are known, types of each of the
        * known arms.
        *)
@@ -307,16 +307,7 @@ and _ ty_ =
       (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
       (** Name of class, name of type const, remaining names of type consts *)
-  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tunapplied_alias : string -> locl_phase ty_
-      (** This represents a type alias that lacks necessary type arguments. Given
-           type Foo<T1,T2> = ...
-         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-         further type arguments. In particular, Tunappliedalias always stands for
-         a higher-kinded type. It is never used for an alias like
-           type Foo2 = ...
-         that simply doesn't require type arguments. *)
-  | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
+  | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
       (** The type of an opaque type or enum. Outside their defining files or
        * when they represent enums, they are "opaque", which means that they
        * only unify with themselves. Within a file, uses of newtypes are
@@ -340,6 +331,15 @@ and _ ty_ =
        *
        * The second parameter is the list of type arguments to the type.
        *)
+  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  | Tunapplied_alias : string -> locl_phase ty_
+      (** This represents a type alias that lacks necessary type arguments. Given
+           type Foo<T1,T2> = ...
+         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+         further type arguments. In particular, Tunappliedalias always stands for
+         a higher-kinded type. It is never used for an alias like
+           type Foo2 = ...
+         that simply doesn't require type arguments. *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
@@ -351,6 +351,26 @@ and _ ty_ =
       (** The negation of the type in neg_type *)
 
 and 'phase taccess_type = 'phase ty * pos_id
+
+and exact =
+  | Exact
+  | Nonexact of locl_phase class_refinement
+
+and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
+
+and 'phase refined_const = {
+  rc_bound: 'phase refined_const_bound;
+  rc_is_ctx: bool;
+}
+
+and 'phase refined_const_bound =
+  | TRexact : 'phase ty -> 'phase refined_const_bound
+  | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+
+and 'phase refined_const_bounds = {
+  tr_lower: 'phase ty list;
+  tr_upper: 'phase ty list;
+}
 
 and 'ty capability =
   | CapDefaults of Pos_or_decl.t
@@ -370,6 +390,7 @@ and 'ty fun_type = {
       (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.fun_type_flags;
   ft_ifc_decl: ifc_fun_decl;
+  ft_cross_package: cross_package_decl;
 }
 
 and 'ty possibly_enforced_ty = {
@@ -386,6 +407,19 @@ and 'ty fun_param = {
 }
 
 and 'ty fun_params = 'ty fun_param list
+
+let nonexact = Nonexact { cr_consts = SMap.empty }
+
+let is_nonexact = function
+  | Nonexact _ -> true
+  | Exact -> false
+
+let refined_const_kind_str : type a. a refined_const -> string =
+ fun { rc_is_ctx; _ } ->
+  if rc_is_ctx then
+    "ctx"
+  else
+    "type"
 
 module Flags = struct
   open Typing_defs_flags
@@ -541,7 +575,6 @@ module Pp = struct
    fun fmt ty ->
     match ty with
     | Tany _ -> Format.pp_print_string fmt "Tany"
-    | Terr -> Format.pp_print_string fmt "Terr"
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
     | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
@@ -550,22 +583,19 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tapply (@,";
       let () = pp_pos_id fmt a0 in
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
+      Format.fprintf fmt "@,))@]"
+    | Trefinement (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Trefinement (@,";
+      pp_ty fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_class_refinement fmt a1;
       Format.fprintf fmt "@,))@]"
     | Tgeneric (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tgeneric (@,";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
-      pp_ty_list fmt a1;
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt "@,)@])"
     | Tunapplied_alias a0 ->
       Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
@@ -599,20 +629,11 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Ttuple a0 ->
       Format.fprintf fmt "(@[<2>Ttuple@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a0);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a0;
       Format.fprintf fmt "@])"
-    | Tshape (a0, a1) ->
+    | Tshape (_, a0, a1) ->
       Format.fprintf fmt "(@[<2>Tshape (@,";
-      pp_shape_kind fmt a0;
+      pp_ty fmt a0;
       Format.fprintf fmt ",@ ";
       TShapeMap.pp pp_shape_field_type fmt a1;
       Format.fprintf fmt "@,))@]"
@@ -624,16 +645,7 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tnewtype (@,";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt ",@ ";
       pp_ty fmt a2;
       Format.fprintf fmt "@,))@]"
@@ -645,11 +657,11 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tunion tyl ->
       Format.fprintf fmt "(@[<2>Tunion@ ";
-      pp_ty_list fmt tyl;
+      pp_list pp_ty fmt tyl;
       Format.fprintf fmt "@])"
     | Tintersection tyl ->
       Format.fprintf fmt "(@[<2>Tintersection@ ";
-      pp_ty_list fmt tyl;
+      pp_list pp_ty fmt tyl;
       Format.fprintf fmt "@])"
     | Tclass (a0, a2, a1) ->
       Format.fprintf fmt "(@[<2>Tclass (@,";
@@ -657,34 +669,62 @@ module Pp = struct
       Format.fprintf fmt ",@ ";
       pp_exact fmt a2;
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt "@,))@]"
     | Tneg a0 ->
       Format.fprintf fmt "(@[<2>Tneg@ ";
       pp_neg_type fmt a0;
       Format.fprintf fmt "@])"
 
-  and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
-   fun fmt tyl ->
+  and pp_list :
+      type a.
+      (Format.formatter -> a -> unit) -> Format.formatter -> a list -> unit =
+   fun pp_elem fmt l ->
     Format.fprintf fmt "@[<2>[";
     ignore
       (List.fold_left
          ~f:(fun sep x ->
            if sep then Format.fprintf fmt ";@ ";
-           pp_ty fmt x;
+           pp_elem fmt x;
            true)
          ~init:false
-         tyl);
+         l);
     Format.fprintf fmt "@,]@]"
+
+  and pp_refined_const : type a. Format.formatter -> a refined_const -> unit =
+   fun fmt { rc_bound; rc_is_ctx } ->
+    Format.fprintf fmt "@[<2>{";
+    Format.fprintf fmt "rc_bound = ";
+    (match rc_bound with
+    | TRexact exact ->
+      Format.fprintf fmt "TRexact ";
+      pp_ty fmt exact
+    | TRloose { tr_lower = lower; tr_upper = upper } ->
+      Format.fprintf fmt "TRloose @[<2>{";
+      Format.pp_print_string fmt "tr_lower = ";
+      pp_list pp_ty fmt lower;
+      Format.fprintf fmt ";@ ";
+      Format.pp_print_string fmt "tr_upper = ";
+      pp_list pp_ty fmt upper);
+    Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "rc_is_ctx = %B" rc_is_ctx;
+    Format.fprintf fmt "}@]"
+
+  and pp_class_refinement :
+      type a. Format.formatter -> a class_refinement -> unit =
+   fun fmt { cr_consts } ->
+    Format.fprintf fmt "@[<2>{";
+    Format.fprintf fmt "cr_consts = ";
+    SMap.pp pp_refined_const fmt cr_consts;
+    Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "}@]"
+
+  and pp_exact fmt e =
+    match e with
+    | Exact -> Format.pp_print_string fmt "Exact"
+    | Nonexact cr ->
+      Format.pp_print_string fmt "Nonexact ";
+      pp_class_refinement fmt cr
 
   and pp_taccess_type : type a. Format.formatter -> a taccess_type -> unit =
    fun fmt (a0, a1) ->
@@ -756,40 +796,31 @@ module Pp = struct
       Format.pp_print_string fmt s;
       Format.pp_print_string fmt "}"
 
+  and pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit =
+   fun fmt r ->
+    match r with
+    | Some s ->
+      Format.pp_print_string fmt "CrossPackage(";
+      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt ")"
+    | None -> Format.pp_print_string fmt "None"
+
   and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
    fun fmt x ->
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_tparams";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_tparam_ fmt x;
-           true)
-         ~init:false
-         x.ft_tparams);
-    Format.fprintf fmt "@,]@]";
+    pp_list pp_tparam_ fmt x.ft_tparams;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_where_constraints";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_where_constraint_ fmt x;
-           true)
-         ~init:false
-         x.ft_where_constraints);
-    Format.fprintf fmt "@,]@]";
+    pp_list pp_where_constraint_ fmt x.ft_where_constraints;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_params";
-    pp_fun_params fmt x.ft_params;
+    pp_list pp_fun_param fmt x.ft_params;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
@@ -850,6 +881,10 @@ module Pp = struct
 
     Format.fprintf fmt "@[%s =@ " "ft_ifc_decl";
     pp_ifc_fun_decl fmt x.ft_ifc_decl;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@[%s =@ " "ft_cross_package";
+    pp_cross_package_decl fmt x.ft_cross_package;
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt "@ }@]"
@@ -921,21 +956,7 @@ module Pp = struct
       pp_fp_flags fmt x;
       Format.fprintf fmt "@]";
       Format.fprintf fmt ";@ ";
-
       Format.fprintf fmt "@ }@]"
-
-  and pp_fun_params : type a. Format.formatter -> a ty fun_params -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_fun_param fmt x;
-           true)
-         ~init:false
-         x);
-    Format.fprintf fmt "@,]@]"
 
   and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
    (fun fmt tparam -> pp_tparam pp_ty fmt tparam)
@@ -991,6 +1012,14 @@ type decl_fun_params = decl_ty fun_params
 
 type locl_fun_params = locl_ty fun_params
 
+type decl_class_refinement = decl_phase class_refinement
+
+type locl_class_refinement = locl_phase class_refinement
+
+type decl_refined_const = decl_phase refined_const
+
+type locl_refined_const = locl_phase refined_const
+
 type destructure_kind =
   | ListDestructure
   | SplatUnpack
@@ -1040,8 +1069,35 @@ type has_member = {
 }
 [@@deriving show]
 
+type can_index = {
+  ci_key: locl_ty;
+  ci_shape: tshape_field_name option;
+  ci_val: locl_ty;
+  ci_expr_pos: Pos.t;
+  ci_index_pos: Pos.t;
+}
+[@@deriving show]
+
+type can_traverse = {
+  ct_key: locl_ty option;
+  ct_val: locl_ty;
+  ct_is_await: bool;
+  ct_reason: Reason.t;
+}
+[@@deriving show]
+
+type has_type_member = {
+  htm_id: string;
+  htm_lower: locl_ty;
+  htm_upper: locl_ty;
+}
+[@@deriving show]
+
 type constraint_type_ =
   | Thas_member of has_member
+  | Thas_type_member of has_type_member
+  | Tcan_index of can_index
+  | Tcan_traverse of can_traverse
   | Tdestructure of destructure
       (** The type of container destructuring via list() or splat `...` *)
   | TCunion of locl_ty * constraint_type

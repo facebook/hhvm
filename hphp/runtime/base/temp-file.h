@@ -38,7 +38,7 @@ struct TempFile : PlainFile {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
 
   Object await(uint16_t /*events*/, double /*timeout*/) override {
     SystemLib::throwExceptionObject(
@@ -53,7 +53,6 @@ private:
   bool m_autoDelete;
   std::string m_rawName;
 
-  bool closeImpl();
   int64_t getLength();
 };
 

@@ -1,0 +1,96 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
+
+}}
+{{> common/auto_generated_c}}
+
+#pragma once
+{{#program:services}}
+#if __has_include(<{{program:includePrefix}}{{program:cpp_gen_path}}/{{service:name}}.h>)
+#include <{{program:includePrefix}}{{program:cpp_gen_path}}/{{service:name}}.h>
+#else
+#include <{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h>
+#endif
+{{#service:extends}}
+{{#service:externalProgram?}}
+#include <{{service:includePrefix}}gen-py3/{{service:programName}}/clients_wrapper.h>
+{{/service:externalProgram?}}
+{{/service:extends}}
+{{/program:services}}
+
+#include <folly/futures/Future.h>
+#include <folly/futures/Promise.h>
+#include <folly/Unit.h>
+#include <thrift/lib/py3/clientcallbacks.h>
+#include <thrift/lib/py3/client_wrapper.h>
+
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
+
+{{#program:cppNamespaces}}namespace {{value}} {
+{{/program:cppNamespaces}}
+
+{{#program:services}}
+class {{service:name}}ClientWrapper : {{!
+}}{{#service:extends?}}{{#service:extends}}public ::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}ClientWrapper{{/service:extends}}{{/service:extends?}}{{!
+}}{{^service:extends?}}public ::thrift::py3::ClientWrapper{{/service:extends?}}{{!
+}} {
+  public:
+    using {{#service:extends?}}{{#service:extends}}{{!
+    }}::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}ClientWrapper::{{service:name}}ClientWrapper{{!
+    }}{{/service:extends}}{{/service:extends?}}{{!
+    }}{{^service:extends?}}::thrift::py3::ClientWrapper::ClientWrapper{{/service:extends?}};
+
+{{#service:supportedFunctions}}
+    folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> {{function:cppName}}(
+      apache::thrift::RpcOptions& rpcOptions{{#function:args}},
+      {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}});
+{{/service:supportedFunctions}}
+{{#service:interactions}}
+
+    class {{service:name}}InteractionWrapper : public {{!
+    }}{{#service:extends}}{{service:name}}{{/service:extends}}ClientWrapper {
+      public:
+        {{service:name}}InteractionWrapper(
+          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
+           std::shared_ptr<apache::thrift::RequestChannel> channel)
+           : ClientWrapper(std::move(async_client), channel) {}
+
+        {{#service:supportedFunctions}}
+        folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> {{function:cppName}}(
+          apache::thrift::RpcOptions& rpcOptions{{#function:args}},
+          {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}});
+        {{/service:supportedFunctions}}
+    };
+{{/service:interactions}}
+{{#service:interactions}}
+    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> create{{service:name}}();
+{{/service:interactions}}
+};
+
+
+{{/program:services}}{{!
+}}{{#program:cppNamespaces}}
+} // namespace {{value}}
+{{/program:cppNamespaces}}

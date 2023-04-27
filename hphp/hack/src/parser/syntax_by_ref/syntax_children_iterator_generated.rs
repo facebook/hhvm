@@ -63,6 +63,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ModuleName(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.parts),
+                        _ => None,
+                    }
+                })
+            },
             SimpleTypeSpecifier(x) => {
                 get_index(1).and_then(|index| { match index {
                         0 => Some(&x.specifier),
@@ -89,7 +96,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(4).and_then(|index| { match index {
                         0 => Some(&x.prefix),
                     1 => Some(&x.left_backtick),
-                    2 => Some(&x.expression),
+                    2 => Some(&x.body),
                     3 => Some(&x.right_backtick),
                         _ => None,
                     }
@@ -121,17 +128,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumDeclaration(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.colon),
-                    4 => Some(&x.base),
-                    5 => Some(&x.type_),
-                    6 => Some(&x.left_brace),
-                    7 => Some(&x.use_clauses),
-                    8 => Some(&x.enumerators),
-                    9 => Some(&x.right_brace),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.colon),
+                    5 => Some(&x.base),
+                    6 => Some(&x.type_),
+                    7 => Some(&x.left_brace),
+                    8 => Some(&x.use_clauses),
+                    9 => Some(&x.enumerators),
+                    10 => Some(&x.right_brace),
                         _ => None,
                     }
                 })
@@ -185,15 +193,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AliasDeclaration(x) => {
-                get_index(8).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.generic_parameter),
-                    4 => Some(&x.constraint),
-                    5 => Some(&x.equal),
-                    6 => Some(&x.type_),
-                    7 => Some(&x.semicolon),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.module_kw_opt),
+                    3 => Some(&x.keyword),
+                    4 => Some(&x.name),
+                    5 => Some(&x.generic_parameter),
+                    6 => Some(&x.constraint),
+                    7 => Some(&x.equal),
+                    8 => Some(&x.type_),
+                    9 => Some(&x.semicolon),
                         _ => None,
                     }
                 })
@@ -208,6 +218,31 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     5 => Some(&x.equal),
                     6 => Some(&x.context),
                     7 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            CaseTypeDeclaration(x) => {
+                get_index(11).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.case_keyword),
+                    3 => Some(&x.type_keyword),
+                    4 => Some(&x.name),
+                    5 => Some(&x.generic_parameter),
+                    6 => Some(&x.as_),
+                    7 => Some(&x.bounds),
+                    8 => Some(&x.equal),
+                    9 => Some(&x.variants),
+                    10 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            CaseTypeVariant(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.bar),
+                    1 => Some(&x.type_),
                         _ => None,
                     }
                 })
@@ -393,36 +428,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.left_brace),
                     1 => Some(&x.elements),
                     2 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUsePrecedenceItem(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.name),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.removed_names),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseAliasItem(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.aliasing_name),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.modifiers),
-                    3 => Some(&x.aliased_name),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseConflictResolution(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.names),
-                    2 => Some(&x.left_brace),
-                    3 => Some(&x.clauses),
-                    4 => Some(&x.right_brace),
                         _ => None,
                     }
                 })
@@ -645,25 +650,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             IfStatement(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_paren),
                     2 => Some(&x.condition),
                     3 => Some(&x.right_paren),
                     4 => Some(&x.statement),
-                    5 => Some(&x.elseif_clauses),
-                    6 => Some(&x.else_clause),
-                        _ => None,
-                    }
-                })
-            },
-            ElseifClause(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.left_paren),
-                    2 => Some(&x.condition),
-                    3 => Some(&x.right_paren),
-                    4 => Some(&x.statement),
+                    5 => Some(&x.else_clause),
                         _ => None,
                     }
                 })
@@ -1529,6 +1522,41 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            TypeRefinement(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.type_),
+                    1 => Some(&x.keyword),
+                    2 => Some(&x.left_brace),
+                    3 => Some(&x.members),
+                    4 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            TypeInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.type_parameters),
+                    3 => Some(&x.constraints),
+                    4 => Some(&x.equal),
+                    5 => Some(&x.type_),
+                        _ => None,
+                    }
+                })
+            },
+            CtxInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.type_parameters),
+                    3 => Some(&x.constraints),
+                    4 => Some(&x.equal),
+                    5 => Some(&x.ctx_list),
+                        _ => None,
+                    }
+                })
+            },
             ClassnameTypeSpecifier(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),
@@ -1708,12 +1736,52 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ModuleDeclaration(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.left_brace),
-                    4 => Some(&x.right_brace),
+                    1 => Some(&x.new_keyword),
+                    2 => Some(&x.module_keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.left_brace),
+                    5 => Some(&x.exports),
+                    6 => Some(&x.imports),
+                    7 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleExports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.exports_keyword),
+                    1 => Some(&x.left_brace),
+                    2 => Some(&x.exports),
+                    3 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleImports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.imports_keyword),
+                    1 => Some(&x.left_brace),
+                    2 => Some(&x.imports),
+                    3 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleMembershipDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.module_keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PackageExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
                         _ => None,
                     }
                 })

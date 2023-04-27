@@ -69,7 +69,22 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
   vcold = handleSurprise;
   auto const call = CallSpec::stub(tc::ustubs().functionEnterHelper);
   auto const args = v.makeVcallArgs({});
-  vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
+  auto const doneCall = v.makeBlock();
+  vcold << vinvoke{call, args, v.makeTuple({}), {doneCall, catchBlock}, fixup};
+  vcold = doneCall;
+
+  auto const sf = v.makeReg();
+
+  auto const rIntercept = rarg(3); // NB: must match emitFunctionEnterHelper
+  assertx(!php_return_regs().contains(rIntercept));
+
+  vcold << testq{rIntercept, rIntercept, sf};
+  ifThen(vcold, CC_NZ, sf, [&] (Vout& v) {
+    // We are intercepting. Return to the caller.
+    v << unrecordbasenativesp{};
+    v << jmpr{rIntercept, php_return_regs()};
+  });
+  vcold << jmp{done};
 
   v = done;
 }
@@ -130,11 +145,8 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<CheckSurpriseFlagsEnter>();
-  auto const func = extra->func;
 
-  auto const off = func->getEntryForNumArgs(extra->argc);
-  auto const fixup = Fixup::direct(off, SBInvOffset{0});
+  auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
 
   auto const catchBlock = label(env, inst->taken());
   emitCheckSurpriseFlagsEnter(vmain(env), vcold(env), fp, fixup, catchBlock);
@@ -142,11 +154,9 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<CheckSurpriseAndStack>();
-  auto const func = extra->func;
+  auto const func = inst->extra<CheckSurpriseAndStack>()->func;
 
-  auto const off = func->getEntryForNumArgs(extra->argc);
-  auto const fixup = Fixup::direct(off, SBInvOffset{0});
+  auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
@@ -160,6 +170,18 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
     v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),
                  {done, label(env, inst->taken())}, fixup };
     v = done;
+
+    auto const sf = v.makeReg();
+
+    auto const rIntercept = rarg(3); // NB: must match emitFunctionEnterHelper
+    assertx(!php_return_regs().contains(rIntercept));
+
+    v << testq{rIntercept, rIntercept, sf};
+    ifThen(v, CC_NZ, sf, [&] (Vout& v) {
+      // We are intercepting. Return to the caller.
+      v << unrecordbasenativesp{};
+      v << jmpr{rIntercept, php_return_regs()};
+    });
   });
 }
 

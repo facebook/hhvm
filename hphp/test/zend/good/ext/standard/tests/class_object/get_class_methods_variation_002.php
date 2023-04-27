@@ -8,7 +8,7 @@
 class caseSensitivityTest {
     function MyMeThOd() {}
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_variation_002(): void {
 echo "*** Testing get_class_methods() : usage variations ***\n";
 
 var_dump( get_class_methods('CasesensitivitytesT') );

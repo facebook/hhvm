@@ -30,6 +30,8 @@
 
 namespace HPHP {
 
+const StaticString s_SoftInternal("__SoftInternal");
+
 //=============================================================================
 // PreClassEmitter::Prop.
 
@@ -53,6 +55,10 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
   , m_userAttributes(userAttributes)
 {
   memcpy(&m_val, val, sizeof(TypedValue));
+  if (m_attrs & AttrInternal &&
+      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+    m_attrs |= AttrInternalSoft;
+  }
 }
 
 PreClassEmitter::Prop::~Prop() {
@@ -62,11 +68,9 @@ PreClassEmitter::Prop::~Prop() {
 // PreClassEmitter.
 
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
-                                 Id id,
                                  const std::string& n)
   : m_ue(ue)
-  , m_name(makeStaticString(n))
-  , m_id(id) {}
+  , m_name(makeStaticString(n)) {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
@@ -104,16 +108,6 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
   m_methods.push_back(method);
   m_methodMap[method->name] = method;
   return true;
-}
-
-void PreClassEmitter::renameMethod(const StringData* oldName,
-                                   const StringData* newName) {
-  assertx(m_methodMap.count(oldName));
-  auto it = m_methodMap.find(oldName);
-  auto fe = it->second;
-  m_methodMap.erase(it);
-  fe->name = newName;
-  m_methodMap[newName] = fe;
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
@@ -217,18 +211,8 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
   m_usedTraits.push_back(traitName);
 }
 
-void PreClassEmitter::addTraitPrecRule(
-    const PreClass::TraitPrecRule &rule) {
-  m_traitPrecRules.push_back(rule);
-}
-
-void PreClassEmitter::addTraitAliasRule(
-    const PreClass::TraitAliasRule &rule) {
-  m_traitAliasRules.push_back(rule);
-}
-
 const StaticString
-  s_nativedata("__nativedata"),
+  s_NativeData("__NativeData"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
   s_invoke("__invoke"),
   s_coeffectsProp("86coeffects");
@@ -267,17 +251,20 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     }
   }
 
+  if (attrs & AttrInternal &&
+      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+    attrs |= AttrInternalSoft;
+  }
+
   assertx(attrs & AttrPersistent || SystemLib::s_inited);
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_name,
-    attrs, m_parent, m_docComment, m_id);
+    attrs, m_parent, m_docComment);
   pc->m_interfaces = m_interfaces;
   pc->m_includedEnums = m_enumIncludes;
   pc->m_usedTraits = m_usedTraits;
   pc->m_requirements = m_requirements;
-  pc->m_traitPrecRules = m_traitPrecRules;
-  pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_enumBaseTy = m_enumBaseTy;
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
@@ -290,7 +277,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     if (!m_userAttributes.size()) return;
 
     // Check for <<__NativeData("Type")>>.
-    auto it = m_userAttributes.find(s_nativedata.get());
+    auto it = m_userAttributes.find(s_NativeData.get());
     if (it == m_userAttributes.end()) return;
 
     TypedValue ndiInfo = it->second;
@@ -441,8 +428,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_enumIncludes)
     (m_usedTraits)
     (m_requirements)
-    (m_traitPrecRules)
-    (m_traitAliasRules)
     (m_userAttributes)
     (m_propMap, [](Prop p) { return p.name(); })
     (m_constMap, [](Const c) { return c.name(); })

@@ -51,7 +51,13 @@ let infer_type_error_response_to_json
            expected_type_json;
        ])
 
-let tast_holes_response_to_json holes =
+let tast_holes_response_to_json ~print_file holes =
+  let printer pos =
+    if print_file then
+      Pos.to_absolute pos |> Pos.multiline_json
+    else
+      Pos.multiline_json_no_filename pos
+  in
   let f
       ( actual_type_str,
         actual_type_json,
@@ -64,7 +70,7 @@ let tast_holes_response_to_json holes =
         ("full_actual_type", json_of_string actual_type_json);
         ("expected_type", Hh_json.string_ expected_type_str);
         ("full_expected_type", json_of_string expected_type_json);
-        ("pos", Pos.multiline_json_no_filename pos);
+        ("pos", printer pos);
       ]
   in
   Hh_json.JSON_Array (List.map ~f holes)

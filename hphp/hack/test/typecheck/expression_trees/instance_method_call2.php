@@ -10,7 +10,7 @@ final class MyClass {
 
 function getMyClass(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): MyClass)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): MyClass)>>> {
   throw new Exception();
 }
 

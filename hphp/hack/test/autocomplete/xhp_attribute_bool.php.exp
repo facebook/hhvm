@@ -1,2 +1,6 @@
-false literal
-true literal
+false
+  INSERT false
+  literal
+true
+  INSERT true
+  literal

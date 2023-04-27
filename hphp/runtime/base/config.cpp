@@ -16,13 +16,13 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -31,6 +31,60 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template<typename T>
+void hdfConfigGetSet(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values.insert(child.configGetString(""));
+  }
+}
+
+template<typename T>
+void hdfConfigGetMap(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values[child.getName()] = child.configGetString("");
+  }
+}
+
+template<typename T>
+void hdfConfigGet(const Hdf& hdf, T& values) {
+  hdf.configGet(values);
+}
+
+void hdfConfigGet(const Hdf& hdf, boost::container::flat_set<std::string>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::set<std::string, stdltistr>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_set& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::map<std::string, std::string,
+                    stdltistr>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_map<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+}
 
 std::string
 Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
@@ -93,7 +147,7 @@ void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini,
 }
 
 void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {
-  hdf.fromString(hdfStr.c_str());
+  hdf.fromString(hdfStr);
 }
 
 void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
@@ -157,12 +211,12 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
     }
     std::string file = line.substr(start + 1, end - start - 1);
     const std::string logger_file = file;
-    boost::filesystem::path p(file);
+    std::filesystem::path p(file);
     if (!p.is_absolute()) {
-      boost::filesystem::path opath(original_ini_filename);
+      std::filesystem::path opath(original_ini_filename);
       p = opath.parent_path()/p;
     }
-    if (boost::filesystem::exists(p)) {
+    if (std::filesystem::exists(p)) {
       std::ifstream ifs(p.string());
       const std::string contents((std::istreambuf_iterator<char>(ifs)),
                                  std::istreambuf_iterator<char>());
@@ -297,7 +351,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     /** have an hdf value, that it maintains its edge as beating out **/ \
     /** ini                                                          **/ \
     if (hdf.exists() && !hdf.isEmpty()) { \
-      hdf.configGet(hdf_ret); \
+      hdfConfigGet(hdf, hdf_ret); \
       if (hdf_ret != ini_ret) { \
         ini_ret = hdf_ret; \
         IniSetting::SetSystem(ini_name, ini_get(ini_ret)); \
@@ -306,7 +360,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     return ini_ret; \
   } \
   if (hdf.exists() && !hdf.isEmpty()) { \
-    hdf.configGet(hdf_ret); \
+    hdfConfigGet(hdf, hdf_ret); \
     return hdf_ret; \
   } \
   return defValue; \

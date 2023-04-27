@@ -621,7 +621,7 @@ static int php_mb_parse_encoding_list(const char* value, int value_length,
             ret = 0;
           }
         }
-        p1 = p2 + 1;
+        if (p2 != nullptr) p1 = p2 + 1;
       } while (n < size && p2 != nullptr);
       if (n > 0) {
         if (return_list) {
@@ -1544,7 +1544,7 @@ static Variant php_mb_numericentity_exec(const String& str,
       iconvmap = (int*)req::malloc_noptrs(mapsize * sizeof(int));
       int *mapelm = iconvmap;
       for (ArrayIter iter(convs); iter; ++iter) {
-        *mapelm++ = iter.second().toInt32();
+        *mapelm++ = (int)iter.second().toInt64();
       }
     }
   }
@@ -2690,11 +2690,11 @@ Variant HHVM_FUNCTION(mb_strrpos,
       }
     }
     if (str_flg) {
-      noffset = offset.toInt32();
+      noffset = (int)offset.toInt64();
       enc_name = encoding.data();
     }
   } else {
-    noffset = offset.toInt32();
+    noffset = (int)offset.toInt64();
   }
 
   if (enc_name != nullptr && *enc_name) {
@@ -3566,7 +3566,7 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
     spattern = pattern.toString();
   } else {
     /* FIXME: this code is not multibyte aware! */
-    pat_buf[0] = pattern.toByte();
+    pat_buf[0] = (char)pattern.toInt64();
     pat_buf[1] = '\0';
     spattern = String(pat_buf, 1, CopyString);
   }

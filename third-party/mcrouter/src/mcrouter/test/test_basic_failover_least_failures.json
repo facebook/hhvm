@@ -1,0 +1,27 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "localhost:12345" ]
+    },
+    "B.wildcard": {
+      "servers": [ "localhost:12346" ]
+    },
+    "C.wildcard": {
+      "servers": [ "localhost:12347" ]
+    },
+    "D.wildcard": {
+      "servers": [ "localhost:12348" ]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": ["PoolRoute|A.wildcard",
+                 "PoolRoute|B.wildcard",
+                 "PoolRoute|C.wildcard",
+                 "PoolRoute|D.wildcard"],
+    "failover_policy": {
+      "type": "LeastFailuresPolicy",
+      "max_tries": 3
+    }
+  }
+}

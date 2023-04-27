@@ -26,7 +26,7 @@ type t =
   | IgnoreError
   | FallThrough
   | ExtraTokenError
-[@@deriving show, enum, eq]
+[@@deriving show, enum, eq, sexp_of]
 
 let to_string kind =
   match kind with

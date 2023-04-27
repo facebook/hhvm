@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -174,6 +175,11 @@ bool ArrayLayout::is_struct() const {
   return index && bespoke::StructLayout::IsStructLayout(*index);
 }
 
+bool ArrayLayout::is_type_structure() const {
+  auto const index = layoutIndex();
+  return index && *index == bespoke::TypeStructure::GetLayoutIndex();
+}
+
 bool ArrayLayout::is_concrete() const {
   auto const layout = bespokeLayout();
   return layout && layout->isConcrete();
@@ -216,6 +222,8 @@ std::string ArrayLayout::describe() const {
 
 ArrayData* ArrayLayout::apply(ArrayData* ad) const {
   assertx(ad->isStatic());
+
+  if (bespoke::TypeStructure::isBespokeTypeStructure(ad)) return ad;
   assertx(ad->isVanilla());
 
   auto const result = [&]() -> ArrayData* {
@@ -293,6 +301,7 @@ void write_field_vector(ProfDataSerializer& ser, const StructLayout* layout) {
   write_raw(ser, num);
   for (auto slot = 0; slot < num; ++slot) {
     auto const& f = layout->field(slot);
+    assertx(f.key->color() != StringData::kInvalidColor);
     write_string(ser, f.key);
     write_raw(ser, f.required);
     write_raw(ser, f.type_mask);
@@ -320,8 +329,12 @@ void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
     case bespoke::LocationType::APCKey:
       write_raw(ser, key.ak);
       break;
+    case bespoke::LocationType::TypeAlias:
+      write_typealias(ser, key.ta);
+      break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:
+    case bespoke::LocationType::TypeConstant:
       write_class(ser, key.cls);
       write_raw(ser, key.slot);
       break;
@@ -342,8 +355,12 @@ LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
     case bespoke::LocationType::APCKey:
       read_raw(des, key.ak);
       break;
+    case bespoke::LocationType::TypeAlias:
+      key.ta = read_typealias(des);
+      break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:
+    case bespoke::LocationType::TypeConstant:
       key.cls = read_class(des);
       read_raw(des, key.slot);
       break;
@@ -369,12 +386,30 @@ SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
 
 void write_sink_layout(ProfDataSerializer& ser, bespoke::SinkLayout sl) {
   write_raw(ser, sl.layout);
-  write_raw(ser, sl.sideExit);
+  write_raw(ser, sl.coverage);
+}
+
+void write_sink_layouts(ProfDataSerializer& ser, bespoke::SinkLayouts sls) {
+  write_raw(ser, safe_cast<size_t>(sls.layouts.size()));
+  for (auto const &sl : sls.layouts) {
+    write_sink_layout(ser, sl);
+  }
+  write_raw(ser, sls.sideExit);
 }
 
 bespoke::SinkLayout read_sink_layout(ProfDataDeserializer& des) {
   auto result = bespoke::SinkLayout{};
   result.layout = read_layout(des);
+  result.coverage = read_raw<double>(des);
+  return result;
+}
+
+bespoke::SinkLayouts read_sink_layouts(ProfDataDeserializer& des) {
+  auto result = bespoke::SinkLayouts{};
+  auto const layouts = read_raw<size_t>(des);
+  for (size_t i = 0; i < layouts; i++) {
+    result.layouts.push_back(read_sink_layout(des));
+  }
   read_raw(des, result.sideExit);
   return result;
 }
@@ -410,7 +445,7 @@ struct RuntimeStructSerde {
     auto const fieldSize = read_raw<size_t>(des);
 
     auto fields = RuntimeStruct::FieldKeys(fieldSize, nullptr);
-    for (int i = 0; i < fieldSize; i ++) {
+    for (int i = 0; i < fieldSize; i++) {
       auto const present = read_raw<bool>(des);
       if (present) fields[i] = read_string(des);
     }
@@ -436,6 +471,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
     layouts.push_back(StructLayout::As(&layout));
   });
   write_raw(ser, layouts.size());
+  write_raw(ser, StructLayout::maxColoredFields());
   for (auto const layout : layouts) {
     write_raw(ser, layout->index());
     write_field_vector(ser, layout);
@@ -460,7 +496,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   write_raw(ser, bespoke::countSinks());
   bespoke::eachSink([&](auto const& profile) {
     write_sink_key(ser, profile.key);
-    write_sink_layout(ser, profile.getLayout());
+    write_sink_layouts(ser, profile.getLayouts());
   });
 }
 
@@ -472,11 +508,12 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   always_assert(bespoke::countSinks() == 0);
 
   auto const layouts = read_raw<size_t>(des);
+  auto const maxColoredFields = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
     auto const fields = read_field_vector(des);
     auto const layout = StructLayout::Deserialize(index, fields);
-    layout->createColoringHashMap();
+    layout->createColoringHashMap(maxColoredFields);
   }
   auto const runtimeStructs = read_raw<size_t>(des);
   for (auto i = 0; i < runtimeStructs; i++) {
@@ -493,7 +530,7 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   for (auto i = 0; i < sinks; i++) {
     assertx(bespoke::countSinks() == i);
     auto const key = read_sink_key(des);
-    bespoke::deserializeSink(key, read_sink_layout(des));
+    bespoke::deserializeSink(key, read_sink_layouts(des));
     assertx(bespoke::countSinks() == i + 1);
   }
   bespoke::Layout::FinalizeHierarchy();

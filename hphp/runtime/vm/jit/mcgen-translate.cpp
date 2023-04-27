@@ -57,6 +57,8 @@
 
 #include "hphp/zend/zend-strtod.h"
 
+#include <folly/system/ThreadName.h>
+
 TRACE_SET_MOD(mcg);
 
 namespace HPHP::jit::mcgen {
@@ -125,23 +127,21 @@ void optimize(tc::FuncMetaInfo& info) {
 
   tracing::Block _{"optimize", [&] { return traceProps(func); }};
 
-  // Regenerate the prologues and DV funclets before the actual function body.
-  auto const includedBody = regeneratePrologues(func, info);
+  // Regenerate the prologues before the actual function body.
+  regeneratePrologues(func, info);
 
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
-  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, transCFGAnnot);
+  auto const regions = regionizeFunc(func, transCFGAnnot);
   tracing::annotateBlock(
     [&] {
       return tracing::Props{}
-        .add("num_regions", regions.size())
-        .add("included_body", includedBody);
+        .add("num_regions", regions.size());
     }
   );
 
-  FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
-         regions.size(), func->fullName(), includedBody);
+  FTRACE(4, "Translating {} regions for {}\n",
+         regions.size(), func->fullName());
 
   Optional<uint64_t> maxWeight;
   for (auto region : regions) {
@@ -173,7 +173,10 @@ void optimize(tc::FuncMetaInfo& info) {
     translator->optIndex = optIndex++;
     auto const spOff = region->entry()->initialSpOffset();
     translator->spOff = spOff;
-    tc::createSrcRec(regionSk, spOff);
+    if (tc::createSrcRec(regionSk, spOff) == nullptr) {
+      // ran out of TC space, stop trying to translate regions
+      break;
+    }
     translator->translate(info.tcBuf.view());
     if (translator->translateSuccess()) {
       info.add(std::move(translator));
@@ -213,13 +216,14 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
     }
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
   void onThreadEnter() override {
+    folly::setThreadName("jitworker");
+#if USE_JEMALLOC_EXTENT_HOOKS
     if (auto arena = next_extra_arena(s_numaNode)) {
       arena->bindCurrentThread();
     }
-  }
 #endif
+  }
 };
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
@@ -244,18 +248,18 @@ void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
 
 void createSrcRecs(const Func* func) {
   auto const profData = globalProfData();
+  auto const numParams = func->numNonVariadicParams();
 
-  auto create_one = [&] (Offset off) {
-    auto const sk = SrcKey { func, off, SrcKey::FuncEntryTag {} };
-    if (off == 0 ||
+  auto create_one = [&] (uint32_t numArgs) {
+    auto const sk = SrcKey { func, numArgs, SrcKey::FuncEntryTag {} };
+    if (numArgs == numParams ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, SBInvOffset{0});
     }
   };
 
-  create_one(0);
-  for (auto const& pi : func->params()) {
-    if (pi.hasDefaultValue()) create_one(pi.funcletOff);
+  for (auto i = func->numRequiredParams(); i <= numParams; ++i) {
+    create_one(i);
   }
 }
 
@@ -334,10 +338,10 @@ void scheduleSerializeOptProf() {
     }
   }
 
-  // f_server_uptime will return -1 if the http server is not yet
+  // server_uptime will return -1 if the http server is not yet
   // active. In that case, set the uptime to 0, so that we'll trigger
   // exactly delaySeconds after the server becomes active.
-  auto const uptime = std::max(0, static_cast<int>(f_server_uptime()));
+  auto const uptime = std::max(0, static_cast<int>(HHVM_FN(server_uptime)()));
   if (delaySeconds > 0) {
     s_serializeOptProfSeconds = uptime + delaySeconds;
     if (serverMode) {
@@ -348,12 +352,10 @@ void scheduleSerializeOptProf() {
   }
 }
 
-#ifdef __linux__
-  // GCC GCOV API
-  extern "C" void __gcov_reset() __attribute__((__weak__));
-  // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
-  extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
-#endif
+// GCC GCOV API
+extern "C" void __gcov_reset() __attribute__((__weak__));
+// LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
+extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -364,9 +366,10 @@ void scheduleSerializeOptProf() {
  *   1) Get ordering of functions in the TC using hfsort on the call graph (or
  *   from a precomputed order when deserializing).
  *   2) Compute a bespoke coloring and finalize the layout hierarchy.
- *   3) Optionally serialize profile data when configured.
- *   4) Generate machine code for each of the profiled functions.
- *   5) Relocate the functions in the TC according to the selected order.
+ *   3) Finalize the list of "lazy APC classes".
+ *   4) Optionally serialize profile data when configured.
+ *   5) Generate machine code for each of the profiled functions.
+ *   6) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll(bool skipSerialize) {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
@@ -393,13 +396,19 @@ void retranslateAll(bool skipSerialize) {
 
   if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
 
-  // 3) Check if we should dump profile data. We may exit here in
+  // 3) Stop adding new classes to the "lazy APC classes" list. After we
+  //    finalize this list, we can skip lazy deserialization checks for any
+  //    classes that are NOT on the list when JIT-ing access to them.
+
+  Class::finalizeLazyAPCClasses();
+
+  // 4) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless
   //    serialization of optimized code's profile is also enabled.
 
   if (serialize && !skipSerialize && serializeProfDataAndLog()) return;
 
-  // 4) Generate machine code for all the profiled functions.
+  // 5) Generate machine code for all the profiled functions.
 
   auto const initialSize = 512;
   std::vector<tc::FuncMetaInfo> jobs;
@@ -461,7 +470,7 @@ void retranslateAll(bool skipSerialize) {
       runParallelRetranslate();
     }
 
-    // 5) Relocate the machine code into code.hot in the desired order
+    // 6) Relocate the machine code into code.hot in the desired order
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
@@ -472,8 +481,15 @@ void retranslateAll(bool skipSerialize) {
   }
 
   if (serverMode) {
-    Logger::Info("retranslateAll: finished retranslating all optimized "
-                 "translations!");
+    auto const uptime = HHVM_FN(server_uptime)();
+    if (uptime > 0) {
+      BootStats::set("jit_profile_and_optimize", uptime);
+      BootStats::done();
+      Logger::FInfo("retranslateAll finished {} seconds after server started",
+                    uptime);
+    } else {
+      Logger::Info("retranslateAll finished");
+    }
   }
 
   // This will enable live translations to happen again.
@@ -493,7 +509,6 @@ void retranslateAll(bool skipSerialize) {
     scheduleSerializeOptProf();
   }
 
-#ifdef __linux__
   if (__gcov_reset) {
     if (serverMode) {
       Logger::Info("Calling __gcov_reset (retranslateAll finished)");
@@ -507,7 +522,6 @@ void retranslateAll(bool skipSerialize) {
     }
     __llvm_profile_reset_counters();
   }
-#endif
 
 }
 
@@ -617,7 +631,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
 
   auto const serverMode = RuntimeOption::ServerExecutionMode();
   if (!force) {
-    auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
+    auto const uptime = static_cast<int>(HHVM_FN(server_uptime)()); // may be -1
     if (uptime >= (int)RuntimeOption::EvalJitRetranslateAllSeconds) {
       assertx(serverMode);
       Logger::FInfo("retranslateAll: scheduled after {} seconds", uptime);
@@ -647,6 +661,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     Treadmill::enqueue([] {
       std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
       s_retranslateAllThread = std::thread([] {
+        folly::setThreadName("jit.rta");
         rds::local::init();
         zend_get_bigint_data();
         SCOPE_EXIT { rds::local::fini(); };
@@ -656,6 +671,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
   } else {
     std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
     s_retranslateAllThread = std::thread([skipSerialize] {
+      folly::setThreadName("jit.rta");
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
       rds::local::init();
@@ -716,7 +732,7 @@ void checkSerializeOptProf() {
           !RuntimeOption::EvalJitSerdesFile.empty() &&
           isJitSerializing());
 
-  auto const uptime = f_server_uptime(); // may be -1
+  auto const uptime = HHVM_FN(server_uptime)(); // may be -1
   auto const triggerSeconds =
     s_serializeOptProfSeconds.load(std::memory_order_relaxed);
   auto const triggerRequest =

@@ -23,7 +23,6 @@ function positive_tests() {
 function negative_tests() {
   $func = 'func';
   var_dump('==================== negative tests (false) ====================');
-  var_dump(HH\is_fun(HH\class_meth('A', 'f_static')));
   var_dump(HH\is_fun(A::f_static<>));
   var_dump(HH\is_fun(A::rclsmeth<int>));
 }

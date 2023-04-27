@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ServerMonitorUtils
+open MonitorUtils
 
 let log s ~tracker =
   Hh_logger.log ("[%s] " ^^ s) (Connection_tracker.log_id tracker)
@@ -19,7 +19,7 @@ let from_channel_without_buffering ?timeout tic =
   Marshal_tools.from_fd_with_preamble ?timeout (Timeout.descr_of_in_channel tic)
 
 let hh_monitor_config root =
-  ServerMonitorUtils.
+  MonitorUtils.
     {
       lock_file = ServerFiles.lock_file root;
       socket_file = ServerFiles.socket_file root;
@@ -37,11 +37,11 @@ let wait_on_server_restart ic =
    * wait for the connection to be closed, signaling that the server
    * has exited and the OS has cleaned up after it, then we try again.
    *
-   * See also: ServerMonitor.client_out_of_date
+   * See also: MonitorMain.client_out_of_date
    *)
   try
     while true do
-      let _ = Timeout.input_char ic in
+      let (_ : char) = Timeout.input_char ic in
       ()
     done
   with
@@ -59,7 +59,7 @@ let produce_version_payload ~(tracker : Connection_tracker.t) : string =
   |> Hh_json.json_to_string
 
 let get_sockaddr config =
-  let sock_name = Socket.get_path config.ServerMonitorUtils.socket_file in
+  let sock_name = Socket.get_path config.MonitorUtils.socket_file in
   if Sys.win32 then (
     let ic = In_channel.create ~binary:true sock_name in
     let port = Option.value_exn (In_channel.input_binary_int ic) in
@@ -74,7 +74,7 @@ let rec consume_prehandoff_messages
     ( Timeout.in_channel
       * Stdlib.out_channel
       * ServerCommandTypes.server_specific_files,
-      ServerMonitorUtils.connection_error )
+      MonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
   let m : PH.msg = from_channel_without_buffering ~timeout ic in
@@ -165,11 +165,7 @@ let read_and_log_process_information ~timeout =
       "INVARIANT VIOLATION BUG: [%s] [%s]"
       desc
       (Telemetry.to_string telemetry);
-    HackEventLogger.invariant_violation_bug
-      ~desc
-      ~path:Relative_path.default
-      ~pos:""
-      telemetry;
+    HackEventLogger.invariant_violation_bug desc ~telemetry;
     ()
 
 let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
@@ -191,7 +187,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
      where I know there are outstanding requests but again it doesn't see them. I have no
      explanation for these phemona. *)
   let open Connection_tracker in
-  let phase = ref ServerMonitorUtils.Connect_open_socket in
+  let phase = ref MonitorUtils.Connect_open_socket in
   let finally_close : Timeout.in_channel option ref = ref None in
   let warn_of_busy_server_timer : Timer.t option ref = ref None in
   Utils.try_finally
@@ -203,7 +199,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
           ~timeout
           ~do_:(fun timeout ->
             (* 1. open the socket *)
-            phase := ServerMonitorUtils.Connect_open_socket;
+            phase := MonitorUtils.Connect_open_socket;
             let monitor_daemon_is_running =
               match
                 Process.read_and_wait_pid
@@ -236,14 +232,14 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
             in
 
             (* 2. send version, followed by newline *)
-            phase := ServerMonitorUtils.Connect_send_version;
+            phase := MonitorUtils.Connect_send_version;
             let version_str = produce_version_payload ~tracker in
             let (_ : int) =
               Marshal_tools.to_fd_with_preamble
                 (Unix.descr_of_out_channel oc)
                 version_str
             in
-            phase := ServerMonitorUtils.Connect_send_newline;
+            phase := MonitorUtils.Connect_send_newline;
             let (_ : int) =
               Unix.write
                 (Unix.descr_of_out_channel oc)
@@ -257,7 +253,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
 
             (* 3. wait for Connection_ok *)
             (* timeout/exn -> Server_missing_exn/Monitor_connection_misc_exception *)
-            phase := ServerMonitorUtils.Connect_receive_connection_ok;
+            phase := MonitorUtils.Connect_receive_connection_ok;
             let cstate : connection_state = from_channel_without_buffering ic in
             let tracker =
               Connection_tracker.track tracker ~key:Client_got_cstate
@@ -290,7 +286,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
                    failure_reason = Connect_timeout;
                  }))
       with
-      | exn ->
+      | Unix.Unix_error _ as exn ->
         let e = Exception.wrap exn in
         Error
           (Connect_to_monitor_failure
@@ -320,7 +316,7 @@ let connect_and_shut_down ~tracker root =
     ~timeout:3
     ~on_timeout:(fun _timings ->
       if server_exists config.lock_file then
-        Ok ServerMonitorUtils.SHUTDOWN_UNVERIFIED
+        Ok MonitorUtils.SHUTDOWN_UNVERIFIED
       else
         Error
           (Connect_to_monitor_failure
@@ -332,12 +328,11 @@ let connect_and_shut_down ~tracker root =
     ~do_:
       begin
         fun _ ->
-        wait_on_server_restart ic;
-        Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
+          wait_on_server_restart ic;
+          Ok MonitorUtils.SHUTDOWN_VERIFIED
       end
 
-let connect_once
-    ?(log_on_slow_connect = false) ~tracker ~timeout root handoff_options =
+let connect_once ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
@@ -345,8 +340,7 @@ let connect_once
     let tracker =
       Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
     in
-    connect_to_monitor ~tracker ~timeout ~log_on_slow_connect config
-    >>= fun (ic, oc, tracker) ->
+    connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
     let tracker =
       Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
     in
@@ -360,15 +354,14 @@ let connect_once
     Timeout.with_timeout
       ~timeout
       ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
-      ~on_timeout:(fun _ ->
-        Error ServerMonitorUtils.Server_dormant_out_of_retries)
+      ~on_timeout:(fun _ -> Error MonitorUtils.Server_dormant_out_of_retries)
   in
   Result.iter result ~f:(fun _ ->
       log ~tracker "CLIENT_CONNECT_ONCE";
       HackEventLogger.client_connect_once ~t_start;
       ());
   Result.iter_error result ~f:(fun e ->
-      let telemetry = ServerMonitorUtils.connection_error_to_telemetry e in
+      let telemetry = MonitorUtils.connection_error_to_telemetry e in
       log
         ~tracker
         "CLIENT_CONNECT_ONCE FAILURE %s"

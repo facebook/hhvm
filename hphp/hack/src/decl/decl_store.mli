@@ -9,7 +9,7 @@
 
 (* Abstracts over the particular shared memory implementation used for decl
    information.
- *)
+*)
 
 type class_members = {
   m_properties: Typing_defs.decl_ty SMap.t;
@@ -51,3 +51,5 @@ type decl_store = {
 val get : unit -> decl_store
 
 val set : decl_store -> unit
+
+val shared_memory_store : decl_store

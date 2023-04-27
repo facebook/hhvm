@@ -27,6 +27,9 @@ function server_warmup_status(): string;
 <<__Native>>
 function server_warmup_status_monotonic(): string;
 
+<<__Native>>
+function set_endpoint_name(string $name): void;
+
 /**
  * Returns a description of the context in which the request is executing.
  *
@@ -38,7 +41,7 @@ function server_warmup_status_monotonic(): string;
  * on an unnamed JobQueue within the server.
  */
 <<__Native>>
-function execution_context(): string;
+function execution_context()[read_globals]: string;
 
 <<__Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false)[]: mixed;
@@ -105,7 +108,7 @@ function constant(string $name): mixed;
  * @return bool - Returns TRUE if the named constant given by name has been
  * defined, FALSE otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function defined(string $name,
                  bool $autoload = true): bool;
 
@@ -154,7 +157,7 @@ function ignore_user_abort(bool $setting = false): int;
  * @return mixed - Returns a binary string containing data.
  */
 <<__Native, __IsFoldable>>
-function pack(string $format, ...$args)[]: mixed;
+function pack(string $format, mixed... $args)[]: mixed;
 
 /** @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was
@@ -236,7 +239,7 @@ function unpack(string $format,
  * minutes).
  */
 <<__Native>>
-function sys_getloadavg(): varray;
+function sys_getloadavg(): vec<float>;
 
 /** Casts a given value to a string.
  * @param mixed $v - The value being casted to a string.
@@ -244,12 +247,6 @@ function sys_getloadavg(): varray;
  */
 <<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v)[]: string;
-
-function __hhas_adata(string $incorrect_hhas_adata) {
-  throw new Exception(
-    "__hhas_adata may only be called with a scalar string argument."
-  );
-}
 
 }
 
@@ -260,7 +257,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /** min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -268,7 +265,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

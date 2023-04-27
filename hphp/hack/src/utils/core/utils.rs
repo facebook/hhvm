@@ -44,6 +44,11 @@ pub fn strip_ns(s: &str) -> &str {
     }
 }
 
+// A\B\C -> C
+pub fn strip_all_ns(s: &str) -> &str {
+    s.rfind('\\').map_or(s, |pos| &s[pos + 1..])
+}
+
 /// \A\B\C -> (\A\B\, C)
 /// A -> (\, A)
 pub fn split_ns_from_name(s: &str) -> (&str, &str) {

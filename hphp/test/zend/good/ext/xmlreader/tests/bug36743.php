@@ -10,7 +10,7 @@ class Test extends XMLReader
     }
 }
 <<__EntryPoint>> function main(): void {
-$t = new test;
+$t = new Test;
 
 echo "Done\n";
 }

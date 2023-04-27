@@ -203,12 +203,30 @@ uint16_t inlineDepth(const IRGS& env) {
   return env.inlineState.depth;
 }
 
+SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
+  return gen(
+    env,
+    BeginInlining,
+    BeginInliningData{
+      {}, // calleeAROff
+      callee,
+      static_cast<uint32_t>(env.inlineState.depth + 1),
+      nextSrcKey(env),
+      {}, // calleeSBOff
+      {}, // returnSPOff
+      0   // cost
+    },
+    sp(env)
+  );
+}
+
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
-                   int cost) {
+                   int cost,
+                   SSATmp* calleeFP) {
   assertx(entry.funcEntry());
   assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
@@ -255,6 +273,15 @@ void beginInlining(IRGS& env,
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popCU(env);
   }
+
+  while (entry.trivialDVFuncEntry()) {
+    auto const param = entry.numEntryArgs();
+    assertx(param < numTotalInputs);
+    auto const dv = callee->params()[param].defaultValue;
+    inputs[param] = cns(env, dv);
+    entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
+  }
+
   updateMarker(env);
 
   // NB: Now that we've popped the callee's arguments off the stack
@@ -264,23 +291,15 @@ void beginInlining(IRGS& env,
   // they do).
 
   // The top of the stack now points to the space for ActRec.
-  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env);
-  IRSPRelOffset calleeSBOff = calleeAROff - callee->numSlotsInFrame();
+  auto const extra   = calleeFP->inst()->extra<BeginInlining>();
+  extra->spOffset    = spOffBCFromIRSP(env);
+  extra->sbOffset    = extra->spOffset - callee->numSlotsInFrame();
+  extra->returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
+  extra->cost        = cost;
 
-  auto const calleeFP = gen(
-    env,
-    BeginInlining,
-    BeginInliningData{
-      calleeAROff,
-      callee,
-      static_cast<uint32_t>(env.inlineState.depth + 1),
-      nextSrcKey(env),
-      calleeSBOff,
-      spOffBCFromStackBase(env) - kNumActRecCells + 1,
-      cost
-    },
-    sp(env)
-  );
+  // Make the new FramePtr live (marking the caller stack below the frame as
+  // killed).
+  gen(env, EnterInlineFrame, calleeFP);
 
   env.inlineState.depth++;
   env.inlineState.costStack.emplace_back(env.inlineState.cost);
@@ -352,7 +371,7 @@ void conjureBeginInlining(IRGS& env,
     : conjure(thisType);
 
   beginInlining(env, entry, ctx, 0 /* callBcOffset */, returnTarget,
-                9 /* cost */);
+                9 /* cost */, genCalleeFP(env, callee));
 }
 
 namespace {

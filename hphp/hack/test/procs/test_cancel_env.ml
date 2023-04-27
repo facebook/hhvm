@@ -92,6 +92,11 @@ let interrupt_handler fd env =
     MultiThreadedCall.(
       if env = 2 then
         Cancel
+          {
+            MultiThreadedCall.user_message = "c";
+            log_message = "c1";
+            timestamp = 0.0;
+          }
       else
         Continue)
   in
@@ -128,7 +133,13 @@ let test_cancel_env () =
   let total = num_workers_and_jobs * (num_workers_and_jobs + 1) / 2 in
   assert (interrupt_env = 2);
   assert (res = total - 7 - 2);
-  assert (cancelled = [[7]; [2]] || cancelled = [[2]; [7]]);
+  begin
+    match cancelled with
+    | Some ([[7]; [2]], _)
+    | Some ([[2]; [7]], _) ->
+      ()
+    | _ -> failwith "unexpected cancellation result"
+  end;
   true
 
 let () =

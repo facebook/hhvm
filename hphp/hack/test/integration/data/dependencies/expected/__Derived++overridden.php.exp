@@ -1,9 +1,23 @@
 <?hh
 
-abstract class AbstractBase {}
+abstract class AbstractBase {
+  abstract protected function must_implement(): void;
+
+  public float $base_property = 0.0;
+
+  public static int $static_base_property = 0;
+}
 
 class ImplementingBase extends \AbstractBase {
+  protected function must_implement(): void {
+    throw new \Exception();
+  }
+
   public function overridden(): int {
+    throw new \Exception();
+  }
+
+  public function inherited(): void {
     throw new \Exception();
   }
 }

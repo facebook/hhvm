@@ -26,9 +26,6 @@
 #include "hphp/zend/zend-string.h"
 
 #include <strings.h>
-#ifdef __APPLE__
-#include <xlocale.h>
-#endif
 
 namespace HPHP {
 
@@ -120,7 +117,7 @@ int64_t HSLLocaleLibcOps::strcasecmp(const String& a, const String& b) const {
 }
 
 bool HSLLocaleLibcOps::starts_with(const String& str, const String& prefix) const {
-  assertx(!str.isNull() & !prefix.isNull());
+  assertx(!str.isNull() && !prefix.isNull());
   if (str.size() < prefix.size()) {
     return false;
   }
@@ -128,7 +125,7 @@ bool HSLLocaleLibcOps::starts_with(const String& str, const String& prefix) cons
 }
 
 bool HSLLocaleLibcOps::starts_with_ci(const String& str, const String& prefix) const {
-  assertx(!str.isNull() & !prefix.isNull());
+  assertx(!str.isNull() && !prefix.isNull());
   if (str.size() < prefix.size()) {
     return false;
   }
@@ -136,7 +133,7 @@ bool HSLLocaleLibcOps::starts_with_ci(const String& str, const String& prefix) c
 }
 
 bool HSLLocaleLibcOps::ends_with(const String& str, const String& suffix) const {
-  assertx(!str.isNull() & !suffix.isNull());
+  assertx(!str.isNull() && !suffix.isNull());
   if (str.size() < suffix.size()) {
     return false;
   }
@@ -145,7 +142,7 @@ bool HSLLocaleLibcOps::ends_with(const String& str, const String& suffix) const 
 }
 
 bool HSLLocaleLibcOps::ends_with_ci(const String& str, const String& suffix) const {
-  assertx(!str.isNull() & !suffix.isNull());
+  assertx(!str.isNull() && !suffix.isNull());
   if (str.size() < suffix.size()) {
     return false;
   }
@@ -331,7 +328,7 @@ String HSLLocaleLibcOps::replace_every_nonrecursive_ci(const String& haystack,
     haystack,
     replacements,
     /* to_t = */ id,
-    /* from_t = */ id, 
+    /* from_t = */ id,
     /* normalize = */ [](String* s) {},
     [](String* s) {
       *s = HHVM_FN(strtolower)(*s);

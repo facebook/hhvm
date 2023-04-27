@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_a_variation_001(): void {
 echo "*** Testing is_a() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $class_name = 'stdClass';

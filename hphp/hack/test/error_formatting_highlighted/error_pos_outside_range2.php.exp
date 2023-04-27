@@ -9,4 +9,9 @@ error_pos_outside_range2.php:2:1
     1 | function }
 [1] 2 | _
 
-2 errors found.
+Typing[4030] Was expecting a return type hint [1]
+
+error_pos_outside_range2.php:1:10
+[1] 1 | function }
+
+3 errors found.

@@ -1,3 +1,5 @@
+File "autoimport_namespaces.php", line 3, characters 20-31:
+Unbound name: `HH\Rx\Exception` (Naming[2049])
 File "autoimport_namespaces.php", line 5, characters 29-41:
 Unbound name: `Rx\Exception` (Naming[2049])
 File "autoimport_namespaces.php", line 7, characters 22-35:

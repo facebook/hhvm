@@ -44,7 +44,7 @@ class Collator {
                           mixed $str2): mixed;
 
   /**
-   * Create a collator
+   * Create a Collator
    *
    * @param string $locale - The locale containing the required collation
    *   rules. Special values for locales can be passed in - if null is
@@ -176,7 +176,7 @@ class Collator {
 /**
  * Sort array maintaining index association
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param array $arr - Array of strings to sort.
  * @param int $sort_flag - Optional sorting type, one of the following:
  *    Collator::SORT_REGULAR - compare items normally (don't change types)
@@ -187,7 +187,7 @@ class Collator {
  *
  * @return bool -
  */
-function collator_asort(collator $coll,
+function collator_asort(Collator $coll,
                         inout mixed $arr,
                         int $sort_flag = Collator::SORT_REGULAR): bool {
   return $coll->asort(inout $arr, $sort_flag);
@@ -196,7 +196,7 @@ function collator_asort(collator $coll,
 /**
  * Compare two Unicode strings
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param string $str1 - The first string to compare.
  * @param string $str2 - The second string to compare.
  *
@@ -204,7 +204,7 @@ function collator_asort(collator $coll,
  *   str2 ;     0 if str1 is equal to str2;     -1 if str1 is less than
  *   str2 .    On error boolean FALSE is returned.
  */
-function collator_compare(collator $coll,
+function collator_compare(Collator $coll,
                           mixed $str1,
                           mixed $str2): int {
   return $coll->compare($str1, $str2);
@@ -228,12 +228,12 @@ function collator_create(string $locale): Collator {
 /**
  * Get collation attribute value
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param int $attr - Attribute to get value for.
  *
  * @return int - Attribute value, or boolean FALSE on error.
  */
-function collator_get_attribute(collator $coll,
+function collator_get_attribute(Collator $coll,
                                 int $attr): int {
   return $coll->getAttribute($attr);
 }
@@ -241,31 +241,31 @@ function collator_get_attribute(collator $coll,
 /**
  * Get collator's last error code
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  *
  * @return int - Error code returned by the last Collator API function
  *   call.
  */
-function collator_get_error_code(collator $coll): int {
+function collator_get_error_code(Collator $coll): int {
   return $coll->getErrorCode();
 }
 
 /**
  * Get text for collator's last error code
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  *
  * @return string - Description of an error occurred in the last Collator
  *   API function call.
  */
-function collator_get_error_message(collator $coll): string {
+function collator_get_error_message(Collator $coll): string {
   return $coll->getErrorMessage();
 }
 
 /**
  * Get the locale name of the collator
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param int $type - You can choose between valid and actual locale (
  *   Locale::VALID_LOCALE and Locale::ACTUAL_LOCALE, respectively).
  *
@@ -273,7 +273,7 @@ function collator_get_error_message(collator $coll): string {
  *   If the collator was instantiated from rules or an error occurred,
  *   returns boolean FALSE.
  */
-function collator_get_locale(collator $coll,
+function collator_get_locale(Collator $coll,
                              int $type): string {
   return $coll->getLocale($type);
 }
@@ -281,13 +281,13 @@ function collator_get_locale(collator $coll,
 /**
  * Get sorting key for a string
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param string $str - The string to produce the key from.
  *
  * @return string - Returns the collation key for the string. Collation
  *   keys can be compared directly instead of strings.
  */
-function collator_get_sort_key(collator $coll,
+function collator_get_sort_key(Collator $coll,
                                string $str): string {
   return $coll->getSortKey($str);
 }
@@ -295,25 +295,25 @@ function collator_get_sort_key(collator $coll,
 /**
  * Get current collation strength
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  *
  * @return int - Returns current collation strength, or boolean FALSE on
  *   error.
  */
-function collator_get_strength(collator $coll): int {
+function collator_get_strength(Collator $coll): int {
   return $coll->getStrength();
 }
 
 /**
  * Set collation attribute
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param int $attr - Attribute.
  * @param int $val - Attribute value.
  *
  * @return bool -
  */
-function collator_set_attribute(collator $coll,
+function collator_set_attribute(Collator $coll,
                                 int $attr,
                                 int $val): bool {
   return $coll->setAttribute($attr, $val);
@@ -322,7 +322,7 @@ function collator_set_attribute(collator $coll,
 /**
  * Set collation strength
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param int $strength - Strength to set.  Possible values are:
  *   Collator::PRIMARY     Collator::SECONDARY     Collator::TERTIARY
  *   Collator::QUATERNARY     Collator::IDENTICAL
@@ -330,7 +330,7 @@ function collator_set_attribute(collator $coll,
  *
  * @return bool -
  */
-function collator_set_strength(collator $coll,
+function collator_set_strength(Collator $coll,
                                int $strength): bool {
   return $coll->setStrength($strength);
 }
@@ -338,12 +338,12 @@ function collator_set_strength(collator $coll,
 /**
  * Sort array using specified collator and sort keys
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param array $arr - Array of strings to sort
  *
  * @return bool -
  */
-function collator_sort_with_sort_keys(collator $coll,
+function collator_sort_with_sort_keys(Collator $coll,
                                       inout mixed $arr): bool {
   return $coll->sortWithSortKeys(inout $arr);
 }
@@ -351,7 +351,7 @@ function collator_sort_with_sort_keys(collator $coll,
 /**
  * Sort array using specified collator
  *
- * @param collator $coll - Collator object.
+ * @param Collator $coll - Collator object.
  * @param array $arr - Array of strings to sort.
  * @param int $sort_flag - Optional sorting type, one of the following:
  *      Collator::SORT_REGULAR - compare items normally (don't change
@@ -362,7 +362,7 @@ function collator_sort_with_sort_keys(collator $coll,
  *
  * @return bool -
  */
-function collator_sort(collator $coll,
+function collator_sort(Collator $coll,
                        inout mixed $arr,
                        int $sort_flag = Collator::SORT_REGULAR): bool {
   return $coll->sort(inout $arr, $sort_flag);

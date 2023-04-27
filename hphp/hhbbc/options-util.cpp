@@ -31,7 +31,7 @@ bool method_map_contains(const MethodMap& mmap,
   if (it == end(mmap)) return false;
   return it->second.count(func == nullptr ? "" :
                           (func->name->empty() ?
-                           func->unit->filename : func->name)->data());
+                           func->unit : func->name)->data());
 }
 
 bool is_trace_function(const php::Class* cls,
@@ -43,7 +43,7 @@ int trace_bump_for(const php::Class* cls,
                    const php::Func* func) {
   auto const unit = func ? func->unit : cls->unit;
   return is_trace_function(cls, func) ? kTraceFuncBump :
-    (is_systemlib_part(*unit) ? kSystemLibBump : 0);
+    (is_systemlib_part(unit) ? kSystemLibBump : 0);
 }
 
 //////////////////////////////////////////////////////////////////////

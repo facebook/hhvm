@@ -35,10 +35,14 @@ type t = {
   (* A list of extra paths to search for declarations *)
   extra_paths: Path.t list;
   warn_on_non_opt_build: bool;
+  (* clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
+  ide_fall_back_to_full_index: bool;
+  (* when clientIdeDaemon loads a saved state, it also gets a list of the files changed since the saved state. When this option is set, the daemon will process all of these changes right away: the IDE won't be "initialized" and won't be responding to requests until these changes are processed. *)
+  ide_process_changes_sync: bool;
 }
 [@@deriving show]
 
-let filename =
+let repo_config_path =
   Relative_path.from_root ~suffix:Config_file.file_path_relative_to_repo_root
 
 let is_compatible c1 c2 =
@@ -113,13 +117,11 @@ let process_experimental sl =
   | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
 
 let config_experimental_tc_features config =
-  match
-    Config_file.Getters.string_opt "enable_experimental_tc_features" config
-  with
-  | None -> SSet.empty
-  | Some s ->
-    let sl = Str.split config_list_regexp s in
-    process_experimental sl
+  Option.map
+    (Config_file.Getters.string_opt "enable_experimental_tc_features" config)
+    ~f:(fun list_str ->
+      let sl = Str.split config_list_regexp list_str in
+      process_experimental sl)
 
 let process_migration_flags sl =
   match sl with
@@ -132,10 +134,12 @@ let process_migration_flags sl =
     List.fold_left flags ~f:SSet.add ~init:SSet.empty
 
 let config_tc_migration_flags config =
-  Config_file.Getters.string_opt "enable_tc_migration_flags" config
-  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
-  |> List.map ~f:String.lowercase
-  |> process_migration_flags
+  Option.map
+    (Config_file.Getters.string_opt "enable_tc_migration_flags" config)
+    ~f:(fun list_str ->
+      Str.split config_list_regexp list_str
+      |> List.map ~f:String.lowercase
+      |> process_migration_flags)
 
 let convert_paths str =
   let json = Hh_json.json_of_string ~strict:true str in
@@ -190,7 +194,7 @@ let process_untrusted_mode config =
             in
             let prefix_match =
               List.find
-                ~f:(fun blp -> String_utils.string_starts_with ck blp)
+                ~f:(fun blp -> String.is_prefix ck ~prefix:blp)
                 prefix_blacklist
             in
             match (exact_match, prefix_match) with
@@ -220,18 +224,16 @@ let convert_auto_namespace_to_map map =
   List.fold_left ~init:[] ~f:extract_auto_namespace_element pairs
 
 let prepare_auto_namespace_map config =
-  Option.value_map
+  Option.map
     (Config_file.Getters.string_opt "auto_namespace_map" config)
-    ~default:[]
     ~f:convert_auto_namespace_to_map
 
 let extract_log_level = function
-  | (log_key, Hh_json.JSON_Number log_level) ->
-    begin
-      match int_of_string_opt log_level with
-      | Some log_level -> (log_key, log_level)
-      | None -> failwith "non-integer log level value"
-    end
+  | (log_key, Hh_json.JSON_Number log_level) -> begin
+    match int_of_string_opt log_level with
+    | Some log_level -> (log_key, log_level)
+    | None -> failwith "non-integer log level value"
+  end
   | _ -> failwith "non-integer log level value"
 
 let convert_log_levels_to_map map =
@@ -240,37 +242,198 @@ let convert_log_levels_to_map map =
   List.map ~f:extract_log_level pairs |> SMap.of_list
 
 let prepare_log_levels config =
-  Option.value_map
+  Option.map
     (Config_file.Getters.string_opt "log_levels" config)
-    ~default:SMap.empty
     ~f:convert_log_levels_to_map
 
-let prepare_iset config config_name initial_values =
-  Config_file.Getters.string_opt config_name config
-  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
-  |> List.map ~f:int_of_string
-  |> List.fold_right ~init:initial_values ~f:ISet.add
-
-let prepare_error_codes_treated_strictly config =
-  prepare_iset config "error_codes_treated_strictly" (ISet.of_list [])
+let prepare_iset config config_name =
+  Option.map
+    (Config_file.Getters.string_opt config_name config)
+    ~f:(fun list_str ->
+      Str.split config_list_regexp list_str
+      |> List.map ~f:int_of_string
+      |> List.fold_right ~init:ISet.empty ~f:ISet.add)
 
 let prepare_allowed_decl_fixme_codes config =
-  prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
+  prepare_iset config "allowed_decl_fixme_codes"
 
-let load ~silent config_filename options : t * ServerLocalConfig.t =
-  let config_overrides = Config_file.of_list @@ ServerArgs.config options in
+let load_config config options =
+  GlobalOptions.set
+    ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
+    ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
+    ?tco_timeout:(int_opt "timeout" config)
+    ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
+    ?tco_disallow_byref_dynamic_calls:
+      (bool_opt "disallow_byref_dynamic_calls" config)
+    ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
+    ?po_disable_lval_as_an_expression:
+      (bool_opt "disable_lval_as_an_expression" config)
+    ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
+    ?allowed_fixme_codes_strict:
+      (prepare_iset config "allowed_fixme_codes_strict")
+    ?po_auto_namespace_map:(prepare_auto_namespace_map config)
+    ?tco_experimental_features:(config_experimental_tc_features config)
+    ?tco_migration_flags:(config_tc_migration_flags config)
+    ?tco_like_type_hints:(bool_opt "like_type_hints" config)
+    ?tco_union_intersection_type_hints:
+      (bool_opt "union_intersection_type_hints" config)
+    ?tco_coeffects:(bool_opt "call_coeffects" config)
+    ?tco_coeffects_local:(bool_opt "local_coeffects" config)
+    ?tco_like_casts:(bool_opt "like_casts" config)
+    ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
+    ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
+    ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
+    ?tco_disallow_unresolved_type_variables:
+      (bool_opt "disallow_unresolved_type_variables" config)
+    ?tco_locl_cache_capacity:(int_opt "locl_cache_capacity" config)
+    ?tco_locl_cache_node_threshold:(int_opt "locl_cache_node_threshold" config)
+    ?po_enable_class_level_where_clauses:
+      (bool_opt "class_level_where_clauses" config)
+    ?po_disable_legacy_soft_typehints:
+      (bool_opt "disable_legacy_soft_typehints" config)
+    ?po_disallow_toplevel_requires:
+      (bool_opt "disallow_toplevel_requires" config)
+    ?po_allowed_decl_fixme_codes:(prepare_allowed_decl_fixme_codes config)
+    ?po_allow_new_attribute_syntax:
+      (bool_opt "allow_new_attribute_syntax" config)
+    ?po_disable_legacy_attribute_syntax:
+      (bool_opt "disable_legacy_attribute_syntax" config)
+    ?tco_const_attribute:(bool_opt "const_attribute" config)
+    ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
+    ?po_const_default_lambda_args:(bool_opt "const_default_lambda_args" config)
+    ?po_disallow_silence:(bool_opt "disallow_silence" config)
+    ?tco_global_inference:(bool_opt "global_inference" config)
+    ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)
+    ?tco_const_static_props:(bool_opt "const_static_props" config)
+    ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
+    ?tco_check_attribute_locations:(bool_opt "check_attribute_locations" config)
+    ?glean_service:(string_opt "glean_service" config)
+    ?glean_hostname:(string_opt "glean_hostname" config)
+    ?glean_port:(int_opt "glean_port" config)
+    ?glean_reponame:(string_opt "glean_reponame" config)
+    ?symbol_write_ownership:(bool_opt "symbol_write_ownership" config)
+    ?symbol_write_root_path:(string_opt "symbol_write_root_path" config)
+    ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
+    ?symbol_write_ignore_paths:
+      (string_list_opt "symbol_write_ignore_paths" config)
+    ?symbol_write_index_paths:
+      (string_list_opt "symbol_write_index_paths" config)
+    ?symbol_write_index_paths_file:
+      (string_opt "symbol_write_index_paths_file" config)
+    ?symbol_write_index_paths_file_output:
+      (string_opt "symbol_write_index_paths_file_output" config)
+    ?symbol_write_include_hhi:(bool_opt "symbol_write_include_hhi" config)
+    ?symbol_write_sym_hash_in:(string_opt "symbol_write_sym_hash_in" config)
+    ?symbol_write_exclude_out:(string_opt "symbol_write_exclude_out" config)
+    ?symbol_write_referenced_out:
+      (string_opt "symbol_write_referenced_out" config)
+    ?symbol_write_sym_hash_out:(bool_opt "symbol_write_sym_hash_out" config)
+    ?po_disallow_func_ptrs_in_constants:
+      (bool_opt "disallow_func_ptrs_in_constants" config)
+    ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
+    ?tco_disallow_discarded_nullable_awaitables:
+      (bool_opt "disallow_discarded_nullable_awaitables" config)
+    ?po_disable_xhp_element_mangling:
+      (bool_opt "disable_xhp_element_mangling" config)
+    ?po_disable_xhp_children_declarations:
+      (bool_opt "disable_xhp_children_declarations" config)
+    ?po_enable_xhp_class_modifier:(bool_opt "enable_xhp_class_modifier" config)
+    ?po_disable_hh_ignore_error:(int_opt "disable_hh_ignore_error" config)
+    ?tco_method_call_inference:(bool_opt "method_call_inference" config)
+    ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
+    ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
+    ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
+    ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
+    ?tco_enable_modules:(bool_opt "enable_modules" config)
+    ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
+    ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
+    ?po_interpret_soft_types_as_like_types:
+      (bool_opt "interpret_soft_types_as_like_types" config)
+    ?tco_enable_strict_string_concat_interp:
+      (bool_opt "enable_strict_string_concat_interp" config)
+    ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
+    ?tco_allowed_expression_tree_visitors:
+      (Option.map
+         (string_list_opt "allowed_expression_tree_visitors" config)
+         ~f:(fun l -> List.map l ~f:Utils.add_ns))
+    ?tco_math_new_code:(bool_opt "math_new_code" config)
+    ?tco_typeconst_concrete_concrete_error:
+      (bool_opt "typeconst_concrete_concrete_error" config)
+    ?tco_enable_strict_const_semantics:
+      (let key = "enable_strict_const_semantics" in
+       match int_opt_result key config with
+       | None -> None
+       | Some (Ok i) -> Some i
+       | Some (Error _) ->
+         (* not an int *)
+         bool_opt key config |> Option.map ~f:Bool.to_int)
+    ?tco_strict_wellformedness:(int_opt "strict_wellformedness" config)
+    ?tco_meth_caller_only_public_visibility:
+      (bool_opt "meth_caller_only_public_visibility" config)
+    ?tco_require_extends_implements_ancestors:
+      (bool_opt "require_extends_implements_ancestors" config)
+    ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
+    ?tco_enforce_sealed_subclasses:(bool_opt "enforce_sealed_subclasses" config)
+    ?tco_everything_sdt:(bool_opt "everything_sdt" config)
+    ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
+    ?tco_explicit_consistent_constructors:
+      (int_opt "explicit_consistent_constructors" config)
+    ?tco_require_types_class_consts:
+      (int_opt "require_types_tco_require_types_class_consts" config)
+    ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
+    ?tco_profile_top_level_definitions:
+      (bool_opt "profile_top_level_definitions" config)
+    ?tco_is_systemlib:(bool_opt "is_systemlib" config)
+    ?log_levels:(prepare_log_levels config)
+    ?tco_allowed_files_for_module_declarations:
+      (string_list_opt "allowed_files_for_module_declarations" config)
+    ?tco_allow_all_files_for_module_declarations:
+      (bool_opt "allow_all_files_for_module_declarations" config)
+    ?tco_expression_tree_virtualize_functions:
+      (bool_opt "expression_tree_virtualize_functions" config)
+    ?tco_use_type_alias_heap:(bool_opt "use_type_alias_heap" config)
+    ?tco_populate_dead_unsafe_cast_heap:
+      (bool_opt "populate_dead_unsafe_cast_heap" config)
+    ?po_disallow_static_constants_in_default_func_args:
+      (bool_opt "disallow_static_constants_in_default_func_args" config)
+    ?tco_tast_under_dynamic:(bool_opt "tast_under_dynamic" config)
+    ?tco_ide_should_use_hack_64_distc:
+      (bool_opt "ide_should_use_hack_64_distc" config)
+    options
+
+let load ~silent options : t * ServerLocalConfig.t =
+  let command_line_overrides =
+    Config_file.of_list @@ ServerArgs.config options
+  in
   let (config_hash, config) =
-    Config_file.parse_hhconfig (Relative_path.to_absolute config_filename)
+    Config_file.parse_hhconfig (Relative_path.to_absolute repo_config_path)
   in
   let config =
-    Config_file.apply_overrides ~from:None ~config ~overrides:config_overrides
+    Config_file.apply_overrides
+      ~from:None
+      ~config
+      ~overrides:command_line_overrides
   in
   process_untrusted_mode config;
   let version =
     Config_file.parse_version (Config_file.Getters.string_opt "version" config)
   in
   let local_config =
-    ServerLocalConfig.load ~silent ~current_version:version config_overrides
+    let current_rolled_out_flag_idx =
+      int_
+        "current_saved_state_rollout_flag_index"
+        ~default:Int.min_value
+        config
+    in
+    let deactivate_saved_state_rollout =
+      bool_ "deactivate_saved_state_rollout" ~default:false config
+    in
+    ServerLocalConfig.load
+      ~silent
+      ~current_version:version
+      ~current_rolled_out_flag_idx
+      ~deactivate_saved_state_rollout
+      command_line_overrides
   in
   let local_config =
     if Option.is_some (ServerArgs.ai_mode options) then
@@ -298,208 +461,63 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   let warn_on_non_opt_build =
     bool_ "warn_on_non_opt_build" ~default:false config
   in
+  let ide_fall_back_to_full_index =
+    bool_ "ide_fall_back_to_full_index" ~default:true config
+  in
+  let ide_process_changes_sync =
+    bool_ "ide_process_changes_sync" ~default:false config
+  in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
       ~f:maybe_relative_path
   in
   let global_opts =
-    GlobalOptions.make
-      ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
-      ?tco_num_local_workers:local_config.num_local_workers
-      ~tco_parallel_type_checking_threshold:
-        local_config.parallel_type_checking_threshold
-      ?tco_max_typechecker_worker_memory_mb:
-        local_config.max_typechecker_worker_memory_mb
-      ?tco_defer_class_declaration_threshold:
-        local_config.defer_class_declaration_threshold
-      ?tco_prefetch_deferred_files:(Some local_config.prefetch_deferred_files)
-      ?tco_remote_type_check_threshold:
-        ServerLocalConfig.RemoteTypeCheck.(
-          local_config.remote_type_check.recheck_threshold)
-      ?tco_remote_type_check:
-        ServerLocalConfig.RemoteTypeCheck.(
-          Some local_config.remote_type_check.enabled)
-      ?tco_remote_worker_key:local_config.remote_worker_key
-      ?tco_remote_check_id:local_config.remote_check_id
-      ?tco_remote_max_batch_size:
-        ServerLocalConfig.RemoteTypeCheck.(
-          Some local_config.remote_type_check.max_batch_size)
-      ?tco_remote_min_batch_size:
-        ServerLocalConfig.RemoteTypeCheck.(
-          Some local_config.remote_type_check.min_batch_size)
-      ?tco_num_remote_workers:
-        ServerLocalConfig.RemoteTypeCheck.(
-          Some local_config.remote_type_check.num_workers)
-      ?so_remote_version_specifier:local_config.remote_version_specifier
-      ?so_remote_worker_vfs_checkout_threshold:
-        ServerLocalConfig.RemoteTypeCheck.(
-          Some local_config.remote_type_check.worker_vfs_checkout_threshold)
-      ?so_naming_sqlite_path:local_config.naming_sqlite_path
-      ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
-      ?tco_timeout:(int_opt "timeout" config)
-      ?tco_disallow_invalid_arraykey:
-        (bool_opt "disallow_invalid_arraykey" config)
-      ?tco_disallow_byref_dynamic_calls:
-        (bool_opt "disallow_byref_dynamic_calls" config)
-      ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
-      ?po_disable_lval_as_an_expression:
-        (bool_opt "disable_lval_as_an_expression" config)
-      ~allowed_fixme_codes_strict:
-        (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
-      ~allowed_fixme_codes_partial:
-        (prepare_iset config "allowed_fixme_codes_partial" ISet.empty)
-      ~codes_not_raised_partial:
-        (prepare_iset config "codes_not_raised_partial" ISet.empty)
-      ~po_auto_namespace_map:(prepare_auto_namespace_map config)
-      ~tco_experimental_features:(config_experimental_tc_features config)
-      ~tco_log_inference_constraints:
-        (ServerArgs.log_inference_constraints options)
-      ~tco_migration_flags:(config_tc_migration_flags config)
-      ~tco_shallow_class_decl:local_config.ServerLocalConfig.shallow_class_decl
-      ~tco_force_shallow_decl_fanout:
-        local_config.ServerLocalConfig.force_shallow_decl_fanout
-      ~tco_force_load_hot_shallow_decls:
-        local_config.ServerLocalConfig.force_load_hot_shallow_decls
-      ~tco_fetch_remote_old_decls:
-        local_config.ServerLocalConfig.fetch_remote_old_decls
-      ~tco_populate_member_heaps:
-        local_config.ServerLocalConfig.populate_member_heaps
-      ~tco_skip_hierarchy_checks:
-        local_config.ServerLocalConfig.skip_hierarchy_checks
-      ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
-      ~po_allow_unstable_features:
-        local_config.ServerLocalConfig.allow_unstable_features
-      ?tco_like_type_hints:(bool_opt "like_type_hints" config)
-      ?tco_union_intersection_type_hints:
-        (bool_opt "union_intersection_type_hints" config)
-      ?tco_coeffects:(bool_opt "call_coeffects" config)
-      ?tco_coeffects_local:(bool_opt "local_coeffects" config)
-      ?tco_like_casts:(bool_opt "like_casts" config)
-      ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
-      ?tco_complex_coercion:(bool_opt "complex_coercion" config)
-      ~error_codes_treated_strictly:
-        (prepare_error_codes_treated_strictly config)
-      ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
-      ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
-      ?tco_disallow_unresolved_type_variables:
-        (bool_opt "disallow_unresolved_type_variables" config)
-      ?po_enable_class_level_where_clauses:
-        (bool_opt "class_level_where_clauses" config)
-      ?po_disable_legacy_soft_typehints:
-        (bool_opt "disable_legacy_soft_typehints" config)
-      ?po_disallow_toplevel_requires:
-        (bool_opt "disallow_toplevel_requires" config)
-      ~po_allowed_decl_fixme_codes:(prepare_allowed_decl_fixme_codes config)
-      ?po_allow_new_attribute_syntax:
-        (bool_opt "allow_new_attribute_syntax" config)
-      ?po_disable_legacy_attribute_syntax:
-        (bool_opt "disable_legacy_attribute_syntax" config)
-      ?tco_const_attribute:(bool_opt "const_attribute" config)
-      ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
-      ?po_const_default_lambda_args:
-        (bool_opt "const_default_lambda_args" config)
-      ?po_disallow_silence:(bool_opt "disallow_silence" config)
-      ?tco_global_inference:(bool_opt "global_inference" config)
-      ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)
-      ?tco_const_static_props:(bool_opt "const_static_props" config)
-      ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
-      ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
-      ?tco_check_attribute_locations:
-        (bool_opt "check_attribute_locations" config)
-      ?glean_service:(string_opt "glean_service" config)
-      ?glean_hostname:(string_opt "glean_hostname" config)
-      ?glean_port:(int_opt "glean_port" config)
-      ?glean_reponame:(string_opt "glean_reponame" config)
-      ?symbol_write_ownership:(bool_opt "symbol_write_ownership" config)
-      ?symbol_write_root_path:(string_opt "symbol_write_root_path" config)
-      ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
-      ?symbol_write_ignore_paths:
-        (string_list_opt "symbol_write_ignore_paths" config)
-      ?symbol_write_index_paths:
-        (string_list_opt "symbol_write_index_paths" config)
-      ?symbol_write_index_paths_file:
-        (string_opt "symbol_write_index_paths_file" config)
-      ?symbol_write_index_paths_file_output:
-        (string_opt "symbol_write_index_paths_file_output" config)
-      ?symbol_write_include_hhi:(bool_opt "symbol_write_include_hhi" config)
-      ?po_disallow_func_ptrs_in_constants:
-        (bool_opt "disallow_func_ptrs_in_constants" config)
-      ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
-      ?tco_disallow_discarded_nullable_awaitables:
-        (bool_opt "disallow_discarded_nullable_awaitables" config)
-      ?po_disable_xhp_element_mangling:
-        (bool_opt "disable_xhp_element_mangling" config)
-      ?po_disable_xhp_children_declarations:
-        (bool_opt "disable_xhp_children_declarations" config)
-      ?po_enable_xhp_class_modifier:
-        (bool_opt "enable_xhp_class_modifier" config)
-      ?po_disable_hh_ignore_error:(bool_opt "disable_hh_ignore_error" config)
-      ?tco_method_call_inference:(bool_opt "method_call_inference" config)
-      ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
-      ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
-      ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
-      ?tco_enable_modules:(bool_opt "enable_modules" config)
-      ?po_disallow_fun_and_cls_meth_pseudo_funcs:
-        (bool_opt "disallow_fun_and_cls_meth_pseudo_funcs" config)
-      ?po_disallow_inst_meth:(bool_opt "disallow_inst_meth" config)
-      ~tco_use_direct_decl_parser:
-        local_config.ServerLocalConfig.use_direct_decl_parser
-      ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
-      ~tco_global_write_check_enabled:
-        (ServerArgs.enable_global_write_check options)
-      ~tco_global_write_check_functions_enabled:
-        (ServerArgs.enable_global_write_check_functions options)
-      ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
-      ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
-      ?po_interpret_soft_types_as_like_types:
-        (bool_opt "interpret_soft_types_as_like_types" config)
-      ?tco_enable_strict_string_concat_interp:
-        (bool_opt "enable_strict_string_concat_interp" config)
-      ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
-      ?tco_allowed_expression_tree_visitors:
-        (Option.map
-           (string_list_opt "allowed_expression_tree_visitors" config)
-           ~f:(fun l -> List.map l ~f:Utils.add_ns))
-      ?tco_math_new_code:(bool_opt "math_new_code" config)
-      ?tco_typeconst_concrete_concrete_error:
-        (bool_opt "typeconst_concrete_concrete_error" config)
-      ?tco_enable_strict_const_semantics:
-        (bool_opt "enable_strict_const_semantics" config)
-      ?tco_meth_caller_only_public_visibility:
-        (bool_opt "meth_caller_only_public_visibility" config)
-      ?tco_require_extends_implements_ancestors:
-        (bool_opt "require_extends_implements_ancestors" config)
-      ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
-      ?tco_enforce_sealed_subclasses:
-        (bool_opt "enforce_sealed_subclasses" config)
-      ?tco_everything_sdt:(bool_opt "everything_sdt" config)
-      ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
-      ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
-      ?tco_explicit_consistent_constructors:
-        (int_opt "explicit_consistent_constructors" config)
-      ?tco_require_types_class_consts:
-        (int_opt "require_types_tco_require_types_class_consts" config)
-      ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
-      ?tco_enable_systemlib_annotations:
-        (bool_opt "enable_systemlib_annotations" config)
-      ?tco_saved_state_manifold_api_key:
-        (Some local_config.ServerLocalConfig.saved_state_manifold_api_key)
-      ~tco_log_saved_state_age_and_distance:
-        local_config.ServerLocalConfig.log_saved_state_age_and_distance
-      ~log_levels:(prepare_log_levels config)
-      ()
+    let local_config_opts =
+      GlobalOptions.set
+        ~tco_remote_type_check_threshold:
+          ServerLocalConfig.RemoteTypeCheck.(
+            local_config.remote_type_check.remote_type_check_recheck_threshold)
+        ?tco_remote_type_check:
+          ServerLocalConfig.RemoteTypeCheck.(
+            Some local_config.remote_type_check.enabled)
+        ?tco_remote_worker_key:local_config.remote_worker_key
+        ?tco_remote_check_id:local_config.remote_check_id
+        ?tco_num_remote_workers:
+          ServerLocalConfig.RemoteTypeCheck.(
+            Some local_config.remote_type_check.num_workers)
+        ?so_remote_version_specifier:local_config.remote_version_specifier
+        ?so_naming_sqlite_path:local_config.naming_sqlite_path
+        ?tco_log_large_fanouts_threshold:
+          local_config.log_large_fanouts_threshold
+        ~tco_remote_old_decls_no_limit:
+          local_config.ServerLocalConfig.remote_old_decls_no_limit
+        ~tco_fetch_remote_old_decls:
+          local_config.ServerLocalConfig.fetch_remote_old_decls
+        ~tco_populate_member_heaps:
+          local_config.ServerLocalConfig.populate_member_heaps
+        ~tco_skip_hierarchy_checks:
+          local_config.ServerLocalConfig.skip_hierarchy_checks
+        ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
+        ~po_allow_unstable_features:
+          local_config.ServerLocalConfig.allow_unstable_features
+        ~tco_saved_state:local_config.ServerLocalConfig.saved_state
+        ~tco_rust_elab:local_config.ServerLocalConfig.rust_elab
+        ~tco_log_inference_constraints:
+          (ServerArgs.log_inference_constraints options)
+        ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
+        ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
+        ~tco_global_access_check_enabled:
+          (ServerArgs.enable_global_access_check options)
+        GlobalOptions.default
+    in
+    load_config config local_config_opts
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial global_opts;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial global_opts;
-  Errors.error_codes_treated_strictly :=
-    GlobalOptions.error_codes_treated_strictly global_opts;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason global_opts;
+    TypecheckerOptions.report_pos_from_reason global_opts;
+  Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;
   ( {
       version;
       load_script_timeout;
@@ -514,6 +532,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ignored_paths;
       extra_paths;
       warn_on_non_opt_build;
+      ide_fall_back_to_full_index;
+      ide_process_changes_sync;
     },
     local_config )
 
@@ -533,6 +553,8 @@ let default_config =
     ignored_paths = [];
     extra_paths = [];
     warn_on_non_opt_build = false;
+    ide_fall_back_to_full_index = false;
+    ide_process_changes_sync = false;
   }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -567,3 +589,7 @@ let extra_paths config = config.extra_paths
 let version config = config.version
 
 let warn_on_non_opt_build config = config.warn_on_non_opt_build
+
+let ide_fall_back_to_full_index config = config.ide_fall_back_to_full_index
+
+let ide_process_changes_sync config = config.ide_process_changes_sync

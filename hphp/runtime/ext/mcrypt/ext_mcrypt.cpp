@@ -426,7 +426,7 @@ Variant HHVM_FUNCTION(mcrypt_cbc, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cbc() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, (int)mode.toInt64(),
                              "mcrypt_cbc");
 }
 
@@ -435,7 +435,7 @@ Variant HHVM_FUNCTION(mcrypt_cfb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cfb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, (int)mode.toInt64(),
                              "mcrypt_cfb");
 }
 
@@ -444,7 +444,7 @@ Variant HHVM_FUNCTION(mcrypt_ecb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ecb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, (int)mode.toInt64(),
                              "mcrypt_ecb");
 }
 
@@ -453,7 +453,7 @@ Variant HHVM_FUNCTION(mcrypt_ofb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ofb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, (int)mode.toInt64(),
                              "mcrypt_ofb");
 }
 

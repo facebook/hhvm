@@ -157,7 +157,10 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
-  tc::createSrcRec(sk, liveSpOff());
+  if (tc::createSrcRec(sk, liveSpOff()) == nullptr) {
+    // ran out of TC space
+    return TranslationResult::failForProcess();
+  }
 
   if (auto const tca = tc::findSrcRec(sk)->getTopTranslation()) {
     // Handle extremely unlikely race; someone may have just added the first
@@ -190,13 +193,14 @@ JitResumeAddr getFuncEntry(const Func* func) {
     return JitResumeAddr::transFuncEntry(addr);
   }
 
-  if (func->numRequiredParams() != func->numNonVariadicParams()) {
+  auto const numParams = func->numNonVariadicParams();
+  if (func->numRequiredParams() != numParams) {
     const_cast<Func*>(func)
       ->setFuncEntry(tc::ustubs().resumeHelperFuncEntryFromTC);
     return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
   }
 
-  SrcKey sk{func, 0, SrcKey::FuncEntryTag{}};
+  SrcKey sk{func, numParams, SrcKey::FuncEntryTag{}};
   auto const trans = getTranslation(sk);
 
   if (auto const addr = trans.addr()) {
@@ -257,6 +261,15 @@ void syncRegs(SBInvOffset spOff) noexcept {
 
 }
 
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+                       uint32_t numNonVariadicParams) noexcept {
+  // JIT may optimize away uninit writes for default arguments. Write them, as
+  // we may inspect them or continue execution in the interpreter.
+  for (auto param = numEntryArgs; param < numNonVariadicParams; ++param) {
+    tvWriteUninit(frame_local(fp, param));
+  }
+}
+
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   syncRegs(spOff);
   FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
@@ -265,12 +278,13 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   return resume(sk, getTranslation(sk));
 }
 
-TCA handleTranslateFuncEntry(Offset bcOff) noexcept {
+TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleTranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   return resume(sk, getTranslation(sk));
 }
 
@@ -286,24 +300,26 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateFuncEntry(Offset bcOff) noexcept {
+TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
   INC_TPC(retranslate);
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const context = getContext(sk, tc::profileFunc(sk.func()));
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateOpt(Offset bcOff) noexcept {
+TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const translated = mcgen::retranslateOpt(sk.funcID());
   vmpc() = sk.advanced().pc();
   regState() = VMRegState::DIRTY;
@@ -401,7 +417,15 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   auto sk = liveSK();
   if (flags.m_funcEntry) {
     assertx(sk.resumeMode() == ResumeMode::None);
-    sk = SrcKey { sk.func(), sk.offset(), SrcKey::FuncEntryTag {} };
+    auto const func = sk.func();
+    auto numArgs = func->numNonVariadicParams();
+    while (numArgs > 0 && !frame_local(vmfp(), numArgs - 1)->is_init()) {
+      --numArgs;
+    }
+    DEBUG_ONLY auto const entryOffset = sk.offset();
+    sk = SrcKey { sk.func(), numArgs, SrcKey::FuncEntryTag {} };
+    assertx(sk.entryOffset() == entryOffset);
+
     vmsp() = Stack::frameStackBase(vmfp());
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));

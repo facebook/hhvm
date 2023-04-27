@@ -21,9 +21,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
+inline NamedType::NamedType(NamedType&& ne) noexcept
   : m_cachedClass(ne.m_cachedClass)
-  , m_cachedFunc(ne.m_cachedFunc)
   // Since cached type alias and cached reified generics are a union
   // the following line will set them both
   , m_cachedTypeAlias(ne.m_cachedTypeAlias)
@@ -31,27 +30,33 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   m_clsList = ne.m_clsList;
 }
 
-inline Func* NamedEntity::getCachedFunc() const {
-  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
-    ? *m_cachedFunc
-    : nullptr;
-}
-
-inline Class* NamedEntity::getCachedClass() const {
+inline Class* NamedType::getCachedClass() const {
   return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
     ? *m_cachedClass
     : nullptr;
 }
 
-inline ArrayData* NamedEntity::getCachedReifiedGenerics() const {
+inline ArrayData* NamedType::getCachedReifiedGenerics() const {
   return LIKELY(m_cachedReifiedGenerics.bound() &&
                 m_cachedReifiedGenerics.isInit())
     ? *m_cachedReifiedGenerics
     : nullptr;
 }
 
-inline Class* NamedEntity::clsList() const {
+inline Class* NamedType::clsList() const {
   return m_clsList;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline NamedFunc::NamedFunc(NamedFunc&& ne) noexcept
+  : m_cachedFunc(ne.m_cachedFunc)
+{}
+
+inline Func* NamedFunc::getCachedFunc() const {
+  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
+    ? *m_cachedFunc
+    : nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,12 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use log::info;
-
 use std::collections::HashSet;
 use std::ffi::OsString;
 
-use depgraph::reader::{Dep, DepGraphOpener};
+use depgraph_reader::DepGraph;
+use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 fn main(dep_graph: OsString) {
@@ -16,8 +15,7 @@ fn main(dep_graph: OsString) {
     );
 
     info!("Opening dependency graph at {:?}", dep_graph);
-    let opener = DepGraphOpener::from_path(&dep_graph).unwrap();
-    let depgraph = opener.open().unwrap();
+    let depgraph = DepGraph::from_path(&dep_graph).unwrap();
 
     info!("Validating integrity of dependency graph");
     depgraph.validate_hash_lists().unwrap();
@@ -28,20 +26,19 @@ fn main(dep_graph: OsString) {
         "Gathering hash list stats for {} unique hashes",
         num_unique_hashes
     );
-    let mut all_hash_list_pointers = HashSet::new();
+    let mut all_hash_list_ids = HashSet::new();
     let mut num_total_edges = 0;
     let mut num_stored_edges = 0;
-    for &hash in depgraph.all_hashes().iter() {
-        if let Some(hash_list) = depgraph.hash_list_for(Dep::new(hash)) {
-            let hash_indices = hash_list.hash_indices();
-            num_total_edges += hash_list.len();
-            let indices_pointer = hash_indices.as_ptr();
-            if all_hash_list_pointers.insert(indices_pointer) {
-                num_stored_edges += hash_list.len();
-            };
+    for hash in depgraph.all_hashes() {
+        if let Some(hash_list_id) = depgraph.hash_list_id_for_dep(hash) {
+            let num_hash_indices = depgraph.hash_list_for_id(hash_list_id).len() as u64;
+            num_total_edges += num_hash_indices;
+            if all_hash_list_ids.insert(hash_list_id) {
+                num_stored_edges += num_hash_indices;
+            }
         }
     }
-    let num_unique_hash_lists = all_hash_list_pointers.len();
+    let num_unique_hash_lists = all_hash_list_ids.len();
 
     let obj = json::object! {
         unique_hashes: num_unique_hashes,

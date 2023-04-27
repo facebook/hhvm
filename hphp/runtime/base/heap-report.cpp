@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/container-functions.h"
 
 TRACE_SET_MOD(heapreport);
@@ -78,6 +77,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
     case HeaderKind::Vector:

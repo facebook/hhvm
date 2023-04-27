@@ -25,7 +25,57 @@ namespace HH\FIXME;
  * help you, and future changes will be less scary.
  *
  * `UNSAFE_CAST` is still better than `HH_FIXME`, because `HH_FIXME`
- * applies the entire next line, and `UNSAFE_CAST` applies to a single
+ * applies to the entire next line, and `UNSAFE_CAST` applies to a single
  * expression.
  */
-function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\FormatString<nothing> $msg = null)[]: Tout;
+function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(
+  Tin $t,
+  ?\HH\FormatString<nothing> $msg = null,
+)[]: Tout;
+
+/**
+ * `UNSAFE_NONNULL_CAST` allows you to lie to the type checker and
+ * pretend that a value is never `null`. **This is almost always a bad
+ * idea**. It can lead to exceptions that the type checker would have
+ * prevented.
+ *
+ * If you're sure a value is never null, use `$my_value as nonnull`. The
+ * type checker understands this, and the runtime checks the value.
+ *
+ * If you're not sure whether a value is null, check for null first.
+ *
+ * ```
+ * if ($my_value is null) { ... } else { ... }
+ * ```
+ */
+function UNSAFE_NONNULL_CAST<T as nonnull>(
+  ?T $t,
+  ?\HH\FormatString<nothing> $msg = null,
+)[]: T;
+
+/* Acts as Tany under current semantics, and T under sound dynamic */
+type TANY_MARKER<+T> = T;
+/* Acts as T under current semantics, and ~T under sound dynamic */
+type POISON_MARKER<+T> = T;
+/* Acts as T under current semantics, and supportdyn<T> under sound dynamic */
+type SUPPORTDYN_MARKER<+T> = T;
+
+/**
+ * We haven't written the type for every property in the codebase yet.
+ * Properties which are missing their types have this placeholder instead.
+ */
+type MISSING_PROP_TYPE = TANY_MARKER<dynamic>;
+
+/**
+ * We haven't written the type for every parameter to every function in the
+ * codebase yet. Function parameters which are missing their types have this
+ * placeholder instead.
+ */
+type MISSING_PARAM_TYPE = mixed;
+
+/**
+ * We haven't written the return type for every function in the codebase yet.
+ * Functions which are still missing return types have this placeholder
+ * instead.
+ */
+type MISSING_RETURN_TYPE = TANY_MARKER<dynamic>;

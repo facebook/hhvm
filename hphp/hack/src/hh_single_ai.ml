@@ -13,8 +13,6 @@ open Hh_prelude
 (* Types, constants *)
 (*****************************************************************************)
 
-type mode = Ai of Ai_options.t
-
 type options = {
   files: string list;
   extra_builtins: string list;
@@ -71,7 +69,8 @@ let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
     | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Errors.to_string e)
+    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
+    | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
   let absolute_errors =
@@ -92,7 +91,11 @@ let parse_options () =
   let no_builtins = ref false in
   let ai_options = ref None in
   let set_ai_options x =
-    ai_options := Some (Ai_options.prepare ~server:false x)
+    let options = Ai_options.prepare ~server:false x in
+    match !ai_options with
+    | None -> ai_options := Some options
+    | Some existing ->
+      ai_options := Some (Ai_options.merge_for_unit_tests existing options)
   in
   let error_format = ref Errors.Highlighted in
   let check_xhp_attribute = ref false in
@@ -100,8 +103,8 @@ let parse_options () =
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let allowed_fixme_codes_strict = ref None in
+  let disable_hh_ignore_error = ref 0 in
   let allowed_decl_fixme_codes = ref None in
-  let enable_enum_supertyping = ref false in
   let options =
     [
       ( "--extra-builtin",
@@ -115,10 +118,12 @@ let parse_options () =
           (fun s ->
             match s with
             | "raw" -> error_format := Errors.Raw
+            | "plain" -> error_format := Errors.Plain
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
+        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+      );
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
@@ -137,13 +142,14 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in strict mode." );
+      ( "--disable-hh-ignore-error",
+        Arg.Int (( := ) disable_hh_ignore_error),
+        " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
+      );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in declarations." );
-      ( "--enable-enum-supertyping",
-        Arg.Set enable_enum_supertyping,
-        "Enable the enum supertyping extension." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -158,26 +164,23 @@ let parse_options () =
 
   let root = Path.make "/" (* if none specified, we use this dummy *) in
   let tcopt =
-    GlobalOptions.make
+    GlobalOptions.set
+      ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
+      ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
-      ~po_enable_enum_supertyping:!enable_enum_supertyping
-      ()
+      GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial tcopt;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason tcopt;
+    TypecheckerOptions.report_pos_from_reason tcopt;
   ( {
       files = fns;
       extra_builtins = !extra_builtins;
@@ -191,8 +194,9 @@ let parse_options () =
     SharedMem.default_config )
 
 let parse_and_name ctx files_contents =
-  let parsed_files =
-    Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+  Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+      (* Get parse errors *)
+      let _ =
         Errors.run_in_context fn Errors.Parsing (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
@@ -206,40 +210,20 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast }))
-  in
-  let files_info =
-    Relative_path.Map.mapi
-      ~f:
-        begin
-          fun _fn parsed_file ->
-          let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
-          (* If the feature is turned on, deregister functions with attribute
-             __PHPStdLib. This does it for all functions, not just hhi files *)
-          let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
-          {
-            FileInfo.file_mode;
-            funs;
-            classes;
-            typedefs;
-            consts;
-            modules;
-            comments = Some comments;
-            hash = None;
-          }
-        end
-      parsed_files
-  in
-  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-      let (errors, _failed_naming_fns) =
-        Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+            { parsed_file with Parser_return.ast })
       in
-      Errors.merge_into_current errors);
-  (parsed_files, files_info)
+      match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
+      | None -> failwith "no file contents"
+      | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
 
 let parse_name_and_skip_decl ctx files_contents =
   Errors.do_ (fun () ->
-      let (_parsed_files, files_info) = parse_and_name ctx files_contents in
+      let files_info = parse_and_name ctx files_contents in
+      Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
+          let (errors, _failed_naming_fns) =
+            Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+          in
+          Errors.merge_into_current errors);
       files_info)
 
 let handle_mode ai_options ctx files_info parse_errors error_format =
@@ -330,8 +314,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in
@@ -372,6 +355,7 @@ let main_hack
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
 
+  let () = FlashSharedMem.pre_init None in
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in

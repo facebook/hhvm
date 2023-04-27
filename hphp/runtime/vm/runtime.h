@@ -85,6 +85,16 @@ void raiseCoeffectsCallViolation(const Func* callee,
 void raiseCoeffectsFunParamTypeViolation(TypedValue, int32_t);
 void raiseCoeffectsFunParamCoeffectRulesViolation(const Func*);
 
+void raiseModuleBoundaryViolation(const Class* ctx,
+                                  const Func* callee,
+                                  const StringData* callerModule);
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const StringData* callerModule);
+
+void raiseModulePropertyViolation(const Class* cls, const StringData* prop, const StringData* callerModule, bool is_static);
+
+void raiseImplicitContextStateInvalidDispatch(const Func*);
+
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

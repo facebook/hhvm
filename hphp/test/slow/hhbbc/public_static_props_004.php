@@ -1,11 +1,11 @@
 <?hh
 
 class B {
-  static $x = 'ok';
+  public static $x = 'ok';
 }
 
 final class Y extends B { // nooverride
-  static $x = 2;
+  public static $x = 2;
 }
 
 function set(Y $y) {

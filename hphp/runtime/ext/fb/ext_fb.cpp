@@ -48,6 +48,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
+#include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/zend/zend-string.h"
 
@@ -1100,7 +1101,7 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
   if (start < 0 || length < 0) {
     // Get number of code points assuming we substitute invalid sequences.
     Variant utf8StrlenResult = HHVM_FN(fb_utf8_strlen)(str);
-    int32_t sourceNumCodePoints = utf8StrlenResult.toInt32();
+    auto sourceNumCodePoints = (int)utf8StrlenResult.toInt64();
 
     if (start < 0) {
       // Negative means first character is start'th code point from end.
@@ -1256,7 +1257,7 @@ Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return false;
   }
-  return do_lazy_stat(StatCache::lstat, filename);
+  return do_lazy_stat(lstatSyscall, filename);
 }
 
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
@@ -1264,7 +1265,7 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
     return false;
   }
 
-  return StatCache::realpath(filename.c_str());
+  return realpathLibc(filename.c_str());
 }
 
 int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str) {
@@ -1311,10 +1312,78 @@ int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// xbox APIs
 
-EXTERNALLY_VISIBLE
-void const_load() {
-  // TODO(8117903): Unused; remove after updating www side.
+namespace {
+
+Array fb_call_user_func_message(const String& initialDoc,
+                                const Variant& function,
+                                const Array& _argv) {
+  if (function.isArray()) {
+    Array farr = function.toArray();
+    if (!array_is_valid_callback(farr)) {
+      raise_warning("function must be a valid callback");
+      return Array();
+    }
+  } else if (!function.isString() && !function.isFunc() &&
+             !function.isClsMeth()) {
+    raise_warning("function must be a valid callback");
+    return Array();
+  }
+  if (initialDoc.empty()) {
+    raise_warning("initialDoc must be a non-empty string");
+    return Array();
+  }
+
+  Array msg;
+  msg.append(function);
+  msg.append(_argv);
+
+  return msg;
+}
+
+Variant HHVM_FUNCTION(fb_call_user_func_array_async, const String& initialDoc,
+                      const Variant& function, const Array& params) {
+  Array msg = fb_call_user_func_message(initialDoc, function, params);
+  if (msg.empty()) {
+    return init_null();
+  }
+  return XboxServer::TaskStart(internal_serialize(msg), initialDoc);
+}
+
+Variant HHVM_FUNCTION(fb_check_user_func_async, const Resource& handle) {
+  return XboxServer::TaskStatus(handle);
+}
+
+Variant HHVM_FUNCTION(fb_end_user_func_async, const Resource& handle) {
+  Variant ret;
+  int code = XboxServer::TaskResult(handle, 0, &ret);
+  if (code != 200) {
+    SystemLib::throwExceptionObject(ret);
+  }
+  return ret;
+}
+
+Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
+                      const Variant& function, const Array& _argv) {
+  Array msg = fb_call_user_func_message(initialDoc, function, _argv);
+  if (msg.empty()) {
+    return init_null();
+  }
+
+  ServerTaskEvent<XboxServer, XboxTransport> *event;
+  event = new ServerTaskEvent<XboxServer, XboxTransport>();
+
+  try {
+    XboxServer::TaskStart(internal_serialize(msg), initialDoc, event);
+  } catch (...) {
+    event->abandon();
+    throw;
+  }
+
+  return Variant{event->getWaitHandle()};
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1364,6 +1433,11 @@ struct FBExtension : Extension {
     HHVM_FALIAS(HH\\non_crypto_md5_lower, HH_non_crypto_md5_lower);
     HHVM_FALIAS(HH\\int_mul_overflow, HH_int_mul_overflow);
     HHVM_FALIAS(HH\\int_mul_add_overflow, HH_int_mul_add_overflow);
+
+    HHVM_FE(fb_call_user_func_array_async);
+    HHVM_FE(fb_check_user_func_async);
+    HHVM_FE(fb_end_user_func_async);
+    HHVM_FE(fb_gen_user_func_array);
 
     loadSystemlib();
   }

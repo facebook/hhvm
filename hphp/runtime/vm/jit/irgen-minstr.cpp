@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-arith.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -38,6 +39,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/module.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -79,7 +81,7 @@ struct PropInfo {
            Type knownType,
            const HPHP::TypeConstraint* typeConstraint,
            const UpperBoundVec* ubs,
-           const Class* objClass,
+           const Class::Prop* objProp,
            const Class* propClass)
     : slot{slot}
     , index{index}
@@ -90,7 +92,7 @@ struct PropInfo {
     , knownType{std::move(knownType)}
     , typeConstraint{typeConstraint}
     , ubs{ubs}
-    , objClass{objClass}
+    , objProp{objProp}
     , propClass{propClass}
   {}
 
@@ -103,8 +105,9 @@ struct PropInfo {
   Type knownType{TCell};
   const HPHP::TypeConstraint* typeConstraint{nullptr};
   const UpperBoundVec* ubs{nullptr};
-  const Class* objClass{nullptr};
+  const Class::Prop* objProp{nullptr};
   const Class* propClass{nullptr};
+
 };
 
 Type knownTypeForProp(const Class::Prop& prop,
@@ -149,6 +152,7 @@ getPropertyOffset(IRGS& env,
   auto const name = keyType.strVal();
 
   auto const ctx = curClass(env);
+  auto const moduleName = curUnit(env)->moduleName();
 
   // We need to check that baseClass cannot change between requests.
   if (!(baseClass->preClass()->attrs() & AttrUnique)) {
@@ -166,9 +170,10 @@ getPropertyOffset(IRGS& env,
       }
     }
   }
+  auto const propCtx = MemberLookupContext(ctx, moduleName);
 
   // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropSlot(ctx, name);
+  auto const lookup = baseClass->getDeclPropSlot(propCtx, name);
   auto const slot = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
@@ -199,7 +204,7 @@ getPropertyOffset(IRGS& env,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
     &prop.typeConstraint,
     &prop.ubs,
-    baseClass,
+    &prop,
     prop.cls
   );
 }
@@ -221,7 +226,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   // If the property name is known, try to look it up and get its RAT.
   if (key->hasConstVal(TStr)) {
     auto const keyStr = key->strVal();
-    auto const ctx = curClass(env);
+    auto const ctx = MemberLookupContext(curClass(env), curUnit(env)->moduleName());
     auto const lookup = cls->getDeclPropSlot(ctx, keyStr);
     if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;
@@ -298,20 +303,6 @@ SSATmp* ptrToUninit(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * This is called in a few places to be consistent with old minstrs, and should
- * be revisited once they're gone. It probably doesn't make sense to always
- * guard on an object class when we have one.
- */
-void specializeObjBase(IRGS& env, SSATmp* base) {
-  if (base && base->isA(TObj) && base->type().clsSpec().cls()) {
-    env.irb->constrainValue(
-      base, GuardConstraint(base->type().clsSpec().cls()));
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
 Optional<PropInfo>
@@ -321,7 +312,8 @@ getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   auto const baseCls = base->type().clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (!info) return info;
-  specializeObjBase(env, base);
+
+  env.irb->constrainValue(base, GuardConstraint(info->propClass));
   return info;
 }
 
@@ -335,7 +327,7 @@ SSATmp* emitPropSpecialized(
   assertx(base->isA(TObj));
 
   assertx(IMPLIES(propInfo.lateInitCheck, propInfo.lateInit));
-
+  emitModuleBoundaryCheckKnown(env, propInfo.objProp);
   if (!propInfo.lateInitCheck &&
       (propInfo.lateInit ||
        mode != MOpMode::Warn ||
@@ -1203,7 +1195,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);
     gen(env, IncRef, newVal);
     gen(env, StMem, propPtr, newVal);
-    decRef(env, oldVal, DecRefProfileId::Default);
+    decRef(env, oldVal);
   } else {
     gen(
       env,
@@ -1317,9 +1309,6 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
 void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
                        Type baseType, SSATmp* value) {
   assertx(baseType <= TVec);
-  auto const maybeCyclic = value->type().maybe(baseType);
-
-  if (maybeCyclic) gen(env, IncRef, value);
 
   static const StaticString s_ArrayCOW{"NewElemVecCOW"};
   auto const profile = TargetProfile<COWProfile>{
@@ -1355,12 +1344,13 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
     );
   }
 
-  if (!maybeCyclic) gen(env, IncRef, value);
+  gen(env, IncRef, value);
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
-  auto value = topC(env);
   auto const baseType = env.irb->fs().mbase().type;
+  auto value = topC(env, BCSPRelOffset{0},
+                    baseType <= TKeyset ? DataTypeSpecific : DataTypeGeneric);
 
   // We load the member base pointer before calling makeCatchSet() to avoid
   // mismatched in-states for any catch block edges we emit later on.
@@ -1436,7 +1426,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
-        decRef(env, value, DecRefProfileId::Default);
+        decRef(env, value);
         value = result;
       } else {
         assertx(t == (TStaticStr | TNullptr));
@@ -1484,6 +1474,13 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
 
   auto const data = IndexData { cls->propSlotToIndex(slot) };
 
+  auto const TSerializedAsAPCTypedValue =
+      TUninit | TInitNull | TBool | TInt | TDbl | TStr | TLazyCls;
+  auto const maybe_lazy = !(type <= TSerializedAsAPCTypedValue) &&
+                          cls->mayUseLazyAPCDeserialization();
+
+  if (maybe_lazy) gen(env, DeserializeLazyProp, data, obj);
+
   return taken
     ? gen(env, LdInitPropAddr, taken, data, type & TInitCell, obj)
     : gen(env, LdPropAddr, data, type, obj);
@@ -1523,7 +1520,7 @@ SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1584,7 +1581,7 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1795,9 +1792,6 @@ Optional<Type> simpleSetOpType(SetOpOp op) {
     case SetOpOp::OrEqual:
     case SetOpOp::XorEqual:    return TInt;
     case SetOpOp::ConcatEqual: return TStr;
-    case SetOpOp::PlusEqualO:
-    case SetOpOp::MinusEqualO:
-    case SetOpOp::MulEqualO:
     case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
@@ -1825,9 +1819,6 @@ SSATmp* simpleSetOpAction(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
       case SetOpOp::OrEqual:     return OrInt;
       case SetOpOp::XorEqual:    return XorInt;
       case SetOpOp::ConcatEqual: return ConcatStrStr;
-      case SetOpOp::PlusEqualO:
-      case SetOpOp::MinusEqualO:
-      case SetOpOp::MulEqualO:
       case SetOpOp::DivEqual:
       case SetOpOp::ModEqual:
       case SetOpOp::PowEqual:
@@ -2076,9 +2067,6 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return std::nullopt;
-    case SetOpOp::MinusEqualO: return std::nullopt;
-    case SetOpOp::MulEqualO:   return std::nullopt;
     case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return std::nullopt;
     case SetOpOp::ModEqual:    return std::nullopt;
@@ -2200,7 +2188,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto rhs = topC(env);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     mFinalImpl(env, nDiscard, result);
   };
   auto const result = [&] {

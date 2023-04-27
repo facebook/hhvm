@@ -298,31 +298,10 @@ void computeFrames(Vunit& unit) {
     auto const next_frame = [&] () -> int {
       auto frame = block.frame;
       for (auto& inst : block.code) {
-        auto origin = inst.origin;
         switch (inst.op) {
         case Vinstr::inlinestart: {
-          // Each inlined frame will have a single start but may have multiple
-          // ends, and so we need to propagate this state here so that it only
-          // happens once per frame.
-          for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
-            unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
-            unit.frames[f].num_inner_frames++;
-          }
-
-          auto const sbToRootSbOff =
-            unit.frames[frame].sbToRootSbOff +
-            origin->marker().bcSPOff().offset +
-            inst.inlinestart_.func->numSlotsInFrame();
-
-          unit.frames.emplace_back(
-            inst.inlinestart_.func,
-            origin->marker().bcOff(),
-            sbToRootSbOff,
-            frame,
-            inst.inlinestart_.cost,
-            block.weight
-          );
-          frame = inst.inlinestart_.id = unit.frames.size() - 1;
+          frame = inst.inlinestart_.id = unit.allocFrame(inst, frame,
+                                                         block.weight);
           pending++;
           break;
         }

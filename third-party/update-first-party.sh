@@ -23,5 +23,5 @@ while read -r MATCH; do
   wget -O "$FILE" "$URL"
   HASH="$(openssl dgst -sha256 "$FILE" | awk '{print $NF}')"
   rm "$FILE"
-  sed -i.orig -e 's/SHA[0-9]\+=[0-9a-z]\+/SHA256='"$HASH/" "$CMAKE_FILE"
+  sed -i.orig -e 's/SHA[0-9]*=[0-9a-z]*/SHA256='"$HASH/" "$CMAKE_FILE"
 done

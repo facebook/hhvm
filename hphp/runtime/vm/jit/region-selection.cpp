@@ -951,12 +951,6 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   return true;
 }
 
-const StaticString
-  s_HH_AsyncGenerator("HH\\AsyncGenerator"),
-  s_next("next"),
-  s_send("send"),
-  s_rewind("rewind");
-
 bool breaksRegion(SrcKey sk) {
   if (sk.funcEntry()) return false;
   switch (sk.op()) {
@@ -981,22 +975,6 @@ bool breaksRegion(SrcKey sk) {
       // duplicating the translation of the resumed SrcKey after the
       // Await.
       return sk.resumeMode() == ResumeMode::Async;
-
-    case Op::FCallObjMethodD: {
-      // AsyncGenerators executing in Async mode will resume after a side exit.
-      // As a result, we should break the translation here to avoid needing a
-      // live translation for the resume point.
-      auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
-      auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
-      if (sk.resumeMode() == ResumeMode::Async &&
-          cls->isame(s_HH_AsyncGenerator.get()) &&
-          (func->isame(s_send.get()) || func->isame(s_next.get()) ||
-           func->isame(s_rewind.get()))) {
-        return true;
-      }
-
-      return false;
-    }
 
     default:
       return false;
@@ -1082,12 +1060,11 @@ bool check(const RegionDesc& region, std::string& error) {
   for (auto b : region.blocks()) {
     auto bid = b->id();
     SrcKey    lastSk = region.block(bid)->last();
-    OffsetSet validSuccOffsets = lastSk.succOffsets();
-    OffsetSet succOffsets;
+    SrcKey::Set validSuccSrcKeys = lastSk.succSrcKeys();
+    SrcKey::Set succSrcKeys;
 
     for (auto succ : region.succs(bid)) {
       SrcKey succSk = region.block(succ)->start();
-      Offset succOffset = succSk.offset();
 
       // 3) All arcs involve blocks within the region.
       if (blockSet.count(succ) == 0) {
@@ -1108,18 +1085,18 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
-      if (validSuccOffsets.count(succOffset) == 0) {
+      if (validSuccSrcKeys.count(succSk) == 0) {
         return bad(folly::sformat("arc with impossible control flow: {} -> {}",
                                   bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
-      if (succOffsets.count(succOffset) > 0) {
+      if (succSrcKeys.count(succSk) > 0) {
         return bad(folly::sformat("block {} has multiple successors with SK {}",
                                   bid, show(succSk)));
       }
-      succOffsets.insert(succOffset);
+      succSrcKeys.insert(succSk);
     }
     for (auto pred : region.preds(bid)) {
       if (blockSet.count(pred) == 0) {

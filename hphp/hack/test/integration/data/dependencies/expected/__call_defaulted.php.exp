@@ -2,8 +2,8 @@
 <?hh
 
 function with_defaults(
-  int $arg = \extract_standalone_make_default(),
-  float $argf = \extract_standalone_make_default(),
+  int $arg = \EXTRACT_STANDALONE_DEFAULT,
+  float $argf = \EXTRACT_STANDALONE_DEFAULT,
 ): void {
   throw new \Exception();
 }
@@ -16,6 +16,4 @@ function call_defaulted(int $arg): void {
 //// __extract_standalone__.php
 <?hh
 
-function extract_standalone_make_default()[]: nothing {
-  throw new \Exception();
-}
+const nothing EXTRACT_STANDALONE_DEFAULT = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");

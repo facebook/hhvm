@@ -136,10 +136,7 @@ ExecutionContext::ExecutionContext()
 }
 
 namespace rds::local {
-// See header for why this is required.
-#ifndef _MSC_VER
 template<>
-#endif
 void GContextType::Base::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();
@@ -642,12 +639,8 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       RuntimeOption::PspCpuTimeoutSeconds
   );
 
-  if (RO::EvalEnableImplicitContext) {
-    // If the main request terminated with a C++ exception, we would not
-    // have cleared the implicit context since that logic is
-    // done in a PHP try-finally. Let's clear the implicit context here.
-    *ImplicitContext::activeCtx = nullptr;
-  }
+  // Implicit context should not have leaked
+  assertx(!(*ImplicitContext::activeCtx));
 
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
@@ -663,8 +656,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
         vm_call_user_func(VarNR{v}, init_null_variant,
                           RuntimeCoeffects::defaults());
         // Implicit context should not have leaked between each call
-        assertx(!RO::EvalEnableImplicitContext ||
-                !(*ImplicitContext::activeCtx));
+        assertx(!(*ImplicitContext::activeCtx));
       }
     );
     tmp.append(funcs);
@@ -769,6 +761,7 @@ const StaticString
   s_error_file("error-file"),
   s_error_line("error-line"),
   s_error_backtrace("error-backtrace"),
+  s_error_implicit_context_blame("error-implicit-context-blame"),
   s_overflow("overflow");
 
 void ExecutionContext::handleError(const std::string& msg,
@@ -842,7 +835,8 @@ void ExecutionContext::handleError(const std::string& msg,
             s_error_string, msg,
             s_error_file, std::move(fileAndLine.first),
             s_error_line, fileAndLine.second,
-            s_error_backtrace, ee.getBacktrace()
+            s_error_backtrace, ee.getBacktrace(),
+            s_error_implicit_context_blame, ImplicitContext::getBlameVectors()
           )
         );
       } else if (!deferred.empty()) {
@@ -887,7 +881,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, empty_dict_array(),
-                     backtrace),
+                     backtrace, ImplicitContext::getBlameVectors()),
                  RuntimeCoeffects::defaults()),
                 false)) {
         return true;
@@ -1044,12 +1038,14 @@ String ExecutionContext::getenv(const String& name) const {
   return String();
 }
 
-TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
+TypedValue ExecutionContext::lookupClsCns(const NamedType* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
   Class* class_ = nullptr;
   try {
-    class_ = Class::load(ne, cls);
+    // Use resolve() as opposed to load() since we want to make sure this
+    // class is accessible to us.
+    class_ = Class::resolve(ne, cls, vmfp()->func());
   } catch (Object& ex) {
     // For compatibility with php, throwing through a constant lookup has
     // different behavior inside a property initializer (86pinit/86sinit).
@@ -1184,7 +1180,6 @@ const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
 void ExecutionContext::onLoadWithOptions(
   const char* f, const RepoOptions& opts
 ) {
-  if (!RuntimeOption::EvalFatalOnParserOptionMismatch) return;
   if (!m_requestOptions) {
     m_requestOptions.emplace(opts);
     return;
@@ -1388,7 +1383,7 @@ StaticString
   s_evaluate_default_argument("evaluate_default_argument"),
   s_function_middle("() { return "),
   s_semicolon(";"),
-  s_stdclass("stdclass");
+  s_stdClass("stdClass");
 
 void ExecutionContext::requestInit() {
   assertx(SystemLib::s_unit);
@@ -1419,23 +1414,22 @@ void ExecutionContext::requestInit() {
   if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
     SystemLib::s_unit->merge();
     SystemLib::mergePersistentUnits();
-    if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
   } else {
     // System units are merge only, and everything is persistent.
     assertx(SystemLib::s_unit->isEmpty());
-    assertx(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
   }
 
-  if (RO::EvalEnableImplicitContext) *ImplicitContext::activeCtx = nullptr;
+  assertx(!ImplicitContext::activeCtx.isInit());
+  ImplicitContext::activeCtx.initWith(nullptr);
 
   profileRequestStart();
 
   HHProf::Request::StartProfiling();
 
 #ifndef NDEBUG
-  Class* cls = NamedEntity::get(s_stdclass.get())->clsList();
+  Class* cls = NamedType::get(s_stdClass.get())->clsList();
   assertx(cls);
-  assertx(cls == SystemLib::s_stdclassClass);
+  assertx(cls == SystemLib::s_stdClassClass);
 #endif
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(&m_logger_hook);
@@ -1483,6 +1477,7 @@ void ExecutionContext::requestExit() {
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
   if (!RO::RepoAuthoritative) m_requestStartForTearing.reset();
+  if (RO::EvalLogDeclDeps) m_loadedRdepMap.clear();
 }
 
 /**
@@ -1527,12 +1522,13 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
 
   ActRec* ar = vmStack().indA(numArgsInclUnpack + (hasGenerics ? 1 : 0));
+  void* ctx = thiz ? (void*)thiz : (void*)cls;
 
   // Callee checks and input initialization.
   calleeGenericsChecks(f, hasGenerics);
   calleeArgumentArityChecks(f, numArgsInclUnpack);
+  calleeArgumentTypeChecks(f, numArgsInclUnpack, ctx);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
-  void* ctx = thiz ? (void*)thiz : (void*)cls;
   calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
   f->recordCall();
   initFuncInputs(f, numArgsInclUnpack);
@@ -1573,23 +1569,37 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     popVMState();
   };
 
-  enterVM(ar, [&] {
-    exception_handler([&] {
-      enterVMAtFunc(ar, numArgsInclUnpack);
+  // If the request terminated with a C++ exception, we would not
+  // have cleared the implicit context since that logic is
+  // done in a PHP try-finally. Let's clear the implicit context here.
+  auto const prev_ic = *ImplicitContext::activeCtx;
+  try {
+    enterVM(ar, [&] {
+      exception_handler([&] {
+        enterVMAtFunc(ar, numArgsInclUnpack);
+      });
     });
-  });
 
-  if (UNLIKELY(f->takesInOutParams())) {
-    VecInit vec(f->numInOutParams() + 1);
-    for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
-      vec.append(*vmStack().topTV());
-      vmStack().popC();
+    assertx(prev_ic == *ImplicitContext::activeCtx);
+
+    if (UNLIKELY(f->takesInOutParams())) {
+      VecInit vec(f->numInOutParams() + 1);
+      for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
+        vec.append(*vmStack().topTV());
+        vmStack().popC();
+      }
+      return make_array_like_tv(vec.create());
+    } else {
+      auto const retval = *vmStack().topTV();
+      vmStack().discard();
+      return retval;
     }
-    return make_array_like_tv(vec.create());
-  } else {
-    auto const retval = *vmStack().topTV();
-    vmStack().discard();
-    return retval;
+  } catch (...) {
+    // This is an explicit try-catch-rethrow rather than a SCOPE_EXIT
+    // because std::uncaught_exceptions() is relatively expensive, and this
+    // is very hot code.
+    *ImplicitContext::activeCtx = prev_ic;
+    throw;
   }
 }
 
@@ -1714,13 +1724,11 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
 
   auto fp = resumable->actRec();
 
-  if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::activeCtx = [&] {
-      if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
-      auto gen = frame_async_generator(fp);
-      return gen->getWaitHandle()->m_implicitContext;
-    }();
-  }
+  *ImplicitContext::activeCtx = [&] {
+    if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
+    auto gen = frame_async_generator(fp);
+    return gen->getWaitHandle()->m_implicitContext;
+  }();
 
   // We don't need to check for space for the ActRec (unlike generally
   // in normal re-entry), because the ActRec isn't on the stack.
@@ -1760,13 +1768,11 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
 
   auto fp = resumable->actRec();
 
-  if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::activeCtx = [&] {
-      if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
-      auto gen = frame_async_generator(fp);
-      return gen->getWaitHandle()->m_implicitContext;
-    }();
-  }
+  *ImplicitContext::activeCtx = [&] {
+    if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
+    auto gen = frame_async_generator(fp);
+    return gen->getWaitHandle()->m_implicitContext;
+  }();
 
   checkStack(vmStack(), fp->func(), 0);
 

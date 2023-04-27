@@ -2,7 +2,7 @@
 
 class C {
   public function __construct() {
-    $fn = function () { return get_called_class(); };
+    $fn = function () { throw new Exception('not reached'); };
     $res = (new ReflectionFunction($fn))->getClosureScopeClass();
 
     var_dump(get_class($res));
@@ -10,7 +10,7 @@ class C {
   }
 
   public static function s_fn() {
-    $fn = function () { return get_called_class(); };
+    $fn = function () { throw new Exception('not reached'); };
     $res = (new ReflectionFunction($fn))->getClosureScopeClass();
 
     var_dump(get_class($res));
@@ -27,7 +27,7 @@ class D extends C {
 
 <<__EntryPoint>>
 function main_get_closure_scope_class() {
-$fn = function () { return get_called_class(); };
+$fn = function () { throw new Exception('not reached'); };
 var_dump((new ReflectionFunction($fn))->getClosureScopeClass());
 
 $c = new C;

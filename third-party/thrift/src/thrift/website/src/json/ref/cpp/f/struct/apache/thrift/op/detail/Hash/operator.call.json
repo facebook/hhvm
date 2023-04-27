@@ -1,0 +1,110 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator()",
+  "compoundname_html": "apache::thrift::op::detail::Hash::operator()",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Hash_1a142aa82ee0af88a27529eae162758271",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        },
+        {
+          "type_html": "typename Accumulator"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Hash&lt; Tag &gt;::operator()",
+      "argsstring_html": "(const T &amp;value, Accumulator &amp;accumulator) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "value"
+        },
+        {
+          "type_html": "Accumulator &amp;",
+          "declname_html": "accumulator"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Hash.h",
+        "line": "84",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Hash.h",
+        "bodystart": "84",
+        "bodyend": "86"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T, typename Accumulator&gt;\nvoid operator()(const T&amp; value, Accumulator&amp; accumulator) const",
+        "simple_raw": "template <typename T, typename Accumulator>\nvoid operator()(const T& value, Accumulator& accumulator) const",
+        "detailed_html": "template &lt;typename T, typename Accumulator&gt;\ninline void operator()(const T&amp; value, Accumulator&amp; accumulator) const",
+        "detailed_raw": "template <typename T, typename Accumulator>\ninline void operator()(const T& value, Accumulator& accumulator) const",
+        "original_definition_html": "void apache::thrift::op::detail::Hash&lt; Tag &gt;::operator()",
+        "original_argsstring_html": "(const T &amp;value, Accumulator &amp;accumulator) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Hash/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Hash/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Hash",
+      "compoundname_html": "apache::thrift::op::detail::Hash::operator()"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Hash_1a7dc149737770d8e8b0c2b2b9760bf7db",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T",
+          "defval_html": "type::native_type&lt;Tag&gt;"
+        }
+      ],
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::op::detail::Hash&lt; Tag &gt;::operator()",
+      "argsstring_html": "(const T &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Hash.h",
+        "line": "88",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Hash.h",
+        "bodystart": "88",
+        "bodyend": "93"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\nauto operator()(const T&amp; value) const",
+        "simple_raw": "template <typename T = type::native_type<Tag>>\nauto operator()(const T& value) const",
+        "detailed_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\ninline auto operator()(const T&amp; value) const",
+        "detailed_raw": "template <typename T = type::native_type<Tag>>\ninline auto operator()(const T& value) const",
+        "original_definition_html": "auto apache::thrift::op::detail::Hash&lt; Tag &gt;::operator()",
+        "original_argsstring_html": "(const T &amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Hash/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Hash/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Hash",
+      "compoundname_html": "apache::thrift::op::detail::Hash::operator()"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/Hash/operator.call",
+  "minprot": "public",
+  "displayname_html": "operator()",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Hash/operator.call",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Hash/operator.call"
+}

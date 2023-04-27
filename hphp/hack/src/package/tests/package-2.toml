@@ -1,0 +1,13 @@
+[packages]
+
+[packages.bar]
+
+[packages.foo]
+uses = [
+  "a.*",
+  # some comment
+  "b.*"
+]
+includes = [
+  "bar"
+]

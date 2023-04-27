@@ -11,8 +11,6 @@ class type ['a] decl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_terr : 'a -> Typing_reason.decl_t -> 'a
-
     method on_tmixed : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.decl_t -> 'a
@@ -63,7 +61,7 @@ class type ['a] decl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.decl_t ->
-      Typing_defs.shape_kind ->
+      Typing_defs.decl_ty ->
       Typing_defs.decl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
       'a
@@ -73,6 +71,21 @@ class type ['a] decl_type_visitor_type =
       Typing_reason.decl_t ->
       Typing_defs.decl_phase Typing_defs.taccess_type ->
       'a
+
+    method on_trefinement :
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_class_refinement ->
+      'a
+
+    method on_tnewtype :
+      'a ->
+      Typing_reason.decl_t ->
+      string ->
+      Typing_defs.decl_ty list ->
+      Typing_defs.decl_ty ->
+      'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
@@ -80,8 +93,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
 class type ['a] locl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.t -> 'a
-
-    method on_terr : 'a -> Typing_reason.t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.t -> 'a
 
@@ -133,7 +144,7 @@ class type ['a] locl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.t ->
-      Typing_defs.shape_kind ->
+      Typing_defs.locl_ty ->
       Typing_defs.locl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
       'a
@@ -145,6 +156,8 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.exact ->
       Typing_defs.locl_ty list ->
       'a
+
+    method on_class_refinement : 'a -> Typing_defs.locl_class_refinement -> 'a
 
     method on_tlist : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 
@@ -179,6 +192,22 @@ class type ['a] internal_type_visitor_type =
       'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
 
     method on_has_member : 'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
+
+    method on_thas_type_member :
+      'a -> Typing_reason.t -> Typing_defs.has_type_member -> 'a
+
+    method on_has_type_member :
+      'a -> Typing_reason.t -> Typing_defs.has_type_member -> 'a
+
+    method on_tcan_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+
+    method on_tcan_traverse :
+      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
+
+    method on_can_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+
+    method on_can_traverse :
+      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
 
     method on_tdestructure :
       'a -> Typing_reason.t -> Typing_defs.destructure -> 'a

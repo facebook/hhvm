@@ -380,12 +380,11 @@ let rec set_file pos_file pos =
   | Pos_tiny { pos_span; pos_file = _ } -> Pos_tiny { pos_file; pos_span }
   | Pos_from_reason p -> Pos_from_reason (set_file pos_file p)
 
-let set_line_end line pos =
+let set_col_start pos_cnum pos =
   let pos = as_large_pos pos in
   match pos with
   | Pos_large { pos_file; pos_start; pos_end } ->
-    let (_, column, offset) = File_pos_large.line_column_offset pos_end in
-    let pos_end = File_pos_large.of_line_column_offset ~line ~column ~offset in
+    let pos_start = File_pos_large.set_column pos_cnum pos_start in
     Pos_large { pos_file; pos_start; pos_end }
   | _ -> pos
 
@@ -395,6 +394,22 @@ let set_col_end pos_cnum pos =
   | Pos_large { pos_file; pos_start; pos_end } ->
     let pos_end = File_pos_large.set_column pos_cnum pos_end in
     Pos_large { pos_file; pos_start; pos_end }
+  | _ -> pos
+
+let rec shrink_to_start pos =
+  let pos = as_large_pos pos in
+  match pos with
+  | Pos_large { pos_file; pos_start; _ } ->
+    Pos_large { pos_file; pos_start; pos_end = pos_start }
+  | Pos_from_reason p -> Pos_from_reason (shrink_to_start p)
+  | _ -> pos
+
+let rec shrink_to_end pos =
+  let pos = as_large_pos pos in
+  match pos with
+  | Pos_large { pos_file; pos_end; _ } ->
+    Pos_large { pos_file; pos_start = pos_end; pos_end }
+  | Pos_from_reason p -> Pos_from_reason (shrink_to_end p)
   | _ -> pos
 
 let set_from_reason pos =
@@ -685,7 +700,7 @@ let pessimize_enabled pos pessimize_coefficient =
     let range = 2000000 in
     let filename = Relative_path.suffix path in
     let hash = Hashtbl.hash filename in
-    let r = hash % range in
+    let r = Int.( % ) hash range in
     Float.of_int r /. Float.of_int range <= pessimize_coefficient
   | _ -> Float.equal pessimize_coefficient 1.0
 

@@ -1,8 +1,0 @@
-File "sound_dynamic_callable_1.bad.php", line 11, characters 19-21:
-Method  `foo` in class `C` is not dynamically callable. (Typing[4402])
-  File "sound_dynamic_callable_1.bad.php", line 12, characters 12-22:
-  Invalid return type
-  File "sound_dynamic_callable_1.bad.php", line 11, characters 27-34:
-  Expected `dynamic` because method must be callable in a dynamic context
-  File "sound_dynamic_callable_1.bad.php", line 12, characters 16-18:
-  Type `Box<[unresolved]>` is not a subtype of `dynamic` under dynamic-aware subtyping

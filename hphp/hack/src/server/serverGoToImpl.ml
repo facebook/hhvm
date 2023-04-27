@@ -33,7 +33,7 @@ let find_positions_of_classes
                  "Could not find class %s in %s"
                  child_class
                  (Relative_path.to_absolute path))
-          | Some { Aast.c_span; _ } -> (child_class, c_span))
+          | Some { Aast.c_name = (name_pos, _); _ } -> (child_class, name_pos))
         | Some FileInfo.(File ((Fun | Typedef | Const | Module), _path)) ->
           failwith
             (Printf.sprintf

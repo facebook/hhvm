@@ -1,7 +1,7 @@
 <?hh
 
 class A {
- static $a = 10;
+ public static $a = 10;
  public $b = 20;
 }
 

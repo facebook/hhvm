@@ -4,11 +4,11 @@ interface I {
   abstract const ctx C;
 }
 
-function f1(I $a = null)[$a::C] {
+function f1(?I $a = null)[$a::C] {
   echo "in f1\n";
 }
 
-function f2(I $a = null)[write_props, $a::C] {
+function f2(?I $a = null)[write_props, $a::C] {
   echo "in f2\n";
 }
 

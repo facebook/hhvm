@@ -14,35 +14,26 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/process.h"
+#include "hphp/util/process-cpu.h"
+#include "hphp/util/process-host.h"
 
 #include <sys/types.h>
 #include <stdlib.h>
 
-#ifdef _MSC_VER
-#include <lmcons.h>
-#include <Windows.h>
-#include <ShlObj.h>
-#else
 #include <sys/fcntl.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
+
 #include <folly/portability/Sockets.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
-#endif
-
-#ifdef __APPLE__
-#include <crt_externs.h>
-#endif
-
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <set>
 
 #include "hphp/util/hugetlb.h"
@@ -113,7 +104,7 @@ bool Process::IsUnderGDB() {
   auto const spaceIdx = std::min(cmdPiece.find(' '), cmdPiece.size() - 1);
   auto const binaryPiece = cmdPiece.subpiece(0, spaceIdx + 1);
 
-  boost::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
+  std::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
   return binaryPath.filename() == "gdb ";
 }
 
@@ -159,6 +150,50 @@ int Process::GetNumThreads() {
   return ProcStatus::valid() ? ProcStatus::nThreads() : 1;
 }
 
+/////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * Try to read the memory information from the given /cgroup2/memory.<fileName>
+ * file if available.  For reference, see the "Memory Interface Files" section in
+ * https://www.kernel.org/doc/Documentation/cgroup-v2.txt.
+ *
+ * In case this function fails to read from the given file, it returns -1.
+ * Otherwise, it returns the size read converted to MBs.
+ */
+int64_t readCgroup2FileMb(const char* fileName) {
+  std::string fullFileName = std::string("/cgroup2/memory.") + fileName;
+
+  if (FILE* f = fopen(fullFileName.c_str(), "r")) {
+    int64_t size;
+    if (fscanf(f, "%ld", &size) != 1) return -1;
+    fclose(f);
+    return size >> 20;
+  }
+
+  return -1;
+}
+
+/*
+ * If cgroup2 is enabled, update the MemInfo in `info' based on cgroup2 limits.
+ */
+void updateMemInfoWithCgroup2Info(MemInfo& info) {
+  if (!ProcStatus::valid()) return;
+  const int64_t cgroup2TotalMb = readCgroup2FileMb("max");
+  const int64_t currUsageMb = ProcStatus::totalRssKb() / 1024;
+  if (cgroup2TotalMb >= 0) {
+    auto const availableMb_approx =
+      std::max(cgroup2TotalMb - currUsageMb, int64_t{});
+    if (availableMb_approx < info.availableMb) {
+      info.availableMb = availableMb_approx;
+    }
+    if (cgroup2TotalMb < info.totalMb) {
+      info.totalMb = cgroup2TotalMb;
+    }
+  }
+}
+
 // Files such as /proc/meminfo and /proc/self/status contain many lines
 // formatted as one of the following:
 //   <fieldName>: <number>
@@ -166,7 +201,7 @@ int Process::GetNumThreads() {
 // This function parses the line and return the number in it.  -1 is returned
 // when the line isn't formatted as expected (until one day we need to read a
 // line where -1 is a legit value).
-static int64_t readSize(const char* line, bool expectKB = false) {
+int64_t readSize(const char* line, bool expectKB = false) {
   int64_t result = -1;
   char tail[8];
   auto n = sscanf(line, "%*s %" SCNd64 " %7s", &result, tail);
@@ -177,12 +212,11 @@ static int64_t readSize(const char* line, bool expectKB = false) {
   return result;
 }
 
-bool Process::GetMemoryInfo(MemInfo& info) {
-#ifdef _WIN32
-#error "Process::GetMemoryInfo() doesn't support Windows (yet)."
-  return false;
-#endif
+}
 
+/////////////////////////////////////////////////////////////////////////
+
+bool Process::GetMemoryInfo(MemInfo& info, bool checkCgroup2) {
   info = MemInfo{};
   FILE* f = fopen("/proc/meminfo", "r");
   if (f) {
@@ -202,10 +236,13 @@ bool Process::GetMemoryInfo(MemInfo& info) {
       } else if (!strncmp(line, "MemAvailable:", 13)) {
         if (kb >= 0) info.availableMb = kb / 1024;
       }
-      if (info.valid()) return true;
+      if (info.valid()) {
+        if (checkCgroup2) updateMemInfoWithCgroup2Info(info);
+        return true;
+      }
     }
     // If MemAvailable isn't available, which shouldn't be the case for kernel
-    // versions later than 3.14, we get a rough esitmation.
+    // versions later than 3.14, we get a rough estimation.
     if (info.availableMb < 0 && info.freeMb >= 0 &&
         info.cachedMb >= 0 && info.buffersMb >= 0) {
       info.availableMb = info.freeMb + info.cachedMb;
@@ -213,61 +250,6 @@ bool Process::GetMemoryInfo(MemInfo& info) {
     }
   }
   return false;
-}
-
-int Process::GetCPUCount() {
-  return sysconf(_SC_NPROCESSORS_ONLN);
-}
-
-#ifdef __x86_64__
-static __inline void do_cpuid(u_int ax, u_int *p) {
-  asm volatile ("cpuid"
-                : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
-                : "0" (ax));
-}
-#elif defined(_M_X64)
-#include <intrin.h>
-static ALWAYS_INLINE void do_cpuid(int func, uint32_t* p) {
-  __cpuid((int*)p, func);
-}
-#endif
-
-std::string Process::GetCPUModel() {
-#if defined(__x86_64__) || defined(_M_X64)
-  uint32_t regs[4];
-  do_cpuid(0, regs);
-
-  const int vendor_size = sizeof(regs[1])*3;
-  std::swap(regs[2], regs[3]);
-  uint32_t cpu_exthigh = 0;
-  if (memcmp(regs + 1, "GenuineIntel", vendor_size) == 0 ||
-      memcmp(regs + 1, "AuthenticAMD", vendor_size) == 0) {
-    do_cpuid(0x80000000, regs);
-    cpu_exthigh = regs[0];
-  }
-
-  char cpu_brand[3 * sizeof(regs) + 1];
-  char *brand = cpu_brand;
-  if (cpu_exthigh >= 0x80000004) {
-    for (u_int i = 0x80000002; i < 0x80000005; i++) {
-      do_cpuid(i, regs);
-      memcpy(brand, regs, sizeof(regs));
-      brand += sizeof(regs);
-    }
-  }
-  *brand = '\0';
-  assert(brand - cpu_brand < sizeof(cpu_brand));
-  return cpu_brand;
-
-#else
-  // On non-x64, fall back to calling uname
-  std::string model = "Unknown ";
-  struct utsname uname_buf;
-  uname(&uname_buf);
-  model.append(uname_buf.machine);
-  return model;
-
-#endif  // __x86_64__
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -280,33 +262,18 @@ std::string Process::GetAppName() {
   return progname;
 }
 
-std::string Process::GetHostName() {
-  char hostbuf[128];
-  hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails
-  gethostname(hostbuf, sizeof(hostbuf));
-  hostbuf[sizeof(hostbuf) - 1] = '\0';
-  return hostbuf;
-}
-
 std::string Process::GetCurrentUser() {
   const char *name = getenv("LOGNAME");
   if (name && *name) {
     return name;
   }
 
-#ifdef _MSC_VER
-  char username[UNLEN + 1];
-  DWORD username_len = UNLEN + 1;
-  if (GetUserName(username, &username_len))
-    return std::string(username, username_len);
-#else
   auto buf = PasswdBuffer{};
   passwd *pwd;
   if (!getpwuid_r(geteuid(), &buf.ent, buf.data.get(), buf.size, &pwd) &&
       pwd && pwd->pw_name) {
     return pwd->pw_name;
   }
-#endif
   return "";
 }
 
@@ -315,7 +282,6 @@ std::string Process::GetCurrentDirectory() {
   memset(buf, 0, sizeof(buf));
   if (char* cwd = getcwd(buf, PATH_MAX)) return cwd;
 
-#if defined(__linux__)
   if (errno != ENOENT) {
     return "";
   }
@@ -330,10 +296,6 @@ std::string Process::GetCurrentDirectory() {
     buf[r - kDeletedLen] = 0;
   }
   return &(buf[0]);
-#else
-  // /proc/self/cwd is not available.
-  return "";
-#endif
 }
 
 std::string Process::GetHomeDirectory() {
@@ -343,20 +305,10 @@ std::string Process::GetHomeDirectory() {
   if (home && *home) {
     ret = home;
   } else {
-#ifdef _MSC_VER
-    PWSTR path;
-    if (SHGetKnownFolderPath(FOLDERID_UsersFiles, 0, nullptr, &path) == S_OK) {
-      char hPath[PATH_MAX];
-      size_t len = wcstombs(hPath, path, MAX_PATH);
-      CoTaskMemFree(path);
-      ret = std::string(hPath, len);
-    }
-#else
     passwd *pwd = getpwent();
     if (pwd && pwd->pw_dir) {
       ret = pwd->pw_dir;
     }
-#endif
   }
 
   if (ret.empty() || ret[ret.size() - 1] != '/') {
@@ -366,7 +318,6 @@ std::string Process::GetHomeDirectory() {
 }
 
 void Process::SetCoreDumpHugePages() {
-#if defined(__linux__)
   /*
    * From documentation athttp://man7.org/linux/man-pages/man5/core.5.html
    *
@@ -394,7 +345,6 @@ void Process::SetCoreDumpHugePages() {
     }
     fclose(f);
   }
-#endif
 }
 
 void ProcStatus::update() {
@@ -450,7 +400,6 @@ void ProcStatus::update() {
 }
 
 bool Process::OOMScoreAdj(int adj) {
-#ifdef __linux__
   if (adj >= -1000 && adj < 1000) {
     if (auto f = fopen("/proc/self/oom_score_adj", "r+")) {
       fprintf(f, "%d", adj);
@@ -458,7 +407,6 @@ bool Process::OOMScoreAdj(int adj) {
       return true;
     }
   }
-#endif
   return false;
 }
 
@@ -517,16 +465,11 @@ std::map<int, int> Process::RemapFDsPreExec(const std::map<int, int>& fds) {
   // This includes the STDIO FDs as it's possible that:
   // - the FILE* were previously closed (so the fclose above were no-ops)
   // - the FDs were then re-used
-#ifdef __APPLE__
-  const char* fd_dir = "/dev/fd";
-#endif
-#ifdef __linux__
   const char* fd_dir = "/proc/self/fd";
-#endif
   // If you close FDs while in this loop, they get removed from /proc/self/fd
   // and the iterator gets sad ("Bad file descriptor: /proc/self/fd")
   std::set<int> fds_to_close;
-  for (const auto& entry : boost::filesystem::directory_iterator(fd_dir)) {
+  for (const auto& entry : std::filesystem::directory_iterator(fd_dir)) {
     char* endptr = nullptr;
     auto filename = entry.path().filename();
     const char* filename_c = filename.c_str();
@@ -619,7 +562,7 @@ pid_t Process::ForkAndExecve(
       if (cwd != Process::GetCurrentDirectory()) {
         if (chdir(cwd.c_str()) == -1) {
           dprintf(fork_w, "%s %d", "chdir", errno);
-          _Exit(1);
+          _Exit(HPHP_EXIT_FAILURE);
         }
       }
     }
@@ -627,12 +570,12 @@ pid_t Process::ForkAndExecve(
     if (flags & Process::FORK_AND_EXECVE_FLAG_SETSID) {
       if (setsid() == -1) {
         dprintf(fork_w, "%s\n%d\n", "setsid", errno);
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
     } else if (flags & Process::FORK_AND_EXECVE_FLAG_SETPGID) {
       if (setpgid(0, pgid) == -1) {
         dprintf(fork_w, "%s %d", "setpgid", errno);
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
     }
 
@@ -641,28 +584,12 @@ pid_t Process::ForkAndExecve(
     SCOPE_EXIT { free(argv_arr); free(envp_arr); };
 
     if (flags & Process::FORK_AND_EXECVE_FLAG_EXECVPE) {
-#if defined(__APPLE__)
-      // execvpe() is a glibcism
-      //
-      // We could either:
-      // - use `execve()` and implement our own $PATH behavior
-      // - use `execvp()` and implement our own envp behavior
-      // The latter seems less likely to lead to accidental problems, so let's
-      // do that.
-      char**& environ = *_NSGetEnviron();
-      // We could also use this implementation on Linux (using the standard
-      // `extern char** environ` instead of the Apple-specific call above)...
-      environ = envp_arr;
-      execvp(path.c_str(), argv_arr);
-#else
-      // ... but it feels nasty enough that I'll use the glibcism
       execvpe(path.c_str(), argv_arr, envp_arr);
-#endif
     } else {
       execve(path.c_str(), argv_arr, envp_arr);
     }
     dprintf(fork_w, "%s %d", "execve", errno);
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 
   close(fork_w);

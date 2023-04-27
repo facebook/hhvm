@@ -266,7 +266,7 @@ int instrLen(const PC origPC) {
   return pc - origPC;
 }
 
-OffsetList instrJumpOffsets(const PC origPC) {
+OffsetList instrJumpTargets(PC instrs, Offset pos) {
   static const std::array<uint8_t, kMaxHhbcImms> argTypes[] = {
 #define IMM_NA 0
 #define IMM_IVA 0
@@ -329,13 +329,20 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef SIX
   };
 
-  auto pc = origPC;
+  auto pc = instrs + pos;
   auto const op = decode_op(pc);
 
   OffsetList targets;
+  if (!instrIsControlFlow(op)) {
+    DEBUG_ONLY constexpr std::array<uint8_t, kMaxHhbcImms>
+      empty = { 0, 0, 0, 0, 0 };
+    assertx(argTypes[size_t(op)] == empty);
+    return targets;
+  }
+
   if (isFCall(op)) {
     auto const offset = decodeFCallArgs(op, pc, nullptr).asyncEagerOffset;
-    if (offset != kInvalidOffset) targets.emplace_back(offset);
+    if (offset != kInvalidOffset) targets.emplace_back(offset + pos);
     return targets;
   }
 
@@ -345,24 +352,23 @@ OffsetList instrJumpOffsets(const PC origPC) {
       case 0:
         break;
       case 1:
-        pc = origPC;
-        targets.emplace_back(getImmPtr(pc, i)->u_BA);
+        targets.emplace_back(getImmPtr(instrs + pos, i)->u_BA + pos);
         break;
       case 2: {
-        pc = origPC;
-        PC vp = getImmPtr(pc, i)->bytes;
-        auto const size = decode_iva(vp);
-        ImmVector iv(vp, size, 0);
-        targets.insert(targets.end(), iv.vec32(), iv.vec32() + iv.size());
-        break;
-      }
-      case 3: {
-        pc = origPC;
-        PC vp = getImmPtr(pc, i)->bytes;
+        PC vp = getImmPtr(instrs + pos, i)->bytes;
         auto const size = decode_iva(vp);
         ImmVector iv(vp, size, 0);
         for (size_t j = 0; j < iv.size(); ++j) {
-          targets.emplace_back(iv.strvec()[j].dest);
+          targets.emplace_back(iv.vec32()[j] + pos);
+        }
+        break;
+      }
+      case 3: {
+        PC vp = getImmPtr(instrs + pos, i)->bytes;
+        auto const size = decode_iva(vp);
+        ImmVector iv(vp, size, 0);
+        for (size_t j = 0; j < iv.size(); ++j) {
+          targets.emplace_back(iv.strvec()[j].dest + pos);
         }
         break;
       }
@@ -372,12 +378,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
   }
 
   return targets;
-}
-
-OffsetList instrJumpTargets(PC instrs, Offset pos) {
-  auto offsets = instrJumpOffsets(instrs + pos);
-  for (auto& o : offsets) o += pos;
-  return offsets;
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Func* func) {
@@ -397,18 +397,6 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func) {
   }
 
   return offsetsSet;
-}
-
-/**
- * Return the number of successor-edges including fall-through paths but not
- * implicit exception paths.
- */
-int numSuccs(const PC origPC) {
-  auto pc = origPC;
-  auto numTargets = instrJumpOffsets(pc).size();
-  pc = origPC;
-  if ((instrFlags(decode_op(pc)) & TF) == 0) ++numTargets;
-  return numTargets;
 }
 
 /**
@@ -1065,12 +1053,6 @@ bool instrIsVMCall(Op opcode) {
   switch (opcode) {
     case OpContEnter:
     case OpContRaise:
-    case OpEval:
-    case OpIncl:
-    case OpInclOnce:
-    case OpReq:
-    case OpReqDoc:
-    case OpReqOnce:
       return true;
 
     default:

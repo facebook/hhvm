@@ -12,15 +12,15 @@ open Hh_prelude
 
 (* This check enforces 3 properties related to return statements and functions' return types:
 
-Property 1: A function annotated with return type void must not contain a return statement with
-  a value.
+   Property 1: A function annotated with return type void must not contain a return statement with
+     a value.
 
-Property 2: A function containing a return statement without a value (or returning implicitly)
-  can only be annotated with a return type if that return type is void (or
-  <Awaitable<void>, for async functions).
+   Property 2: A function containing a return statement without a value (or returning implicitly)
+     can only be annotated with a return type if that return type is void (or
+     <Awaitable<void>, for async functions).
 
-Property 3: A function must not mix return statements with and without a value, even if such a function
-  could be given a sufficiently general type.
+   Property 3: A function must not mix return statements with and without a value, even if such a function
+     could be given a sufficiently general type.
 *)
 
 type state = {
@@ -49,7 +49,7 @@ let initial_dummy_state =
     active = false;
   }
 
-let validate_state fun_kind env s =
+let validate_state fun_span fun_kind env s =
   (* FIXME: Move as two functions to Ast_defs? *)
   let (is_generator, is_async) =
     let open Ast_defs in
@@ -100,8 +100,8 @@ let validate_state fun_kind env s =
     if is_void_super_ty || is_awaitable_void_super_ty then
       let hint_loc =
         match s.return_type with
-        | None -> None
-        | Some (hint_loc, _) -> Some hint_loc
+        | None -> fun_span
+        | Some (hint_loc, _) -> hint_loc
       in
       ( false,
         lazy
@@ -110,7 +110,7 @@ let validate_state fun_kind env s =
                wellformedness
                @@ Primary.Wellformedness
                   .Non_void_annotation_on_return_void_function
-                    { is_async; pos = s.fun_def_pos; hint_pos = hint_loc })) )
+                    { is_async; hint_pos = hint_loc })) )
     else
       (true, lazy ())
   in
@@ -178,7 +178,13 @@ let visitor =
     val state = ref initial_dummy_state
 
     method traverse_fun_body
-        new_return_type new_fun_pos fun_kind has_implicit_return env traversal =
+        fun_span
+        new_return_type
+        new_fun_pos
+        fun_kind
+        has_implicit_return
+        env
+        traversal =
       let initial_no_value_return =
         if has_implicit_return then
           (* There is an implicit return but we don't know where *)
@@ -205,7 +211,7 @@ let visitor =
         in
         state := new_state;
         traversal ();
-        validate_state fun_kind env !state
+        validate_state fun_span fun_kind env !state
 
     method reset = state := initial_dummy_state
 
@@ -215,13 +221,25 @@ let visitor =
       else
         state := { !state with prev_no_value_return = Some (Some return_pos) }
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env fun_ =
       let decl_env = Tast_env.get_decl_env env in
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
-      if not FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) then
+      if
+        not
+          (FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          || Typing_native.is_native_fun
+               ~env:(Tast_env.tast_env_as_typing_env env)
+               fun_)
+      then
         this#traverse_fun_body
+          fun_.f_span
           (hint_of_type_hint fun_.f_ret)
-          (fst fun_.f_name)
+          fun_.f_span
           fun_.f_fun_kind
           has_impl_ret
           env
@@ -233,9 +251,13 @@ let visitor =
       if
         not
           (method_.m_abstract
-          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi))
+          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          || Typing_native.is_native_meth
+               ~env:(Tast_env.tast_env_as_typing_env env)
+               method_)
       then
         this#traverse_fun_body
+          method_.m_span
           (hint_of_type_hint method_.m_ret)
           (fst method_.m_name)
           method_.m_fun_kind
@@ -262,6 +284,11 @@ let visitor =
       | (return_pos, Return None) ->
         this#update_seen_return_stmts false return_pos
       | _ -> ()
+
+    method! on_expr env e =
+      match e with
+      | (_, _, Aast.Invalid _) -> ()
+      | _ -> super#on_expr env e
   end
 
 let handler =

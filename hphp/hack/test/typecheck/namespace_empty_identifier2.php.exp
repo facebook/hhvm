@@ -1,8 +1,0 @@
-File "namespace_empty_identifier2.php", line 4, characters 14-15:
-Unbound name: `` (an object type) (Naming[2049])
-File "namespace_empty_identifier2.php", line 3, characters 10-13:
-Was expecting a return type hint (Typing[4030])
-File "namespace_empty_identifier2.php", line 3, characters 15-16:
-Was expecting a type hint (Typing[4032])
-File "namespace_empty_identifier2.php", line 4, characters 14-15:
-Unbound name (typing): `` (Typing[4107])

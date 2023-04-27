@@ -1,4 +1,8 @@
 File "trait_implements.php", line 22, characters 7-7:
 This class must be declared `abstract`, or provide an implementation for the abstract method `bar` (Typing[4047])
-File "trait_implements.php", line 13, characters 19-21:
-Declaration is here
+  File "trait_implements.php", line 23, characters 7-7:
+  `Y` uses `X`
+  File "trait_implements.php", line 16, characters 20-20:
+  `X` uses `I`
+  File "trait_implements.php", line 13, characters 19-21:
+  The method is defined here

@@ -21,7 +21,7 @@ from sizeof import sizeof
 # WaitHandle wrapper class.
 
 class WaitHandle(object):
-    """Wrapper class for a HHVM::c_WaitHandle*."""
+    """Wrapper class for a HHVM::c_Awaitable*."""
 
     ##
     # gdb.Value delegation.
@@ -30,16 +30,16 @@ class WaitHandle(object):
         if not isinstance(wh, gdb.Value):
             raise TypeError('bad call to WaitHandle()')
 
-        wh = deref(wh)
-
-        if not str(wh.type).endswith('WaitHandle'):
+        if (
+            not str(deref(wh).type).endswith('WaitHandle')
+            and not str(deref(wh).type).endswith('Awaitable')
+        ):
             raise TypeError('non-WaitHandle[*] value passed to WaitHandle()')
 
-        self.wh = wh.address
+        self.wh = wh
         wh_name = 'HPHP::c_' + self.kind_str() + 'WaitHandle'
 
         self.wh = self.wh.cast(T(wh_name).pointer())
-        self.type = self.wh.type
 
     def __getitem__(self, idx):
         return self.wh[idx]
@@ -48,14 +48,14 @@ class WaitHandle(object):
         return self.wh
 
     ##
-    # c_WaitHandle* methods.
+    # c_Awaitable* methods.
     #
     def kind(self):
-        kind_ty = T('HPHP::c_WaitHandle::Kind')
+        kind_ty = T('HPHP::c_Awaitable::Kind')
         return (self.wh['m_kind_state'] >> 4).cast(kind_ty)
 
     def kind_str(self):
-        return str(self.kind())[len('HPHP::c_WaitHandle::Kind::'):]
+        return str(self.kind())[len('HPHP::c_Awaitable::Kind::'):]
 
     def state(self):
         return (self.wh['m_kind_state'] & 0xf).cast(T('uint8_t'))
@@ -85,16 +85,29 @@ class WaitHandle(object):
         return res
 
     def finished(self):
-        return self.state() <= K('HPHP::c_WaitHandle::STATE_FAILED')
+        return self.state() <= K('HPHP::c_Awaitable::STATE_FAILED')
 
     def resumable(self):
         resumable_ty = T('HPHP::Resumable')
 
-        if self.type != T('HPHP::c_AsyncFunctionWaitHandle').pointer():
+        if deref(self.wh).type == T('HPHP::c_AsyncFunctionWaitHandle'):
+            p = self.wh.cast(T('char').pointer()) - resumable_ty.sizeof
+            return p.cast(resumable_ty.pointer())
+
+        if deref(self.wh).type == T('HPHP::c_AsyncGeneratorWaitHandle'):
+            gen = self.wh['m_generator']
+            native_data_ty = T('HPHP::AsyncGenerator')
+            p = gen.cast(T('char').pointer()) - native_data_ty.sizeof
+            return p.cast(resumable_ty.pointer())
+
+        return None
+
+    def func(self):
+        resumable = self.resumable()
+        if resumable is None:
             return None
 
-        p = self.wh.cast(T('char').pointer()) - resumable_ty.sizeof
-        return p.cast(resumable_ty.pointer())
+        return lookup_func_from_fp(resumable['m_actRec'])
 
     ##
     # Parent chain.
@@ -103,17 +116,23 @@ class WaitHandle(object):
         """Same as wh->getParentChain().firstInContext(wh->getContextIdx())."""
 
         ctx_idx = self.wh['m_contextIdx']
-        blockable = self.wh['m_parentChain']['m_firstParent']
+        blockable = self.wh['m_parentChain']['m_lastParent']
 
+        result = None
         while blockable != nullptr():
             wh = WaitHandle.from_blockable(blockable)
 
-            if not wh.finished() and wh['m_contextIdx'] == ctx_idx:
-                return wh
+            if (
+                wh is not None
+                and not wh.finished()
+                and wh['m_contextIdx'] == ctx_idx
+            ):
+                result = wh
 
-            blockable = wh['m_parentChain']['m_firstParent']
+            ty = T('HPHP::AsioBlockable').pointer()
+            blockable = (blockable['m_bits'] & ~0x7).cast(ty)
 
-        return None
+        return result
 
     def chain(self):
         """Generate a WaitHandle's parent chain."""
@@ -142,7 +161,7 @@ class WaitHandle(object):
         wh_name = m.group(1)
 
         if wh_name == 'AsyncFunction':
-            offset = 40
+            offset = 48
         elif wh_name == 'AsyncGenerator':
             offset = 56
         elif wh_name == 'AwaitAll':
@@ -163,6 +182,15 @@ class WaitHandle(object):
                 return None
 
         return WaitHandle(wh)
+
+    def to_string(self):
+        str = '%s @ %s' % (deref(self.wh).type, self.wh)
+
+        func = self.func()
+        if func is not None:
+            str = str + (' (%s)' % (nameof(func)))
+
+        return str
 
 
 #------------------------------------------------------------------------------
@@ -209,7 +237,9 @@ def asio_stacktrace(wh, limit=None):
             stacktrace.append(frame.create_resumable(count, resumable))
         count += 1
 
-    ar = asio_context(wh['m_contextIdx'])['m_savedFP']
+    # FIXME: requires RDS lookup
+    #ar = asio_context(wh['m_contextIdx'])['m_savedFP']
+    ar = nullptr()
 
     if ar != nullptr():
         stacktrace.append(frame.create_php(idx=count, ar=ar))
@@ -278,7 +308,7 @@ class InfoAsioCommand(gdb.Command):
 
         # Get the current vmfp().
         header_ptype = T('HPHP::rds::Header').pointer()
-        vmfp = TL('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']
+        vmfp = TL('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']  # gdb.Value[HPHP::ActRec]
 
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 

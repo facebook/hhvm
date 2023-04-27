@@ -1,0 +1,86 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template generates a Thrift enum.
+
+}}
+type {{enum:go_name}} int32
+{{^enum:empty?}}
+
+const (
+{{#enum:values}}
+    {{enum:go_name}}_{{enum_value:name}} {{enum:go_name}} = {{enum_value:value}}
+{{/enum:values}}
+)
+{{/enum:empty?}}
+
+// Enum value maps for {{enum:go_name}}
+var (
+    {{enum:go_name}}ToName = map[{{enum:go_name}}]string {
+    {{#enum:values}}
+        {{enum:go_name}}_{{enum_value:name}}: "{{enum_value:name}}",
+    {{/enum:values}}
+    }
+
+    {{enum:go_name}}ToValue = map[string]{{enum:go_name}} {
+    {{#enum:values}}
+        "{{enum_value:name}}": {{enum:go_name}}_{{enum_value:name}},
+    {{/enum:values}}
+    }
+    {{! create variables compatible with the older codegen}}
+    {{#program:compat?}}
+
+    {{enum:go_name}}Names = []string{
+    {{#enum:values}}
+        "{{enum_value:name}}",
+    {{/enum:values}}
+    }
+
+    {{enum:go_name}}Values = []{{enum:go_name}}{
+    {{#enum:values}}
+        {{enum:go_name}}_{{enum_value:name}},
+    {{/enum:values}}
+    }
+    {{/program:compat?}}
+)
+
+func (x {{enum:go_name}}) String() string {
+    if v, ok := {{enum:go_name}}ToName[x]; ok {
+        return v
+    }
+    return "<UNSET>"
+}
+
+func (x {{enum:go_name}}) Ptr() *{{enum:go_name}} {
+    return &x
+}
+{{#program:compat?}}
+
+// Deprecated: Use {{enum:go_name}}ToValue instead (e.g. `x, ok := {{enum:go_name}}ToValue["name"]`).
+func {{enum:go_name}}FromString(s string) ({{enum:go_name}}, error) {
+    if v, ok := {{enum:go_name}}ToValue[s]; ok {
+        return v, nil
+    }
+    return {{enum:go_name}}(0), fmt.Errorf("not a valid {{enum:go_name}} string")
+}
+
+// Deprecated: Use {{enum:go_name}}.Ptr() instead.
+func {{enum:go_name}}Ptr(v {{enum:go_name}}) *{{enum:go_name}} {
+    return &v
+}
+{{/program:compat?}}

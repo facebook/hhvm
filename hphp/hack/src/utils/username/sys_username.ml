@@ -12,13 +12,13 @@ let get_logged_in_username () =
   let name =
     try Unix.getlogin () with
     | Unix.Unix_error (Unix.ENOENT, m, _) when String.equal m "getlogin" ->
-      begin
-        try
-          (* Linux getlogin(3) man page suggests checking LOGNAME. *)
-          Sys.getenv "LOGNAME"
-        with
-        | Not_found -> Sys.getenv "SUDO_USER"
-      end
+    begin
+      try
+        (* Linux getlogin(3) man page suggests checking LOGNAME. *)
+        Sys.getenv "LOGNAME"
+      with
+      | Not_found -> Sys.getenv "SUDO_USER"
+    end
   in
   try
     if String.equal name "root" then

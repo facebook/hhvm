@@ -20,8 +20,9 @@ let error_if_duplicate_method_names methods =
       ~init:SSet.empty
       ~f:(fun seen_methods { m_name = (pos, meth_name); _ } ->
         if SSet.mem meth_name seen_methods then
-          Errors.add_naming_error
-          @@ Naming_error.Method_name_already_bound { pos; meth_name };
+          Errors.add_error
+            Naming_error.(
+              to_user_error @@ Method_name_already_bound { pos; meth_name });
         SSet.add meth_name seen_methods)
   in
   ()

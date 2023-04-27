@@ -32,7 +32,18 @@ val close_file : ServerEnv.env -> string -> ServerEnv.env
     that we have about this IDE. *)
 val clear_sync_data : ServerEnv.env -> ServerEnv.env
 
+(** Get file content from File_provider if present, otherwise from disk.
+If the argument is [ServerCommandTypes.FileName path] for a path that's not
+under Root, or if we get an exception trying to read the file (e.g. because
+it has been deleted), then return the empty string. See also
+[get_file_content_from_disk] which skips File_provider. *)
 val get_file_content : ServerCommandTypes.file_input -> string
+
+(** Get file content from disk. If the path isn't under Root, or we get
+an exception trying to read the file (e.g. because it has been deleted) then
+return the empty string. See also [get_file_content] which looks up
+File_provider first. *)
+val get_file_content_from_disk : string -> string
 
 val has_unsaved_changes : ServerEnv.env -> bool
 

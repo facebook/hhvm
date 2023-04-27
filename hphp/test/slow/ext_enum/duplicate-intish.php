@@ -1,6 +1,6 @@
 <?hh
 
-enum E : mixed {
+enum E : arraykey {
   NAME1 = '1';
   NAME2 = '2';
   NAME3 = 1;

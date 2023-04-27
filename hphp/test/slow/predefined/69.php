@@ -6,6 +6,6 @@ function Test() {
 
 <<__EntryPoint>>
 function main(): void {
-  test();
+  Test();
   var_dump(__FUNCTION__);
 }

@@ -13,7 +13,6 @@ open Typing_defs
 open Utils
 module Env = Tast_env
 module Cls = Decl_provider.Class
-module MakeType = Typing_make_type
 module SN = Naming_special_names
 
 type kind =
@@ -141,13 +140,11 @@ let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
 let apply_if_enum_or_enum_class
     env ~(default : 'a) ~(f : kind -> Env.env -> string -> 'a) name args =
   let check_ec kind = function
-    | [enum; _interface] ->
-      begin
-        match get_node enum with
-        | Tclass ((_, cid), _, _) when Env.is_enum_class env cid ->
-          f kind env cid
-        | _ -> default
-      end
+    | [enum; _interface] -> begin
+      match get_node enum with
+      | Tclass ((_, cid), _, _) when Env.is_enum_class env cid -> f kind env cid
+      | _ -> default
+    end
     | _ -> default
   in
   if Env.is_enum env name then
@@ -170,6 +167,14 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (Env.get_deps_mode env) root dep);
+    if TypecheckerOptions.record_fine_grained_dependencies @@ Env.get_tcopt env
+    then
+      Typing_pessimisation_deps.try_add_fine_dep
+        (Env.get_deps_mode env)
+        decl_env.Decl_env.droot
+        decl_env.Decl_env.droot_member
+        dep;
+
     let tc = unsafe_opt @@ Env.get_enum env id in
     check_enum_exhaustiveness pos tc kind caselist enum_coming_from_unresolved;
     env
@@ -205,7 +210,6 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
              () ))
   | Tnewtype (name, args, _) ->
     apply_if_enum_or_enum_class env ~default:env ~f:check name args
-  | Terr
   | Tany _
   | Tnonnull
   | Tvec_or_dict _

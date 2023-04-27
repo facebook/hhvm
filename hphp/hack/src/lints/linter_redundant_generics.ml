@@ -68,10 +68,11 @@ let ft_redundant_tparams env tparams ty =
           begin
             match super_bounds with
             | [] ->
-              Lints_errors.redundant_covariant pos bounds_message "nothing"
+              Lints_errors.redundant_covariant pos name bounds_message "nothing"
             | [(_, t)] ->
               Lints_errors.redundant_covariant
                 pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()
@@ -89,24 +90,28 @@ let ft_redundant_tparams env tparams ty =
           begin
             match as_bounds with
             | [] ->
-              Lints_errors.redundant_contravariant pos bounds_message "mixed"
+              Lints_errors.redundant_contravariant
+                pos
+                name
+                bounds_message
+                "mixed"
             | [(_, t)] ->
               Lints_errors.redundant_contravariant
                 pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()
           end
-        | (None, None) -> Lints_errors.redundant_generic pos)
+        | (None, None) -> Lints_errors.redundant_generic pos name)
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
-  | (lazy (ty as ft)) ->
-    begin
-      match get_node ty with
-      | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
-      | _ -> assert false
-    end
+  | (lazy (ty as ft)) -> begin
+    match get_node ty with
+    | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
+    | _ -> assert false
+  end
 
 let check_redundant_generics_fun env ft =
   ft_redundant_tparams env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
@@ -124,14 +129,13 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_ env f =
-      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd f.f_name) with
-      | Some { fe_type; _ } ->
-        begin
-          match get_node fe_type with
-          | Tfun ft -> check_redundant_generics_fun env ft
-          | _ -> ()
-        end
+    method! at_fun_def env fd =
+      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd fd.fd_name) with
+      | Some { fe_type; _ } -> begin
+        match get_node fe_type with
+        | Tfun ft -> check_redundant_generics_fun env ft
+        | _ -> ()
+      end
       | _ -> ()
 
     method! at_class_ env c =

@@ -1,0 +1,11 @@
+(library
+ (name dictionary_data_stubs)
+ (wrapped false)
+ (modules)
+ (foreign_stubs
+  (language c)
+  (names data)
+  (flags
+   (:standard)))
+ (c_library_flags
+  (:standard)))

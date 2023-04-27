@@ -14,7 +14,8 @@ type kind =
   | Class
   | Method
   | Property
-  | Const
+  | ClassConst
+  | GlobalConst
   | Enum
   | Interface
   | Trait
@@ -23,8 +24,10 @@ type kind =
   | Typeconst
   | Param
   | Typedef
+  | Module
+[@@deriving ord, show]
 
-and modifier =
+type modifier =
   | Final
   | Static
   | Abstract
@@ -33,11 +36,14 @@ and modifier =
   | Protected
   | Async
   | Inout
+  | Internal
+[@@deriving ord, show]
 
-and 'a t = {
+type 'a t = {
   kind: kind;
   name: string;
   full_name: string;
+  class_name: string option;
   id: string option;
   pos: 'a Pos.pos;
   (* covers the span of just the identifier *)
@@ -74,7 +80,8 @@ let string_of_kind = function
   | Class -> "class"
   | Method -> "method"
   | Property -> "property"
-  | Const -> "const"
+  | ClassConst -> "class constant"
+  | GlobalConst -> "const"
   | Enum -> "enum"
   | Interface -> "interface"
   | Trait -> "trait"
@@ -83,6 +90,7 @@ let string_of_kind = function
   | TypeVar -> "type_var"
   | Param -> "param"
   | Typedef -> "typedef"
+  | Module -> "module"
 
 let string_of_modifier = function
   | Final -> "final"
@@ -93,6 +101,7 @@ let string_of_modifier = function
   | Protected -> "protected"
   | Async -> "async"
   | Inout -> "inout"
+  | Internal -> "internal"
 
 let function_kind_name = "function"
 
@@ -103,6 +112,10 @@ let method_kind_name = "method"
 let property_kind_name = "property"
 
 let class_const_kind_name = "class_const"
+
+let global_const_kind_name = "global_const"
+
+let module_kind_name = "module"
 
 let get_symbol_id kind parent_class name =
   let prefix =
@@ -117,8 +130,10 @@ let get_symbol_id kind parent_class name =
     | Method -> Some method_kind_name
     | Property -> Some property_kind_name
     | Typeconst
-    | Const ->
+    | ClassConst ->
       Some class_const_kind_name
+    | GlobalConst -> Some global_const_kind_name
+    | Module -> Some module_kind_name
     | LocalVar
     | TypeVar
     | Param ->

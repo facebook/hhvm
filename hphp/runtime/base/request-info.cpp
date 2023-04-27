@@ -125,7 +125,9 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
       t->m_reqInjectionData.setHostOOMFlag();
     }
   );
-  Logger::Error("Invoking request-level OOM killer");
+  Logger::FError("Invoking OOM killer on requests using more than {} bytes, "
+                 "current RSS = {}MB",
+                 OOMKillThreshold(), Process::GetMemUsageMb());
   static auto OOMKillerInvokeCounter = ServiceData::createTimeSeries(
     "hhvm_oom_killer_invoke", {ServiceData::StatsType::COUNT}
   );
@@ -135,6 +137,7 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
 void RequestInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
   m_coverage.onSessionInit();
+  m_recorder.onSessionInit();
 }
 
 bool RequestInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
@@ -158,6 +161,7 @@ void RequestInfo::onSessionExit() {
 
   m_reqInjectionData.reset();
   m_coverage.onSessionExit();
+  m_recorder.onSessionExit();
 
   if (auto tmp = m_pendingException) {
     m_pendingException = nullptr;
@@ -263,7 +267,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   info.m_pendingException = nullptr;
 
   if (auto cbFlags =
-      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+      flags & (MemThresholdFlag | IntervalTimerFlag)) {
     if (!callbacksOk()) {
       setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
       flags -= cbFlags;

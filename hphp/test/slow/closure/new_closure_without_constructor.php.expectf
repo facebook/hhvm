@@ -1,12 +1,4 @@
-object(Closure$test) (1) {
-  ["static"]=>
-  dict(1) {
-    ["x"]=>
-    dict(1) {
-      ["a"]=>
-      string(1) "b"
-    }
-  }
+object(Closure$test) (0) {
 }
 
 Fatal error: Can't create a Closure directly in %s/new_closure_without_constructor.php on line 10

@@ -79,23 +79,15 @@ let extend_tparams env tparaml =
   in
   { env with type_params }
 
-(* Functions such as fun, class_meth, and meth_caller require additional
- * fixup on the strings that are passed in
- *)
-let handle_special_calls env call =
+(* `meth_caller` needs some fixup on the strings that are passed in *)
+let handle_meth_caller env call =
   match call with
-  | Call (((_, _, Id (_, cn)) as id), targs, [(pk, (ty, p, String fn))], uargs)
-    when String.equal cn SN.AutoimportedFunctions.fun_ ->
-    (* Functions referenced by fun() are always fully-qualified *)
-    let fn = Utils.add_ns fn in
-    Call (id, targs, [(pk, (ty, p, String fn))], uargs)
   | Call
       ( ((_, _, Id (_, cn)) as id),
         targs,
         [(pk, (ty, p1, String cl)); meth],
         unpacked_element )
-    when (String.equal cn SN.AutoimportedFunctions.meth_caller
-         || String.equal cn SN.AutoimportedFunctions.class_meth)
+    when String.equal cn SN.AutoimportedFunctions.meth_caller
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
     Call (id, targs, [(pk, (ty, p1, String cl)); meth], unpacked_element)
@@ -131,6 +123,18 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
+    method! on_ctx_refinement env =
+      function
+      | CRexact h -> CRexact (self#on_ctx_hint_ns contexts_ns env h)
+      | CRloose { cr_lower; cr_upper } ->
+        CRloose
+          {
+            cr_lower =
+              Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) cr_lower;
+            cr_upper =
+              Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) cr_upper;
+          }
+
     method on_class_ctx_const env kind =
       match kind with
       | TCConcrete { c_tc_type } ->
@@ -164,20 +168,25 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = { env with namespace = td.t_namespace } in
       let env = extend_tparams env td.t_tparams in
       if td.t_is_ctx then
-        let ctx_constr =
-          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) td.t_constraint
+        let t_as_constraint =
+          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) td.t_as_constraint
         in
-        let ctx_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
+        let t_super_constraint =
+          Option.map
+            ~f:(self#on_ctx_hint_ns contexts_ns env)
+            td.t_super_constraint
+        in
+        let t_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
         super#on_typedef
           env
-          { td with t_constraint = ctx_constr; t_kind = ctx_kind }
+          { td with t_as_constraint; t_super_constraint; t_kind }
       else
         super#on_typedef env td
 
     (* Difference between fun_def and fun_ is that fun_ is also lambdas *)
     method! on_fun_def env f =
       let env = { env with namespace = f.fd_namespace } in
-      let env = extend_tparams env f.fd_fun.f_tparams in
+      let env = extend_tparams env f.fd_tparams in
       super#on_fun_def env f
 
     method! on_fun_ env f =
@@ -264,6 +273,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         (self#on_param_kind env_ pk, self#on_expr env_ e)
       in
       match expr with
+      | Collection (id, c_targ_opt, flds) ->
+        let id = NS.elaborate_id env.namespace NS.ElaborateClass id
+        and flds = super#on_list super#on_afield env flds
+        and c_targ_opt =
+          super#on_option super#on_collection_targ env c_targ_opt
+        in
+        Collection (id, c_targ_opt, flds)
       | Call ((ty, p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn ->
         Call
@@ -280,7 +296,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
               List.map el ~f:(map_arg env),
               Option.map unpacked_element ~f:(self#on_expr env) )
         in
-        handle_special_calls env renamed_call
+        handle_meth_caller env renamed_call
       | FunctionPointer (FP_id fn, targs) ->
         let fn = NS.elaborate_id env.namespace NS.ElaborateFun fn in
         let targs = List.map targs ~f:(self#on_targ env) in
@@ -407,17 +423,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       in
       { ua_name; ua_params = List.map ~f:(self#on_expr env) ua.ua_params }
 
-    method! on_insteadof_alias env alias =
-      let (sid1, pstr, sid2) = alias in
-      ( elaborate_type_name env sid1,
-        pstr,
-        List.map ~f:(elaborate_type_name env) sid2 )
-
-    method! on_use_as_alias env alias =
-      let (sido1, pstr, sido2, visl) = alias in
-      let sido1 = Option.map ~f:(elaborate_type_name env) sido1 in
-      (sido1, pstr, sido2, visl)
-
     method! on_xhp_child env child =
       if in_codegen env then
         super#on_xhp_child env child
@@ -440,3 +445,27 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let (_, rev_defs) = List.fold p ~f:aux ~init:(env, []) in
       List.rev rev_defs
   end
+
+let elaborate_namespaces = new generic_elaborator
+
+let elaborate_program program =
+  elaborate_namespaces#on_program
+    (make_env Namespace_env.empty_with_default)
+    program
+
+let elaborate_fun_def fd =
+  elaborate_namespaces#on_fun_def (make_env fd.Aast.fd_namespace) fd
+
+let elaborate_class_ c =
+  elaborate_namespaces#on_class_ (make_env c.Aast.c_namespace) c
+
+let elaborate_module_def m =
+  elaborate_namespaces#on_module_def
+    (make_env Namespace_env.empty_with_default)
+    m
+
+let elaborate_gconst cst =
+  elaborate_namespaces#on_gconst (make_env cst.Aast.cst_namespace) cst
+
+let elaborate_typedef td =
+  elaborate_namespaces#on_typedef (make_env td.Aast.t_namespace) td

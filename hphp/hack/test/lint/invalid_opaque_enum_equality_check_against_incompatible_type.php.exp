@@ -1,9 +1,6 @@
 File "invalid_opaque_enum_equality_check_against_incompatible_type.php", line 9, characters 7-15:
 Invalid comparison: This expression will always return `false`.
 A value of type `Foo` can never be equal to a value of type `string` (Lint[5607])
-File "invalid_opaque_enum_equality_check_against_incompatible_type.php", line 17, characters 7-15:
-Invalid comparison: This expression will always return `false`.
-A value of type `vec<Foo>` can never be equal to a value of type `vec<string>` (Lint[5607])
 File "invalid_opaque_enum_equality_check_against_incompatible_type.php", line 24, characters 7-34:
 Invalid `C\contains` check: This call will always return `false`.
 A `Traversable<string>` cannot contain a value of type `Foo` (Lint[5608])

@@ -1,4 +1,4 @@
-object(TestStruct) (10) {
+object(TestStruct) (11) {
   ["aBool"]=>
   bool(true)
   ["anInt"]=>
@@ -33,9 +33,11 @@ object(TestStruct) (10) {
   int(123)
   ["anI16"]=>
   int(1234)
+  ["anI64CustomDefault"]=>
+  int(7)
 }
-string(32) "6b4fbe9563551f3dee970a74b883f923"
-object(TestStruct) (10) {
+string(32) "04cfb78d6169cc390918a2f05bfbfd66"
+object(TestStruct) (11) {
   ["aBool"]=>
   bool(true)
   ["anInt"]=>
@@ -70,4 +72,62 @@ object(TestStruct) (10) {
   int(123)
   ["anI16"]=>
   int(1234)
+  ["anI64CustomDefault"]=>
+  int(7)
+}
+---- terse: compact ----
+object(TestStruct) (11) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(0)
+  ["aString"]=>
+  string(0) ""
+  ["aDouble"]=>
+  float(0)
+  ["anInt64"]=>
+  int(0)
+  ["aList"]=>
+  vec(0) {
+  }
+  ["aMap"]=>
+  dict(0) {
+  }
+  ["aSet"]=>
+  dict(0) {
+  }
+  ["anByte"]=>
+  int(0)
+  ["anI16"]=>
+  int(0)
+  ["anI64CustomDefault"]=>
+  int(0)
+}
+---- terse: binary ----
+object(TestStruct) (11) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(0)
+  ["aString"]=>
+  string(0) ""
+  ["aDouble"]=>
+  float(0)
+  ["anInt64"]=>
+  int(0)
+  ["aList"]=>
+  vec(0) {
+  }
+  ["aMap"]=>
+  dict(0) {
+  }
+  ["aSet"]=>
+  dict(0) {
+  }
+  ["anByte"]=>
+  int(0)
+  ["anI16"]=>
+  int(0)
+  ["anI64CustomDefault"]=>
+  int(0)
 }

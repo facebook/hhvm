@@ -59,11 +59,11 @@ string(1) "e"
 bool(true)
 string(3) "Hel"
 string(3) "lo "
-string(8) "AB
-CD
+string(8) "AB%h{0d}
+CD%h{0d}
 "
-string(8) "AB
-CD
+string(8) "AB%h{0d}
+CD%h{0d}
 "
 vec(3) {
   string(4) "This"
@@ -94,7 +94,7 @@ string(10) "Alien     "
 string(10) "-=-=-Alien"
 string(10) "__Alien___"
 string(6) "Alien_"
-string(6) "Alien%r\x00%r"
+string(6) "Alien%h{00}"
 string(20) "-=-=-=-=-=-=-=-=-=-="
 string(57) "The quick brown fox<br />
 jumped over the lazy<br />
@@ -112,7 +112,7 @@ string(5) "& & &"
 string(8) "a test &"
 string(4) "c388"
 string(4) "c388"
-string(2) "%r\xce\x91%r"
+string(2) "%h{ce}%h{91}"
 string(4) "ce91"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
@@ -140,8 +140,8 @@ string(2) "AM"
 string(9) "AtestB10C"
 string(10) "0000001101"
 string(2) "09"
-string(17) "(foo%r\x00%rbar-bar%r\x00%rfoo)"
-string(5) "[a%r\x00%rb]"
+string(17) "(foo%h{00}bar-bar%h{00}foo)"
+string(5) "[a%h{00}b]"
 string(9) "AtestB10C"
 dict(1) {
   [0]=>

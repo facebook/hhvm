@@ -57,4 +57,15 @@ let exit
       try hook server_finale_data with
       | _ -> ())
     !hook_upon_clean_exit;
-  Stdlib.exit (Exit_status.exit_code exit_status)
+  let exit_code = Exit_status.exit_code exit_status in
+  (* What's the difference between [Stdlib.exit] and [exit]? The former first calls
+     all installed exit handlers and if any of them throw then it itself throws
+     rather than exiting; the latter skips exit handlers and for-sure throws.
+     As a concrete example: imagine if stdout has been closed, and we detect this
+     and try to call [Exit.exit Exit_status.Client_broken_pipe], but this first runs
+     exit-handlers before exiting, and one of the exit handlers attempts to flush
+     stdout, but the flush attempt raises an exception, and therefore we raise
+     an exception rather than exiting the program! That doesn't feel right. Therefore,
+     the following will guarantee to exit the program even if exit-handlers fail. *)
+  try Stdlib.exit exit_code with
+  | _ -> exit exit_code

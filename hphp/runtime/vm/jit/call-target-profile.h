@@ -38,12 +38,17 @@ struct ProfDataDeserializer;
  */
 struct CallTargetProfile {
 
+  struct Choice {
+    const Func* func;
+    double probability;
+  };
+
   void report(const Func* ar);
 
   static void reduce(CallTargetProfile& profile,
                      const CallTargetProfile& other);
 
-  const Func* choose(double& probability) const;
+  jit::vector<Choice> choose() const;
 
   std::string toString() const;
   folly::dynamic toDynamic() const;
@@ -60,7 +65,7 @@ struct CallTargetProfile {
 
   void init();
 
-  static const size_t kMaxEntries = 3;
+  static const size_t kMaxEntries = 6;
 
   Entry    m_entries[kMaxEntries];
   uint32_t m_untracked{0};
@@ -77,4 +82,3 @@ inline const StringData* callTargetProfileKey() {
 
 
 }}
-

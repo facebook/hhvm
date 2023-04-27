@@ -1,0 +1,60 @@
+# Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+usr/lib/*/libndbclient_static.a
+usr/lib/*/libndbclient.so
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_config_parameters_debug.h
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_debug.h
+usr/include/mysql/storage/ndb/ndb_types.h
+usr/include/mysql/storage/ndb/ndb_constants.h
+usr/include/mysql/storage/ndb/ndb_init.h
+usr/include/mysql/storage/ndb/ndb_version.h
+usr/include/mysql/storage/ndb/ndbapi/NdbReceiver.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbTransaction.hpp
+usr/include/mysql/storage/ndb/ndbapi/ndb_cluster_connection.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbScanOperation.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbIndexScanOperation.hpp
+usr/include/mysql/storage/ndb/ndbapi/ndberror.h
+usr/include/mysql/storage/ndb/ndbapi/NdbIndexOperation.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbIndexStat.hpp
+usr/include/mysql/storage/ndb/ndbapi/ndbapi_limits.h
+usr/include/mysql/storage/ndb/ndbapi/ndb_opt_defaults.h
+usr/include/mysql/storage/ndb/ndbapi/NdbError.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbInterpretedCode.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbBlob.hpp
+usr/include/mysql/storage/ndb/ndbapi/Ndb.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbApi.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbOperation.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbPool.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbScanFilter.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbRecAttr.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbDictionary.hpp
+usr/include/mysql/storage/ndb/ndbapi/NdbEventOperation.hpp
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_error.h
+usr/include/mysql/storage/ndb/mgmapi/ndbd_exit_codes.h
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_config_parameters.h
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_config_parameters_debug.h
+usr/include/mysql/storage/ndb/mgmapi/mgmapi.h
+usr/include/mysql/storage/ndb/mgmapi/ndb_logevent.h
+usr/include/mysql/storage/ndb/mgmapi/mgmapi_debug.h
+# legal
+usr/share/mysql-@MYSQL_BASE_VERSION@/LICENSE usr/share/doc/ndbclient-dev/
+usr/share/mysql-@MYSQL_BASE_VERSION@/README usr/share/doc/ndbclient-dev/

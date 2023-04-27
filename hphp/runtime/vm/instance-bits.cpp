@@ -129,10 +129,10 @@ void initImpl(F&& func) {
   // into their class lists, but in practice most Classes will already be
   // created by now and this process is very fast.
   SharedMutex::WriteHolder clsLocker(g_clsInitLock);
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
   });
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsIndex(lookup(cls->name()));
   });
 
@@ -151,7 +151,7 @@ void init() {
       // current set of counts as quickly as possible to minimize
       // blocking other threads still trying to profile instance
       // checks.
-      typedef std::pair<const StringData*, unsigned> Count;
+      using Count = std::pair<const StringData*, unsigned>;
       std::vector<Count> counts;
       uint64_t total = 0;
       {

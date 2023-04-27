@@ -1,3 +1,5 @@
 <?hh
 
-module Bing {>
+<<file: __EnableUnstableFeatures('modules')>>
+
+new module Bing {>

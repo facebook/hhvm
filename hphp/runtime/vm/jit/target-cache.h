@@ -23,7 +23,7 @@ struct ActRec;
 struct ArrayData;
 struct Class;
 struct Func;
-struct NamedEntity;
+struct NamedType;
 struct StringData;
 struct TypedValue;
 }
@@ -105,10 +105,11 @@ struct StaticMethodCache {
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand,
-                            const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth, const Class* ctx);
+                            const NamedType* ne, const StringData* cls,
+                            const StringData* meth, const Class* ctx,
+                            const Func* callerFunc);
 };
 
 struct StaticMethodFCache {
@@ -117,9 +118,10 @@ struct StaticMethodFCache {
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
-                            const StringData* meth, const Class* ctx);
+                            const StringData* meth, const Class* ctx,
+                            const Func* callerFunc);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -139,11 +141,13 @@ struct Entry {
 
 const Func* handleDynamicCall(const Class* cls,
                               const StringData* name,
-                              const Class* ctx);
+                              const Class* ctx,
+                              const Func* callerFunc);
 
 const Func* handleStaticCall(const Class* cls,
                              const StringData* name,
                              const Class* ctx,
+                             const Func* callerFunc,
                              rds::Handle mce_handle,
                              uintptr_t mcePrime);
 

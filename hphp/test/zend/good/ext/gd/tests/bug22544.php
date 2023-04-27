@@ -1,12 +1,12 @@
 <?hh <<__EntryPoint>> function main(): void {
 $dest = __SystemLib\hphp_test_tmppath('bug22544.png');
 @unlink($dest);
-$image = imageCreateTruecolor(640, 100);
-$transparent = imageColorAllocate($image, 0, 0, 0);
-$red = imageColorAllocate($image, 255, 50, 50);
-imageColorTransparent($image, $transparent);
-imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
-imagePng($image, $dest);
+$image = imagecreatetruecolor(640, 100);
+$transparent = imagecolorallocate($image, 0, 0, 0);
+$red = imagecolorallocate($image, 255, 50, 50);
+imagecolortransparent($image, $transparent);
+imagefilledrectangle($image, 0, 0, 640-1, 100-1, $transparent);
+imagepng($image, $dest);
 echo md5_file($dest) . "\n";
 @unlink($dest);
 }

@@ -3,7 +3,7 @@
 trait T {
   abstract static function foo();
   static function bar() {
-    return class_meth(static::class, 'foo');
+    return static::foo<>;
   }
 }
 class C {

@@ -185,20 +185,31 @@ let exec_checked
     ?(input : string option)
     ?(env : string array option)
     ?(timeout : float option)
+    ?(cancel : unit Lwt.t option)
     (program : Exec_command.t)
     (args : string array) : (Process_success.t, Process_failure.t) Lwt_result.t
     =
-  let program = Exec_command.to_string program in
-  let command_line =
-    let args =
-      args |> Array.map ~f:(fun x -> " " ^ x) |> String.concat_array ~sep:""
-    in
-    program ^ args
-  in
   let start_time = Unix.gettimeofday () in
-  let process =
-    let command = (program, Array.append [| program |] args) in
-    Lwt_process.open_process_full command ?timeout ?env
+  let command =
+    match (program, args) with
+    | (Exec_command.Shell, [| script |]) -> Lwt_process.shell script
+    | (Exec_command.Shell, _) ->
+      failwith "Exec_command.Shell needs exactly one arg"
+    | (program, args) ->
+      let program = Exec_command.to_string program in
+      (program, Array.append [| program |] args)
+  in
+  let command_line = snd command |> String.concat_array ~sep:" " in
+  let process = Lwt_process.open_process_full command ?timeout ?env in
+  let cancel_watcher =
+    match cancel with
+    | None -> []
+    | Some cancel ->
+      [
+        (let%lwt () = cancel in
+         process#kill Sys.sigkill;
+         Lwt.return_unit);
+      ]
   in
   (let%lwt (exn, stdout, stderr) =
      let exn = ref None in
@@ -221,6 +232,13 @@ let exec_checked
            let%lwt result = Lwt_io.read process#stderr in
            stderr := result;
            Lwt.return_unit
+         and () =
+           Lwt.choose
+             (cancel_watcher
+             @ [
+                 (let%lwt _ = process#status in
+                  Lwt.return_unit);
+               ])
          in
          Lwt.return_unit
        with

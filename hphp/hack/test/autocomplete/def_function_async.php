@@ -1,0 +1,3 @@
+<?hh
+
+async fAUTO332

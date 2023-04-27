@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x): MyAlias {
+function f(mixed $x): <<__Soft>> MyAlias {
   return $x;
 }
 

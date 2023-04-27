@@ -33,6 +33,7 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
         | TKTrait -> SI_Trait
         | TKMixed -> SI_Mixed
         | TKRecord -> SI_Unknown
+        | TKTypeAlias -> SI_Typedef
         | _ -> SI_Unknown
       in
       let is_abstract = info.flags land flags_abstract > 0 in
@@ -70,17 +71,6 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
           sif_is_final = false;
         })
   in
-  (* Handle typedefs *)
-  let types_mapped =
-    List.map facts.type_aliases ~f:(fun typename ->
-        {
-          sif_name = typename;
-          sif_kind = SI_Typedef;
-          sif_filepath = relative_path_str;
-          sif_is_abstract = false;
-          sif_is_final = false;
-        })
-  in
   (* Handle constants *)
   let constants_mapped =
     List.map facts.constants ~f:(fun constantname ->
@@ -93,9 +83,7 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
         })
   in
   (* Return unified results *)
-  List.append classes_mapped functions_mapped
-  |> List.append types_mapped
-  |> List.append constants_mapped
+  List.append classes_mapped functions_mapped |> List.append constants_mapped
 
 (* Parse one single file and capture information about it *)
 let parse_one_file
@@ -174,7 +162,7 @@ let entry =
 
 (* Create one worker per cpu *)
 let init_workers () =
-  let nbr_procs = Sys_utils.nproc () in
+  let nbr_procs = Sys_utils.nbr_procs in
   let gc_control = GlobalConfig.gc_control in
   let config = SharedMem.default_config in
   let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
@@ -262,7 +250,7 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
         Sys_utils.collect_paths
           begin
             fun filename ->
-            Str.string_match (Str.regexp "[./a-zA-Z0-9_]+.json") filename 0
+              Str.string_match (Str.regexp "[./a-zA-Z0-9_]+.json") filename 0
           end
           repo_name
     in
@@ -278,14 +266,7 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
          * an integration test that's using a fake repository.  Don't do anything! *)
       if Disk.file_exists (Path.to_string hhconfig_path) then
         let options = ServerArgs.default_options ~root:ctxt.repo_folder in
-        let (hhconfig, _) =
-          ServerConfig.load
-            ~silent:ctxt.silent
-            (Relative_path.create
-               Relative_path.Root
-               (Path.to_string hhconfig_path))
-            options
-        in
+        let (hhconfig, _) = ServerConfig.load ~silent:ctxt.silent options in
         let popt = ServerConfig.parser_options hhconfig in
         let ctxt =
           { ctxt with namespace_map = ParserOptions.auto_namespace_map popt }

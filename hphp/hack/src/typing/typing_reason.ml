@@ -129,6 +129,7 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rtype_variable_error : Pos.t -> locl_phase t_
   | Rglobal_type_variable_generics :
       Pos_or_decl.t * string * string
       -> 'phase t_
@@ -136,6 +137,7 @@ type _ t_ =
   | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
+  | Rshape_literal : Pos.t -> locl_phase t_
   | Renforceable : Pos_or_decl.t -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
@@ -155,6 +157,11 @@ type _ t_ =
   | Rrigid_tvar_escape :
       Pos.t * string * string * locl_phase t_
       -> locl_phase t_
+  | Ropaque_type_from_module :
+      Pos_or_decl.t * string * locl_phase t_
+      -> locl_phase t_
+  | Rmissing_class : Pos.t -> locl_phase t_
+  | Rinvalid : 'phase t_
 
 type t = locl_phase t_
 
@@ -192,6 +199,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rsupport_dynamic_type p -> Rsupport_dynamic_type p
   | Rglobal_type_variable_generics (p, tp, n) ->
     Rglobal_type_variable_generics (p, tp, n)
+  | Rinvalid -> Rinvalid
 
 let arg_pos_str ap =
   match ap with
@@ -207,6 +215,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   let p = to_pos r in
   match r with
   | Rnone -> [(p, prefix)]
+  | Rinvalid -> [(p, prefix)]
   | Rwitness _ -> [(p, prefix)]
   | Rwitness_from_decl p -> [(p, prefix)]
   | Ridx (_, r2) ->
@@ -404,6 +413,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         r_inst
   | Rtype_variable _ ->
     [(p, prefix ^ " because a type could not be determined here")]
+  | Rtype_variable_error _ -> [(p, prefix ^ " because there was another error")]
   | Rtype_variable_generics (_, tp_name, s)
   | Rglobal_type_variable_generics (_, tp_name, s) ->
     [
@@ -459,7 +469,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rexpr_dep_type (r, p, e) ->
     to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]
   | Rtconst_no_cstr (_, n) ->
-    [(p, prefix ^ " because the type constant " ^ n ^ " has no constraints")]
+    [(p, prefix ^ " because the type constant " ^ n ^ " lacks a constraint")]
   | Rpredicated (_, f) ->
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
   | Ris _ -> [(p, prefix ^ " from this `is` expression test")]
@@ -560,6 +570,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         ^ Markdown_lite.md_codify fun_name
         ^ " expects a shape" );
     ]
+  | Rshape_literal _ -> [(p, prefix)]
   | Renforceable _ -> [(p, prefix ^ " because it is an unenforceable type")]
   | Rdestructure _ ->
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
@@ -595,6 +606,15 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ( Pos_or_decl.of_raw_pos p,
       prefix ^ " because " ^ tvar ^ " escaped from " ^ what )
     :: to_string ("  where " ^ tvar ^ " originates from") r_orig
+  | Ropaque_type_from_module (p, module_, r_orig) ->
+    ( p,
+      prefix
+      ^ " because this is an internal symbol from module "
+      ^ module_
+      ^ ", which is opaque outside of the module." )
+    :: to_string "The type originated from here" r_orig
+  | Rmissing_class p ->
+    [(Pos_or_decl.of_raw_pos p, prefix ^ " because class was missing")]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -606,7 +626,9 @@ and to_pos : type ph. ph t_ -> Pos_or_decl.t =
 and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
   match r with
-  | Rnone -> Pos_or_decl.none
+  | Rnone
+  | Rinvalid ->
+    Pos_or_decl.none
   | Rret_fun_kind_from_decl (p, _)
   | Rhint p
   | Rwitness_from_decl p
@@ -676,8 +698,10 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rincdec_dynamic p
   | Rtype_variable p
   | Rtype_variable_generics (p, _, _)
+  | Rtype_variable_error p
   | Rlambda_param (p, _)
   | Rshape (p, _)
+  | Rshape_literal p
   | Rdestructure p
   | Rkey_value_collection_key p
   | Rsplice p
@@ -697,6 +721,8 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
     to_raw_pos r
   | Rdynamic_coercion r -> to_raw_pos r
   | Rdynamic_partial_enforcement (p, _, _) -> p
+  | Ropaque_type_from_module (p, _, _) -> p
+  | Rmissing_class p -> Pos_or_decl.of_raw_pos p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -806,11 +832,13 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"
   | Rtype_variable_generics _ -> "Rtype_variable_generics"
+  | Rtype_variable_error _ -> "Rtype_variable_error"
   | Rglobal_type_variable_generics _ -> "Rglobal_type_variable_generics"
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"
   | Rshape _ -> "Rshape"
+  | Rshape_literal _ -> "Rshape_literal"
   | Renforceable _ -> "Renforceable"
   | Rdestructure _ -> "Rdestructure"
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
@@ -826,6 +854,9 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rsupport_dynamic_type _ -> "Rsupport_dynamic_type"
   | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
   | Rrigid_tvar_escape _ -> "Rrigid_tvar_escape"
+  | Ropaque_type_from_module _ -> "Ropaque_type_from_module"
+  | Rmissing_class _ -> "Rmissing_class"
+  | Rinvalid -> "Rinvalid"
 
 let pp fmt r =
   let pos = to_raw_pos r in

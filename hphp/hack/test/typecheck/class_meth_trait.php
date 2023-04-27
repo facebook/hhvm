@@ -13,6 +13,6 @@ trait MyTestTrait {
 final class MyTestClass {
   use MyTestTrait;
   public static function derp(): void {
-    class_meth(self::class, 'genTest');
+    self::genTest<>;
   }
 }

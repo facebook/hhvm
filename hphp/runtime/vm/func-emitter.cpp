@@ -57,10 +57,10 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
+  , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
@@ -82,10 +82,10 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
+  , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
@@ -202,8 +202,13 @@ void FuncEmitter::finish() {
 const StaticString
   s_construct("__construct"),
   s_DynamicallyCallable("__DynamicallyCallable"),
-  s_PolicyShardedMemoize("__PolicyShardedMemoize"),
-  s_PolicyShardedMemoizeLSB("__PolicyShardedMemoizeLSB");
+  s_Memoize("__Memoize"),
+  s_MemoizeLSB("__MemoizeLSB"),
+  s_KeyedByIC("KeyedByIC"),
+  s_MakeICInaccessible("MakeICInaccessible"),
+  s_SoftMakeICInaccessible("SoftMakeICInaccessible"),
+  s_Uncategorized("Uncategorized"),
+  s_SoftInternal("__SoftInternal");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -236,6 +241,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
   if (!coeffectRules.empty()) attrs |= AttrHasCoeffectRules;
 
+  if (attrs & AttrInternal &&
+      userAttributes.find(s_SoftInternal.get()) != userAttributes.end()) {
+    attrs |= AttrInternalSoft;
+  }
+
   auto const dynCallSampleRate = [&] () -> Optional<int64_t> {
     if (!(attrs & AttrDynamicallyCallable)) return {};
 
@@ -265,6 +275,47 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     preClass && name == s_construct.get());
   f->m_requiredCoeffects = coeffectsInfo.first.toRequired();
 
+  Func::MemoizeICType icType = Func::MemoizeICType::NoIC;
+  uint32_t softMakeICInaccessibleSampleRate = 1;
+  if (isMemoizeWrapper || isMemoizeWrapperLSB) {
+    auto const getICType = [&] (TypedValue tv) {
+      assertx(tvIsVec(tv));
+      IterateV(tv.m_data.parr, [&](TypedValue elem) {
+        if (tvIsString(elem)) {
+          assertx(icType == Func::MemoizeICType::NoIC);
+          if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::KeyedByIC;
+          } else if (elem.m_data.pstr->same(s_MakeICInaccessible.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::MakeICInaccessible;
+          } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
+            assertx(tv.m_data.parr->size() <= 2);
+            icType = Func::MemoizeICType::SoftMakeICInaccessible;
+          } else if (elem.m_data.pstr->same(s_Uncategorized.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::NoIC; // explicitly so
+          } else {
+            assertx(false && "invalid string");
+          }
+        } else if (tvIsInt(elem)) {
+          assertx(icType == Func::MemoizeICType::SoftMakeICInaccessible);
+          assertx(softMakeICInaccessibleSampleRate == 1);
+          softMakeICInaccessibleSampleRate =
+            std::max(1u, static_cast<uint32_t>(elem.m_data.num));
+        } else {
+          assertx(false && "invalid input");
+        }
+      });
+    };
+    auto const attrName = isMemoizeWrapperLSB ? s_MemoizeLSB : s_Memoize;
+    auto const it = userAttributes.find(attrName.get());
+    if (it != userAttributes.end()) {
+      getICType(it->second);
+      assertx((icType & 0x3) == icType);
+    }
+  }
+
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
@@ -274,9 +325,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
+    softMakeICInaccessibleSampleRate > 1 ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
-    (docComment && !docComment->empty());
+    (docComment && !docComment->empty()) ||
+    requiresFromOriginalModule;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -296,22 +349,21 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_sn = m_sn;
     ex->m_line2 = line2;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
+    ex->m_softMakeICInaccessibleSampleRate = softMakeICInaccessibleSampleRate;
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
-    ex->m_allFlags.m_isPolicyShardedMemoize = false;
+    ex->m_allFlags.m_memoizeICType = Func::MemoizeICType::NoIC;
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
     ex->m_docComment = docComment;
+    ex->m_originalModuleName = originalModuleName;
   }
 
   std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
-    if (pi.isVariadic()) {
-      pi.builtinType = KindOfVec;
-    }
     fParams.push_back(pi);
     auto const& fromUBs = params[i].upperBounds;
     if (!fromUBs.empty()) {
@@ -354,15 +406,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
+  f->shared()->m_allFlags.m_memoizeICType = icType;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
-
-  if ((isMemoizeWrapper &&
-       userAttributes.find(s_PolicyShardedMemoize.get()) != userAttributes.end()) ||
-      (isMemoizeWrapperLSB &&
-       userAttributes.find(s_PolicyShardedMemoizeLSB.get()) != userAttributes.end())) {
-    f->shared()->m_allFlags.m_isPolicyShardedMemoize = true;
-  }
-
 
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);
@@ -398,8 +443,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (isNative) {
     auto const ex = f->extShared();
-
-    ex->m_hniReturnType = hniReturnType;
 
     auto const info = getNativeInfo();
 
@@ -668,7 +711,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (a)
     (m_bclen)
     (staticCoeffects)
-    (hniReturnType)
     (repoReturnType)
     (repoAwaitedReturnType)
     (docComment)
@@ -679,9 +721,10 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
 
     (params)
     (m_localNames, [](auto s) { return s; })
-    (ehtab,
+    .delta(
+      ehtab,
       [&](const EHEnt& prev, EHEnt cur) -> EHEnt {
-        if (!SerDe::deserializing) {
+        if constexpr (!SerDe::deserializing) {
           cur.m_handler -= cur.m_past;
           cur.m_past -= cur.m_base;
           cur.m_base -= prev.m_base;
@@ -698,6 +741,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (retUserType)
     (retUpperBounds)
     (originalFilename)
+    (originalModuleName)
     (coeffectRules)
     ;
 
@@ -733,7 +777,7 @@ void FuncEmitter::serde(SerDe& sd, bool lazy) {
       : createLineTable(m_sourceLocTab, m_bclen);
     sd.withSize(
       [&] {
-        sd(
+        sd.delta(
           lines,
           [&] (const LineEntry& prev, const LineEntry& curDelta) {
             return LineEntry {
@@ -773,7 +817,7 @@ void FuncEmitter::deserializeLineTable(BlobDecoder& decoder,
                                        LineTable& lineTable) {
   decoder.withSize(
     [&] {
-      decoder(
+      decoder.delta(
         lineTable,
         [&] (const LineEntry& prev, const LineEntry& curDelta) {
           return LineEntry {

@@ -26,7 +26,7 @@ type ('a, 'b) loop_inputs = {
 
 type ('a, 'b) loop_outputs = {
   did_read_disk_changes: bool;
-  rechecked_count: int;
+  total_changed_files_count: int;
   total_rechecked_count: int;
   last_actual_total_rechecked_count: int option;
   new_client_response: 'a option;

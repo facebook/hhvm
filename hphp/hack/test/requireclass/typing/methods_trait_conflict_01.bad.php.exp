@@ -1,0 +1,14 @@
+File "methods_trait_conflict_01.bad.php", line 23, characters 3-21:
+Cannot use unstable feature: `require_class` (Parsing[1002])
+File "methods_trait_conflict_01.bad.php", line 24, characters 7-17:
+Some members in class `TParentDemo` are incompatible with those declared in type `TChild1Demo` (Typing[4341])
+  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
+  The method `asEnt` is not compatible with the overridden method
+  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
+  `TChild2Demo` and `TChild1Demo` both declare ambiguous implementations of `asEnt`.
+  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
+  `TChild2Demo`'s definition is here.
+  File "methods_trait_conflict_01.bad.php", line 29, characters 19-23:
+  `TChild1Demo`'s definition is here.
+  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
+  Redeclare `asEnt` in `TParentDemo` with a compatible signature.

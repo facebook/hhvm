@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -32,6 +33,7 @@
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
@@ -278,6 +280,14 @@ public:
    */
   bool hasCacheRef() const;
 
+  /*
+   * When Eval.EnableDecl is set we may have multiple versions of the same unit
+   * cached under a particular SHA-1 because of differing versions of
+   * dependencies in different repos.
+   */
+  Unit* nextCachedByHash() const;
+  void setNextCachedByHash(Unit* u);
+
   /////////////////////////////////////////////////////////////////////////////
   // Idle unit reaping
 
@@ -344,7 +354,7 @@ public:
   rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Litstrs and NamedEntitys.                                          [const]
+  // Litstrs and NamedTypes/Funcs.                                      [const]
 
   /*
    * Size of the Unit's litstr table.
@@ -356,8 +366,10 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
 
-  const NamedEntity* lookupNamedEntityId(Id id) const;
-  NamedEntityPair lookupNamedEntityPairId(Id id) const;
+  const NamedType* lookupNamedTypeId(Id id) const;
+  const NamedFunc* lookupNamedFuncId(Id id) const;
+  NamedTypePair lookupNamedTypePairId(Id id) const;
+  NamedFuncPair lookupNamedFuncPairId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]
@@ -383,7 +395,8 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // PreClasses.
 
-  PreClass* lookupPreClassId(Id id) const;
+  PreClass* lookupPreClass(const StringData*) const;
+
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
 
@@ -491,6 +504,20 @@ public:
   void logTearing(int64_t nsecs);
 
   /*
+   * Log information about decls observed during compilation and any potential
+   * tearing that may be occurring.
+   *
+   * For a given unit `U' we say that:
+   *   - rdep tearing has occurred if we previously loaded decls from different
+   *     version of U in the same request. We have `torn' a reverse-dependency
+   *     of U.
+   *   - dep tearing has occurred if for a dependency `D' of U, we had
+   *     previously loaded bytecode from a different version of `D' in the same
+   *     request.
+   */
+  void logDeclInfo() const;
+
+  /*
    * Get parse/runtime failure information if this unit is created as
    * a result of one.
    */
@@ -512,6 +539,12 @@ public:
 
   // Total number of currently allocated Units
   static size_t liveUnitCount() { return s_liveUnits; }
+
+  static constexpr ptrdiff_t moduleNameOff() {
+    return offsetof(Unit, m_moduleName);
+  }
+
+  const std::vector<DeclDep>& deps() const { return m_deps; }
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -549,11 +582,16 @@ private:
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<RATArrayOrToken>> m_rats;
 
-  Id m_entryPointId{kInvalidId};
-
   /*
    * The remaining fields are cold, and arbitrarily ordered.
    */
+
+  hphp_fast_map<
+    const StringData*,
+    PreClassPtr,
+    string_data_hash,
+    string_data_isame
+  > m_nameToPreClass; // Lookup PreClass by name
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   SHA1 m_sha1;
@@ -562,12 +600,17 @@ private:
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
   const StringData* m_moduleName{nullptr};
+  std::vector<DeclDep> m_deps;
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
+
+  Id m_entryPointId{kInvalidId};
 
   static std::atomic<size_t> s_createdUnits;
   static std::atomic<size_t> s_liveUnits;
 };
+
+static_assert(CheckSize<Unit, use_lowptr ? 216 : 224>(), "");
 
 struct UnitExtended : Unit {
   friend struct Unit;
@@ -587,7 +630,11 @@ struct UnitExtended : Unit {
   // Used by Eval.IdleUnitTimeoutSecs:
   std::atomic<int64_t> m_lastTouchRequest{0};
   std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
+
+  std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
+
+static_assert(CheckSize<UnitExtended, use_lowptr ? 272 : 280>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function main(string $x = null) {
+function main(?string $x = null) {
   if (!$x) {
     var_dump($x);
   }

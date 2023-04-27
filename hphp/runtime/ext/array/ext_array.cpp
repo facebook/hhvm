@@ -46,6 +46,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
+#include <folly/lang/UncaughtExceptions.h>
 #include <vector>
 
 namespace HPHP {
@@ -465,12 +466,6 @@ TypedValue HHVM_FUNCTION(array_keys,
 
 namespace {
 
-void php_array_merge(Array& arr1, const Array& arr2) {
-  assertx(arr1->isVanillaDict());
-  arr1.reset(!arr2.empty() ? VanillaDict::Merge(arr1.get(), arr2.get())
-                           : VanillaDict::Renumber(arr1.get()));
-}
-
 void php_array_merge_recursive(Array& arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
@@ -580,34 +575,6 @@ TypedValue HHVM_FUNCTION(array_map,
     }
   }
   return tvReturn(ret_ai.toVariant());
-}
-
-TypedValue HHVM_FUNCTION(array_merge,
-                         const Variant& array1,
-                         const Array& arrays /* = null array */) {
-  getCheckedContainer(array1);
-  Array ret = Array::CreateDict();
-  php_array_merge(ret, arr_array1);
-
-  bool success = true;
-  IterateV(
-    arrays.get(),
-    [&](TypedValue v) -> bool {
-      if (!tvIsArrayLike(v)) {
-        raise_expected_array_warning("array_merge");
-        success = false;
-        return true;
-      }
-
-      php_array_merge(ret, asCArrRef(&v));
-      return false;
-    }
-  );
-
-  if (UNLIKELY(!success)) {
-    return make_tv<KindOfNull>();
-  }
-  return tvReturn(std::move(ret));
 }
 
 TypedValue HHVM_FUNCTION(array_merge_recursive,
@@ -1435,7 +1402,7 @@ TypedValue HHVM_FUNCTION(range,
 
 static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   auto callback = static_cast<const Variant*>(data);
-  return vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt32();
+  return (int)vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt64();
 }
 
 #define COMMA ,
@@ -1510,16 +1477,6 @@ static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
   for (ArrayIter iter(container); iter; ++iter) {
     auto const c = iter.secondValPlus();
     addToSetHelper(st, c, strTv, true);
-  }
-}
-
-static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
-                                     const Variant& container) {
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  bool convertIntLikeStrs = !isArrayLikeType(container.asTypedValue()->m_type);
-  for (ArrayIter iter(container); iter; ++iter) {
-    addToSetHelper(st, *iter.first().asTypedValue(), strTv, convertIntLikeStrs);
   }
 }
 
@@ -2078,44 +2035,6 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
   }
 }
 
-static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
-                                         TypedValue* containers,
-                                         int count) {
-  assertx(count >= 2);
-  auto mp = req::make<c_Map>();
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  TypedValue intOneTv = make_tv<KindOfInt64>(1);
-  bool convertIntLikeStrs = !isArrayLikeType(containers[0].m_type);
-  for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *key.asTypedValue();
-    // For each key k in containers[0], we add the key/value pair (k, 1)
-    // to the map. If a key (after various conversions) occurs more than
-    // once in the container, we'll simply overwrite the old entry and
-    // that's fine.
-    addToIntersectMapHelper(mp, c, &intOneTv, strTv, convertIntLikeStrs);
-  }
-  for (int pos = 1; pos < count; ++pos) {
-    convertIntLikeStrs = !isArrayLikeType(containers[pos].m_type);
-    for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      auto key = iter.first();
-      const auto& c = *key.asTypedValue();
-      updateIntersectMapHelper(mp, c, pos, strTv, convertIntLikeStrs);
-    }
-  }
-  for (ArrayIter iter(mp.get()); iter; ++iter) {
-    // For each key in the map, we copy the key to the set if the
-    // corresponding value is equal to pos exactly (which means it
-    // was present in all of the containers).
-    auto const tv = iter.secondValPlus();
-    assertx(type(tv) == KindOfInt64);
-    if (val(tv).num == count) {
-      st->add(*iter.first().asTypedValue());
-    }
-  }
-}
-
 TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
@@ -2503,6 +2422,17 @@ struct ArraySortTmp {
     if (!old->isVanilla()) {
       m_ad = BespokeArray::PostSort(old, m_ad);
     }
+
+    // Do not update the inout value if we are throwing an exception. Builtins
+    // receive inout values by a TV pointer. The JIT expects that the inout
+    // value will not be updated if the builtin throws. For example, it assumes
+    // that the type remains the same and if an exception is thrown, it uses the
+    // corresponding destructor.
+    if (folly::uncaught_exceptions() > m_excCount) {
+      if (m_ad != old) decRefArr(m_ad);
+      return;
+    }
+
     if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
     }
@@ -2518,6 +2448,7 @@ struct ArraySortTmp {
  private:
   TypedValue* m_tv;
   ArrayData* m_ad;
+  int m_excCount{folly::uncaught_exceptions()};
 };
 }
 
@@ -2787,7 +2718,9 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
       auto const index = key.toKey(arr).tv();
       if (!isNullType(index.m_type)) {
         auto const ret = arr->get(index, false);
-        return tvReturn(ret.is_init() ? tvAsCVarRef(ret) : def);
+        if (ret.is_init()) {
+          return tvReturn(tvAsCVarRef(ret));
+        }
       }
     } else {
       raise_error("hphp_array_idx: search must be an array");
@@ -3162,7 +3095,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_keys);
     HHVM_FALIAS(__SystemLib\\array_map, array_map);
     HHVM_FE(array_merge_recursive);
-    HHVM_FE(array_merge);
     HHVM_FE(array_replace_recursive);
     HHVM_FE(array_replace);
     HHVM_FE(array_pad);

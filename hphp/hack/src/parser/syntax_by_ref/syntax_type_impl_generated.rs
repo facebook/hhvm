@@ -55,6 +55,14 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_name(ctx: &C, parts: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleName(ctx.get_arena().alloc(ModuleNameChildren {
+            parts,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_simple_type_specifier(ctx: &C, specifier: Self) -> Self {
         let syntax = SyntaxVariant::SimpleTypeSpecifier(ctx.get_arena().alloc(SimpleTypeSpecifierChildren {
             specifier,
@@ -80,11 +88,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_prefixed_code_expression(ctx: &C, prefix: Self, left_backtick: Self, expression: Self, right_backtick: Self) -> Self {
+    fn make_prefixed_code_expression(ctx: &C, prefix: Self, left_backtick: Self, body: Self, right_backtick: Self) -> Self {
         let syntax = SyntaxVariant::PrefixedCodeExpression(ctx.get_arena().alloc(PrefixedCodeExpressionChildren {
             prefix,
             left_backtick,
-            expression,
+            body,
             right_backtick,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -119,9 +127,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, left_brace: Self, use_clauses: Self, enumerators: Self, right_brace: Self) -> Self {
+    fn make_enum_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, left_brace: Self, use_clauses: Self, enumerators: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(ctx.get_arena().alloc(EnumDeclarationChildren {
             attribute_spec,
+            modifiers,
             keyword,
             name,
             colon,
@@ -188,9 +197,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alias_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
+    fn make_alias_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, module_kw_opt: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(ctx.get_arena().alloc(AliasDeclarationChildren {
             attribute_spec,
+            modifiers,
+            module_kw_opt,
             keyword,
             name,
             generic_parameter,
@@ -213,6 +224,33 @@ where
             equal,
             context,
             semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_case_type_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, case_keyword: Self, type_keyword: Self, name: Self, generic_parameter: Self, as_: Self, bounds: Self, equal: Self, variants: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::CaseTypeDeclaration(ctx.get_arena().alloc(CaseTypeDeclarationChildren {
+            attribute_spec,
+            modifiers,
+            case_keyword,
+            type_keyword,
+            name,
+            generic_parameter,
+            as_,
+            bounds,
+            equal,
+            variants,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_case_type_variant(ctx: &C, bar: Self, type_: Self) -> Self {
+        let syntax = SyntaxVariant::CaseTypeVariant(ctx.get_arena().alloc(CaseTypeVariantChildren {
+            bar,
+            type_,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -415,39 +453,6 @@ where
         let syntax = SyntaxVariant::ClassishBody(ctx.get_arena().alloc(ClassishBodyChildren {
             left_brace,
             elements,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_precedence_item(ctx: &C, name: Self, keyword: Self, removed_names: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUsePrecedenceItem(ctx.get_arena().alloc(TraitUsePrecedenceItemChildren {
-            name,
-            keyword,
-            removed_names,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_alias_item(ctx: &C, aliasing_name: Self, keyword: Self, modifiers: Self, aliased_name: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseAliasItem(ctx.get_arena().alloc(TraitUseAliasItemChildren {
-            aliasing_name,
-            keyword,
-            modifiers,
-            aliased_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_conflict_resolution(ctx: &C, keyword: Self, names: Self, left_brace: Self, clauses: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseConflictResolution(ctx.get_arena().alloc(TraitUseConflictResolutionChildren {
-            keyword,
-            names,
-            left_brace,
-            clauses,
             right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -693,27 +698,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_if_statement(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self, elseif_clauses: Self, else_clause: Self) -> Self {
+    fn make_if_statement(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self, else_clause: Self) -> Self {
         let syntax = SyntaxVariant::IfStatement(ctx.get_arena().alloc(IfStatementChildren {
             keyword,
             left_paren,
             condition,
             right_paren,
             statement,
-            elseif_clauses,
             else_clause,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_elseif_clause(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self) -> Self {
-        let syntax = SyntaxVariant::ElseifClause(ctx.get_arena().alloc(ElseifClauseChildren {
-            keyword,
-            left_paren,
-            condition,
-            right_paren,
-            statement,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -1667,6 +1659,44 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_type_refinement(ctx: &C, type_: Self, keyword: Self, left_brace: Self, members: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::TypeRefinement(ctx.get_arena().alloc(TypeRefinementChildren {
+            type_,
+            keyword,
+            left_brace,
+            members,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_type_in_refinement(ctx: &C, keyword: Self, name: Self, type_parameters: Self, constraints: Self, equal: Self, type_: Self) -> Self {
+        let syntax = SyntaxVariant::TypeInRefinement(ctx.get_arena().alloc(TypeInRefinementChildren {
+            keyword,
+            name,
+            type_parameters,
+            constraints,
+            equal,
+            type_,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_ctx_in_refinement(ctx: &C, keyword: Self, name: Self, type_parameters: Self, constraints: Self, equal: Self, ctx_list: Self) -> Self {
+        let syntax = SyntaxVariant::CtxInRefinement(ctx.get_arena().alloc(CtxInRefinementChildren {
+            keyword,
+            name,
+            type_parameters,
+            constraints,
+            equal,
+            ctx_list,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_classname_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
         let syntax = SyntaxVariant::ClassnameTypeSpecifier(ctx.get_arena().alloc(ClassnameTypeSpecifierChildren {
             keyword,
@@ -1865,13 +1895,57 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, left_brace: Self, right_brace: Self) -> Self {
+    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, exports: Self, imports: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(ctx.get_arena().alloc(ModuleDeclarationChildren {
             attribute_spec,
-            keyword,
+            new_keyword,
+            module_keyword,
             name,
             left_brace,
+            exports,
+            imports,
             right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_exports(ctx: &C, exports_keyword: Self, left_brace: Self, exports: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleExports(ctx.get_arena().alloc(ModuleExportsChildren {
+            exports_keyword,
+            left_brace,
+            exports,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_imports(ctx: &C, imports_keyword: Self, left_brace: Self, imports: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleImports(ctx.get_arena().alloc(ModuleImportsChildren {
+            imports_keyword,
+            left_brace,
+            imports,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_membership_declaration(ctx: &C, module_keyword: Self, name: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleMembershipDeclaration(ctx.get_arena().alloc(ModuleMembershipDeclarationChildren {
+            module_keyword,
+            name,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_package_expression(ctx: &C, keyword: Self, name: Self) -> Self {
+        let syntax = SyntaxVariant::PackageExpression(ctx.get_arena().alloc(PackageExpressionChildren {
+            keyword,
+            name,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

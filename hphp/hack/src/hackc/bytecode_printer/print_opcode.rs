@@ -3,19 +3,55 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::print;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::io::Result;
+use std::io::Write;
+
 use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
-    FatalOp, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
-    Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp,
-    ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp,
-    SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
-};
+use hhbc::AdataId;
+use hhbc::BareThisOp;
+use hhbc::ClassName;
+use hhbc::CollectionType;
+use hhbc::ConstName;
+use hhbc::ContCheckOp;
+use hhbc::Dummy;
+use hhbc::FCallArgs;
+use hhbc::FatalOp;
+use hhbc::FloatBits;
+use hhbc::FunctionName;
+use hhbc::IncDecOp;
+use hhbc::InitPropOp;
+use hhbc::IsLogAsDynamicCallOp;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::MethodName;
+use hhbc::NumParams;
+use hhbc::OODeclExistsOp;
+use hhbc::ObjMethodOp;
+use hhbc::Opcode;
+use hhbc::PropName;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetOpOp;
+use hhbc::SetRangeOp;
+use hhbc::SilenceOp;
+use hhbc::SpecialClsRef;
+use hhbc::StackIndex;
+use hhbc::SwitchKind;
+use hhbc::TypeStructResolveOp;
 use hhbc_string_utils::float;
-use print_opcode::{PrintOpcode, PrintOpcodeTypes};
-use std::io::{Error, ErrorKind, Result, Write};
+use print_opcode::PrintOpcode;
+use print_opcode::PrintOpcodeTypes;
+
+use crate::print;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
@@ -84,6 +120,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w: &mut dyn Write,
         cases: &[Str<'_>],
         targets: &[Label],
+        _dummy_imm: &Dummy,
     ) -> Result<()> {
         if cases.len() != targets.len() {
             return Err(Error::new(
@@ -125,7 +162,6 @@ macro_rules! print_with_display {
     };
 }
 
-print_with_display!(print_class_num, ClassNum);
 print_with_display!(print_num_params, NumParams);
 print_with_display!(print_stack_index, StackIndex);
 
@@ -159,7 +195,7 @@ print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
     w.write_all(b"@")?;
-    print_str(w, id)
+    print_str(w, &id.as_ffi_str())
 }
 
 fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {
@@ -170,8 +206,8 @@ fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_double(w: &mut dyn Write, d: f64) -> Result<()> {
-    write!(w, "{}", float::to_string(d))
+fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {
+    write!(w, "{}", float::to_string(d.to_f64()))
 }
 
 fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
@@ -260,13 +296,6 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
 
 fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
-}
-
-fn print_param_name(w: &mut dyn Write, param_name: &ParamName<'_>) -> Result<()> {
-    match param_name {
-        ParamName::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
-        ParamName::ParamNamed(s) => w.write_all(s),
-    }
 }
 
 pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName<'_>) -> Result<()> {

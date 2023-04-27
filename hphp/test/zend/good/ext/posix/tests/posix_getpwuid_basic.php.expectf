@@ -1,0 +1,12 @@
+Basic test of POSIX getpwuid
+Dict
+(
+    [name] => %s
+    [passwd] => %s
+    [uid] => %d
+    [gid] => %d
+    [gecos] => %S
+    [dir] => %s
+    [shell] => %s
+)
+===DONE====

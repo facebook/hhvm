@@ -3,7 +3,7 @@
 /**
  * Error: async functions must return an Awaitable.
  */
-async function f(mixed $x): ~Awaitable<int> {
+async function f(mixed $x): <<__Soft>> ~Awaitable<int> {
   return $x;
 }
 

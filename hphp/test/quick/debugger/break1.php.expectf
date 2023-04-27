@@ -11,7 +11,7 @@ Breakpoint 1 reached at foo() on line 6 of %s/break1.php
    7   error_log($y);
 
 break list
-  1%r\x09%rALWAYS    on line 6 of break1.php
+  1%h{09}ALWAYS    on line 6 of break1.php
 continue
 test_break1_suffix
 break clear all
@@ -25,7 +25,7 @@ break break1.php:77
 Breakpoint 2 not set on line 77 of break1.php
 Because the line does not exist or is not executable code.
 break list
-  1%r\x09%rALWAYS    on line 7 of break1.php
+  1%h{09}ALWAYS    on line 7 of break1.php
 @ foo('test_break1')
 Breakpoint 1 reached at foo() on line 7 of %s/break1.php
    6   $y = $x.'_suffix';
@@ -45,10 +45,10 @@ break psp
 Breakpoint 4 set end of psp
 But won't break until connected to a server.
 break list
-  1%r\x09%rALWAYS    on line 7 of break1.php
-  2%r\x09%rALWAYS    start of request (unbound)
-  3%r\x09%rALWAYS    end of request or start of psp (unbound)
-  4%r\x09%rALWAYS    end of psp (unbound)
+  1%h{09}ALWAYS    on line 7 of break1.php
+  2%h{09}ALWAYS    start of request (unbound)
+  3%h{09}ALWAYS    end of request or start of psp (unbound)
+  4%h{09}ALWAYS    end of psp (unbound)
 break clear all
 All breakpoints are cleared.
 continue
@@ -132,13 +132,13 @@ break noSuchFunction()
 Breakpoint 1 set upon entering noSuchFunction()
 But won't break until function noSuchFunction has been loaded.
 break list
-  1%r\x09%rALWAYS    upon entering noSuchFunction() (unbound)
+  1%h{09}ALWAYS    upon entering noSuchFunction() (unbound)
 break clear all
 All breakpoints are cleared.
 break derived::pubObj()
 Breakpoint 1 set upon entering derived::pubObj()
 break list
-  1%r\x09%rALWAYS    upon entering derived::pubObj()
+  1%h{09}ALWAYS    upon entering derived::pubObj()
 @ $break6 = new derived()
 @ $break6->pubObj('test_break6')
 Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
@@ -160,7 +160,7 @@ Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
   13   }
 
 break list
-  1%r\x09%rALWAYS    upon entering cls::pubObj() if $x == 'yes'
+  1%h{09}ALWAYS    upon entering cls::pubObj() if $x == 'yes'
 b 12 if $x == 'yes sir'
 Breakpoint 2 set on line 12 of %s/break1.php if $x == 'yes sir'
 @ $this->pubObj('yes sir');
@@ -170,8 +170,8 @@ Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
   13   }
 
 break list
-  1%r\x09%rALWAYS    upon entering cls::pubObj() if $x == 'yes'
-  2%r\x09%rALWAYS    on line 12 of %s/break1.php if $x == 'yes sir'
+  1%h{09}ALWAYS    upon entering cls::pubObj() if $x == 'yes'
+  2%h{09}ALWAYS    on line 12 of %s/break1.php if $x == 'yes sir'
 break clear all
 All breakpoints are cleared.
 continue
@@ -179,7 +179,7 @@ pubObj:yes sir
 break derived::callPubObj=>cls::pubObj()
 Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj()
 break list
-  1%r\x09%rALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
+  1%h{09}ALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
 @ $break8 = new derived();
 @ $break8->pubObj('no')
 pubObj:no
@@ -196,7 +196,7 @@ pubObj:yes
 break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
 Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
 break list
-  1%r\x09%rALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+  1%h{09}ALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
 @ $break9 = new derived();
 @ $break9->callPubObj('no')
 pubObj:no
@@ -213,7 +213,7 @@ pubObj:yes
 break derived::callCallPubObj=>cls::pubObj()
 Breakpoint 1 set upon entering cls::pubObj() called by derived::callCallPubObj()
 break list
-  1%r\x09%rALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
+  1%h{09}ALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
 @ $break10 = new derived();
 @ $break10->callPubObj('no')
 pubObj:no

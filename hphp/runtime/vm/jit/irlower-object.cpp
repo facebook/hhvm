@@ -52,7 +52,6 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(AllocObj)
-IMPL_OPCODE_CALL(AllocObjReified)
 
 namespace {
 
@@ -278,6 +277,32 @@ void cgLockObj(IRLS& env, const IRInstruction* inst) {
   auto const mask = ~static_cast<int8_t>(ObjectData::IsBeingConstructed);
   v << andbim{mask, obj[HeaderAuxOffset], v.makeReg()};
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgClassHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  v << testbim{(int32_t)Class::reifiedGenericsMask(), cls[Class::allFlagsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
+void cgHasReifiedParent(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  v << testbim{(int32_t)Class::reifiedParentMask(), cls[Class::allFlagsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
+IMPL_OPCODE_CALL(GetClsRGProp)
 
 ///////////////////////////////////////////////////////////////////////////////
 

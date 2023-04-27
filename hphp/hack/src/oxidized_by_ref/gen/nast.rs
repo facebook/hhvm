@@ -3,34 +3,34 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<73587e2e04ab2fc38305b508cf4be969>>
+// @generated SignedSource<<0c4ffaa955942b79ac89fcaaea04e1e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
-
-use arena_trait::TrivialDrop;
-use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
-use serde::Deserialize;
-use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
-pub use crate::ast_defs::shape_map;
 
 pub use aast::ClassHint;
 pub use aast::Hint;
 pub use aast::Sid;
 pub use aast::TraitHint;
 pub use aast::XhpAttrHint;
+use arena_trait::TrivialDrop;
 pub use ast_defs::ShapeFieldName;
+use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
+pub use crate::ast_defs::shape_map;
+#[allow(unused_imports)]
+use crate::*;
+
+#[rust_to_ocaml(attr = "deriving show")]
 pub type Program<'a> = aast::Program<'a, (), ()>;
 
 pub type Def<'a> = aast::Def<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type Expr<'a> = aast::Expr<'a, (), ()>;
 
 pub type Expr_<'a> = aast::Expr_<'a, (), ()>;
@@ -39,8 +39,10 @@ pub type Stmt<'a> = aast::Stmt<'a, (), ()>;
 
 pub type Block<'a> = aast::Block<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type UserAttribute<'a> = aast::UserAttribute<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving eq")]
 pub type ClassId_<'a> = aast::ClassId_<'a, (), ()>;
 
 pub type Class_<'a> = aast::Class_<'a, (), ()>;
@@ -52,6 +54,10 @@ pub type Method_<'a> = aast::Method_<'a, (), ()>;
 pub type FileAttribute<'a> = aast::FileAttribute<'a, (), ()>;
 
 pub type Fun_<'a> = aast::Fun_<'a, (), ()>;
+
+pub type CaptureLid<'a> = aast::CaptureLid<'a, ()>;
+
+pub type Efun<'a> = aast::Efun<'a, (), ()>;
 
 pub type FunDef<'a> = aast::FunDef<'a, (), ()>;
 

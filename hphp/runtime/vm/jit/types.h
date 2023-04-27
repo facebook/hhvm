@@ -34,8 +34,8 @@ namespace HPHP::jit {
 /*
  * Core types.
  */
-typedef unsigned char* TCA; // "Translation cache address."
-typedef const unsigned char* CTCA;
+using TCA = unsigned char*; // "Translation cache address."
+using CTCA = const unsigned char*;
 
 using TcaRange = folly::Range<TCA>;
 
@@ -146,6 +146,24 @@ inline bool isPrologue(TransKind k) {
     case TransKind::Live:
     case TransKind::Profile:
     case TransKind::Optimize:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
+inline bool isOptimized(TransKind k) {
+  switch (k) {
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+      return true;
+
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::LivePrologue:
     case TransKind::Invalid:
       return false;
   }

@@ -26,8 +26,6 @@ class type ['env] type_mapper_type =
 
     method on_tany : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
 
-    method on_terr : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
-
     method on_tprim :
       'env -> Typing_reason.t -> Aast.tprim -> 'env * Typing_defs.locl_ty
 
@@ -97,7 +95,7 @@ class type ['env] type_mapper_type =
     method on_tshape :
       'env ->
       Typing_reason.t ->
-      Typing_defs.shape_kind ->
+      Typing_defs.locl_ty ->
       Typing_defs.locl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
       'env * Typing_defs.locl_ty
@@ -219,6 +217,24 @@ class type ['env] constraint_type_mapper_type =
       'env ->
       Typing_reason.t ->
       Typing_defs.has_member ->
+      'env * Typing_defs.constraint_type
+
+    method on_Thas_type_member :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.has_type_member ->
+      'env * Typing_defs.constraint_type
+
+    method on_Tcan_index :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.can_index ->
+      'env * Typing_defs.constraint_type
+
+    method on_Tcan_traverse :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.can_traverse ->
       'env * Typing_defs.constraint_type
 
     method on_Tdestructure :

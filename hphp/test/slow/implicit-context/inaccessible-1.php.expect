@@ -1,0 +1,24 @@
+  Before: C
+memoNoArgOK passed
+  After: C
+------------------------
+  Before: C
+memoOK passed
+  After: C
+------------------------
+  Before: C
+memoNoArgFail failed with: Implicit context is set to inaccessible
+  After: C
+------------------------
+  Before: C
+memoFail failed with: Implicit context is set to inaccessible
+  After: C
+------------------------
+  Before: C
+memoNoArgExn failed with: oh no exception
+  After: C
+------------------------
+  Before: C
+memoExn failed with: oh no exception
+  After: C
+------------------------

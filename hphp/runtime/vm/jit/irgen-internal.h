@@ -51,7 +51,8 @@ inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
 inline SSATmp* anyStackRegister(const IRGS& env) {
   if (sp(env)->inst()->is(DefRegSP)) return sp(env);
   assertx(sp(env)->inst()->is(DefFrameRelSP));
-  assertx(sp(env)->inst()->src(0)->inst()->is(DefFP, DefFuncEntryFP));
+  assertx(sp(env)->inst()->src(0)->inst()->is(
+    DefFP, DefFuncEntryFP, EnterFrame));
   return sp(env)->inst()->src(0);
 }
 
@@ -115,6 +116,12 @@ inline SSATmp* curCoeffects(IRGS& env) {
     return escapes.value() | RuntimeCoeffects::write_this_props().value();
   }();
   return gen(env, OrInt, coeffects, cns(env, mask));
+}
+
+inline RuntimeCoeffects providedCoeffectsKnownStatically(const Func* func) {
+  assertx(!func->hasCoeffectsLocal());
+  return RuntimeCoeffects::fromValue(func->requiredCoeffects().value() |
+                                     func->coeffectEscapes().value());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -548,7 +555,10 @@ inline SSATmp* popC(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   return assertType(pop(env, gc), TInitCell);
 }
 
-inline SSATmp* popCU(IRGS& env) { return assertType(pop(env), TCell); }
+inline SSATmp* popCU(IRGS& env) {
+  return assertType(pop(env, DataTypeGeneric), TCell);
+}
+
 inline SSATmp* popU(IRGS& env) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   gen(env, AssertStk, TUninit, IRSPRelOffsetData{offset}, sp(env));
@@ -559,7 +569,8 @@ inline void discard(IRGS& env, uint32_t n = 1) {
   env.irb->fs().decBCSPDepth(n);
 }
 
-inline void decRef(IRGS& env, SSATmp* tmp, DecRefProfileId locId) {
+inline void decRef(IRGS& env, SSATmp* tmp,
+                   DecRefProfileId locId = DecRefProfileId::Default) {
   gen(env, DecRef, DecRefData(static_cast<int>(locId)), tmp);
 }
 
@@ -567,8 +578,9 @@ inline void decRefNZ(IRGS& env, SSATmp* tmp, int locId=-1) {
   gen(env, DecRefNZ, DecRefData(locId), tmp);
 }
 
-inline void popDecRef(
-    IRGS& env, DecRefProfileId locId, GuardConstraint gc = DataTypeGeneric) {
+inline void popDecRef(IRGS& env,
+                      DecRefProfileId locId = DecRefProfileId::Default,
+                      GuardConstraint gc = DataTypeGeneric) {
   auto const val = pop(env, gc);
   decRef(env, val, locId);
 }
@@ -886,7 +898,7 @@ inline void decRefLocalsInline(IRGS& env) {
 inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->hasThisInBody()) return;
   auto const ctx = ldCtx(env);
-  decRef(env, ctx, DecRefProfileId::Default);
+  decRef(env, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ let rec prod l1 l2 =
   | ([], _)
   | (_, []) ->
     []
-  | (h1 :: t1, h2 :: t2) -> (h1, h2) :: prod [h1] t2 @ prod t1 l2
+  | (h1 :: t1, h2 :: t2) -> ((h1, h2) :: prod [h1] t2) @ prod t1 l2
 
 let run_1 data =
   let len = String.length data in

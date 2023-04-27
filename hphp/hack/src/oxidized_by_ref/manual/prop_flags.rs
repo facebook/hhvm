@@ -18,6 +18,7 @@ bitflags! {
         const NEEDS_INIT  = 1 << 4;
         const PHP_STD_LIB = 1 << 5;
         const READONLY    = 1 << 6;
+        const SAFE_GLOBAL_VARIABLE = 1 << 7;
     }
 }
 
@@ -40,14 +41,14 @@ impl PropFlags {
     pub fn is_lsb(&self) -> bool {
         self.contains(Self::LSB)
     }
+    pub fn is_safe_global_variable(&self) -> bool {
+        self.contains(Self::SAFE_GLOBAL_VARIABLE)
+    }
 }
 
 impl ocamlrep::ToOcamlRep for PropFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::OpaqueValue::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
     }
 }
 

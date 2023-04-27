@@ -5,7 +5,8 @@
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-8], "\\A"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = [];
        sc_implements =
        [(Rhint ([3:20-37]),
@@ -14,9 +15,8 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:49-51], "i"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint ([4:38-48]),
-                 (Tapply (([4:38-41], "\\HH\\vec"),
-                    [(Rhint ([4:42-47]), Tmixed)]))));
+          (Rhint ([4:38-48]),
+           (Tapply (([4:38-41], "\\HH\\vec"), [(Rhint ([4:42-47]), Tmixed)])));
           sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_sprops = [];
@@ -53,11 +53,12 @@
                        ~returns_readonly:false ~support_dynamic_type:false
                        ~readonly_this:false ~is_memoized:false
                        ~variadic:false);
-                     ft_ifc_decl = FDPolicied {PUBLIC} }));
+                     ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
+                     }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -65,7 +66,8 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([8:7-10], "\\Foo"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false;
         sc_consts =
@@ -79,7 +81,7 @@
         [{ Typing_defs_core.ua_name = ([7:3-4], "\\A");
            ua_classname_params = [] }
           ];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\Bar",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -87,7 +89,8 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([15:7-10], "\\Bar"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -96,7 +99,5 @@
         [{ Typing_defs_core.ua_name = ([12:3-4], "\\A");
            ua_classname_params = [] }
           ];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
-
-They matched!

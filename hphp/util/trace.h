@@ -160,6 +160,7 @@ namespace Trace {
       TM(intercept)     \
       TM(interpOne)     \
       TM(irlower)       \
+      TM(isame)         \
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \
@@ -183,6 +184,7 @@ namespace Trace {
       TM(regalloc)      \
       TM(region)        \
       TM(repo_autoload) \
+      TM(repo_file)     \
       TM(reusetc)       \
       TM(ringbuffer)    \
       TM(runtime)       \
@@ -209,6 +211,7 @@ namespace Trace {
       TM(vasm_copy)     \
       TM(vasm_graph_color) \
       TM(vasm_phi)      \
+      TM(vfs)           \
       TM(watchman)      \
       TM(xenon)         \
       TM(xls)           \

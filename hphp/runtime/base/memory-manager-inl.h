@@ -264,7 +264,8 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
-  assertx(memset(ptr, kSmallFreeFill, bytes));
+  if (debug) debugFreeFill(ptr, bytes);
+
   auto clamped = std::min(index, kNumSmallSizes);
   if (LIKELY(m_freelists[clamped].head != nullptr)) {
     m_freelists[clamped].push(ptr);
@@ -381,11 +382,6 @@ inline bool MemoryManager::empty() const {
 
 inline bool MemoryManager::contains(const void* p) const {
   return m_heap.contains(p);
-}
-
-inline HeapObject* MemoryManager::find(const void* p) {
-  initFree();
-  return m_heap.find(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

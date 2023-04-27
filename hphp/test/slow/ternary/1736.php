@@ -2,7 +2,7 @@
 
 class X {
   public $exp_info;
-  public function __construct(varray $exp_info = null) {
+  public function __construct(?varray $exp_info = null) {
     $this->exp_info = $exp_info ?: varray[];
   }
 }

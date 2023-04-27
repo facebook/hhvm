@@ -10,7 +10,7 @@ class B {
 class C extends B implements I {
   const k = 42;
 
-  static $s = "s";
+  public static $s = "s";
 
   public $p0;
   public $p1 = null;

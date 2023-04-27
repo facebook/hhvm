@@ -40,7 +40,6 @@ enum A: int {
   double = 1;
   echo = 1;
   else = 1;
-  elseif = 1;
   empty = 1;
   enddeclare = 1;
   endfor = 1;
@@ -148,8 +147,6 @@ A::do;
 A::double;
 A::echo;
 A::else;
-A::elseif;
-A::empty;
 A::enddeclare;
 A::endfor;
 A::endforeach;

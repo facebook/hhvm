@@ -39,7 +39,7 @@ module SyntaxKind (SC : SC_S) :
 
   type original_sc_r = SC.r [@@deriving show]
 
-  type t = SC.t [@@deriving show]
+  type t = SC.t [@@deriving show, sexp_of]
 
   type r = SK.t * SC.r [@@deriving show]
 

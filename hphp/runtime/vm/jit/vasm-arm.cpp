@@ -277,7 +277,6 @@ struct Vgen {
 
   // vm entry abi
   void emit(const inittc& /*i*/) {}
-  void emit(const leavetc& i);
 
   // exceptions
   void emit(const landingpad& /*i*/) {}
@@ -301,6 +300,7 @@ struct Vgen {
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const andqi64& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const btrq& i) { a->Bic(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -309,9 +309,9 @@ struct Vgen {
   // extend their arguments--these instructions are lowered to cmp{lq}[i] if
   // the comparison is not narrow or not equality/inequality
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), static_cast<uint8_t>(i.s0.b())); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), i.s0.ub()); }
   void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpwi& i) { a->Cmp(W(i.s1), static_cast<uint16_t>(i.s0.w())); }
+  void emit(const cmpwi& i) { a->Cmp(W(i.s1), i.s0.uw()); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -665,8 +665,16 @@ void Vgen::patch(Venv& env) {
     patch(addr, target);
   }
   for (auto const& p : env.leas) {
-    (void)p;
-    not_implemented();
+    auto addr = env.text.toDestAddress(p.instr);
+    auto const target = env.vaddrs[p.target];
+
+    // Get the address the LDR loads.
+    auto const ldr = Instruction::Cast(addr);
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit);
+    auto literalAddr = ldr->LiteralAddress();
+
+    // Patch it to target
+    patchTarget32(literalAddr, target);
   }
 }
 
@@ -841,15 +849,6 @@ void Vgen::emit(const contenter& i) {
   recordAddressImmediate();
   a->Bl(&stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const leavetc& /*i*/) {
-  // The LR was preserved on the stack by resumetc. Pop it while preserving
-  // SP alignment and return.
-  a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
-  a->Ret();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1513,6 +1512,7 @@ Y(loadups, s)
 Y(loadw, s)
 Y(loadzbl, s)
 Y(loadzbq, s)
+Y(loadzwq, s)
 Y(loadzlq, s)
 Y(store, d)
 Y(storeb, m)
@@ -1691,6 +1691,13 @@ void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void lower(const VLS& e, restoreripm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    lowerVptr(i.s, v);
+    v << load{i.s, rlr()};
+  });
+}
+
 void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Push both the LR and FP regardless of i.saveframe to align SP.
@@ -1770,10 +1777,15 @@ void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, resumetc& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
-    // Call the translation target.
-    v << callr{i.target, i.args};
+    // Jump to the translation target.
+    v << jmpr{i.target, i.args};
+  });
+}
 
-    // After returning to the translation, jump directly to the exit.
+  ///////////////////////////////////////////////////////////////////////////////
+
+void lower(const VLS& e, leavetc& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << jmpi{i.exittc};
   });
 }
@@ -1926,12 +1938,12 @@ void lowerForARM(Vunit& unit) {
 }
 
 void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
-  Timer timer(Timer::vasm_optimize);
+  Timer timer(Timer::vasm_optimize, unit.log_entry);
 
   removeTrivialNops(unit);
   optimizePhis(unit);
   fuseBranches(unit);
-  optimizeJmps(unit, false);
+  optimizeJmps(unit, false, true);
 
   assertx(checkWidths(unit));
 
@@ -1967,7 +1979,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 
   optimizeExits(unit);
-  optimizeJmps(unit, true);
+  optimizeJmps(unit, true, false);
 }
 
 void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,

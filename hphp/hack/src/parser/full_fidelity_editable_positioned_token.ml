@@ -7,6 +7,8 @@
  *
  *)
 
+open Sexplib.Std
+
 (**
  * An EditablePositionedToken represents a token that comes from a positioned
  * source but may have been modified. The token may have had its text or kind
@@ -34,13 +36,13 @@ module Trivia = Full_fidelity_positioned_trivia
 (**
  * Data about the token with respect to the original source text.
  *)
-type synthetic_token_data = { text: string } [@@deriving show, eq]
+type synthetic_token_data = { text: string } [@@deriving show, eq, sexp_of]
 
 type token_data =
   | Original of SourceData.t
   | SynthesizedFromOriginal of synthetic_token_data * SourceData.t
   | Synthetic of synthetic_token_data
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 (**
  * Data common to all EditablePositionedTokens.
@@ -51,7 +53,7 @@ type t = {
   trailing_text: string;
   token_data: token_data;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let from_positioned_token positioned_token =
   {

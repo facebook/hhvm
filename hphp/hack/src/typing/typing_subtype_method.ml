@@ -213,6 +213,7 @@ let subtype_method_decl
   let (env, ty_err7) =
     subtype_funs
       ~on_error:(Some on_error)
+      ~for_override:true
       ~check_return
       r_sub
       locl_ft_sub

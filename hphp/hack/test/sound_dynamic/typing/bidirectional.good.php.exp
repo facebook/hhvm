@@ -1,1 +1,41 @@
-No errors
+Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+bidirectional.good.php:10:16
+       8 | function f(): ~vec<(function (A): void)> {
+       9 |   return vec[
+[1,2] 10 |     ($f) ==> { $f->c(); }
+      11 |   ];
+      12 | }
+
+Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+bidirectional.good.php:16:24
+      14 | function g(): ~dict<string, (function (A): void)> {
+      15 |   return dict[
+[1,2] 16 |     'hi' => ($f) ==> { $f->c(); }
+      17 |   ];
+      18 | }
+
+Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+bidirectional.good.php:23:16
+      21 | function ff(): ~Traversable<(function (A): void)> {
+      22 |   return vec[
+[1,2] 23 |     ($f) ==> { $f->c(); }
+      24 |   ];
+      25 | }
+
+Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+bidirectional.good.php:29:24
+      27 | function gg(): ~KeyedTraversable<string, (function (A): void)> {
+      28 |   return dict[
+[1,2] 29 |     'hi' => ($f) ==> { $f->c(); }
+      30 |   ];
+      31 | }
+
+4 errors found.

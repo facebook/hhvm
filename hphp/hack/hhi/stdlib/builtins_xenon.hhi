@@ -10,39 +10,34 @@
 
 namespace HH {
 
-type XenonSample = shape(
-  'time' => int,
-  'timeNano' => int,
-  'lastTriggerTimeNano' => int,
-  /* HH_FIXME[2071] */
-  'stack' => varray,
-  /* HH_FIXME[2071] */
-  'phpStack' => varray,
-  'ioWaitSample' => bool,
-  'sourceType' => string,
-);
+  type XenonSample = shape(
+    'timeNano' => int,
+    'lastTriggerTimeNano' => int,
+    'stack' => vec<mixed>,
+    'ioWaitSample' => bool,
+    'sourceType' => string,
+  );
 
-/**
- * Gather all of the stack traces this request thread has captured by now.
- * Does not clear the stored stacks.
- *
- * @return array - an array of shapes with the following keys:
- *   'time' - unixtime when the snapshot was taken
- *   'stack' - stack trace formatted as debug_backtrace()
- *   'phpStack' - an array of shapes with the following keys:
- *     'function', 'file', 'line'
- *   'ioWaitSample' - the snapshot occurred while request was in asio scheduler
- *
- * It is possible for the output of this function to change in the future.
- */
-function xenon_get_data(): varray<XenonSample>; // auto-imported from HH namespace
+  /**
+   * Gather all of the stack traces this request thread has captured by now.
+   * Does not clear the stored stacks.
+   *
+   * @return array - an array of shapes with the following keys:
+   *   'timeNano' - unixtime in nanoseconds when the snapshot was taken
+   *   'stack' - stack trace formatted as debug_backtrace()
+   *   'ioWaitSample' - the snapshot occurred while request was in asio scheduler
+   *
+   * It is possible for the output of this function to change in the future.
+   */
+  function xenon_get_data(
+  ): vec<XenonSample>; // auto-imported from HH namespace
 
   /**
    * TODO: this will replace xenon_get_data()
    * this function is same as xenon_get_data() except that it deletes the stack
    * traces that are returned
    */
-  function xenon_get_and_clear_samples(): varray<XenonSample>;
+  function xenon_get_and_clear_samples(): vec<XenonSample>;
   /**
    * Returns the number of xenon samples lost so far.
    */

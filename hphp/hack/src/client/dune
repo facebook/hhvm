@@ -34,12 +34,16 @@
   server
   server_command_types
   server_monitor
+  server_progress
+  server_progress_lwt
   server_utils
+  state_loader
   sys_utils
   utils_config_file_lwt
+  yojson
   version)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps lwt_ppx ppx_deriving.std ppx_variants_conv)))
 
 (library
  (name client_log_command)

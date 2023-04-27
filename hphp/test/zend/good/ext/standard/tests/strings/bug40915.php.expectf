@@ -1,5 +1,0 @@
-string(4) "a\0z"
-string(3) "a%r\x00%rz"
-string(7) "a\000\z"
-string(4) "a%r\x00%r\z"
-Done

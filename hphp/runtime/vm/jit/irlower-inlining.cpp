@@ -51,11 +51,16 @@ void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<BeginInlining>();
   auto& v = vmain(env);
 
-  v << inlinestart{extra->func, extra->cost};
-
   // We could use callerFP in a non-resumed context but vasm-copy should clean
   // this up for us since callerSP was computed as an lea{} from rvmfp.
   v << lea{callerSP[cellsToBytes(extra->spOffset.offset)], calleeFP};
+}
+
+void cgEnterInlineFrame(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->src(0)->inst()->extra<BeginInlining>();
+  auto& v = vmain(env);
+
+  v << inlinestart{extra->func, extra->cost};
 }
 
 void cgInlineCall(IRLS& env, const IRInstruction* inst) {

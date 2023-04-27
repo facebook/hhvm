@@ -2,7 +2,7 @@
 
 class A  {
   const c = 1;
-  static $f1 = "42";
+  public static $f1 = "42";
 }
 
 function f() {

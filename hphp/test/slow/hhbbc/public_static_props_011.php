@@ -1,6 +1,6 @@
 <?hh
 
-class X { static $y = 2; }
+class X { public static $y = 2; }
 function k() { var_dump(is_int(X::$y)); }
 function set_ref(inout $ref, $val) { $ref = $val; }
 

@@ -35,3 +35,30 @@ class UsesTRequireImplementsIBase implements IBase {
 }
 
 abstract final class AbstractFinalClass {}
+
+trait TRequireClassFinalClass {
+  require class FinalClassUsesTRequireClass;
+}
+
+final class FinalClassUsesTRequireClass {
+  use TRequireClassFinalCLass;
+}
+
+// `require class` trait constraints
+
+trait TRequireClassFinalClass {
+  require class FinalClassUsesTRequireClass;
+}
+
+final class FinalClassUsesTRequireClass {
+  use TRequireClassFinalCLass;
+}
+
+trait TRequireClassFinalClassB {
+  require class FinalClassUsesTRequireClassB;
+  require extends SuperClassOfFinalClassB;
+}
+
+final class FinalClassUsesTRequireClassB extends SuperClassOfFinalClassB {
+  use TRequireClassFinalCLass;
+}

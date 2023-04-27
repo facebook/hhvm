@@ -1,4 +1,12 @@
 File "abstract_implement6.php", line 23, characters 7-12:
 This class must be declared `abstract`, or provide an implementation for the abstract method `foo` (Typing[4047])
-File "abstract_implement6.php", line 15, characters 19-21:
-Declaration is here
+  File "abstract_implement6.php", line 23, characters 22-27:
+  `DClass` uses `CClass`
+  File "abstract_implement6.php", line 22, characters 31-36:
+  `CClass` uses `BClass`
+  File "abstract_implement6.php", line 21, characters 31-36:
+  `BClass` uses `AClass`
+  File "abstract_implement6.php", line 19, characters 34-38:
+  `AClass` uses `IFace`
+  File "abstract_implement6.php", line 15, characters 19-21:
+  The method is defined here

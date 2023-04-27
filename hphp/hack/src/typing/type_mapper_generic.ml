@@ -29,8 +29,6 @@ class type ['env] type_mapper_type =
 
     method on_tany : 'env -> Reason.t -> 'env * locl_ty
 
-    method on_terr : 'env -> Reason.t -> 'env * locl_ty
-
     method on_tprim : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
 
     method on_ttuple : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
@@ -60,7 +58,7 @@ class type ['env] type_mapper_type =
     method on_tshape :
       'env ->
       Reason.t ->
-      shape_kind ->
+      locl_ty ->
       locl_phase shape_field_type TShapeMap.t ->
       'env * locl_ty
 
@@ -88,8 +86,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tany env r = (env, mk (r, Typing_defs.make_tany ()))
 
-    method on_terr env r = (env, mk (r, Terr))
-
     method on_tprim env r p = (env, mk (r, Tprim p))
 
     method on_ttuple env r tyl = (env, mk (r, Ttuple tyl))
@@ -114,7 +110,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
     method on_tshape env r shape_kind fdm =
-      (env, mk (r, Tshape (shape_kind, fdm)))
+      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
 
     method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
 
@@ -128,7 +124,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tvar n -> this#on_tvar env r n
       | Tnonnull -> this#on_tnonnull env r
       | Tany _ -> this#on_tany env r
-      | Terr -> this#on_terr env r
       | Tprim p -> this#on_tprim env r p
       | Ttuple tyl -> this#on_ttuple env r tyl
       | Tunion tyl -> this#on_tunion env r tyl
@@ -140,7 +135,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
-      | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
@@ -259,7 +254,7 @@ class ['env] deep_type_mapper =
 
     method! on_tshape env r shape_kind fdm =
       let (env, fdm) = ShapeFieldMap.map_env this#on_type env fdm in
-      (env, mk (r, Tshape (shape_kind, fdm)))
+      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
 
     method private on_opt_type env x =
       match x with
@@ -283,6 +278,15 @@ class type ['env] constraint_type_mapper_type =
 
     method on_Thas_member :
       'env -> Reason.t -> has_member -> 'env * constraint_type
+
+    method on_Thas_type_member :
+      'env -> Reason.t -> has_type_member -> 'env * constraint_type
+
+    method on_Tcan_index :
+      'env -> Reason.t -> can_index -> 'env * constraint_type
+
+    method on_Tcan_traverse :
+      'env -> Reason.t -> can_traverse -> 'env * constraint_type
 
     method on_Tdestructure :
       'env -> Reason.t -> destructure -> 'env * constraint_type
@@ -312,6 +316,9 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
     method on_constraint_type_ env r ty_ =
       match ty_ with
       | Thas_member hm -> this#on_Thas_member env r hm
+      | Thas_type_member htm -> this#on_Thas_type_member env r htm
+      | Tcan_index ci -> this#on_Tcan_index env r ci
+      | Tcan_traverse ct -> this#on_Tcan_traverse env r ct
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
       | TCunion (lty, cty) -> this#on_TCunion env r lty cty
       | TCintersection (lty, cty) -> this#on_TCintersection env r lty cty
@@ -322,17 +329,32 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let hm = { hm_name; hm_type; hm_class_id; hm_explicit_targs } in
       (env, mk_constraint_type (r, Thas_member hm))
 
+    method on_Thas_type_member env r htm =
+      let { htm_id; htm_lower; htm_upper } = htm in
+      let (env, htm_lower) = this#on_type env htm_lower in
+      let (env, htm_upper) = this#on_type env htm_upper in
+      let htm = { htm_id; htm_lower; htm_upper } in
+      (env, mk_constraint_type (r, Thas_type_member htm))
+
+    method on_Tcan_index env r ci =
+      let { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } = ci in
+      let (env, ci_key) = this#on_type env ci_key in
+      let (env, ci_val) = this#on_type env ci_val in
+      let ci = { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } in
+      (env, mk_constraint_type (r, Tcan_index ci))
+
+    method on_Tcan_traverse env r ct =
+      let { ct_key; ct_val; ct_is_await; ct_reason } = ct in
+      let (env, ct_key) = this#on_opt_type env ct_key in
+      let (env, ct_val) = this#on_type env ct_val in
+      let ct = { ct_key; ct_val; ct_is_await; ct_reason } in
+      (env, mk_constraint_type (r, Tcan_traverse ct))
+
     method on_Tdestructure env r { d_required; d_optional; d_variadic; d_kind }
         =
       let (env, d_required) = this#on_locl_ty_list env d_required in
       let (env, d_optional) = this#on_locl_ty_list env d_optional in
-      let (env, d_variadic) =
-        match d_variadic with
-        | None -> (env, d_variadic)
-        | Some v ->
-          let (env, v) = this#on_type env v in
-          (env, Some v)
-      in
+      let (env, d_variadic) = this#on_opt_type env d_variadic in
       ( env,
         mk_constraint_type
           (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) )

@@ -1,9 +1,3 @@
-File "using_bad.php", line 16, characters 5-10:
-Disposable objects must only be assigned in a `using` statement (Typing[4179])
-File "using_bad.php", line 20, characters 29-30:
-Local variable already used in `using` statement (Typing[4178])
-File "using_bad.php", line 26, characters 9-10:
-Local variable already used in `using` statement (Typing[4178])
 File "using_bad.php", line 29, characters 10-31:
 This expression is used in a `using` clause so it must have type `\IDisposable` (Typing[4110])
   File "using_bad.php", line 29, characters 10-31:
@@ -24,3 +18,9 @@ This expression is used in a `using` clause with await so it must have type `\IA
   This is why I think it is an object of type Handle
   File "using_bad.php", line 4, characters 7-12:
   Declaration of `Handle` is here
+File "using_bad.php", line 20, characters 29-30:
+Local variable already used in `using` statement (Typing[4178])
+File "using_bad.php", line 26, characters 9-10:
+Local variable already used in `using` statement (Typing[4178])
+File "using_bad.php", line 16, characters 5-10:
+Disposable objects must only be assigned in a `using` statement (Typing[4179])

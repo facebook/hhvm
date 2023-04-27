@@ -2,27 +2,27 @@
 
 class C{
 }
-function f1(string $x = null) {
+function f1(?string $x = null) {
 $y = (string) $x;
  var_dump($y);
  return $y;
  }
-function f2(AnyArray $x = null) {
+function f2(?AnyArray $x = null) {
  $y = $x !== null ? darray($x) : darray[];
  var_dump($y);
  return $y;
  }
-function f4(int $x = null) {
+function f4(?int $x = null) {
 $y = (int) $x;
  var_dump($y);
  return $y;
  }
-function f5(bool $x = null) {
+function f5(?bool $x = null) {
 $y = (bool) $x;
  var_dump($y);
  return $y;
  }
-function f6(float $x = null) {
+function f6(?float $x = null) {
 $y = (float)$x;
  var_dump($y);
  return $y;

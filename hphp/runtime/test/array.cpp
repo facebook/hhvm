@@ -60,7 +60,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr[0].toInt32() == 0);
+  EXPECT_TRUE((int)arr[0].toInt64() == 0);
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -175,70 +175,46 @@ TEST(Array, Conversions) {
   const String s_Keyset("Keyset");
 
   Array arr0;
-  EXPECT_TRUE(arr0.toBoolean() == false);
-  EXPECT_TRUE(arr0.toByte() == 0);
-  EXPECT_TRUE(arr0.toInt16() == 0);
-  EXPECT_TRUE(arr0.toInt32() == 0);
+  EXPECT_TRUE(arr0.empty() == true);
   EXPECT_TRUE(arr0.toInt64() == 0);
   EXPECT_TRUE(arr0.toDouble() == 0.0);
   EXPECT_TRUE(arr0.toString().empty());
 
   Array arr1 = make_vec_array("test");
-  EXPECT_TRUE(arr1.toBoolean() == true);
-  EXPECT_TRUE(arr1.toByte() == 1);
-  EXPECT_TRUE(arr1.toInt16() == 1);
-  EXPECT_TRUE(arr1.toInt32() == 1);
+  EXPECT_TRUE(arr1.empty() == false);
   EXPECT_TRUE(arr1.toInt64() == 1);
   EXPECT_TRUE(arr1.toDouble() == 1.0);
 
   Array vec0 = Array::CreateVec();
-  EXPECT_TRUE(vec0.toBoolean() == false);
-  EXPECT_TRUE(vec0.toByte() == 0);
-  EXPECT_TRUE(vec0.toInt16() == 0);
-  EXPECT_TRUE(vec0.toInt32() == 0);
+  EXPECT_TRUE(vec0.empty() == true);
   EXPECT_TRUE(vec0.toInt64() == 0);
   EXPECT_TRUE(vec0.toDouble() == 0.0);
 
   Array vec1 = Array::CreateVec();
   vec1.append("test");
-  EXPECT_TRUE(vec1.toBoolean() == true);
-  EXPECT_TRUE(vec1.toByte() == 1);
-  EXPECT_TRUE(vec1.toInt16() == 1);
-  EXPECT_TRUE(vec1.toInt32() == 1);
+  EXPECT_TRUE(vec1.empty() == false);
   EXPECT_TRUE(vec1.toInt64() == 1);
   EXPECT_TRUE(vec1.toDouble() == 1.0);
 
   Array dict0 = Array::CreateDict();
-  EXPECT_TRUE(dict0.toBoolean() == false);
-  EXPECT_TRUE(dict0.toByte() == 0);
-  EXPECT_TRUE(dict0.toInt16() == 0);
-  EXPECT_TRUE(dict0.toInt32() == 0);
+  EXPECT_TRUE(dict0.empty() == true);
   EXPECT_TRUE(dict0.toInt64() == 0);
   EXPECT_TRUE(dict0.toDouble() == 0.0);
 
   Array dict1 = Array::CreateDict();
   dict1.set(Variant{"key"}, Variant{"value"});
-  EXPECT_TRUE(dict1.toBoolean() == true);
-  EXPECT_TRUE(dict1.toByte() == 1);
-  EXPECT_TRUE(dict1.toInt16() == 1);
-  EXPECT_TRUE(dict1.toInt32() == 1);
+  EXPECT_TRUE(dict1.empty() == false);
   EXPECT_TRUE(dict1.toInt64() == 1);
   EXPECT_TRUE(dict1.toDouble() == 1.0);
 
   Array keyset0 = Array::CreateKeyset();
-  EXPECT_TRUE(keyset0.toBoolean() == false);
-  EXPECT_TRUE(keyset0.toByte() == 0);
-  EXPECT_TRUE(keyset0.toInt16() == 0);
-  EXPECT_TRUE(keyset0.toInt32() == 0);
+  EXPECT_TRUE(keyset0.empty() == true);
   EXPECT_TRUE(keyset0.toInt64() == 0);
   EXPECT_TRUE(keyset0.toDouble() == 0.0);
 
   Array keyset1 = Array::CreateKeyset();
   keyset1.append("test");
-  EXPECT_TRUE(keyset1.toBoolean() == true);
-  EXPECT_TRUE(keyset1.toByte() == 1);
-  EXPECT_TRUE(keyset1.toInt16() == 1);
-  EXPECT_TRUE(keyset1.toInt32() == 1);
+  EXPECT_TRUE(keyset1.empty() == false);
   EXPECT_TRUE(keyset1.toInt64() == 1);
   EXPECT_TRUE(keyset1.toDouble() == 1.0);
 }

@@ -13,12 +13,10 @@ type pos = Relative_path.t * int * int * (int * int) option
 
 type spos = string * int * int * (int * int) option [@@deriving eq, ord]
 
-let recheck_typing ctx (pos_list : pos list) =
+let recheck_typing ctx (path_list : Relative_path.t list) =
   let files_to_check =
-    pos_list
-    |> List.map ~f:(fun (path, _, _, _) -> path)
+    List.sort path_list ~compare:Relative_path.compare
     |> List.remove_consecutive_duplicates ~equal:Relative_path.equal
-    (* note: our caller has already sorted pos_list *)
   in
   let (ctx, paths_and_tasts) =
     List.fold
@@ -32,6 +30,16 @@ let recheck_typing ctx (pos_list : pos list) =
         (ctx, (path, tast) :: paths_and_tasts))
   in
   (ctx, paths_and_tasts)
+
+let get_tast_map ctx path_list =
+  let (ctx, paths_and_tasts) = recheck_typing ctx path_list in
+  let tasts =
+    List.fold
+      paths_and_tasts
+      ~init:Relative_path.Map.empty
+      ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
+  in
+  (ctx, tasts)
 
 let result_to_string result (fn, line, char, range_end) =
   Hh_json.(
@@ -57,13 +65,8 @@ let result_to_string result (fn, line, char, range_end) =
     json_to_string obj)
 
 let helper ctx acc pos_list =
-  let (ctx, paths_and_tasts) = recheck_typing ctx pos_list in
-  let tasts =
-    List.fold
-      paths_and_tasts
-      ~init:Relative_path.Map.empty
-      ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
-  in
+  let path_list = List.map pos_list ~f:(fun (path, _, _, _) -> path) in
+  let (ctx, tasts) = get_tast_map ctx path_list in
   List.fold pos_list ~init:acc ~f:(fun acc pos ->
       let (fn, line, char, range_end) = pos in
       let result =

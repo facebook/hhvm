@@ -1,4 +1,2 @@
-File "bad_inout_use_arg6.php", line 9, characters 7-22:
-You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_arg6.php", line 9, characters 13-22:
-`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
+You cannot decorate this argument as `inout` (Parsing[1002])

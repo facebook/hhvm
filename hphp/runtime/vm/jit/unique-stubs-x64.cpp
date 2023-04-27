@@ -104,7 +104,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
     emit_destroy(v);
 
     v << ret{live};
-  }, CodeKind::CrossTrace, true);
+  }, nullptr, CodeKind::CrossTrace, true);
 
   meta.process(nullptr);
   return addr;
@@ -157,7 +157,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       v << cmpq{typePtr, end, sf};
       return sf;
     });
-  }, true);
+  }, nullptr, true);
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
@@ -169,7 +169,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       } else {
         v << fallthru{};
       }
-    }, true);
+    }, nullptr, true);
   }
 
   auto const release = emitDecRefHelper(

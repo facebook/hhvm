@@ -1,0 +1,10 @@
+string(3) "bar"
+
+Fatal error: request has exceeded memory limit in %s on line %d
+string(6) "in psp"
+string(3) "baz"
+
+Warning: memo is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line 6
+string(4) "memo"
+string(10) "after join"
+string(13) "done with psp"

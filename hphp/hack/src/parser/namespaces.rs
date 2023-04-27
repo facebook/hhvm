@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust as sn;
-use oxidized::{ast::*, namespace_env};
-
 use std::borrow::Cow;
+
+use naming_special_names_rust as sn;
+use oxidized::ast::*;
+use oxidized::namespace_env;
 
 trait NamespaceEnv {
     fn disable_xhp_element_mangling(&self) -> bool;
@@ -147,7 +148,7 @@ fn elaborate_raw_id<'a>(
     kind: ElaborateKind,
     id: &'a str,
     elaborate_xhp_namespaces_for_facts: bool,
-) -> Cow<'a, str> {
+) -> Option<String> {
     let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
         let qualified = elaborate_xhp_namespace(id);
         match qualified {
@@ -164,7 +165,10 @@ fn elaborate_raw_id<'a>(
     };
     // It is already qualified
     if id.starts_with('\\') {
-        return id;
+        return match id {
+            Cow::Borrowed(..) => None,
+            Cow::Owned(s) => Some(s),
+        };
     }
     let id = id.as_ref();
 
@@ -173,20 +177,20 @@ fn elaborate_raw_id<'a>(
     match kind {
         ElaborateKind::Const => {
             if sn::pseudo_consts::is_pseudo_const(&fqid) {
-                return Cow::Owned(fqid);
+                return Some(fqid);
             }
         }
         ElaborateKind::Fun if sn::pseudo_functions::is_pseudo_function(&fqid) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_global_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) && nsenv.is_codegen() => {
-            return Cow::Owned(elaborate_into_ns(Some("HH"), id));
+            return Some(elaborate_into_ns(Some("HH"), id));
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         _ => {}
     }
@@ -197,7 +201,7 @@ fn elaborate_raw_id<'a>(
     };
 
     if has_bslash && prefix == "namespace" {
-        return Cow::Owned(elaborate_into_current_ns(
+        return Some(elaborate_into_current_ns(
             nsenv,
             id.trim_start_matches("namespace\\"),
         ));
@@ -209,17 +213,16 @@ fn elaborate_raw_id<'a>(
             let mut s = String::with_capacity(used.len() + without_prefix.len());
             s.push_str(used);
             s.push_str(without_prefix);
-            Cow::Owned(core_utils_rust::add_ns(&s).into_owned())
+            Some(core_utils_rust::add_ns(&s).into_owned())
         }
-        None => Cow::Owned(elaborate_into_current_ns(nsenv, id)),
+        None => Some(elaborate_into_current_ns(nsenv, id)),
     }
 }
 
-pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): &Id) -> Id {
-    Id(
-        p.clone(),
-        elaborate_raw_id(nsenv, kind, id, false).into_owned(),
-    )
+pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &mut Id) {
+    if let Some(s) = elaborate_raw_id(nsenv, kind, &id.1, false) {
+        id.1 = s;
+    }
 }
 
 pub fn elaborate_raw_id_in<'a>(
@@ -230,8 +233,8 @@ pub fn elaborate_raw_id_in<'a>(
     elaborate_xhp_namespaces_for_facts: bool,
 ) -> &'a str {
     match elaborate_raw_id(nsenv, kind, id, elaborate_xhp_namespaces_for_facts) {
-        Cow::Owned(s) => arena.alloc_str(&s),
-        Cow::Borrowed(s) => s,
+        Some(s) => arena.alloc_str(&s),
+        None => id,
     }
 }
 
@@ -257,7 +260,8 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
     use ocamlrep::rc::RcOc;
-    use oxidized::{ast::*, namespace_env};
+    use oxidized::ast::*;
+    use oxidized::namespace_env;
 
     fn elaborate_xhp_namespace(id: &mut String) {
         if let Some(s) = super::elaborate_xhp_namespace(id.as_str()) {
@@ -283,8 +287,8 @@ pub mod toplevel_elaborator {
     }
 
     fn on_hint(nsenv: &namespace_env::Env, hint: &mut Hint) {
-        if let Hint_::Happly(ref mut id, _) = hint.1.as_mut() {
-            *id = super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
+        if let Hint_::Happly(id, _) = hint.1.as_mut() {
+            super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
         }
     }
 
@@ -353,7 +357,7 @@ pub mod toplevel_elaborator {
             }
             D::Fun(mut x) => {
                 let f = x.as_mut();
-                elaborate_defined_id(nsenv, &mut f.fun.name);
+                elaborate_defined_id(nsenv, &mut f.name);
                 f.namespace = RcOc::clone(nsenv);
                 acc.push(Def::Fun(x));
             }
@@ -377,18 +381,38 @@ pub mod toplevel_elaborator {
         }
     }
 
-    fn attach_file_attributes(p: &mut Vec<Def>) {
+    fn attach_file_level_info(p: &mut [Def]) {
         let file_attrs: Vec<FileAttribute> = p
             .iter()
             .filter_map(|x| x.as_file_attributes())
             .cloned()
             .collect();
 
+        let module_name: Option<Id> = p.iter().find_map(|x| x.as_set_module()).cloned();
+
         p.iter_mut().for_each(|x| match x {
-            Def::Class(c) => c.file_attributes = file_attrs.clone(),
-            Def::Fun(f) => f.file_attributes = file_attrs.clone(),
-            Def::Typedef(t) => t.file_attributes = file_attrs.clone(),
-            _ => {}
+            Def::Class(c) => {
+                c.file_attributes = file_attrs.clone();
+                c.module = module_name.clone()
+            }
+            Def::Fun(f) => {
+                f.file_attributes = file_attrs.clone();
+                f.module = module_name.clone()
+            }
+            Def::Typedef(t) => {
+                t.file_attributes = file_attrs.clone();
+                t.module = module_name.clone()
+            }
+            Def::Module(m) => {
+                m.file_attributes = file_attrs.clone();
+            }
+            Def::Stmt(_)
+            | Def::Constant(_)
+            | Def::Namespace(_)
+            | Def::NamespaceUse(_)
+            | Def::SetNamespaceEnv(_)
+            | Def::FileAttributes(_)
+            | Def::SetModule(_) => {}
         });
     }
 
@@ -398,7 +422,7 @@ pub mod toplevel_elaborator {
             on_def(&mut nsenv, &mut new_acc, def)
         }
 
-        attach_file_attributes(&mut new_acc);
+        attach_file_level_info(&mut new_acc);
         acc.append(&mut new_acc);
     }
 

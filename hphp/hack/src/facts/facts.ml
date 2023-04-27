@@ -109,8 +109,11 @@ type type_facts = {
   flags: int;
   require_extends: InvSSet.t;
   require_implements: InvSSet.t;
+  require_class: InvSSet.t;
   attributes: string list InvSMap.t;
 }
+
+type module_facts = unit
 
 let empty_type_facts =
   {
@@ -119,6 +122,7 @@ let empty_type_facts =
     flags = 0;
     require_extends = InvSSet.empty;
     require_implements = InvSSet.empty;
+    require_class = InvSSet.empty;
     attributes = InvSMap.empty;
   }
 
@@ -126,17 +130,18 @@ type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
-  type_aliases: string list;
+  modules: module_facts InvSMap.t;
 }
 
 let empty =
-  { types = InvSMap.empty; functions = []; constants = []; type_aliases = [] }
+  {
+    types = InvSMap.empty;
+    functions = [];
+    constants = [];
+    modules = InvSMap.empty;
+  }
 
 (* Facts to JSON *)
-
-let hex_number_to_json s =
-  let number = "0x" ^ s |> Int64.of_string |> Int64.to_string in
-  J.JSON_Number number
 
 let add_set_member ~include_empty name values members =
   if InvSSet.is_empty values && not include_empty then
@@ -166,6 +171,10 @@ let add_map_member name values members =
     let elements = map_to_json_object values in
     (name, elements) :: members
 
+let module_facts_to_json name _mf =
+  let members = [("name", J.JSON_String name)] in
+  J.JSON_Object members
+
 let type_facts_to_json name tf =
   let members =
     add_set_member
@@ -177,24 +186,22 @@ let type_facts_to_json name tf =
          ~include_empty:(is_tk_trait tf.kind)
          "requireImplements"
          tf.require_implements
+    |> add_set_member
+         ~include_empty:(is_tk_trait tf.kind)
+         "requireClass"
+         tf.require_class
     |> add_map_member "attributes" tf.attributes
     |> add_set_member ~include_empty:true "baseTypes" tf.base_types
   in
   let members =
     ("name", J.JSON_String name)
-    ::
-    ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
-    :: ("flags", J.JSON_Number (string_of_int tf.flags)) :: members
+    :: ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
+    :: ("flags", J.JSON_Number (string_of_int tf.flags))
+    :: members
   in
   J.JSON_Object members
 
-let facts_to_json ~md5 ~sha1 facts =
-  let md5sum0 =
-    ("md5sum0", hex_number_to_json (String.sub md5 ~pos:0 ~len:16))
-  in
-  let md5sum1 =
-    ("md5sum1", hex_number_to_json (String.sub md5 ~pos:16 ~len:16))
-  in
+let facts_to_json ~sha1 facts =
   let sha1sum = ("sha1sum", J.JSON_String sha1) in
   let type_facts_json =
     let elements =
@@ -205,20 +212,20 @@ let facts_to_json ~md5 ~sha1 facts =
     in
     ("types", J.JSON_Array elements)
   in
+  let module_facts_json =
+    let elements =
+      InvSMap.fold
+        (fun name v acc -> module_facts_to_json name v :: acc)
+        facts.modules
+        []
+    in
+    ("modules", J.JSON_Array elements)
+  in
   let functions_json = ("functions", list_to_json_array facts.functions) in
   let constants_json = ("constants", list_to_json_array facts.constants) in
-  let type_aliases_json =
-    ("typeAliases", list_to_json_array facts.type_aliases)
-  in
   J.JSON_Object
     [
-      md5sum0;
-      md5sum1;
-      sha1sum;
-      type_facts_json;
-      functions_json;
-      constants_json;
-      type_aliases_json;
+      sha1sum; type_facts_json; functions_json; constants_json; module_facts_json;
     ]
 
 (* Facts from JSON *)
@@ -226,6 +233,23 @@ let facts_to_json ~md5 ~sha1 facts =
 let facts_from_json : Hh_json.json -> facts option =
   Hh_json.(
     let list_from_jstr_array = List.rev_map ~f:get_string_exn in
+    let module_facts_from_jobj entry : string =
+      let entry =
+        List.find
+          ~f:(fun (k, v) ->
+            match v with
+            | JSON_String _ when String.equal k "name" -> true
+            | _ -> false)
+          entry
+      in
+      let name =
+        match entry with
+        | Some (_, JSON_String s) -> s
+        | _ -> ""
+      in
+      name
+    in
+
     let type_facts_from_jobj entry : string * type_facts =
       let set_from_jstr_array =
         List.fold ~init:InvSSet.empty ~f:(fun acc j ->
@@ -250,6 +274,8 @@ let facts_from_json : Hh_json.json -> facts option =
               { acc with require_extends = set_from_jstr_array xs }
             | JSON_Array xs when String.equal k "requireImplements" ->
               { acc with require_implements = set_from_jstr_array xs }
+            | JSON_Array xs when String.equal k "requireClass" ->
+              { acc with require_class = set_from_jstr_array xs }
             | JSON_Object key_values when String.equal k "attributes" ->
               {
                 acc with
@@ -279,8 +305,20 @@ let facts_from_json : Hh_json.json -> facts option =
                { acc with constants = list_from_jstr_array xs }
              | JSON_Array xs when String.equal k "functions" ->
                { acc with functions = list_from_jstr_array xs }
-             | JSON_Array xs when String.equal k "typeAliases" ->
-               { acc with type_aliases = list_from_jstr_array xs }
+             | JSON_Array modules when String.equal k "modules" ->
+               {
+                 acc with
+                 modules =
+                   List.fold_left
+                     ~init:InvSMap.empty
+                     ~f:(fun acc v ->
+                       match v with
+                       | JSON_Object entry ->
+                         let name = module_facts_from_jobj entry in
+                         InvSMap.add name () acc
+                       | _ -> acc)
+                     modules;
+               }
              | JSON_Array types when String.equal k "types" ->
                {
                  acc with

@@ -1,4 +1,2 @@
-Warning: Unsetting property 'Foo2::x' with type annotation in %s/dim_unset.php on line 20
-
 Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Property ro_f2 of class Foo1 must be mutable.' in %s/dim_unset.php:21
 %A

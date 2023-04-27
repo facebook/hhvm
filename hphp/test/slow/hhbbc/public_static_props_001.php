@@ -8,7 +8,7 @@ class B {
   }
 }
 class D extends B {
-  static $x = 'constant string';
+  public static $x = 'constant string';
 }
 class Y extends D {
   function go() {

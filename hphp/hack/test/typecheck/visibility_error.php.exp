@@ -1,0 +1,6 @@
+File "visibility_error.php", line 8, characters 3-4:
+Typing error (Typing[4112])
+  File "visibility_error.php", line 8, characters 8-8:
+  You cannot access this property
+  File "visibility_error.php", line 4, characters 39-41:
+  This member is private

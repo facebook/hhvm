@@ -1,0 +1,35 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "nixEnvSelector.nixFile": "${workspaceRoot}/shell_clang.nix",
+    "nix.enableLanguageServer": true,
+    "terminal.integrated.profiles.linux": {
+      "Nix Shell": {
+        "path": "nix-shell",
+        "args": [
+          "shell_clang.nix"
+        ]
+      }
+    },
+    "terminal.integrated.profiles.osx": {
+      "Nix Shell": {
+        "path": "nix-shell",
+        "args": [
+          "shell_clang.nix"
+        ]
+      }
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/_build"
+  },
+  "extensions": {
+    "recommendations": [
+      "arrterian.nix-env-selector",
+      "jnoortheen.nix-ide",
+      "ms-vscode.cpptools-extension-pack"
+    ]
+  }
+}

@@ -1,10 +1,9 @@
 <?hh
 
 /**
- * For non-async functions, a like-Awaitable acts like any other type; it's
- * not enforced.
+ * For non-async functions, a like-Awaitable acts like any other like type, enforced at the inner type.
  */
-function f(mixed $x): ~Awaitable<int> {
+function f(mixed $x): <<__Soft>> ~Awaitable<int> {
   return $x;
 }
 

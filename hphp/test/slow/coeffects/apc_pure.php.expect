@@ -1,0 +1,40 @@
+bare defaults object:
+  throws on add: yes
+  throws on store: yes
+  throws on fetch: yes
+defaults object in vec:
+  throws on add: yes
+  throws on store: yes
+  throws on fetch: yes
+defaults object in dict:
+  throws on add: yes
+  throws on store: yes
+  throws on fetch: yes
+defaults object in methodless object:
+  throws on add: yes
+  throws on store: yes
+  throws on fetch: yes
+bare pure object:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no
+pure object in vec:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no
+pure object in dict:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no
+pure object in methodless object:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no
+int in methodless object:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no
+just arrays:
+  throws on add: no
+  throws on store: no
+  throws on fetch: no

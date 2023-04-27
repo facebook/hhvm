@@ -1,0 +1,114 @@
+#! /bin/bash
+
+# Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+
+# Script used by systemd @SYSTEMD_SERVICE_NAME@.service to run before executing mysqld
+
+get_option () {
+    local section=$1
+    local option=$2
+    local default=$3
+    local instance=$4
+    ret=$(@bindir@/my_print_defaults  ${instance:+--defaults-group-suffix=@$instance} $section | \
+	      grep '^--'${option}'=' | cut -d= -f2- | tail -n 1)
+    [ -z "$ret" ] && ret=$default
+    echo $ret
+}
+
+install_validate_password_sql_file () {
+    local initfile
+    initfile="$(mktemp /var/lib/mysql-files/install-validate-password-plugin.XXXXXX.sql)"
+    chmod a+r "$initfile"
+    echo "SET @@SESSION.SQL_LOG_BIN=0;" > "$initfile"
+    echo "INSERT INTO mysql.component (component_id, component_group_id, component_urn) VALUES (1, 1, 'file://component_validate_password');" >> $initfile
+    echo $initfile
+}
+
+fix_mysql_upgrade_info () {
+    datadir=$(get_option mysqld datadir "/var/lib/mysql${instance:+-$instance}" $instance)
+    if [ -d  "$datadir" ]  && [ -O "$datadir/mysql_upgrade_info" ]; then
+	chown --reference="$datadir" "$datadir/mysql_upgrade_info"
+	if [ -x /usr/bin/chcon ]; then
+            /usr/bin/chcon --reference="$datadir" "$datadir/mysql_upgrade_info" > /dev/null 2>&1
+	fi
+    fi
+}
+
+install_db () {
+    # Note: something different than datadir=/var/lib/mysql requires SELinux policy changes (in enforcing mode)
+
+    # mysql_upgrade_info file should be owned by mysql user since MySQL 8.0.16
+    fix_mysql_upgrade_info
+
+    # No automatic init wanted
+    [ -e /etc/sysconfig/mysql ] && . /etc/sysconfig/mysql
+    [ -n "$NO_INIT" ] && exit 0
+
+    local instance=$1
+    datadir=$(get_option mysqld datadir "/var/lib/mysql${instance:+-$instance}" $instance)
+    log=$(get_option mysqld 'log[_-]error' "/var/log/mysql${instance:+-$instance}.log" $instance)
+
+    # Restore log, dir, perms and SELinux contexts
+
+    if [ ! -d "$datadir" -a ! -h "$datadir" -a "x$(dirname "$datadir")" = "x/var/lib" ]; then
+	install -d -m 0751 -o@MYSQLD_USER@ -g@MYSQLD_USER@ "$datadir" || exit 1
+    fi
+
+    if [ ! -e "$log" -a ! -h "$log" -a x$(dirname "$log") = "x/var/log" ]; then
+	case $(basename "$log") in
+	    mysql*.log) install /dev/null -m0640 -o@MYSQLD_USER@ -g@MYSQLD_USER@ "$log" ;;
+	    *) ;;
+	esac
+    fi
+
+    if [ -x /usr/sbin/restorecon ]; then
+        /usr/sbin/restorecon "$datadir"
+        [ -e "$log" ] && /usr/sbin/restorecon "$log"
+	for dir in /var/lib/mysql-files /var/lib/mysql-keyring ; do
+            if [ -x /usr/sbin/semanage -a -d /var/lib/mysql -a -d $dir ] ; then
+                /usr/sbin/semanage fcontext -a -e /var/lib/mysql $dir >/dev/null 2>&1
+                /sbin/restorecon -r $dir
+            fi
+	done
+    fi
+
+    # If special mysql dir is in place, skip db install
+    [ -d "$datadir/mysql" ] && exit 0
+
+    # Create initial db and install validate_password plugin
+    initfile="$(install_validate_password_sql_file)"
+    @libexecdir@/mysqld ${instance:+--defaults-group-suffix=@$instance} --initialize \
+		     --datadir="$datadir" --user=@MYSQLD_USER@ --init-file="$initfile"
+    rm -f "$initfile"
+
+    # Generate certs if needed
+    if [ -x @bindir@/mysql_ssl_rsa_setup -a ! -e "${datadir}/server-key.pem" ] ; then
+        @bindir@/mysql_ssl_rsa_setup --datadir="$datadir" --uid=@MYSQLD_USER@ >/dev/null 2>&1
+    fi
+    exit 0
+}
+
+install_db $1
+
+exit 0

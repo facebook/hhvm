@@ -5,6 +5,6 @@ class C {
     return $x;
   }
 
-  static $x = "foo" |> f($$);
+  public static $x = "foo" |> f($$);
 }
 

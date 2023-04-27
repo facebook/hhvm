@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -59,6 +60,13 @@ inline c_AwaitAllWaitHandle::Node* getAwaitAllWaitHandleNode(
   return getContainingObject<c_AwaitAllWaitHandle::Node>(blockable);
 }
 
+inline c_ConcurrentWaitHandle::Node* getConcurrentWaitHandleNode(
+  const AsioBlockable* blockable
+) {
+  assertx(blockable->getKind() == Kind::ConcurrentWaitHandleNode);
+  return getContainingObject<c_ConcurrentWaitHandle::Node>(blockable);
+}
+
 inline c_ConditionWaitHandle* getConditionWaitHandle(
   const AsioBlockable* blockable
 ) {
@@ -67,6 +75,7 @@ inline c_ConditionWaitHandle* getConditionWaitHandle(
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_WaitableWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -82,29 +91,42 @@ inline void exitContextImpl(
   // Move the wait handle to the parent context.
   waitHandle->setContextIdx(ctx_idx - 1);
 
-  // Recursively move all the parents to the parent context.
-  waitHandle->getParentChain().exitContext(ctx_idx);
+  // Request exit to the parent context for all parents.
+  worklist.emplace_back(waitHandle->getParentChain());
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AsyncFunctionWaitHandle::Node* node,
   context_idx_t ctx_idx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AwaitAllWaitHandle::Node* node,
   context_idx_t ctx_idx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
+  c_ConcurrentWaitHandle::Node* node,
+  context_idx_t ctx_idx
+) {
+  if (node->isFirstUnfinishedChild()) {
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
+  }
+}
+
+inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_ConditionWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -113,7 +135,8 @@ inline void exitContextImpl(
     return;
   }
 
-  exitContextImpl(static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
+  exitContextImpl(
+    worklist, static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
 }
 
 } // anon namespace
@@ -126,6 +149,8 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getAsyncGeneratorWaitHandle(this);
     case Kind::AwaitAllWaitHandleNode:
       return getAwaitAllWaitHandleNode(this)->getWaitHandle();
+    case Kind::ConcurrentWaitHandleNode:
+      return getConcurrentWaitHandleNode(this)->getWaitHandle();
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
   }
@@ -133,9 +158,9 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  while (auto cur = m_firstParent) {
-    m_firstParent = cur->getNextParent();
-    cur->updateNextParent(nullptr);
+  while (auto cur = m_lastParent) {
+    m_lastParent = cur->getPrevParent();
+    cur->updatePrevParent(nullptr);
     // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
@@ -147,6 +172,9 @@ void AsioBlockableChain::unblock() {
       case Kind::AwaitAllWaitHandleNode:
         getAwaitAllWaitHandleNode(cur)->onUnblocked();
         break;
+      case Kind::ConcurrentWaitHandleNode:
+        getConcurrentWaitHandleNode(cur)->onUnblocked();
+        break;
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
         break;
@@ -155,41 +183,52 @@ void AsioBlockableChain::unblock() {
 }
 
 void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    switch (cur->getKind()) {
-      case Kind::AsyncFunctionWaitHandleNode:
-        exitContextImpl(getAsyncFunctionWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::AsyncGeneratorWaitHandle:
-        exitContextImpl(getAsyncGeneratorWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::AwaitAllWaitHandleNode:
-        exitContextImpl(getAwaitAllWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::ConditionWaitHandle:
-        exitContextImpl(getConditionWaitHandle(cur), ctx_idx);
-        break;
+  std::vector<AsioBlockableChain> worklist = { *this };
+  while (!worklist.empty()) {
+    auto const lastParent = worklist.back().m_lastParent;
+    worklist.pop_back();
+
+    for (auto cur = lastParent; cur; cur = cur->getPrevParent()) {
+      switch (cur->getKind()) {
+        case Kind::AsyncFunctionWaitHandleNode:
+          exitContextImpl(
+            worklist, getAsyncFunctionWaitHandleNode(cur), ctx_idx);
+          break;
+        case Kind::AsyncGeneratorWaitHandle:
+          exitContextImpl(worklist, getAsyncGeneratorWaitHandle(cur), ctx_idx);
+          break;
+        case Kind::AwaitAllWaitHandleNode:
+          exitContextImpl(worklist, getAwaitAllWaitHandleNode(cur), ctx_idx);
+          break;
+        case Kind::ConcurrentWaitHandleNode:
+          exitContextImpl(worklist, getConcurrentWaitHandleNode(cur), ctx_idx);
+          break;
+        case Kind::ConditionWaitHandle:
+          exitContextImpl(worklist, getConditionWaitHandle(cur), ctx_idx);
+          break;
+      }
     }
   }
 }
 
-// Currently only AAWH utilizes this to handle failures.
+// Currently only AAWH and CCWH utilizes this to handle failures.
 void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
-  AsioBlockable* prev = nullptr;
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
+  AsioBlockable* next = nullptr;
+  for (AsioBlockable* cur = m_lastParent, *prev; cur; cur = prev) {
+    prev = cur->getPrevParent();
     if (ab == cur) {
-      // Found the AAWH we need to remove
-      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (!prev) {
-        m_firstParent = next;
+      // Found the AAWH or CCWH we need to remove
+      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode ||
+              cur->getKind() == Kind::ConcurrentWaitHandleNode);
+      if (!next) {
+        m_lastParent = prev;
       } else {
-        prev->updateNextParent(next);
+        next->updatePrevParent(prev);
       }
-      cur->updateNextParent(nullptr);
+      cur->updatePrevParent(nullptr);
       return;
     }
-    prev = cur;
+    next = cur;
   }
   // We should always be able to find the parent.
   assertx(false);
@@ -197,13 +236,14 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
 
 c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
+  c_WaitableWaitHandle* result = nullptr;
+  for (auto cur = m_lastParent; cur; cur = cur->getPrevParent()) {
     auto const wh = cur->getWaitHandle();
     if (!wh->isFinished() && wh->getContextIdx() == ctx_idx) {
-      return wh;
+      result = wh;
     }
   }
-  return nullptr;
+  return result;
 }
 
 void AsioBlockableChain::UnblockJitHelper(ActRec* ar,

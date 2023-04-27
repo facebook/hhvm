@@ -1,7 +1,7 @@
 File "lambda_unpacked_parameters.php", line 11, characters 14-24:
 Invalid argument (Typing[4110])
   File "lambda_unpacked_parameters.php", line 11, characters 14-24:
-  Expected `Traversable<[unresolved]>` (it is unpacked with `...`)
+  Expected `Traversable<_>` (it is unpacked with `...`)
   File "lambda_unpacked_parameters.php", line 9, characters 17-17:
   But got `int`
 File "lambda_unpacked_parameters.php", line 15, characters 14-14:

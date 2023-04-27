@@ -2,3 +2,9 @@ File "parse_float_with_underscore_bad1.php", line 5, characters 22-22:
 A semicolon `;` is expected here. (Parsing[1002])
 File "parse_float_with_underscore_bad1.php", line 5, characters 22-22:
 Encountered unexpected text `_`, was expecting a class element. (Parsing[1002])
+File "parse_float_with_underscore_bad1.php", line 5, characters 15-17:
+Wrong type hint (Typing[4338])
+  File "parse_float_with_underscore_bad1.php", line 5, characters 9-13:
+  Expected `float`
+  File "parse_float_with_underscore_bad1.php", line 5, characters 21-21:
+  But got `int`

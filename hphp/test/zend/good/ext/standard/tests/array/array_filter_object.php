@@ -54,7 +54,7 @@ class FinalClass
 // class with static members
 class StaticClass
 {
-  static $var5 = 5;
+  public static $var5 = 5;
   public static function staticMethod() {
     echo 'this is static method';
   }

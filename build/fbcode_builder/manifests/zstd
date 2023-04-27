@@ -1,0 +1,31 @@
+[manifest]
+name = zstd
+
+[homebrew]
+zstd
+
+# 18.04 zstd is too old
+[debs.not(all(distro=ubuntu,distro_vers="18.04"))]
+libzstd-dev
+
+[rpms]
+libzstd-devel
+libzstd
+
+[download]
+url = https://github.com/facebook/zstd/releases/download/v1.4.5/zstd-1.4.5.tar.gz
+sha256 = 98e91c7c6bf162bf90e4e70fdbc41a8188b9fa8de5ad840c401198014406ce9e
+
+[build]
+builder = cmake
+subdir = zstd-1.4.5/build/cmake
+
+# The zstd cmake build explicitly sets the install name
+# for the shared library in such a way that cmake discards
+# the path to the library from the install_name, rendering
+# the library non-resolvable during the build.  The short
+# term solution for this is just to link static on macos.
+#
+# And while we're at it, let's just always link statically.
+[cmake.defines]
+ZSTD_BUILD_SHARED = OFF

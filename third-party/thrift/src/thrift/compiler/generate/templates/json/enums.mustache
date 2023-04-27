@@ -1,0 +1,24 @@
+<%={{ }}=%>
+{{#program:enums}}
+  "{{enum:name}}" : {
+    "name" : "{{enum:name}}",
+    {{^enum:empty?}}
+    "constants" : {
+      {{#enum:values}}
+      "{{enum_value:name}}" : {
+        "name" : "{{enum_value:name}}",
+        {{#enum_value:docstring?}}
+        "docstring" : {{enum_value:docstring}},
+        {{/enum_value:docstring?}}
+        "lineno" : {{enum_value:lineno}},
+        "value" : {{enum_value:value}}
+      }{{^last?}},{{/last?}}
+      {{/enum:values}}
+    },
+    {{/enum:empty?}}
+    {{#enum:docstring?}}
+    "docstring" : {{enum:docstring}},
+    {{/enum:docstring?}}
+    "lineno" : {{enum:lineno}}
+  }{{^last?}},{{/last?}}
+{{/program:enums}}

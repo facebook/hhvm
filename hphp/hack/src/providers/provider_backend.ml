@@ -9,21 +9,36 @@
 
 open Hh_prelude
 
+type pessimisation_info = {
+  pessimise_shallow_class:
+    Relative_path.t ->
+    name:string ->
+    Shallow_decl_defs.shallow_class ->
+    Shallow_decl_defs.shallow_class;
+  pessimise_fun:
+    Relative_path.t -> name:string -> Typing_defs.fun_elt -> Typing_defs.fun_elt;
+  pessimise_gconst:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.const_decl ->
+    Typing_defs.const_decl;
+  pessimise_typedef:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.typedef_type ->
+    Typing_defs.typedef_type;
+  allow_ast_caching: bool;
+  store_pessimised_result: bool;
+}
+
 module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
      conflict, we may put e.g. a function named 'foo' into the cache whose value is
      one type, and then later try to withdraw a class named 'foo' whose value is
-     another type.
-
-     The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
-     but that module depends on this module, so we can't write it down or else we
-     will cause a circular dependency. (It could probably be refactored to break
-     the dependency.) We just use [Obj.t] instead, which is better than using
-     [Obj.t] for all of the cases here.
-  *)
+     another type. *)
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t
@@ -44,68 +59,7 @@ module Decl_cache_entry = struct
     | Module_decl s -> "ModuleDecl" ^ s
 end
 
-module Cache_kind = struct
-  type t =
-    | LRU
-    | LFU
-end
-
-module Cache (Entry : Cache_sig.Entry) : sig
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  include Cache_intf with type t = (module Instance)
-
-  val make : Cache_kind.t -> max_size:int -> t
-end = struct
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  type t = (module Instance)
-
-  let make cache_kind ~max_size : t =
-    (module struct
-      module Cache = (val match cache_kind with
-                          | Cache_kind.LRU ->
-                            (module Lru_cache.Cache (Entry) : Cache_intf)
-                          | Cache_kind.LFU ->
-                            (module Lfu_cache.Cache (Entry) : Cache_intf)
-                        : Cache_intf)
-
-      let this = Cache.make ~max_size
-    end : Instance)
-
-  let find_or_add (module C : Instance) = C.Cache.find_or_add C.this
-
-  let clear (module C : Instance) = C.Cache.clear C.this
-
-  let add (module C : Instance) = C.Cache.add C.this
-
-  let remove (module C : Instance) = C.Cache.remove C.this
-
-  let length (module C : Instance) = C.Cache.length C.this
-
-  let get_telemetry (module C : Instance) = C.Cache.get_telemetry C.this
-
-  let reset_telemetry (module C : Instance) = C.Cache.reset_telemetry C.this
-end
-
+module Cache (Entry : Lfu_cache.Entry) = Lfu_cache.Cache (Entry)
 module Decl_cache = Cache (Decl_cache_entry)
 
 module Shallow_decl_cache_entry = struct
@@ -123,8 +77,8 @@ end
 
 module Shallow_decl_cache = Cache (Shallow_decl_cache_entry)
 
-module Linearization_cache_entry = struct
-  type _ t = Linearization : string -> Decl_defs.lin t
+module Folded_class_cache_entry = struct
+  type _ t = Folded_class_decl : string -> Decl_defs.decl_class_type t
 
   type 'a key = 'a t
 
@@ -133,12 +87,10 @@ module Linearization_cache_entry = struct
   let get_size ~key:_ ~value:_ = 1
 
   let key_to_log_string : type a. a key -> string =
-   fun key ->
-    match key with
-    | Linearization c -> "Linearization" ^ c
+   (fun (Folded_class_decl key) -> "ClassFolded" ^ key)
 end
 
-module Linearization_cache = Cache (Linearization_cache_entry)
+module Folded_class_cache = Cache (Folded_class_cache_entry)
 
 type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
 
@@ -242,9 +194,9 @@ module Reverse_naming_table_delta = struct
 end
 
 type local_memory = {
-  decl_cache: (module Decl_cache.Instance);
-  shallow_decl_cache: (module Shallow_decl_cache.Instance);
-  linearization_cache: (module Linearization_cache.Instance);
+  shallow_decl_cache: Shallow_decl_cache.t;
+  folded_class_cache: Folded_class_cache.t;
+  decl_cache: Decl_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
@@ -252,57 +204,138 @@ type local_memory = {
 
 type t =
   | Shared_memory
+  | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory
   | Decl_service of {
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }
+  | Rust_provider_backend of Rust_provider_backend.t
   | Analysis
 
 let t_to_string (t : t) : string =
   match t with
   | Shared_memory -> "Shared_memory"
+  | Pessimised_shared_memory _ -> "Pessimised_shared_memory"
   | Local_memory _ -> "Local_memory"
   | Decl_service _ -> "Decl_service"
+  | Rust_provider_backend _ -> "Rust_provider_backend"
   | Analysis -> "Analysis"
 
 let backend_ref = ref Shared_memory
 
 let set_analysis_backend () : unit = backend_ref := Analysis
 
-let set_shared_memory_backend () : unit = backend_ref := Shared_memory
+let set_shared_memory_backend () : unit =
+  backend_ref := Shared_memory;
+  Decl_store.set Decl_store.shared_memory_store;
+  ()
+
+let set_pessimised_shared_memory_backend info : unit =
+  backend_ref := Pessimised_shared_memory info;
+  Decl_store.set Decl_store.shared_memory_store;
+  ()
+
+let set_rust_backend popt : unit =
+  backend_ref := Rust_provider_backend (Rust_provider_backend.make popt)
+
+let set_custom_rust_backend backend : unit =
+  Rust_provider_backend.set backend;
+  backend_ref := Rust_provider_backend backend
+
+let make_decl_store_from_local_memory
+    ({ decl_cache; folded_class_cache; _ } : local_memory) :
+    Decl_store.decl_store =
+  {
+    Decl_store.add_class =
+      (fun k v ->
+        Folded_class_cache.add
+          folded_class_cache
+          ~key:(Folded_class_cache_entry.Folded_class_decl k)
+          ~value:v);
+    get_class =
+      (fun k : Decl_defs.decl_class_type option ->
+        Folded_class_cache.find_or_add
+          folded_class_cache
+          ~key:(Folded_class_cache_entry.Folded_class_decl k)
+          ~default:(fun _ -> None));
+    add_typedef =
+      (fun k v ->
+        Decl_cache.add
+          decl_cache
+          ~key:(Decl_cache_entry.Typedef_decl k)
+          ~value:v);
+    get_typedef =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Typedef_decl k)
+          ~default:(fun _ -> None));
+    add_module =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Module_decl k) ~value:v);
+    get_module =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Module_decl k)
+          ~default:(fun _ -> None));
+    add_fun =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Fun_decl k) ~value:v);
+    get_fun =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Fun_decl k)
+          ~default:(fun _ -> None));
+    add_gconst =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Gconst_decl k) ~value:v);
+    get_gconst =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Gconst_decl k)
+          ~default:(fun _ -> None));
+    add_method = (fun _ _ -> ());
+    get_method = (fun _ -> None);
+    add_static_method = (fun _ _ -> ());
+    get_static_method = (fun _ -> None);
+    add_prop = (fun _ _ -> ());
+    get_prop = (fun _ -> None);
+    add_static_prop = (fun _ _ -> ());
+    get_static_prop = (fun _ -> None);
+    add_constructor = (fun _ _ -> ());
+    get_constructor = (fun _ -> None);
+    push_local_changes = (fun () -> ());
+    pop_local_changes = (fun () -> ());
+  }
 
 let set_local_memory_backend_internal
-    ~(max_num_decls : int)
-    ~(max_num_shallow_decls : int)
-    ~(max_num_linearizations : int)
-    ~(cache_kind : Cache_kind.t) : unit =
-  backend_ref :=
-    Local_memory
-      {
-        decl_cache = Decl_cache.make cache_kind ~max_size:max_num_decls;
-        shallow_decl_cache =
-          Shallow_decl_cache.make cache_kind ~max_size:max_num_shallow_decls;
-        linearization_cache =
-          Linearization_cache.make cache_kind ~max_size:max_num_linearizations;
-        reverse_naming_table_delta = Reverse_naming_table_delta.make ();
-        fixmes = empty_fixmes;
-        naming_db_path_ref = ref None;
-      }
+    ~(max_num_decls : int) ~(max_num_shallow_decls : int) : unit =
+  let local_memory =
+    {
+      decl_cache = Decl_cache.make ~max_size:max_num_decls;
+      folded_class_cache = Folded_class_cache.make ~max_size:max_num_decls;
+      shallow_decl_cache =
+        Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+      reverse_naming_table_delta = Reverse_naming_table_delta.make ();
+      fixmes = empty_fixmes;
+      naming_db_path_ref = ref None;
+    }
+  in
+  backend_ref := Local_memory local_memory;
+  Decl_store.set @@ make_decl_store_from_local_memory local_memory;
+  ()
 
 let set_local_memory_backend
-    ~(max_num_decls : int)
-    ~(max_num_shallow_decls : int)
-    ~(max_num_linearizations : int) =
+    ~(max_num_decls : int) ~(max_num_shallow_decls : int) =
   Hh_logger.log
-    "Provider_backend.Local_memory cache sizes: max_num_decls=%d max_num_shallow_decls=%d max_num_linearizations=%d"
+    "Provider_backend.Local_memory cache sizes: max_num_decls=%d max_num_shallow_decls=%d"
     max_num_decls
-    max_num_shallow_decls
-    max_num_linearizations;
-  set_local_memory_backend_internal
-    ~max_num_decls
-    ~max_num_shallow_decls
-    ~max_num_linearizations
+    max_num_shallow_decls;
+  set_local_memory_backend_internal ~max_num_decls ~max_num_shallow_decls
 
 let set_local_memory_backend_with_defaults_for_test () : unit =
   (* These are all arbitrary, so that test can spin up the backend easily;
@@ -310,18 +343,84 @@ let set_local_memory_backend_with_defaults_for_test () : unit =
   set_local_memory_backend_internal
     ~max_num_decls:5000
     ~max_num_shallow_decls:(140 * 1024 * 1024)
-    ~max_num_linearizations:10000
-    ~cache_kind:Cache_kind.LFU
 
-let set_decl_service_backend (decl : Decl_service_client.t) : unit =
-  backend_ref := Decl_service { decl; fixmes = empty_fixmes }
+let make_decl_store_from_decl_service
+    (decl : Decl_service_client.t) (tcopts : TypecheckerOptions.t) :
+    Decl_store.decl_store =
+  assert (not (TypecheckerOptions.populate_member_heaps tcopts));
+  Decl_store.
+    {
+      (* Decl_service must only be used without member heaps.
+         Therefore, add_prop,static_prop,method,static_method_constructor will never be called.
+         And the corresponding get_ methods will always return None, to indicate that the caller
+         in decl_folded_class.ml will have to retrieve the information from a shallow decl. *)
+      add_prop = (fun _ _ -> failwith "decl_service.add_prop");
+      get_prop = (fun _ -> None);
+      add_static_prop = (fun _ _ -> failwith "decl_service.add_static_prop");
+      get_static_prop = (fun _ -> None);
+      add_method = (fun _ _ -> failwith "decl_service.add_method");
+      get_method = (fun _ -> None);
+      add_static_method = (fun _ _ -> failwith "decl_service.add_static_method");
+      get_static_method = (fun _ -> None);
+      add_constructor = (fun _ _ -> failwith "decl_service.add_constructor");
+      get_constructor = (fun _ -> None);
+      (* Local_changes is a concept used by hh_server to deliver typechecks for
+         unsaved files. It is not supported by the decl-service. *)
+      pop_local_changes = (fun () -> failwith "decl_service.pop_local_changes");
+      push_local_changes = (fun () -> failwith "push_local_changes");
+      (* The {add,get}_{fun,typedef,gconst,module} part of Decl_store API aren't used at all.
+         Instead, when Decl_provider wants one of these things, it calls directly into other APIs in this module.
+         In case you're wondering why "get_shallow_class" isn't also here? Well, it's called by Shallow_classes_provider
+         and it doesn't use the Decl_store API at all; it calls other functions in this current module too. *)
+      get_fun = (fun _ -> failwith "decl_service.get_fun");
+      add_fun = (fun _ _ -> failwith "decl_service.add_fun");
+      get_typedef = (fun _ -> failwith "decl_service.get_typedef");
+      add_typedef = (fun _ _ -> failwith "decl_service.add_typedef");
+      get_gconst = (fun _ -> failwith "decl_service.get_gconst");
+      add_gconst = (fun _ _ -> failwith "decl_service.add_gconst");
+      get_module = (fun _ -> failwith "decl_service.get_module");
+      add_module = (fun _ _ -> failwith "decl_service.add_module");
+      (* The {get,add}_class API is used by decl_folded_class.ml in its folding work, invoked by Decl_provider.
+         These two functions deal with folded decls by the way, not shallow.
+         Anyway, our implementation of "get_class" and "add_class" is to use our process-local cache,
+         and also pass through to hh_decl where needed. *)
+      get_class = Decl_service_client.rpc_get_folded_class decl;
+      add_class = Decl_service_client.rpc_store_folded_class decl;
+    }
+
+let set_decl_service_backend
+    (decl : Decl_service_client.t) (tcopt : TypecheckerOptions.t) : unit =
+  backend_ref := Decl_service { decl; fixmes = empty_fixmes };
+  Decl_store.set (make_decl_store_from_decl_service decl tcopt);
+  ()
 
 let get () : t = !backend_ref
 
 let supports_eviction (t : t) : bool =
   match t with
-  | Analysis -> false
+  | Pessimised_shared_memory _
+  | Analysis ->
+    false
   | Local_memory _
   | Decl_service _
+  | Rust_provider_backend _
   | Shared_memory ->
     true
+
+let noop_pessimisation_info =
+  {
+    pessimise_shallow_class = (fun _path ~name:_ x -> x);
+    pessimise_fun = (fun _path ~name:_ x -> x);
+    pessimise_gconst = (fun _path ~name:_ x -> x);
+    pessimise_typedef = (fun _path ~name:_ x -> x);
+    allow_ast_caching = false;
+    store_pessimised_result = false;
+  }
+
+let is_pessimised_shared_memory_backend = function
+  | Pessimised_shared_memory _ -> true
+  | _ -> false
+
+let get_pessimised_shared_memory_backend_info = function
+  | Pessimised_shared_memory info -> Some info
+  | _ -> None

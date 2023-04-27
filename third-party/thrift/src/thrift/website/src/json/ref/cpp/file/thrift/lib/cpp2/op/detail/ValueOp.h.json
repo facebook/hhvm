@@ -1,0 +1,137 @@
+{
+  "refid": "ValueOp_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "ValueOp.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "cstdint"
+    },
+    {
+      "local": "no",
+      "text_html": "iterator"
+    },
+    {
+      "local": "no",
+      "text_html": "stdexcept"
+    },
+    {
+      "local": "no",
+      "text_html": "type_traits"
+    },
+    {
+      "local": "no",
+      "text_html": "utility"
+    },
+    {
+      "refid": "BaseOp_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/detail/BaseOp.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/NativeType.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Tag.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::NumberOp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1bool__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::bool_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1byte__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i16__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i16_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i32_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i64__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i64_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1float__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::float_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1double__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::double_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringCompare",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::StringCompare"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::StringOp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1string__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::string_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1string__t_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::string_t &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1binary__t_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1binary__t_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::binary_t &gt; &gt;"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1_1detail",
+      "text_html": "apache::thrift::op::detail"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/detail/ValueOp.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/detail/ValueOp.h",
+  "free_overloadgroups": []
+}

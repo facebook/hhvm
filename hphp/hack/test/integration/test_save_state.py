@@ -16,10 +16,7 @@ from typing import Optional, TextIO
 import common_tests
 import hierarchy_tests
 from hh_paths import hh_client
-from saved_state_test_driver import (
-    SavedStateTestDriver,
-    SaveStateResult,
-)
+from saved_state_test_driver import SavedStateTestDriver, SaveStateResult
 from test_case import TestCase
 
 

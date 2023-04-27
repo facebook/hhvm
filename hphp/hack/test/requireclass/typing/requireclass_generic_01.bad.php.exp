@@ -1,2 +1,8 @@
 File "requireclass_generic_01.bad.php", line 7, characters 17-22:
 Require class cannot be used with a generic class (Parsing[1002])
+File "requireclass_generic_01.bad.php", line 10, characters 13-13:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "requireclass_generic_01.bad.php", line 11, characters 7-13:
+  This requires to be exactly C
+  File "requireclass_generic_01.bad.php", line 7, characters 17-22:
+  Required here

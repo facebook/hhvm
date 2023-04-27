@@ -1,0 +1,19 @@
+File "pointless_booleans.php", line 4, characters 6-23:
+The boolean expression is pointless (Lint[5644])
+File "pointless_booleans.php", line 8, characters 6-24:
+The boolean expression is pointless (Lint[5644])
+File "pointless_booleans.php", line 12, characters 6-24:
+The boolean expression is always false (Lint[5644])
+File "pointless_booleans.php", line 16, characters 6-22:
+The boolean expression is always false (Lint[5644])
+File "pointless_booleans.php", line 20, characters 6-18:
+The boolean expression is always true (Lint[5644])
+File "pointless_booleans.php", line 24, characters 6-24:
+The boolean expression is always false (Lint[5644])
+File "pointless_booleans.php", line 32, characters 6-20:
+The boolean expression is always false (Lint[5644])
+File "pointless_booleans.php", line 36, characters 6-8:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$z1 is nonnull` instead (Lint[5618])

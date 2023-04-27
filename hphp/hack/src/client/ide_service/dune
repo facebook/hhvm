@@ -8,6 +8,8 @@
   folly_stubs
   lwt
   lsp
+  package
+  rust_batch_index_ffi
   server
   server_autocomplete_services
   server_env
@@ -16,9 +18,10 @@
   server_highlight_refs
   server_search
   state_loader
+  naming_table_builder_ffi_externs
   sys_utils)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name client_ide_message)
@@ -35,3 +38,20 @@
  (libraries client_ide_message)
  (preprocess
   (pps lwt_ppx)))
+
+(rule
+ (targets librust_batch_index_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   rust_batch_index_ffi
+   rust_batch_index_ffi)))
+
+(library
+ (name rust_batch_index_ffi)
+ (wrapped false)
+ (modules)
+ (foreign_archives rust_batch_index_ffi))

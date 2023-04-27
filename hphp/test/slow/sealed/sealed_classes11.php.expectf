@@ -1,1 +1,1 @@
-Fatal error: Class SomeTrait2 may not inherit from sealed class (MyTrait) without being in the whitelist in %s/test/slow/sealed/sealed_classes11.inc on line 3
+Fatal error: Class SealedClass11\SomeTrait2 may not inherit from sealed class (SealedClass11\MyTrait) without being in the whitelist in %s/test/slow/sealed/sealed_classes11.inc on line %d

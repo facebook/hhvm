@@ -2,101 +2,101 @@
  (alias full_fidelity_errors_test)
  (deps
   %{exe:../../../src/hh_parse.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/full_fidelity/cases/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/*.errors.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/*.flags)
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.errors.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.flags)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/concurrent/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/concurrent/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/concurrent/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/concurrent/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/concurrent/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/concurrent/error/*.errors.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/context/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/context/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/concurrent/error/*.errors.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/context/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/context/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.errors.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/*.errors.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/modes/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/modes/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/*.errors.exp)
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/*.errors.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/HH_FLAGS))
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/HH_FLAGS))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/full_fidelity/cases
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/full_fidelity/cases
    --out-extension
    .errors.out
    --expect-extension
@@ -111,100 +111,100 @@
  (alias full_fidelity_json_test)
  (deps
   %{exe:../../../src/hh_parse.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/full_fidelity/cases/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/*.json.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/*.flags)
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.json.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/*.flags)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/abstract_static_props/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/abstract_static_props/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/atted_attribute_syntax/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/atted_attribute_syntax/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/byref-assignment/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/byref-assignment/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/concurrent/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/concurrent/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/concurrent/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/concurrent/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/concurrent/error/*.json.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/context/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/context/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/concurrent/error/*.json.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/context/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/context/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/final_interface_trait/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/final_interface_trait/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/function_default_args/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.json.exp)
-  (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/function_default_args/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/*.json.exp)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/hh_parse/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_attribute_syntax/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_attribute_syntax/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/legacy_soft_typehints/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/legacy_soft_typehints/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
-  (glob_files %{project_root}/test/full_fidelity/cases/modes/*.php)
-  (glob_files %{project_root}/test/full_fidelity/cases/modes/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.php)
+  (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/*.php)
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/*.php)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/*.json.exp)
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/*.json.exp)
   (glob_files
-   %{project_root}/test/full_fidelity/cases/static_const_props/HH_FLAGS))
+   %{project_root}/hack/test/full_fidelity/cases/static_const_props/HH_FLAGS))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/full_fidelity/cases
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/full_fidelity/cases
    --out-extension
    .json.out
    --expect-extension

@@ -25,7 +25,12 @@ let member_type env member_ce =
   if Option.is_none (get_ce_xhp_attr member_ce) then
     default_result
   else
-    match get_node default_result with
+    let (stripped_ty, has_like) =
+      match get_node default_result with
+      | Tlike ty -> (ty, true)
+      | _ -> (default_result, false)
+    in
+    match get_node stripped_ty with
     | Tapply (enum_id, _) ->
       (* XHP attribute type transform is necessary to account for
        * non-first class Enums:
@@ -62,18 +67,25 @@ let member_type env member_ce =
               interface = _;
             } ->
           let ty = mk (get_reason default_result, get_node enum_ty) in
-          ty))
+          if has_like then
+            mk (get_reason default_result, Tlike ty)
+          else
+            ty))
     | _ -> default_result
 
 let enum_check_const ty_exp env cc t =
-  let p = fst cc.cc_id in
-  Typing_ops.sub_type
-    p
-    Reason.URenum
-    env
-    t
-    ty_exp
-    Typing_error.Callback.constant_does_not_match_enum_type
+  if Typing_utils.is_tyvar_error env ty_exp || Typing_utils.is_tyvar_error env t
+  then
+    (env, None)
+  else
+    let p = fst cc.cc_id in
+    Typing_ops.sub_type
+      p
+      Reason.URenum
+      env
+      t
+      ty_exp
+      Typing_error.Callback.constant_does_not_match_enum_type
 
 (* Check that the `as` bound or the underlying type of an enum is a subtype of
  * arraykey. For enum class, check that it is a denotable closed type:
@@ -90,6 +102,8 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
   let rec is_valid_base lty =
+    Typing_utils.is_tyvar_error env lty
+    ||
     match get_node lty with
     | Tprim _
     | Tnonnull ->
@@ -100,10 +114,9 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
     | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
-    | Tshape (_, shapemap) ->
+    | Tshape (_, _, shapemap) ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
     | Tany _
-    | Terr
     | Tdynamic
     | Tfun _
     | Tvar _

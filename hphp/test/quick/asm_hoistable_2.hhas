@@ -5,7 +5,7 @@
   .default_ctor;
 }
 
-.class [unique] B extends A {
+.class [unique] B extends a {
   .default_ctor;
 
   .method [public static] print() {
@@ -22,7 +22,7 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
-  FCallClsMethodD <> 0 1 "" "" - "" "" "B" "print"
+  FCallClsMethodD <> 0 1 "" "" - "" "B" "print"
   PopC
 
   Int 1

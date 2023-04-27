@@ -44,7 +44,6 @@ enum Foo: int {
   require_once = 40;
   return = 41;
   else = 42;
-  elseif = 43;
   default = 44;
   break = 45;
   continue = 46;
@@ -111,7 +110,6 @@ function main_entry(): void {
   echo Foo::require_once;
   echo Foo::return;
   echo Foo::else;
-  echo Foo::elseif;
   echo Foo::default;
   echo Foo::break;
   echo Foo::continue;

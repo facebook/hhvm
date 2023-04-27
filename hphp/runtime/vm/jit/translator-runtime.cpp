@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -59,6 +58,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -195,9 +195,9 @@ void raise_error_sd(const StringData *msg) {
 }
 
 ALWAYS_INLINE
-static bool VerifyTypeSlowImpl(const Class* cls,
-                               const Class* constraint,
-                               const TypeConstraint* expected) {
+static bool VerifyTypeClsImpl(const Class* cls,
+                              const Class* constraint,
+                              const TypeConstraint* expected) {
   // This helper should only be called for the Object and Unresolved cases
   assertx(expected->isObject() || expected->isUnresolved());
   // If we have a resolved class for the constraint, all we have to do is
@@ -209,12 +209,12 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   return expected->isUnresolved() && expected->checkTypeAliasObj(cls);
 }
 
-void VerifyParamTypeSlow(ObjectData* obj,
-                         const Class* constraint,
-                         const Func* func,
-                         int32_t paramId,
-                         const TypeConstraint* expected) {
-  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+void VerifyParamTypeCls(ObjectData* obj,
+                        const Class* constraint,
+                        const Func* func,
+                        int32_t paramId,
+                        const TypeConstraint* expected) {
+  if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
     assertx(expected->isObject() || expected->isUnresolved());
     VerifyParamTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
@@ -230,21 +230,32 @@ void VerifyParamTypeCallable(TypedValue value, const Func* func,
   }
 }
 
-
-TypedValue VerifyParamTypeFail(TypedValue value, const Class* ctx,
-                               const Func* func, int32_t paramId,
-                               const TypeConstraint* tc) {
-  assertx(!tc->check(&value, ctx));
-  tc->verifyParamFail(&value, ctx, func, paramId);
+TypedValue VerifyParamType(TypedValue value, const Class* ctx,
+                           const Func* func, int32_t paramId,
+                           const TypeConstraint* tc) {
+  assertx(tvIsPlausible(value));
+  assertx(tc->isCheckable());
+  tc->verifyParam(&value, ctx, func, paramId);
+  assertx(tvIsPlausible(value));
   return value;
 }
 
-void VerifyRetTypeSlow(ObjectData* obj,
-                       const Class* constraint,
-                       const Func* func,
-                       int32_t retId,
-                       const TypeConstraint* expected) {
-  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+void VerifyParamTypeFail(TypedValue value, const Class* ctx,
+                         const Func* func, int32_t paramId,
+                         const TypeConstraint* tc) {
+  DEBUG_ONLY auto const origType = value.type();
+  assertx(tvIsPlausible(value));
+  assertx(!tc->check(&value, ctx));
+  tc->verifyParamFail(&value, ctx, func, paramId);
+  assertx(value.type() == origType);
+}
+
+void VerifyRetTypeCls(ObjectData* obj,
+                      const Class* constraint,
+                      const Func* func,
+                      int32_t retId,
+                      const TypeConstraint* expected) {
+  if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
     assertx(expected->isObject() || expected->isUnresolved());
     VerifyRetTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
@@ -261,9 +272,24 @@ void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
   }
 }
 
-TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
-                             const Func* func, int32_t retId,
-                             const TypeConstraint* tc) {
+TypedValue VerifyRetType(TypedValue value, const Class* ctx,
+                         const Func* func, int32_t retId,
+                         const TypeConstraint* tc) {
+  assertx(tvIsPlausible(value));
+  assertx(tc->isCheckable());
+  if (retId == TypeConstraint::ReturnId) {
+    tc->verifyReturn(&value, ctx, func);
+  } else {
+    tc->verifyOutParam(&value, ctx, func, retId);
+  }
+  assertx(tvIsPlausible(value));
+  return value;
+}
+
+void VerifyRetTypeFail(TypedValue value, const Class* ctx,
+                       const Func* func, int32_t retId,
+                       const TypeConstraint* tc) {
+  DEBUG_ONLY auto const origType = value.type();
   if (retId == TypeConstraint::ReturnId) {
     assertx(!tc->check(&value, ctx));
     tc->verifyReturnFail(&value, ctx, func);
@@ -271,7 +297,7 @@ TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
     assertx(!tc->check(&value, ctx));
     tc->verifyOutParamFail(&value, ctx, func, retId);
   }
-  return value;
+  assertx(value.type() == origType);
 }
 
 void VerifyReifiedLocalTypeImpl(TypedValue value, ArrayData* ts,
@@ -394,14 +420,22 @@ template TypedValue arrFirstLast<false, true>(ArrayData*);
 TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
-                           Class* ctx,
+                           const Func* ctx,
                            bool ignoreLateInit,
                            bool writeMode) {
+  auto const propCtx = MemberLookupContext(ctx->cls(), ctx->moduleName());
   auto const lookup = ignoreLateInit
-    ? cls->getSPropIgnoreLateInit(ctx, name)
-    : cls->getSProp(ctx, name);
+    ? cls->getSPropIgnoreLateInit(propCtx, name)
+    : cls->getSProp(propCtx, name);
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
+  if (lookup.internal) {
+    auto const slot = cls->lookupSProp(name);
+    auto const prop = cls->staticProperties()[slot];
+    if (will_symbol_raise_module_boundary_violation(&prop, ctx)) {
+      raiseModulePropertyViolation(cls, name, ctx->moduleName(), true);
+    }
   }
   checkReadonly(lookup.val, cls, name, lookup.readonly, op, writeMode);
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
@@ -412,7 +446,7 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
-                            Class* ctx,
+                            const Func* ctx,
                             bool ignoreLateInit,
                             bool writeMode) {
   auto sprop = getSPropOrNull(op, cls, name, ctx, ignoreLateInit, writeMode);
@@ -460,7 +494,7 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
 const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    auto const callCtx = MethodLookupCallContext(ctxFunc->cls(), ctxFunc);
+    auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
     UNUSED auto func =
       lookupMethodCtx(cls, nullptr, callCtx, CallType::CtorMethod,
                       MethodLookupErrorOptions::RaiseOnNotFound);
@@ -472,7 +506,7 @@ const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Func* ctxFunc) {
   const Func* f;
-  auto const callCtx = MethodLookupCallContext(ctxFunc->cls(), ctxFunc);
+  auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
   auto const res = lookupClsMethod(f, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
 
@@ -544,6 +578,11 @@ void profileIsTypeStructHelper(ArrayData* a, IsTypeStructProfile* prof) {
   prof->update(a);
 }
 
+void profileCoeffectFunParamHelper(TypedValue tv,
+                                   CoeffectFunParamProfile* prof) {
+  prof->update(&tv);
+}
+
 void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {
   std::string givenType, expectedType, errorKey;
   auto const ts = ArrNR(a);
@@ -562,7 +601,7 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {
 
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  auto result = addToReifiedGenericsTable(mangledName, tsList);
+  auto result = addToTypeReifiedGenericsTable(mangledName, tsList);
   return result;
 }
 

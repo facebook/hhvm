@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
 #include "hphp/runtime/server/server-worker.h"
-#include "hphp/runtime/server/job-queue-vm-stack.h"
 
 namespace HPHP {
 

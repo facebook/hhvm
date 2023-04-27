@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 
 #include <sstream>
 
@@ -181,7 +182,7 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
     keys.insert(pair.first.begin(), pair.first.end());
   }
 
-  if (weight == 0 || keys.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+  if (weight == 0 || keys.size() > bespoke::StructLayout::maxNumKeys()) {
     return KeyOrder::MakeInvalid();
   }
 

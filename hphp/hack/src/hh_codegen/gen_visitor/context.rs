@@ -3,15 +3,19 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{gen_helper, syn_helper::*};
-use anyhow::{anyhow, Result};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::collections::VecDeque;
+use std::path::Path;
+
+use anyhow::anyhow;
+use anyhow::Result;
 use proc_macro2::TokenStream;
 use quote::format_ident;
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    path::Path,
-};
 use syn::*;
+
+use super::gen_helper;
+use super::syn_helper::*;
 
 pub struct Context<'a> {
     /// type declerations, no visit function will be generated for
@@ -113,7 +117,7 @@ impl<'a> Context<'a> {
     pub fn non_alias_types(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
         self.types
             .iter()
-            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(*def)))
+            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(def)))
     }
 
     fn get_ty_names_<'b>(defs: &'b HashMap<String, &'b Item>) -> HashSet<&'b str> {

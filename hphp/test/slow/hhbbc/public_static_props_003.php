@@ -7,7 +7,7 @@ class D {
 }
 
 class Y extends D {
-  static $boom = 'heh';
+  public static $boom = 'heh';
 }
 
 function go() {

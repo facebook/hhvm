@@ -40,8 +40,11 @@ class virtual type_validator =
 
     method on_class acc _ _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_newtype acc _ _ tyl cstr ty =
-      List.fold_left (ty :: cstr :: tyl) ~f:this#on_type ~init:acc
+    method on_newtype acc _ _ tyl as_cstr super_cstr ty =
+      List.fold_left
+        (ty :: as_cstr :: super_cstr :: tyl)
+        ~f:this#on_type
+        ~init:acc
 
     method on_alias acc _ _ tyl ty =
       List.fold_left (ty :: tyl) ~f:this#on_type ~init:acc
@@ -101,9 +104,12 @@ class virtual type_validator =
             td_module = _;
             td_tparams;
             td_type;
-            td_constraint;
+            td_as_constraint;
+            td_super_constraint;
             td_is_ctx = _;
             td_attributes = _;
+            td_internal = _;
+            td_docs_url = _;
           } =
             td
           in
@@ -118,15 +124,27 @@ class virtual type_validator =
             in
             let subst = Decl_instantiate.make_subst td_tparams tyl in
             let td_type = Decl_instantiate.instantiate subst td_type in
-            if Env.is_typedef_visible acc.env td then
+            if Env.is_typedef_visible acc.env ~name td then
               this#on_alias acc r (pos, name) tyl td_type
             else
-              let td_constraint =
-                match td_constraint with
+              let td_as_constraint =
+                match td_as_constraint with
                 | None -> mk (r, Tmixed)
                 | Some ty -> Decl_instantiate.instantiate subst ty
               in
-              this#on_newtype acc r (pos, name) tyl td_constraint td_type
+              let td_super_constraint =
+                match td_super_constraint with
+                | None -> MakeType.nothing r
+                | Some ty -> Decl_instantiate.instantiate subst ty
+              in
+              this#on_newtype
+                acc
+                r
+                (pos, name)
+                tyl
+                td_as_constraint
+                td_super_constraint
+                td_type
         | _ -> this#on_class acc r (pos, name) tyl
 
     (* Use_pos is the primary error position *)

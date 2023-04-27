@@ -11,7 +11,7 @@
     --out-extension .legacy.out
     --in-extension .php
     --batch
-    --flags --error-format raw --out-extension .legacy.out)))
+    --flags --error-format plain --out-extension .legacy.out)))
 
 (alias
     (name runtest)

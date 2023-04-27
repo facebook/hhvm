@@ -35,10 +35,7 @@ struct Pipe : PlainFile {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
-
-private:
-  bool closeImpl();
+  bool close(int* raw_pclose_return = nullptr) final;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

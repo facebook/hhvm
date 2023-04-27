@@ -16,10 +16,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
-
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
@@ -31,6 +30,7 @@ enum class SymKind {
   Type,
   Function,
   Constant,
+  Module,
 };
 
 constexpr std::string_view toString(SymKind k) {
@@ -41,6 +41,8 @@ constexpr std::string_view toString(SymKind k) {
       return "function";
     case SymKind::Constant:
       return "constant";
+    case SymKind::Module:
+      return "module";
   }
   return "unknown";
 }
@@ -51,6 +53,7 @@ constexpr bool isCaseSensitive(SymKind k) {
     case SymKind::Function:
       return false;
     case SymKind::Constant:
+    case SymKind::Module:
       return true;
   }
 }
@@ -60,20 +63,16 @@ constexpr bool isCaseSensitive(SymKind k) {
  * relative to the repo's root.
  */
 struct Path {
-
-  explicit Path(std::nullptr_t) : m_path{nullptr} {
-  }
+  explicit Path(std::nullptr_t) : m_path{nullptr} {}
   explicit Path(StringPtr path) : m_path{path} {
     assertx(!m_path.empty());
   }
-  explicit Path(const StringData& path) : Path{makeStringPtr(path)} {
-  }
-  explicit Path(const folly::fs::path& path)
+  explicit Path(const StringData& path) : Path{makeStringPtr(path)} {}
+  explicit Path(const std::filesystem::path& path)
       : Path{makeStringPtr(path.native())} {
     assertx(path.is_relative());
   }
-  explicit Path(const std::string_view path) : Path{makeStringPtr(path)} {
-  }
+  explicit Path(const std::string_view path) : Path{makeStringPtr(path)} {}
 
   bool operator==(const Path& o) const noexcept {
     return m_path.same(o.m_path);
@@ -87,7 +86,8 @@ struct Path {
     return m_path == s;
   }
 
-  template <typename T> bool operator!=(const T& o) const noexcept {
+  template <typename T>
+  bool operator!=(const T& o) const noexcept {
     return !(operator==(o));
   }
 
@@ -95,8 +95,8 @@ struct Path {
     return m_path.slice();
   }
 
-  folly::fs::path native() const noexcept {
-    return folly::fs::path{std::string{slice()}};
+  std::filesystem::path native() const noexcept {
+    return std::filesystem::path{std::string{slice()}};
   }
 
   const StringData* get() const noexcept {
@@ -112,14 +112,11 @@ struct Path {
  *
  * This may compare case
  */
-template <SymKind k> struct Symbol {
-
-  explicit Symbol(StringPtr name) : m_name{name} {
-  }
-  explicit Symbol(const StringData& name) : Symbol{makeStringPtr(name)} {
-  }
-  explicit Symbol(const std::string_view name) : Symbol{makeStringPtr(name)} {
-  }
+template <SymKind k>
+struct Symbol {
+  explicit Symbol(StringPtr name) : m_name{name} {}
+  explicit Symbol(const StringData& name) : Symbol{makeStringPtr(name)} {}
+  explicit Symbol(const std::string_view name) : Symbol{makeStringPtr(name)} {}
 
   /**
    * This operation is case-insensitive for Types, Functions, and Type Aliases,
@@ -182,13 +179,15 @@ struct MethodDecl {
 } // namespace Facts
 } // namespace HPHP
 
-template <> struct std::hash<HPHP::Facts::Path> {
+template <>
+struct std::hash<HPHP::Facts::Path> {
   std::size_t operator()(const HPHP::Facts::Path& p) const noexcept {
     return p.m_path.hash();
   }
 };
 
-template <HPHP::Facts::SymKind k> struct std::hash<HPHP::Facts::Symbol<k>> {
+template <HPHP::Facts::SymKind k>
+struct std::hash<HPHP::Facts::Symbol<k>> {
   std::size_t operator()(const HPHP::Facts::Symbol<k>& s) const noexcept {
     // This is a case-insensitive hash, suitable for use whether the equality
     // comparator is case-sensitive or case-insensitive.
@@ -198,7 +197,8 @@ template <HPHP::Facts::SymKind k> struct std::hash<HPHP::Facts::Symbol<k>> {
 
 namespace std {
 
-template <> struct hash<typename HPHP::Facts::TypeDecl> {
+template <>
+struct hash<typename HPHP::Facts::TypeDecl> {
   size_t operator()(const typename HPHP::Facts::TypeDecl& d) const {
     return folly::hash::hash_combine(
         std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Type>>{}(d.m_name),
@@ -206,7 +206,8 @@ template <> struct hash<typename HPHP::Facts::TypeDecl> {
   }
 };
 
-template <> struct hash<typename HPHP::Facts::MethodDecl> {
+template <>
+struct hash<typename HPHP::Facts::MethodDecl> {
   size_t operator()(const typename HPHP::Facts::MethodDecl& d) const {
     return folly::hash::hash_combine(
         std::hash<HPHP::Facts::TypeDecl>{}(d.m_type),

@@ -4,10 +4,10 @@ class A {
   const CD = "A::CD";
   const CE = B::CE;
   const CF = C::CG;
-  static $a = "A::a";
+  public static $a = "A::a";
   static protected $b = "A::b";
   static private $c = "A::c";
-  static $d = A::CD;
+  public static $d = A::CD;
   static protected $e = A::CE;
   static private $f = A::CF;
 
@@ -44,7 +44,7 @@ class B extends A {
   const CE = "B::CE";
   static protected $b = "B::b";
   static private $c = "B::c";
-  static $d = B::CD;
+  public static $d = B::CD;
   static protected $g = "B::g";
   function bFunc() {
     print "In B::bFunc():\n";
@@ -77,7 +77,7 @@ class B extends A {
 class C extends B {
   const CG = "C::CG";
   static protected $b = "C::b";
-  static $h = "C::h";
+  public static $h = "C::h";
   public $i = C::CG;
   function cFunc() {
     print "In C::cFunc():\n";

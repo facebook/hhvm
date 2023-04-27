@@ -23,65 +23,12 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_Vector("HH\\Vector");
-const StaticString s_Map("HH\\Map");
-const StaticString s_Set("HH\\Set");
-
-const StaticString s_add("add");
-const StaticString s_addall("addall");
-const StaticString s_append("append");
-const StaticString s_clear("clear");
-const StaticString s_remove("remove");
-const StaticString s_removeall("removeall");
-const StaticString s_removekey("removekey");
-const StaticString s_set("set");
-const StaticString s_setall("setall");
-
-//////////////////////////////////////////////////////////////////////
-
-bool is_collection_method_returning_this(const php::Class* cls,
-                                         const php::Func* func) {
-  if (!cls) return false;
-
-  if (cls->name->isame(s_Vector.get())) {
-    return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_append.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_removekey.get()) ||
-      func->name->isame(s_set.get()) ||
-      func->name->isame(s_setall.get());
-  }
-
-  if (cls->name->isame(s_Map.get())) {
-    return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_remove.get()) ||
-      func->name->isame(s_set.get()) ||
-      func->name->isame(s_setall.get());
-  }
-
-  if (cls->name->isame(s_Set.get())) {
-    return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_remove.get()) ||
-      func->name->isame(s_removeall.get());
-  }
-
-  return false;
-}
-
 Type native_function_return_type(const php::Func* f) {
-  assertx(f->nativeInfo);
+  assertx(f->isNative);
 
   // Infer the type from the HNI declaration
   auto t = [&]{
-    auto const hni = f->nativeInfo->returnType;
+    auto const hni = f->retTypeConstraint.asSystemlibType();
     return hni ? from_DataType(*hni) : TInitCell;
   }();
 

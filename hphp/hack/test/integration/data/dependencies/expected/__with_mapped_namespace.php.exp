@@ -13,7 +13,7 @@ namespace HH {
     namespace PHP {
       function ini_set(
         string $varname,
-        ?int $newvalue = \extract_standalone_make_default(),
+        ?int $newvalue = \EXTRACT_STANDALONE_DEFAULT,
       ): void {
         throw new \Exception();
       }
@@ -24,6 +24,4 @@ namespace HH {
 //// __extract_standalone__.php
 <?hh
 
-function extract_standalone_make_default()[]: nothing {
-  throw new \Exception();
-}
+const nothing EXTRACT_STANDALONE_DEFAULT = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");

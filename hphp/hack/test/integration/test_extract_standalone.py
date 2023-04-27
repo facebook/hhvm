@@ -4,9 +4,14 @@ import os
 from sys import stderr
 from typing import List
 
-import hh_paths
 from common_tests import CommonTestDriver
 from test_case import TestCase
+
+hh_single_type_check = os.path.abspath(os.getenv("HH_SINGLE_TYPE_CHECK", "<undefined>"))
+# we expect env var to be repo-relative, so abspath will find it relative to CWD which is repo-root
+if not os.path.exists(hh_single_type_check):
+    print("Not found HH_SINGLE_TYPE_CHECK=" + hh_single_type_check, file=stderr)
+    exit(1)
 
 
 class ExtractStandaloneDriver(CommonTestDriver):
@@ -83,7 +88,7 @@ disable_xhp_element_mangling = false
         ]
         self.proc_call(
             [
-                hh_paths.hh_single_type_check,
+                hh_single_type_check,
                 "--allowed-fixme-codes-strict",
                 "4101",
                 "--allowed-decl-fixme-codes",

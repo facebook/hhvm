@@ -39,12 +39,21 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | ModuleDeclaration
+  | ModuleDefinition
+  | FileCall
+  | GlobalNamespaceAlias
+  | IndexerInputsHash
+  | TypeInfo
 
 type src = FileLines
+
+type gencode = GenCode
 
 type t =
   | Hack of hack
   | Src of src
+  | Gencode of gencode
 
 type predicate = t
 
@@ -60,8 +69,9 @@ val parent_decl_predicate : parent_container_type -> string * t
 val get_parent_kind : ('a, 'b) Aast.class_ -> parent_container_type
 
 module Fact_acc : sig
-  (* fact accumulator. This is used to store facts generated from
-     a batch of files. *)
+  (* fact accumulator. This is used to maintain state through indexing
+     a batch. State is mostly generated facts *)
+
   type t
 
   val init : ownership:bool -> t
@@ -78,6 +88,10 @@ module Fact_acc : sig
      the ownership_unit is ignored. *)
   val set_ownership_unit : t -> string option -> unit
 
+  val set_pos_map : t -> Symbol_xrefs.pos_map -> unit
+
+  val get_pos_map : t -> Symbol_xrefs.pos_map option
+
   (** [add_fact pred fact t] returns an [id] and a new accumulator [t'].
      If a fact already exists in [t] for this [pred], returns [t] unchanged
      together with its id. Otherwise, [id] is a new fact id, and a fact
@@ -85,5 +99,10 @@ module Fact_acc : sig
 
      If [ownership] is set, we distinguish between identical facts with different
      owners *)
-  val add_fact : predicate -> Hh_json.json -> t -> Symbol_fact_id.t * t
+  val add_fact :
+    predicate ->
+    Hh_json.json ->
+    ?value:Hh_json.json ->
+    t ->
+    Symbol_fact_id.t * t
 end

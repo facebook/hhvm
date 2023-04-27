@@ -7,7 +7,7 @@ exception Remote_fatal_exception of Marshal_tools.remote_exception_data
 exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
 val rpc_persistent :
-  Timeout.in_channel * Core_kernel.Out_channel.t ->
+  Timeout.in_channel * Core.Out_channel.t ->
   's ->
   ('s -> ServerCommandTypes.push -> 's) ->
   desc:string ->

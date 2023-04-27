@@ -1,0 +1,20 @@
+File "req_extends.php", line 7, characters 22-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "req_extends.php", line 4, characters 13-13:
+  `T` is a constrained type parameter
+  File "req_extends.php", line 4, characters 18-20:
+  This type constraint is violated
+  File "req_extends.php", line 4, characters 18-20:
+  Expected `int`
+  File "req_extends.php", line 7, characters 24-29:
+  But got `string`
+File "req_extends.php", line 8, characters 19-27:
+Some type arguments violate their constraints (Typing[4323])
+  File "req_extends.php", line 3, characters 9-9:
+  `T` is a constrained type parameter
+  File "req_extends.php", line 3, characters 14-16:
+  This type constraint is violated
+  File "req_extends.php", line 3, characters 14-16:
+  Expected `int`
+  File "req_extends.php", line 8, characters 21-26:
+  But got `string`

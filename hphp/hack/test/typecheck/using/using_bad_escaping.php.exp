@@ -1,7 +1,3 @@
-File "using_bad_escaping.php", line 16, characters 16-17:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
-File "using_bad_escaping.php", line 22, characters 10-11:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
 File "using_bad_escaping.php", line 27, characters 10-11:
 Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
 File "using_bad_escaping.php", line 30, characters 18-19:
@@ -12,3 +8,7 @@ File "using_bad_escaping.php", line 36, characters 17-18:
 Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
 File "using_bad_escaping.php", line 43, characters 12-13:
 Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
+File "using_bad_escaping.php", line 16, characters 16-17:
+Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
+File "using_bad_escaping.php", line 22, characters 10-11:
+Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])

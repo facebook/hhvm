@@ -3,12 +3,10 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-32], "\\array_access_read_prim");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid)))); 
-        f_name = ([3:10-32], "\\array_access_read_prim"); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:33-37], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:38-40]; param_name = "$x"; 
@@ -19,8 +17,11 @@
         f_body =
         { fb_ast =
           [([5:3-9],
-            (Expr ((_), [5:3-8], (Array_get (((_), [5:3-5], (Hole (((bool), [5:3-5], (Lvar ([5:3-5], $x))), (_), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:6-7], (Int "1"))))))))]
+            (Expr
+               ((nothing), [5:3-8],
+                (Array_get (((bool), [5:3-5], (Hole (((bool), [5:3-5], (Lvar ([5:3-5], $x))), (bool), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:6-7], (Int "1"))))))))
+            ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

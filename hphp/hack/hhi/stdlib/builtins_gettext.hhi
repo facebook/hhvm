@@ -9,20 +9,48 @@
  */
 
 <<__PHPStdLib>>
-function bind_textdomain_codeset(string $domain, string $codeset);
+function bind_textdomain_codeset(
+  string $domain,
+  string $codeset,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bindtextdomain(string $domain_name, string $dir);
+function bindtextdomain(
+  string $domain_name,
+  string $dir,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dcgettext(string $domain_name, string $msgid, int $category);
+function dcgettext(
+  string $domain_name,
+  string $msgid,
+  int $category,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dcngettext(string $domain, string $msgid1, string $msgid2, int $count, int $category);
+function dcngettext(
+  string $domain,
+  string $msgid1,
+  string $msgid2,
+  int $count,
+  int $category,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dgettext(string $domain_name, string $msgid);
+function dgettext(
+  string $domain_name,
+  string $msgid,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dngettext(string $domain, string $msgid1, string $msgid2, int $count);
+function dngettext(
+  string $domain,
+  string $msgid1,
+  string $msgid2,
+  int $count,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gettext(string $msgid);
+function gettext(string $msgid): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ngettext(string $msgid1, string $msgid2, int $count);
+function ngettext(
+  string $msgid1,
+  string $msgid2,
+  int $count,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function textdomain(string $domain);
+function textdomain(string $domain): HH\FIXME\MISSING_RETURN_TYPE;

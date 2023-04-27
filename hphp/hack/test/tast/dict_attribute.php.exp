@@ -2,9 +2,8 @@
     { c_span = [5:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([5:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [6:3-55]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -21,7 +20,7 @@
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -32,7 +31,9 @@
          [{ ua_name = ([3:9-11], "\\Fi");
             ua_params =
             [((dict<string, int>), [3:12-36],
-              (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+              (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                 )))
+              ]
             }
            ];
          fa_namespace =
@@ -41,15 +42,16 @@
            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None });
   (Class
      { c_span = [9:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([9:7-8], "\\C"); c_tparams = []; c_extends = [([9:17-18], (Happly (([9:17-18], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([9:30-47], (Happly (([9:30-47], "\\HH\\ClassAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([9:30-47], (Happly (([9:30-47], "\\HH\\ClassAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -60,7 +62,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -69,15 +73,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [10:1-49]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([10:7-8], "\\E"); c_tparams = []; c_extends = [([10:17-18], (Happly (([10:17-18], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([10:30-46], (Happly (([10:30-46], "\\HH\\EnumAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([10:30-46], (Happly (([10:30-46], "\\HH\\EnumAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -88,7 +93,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -97,15 +104,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [11:1-53]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([11:7-8], "\\F"); c_tparams = []; c_extends = [([11:17-18], (Happly (([11:17-18], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([11:30-50], (Happly (([11:30-50], "\\HH\\FunctionAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([11:30-50], (Happly (([11:30-50], "\\HH\\FunctionAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -116,7 +124,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -125,15 +135,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [12:1-53]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([12:7-10], "\\Met"); c_tparams = []; c_extends = [([12:19-20], (Happly (([12:19-20], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([12:32-50], (Happly (([12:32-50], "\\HH\\MethodAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([12:32-50], (Happly (([12:32-50], "\\HH\\MethodAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -144,7 +155,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -153,15 +166,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [13:1-65]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([13:7-12], "\\IProp"); c_tparams = []; c_extends = [([13:21-22], (Happly (([13:21-22], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([13:34-62], (Happly (([13:34-62], "\\HH\\InstancePropertyAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([13:34-62], (Happly (([13:34-62], "\\HH\\InstancePropertyAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -172,7 +186,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -181,15 +197,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [14:1-63]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([14:7-12], "\\SProp"); c_tparams = []; c_extends = [([14:21-22], (Happly (([14:21-22], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([14:34-60], (Happly (([14:34-60], "\\HH\\StaticPropertyAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([14:34-60], (Happly (([14:34-60], "\\HH\\StaticPropertyAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -200,7 +217,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -209,15 +228,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [15:1-54]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([15:7-8], "\\P"); c_tparams = []; c_extends = [([15:17-18], (Happly (([15:17-18], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([15:30-51], (Happly (([15:30-51], "\\HH\\ParameterAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([15:30-51], (Happly (([15:30-51], "\\HH\\ParameterAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -228,7 +248,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -237,15 +259,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [16:1-59]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:7-13], "\\TAlias"); c_tparams = []; c_extends = [([16:22-23], (Happly (([16:22-23], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([16:35-56], (Happly (([16:35-56], "\\HH\\TypeAliasAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([16:35-56], (Happly (([16:35-56], "\\HH\\TypeAliasAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -256,7 +279,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -265,15 +290,16 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [17:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([17:7-9], "\\Fi"); c_tparams = []; c_extends = [([17:18-19], (Happly (([17:18-19], "\\A"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([17:31-47], (Happly (([17:31-47], "\\HH\\FileAttribute"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([17:31-47], (Happly (([17:31-47], "\\HH\\FileAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -284,7 +310,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -293,7 +321,8 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -304,7 +333,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -313,11 +344,10 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       fd_mode = Mstrict;
+       fd_mode = Mstrict; fd_name = ([20:10-12], "\\ff");
        fd_fun =
        { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); 
-         f_name = ([20:10-12], "\\ff"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 
@@ -326,7 +356,9 @@
             [{ ua_name = ([20:15-16], "\\P");
                ua_params =
                [((dict<string, int>), [20:17-41],
-                 (KeyValCollection (Dict, None, [(((string), [20:22-25], (String "a")), ((int), [20:29-30], (Int "1"))); (((string), [20:32-35], (String "b")), ((int), [20:39-40], (Int "2")))])))]
+                 (KeyValCollection (([20:17-21], Dict), None,
+                    [(((string), [20:22-25], (String "a")), ((int), [20:29-30], (Int "1"))); (((string), [20:32-35], (String "b")), ((int), [20:39-40], (Int "2")))])))
+                 ]
                }
               ];
             param_visibility = None }
@@ -337,18 +369,19 @@
          [{ ua_name = ([19:3-4], "\\F");
             ua_params =
             [((dict<string, int>), [19:5-29],
-              (KeyValCollection (Dict, None, [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))]
+              (KeyValCollection (([19:5-9], Dict), None,
+                 [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))
+              ]
             }
            ];
          f_external = false; f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [22:1-30:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([23:7-9], "\\CC"); c_tparams = []; c_extends = []; c_uses = []; 
-       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-       c_consts = []; c_typeconsts = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((int), (Some ([27:18-21], (Hprim Tint)))); 
@@ -357,7 +390,9 @@
           [{ ua_name = ([26:5-10], "\\SProp");
              ua_params =
              [((dict<string, int>), [26:11-35],
-               (KeyValCollection (Dict, None, [(((string), [26:16-19], (String "a")), ((int), [26:23-24], (Int "1"))); (((string), [26:26-29], (String "b")), ((int), [26:33-34], (Int "2")))])))]
+               (KeyValCollection (([26:11-15], Dict), None,
+                  [(((string), [26:16-19], (String "a")), ((int), [26:23-24], (Int "1"))); (((string), [26:26-29], (String "b")), ((int), [26:33-34], (Int "2")))])))
+               ]
              }
             ];
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true; 
@@ -369,7 +404,9 @@
            [{ ua_name = ([24:5-10], "\\IProp");
               ua_params =
               [((dict<string, int>), [24:11-35],
-                (KeyValCollection (Dict, None, [(((string), [24:16-19], (String "a")), ((int), [24:23-24], (Int "1"))); (((string), [24:26-29], (String "b")), ((int), [24:33-34], (Int "2")))])))]
+                (KeyValCollection (([24:11-15], Dict), None,
+                   [(((string), [24:16-19], (String "a")), ((int), [24:23-24], (Int "1"))); (((string), [24:26-29], (String "b")), ((int), [24:33-34], (Int "2")))])))
+                ]
               }
              ];
            cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
@@ -385,13 +422,15 @@
           [{ ua_name = ([28:5-8], "\\Met");
              ua_params =
              [((dict<string, int>), [28:9-33],
-               (KeyValCollection (Dict, None, [(((string), [28:14-17], (String "a")), ((int), [28:21-22], (Int "1"))); (((string), [28:24-27], (String "b")), ((int), [28:31-32], (Int "2")))])))]
+               (KeyValCollection (([28:9-13], Dict), None,
+                  [(((string), [28:14-17], (String "a")), ((int), [28:21-22], (Int "1"))); (((string), [28:24-27], (String "b")), ((int), [28:31-32], (Int "2")))])))
+               ]
              }
             ];
           m_readonly_ret = None; m_ret = ((void), (Some ([29:27-31], (Hprim Tvoid)))); 
           m_external = false; m_doc_comment = None }
          ];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -400,7 +439,9 @@
        [{ ua_name = ([22:3-4], "\\C");
           ua_params =
           [((dict<string, int>), [22:5-29],
-            (KeyValCollection (Dict, None, [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))])))]
+            (KeyValCollection (([22:5-9], Dict), None, [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))]
+               )))
+            ]
           }
          ];
        c_file_attributes =
@@ -408,7 +449,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -417,15 +460,15 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
   (Class
      { c_span = [32:1-33:16]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cenum; c_name = ([33:6-8], "\\EE"); 
        c_tparams = []; c_extends = [([33:6-8], (Happly (([33:6-8], "\\HH\\BuiltinEnum"), [([33:6-8], (Happly (([33:6-8], "\\EE"), [])))])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -434,7 +477,9 @@
        [{ ua_name = ([32:3-4], "\\E");
           ua_params =
           [((dict<string, int>), [32:5-29],
-            (KeyValCollection (Dict, None, [(((string), [32:10-13], (String "a")), ((int), [32:17-18], (Int "1"))); (((string), [32:20-23], (String "b")), ((int), [32:27-28], (Int "2")))])))]
+            (KeyValCollection (([32:5-9], Dict), None, [(((string), [32:10-13], (String "a")), ((int), [32:17-18], (Int "1"))); (((string), [32:20-23], (String "b")), ((int), [32:27-28], (Int "2")))]
+               )))
+            ]
           }
          ];
        c_file_attributes =
@@ -442,7 +487,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -451,16 +498,18 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = (Some { e_base = ([33:10-13], (Hprim Tint)); e_constraint = None; e_includes = [] }); 
-       c_doc_comment = None; c_emit_id = None; c_internal = false });
+       c_docs_url = None; c_enum = (Some { e_base = ([33:10-13], (Hprim Tint)); e_constraint = None; e_includes = [] }); 
+       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([36:6-8], "\\tt"); t_tparams = []; 
-       t_constraint = None; t_kind = ([36:11-14], (Hprim Tint));
+       t_as_constraint = None; t_super_constraint = None; t_kind = ([36:11-14], (Hprim Tint));
        t_user_attributes =
        [{ ua_name = ([35:3-9], "\\TAlias");
           ua_params =
           [((dict<string, int>), [35:10-34],
-            (KeyValCollection (Dict, None, [(((string), [35:15-18], (String "a")), ((int), [35:22-23], (Int "1"))); (((string), [35:25-28], (String "b")), ((int), [35:32-33], (Int "2")))])))]
+            (KeyValCollection (([35:10-14], Dict), None,
+               [(((string), [35:15-18], (String "a")), ((int), [35:22-23], (Int "1"))); (((string), [35:25-28], (String "b")), ((int), [35:32-33], (Int "2")))])))
+            ]
           }
          ];
        t_file_attributes =
@@ -468,7 +517,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -482,4 +533,5 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       t_span = [35:1-36:15]; t_emit_id = None; t_is_ctx = false })
+       t_span = [35:1-36:15]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None })

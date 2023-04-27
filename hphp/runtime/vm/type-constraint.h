@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <hphp/runtime/base/datatype.h>
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -58,7 +59,7 @@ struct TypeConstraint {
     : m_flags(NoFlags)
     , m_clsName(nullptr)
     , m_typeName(nullptr)
-    , m_namedEntity(nullptr)
+    , m_namedType(nullptr)
   {
     init();
   }
@@ -67,7 +68,7 @@ struct TypeConstraint {
     : m_flags(flags)
     , m_clsName(nullptr)
     , m_typeName(typeName)
-    , m_namedEntity(nullptr)
+    , m_namedType(nullptr)
   {
     init();
   }
@@ -94,21 +95,8 @@ struct TypeConstraint {
 
   size_t stableHash() const;
 
-  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName) {
-    assertx(m_type == AnnotType::Unresolved);
-    assertx(t != AnnotType::Unresolved);
-    assertx((t == AnnotType::Object) == (clsName != nullptr));
-    auto flags = m_flags | Flags::Resolved;
-    if (nullable) flags |= Flags::Nullable;
-    m_flags = static_cast<Flags>(flags);
-    m_type = t;
-    m_clsName = clsName;
-  }
-
-  void setNoMockObjects() {
-    auto flags = m_flags | Flags::NoMockObjects;
-    m_flags = static_cast<Flags>(flags);
-  }
+  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName);
+  void unresolve();
 
   void addFlags(Flags flags) {
     m_flags = static_cast<Flags>(m_flags | flags);
@@ -116,8 +104,8 @@ struct TypeConstraint {
 
   /*
    * Returns: whether this constraint implies any runtime checking at
-   * all.  If this function returns false, it means the
-   * VerifyParamType would be a no-op.
+   * all.  If this function returns false, it means the parameter type
+   * verification would be a no-op.
    */
   bool hasConstraint() const { return m_typeName; }
 
@@ -126,15 +114,15 @@ struct TypeConstraint {
    */
   const StringData* clsName() const { return m_clsName; }
   const StringData* typeName() const { return m_typeName; }
-  const NamedEntity* clsNamedEntity() const {
+  const NamedType* clsNamedType() const {
     assertx(isObject());
-    return m_namedEntity;
+    return m_namedType;
   }
-  const NamedEntity* typeNamedEntity() const {
+  const NamedType* typeNamedType() const {
     assertx(isUnresolved());
-    return m_namedEntity;
+    return m_namedType;
   }
-  const NamedEntity* anyNamedEntity() const { return m_namedEntity; }
+  const NamedType* anyNamedType() const { return m_namedType; }
   Flags flags() const { return m_flags; }
 
   /*
@@ -201,7 +189,6 @@ struct TypeConstraint {
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isUpperBound() const { return m_flags & UpperBound; }
-  bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }
@@ -229,6 +216,13 @@ struct TypeConstraint {
 
   bool validForProp() const {
     return !isCallable() && !isNothing() && !isNoReturn();
+  }
+
+  bool validForEnumBase() const {
+    auto const resolved = resolvedWithAutoload();
+    return resolved.isInt() || resolved.isString() ||
+           resolved.isArrayKey() || resolved.isClassname() ||
+           resolved.isNothing();
   }
 
   /*
@@ -361,6 +355,16 @@ struct TypeConstraint {
     return maybeStringCompatible();
   }
 
+  /**
+   * Return the correct `DataType` that represents this type constraint as used
+   * as a type within systemlib, specifically in the context of a `__Native`
+   * function. For example:
+   * - Nullable and soft types are always represented as `KindOfMixed`
+   * - Unresolved types are always represented as `KindOfObejct`
+   * - Otherwise, grab the result of `underlyingDataType`
+   */
+  MaybeDataType asSystemlibType() const;
+
 
 private:
   void init();
@@ -403,9 +407,9 @@ private:
   // for details).
   Type m_type;
   Flags m_flags;
-  LowStringPtr m_clsName;   // valid iff isObject()
+  LowStringPtr m_clsName;   // valid iff isObject() or if an enum
   LowStringPtr m_typeName;
-  LowPtr<const NamedEntity> m_namedEntity;
+  LowPtr<const NamedType> m_namedType;
 };
 
 //////////////////////////////////////////////////////////////////////

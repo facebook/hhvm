@@ -299,9 +299,9 @@ class SplFileInfo {
    *
    * This method can be used to determine if the file is a directory.
    *
-   * @return     mixed   Returns TRUE if a directory, FALSE otherwise.
+   * @return     bool    Returns TRUE if a directory, FALSE otherwise.
    */
-  public function isDir() {
+  public function isDir(): bool {
     return is_dir($this->getPathname());
   }
 

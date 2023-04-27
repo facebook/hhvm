@@ -1,5 +1,7 @@
 <?hh
 
+namespace SealedClass3;
+
 <<__Sealed(SomeRandomClass::class, SomeOtherClass::class)>>
 interface SomeSealedInterface {}
 

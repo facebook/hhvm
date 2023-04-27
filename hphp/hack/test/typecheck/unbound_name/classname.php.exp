@@ -1,12 +1,12 @@
 File "classname.php", line 18, characters 3-10:
 Unbound name: `NotFound` (an object type) (Naming[2049])
-File "classname.php", line 12, characters 6-10:
-You are trying to access the static property `class` but this is a value of generic type T (Typing[4252])
-File "classname.php", line 12, characters 3-3:
-Definition is here
 File "classname.php", line 23, characters 3-3:
 Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
+File "classname.php", line 12, characters 6-10:
+You are trying to access the static property `class` but this is a value of generic type T (Typing[4252])
+  File "classname.php", line 12, characters 3-3:
+  Definition is here
 File "classname.php", line 23, characters 6-10:
 You are trying to access the static property `class` but this is a value of generic type T (Typing[4252])
-File "classname.php", line 23, characters 3-3:
-Definition is here
+  File "classname.php", line 23, characters 3-3:
+  Definition is here

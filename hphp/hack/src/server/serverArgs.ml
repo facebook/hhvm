@@ -28,8 +28,7 @@ type options = {
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
   enable_ifc: string list;
-  enable_global_write_check: string list;
-  enable_global_write_check_functions: SSet.t;
+  enable_global_access_check: bool;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   log_inference_constraints: bool;
@@ -78,11 +77,8 @@ module Messages = struct
   let enable_ifc =
     " run IFC analysis on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
-  let enable_global_write_check =
-    " run global write checker on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
-
-  let enable_global_write_check_functions =
-    " run global write checker on functions listed in the JSON file"
+  let enable_global_access_check =
+    " run global access checker to check global writes and reads"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -94,8 +90,6 @@ module Messages = struct
 
   let gen_saved_ignore_type_errors =
     " generate a saved state even if there are type errors."
-
-  let glean_schema_version = " displays Glean schema version used by indexer."
 
   let ignore_hh_version = " ignore hh_version check when loading saved states"
 
@@ -142,9 +136,8 @@ module Messages = struct
   let write_symbol_info = " write symbol info to json files"
 end
 
-let print_json version = print_endline @@ Hh_json.json_to_string version
-
-let print_json_version () = print_json Hh_version.version_json
+let print_json_version () =
+  print_endline @@ Hh_json.json_to_string Hh_version.version_json
 
 (*****************************************************************************)
 (* The main entry point *)
@@ -159,14 +152,12 @@ let parse_options () : options =
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let enable_ifc = ref [] in
-  let enable_global_write_check = ref [] in
-  let enable_global_write_check_functions = ref SSet.empty in
+  let enable_global_access_check = ref false in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
   let from_vim = ref false in
   let gen_saved_ignore_type_errors = ref false in
-  let glean_schema_version = ref false in
   let ignore_hh = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let json_mode = ref false in
@@ -195,22 +186,6 @@ let parse_options () : options =
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
   let set_enable_ifc s = enable_ifc := String_utils.split ',' s in
-  let set_enable_global_write_check s =
-    enable_global_write_check := String_utils.split ',' s
-  in
-  let set_enable_global_write_check_functions s =
-    let json_obj = Hh_json.json_of_file s in
-    let add_function f =
-      match f with
-      | Hh_json.JSON_String str ->
-        enable_global_write_check_functions :=
-          SSet.add str !enable_global_write_check_functions
-      | _ -> ()
-    in
-    match json_obj with
-    | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
-    | _ -> enable_global_write_check_functions := SSet.empty
-  in
   let set_from s = from := s in
   let options =
     [
@@ -236,12 +211,9 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--enable-ifc", Arg.String set_enable_ifc, Messages.enable_ifc);
-      ( "--enable-global-write-check",
-        Arg.String set_enable_global_write_check,
-        Messages.enable_global_write_check );
-      ( "--enable-global-write-check-functions",
-        Arg.String set_enable_global_write_check_functions,
-        Messages.enable_global_write_check_functions );
+      ( "--enable-global-access-check",
+        Arg.Set enable_global_access_check,
+        Messages.enable_global_access_check );
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
@@ -249,9 +221,6 @@ let parse_options () : options =
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         Messages.gen_saved_ignore_type_errors );
-      ( "--schema-version",
-        Arg.Set glean_schema_version,
-        Messages.glean_schema_version );
       ("--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version);
       ("--json", Arg.Set json_mode, Messages.json);
       ( "--log-inference-constraints",
@@ -298,22 +267,11 @@ let parse_options () : options =
   in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
-  if !version && !glean_schema_version then (
-    Printf.eprintf "--version is incompatible with --schema-version!\n";
-    Exit.exit Exit_status.Input_error
-  );
   if !version then (
     if !json_mode then
       print_json_version ()
     else
       print_endline Hh_version.version;
-    exit 0
-  );
-  if !glean_schema_version then (
-    if !json_mode then
-      print_json Hh_glean_version.version_json
-    else
-      print_endline Hh_glean_version.version;
     exit 0
   );
   (* --json, --save, --write-symbol-info, --concatenate-all all imply check *)
@@ -355,8 +313,7 @@ let parse_options () : options =
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     enable_ifc = !enable_ifc;
-    enable_global_write_check = !enable_global_write_check;
-    enable_global_write_check_functions = !enable_global_write_check_functions;
+    enable_global_access_check = !enable_global_access_check;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
@@ -391,8 +348,7 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     enable_ifc = [];
-    enable_global_write_check = [];
-    enable_global_write_check_functions = SSet.empty;
+    enable_global_access_check = false;
     from = "";
     gen_saved_ignore_type_errors = false;
     ignore_hh_version = false;
@@ -441,10 +397,7 @@ let dump_fanout options = options.dump_fanout
 
 let enable_ifc options = options.enable_ifc
 
-let enable_global_write_check options = options.enable_global_write_check
-
-let enable_global_write_check_functions options =
-  options.enable_global_write_check_functions
+let enable_global_access_check options = options.enable_global_access_check
 
 let from options = options.from
 
@@ -511,6 +464,13 @@ let set_no_load options is_no_load = { options with no_load = is_no_load }
 
 let set_config options config = { options with config }
 
+let set_save_64bit options save_64bit = { options with save_64bit }
+
+let set_save_naming_filename options save_naming_filename =
+  { options with save_naming_filename }
+
+let set_save_filename options save_filename = { options with save_filename }
+
 (****************************************************************************)
 (* Misc *)
 (****************************************************************************)
@@ -524,8 +484,7 @@ let to_string
       custom_telemetry_data;
       dump_fanout;
       enable_ifc;
-      enable_global_write_check;
-      enable_global_write_check_functions;
+      enable_global_access_check;
       from;
       gen_saved_ignore_type_errors;
       ignore_hh_version;
@@ -619,14 +578,6 @@ let to_string
   let enable_ifc_str =
     Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)
   in
-  let enable_global_write_check_str =
-    Printf.sprintf "[%s]" (String.concat ~sep:"," enable_global_write_check)
-  in
-  let enable_global_write_check_functions_str =
-    Printf.sprintf
-      "[%i functions specified in the JSON file]"
-      (SSet.cardinal enable_global_write_check_functions)
-  in
   let custom_telemetry_data_str =
     custom_telemetry_data
     |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
@@ -656,11 +607,8 @@ let to_string
     "enable_ifc: ";
     enable_ifc_str;
     ", ";
-    "enable_global_write_check: ";
-    enable_global_write_check_str;
-    ", ";
-    "enable_global_write_check_functions: ";
-    enable_global_write_check_functions_str;
+    "enable_global_access_check: ";
+    string_of_bool enable_global_access_check;
     ", ";
     "from: ";
     from;

@@ -25,15 +25,14 @@ let raise_xhp_required env pos ureason ty =
     Lazy.map ty_str ~f:(fun ty_str ->
         Reason.to_string ("This is " ^ ty_str) (get_reason ty))
   in
-  Errors.add_typing_error
-    Typing_error.(
-      xhp
-      @@ Primary.Xhp.Xhp_required
-           {
-             pos;
-             why_xhp = Reason.string_of_ureason ureason;
-             ty_reason_msg = msgl;
-           })
+  Typing_error.(
+    xhp
+    @@ Primary.Xhp.Xhp_required
+         {
+           pos;
+           why_xhp = Reason.string_of_ureason ureason;
+           ty_reason_msg = msgl;
+         })
 
 (**
  * Given class info, produces the subset of props that are XHP attributes
@@ -57,32 +56,34 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   match get_node cty with
   | Tany _
-  | Terr
   | Tdynamic ->
     (env, [], [])
   | Tunion tyl ->
-    (* If it's unresolved, make sure it can only be XHP and add every
+    (* If it's a union, make sure it can only be XHP and add every
      * possible class. *)
     walk_list_and_gather_xhp env pos tyl
   | Tintersection tyl ->
-    let (env, xhp, non_xhp) = walk_list_and_gather_xhp env pos tyl in
-    (* ok to have non_xhp if there are some xhp *)
-    let non_xhp =
-      match xhp with
-      | _ :: _ -> []
-      | _ -> non_xhp
-    in
-    (env, xhp, non_xhp)
-  | Tgeneric ("this", []) ->
+    (* If any conjunct is dynamic then we let it pass *)
+    if List.exists tyl ~f:is_dynamic then
+      (env, [], [])
+    else
+      let (env, xhp, non_xhp) = walk_list_and_gather_xhp env pos tyl in
+      (* ok to have non_xhp if there are some xhp *)
+      let non_xhp =
+        match xhp with
+        | _ :: _ -> []
+        | _ -> non_xhp
+      in
+      (env, xhp, non_xhp)
+  | Tgeneric ("this", []) -> begin
     (* This is unsound, but we want to do best-effort checking
      * of attribute spreads even on XHP classes not marked `final`. We should
      * implement <<__ConsistentAttributes>> as a way to make this hacky
      * inference sound and check it before doing this conversion. *)
-    begin
-      match Env.get_self_ty env with
-      | None -> (env, [], [])
-      | Some ty -> walk_and_gather_xhp_ ~env ~pos ty
-    end
+    match Env.get_self_ty env with
+    | None -> (env, [], [])
+    | Some ty -> walk_and_gather_xhp_ ~env ~pos ty
+  end
   | Tgeneric _
   | Tdependent _
   | Tnewtype _ ->
@@ -90,13 +91,12 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       TUtils.get_concrete_supertypes ~abstract_enum:true env cty
     in
     walk_list_and_gather_xhp env pos tyl
-  | Tclass ((_, c), _, tyl) ->
+  | Tclass ((_, c), _, tyl) -> begin
     (* Here's where we actually check the declaration *)
-    begin
-      match Env.get_class env c with
-      | Some class_ when Cls.is_xhp class_ -> (env, [(cty, tyl, class_)], [])
-      | _ -> (env, [], [cty])
-    end
+    match Env.get_class env c with
+    | Some class_ when Cls.is_xhp class_ -> (env, [(cty, tyl, class_)], [])
+    | _ -> (env, [], [cty])
+  end
   | Tnonnull
   | Tvec_or_dict _
   | Toption _
@@ -126,7 +126,10 @@ and get_spread_attributes env pos onto_xhp cty =
     |> List.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc)
   in
   let (env, possible_xhp, non_xhp) = walk_and_gather_xhp_ ~env ~pos cty in
-  List.iter non_xhp ~f:(raise_xhp_required env pos Reason.URxhp_spread);
+  let xhp_required_err_opt =
+    Typing_error.multiple_opt
+    @@ List.map non_xhp ~f:(raise_xhp_required env pos Reason.URxhp_spread)
+  in
   let xhp_to_attrs env (xhp_ty, tparams, xhp_info) =
     let attrs = xhp_attributes_for_class xhp_info in
     (* Compute the intersection and then localize the types *)
@@ -145,22 +148,24 @@ and get_spread_attributes env pos onto_xhp cty =
       ~f:
         begin
           fun env (k, ce) ->
-          let (lazy ty) = ce.ce_type in
-          let (env, ty) = Phase.localize ~ety_env env ty in
-          (env, ((pos, k), (pos, ty)))
+            let (lazy ty) = ce.ce_type in
+            let (env, ty) = Phase.localize ~ety_env env ty in
+            (env, ((pos, k), (pos, ty)))
         end
       env
       attrs
   in
-  let ((env, ty_err_opt), attrs) =
+  let ((env, locl_ty_err_opt), attrs) =
     List.map_env_ty_err_opt
       ~f:xhp_to_attrs
       env
       possible_xhp
       ~combine_ty_errs:Typing_error.multiple_opt
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (env, List.concat attrs)
+  let ty_err_opt =
+    Option.merge ~f:Typing_error.both xhp_required_err_opt locl_ty_err_opt
+  in
+  ((env, ty_err_opt), List.concat attrs)
 
 (**
  * Typing rules for the body expressions of an XHP literal.
@@ -171,16 +176,12 @@ let is_xhp_child env pos ty =
   let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
   (* Any Traversable *)
   let ty_traversable = MakeType.traversable r (MakeType.mixed r) in
-  let (res, ty_err_opt) =
-    Typing_solver.is_sub_type
-      env
-      ty
-      (MakeType.nullable_locl
-         r
-         (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
-  in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  res
+  Typing_solver.is_sub_type
+    env
+    ty
+    (MakeType.nullable_locl
+       r
+       (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
 
 let rewrite_xml_into_new pos sid attributes children =
   let cid = CI sid in

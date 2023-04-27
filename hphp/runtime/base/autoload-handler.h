@@ -18,8 +18,6 @@
 #include <memory>
 #include <utility>
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-deque.h"
@@ -49,23 +47,17 @@ struct AutoloadHandler final : RequestEventHandler {
   void requestInit() override;
   void requestShutdown() override;
 
-  bool autoloadClass(const String& className);
-
   /**
-   * autoloadNamedType() tries to autoload either a class or a type
-   * alias with the specified name. This method avoids calling the
-   * failure callback until one of the following happens: (1) we tried
-   * to autoload the specified name from the 'class' and 'type' maps
-   * but for each map either nothing was found or the file we included
-   * did not define a class or type alias with the specified name, or
-   * (2) there was an uncaught exception or fatal error during an
-   * include operation.
+   * autoloadTypeOrTypeAlias() tries to autoload either a type or a type
+   * alias with the specified name.
    */
-  bool autoloadNamedType(const String& className);
+  bool autoloadTypeOrTypeAlias(const String& className);
 
+  bool autoloadType(const String& className);
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
-  bool autoloadType(const String& name);
+  bool autoloadTypeAlias(const String& name);
+  bool autoloadModule(StringData* name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
 
   /**
@@ -79,6 +71,7 @@ struct AutoloadHandler final : RequestEventHandler {
    *        'function' => dict['fun' => 'fun_file.php', ...],
    *        'constant' => dict['con' => 'con_file.php', ...],
    *        'type'     => dict['type' => 'type_file.php', ...],
+   *        'module'   => dict['module' => 'module_file.php', ...],
    *        'failure'  => (string $type, string $name, mixed $err): ?bool ==> {
    *          return null;  // KEEP_GOING We don't know where this symbol is,
    *                                      but it isn't important. Ignore the
@@ -105,12 +98,19 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  Optional<String> getFile(const String& name,
-                                  AutoloadMap::KindOf kind);
+  Optional<AutoloadMap::FileResult> getFile(const String& name,
+                                            AutoloadMap::KindOf kind);
 
   Array getSymbols(const String& path, AutoloadMap::KindOf kind);
 
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
+
+  /**
+   * Initialize a listener callback which will run after we autoload a symbol.
+   *
+   * Don't use this. We'll probably remove it.
+   */
+  void setPostAutoloadHandler(Variant onPostAutoloadFunc);
 
 private:
   /**
@@ -153,6 +153,11 @@ private:
 
   static String getSignature(const Variant& handler);
 
+  /**
+   * Invoke `m_onPostAutoloadFunc` after autoloading a class.
+   */
+  void onPostAutoload(AutoloadMap::KindOf kind, const String& clsName);
+
 private:
 
   // The value of m_map determines which data structure, if any, we'll be
@@ -163,6 +168,7 @@ private:
   FactsStore* m_facts = nullptr;
   req::unique_ptr<UserAutoloadMap> m_req_map;
   AutoloadMap* m_map = nullptr;
+  Variant m_onPostAutoloadFunc{Variant::NullInit{}};
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };

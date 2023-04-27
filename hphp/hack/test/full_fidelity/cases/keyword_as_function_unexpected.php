@@ -17,12 +17,9 @@ function default() {}
 function do() {}
 function echo() {}
 function else() {}
-function elseif() {}
 function endfor() {}
 function endforeach() {}
 function endif() {}
-function endswitch() {}
-function endwhile() {}
 function eval() {}
 function extends() {}
 function final() {}
@@ -78,7 +75,6 @@ default();
 do();
 echo();
 else();
-elseif();
 endfor();
 endforeach();
 enddeclare();

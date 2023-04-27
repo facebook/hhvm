@@ -72,11 +72,6 @@ HPHP::jit::TCA parseTCA(const std::string& raw) {
 namespace folly {
 using namespace HPHP;
 
-template <typename T> HPHP::Optional<T> DynamicConverter<HPHP::Optional<T>>::convert(
-  const dynamic& d) {
-  return d.isNull() ? std::nullopt : HPHP::Optional<T>(convertTo<T>(d));
-}
-
 jit::Opcode DynamicConverter<jit::Opcode>::convert(const dynamic& d) {
   auto const rawOpcode = convertTo<string>(d);
   auto const maybeOpcode = jit::nameToOpcode(rawOpcode);
@@ -308,11 +303,6 @@ printir::Unit DynamicConverter<printir::Unit>::convert(const dynamic& d) {
 
   return printir::Unit{std::move(transContext), std::move(blocks),
                        std::move(inliningDecisions)};
-}
-
-template <typename T>  dynamic DynamicConstructor<HPHP::Optional<T>>::construct(
-    const HPHP::Optional<T>& opt) {
-  return opt ? toDynamic(*opt) : dynamic();
 }
 
 dynamic DynamicConstructor<jit::Opcode>::construct(const jit::Opcode& opc) {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3348c8907ec905ff4bb78c9e74a5e404>>
+// @generated SignedSource<<f8a7db0e6c31e3e718d5ae8b5ed89714>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,17 +11,15 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs_core::*;
+pub use typing_defs_flags::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs_flags::*;
-
-pub use typing_defs_core::*;
 
 /// Origin of Class Constant References:
 /// In order to be able to detect cycle definitions like
@@ -53,8 +51,10 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom<'a> {
+    #[rust_to_ocaml(name = "Self")]
     Self_,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     From(&'a str),
@@ -90,6 +90,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstFrom<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ClassConstRef<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub ClassConstFrom<'a>,
@@ -113,6 +114,8 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstRef<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -138,6 +141,8 @@ arena_deserializer::impl_deserialize_in_arena!(ConstDecl<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
 pub struct ClassElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -172,6 +177,8 @@ arena_deserializer::impl_deserialize_in_arena!(ClassElt<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -186,6 +193,7 @@ pub struct FunElt<'a> {
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub php_std_lib: bool,
     pub support_dynamic_type: bool,
+    pub no_auto_dynamic: bool,
 }
 impl<'a> TrivialDrop for FunElt<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunElt<'arena>);
@@ -207,6 +215,8 @@ pub use oxidized::typing_defs::ClassConstKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
@@ -227,6 +237,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Deserialize,
     Eq,
@@ -240,10 +251,43 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C, u8)]
+pub enum ModuleReference<'a> {
+    MRGlobal,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    MRPrefix(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    MRExact(&'a str),
+}
+impl<'a> TrivialDrop for ModuleReference<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ModuleReference<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "mdt_")]
 #[repr(C)]
 pub struct ModuleDefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub mdt_pos: &'a pos_or_decl::PosOrDecl<'a>,
+    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub exports: Option<&'a [ModuleReference<'a>]>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub imports: Option<&'a [ModuleReference<'a>]>,
 }
 impl<'a> TrivialDrop for ModuleDefType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ModuleDefType<'arena>);
@@ -300,6 +344,8 @@ arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -327,6 +373,7 @@ arena_deserializer::impl_deserialize_in_arena!(AbstractTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ConcreteTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -350,6 +397,8 @@ arena_deserializer::impl_deserialize_in_arena!(ConcreteTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -376,6 +425,7 @@ arena_deserializer::impl_deserialize_in_arena!(PartiallyAbstractTypeconst<'arena
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Typeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -401,6 +451,8 @@ arena_deserializer::impl_deserialize_in_arena!(Typeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType<'a> {
     pub synthesized: bool,
@@ -453,6 +505,9 @@ arena_deserializer::impl_deserialize_in_arena!(TypeconstType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -480,22 +535,29 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<ast_defs::Id<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-    pub vis: oxidized::aast::TypedefVisibility,
+    pub vis: oxidized::ast_defs::TypedefVisibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub constraint: Option<&'a Ty<'a>>,
+    pub as_constraint: Option<&'a Ty<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub super_constraint: Option<&'a Ty<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
     pub is_ctx: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub attributes: &'a [&'a UserAttribute<'a>],
+    pub internal: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub docs_url: Option<&'a str>,
 }
 impl<'a> TrivialDrop for TypedefType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);
@@ -516,19 +578,23 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Wrong_phase")]
     WrongPhase(&'a str),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
     /// able to deserialize it again.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Not_supported")]
     NotSupported(&'a str),
     /// The input JSON was invalid for some reason.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Deserialization_error")]
     DeserializationError(&'a str),
 }
 impl<'a> TrivialDrop for DeserializationError<'a> {}

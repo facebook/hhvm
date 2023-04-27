@@ -48,12 +48,34 @@ type fun_tast_info = {
 }
 [@@deriving show]
 
+type check_status =
+  | COnce  (** The definition is checked only once. *)
+  | CUnderNormalAssumptions
+      (** The definition is checked twice and this is the check under normal
+          assumptions that is using the parameter and return types that are
+          written in the source code (but potentially implicitly pessimised).
+          *)
+  | CUnderDynamicAssumptions
+      (** The definition is checked twice and this is the check under dynamic
+          assumptions that is using the dynamic type for parameters and return.
+          *)
+[@@deriving show]
+
+let is_under_dynamic_assumptions = function
+  | COnce
+  | CUnderNormalAssumptions ->
+    false
+  | CUnderDynamicAssumptions -> true
+
 type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque]
   inference_env: Typing_inference_env.t;
   tpenv: Type_parameter_env.t;
   condition_types: decl_ty SMap.t;
   fun_tast_info: fun_tast_info option;
+  checked: check_status;
+      (** Indicates how many types the callable was checked and under what
+          assumptions. *)
 }
 [@@deriving show]
 
@@ -68,6 +90,8 @@ type expr_ = (ty, saved_env) Aast.expr_
 type stmt = (ty, saved_env) Aast.stmt
 
 type stmt_ = (ty, saved_env) Aast.stmt_
+
+type case = (ty, saved_env) Aast.case
 
 type block = (ty, saved_env) Aast.block
 
@@ -85,7 +109,11 @@ type class_typeconst_def = (ty, saved_env) Aast.class_typeconst_def
 
 type user_attribute = (ty, saved_env) Aast.user_attribute
 
+type capture_lid = ty Aast.capture_lid
+
 type fun_ = (ty, saved_env) Aast.fun_
+
+type efun = (ty, saved_env) Aast.efun
 
 type file_attribute = (ty, saved_env) Aast.file_attribute
 
@@ -116,6 +144,7 @@ let empty_saved_env tcopt : saved_env =
     tpenv = Type_parameter_env.empty;
     condition_types = SMap.empty;
     fun_tast_info = None;
+    checked = COnce;
   }
 
 (* Used when an env is needed in codegen.
@@ -166,6 +195,8 @@ let nast_converter =
       match src with
       | Aast.UnsafeCast hints ->
         mk_call hints Naming_special_names.PseudoFunctions.unsafe_cast
+      | Aast.UnsafeNonnullCast ->
+        mk_call [] Naming_special_names.PseudoFunctions.unsafe_nonnull_cast
       | Aast.EnforcedCast hints ->
         mk_call hints Naming_special_names.PseudoFunctions.enforced_cast
       | _ -> ex_

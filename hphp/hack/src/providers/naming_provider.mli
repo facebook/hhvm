@@ -173,3 +173,8 @@ val module_exists : Provider_context.t -> string -> bool
 val add_module : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 val remove_module_batch : Provider_backend.t -> string list -> unit
+
+val rust_backend_ctx_proxy :
+  Provider_context.t -> Rust_provider_backend.ctx_proxy option
+
+val get_entry_contents : Provider_context.t -> Relative_path.t -> string option

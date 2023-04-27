@@ -18,27 +18,19 @@
 
 #include <memory>
 
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/util/file-cache.h"
+#include "hphp/util/virtual-file-system.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StaticContentCache {
-  static StaticContentCache TheCache;
-  static std::shared_ptr<FileCache> TheFileCache;
+  static std::shared_ptr<VirtualFileSystem> TheFileCache;
 
 public:
   /**
    * Load all registered static files from RuntimeOption::DocumentRoot.
    */
-  void load();
-
-  /**
-   * Find a file from cache.
-   */
-  bool find(const std::string &name, const char *&data, int &len,
-            bool &compressed) const;
+  static void load();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

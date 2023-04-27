@@ -38,7 +38,8 @@ inline const Path& getPathFromKey(const Path& path) {
 inline const Path& getPathFromKey(const MethodDecl& methodDecl) {
   return methodDecl.m_type.m_path;
 }
-template <typename Key> const Path& getPathFromKey(const Key& key) {
+template <typename Key>
+const Path& getPathFromKey(const Key& key) {
   return key.m_path;
 }
 
@@ -56,7 +57,6 @@ template <
     // Must also have std::hash and operator== defined
     typename Value>
 struct LazyTwoWayMap {
-
   using Keys = std::vector<Key>;
   using Values = std::vector<Value>;
 
@@ -66,8 +66,7 @@ struct LazyTwoWayMap {
   };
 
   explicit LazyTwoWayMap(std::shared_ptr<PathVersions> versions)
-      : m_versions{std::move(versions)} {
-  }
+      : m_versions{std::move(versions)} {}
 
   /**
    * The `const` methods which return an `Optional` will return `std::nullopt`
@@ -152,7 +151,6 @@ struct LazyTwoWayMap {
    * in that path.
    */
   void setValuesForKey(const Key& key, Values newValues) noexcept {
-
     // Erase old mappings.
     auto& existingValues = m_keyToValues[key];
     for (const Value& value : existingValues) {
@@ -176,7 +174,7 @@ struct LazyTwoWayMap {
     existingValues = std::move(newValues);
   }
 
-private:
+ private:
   uint64_t getVersion(const Key& key) const noexcept {
     return m_versions->getVersion(detail::getPathFromKey(key));
   }

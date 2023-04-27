@@ -89,6 +89,20 @@ struct IterArgs {
   int32_t keyId;
   int32_t valId;
   Flags flags;
+
+  template <typename SerDe> static IterArgs makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    int32_t iterId;
+    int32_t keyId;
+    int32_t valId;
+    Flags flags;
+    sd(iterId)(keyId)(valId)(flags);
+    return IterArgs{flags, iterId, keyId, valId};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(iterId)(keyId)(valId)(flags);
+  }
 };
 
 // Arguments to FCall opcodes.
@@ -142,6 +156,20 @@ struct FCallArgsBase {
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
+
+  template <typename SerDe> static FCallArgsBase makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    uint32_t numArgs;
+    uint32_t numRets;
+    Flags flags;
+    sd(numArgs)(numRets)(flags);
+    return FCallArgsBase{flags, numArgs, numRets};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(numArgs)(numRets)(flags);
+  }
 };
 
 struct FCallArgs : FCallArgsBase {
@@ -298,21 +326,11 @@ enum InstrFlags {
 };
 
 inline bool isPre(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PreDec || op == IncDecOp::PreDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PreDec;
 }
 
 inline bool isInc(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PostInc || op == IncDecOp::PostIncO;
-}
-
-inline bool isIncDecO(IncDecOp op) {
-  return
-    op == IncDecOp::PreIncO || op == IncDecOp::PreDecO ||
-    op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PostInc;
 }
 
 constexpr uint32_t kMaxConcatN = 4;
@@ -335,8 +353,6 @@ enum class Op : std::conditional<Op_count <= 256, uint8_t, uint16_t>::type {
   OPCODES
 #undef O
 
-// These are comparable by default under MSVC.
-#ifndef _MSC_VER
 inline constexpr bool operator<(Op a, Op b) { return size_t(a) < size_t(b); }
 inline constexpr bool operator>(Op a, Op b) { return size_t(a) > size_t(b); }
 inline constexpr bool operator<=(Op a, Op b) {
@@ -345,7 +361,6 @@ inline constexpr bool operator<=(Op a, Op b) {
 inline constexpr bool operator>=(Op a, Op b) {
   return size_t(a) >= size_t(b);
 }
-#endif
 
 constexpr bool isValidOpcode(Op op) {
   return size_t(op) < Op_count;
@@ -427,7 +442,6 @@ int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 int instrLen(PC opcode);
-int numSuccs(PC opcode);
 
 PC skipCall(PC pc);
 
@@ -488,10 +502,6 @@ Optional<SubOpType> nameToSubop(const char*);
 
 using OffsetList = std::vector<Offset>;
 
-// Returns a jump offsets relative to the instruction, or nothing if
-// the instruction cannot jump.
-OffsetList instrJumpOffsets(PC instr);
-
 // returns absolute address of targets, or nothing if instruction
 // cannot jump
 OffsetList instrJumpTargets(PC instrs, Offset pos);
@@ -536,7 +546,7 @@ constexpr bool instrIsControlFlow(Op opcode) {
 }
 
 constexpr bool isUnconditionalJmp(Op opcode) {
-  return opcode == Op::Jmp || opcode == Op::JmpNS;
+  return opcode == Op::Enter || opcode == Op::Jmp;
 }
 
 constexpr bool isConditionalJmp(Op opcode) {
@@ -545,8 +555,8 @@ constexpr bool isConditionalJmp(Op opcode) {
 
 constexpr bool isJmp(Op opcode) {
   return
+    opcode == Op::Enter ||
     opcode == Op::Jmp   ||
-    opcode == Op::JmpNS ||
     opcode == Op::JmpZ  ||
     opcode == Op::JmpNZ;
 }
@@ -555,8 +565,6 @@ constexpr bool isObjectConstructorOp(Op opcode) {
   return
     opcode == Op::NewObj ||
     opcode == Op::NewObjD ||
-    opcode == Op::NewObjR ||
-    opcode == Op::NewObjRD ||
     opcode == Op::NewObjS;
 }
 
@@ -594,6 +602,7 @@ constexpr bool isComparisonOp(Op opcode) {
 constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||
+    opcode == OpFCallClsMethodM ||
     opcode == OpFCallClsMethodD ||
     opcode == OpFCallClsMethodS ||
     opcode == OpFCallClsMethodSD;

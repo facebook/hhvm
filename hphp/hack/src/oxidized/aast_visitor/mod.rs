@@ -17,8 +17,10 @@ pub use node::Node;
 pub use node_mut::NodeMut;
 pub use type_params::Params;
 pub use type_params_defaults::AstParams;
-pub use visitor::{visit, Visitor};
-pub use visitor_mut::{visit as visit_mut, VisitorMut};
+pub use visitor::visit;
+pub use visitor::Visitor;
+pub use visitor_mut::visit as visit_mut;
+pub use visitor_mut::VisitorMut;
 
 mod type_params_defaults {
     pub struct P<Context, Error, Ex, En>(std::marker::PhantomData<(Context, Error, Ex, En)>);
@@ -34,13 +36,14 @@ mod type_params_defaults {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::aast::*;
     use node::Node;
     use node_mut::NodeMut;
     use pretty_assertions::assert_eq;
     use visitor::Visitor;
     use visitor_mut::VisitorMut;
+
+    use super::*;
+    use crate::aast::*;
 
     #[test]
     fn simple() {
@@ -56,7 +59,7 @@ mod tests {
             }
         }
 
-        let expr = Expr((), crate::pos::Pos::make_none(), Expr_::Null);
+        let expr = Expr((), crate::pos::Pos::NONE, Expr_::Null);
         let mut v: usize = 0;
         v.visit_expr(&mut (), &expr).unwrap();
         assert_eq!(v, 1);
@@ -80,7 +83,7 @@ mod tests {
             }
         }
 
-        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::NONE, Expr_::True);
         let mut v = ();
         v.visit_expr(&mut (), &mut expr).unwrap();
         match expr.2 {
@@ -88,7 +91,7 @@ mod tests {
             e => panic!("Expect Expr_::Null, but got {:?}", e),
         }
 
-        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::NONE, Expr_::True);
         let mut v = ();
         visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
         match expr.2 {
@@ -99,10 +102,11 @@ mod tests {
 
     #[test]
     fn local_map_id() {
+        use std::collections::BTreeMap;
+
         use crate::aast::*;
         use crate::local_id::LocalId;
         use crate::LocalIdMap;
-        use std::collections::BTreeMap;
 
         impl<'ast> Visitor<'ast> for u8 {
             type Params = type_params_defaults::P<(), (), u8, ()>;
@@ -120,9 +124,9 @@ mod tests {
         }
 
         let mut map: BTreeMap<LocalId, (Pos, u8)> = BTreeMap::new();
-        map.insert((0, "".into()), (Pos::make_none(), 1));
-        map.insert((1, "".into()), (Pos::make_none(), 3));
-        map.insert((2, "".into()), (Pos::make_none(), 5));
+        map.insert((0, "".into()), (Pos::NONE, 1));
+        map.insert((1, "".into()), (Pos::NONE, 3));
+        map.insert((2, "".into()), (Pos::NONE, 5));
         let stmt_ = Stmt_::AssertEnv(Box::new((EnvAnnot::Join, LocalIdMap(map))));
         let mut s = 0u8;
         visitor::visit(&mut s, &mut (), &stmt_).unwrap();

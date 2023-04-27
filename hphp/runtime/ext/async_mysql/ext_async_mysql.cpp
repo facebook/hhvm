@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 
+#include <folly/Singleton.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <squangle/mysql_client/AsyncHelpers.h>
 #include <squangle/mysql_client/ClientPool.h>
@@ -258,7 +259,7 @@ generateCertValidationCallback(
     const std::string& serverCertExtNames,
     const std::string& extensionValues) {
   std::vector<std::string> extNames;
-  folly::split(",", serverCertExtNames, extNames);
+  folly::split(',', serverCertExtNames, extNames);
   if (extensionValues.empty()) {
     return [extNames = std::move(extNames)] (
           X509* server_cert, const void* context, folly::StringPiece& errMsg) {
@@ -266,7 +267,7 @@ generateCertValidationCallback(
     };
   } else {
     std::vector<std::string> extValues;
-    folly::split(",", extensionValues, extValues);
+    folly::split(',', extensionValues, extValues);
     return [extNames = std::move(extNames), extValues = std::move(extValues)] (
           X509* server_cert, const void* context, folly::StringPiece& errMsg) {
         return serverCertValidationCallback(
@@ -809,10 +810,10 @@ HHVM_METHOD(AsyncMysqlConnectionPool, __construct, const Array& options) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   am::PoolOptions pool_options;
   if (options.exists(s_per_key_connection_limit)) {
-    pool_options.setPerKeyLimit(options[s_per_key_connection_limit].toInt32());
+    pool_options.setPerKeyLimit((int)options[s_per_key_connection_limit].toInt64());
   }
   if (options.exists(s_pool_connection_limit)) {
-    pool_options.setPoolLimit(options[s_pool_connection_limit].toInt32());
+    pool_options.setPoolLimit((int)options[s_pool_connection_limit].toInt64());
   }
   if (options.exists(s_idle_timeout_micros)) {
     pool_options.setIdleTimeout(
@@ -1425,6 +1426,16 @@ connectionContextFromOperation(const am::Operation* operation) {
   return context;
 }
 
+static bool HHVM_METHOD(AsyncMysqlResult, sslSessionReused) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    return context && context->sslSessionReused;
+  }
+  return false;
+}
+
 static String HHVM_METHOD(AsyncMysqlResult, getSslCertCn) {
   auto* data = Native::data<AsyncMysqlResult>(this_);
   if (auto* op = data->m_op.get()) {
@@ -1599,7 +1610,7 @@ void AsyncMysqlQueryResult::sweep() {
   m_query_result.reset();
 }
 
-Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
+Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::FetchOperation> op,
                                           db::ClientPerfStats stats,
                                           am::QueryResult query_result,
                                           bool noIndexUsed) {
@@ -1609,7 +1620,7 @@ Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
   return ret;
 }
 
-void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
+void AsyncMysqlQueryResult::create(std::shared_ptr<am::FetchOperation> op,
                                    db::ClientPerfStats stats,
                                    am::QueryResult query_result,
                                    bool noIndexUsed) {
@@ -1638,6 +1649,15 @@ static int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRows) {
 static Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRows) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(false /* as_maps */, false /* typed */);
+}
+
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, resultSizeBytes) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  auto* fetchOp =  dynamic_cast<const am::FetchOperation*>(data->op());
+  if(fetchOp) {
+    return fetchOp->resultSize();
+  }
+  return -1;
 }
 
 static Object HHVM_METHOD(AsyncMysqlQueryResult, mapRows) {
@@ -2236,7 +2256,12 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "6.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "7.0") {}
+  void loadDecls() override {
+    loadDeclsFrom("async_mysql");
+    loadDeclsFrom("async_mysql_exceptions");
+    loadDeclsFrom("mysqlrow");
+  }
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2331,6 +2356,7 @@ static struct AsyncMysqlExtension final : Extension {
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
         AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);
 
+    HHVM_ME(AsyncMysqlResult, sslSessionReused);
     HHVM_ME(AsyncMysqlResult, getSslCertCn);
     HHVM_ME(AsyncMysqlResult, getSslCertSan);
     HHVM_ME(AsyncMysqlResult, getSslCertExtensions);
@@ -2376,6 +2402,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);
     HHVM_ME(AsyncMysqlQueryResult, recvGtid);
     HHVM_ME(AsyncMysqlQueryResult, responseAttributes);
+    HHVM_ME(AsyncMysqlQueryResult, resultSizeBytes);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       AsyncMysqlQueryResult::s_className.get(), Native::NDIFlags::NO_COPY);
 

@@ -2,24 +2,40 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::marker::PhantomData;
 
 use ast_scope::Scope;
-use emit_type_hint::{hint_to_type_info, Kind};
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Nothing, Slice, Str};
-use hhbc::{hhas_param::HhasParam, hhas_type::HhasTypeInfo, Label, Local};
+use emit_type_hint::hint_to_type_info;
+use emit_type_hint::Kind;
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Nothing;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::Param;
+use hhbc::TypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{
-    aast_defs::{Hint, Hint_},
-    aast_visitor::{self, AstParams, Node},
-    ast as a,
-    ast_defs::{Id, ReadonlyKind},
-    pos::Pos,
-};
-use std::collections::{BTreeMap, BTreeSet};
-use std::marker::PhantomData;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_visitor;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::ast as a;
+use oxidized::ast_defs::Id;
+use oxidized::ast_defs::ReadonlyKind;
+use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_expression;
 
 pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -27,7 +43,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
     ast_params: &[a::FunParam],
-) -> Result<Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Vec<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
         .map(|param| from_ast(emitter, tparams, generate_defaults, scope, param))
@@ -43,13 +59,13 @@ pub fn from_asts<'a, 'arena, 'decl>(
 
 fn rename_params<'arena>(
     alloc: &'arena bumpalo::Bump,
-    mut params: Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>,
-) -> Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)> {
+    mut params: Vec<(Param<'arena>, Option<(Label, a::Expr)>)>,
+) -> Vec<(Param<'arena>, Option<(Label, a::Expr)>)> {
     fn rename<'arena>(
         alloc: &'arena bumpalo::Bump,
         names: &BTreeSet<Str<'arena>>,
         param_counts: &mut BTreeMap<Str<'arena>, usize>,
-        param: &mut HhasParam<'arena>,
+        param: &mut Param<'arena>,
     ) {
         match param_counts.get_mut(&param.name) {
             None => {
@@ -85,23 +101,19 @@ fn from_ast<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
     param: &a::FunParam,
-) -> Result<Option<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Option<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
     if param.is_variadic {
         tparams.push("array");
     };
-    let nullable = param
-        .expr
-        .as_ref()
-        .map_or(false, |a::Expr(_, _, e)| e.is_null());
     let type_info = {
         let param_type_hint = if param.is_variadic {
             Some(Hint(
-                Pos::make_none(),
+                Pos::NONE,
                 Box::new(Hint_::mk_happly(
-                    Id(Pos::make_none(), "array".to_string()),
+                    Id(Pos::NONE, "array".to_string()),
                     param
                         .type_hint
                         .get_hint()
@@ -117,7 +129,7 @@ fn from_ast<'a, 'arena, 'decl>(
                 emitter.alloc,
                 &Kind::Param,
                 false,
-                nullable,
+                false, /* meaning only set nullable based on given hint */
                 &tparams[..],
                 &h,
             )?)
@@ -126,12 +138,9 @@ fn from_ast<'a, 'arena, 'decl>(
         }
     };
     // Do the type check for default value type and hint type
-    if !nullable {
-        if let Some(err_msg) =
-            default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
-        {
-            return Err(Error::fatal_parse(&param.pos, err_msg));
-        }
+    if let Some(err_msg) = default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
+    {
+        return Err(Error::fatal_parse(&param.pos, err_msg));
     }
     aast_visitor::visit(
         &mut ResolverVisitor {
@@ -157,7 +166,7 @@ fn from_ast<'a, 'arena, 'decl>(
     };
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
-        HhasParam {
+        Param {
             name: Str::new_str(emitter.alloc, &param.name),
             is_variadic: param.is_variadic,
             is_inout: param.callconv.is_pinout(),
@@ -177,7 +186,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let setters = params
         .iter()
@@ -185,11 +194,13 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         .filter_map(|(i, (_, dv))| {
             // LocalIds for params are numbered from 0.
             dv.as_ref().map(|(lbl, expr)| {
+                let param_local = Local::new(i);
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
                     emit_pos::emit_pos(pos),
-                    instr::setl(Local::new(i)),
-                    instr::popc(),
+                    instr::verify_param_type(param_local),
+                    instr::set_l(param_local),
+                    instr::pop_c(),
                 ]);
                 Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
             })
@@ -201,7 +212,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmpns(l)]),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::enter(l)]),
         ))
     }
 }
@@ -234,7 +245,7 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
 // Return None if it passes type check, otherwise return error msg
 fn default_type_check<'arena>(
     param_name: &str,
-    param_type_info: Option<&HhasTypeInfo<'arena>>,
+    param_type_info: Option<&TypeInfo<'arena>>,
     param_expr: Option<&a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(

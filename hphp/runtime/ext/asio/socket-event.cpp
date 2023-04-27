@@ -1,3 +1,4 @@
+#include <folly/Singleton.h>
 #include "hphp/runtime/ext/asio/socket-event.h"
 
 using folly::EventBase;

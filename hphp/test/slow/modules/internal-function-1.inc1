@@ -1,0 +1,5 @@
+<?hh
+
+module A;
+
+internal function foo(): void { echo "foo"; }

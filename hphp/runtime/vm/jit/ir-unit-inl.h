@@ -51,7 +51,7 @@ struct InstructionBuilder {
     void* const vpBuffer = &buffer;
     Edge edges[2];
 
-    new (vpBuffer) IRInstruction(op, bcctx, hasEdges(op) ? edges : nullptr);
+    new (vpBuffer) IRInstruction(op, std::move(bcctx), hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT {

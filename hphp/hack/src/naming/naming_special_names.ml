@@ -196,8 +196,7 @@ module Members = struct
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
   let is_special_xhp_attribute s =
-    String_utils.string_starts_with s ":data-"
-    || String_utils.string_starts_with s ":aria-"
+    String.is_prefix s ~prefix:":data-" || String.is_prefix s ~prefix:":aria-"
 end
 
 module AttributeKinds = struct
@@ -229,6 +228,8 @@ module AttributeKinds = struct
 
   let enumcls = "\\HH\\EnumClassAttribute"
 
+  let module_ = "\\HH\\ModuleAttribute"
+
   let plain_english_map =
     List.fold_left
       ~init:SMap.empty
@@ -248,6 +249,7 @@ module AttributeKinds = struct
         (typeconst, "a type constant");
         (lambda, "a lambda expression");
         (enumcls, "an enum class");
+        (module_, "a module");
       ]
 end
 
@@ -260,15 +262,13 @@ module UserAttributes = struct
 
   let uaDeprecated = "__Deprecated"
 
+  let uaDocs = "__Docs"
+
   let uaEntryPoint = "__EntryPoint"
 
   let uaMemoize = "__Memoize"
 
   let uaMemoizeLSB = "__MemoizeLSB"
-
-  let uaPolicyShardedMemoize = "__PolicyShardedMemoize"
-
-  let uaPolicyShardedMemoizeLSB = "__PolicyShardedMemoizeLSB"
 
   let uaPHPStdLib = "__PHPStdLib"
 
@@ -334,11 +334,9 @@ module UserAttributes = struct
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
+  let uaNoAutoDynamic = "__NoAutoDynamic"
+
   let uaRequireDynamic = "__RequireDynamic"
-
-  let uaModule = "__Module"
-
-  let uaInternal = "__Internal"
 
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
 
@@ -350,235 +348,397 @@ module UserAttributes = struct
 
   let uaHasReifiedParent = "__HasReifiedParent"
 
+  let uaSoftInternal = "__SoftInternal"
+
   let uaNoFlatten = "__NoFlatten"
 
-  let as_map =
+  let uaCrossPackage = "__CrossPackage"
+
+  (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
+     This attribute merely ensures that the global_access_check does NOT raise
+     errors/warnings from writing to the annotated global variable, and it
+     has NO runtime/semantic implication. *)
+  let uaSafeGlobalVariable = "__SafeForGlobalAccessCheck"
+
+  let uaModuleLevelTrait = "__ModuleLevelTrait"
+
+  type attr_info = {
+    contexts: string list;
+    doc: string;
+    autocomplete: bool;
+  }
+
+  let as_map : attr_info SMap.t =
     AttributeKinds.(
       SMap.of_list
         [
           ( uaOverride,
-            ([mthd], "Ensures there's a parent method being overridden.") );
+            {
+              contexts = [mthd];
+              autocomplete = true;
+              doc = "Ensures there's a parent method being overridden.";
+            } );
           ( uaConsistentConstruct,
-            ( [cls],
-              "Requires all child classes to have the same constructor signature. "
-              ^ " This allows `new static(...)` and `new $the_class_name(...)`."
-            ) );
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "Requires all child classes to have the same constructor signature. "
+                ^ " This allows `new static(...)` and `new $the_class_name(...)`.";
+            } );
           ( uaConst,
-            ( [cls; instProperty; parameter; staticProperty],
-              "Marks a class or property as immutable."
-              ^ " When applied to a class, all the properties are considered `__Const`."
-              ^ " `__Const` properties can only be set in the constructor." ) );
+            {
+              contexts = [cls; instProperty; parameter; staticProperty];
+              autocomplete = false;
+              doc =
+                "Marks a class or property as immutable."
+                ^ " When applied to a class, all the properties are considered `__Const`."
+                ^ " `__Const` properties can only be set in the constructor.";
+            } );
           ( uaDeprecated,
-            ( [fn; mthd],
-              "Mark a function/method as deprecated. "
-              ^ " The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called."
-              ^ "\n\nThe optional second argument specifies a sampling rate for raising notices at runtime."
-              ^ " If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices)."
-              ^ " To disable runtime notices, use a sampling rate of 0." ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Mark a function/method as deprecated. "
+                ^ " The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called."
+                ^ "\n\nThe optional second argument specifies a sampling rate for raising notices at runtime."
+                ^ " If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices)."
+                ^ " To disable runtime notices, use a sampling rate of 0.";
+            } );
+          ( uaDocs,
+            {
+              contexts = [cls; enum; enumcls; typealias];
+              autocomplete = true;
+              doc = "Shows the linked URL when hovering over this type.";
+            } );
           ( uaEntryPoint,
-            ( [fn],
-              "Execution of the program will start here."
-              ^ " This only applies in the first file executed, `__EntryPoint` in required or autoloaded files has no effect."
-            ) );
+            {
+              contexts = [fn];
+              autocomplete = true;
+              doc =
+                "Execution of the program will start here."
+                ^ " This only applies in the first file executed, `__EntryPoint` in required or autoloaded files has no effect.";
+            } );
           ( uaMemoize,
-            ( [fn; mthd],
-              "Cache the return values from this function/method."
-              ^ " Calls with the same arguments will return the cached value."
-              ^ "\n\nCaching is per-request and shared between subclasses (see also `__MemoizeLSB`)."
-            ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Cache the return values from this function/method."
+                ^ " Calls with the same arguments will return the cached value."
+                ^ "\n\nCaching is per-request and shared between subclasses (see also `__MemoizeLSB`).";
+            } );
           ( uaMemoizeLSB,
-            ( [mthd],
-              "Cache the return values from this method."
-              ^ " Calls with the same arguments will return the cached value."
-              ^ "\n\nCaching is per-request and has Late Static Binding, so subclasses do not share the cache."
-            ) );
-          ( uaPolicyShardedMemoize,
-            ( [fn; mthd],
-              "Memoize this function/method independently for each zone.\n\n"
-              ^ "See also `__PolicyShardedMemoizeLSB`." ) );
-          ( uaPolicyShardedMemoizeLSB,
-            ( [mthd],
-              "Memoize this function/method independently for each zone. "
-              ^ "Respects Late Static Binding, so subclasses do not share the cache.\n\n"
-              ^ "See also `__PolicyShardedMemoizeLSB` and `__MemoizeLSB`." ) );
+            {
+              contexts = [mthd];
+              autocomplete = true;
+              doc =
+                "Cache the return values from this method."
+                ^ " Calls with the same arguments will return the cached value."
+                ^ "\n\nCaching is per-request and has Late Static Binding, so subclasses do not share the cache.";
+            } );
           ( uaPHPStdLib,
-            ( [cls; fn; mthd],
-              "Ignore this built-in function or class, so the type checker errors if code uses it."
-              ^ " This only applies to code in .hhi files by default, but can apply everywhere with `deregister_php_stdlib`."
-            ) );
+            {
+              contexts = [cls; fn; mthd];
+              autocomplete = false;
+              doc =
+                "Ignore this built-in function or class, so the type checker errors if code uses it."
+                ^ " This only applies to code in .hhi files by default, but can apply everywhere with `deregister_php_stdlib`.";
+            } );
           ( uaAcceptDisposable,
-            ( [parameter],
-              "Allows passing values that implement `IDisposable` or `IAsyncDisposable`."
-              ^ " Normally these values cannot be passed to functions."
-              ^ "\n\nYou cannot save references to `__AcceptDisposable` parameters, to ensure they are disposed at the end of their using block."
-            ) );
+            {
+              contexts = [parameter];
+              autocomplete = true;
+              doc =
+                "Allows passing values that implement `IDisposable` or `IAsyncDisposable`."
+                ^ " Normally these values cannot be passed to functions."
+                ^ "\n\nYou cannot save references to `__AcceptDisposable` parameters, to ensure they are disposed at the end of their using block.";
+            } );
           ( uaReturnDisposable,
-            ( [fn; mthd; lambda],
-              "Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`."
-              ^ " The function must return a fresh disposable value by either instantiating a class or "
-              ^ " returning a value from another method/function marked `__ReturnDisposable`."
-            ) );
+            {
+              contexts = [fn; mthd; lambda];
+              autocomplete = true;
+              doc =
+                "Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`."
+                ^ " The function must return a fresh disposable value by either instantiating a class or "
+                ^ " returning a value from another method/function marked `__ReturnDisposable`.";
+            } );
           ( uaLSB,
-            ( [staticProperty],
-              "Marks this property as implicitly redeclared on all subclasses."
-              ^ " This ensures each subclass has its own value for the property."
-            ) );
+            {
+              contexts = [staticProperty];
+              autocomplete = true;
+              doc =
+                "Marks this property as implicitly redeclared on all subclasses."
+                ^ " This ensures each subclass has its own value for the property.";
+            } );
           ( uaSealed,
-            ( [cls; enumcls; enum],
-              "Only the named classes can extend this class or interface."
-              ^ " Child classes may still be extended unless they are marked `final`."
-            ) );
+            {
+              contexts = [cls; enumcls; enum];
+              autocomplete = true;
+              doc =
+                "Only the named classes can extend this class or interface."
+                ^ " Child classes may still be extended unless they are marked `final`.";
+            } );
           ( uaLateInit,
-            ( [instProperty; staticProperty],
-              "Marks a property as late initialized."
-              ^ " Normally properties are required to be initialized in the constructor."
-            ) );
+            {
+              contexts = [instProperty; staticProperty];
+              autocomplete = true;
+              doc =
+                "Marks a property as late initialized."
+                ^ " Normally properties are required to be initialized in the constructor.";
+            } );
           ( uaNewable,
-            ( [typeparam],
-              "Ensures the class can be constructed."
-              ^ "\n\nThis forbids abstract classes, and ensures that the constructor has a consistent signature."
-              ^ " Classes must use `__ConsistentConstruct` or be final." ) );
+            {
+              contexts = [typeparam];
+              autocomplete = true;
+              doc =
+                "Ensures the class can be constructed."
+                ^ "\n\nThis forbids abstract classes, and ensures that the constructor has a consistent signature."
+                ^ " Classes must use `__ConsistentConstruct` or be final.";
+            } );
           ( uaEnforceable,
-            ( [typeconst; typeparam],
-              "Ensures that this type is enforceable."
-              ^ " Enforceable types can be used with `is` and `as`."
-              ^ " This forbids usage of function types and erased (not reified) generics."
-            ) );
+            {
+              contexts = [typeconst; typeparam];
+              autocomplete = true;
+              doc =
+                "Ensures that this type is enforceable."
+                ^ " Enforceable types can be used with `is` and `as`."
+                ^ " This forbids usage of function types and erased (not reified) generics.";
+            } );
           ( uaExplicit,
-            ( [typeparam],
-              "Requires callers to explicitly specify this type."
-              ^ "\n\nNormally Hack allows generics to be inferred at the call site."
-            ) );
+            {
+              contexts = [typeparam];
+              autocomplete = true;
+              doc =
+                "Requires callers to explicitly specify this type."
+                ^ "\n\nNormally Hack allows generics to be inferred at the call site.";
+            } );
           ( uaSoft,
-            ( [instProperty; parameter; staticProperty; typeparam],
-              "A runtime type mismatch on this parameter/property will not throw a TypeError/Error."
-              ^ " This is useful for migrating partial code where you're unsure about the type."
-              ^ "\n\nThe type checker will ignore this attribute, so your code will still get type checked."
-              ^ " If the type is wrong at runtime, a warning will be logged and code execution will continue."
-            ) );
+            {
+              contexts = [instProperty; parameter; staticProperty; typeparam];
+              autocomplete = true;
+              doc =
+                "A runtime type mismatch on this parameter/property will not throw a TypeError/Error."
+                ^ " This is useful for migrating partial code where you're unsure about the type."
+                ^ "\n\nThe type checker will ignore this attribute, so your code will still get type checked."
+                ^ " If the type is wrong at runtime, a warning will be logged and code execution will continue.";
+            } );
           ( uaWarn,
-            ( [typeparam],
-              "Ensures that incorrect reified types are a warning rather than error."
-              ^ "\n\nThis is intended to help gradually migrate code to reified types."
-            ) );
+            {
+              contexts = [typeparam];
+              autocomplete = true;
+              doc =
+                "Ensures that incorrect reified types are a warning rather than error."
+                ^ "\n\nThis is intended to help gradually migrate code to reified types.";
+            } );
           ( uaMockClass,
-            ( [cls],
-              "Allows subclasses of final classes and overriding of final methods."
-              ^ " This is useful for writing mock classes."
-              ^ "\n\nYou cannot use this to subclass `vec`, `keyset`, `dict`, `Vector`, `Map` or `Set`."
-            ) );
+            {
+              contexts = [cls];
+              autocomplete = false;
+              doc =
+                "Allows subclasses of final classes and overriding of final methods."
+                ^ " This is useful for writing mock classes."
+                ^ "\n\nYou cannot use this to subclass `vec`, `keyset`, `dict`, `Vector`, `Map` or `Set`.";
+            } );
           ( uaProvenanceSkipFrame,
-            ( [fn; mthd; lambda],
-              "Don't track Hack arrays created by this function."
-              ^ " This is useful when migrating code from PHP arrays to Hack arrays."
-            ) );
+            {
+              contexts = [fn; mthd; lambda];
+              autocomplete = false;
+              doc =
+                "Don't track Hack arrays created by this function."
+                ^ " This is useful when migrating code from PHP arrays to Hack arrays.";
+            } );
           ( uaDynamicallyCallable,
-            ( [fn; mthd],
-              "Allows this function/method to be called dynamically, based on a string of its name. "
-              ^ " HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute."
-              ^ "\n\nSee also `HH\\dynamic_fun()` and `HH\\dynamic_class_meth()`."
-            ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Allows this function/method to be called dynamically, based on a string of its name. "
+                ^ " HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute."
+                ^ "\n\nSee also `HH\\dynamic_fun()` and `HH\\dynamic_class_meth()`.";
+            } );
           ( uaDynamicallyConstructible,
-            ( [cls],
-              "Allows this class to be instantiated dynamically, based on a string of its name."
-              ^ " HHVM will warn or error (depending on settings) on dynamic instantiations without this attribute."
-            ) );
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "Allows this class to be instantiated dynamically, based on a string of its name."
+                ^ " HHVM will warn or error (depending on settings) on dynamic instantiations without this attribute.";
+            } );
           ( uaReifiable,
-            ( [typeconst],
-              "Requires this type to be reifiable."
-              ^ " This bans PHP arrays (varray and darray)." ) );
+            {
+              contexts = [typeconst];
+              autocomplete = true;
+              doc =
+                "Requires this type to be reifiable."
+                ^ " This bans PHP arrays (varray and darray).";
+            } );
           ( uaNeverInline,
-            ( [fn; mthd],
-              "Instructs HHVM to never inline this function."
-              ^ " Only used for testing HHVM."
-              ^ "\n\nSee also `__ALWAYS_INLINE`." ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Instructs HHVM to never inline this function."
+                ^ " Only used for testing HHVM."
+                ^ "\n\nSee also `__ALWAYS_INLINE`.";
+            } );
           ( uaReified,
-            ( [],
-              "Marks a function as taking reified generics."
-              ^ " This is an internal attribute used for byte compilation, and is banned in user code."
-            ) );
+            {
+              contexts = [];
+              autocomplete = false;
+              doc =
+                "Marks a function as taking reified generics."
+                ^ " This is an internal attribute used for byte compilation, and is banned in user code.";
+            } );
           ( uaHasReifiedParent,
-            ( [],
-              "Marks a class as extending a class that uses reified generics."
-              ^ " This is an internal attribute used for byte compilation, and is banned in user code."
-            ) );
+            {
+              contexts = [];
+              autocomplete = false;
+              doc =
+                "Marks a class as extending a class that uses reified generics."
+                ^ " This is an internal attribute used for byte compilation, and is banned in user code.";
+            } );
           ( uaNoFlatten,
-            ( [],
-              "Instructs hhbbc to never inline this trait into classes that use it."
-              ^ " Used for testing hhbbc optimizations." ) );
+            {
+              contexts = [];
+              autocomplete = false;
+              doc =
+                "Instructs hhbbc to never inline this trait into classes that use it."
+                ^ " Used for testing hhbbc optimizations.";
+            } );
           ( uaNativeData,
-            ( [],
-              "Associates this class with a native data type (usually a C++ class)."
-              ^ " When instantiating this class, the corresponding native object will also be allocated."
-            ) );
+            {
+              contexts = [cls];
+              autocomplete = false;
+              doc =
+                "Associates this class with a native data type (usually a C++ class)."
+                ^ " When instantiating this class, the corresponding native object will also be allocated.";
+            } );
           ( uaNonDisjoint,
-            ( [typeparam],
-              "Requires this type parameter to have some overlap with the other `<<__NonDisjoin>>` type parameters."
-              ^ "\n\nThis prevents Hack inferring completely unrelated types."
-              ^ " For example, this allows the typechecker to warn on `C\\contains(vec[1], \"foo\")`."
-            ) );
+            {
+              contexts = [typeparam];
+              autocomplete = true;
+              doc =
+                "Requires this type parameter to have some overlap with the other `<<__NonDisjoint>>` type parameters."
+                ^ "\n\nThis prevents Hack inferring completely unrelated types."
+                ^ " For example, this allows the typechecker to warn on `C\\contains(vec[1], \"foo\")`.";
+            } );
           ( uaDisableTypecheckerInternal,
-            ( [fn; mthd],
-              "Disables type checking of a function body or method. This is only useful for debugging typechecker performance."
-              ^ " The typechecker will discard the body and immediately report an internal error."
-            ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Disables type checking of a function body or method. This is only useful for debugging typechecker performance."
+                ^ " The typechecker will discard the body and immediately report an internal error.";
+            } );
           ( uaEnableUnstableFeatures,
-            ( [file],
-              "Enables unstable or preview features of Hack."
-              ^ "\n\nUnstable features can only run when HHVM has `Hack.Lang.AllowUnstableFeatures` set. This allows local experimentation without using the feature in production."
-              ^ "\n\nWhen a feature enters preview, `__EnableUnstableFeatures` is still required but HHVM will allow the code to run."
-            ) );
+            {
+              contexts = [file];
+              autocomplete = true;
+              doc =
+                "Enables unstable or preview features of Hack."
+                ^ "\n\nUnstable features can only run when HHVM has `Hack.Lang.AllowUnstableFeatures` set. This allows local experimentation without using the feature in production."
+                ^ "\n\nWhen a feature enters preview, `__EnableUnstableFeatures` is still required but HHVM will allow the code to run.";
+            } );
           ( uaEnumClass,
-            ( [cls; enumcls],
-              "Allows initializing class constants with class instances (not just constant expressions). Used when desugaring `enum class`."
-            ) );
+            {
+              contexts = [cls; enumcls];
+              autocomplete = false;
+              doc =
+                "Allows initializing class constants with class instances (not just constant expressions). Used when desugaring `enum class`.";
+            } );
           ( uaPolicied,
-            ( [fn; mthd; instProperty; parameter],
-              "Associate a definition with a policy. Used for information flow control, requires `<<file:__EnableUnstableFeatures('ifc')>>`."
-            ) );
+            {
+              contexts = [fn; mthd; instProperty; parameter];
+              autocomplete = false;
+              doc =
+                "Associate a definition with a policy. Used for information flow control, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
+            } );
           ( uaInferFlows,
-            ( [fn; mthd],
-              "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`."
-            ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
+            } );
           ( uaExternal,
-            ( [parameter],
-              "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`."
-            ) );
+            {
+              contexts = [parameter];
+              autocomplete = false;
+              doc =
+                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
+            } );
           ( uaCanCall,
-            ( [parameter],
-              "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`."
-            ) );
+            {
+              contexts = [parameter];
+              autocomplete = false;
+              doc =
+                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
+            } );
           ( uaSupportDynamicType,
-            ( [fn; cls; mthd; lambda],
-              "Marks methods and functions that can be called on a receiver of type `dynamic` with `dynamic` arguments. Requires the enable_sound_dynamic_type typechecking flag."
-            ) );
+            {
+              contexts = [fn; cls; mthd; lambda; enumcls];
+              autocomplete = false;
+              doc =
+                "Marks methods and functions that can be called on a receiver of type `dynamic` with `dynamic` arguments. Requires the enable_sound_dynamic_type typechecking flag.";
+            } );
+          ( uaNoAutoDynamic,
+            {
+              contexts = [fn; cls; mthd; typealias];
+              autocomplete = false;
+              doc = "Locally disable implicit pessimisation.";
+            } );
           ( uaRequireDynamic,
-            ( [typeparam],
-              "Marks this type parameter as required to be `dynamic`. Requires the enable_sound_dynamic_type typechecking flag."
-            ) );
-          ( uaModule,
-            ( [fn; cls; file; typealias; enum; enumcls],
-              "Associates a definition with a module. Requires `<<file:__EnableUnstableFeatures('modules')>>`."
-            ) );
-          ( uaInternal,
-            ( [
-                fn;
-                mthd;
-                cls;
-                instProperty;
-                staticProperty;
-                typealias;
-                enum;
-                enumcls;
-              ],
-              "Marks a definition as a private to a module. Requires `<<file:__EnableUnstableFeatures('modules')>>`."
-            ) );
+            {
+              contexts = [typeparam];
+              autocomplete = false;
+              doc =
+                "Marks this type parameter as required to be `dynamic`. Requires the enable_sound_dynamic_type typechecking flag.";
+            } );
           ( uaEnableMethodTraitDiamond,
-            ( [cls],
-              "Allows a trait to be `use`d more than once. "
-              ^ "This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'."
-              ^ "\n\nThis requires methods to unambiguous: each method definition must occur in exactly one trait."
-            ) );
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "Allows a trait to be `use`d more than once. "
+                ^ "This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'."
+                ^ "\n\nThis requires methods to unambiguous: each method definition must occur in exactly one trait.";
+            } );
+          ( uaSafeGlobalVariable,
+            {
+              contexts = [staticProperty];
+              autocomplete = false;
+              doc =
+                "Marks this global variable as safe from mutation."
+                ^ " This ensures the global_access_check does NOT raise errors/warnings from writing to this global variable.";
+            } );
+          ( uaSoftInternal,
+            {
+              (* Parameters are for constructor promotion: if someone tries to use it on a
+                 parameter without internal, they'll encounter a nast check error *)
+              contexts =
+                [
+                  fn;
+                  cls;
+                  mthd;
+                  instProperty;
+                  staticProperty;
+                  parameter;
+                  enum;
+                  enumcls;
+                ];
+              autocomplete = false;
+              doc =
+                "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";
+            } );
+          ( uaCrossPackage,
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`";
+            } );
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)
@@ -587,30 +747,50 @@ module UserAttributes = struct
       SMap.of_list
         [
           ( uaAlwaysInline,
-            ( [fn; mthd],
-              "Instructs HHVM to always inline this function."
-              ^ " Only used for testing HHVM."
-              ^ "\n\nSee also `__NEVER_INLINE`." ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Instructs HHVM to always inline this function."
+                ^ " Only used for testing HHVM."
+                ^ "\n\nSee also `__NEVER_INLINE`.";
+            } );
           ( uaIsFoldable,
-            ( [fn; mthd],
-              "Marks that this function can be constant-folded if all arguments are constants."
-              ^ " Used by hhbbc." ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Marks that this function can be constant-folded if all arguments are constants."
+                ^ " Used by hhbbc.";
+            } );
           ( uaNative,
-            ( [fn; mthd],
-              "Declares a native function."
-              ^ " This declares the signature, the implementation will be in an HHVM extension (usually C++)."
-            ) );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Declares a native function."
+                ^ " This declares the signature, the implementation will be in an HHVM extension (usually C++).";
+            } );
           ( uaOutOnly,
-            ( [parameter],
-              "Declares that an `inout` parameter is written but never read." )
-          );
+            {
+              contexts = [parameter];
+              autocomplete = false;
+              doc =
+                "Declares that an `inout` parameter is written but never read.";
+            } );
           ( uaIgnoreReadonlyLocalErrors,
-            ([fn; mthd], "Disables `readonly` compiler checks (systemlib only).")
-          );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc = "Disables `readonly` compiler checks (systemlib only).";
+            } );
           ( uaIgnoreCoeffectLocalErrors,
-            ( [fn; mthd],
-              "Disables context/capability runtime checks (systemlib only)." )
-          );
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Disables context/capability runtime checks (systemlib only).";
+            } );
         ])
 
   let is_reserved name = String.is_prefix name ~prefix:"__"
@@ -620,10 +800,8 @@ end
 module SpecialFunctions = struct
   let echo = "echo" (* pseudo-function *)
 
-  let hhas_adata = "__hhas_adata"
-
   let is_special_function =
-    let all_special_functions = HashSet.of_list [echo; hhas_adata] in
+    let all_special_functions = HashSet.of_list [echo] in
     (fun x -> HashSet.mem all_special_functions x)
 end
 
@@ -634,12 +812,6 @@ module AutoimportedFunctions = struct
   let invariant_violation = "\\HH\\invariant_violation"
 
   let invariant = "\\HH\\invariant"
-
-  let fun_ = "\\HH\\fun"
-
-  let inst_meth = "\\HH\\inst_meth"
-
-  let class_meth = "\\HH\\class_meth"
 
   let meth_caller = "\\HH\\meth_caller"
 end
@@ -694,6 +866,8 @@ module PseudoFunctions = struct
 
   let unsafe_cast = "\\HH\\FIXME\\UNSAFE_CAST"
 
+  let unsafe_nonnull_cast = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST"
+
   let enforced_cast = "\\HH\\FIXME\\ENFORCED_CAST"
 
   let all_pseudo_functions =
@@ -713,6 +887,7 @@ module PseudoFunctions = struct
         exit;
         die;
         unsafe_cast;
+        unsafe_nonnull_cast;
       ]
 
   let is_pseudo_function x = HashSet.mem all_pseudo_functions x
@@ -735,8 +910,6 @@ module StdlibFunctions = struct
 
   let array_unmark_legacy = "\\HH\\array_unmark_legacy"
 
-  let is_php_array = "\\HH\\is_php_array"
-
   let is_any_array = "\\HH\\is_any_array"
 
   let is_dict_or_darray = "\\HH\\is_dict_or_darray"
@@ -753,6 +926,7 @@ module StdlibFunctions = struct
         PseudoFunctions.unset;
         type_structure;
         PseudoFunctions.unsafe_cast;
+        PseudoFunctions.unsafe_nonnull_cast;
       ]
 
   let needs_special_dispatch x = Hash_set.mem special_dispatch x
@@ -778,8 +952,6 @@ module Typehints = struct
   let this = "this"
 
   let dynamic = "dynamic"
-
-  let supportdynamic = "supportdynamic"
 
   let nothing = "nothing"
 
@@ -935,9 +1107,19 @@ module FB = struct
 end
 
 module HH = struct
+  let memoizeOption = "\\HH\\MemoizeOption"
+
   let contains = "\\HH\\Lib\\C\\contains"
 
   let contains_key = "\\HH\\Lib\\C\\contains_key"
+
+  module FIXME = struct
+    let tTanyMarker = "\\HH\\FIXME\\TANY_MARKER"
+
+    let tPoisonMarker = "\\HH\\FIXME\\POISON_MARKER"
+
+    let tSupportdynMarker = "\\HH\\FIXME\\SUPPORTDYN_MARKER"
+  end
 end
 
 module Shapes = struct
@@ -956,6 +1138,10 @@ module Shapes = struct
   let toArray = "toArray"
 
   let toDict = "toDict"
+end
+
+module Hips = struct
+  let inspect = "\\inspect"
 end
 
 module Superglobals = struct
@@ -1003,7 +1189,7 @@ module XHP = struct
   let is_reserved name =
     String.equal name pcdata || String.equal name any || String.equal name empty
 
-  let is_xhp_category name = String_utils.string_starts_with name "%"
+  let is_xhp_category name = String.is_prefix name ~prefix:"%"
 end
 
 (* This should be a subset of rust_parser_errors::UnstableFeatures that is relevant
@@ -1032,6 +1218,12 @@ module Coeffects = struct
   let generated_generic_prefix = "T/"
 
   let is_generated_generic = String.is_prefix ~prefix:generated_generic_prefix
+
+  (** "T/[ctx $foo]" to "ctx $foo". *)
+  let unwrap_generated_generic name =
+    name
+    |> String.chop_prefix_if_exists ~prefix:"T/["
+    |> String.chop_suffix_if_exists ~suffix:"]"
 end
 
 module Readonly = struct
@@ -1055,7 +1247,7 @@ module Capabilities = struct
 
   let readGlobals = prefix ^ "ReadGlobals"
 
-  let system = prefix ^ "System"
+  let systemLocal = prefix ^ "SystemLocal"
 
   let implicitPolicy = prefix ^ "ImplicitPolicy"
 

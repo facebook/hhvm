@@ -33,9 +33,8 @@ class Baz {
   }
 
   public static function Vector_fun() {
-    echo '===Vector:===';
+    echo "===Vector:===\n";
     self::$vv[] = Baz::class;
-    self::$vv[] = Fizz::class; // not a class
     self::$vv[] = self::$c;
     var_dump(self::$vv);
   }
@@ -65,8 +64,8 @@ function Set_fun() {
 }
 
 function vec_fun() {
-  echo '===vec:===';
-  $a = vec[Foo::class, Fizz::class]; // Fizz is not a class
+  echo "===vec:===\n";
+  $a = vec[Foo::class];
   $a[] = Baz::class;
   var_dump($a);
   foreach ($a as $v) {
@@ -75,14 +74,13 @@ function vec_fun() {
 }
 
 function dvarray_fun() {
-  echo '===dvarray:===';
+  echo "===dvarray:===\n";
   $a = varray[];
   $a[] = Baz::class;
-  $a[] = Fizz::class;
   var_dump($a);
   var_dump(array_keys($a));
   $b = darray[Foo::class => Baz::class];
-  $b[Baz::class] = Fizz::class;
+  $b[Baz::class] = Foo::class;
   var_dump(array_keys($b));
 }
 
@@ -91,7 +89,6 @@ function shape_fun() {
   $x = shape(Foo::class => 1);
   $x[Bar::class] = 2;
   $x['Foo'] = 3;
-  $x[Fizz::class] = 4;
   var_dump($x);
   var_dump(idx($x, Foo::class));
   var_dump(Shapes::idx(__hhvm_intrinsics\launder_value($x), Foo::class, true));

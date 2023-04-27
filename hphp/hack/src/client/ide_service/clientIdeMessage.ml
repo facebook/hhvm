@@ -13,8 +13,8 @@ module Initialize_from_saved_state = struct
   type t = {
     root: Path.t;
     naming_table_load_info: naming_table_load_info option;
-    use_ranked_autocomplete: bool;
     config: (string * string) list;
+    ignore_hh_version: bool;
     open_files: Path.t list;
   }
 
@@ -24,116 +24,17 @@ module Initialize_from_saved_state = struct
   }
 end
 
-type document_location = {
-  file_path: Path.t;
-  file_contents: string option;
-  (* if absent, should read from file on disk *)
-  line: int;
-  column: int;
-}
-
-type document_and_path = {
+type document = {
   file_path: Path.t;
   file_contents: string;
 }
 
-(** Denotes a location of the cursor in a document at which an IDE request is
-being executed (e.g. hover). *)
+type location = {
+  line: int;
+  column: int;
+}
 
-module Ide_file_opened = struct
-  type request = document_and_path
-end
-
-module Ide_file_changed = struct
-  type request = { file_path: Path.t }
-end
-
-module Hover = struct
-  type request = document_location
-
-  type result = HoverService.result
-end
-
-module Definition = struct
-  type request = document_location
-
-  type result = ServerCommandTypes.Go_to_definition.result
-end
-
-(* Handles "textDocument/typeDefinition" LSP messages *)
-module Type_definition = struct
-  type request = document_location
-
-  type result = ServerCommandTypes.Go_to_type_definition.result
-end
-
-(* Handles "textDocument/completion" LSP messages *)
-module Completion = struct
-  type request = {
-    document_location: document_location;
-    is_manually_invoked: bool;
-  }
-
-  type result = AutocompleteTypes.ide_result
-end
-
-(* "completionItem/resolve" LSP messages - if we have symbol name *)
-module Completion_resolve = struct
-  type request = {
-    symbol: string;
-    kind: SearchUtils.si_kind;
-  }
-
-  type result = DocblockService.result
-end
-
-(* "completionItem/resolve" LSP messages - if we have file/line/column *)
-module Completion_resolve_location = struct
-  type request = {
-    kind: SearchUtils.si_kind;
-    document_location: document_location;
-  }
-
-  type result = DocblockService.result
-end
-
-(* Handles "textDocument/documentHighlight" LSP messages *)
-module Document_highlight = struct
-  type request = document_location
-
-  type result = Ide_api_types.range list
-end
-
-(* Handles "textDocument/signatureHelp" LSP messages *)
-module Signature_help = struct
-  type request = document_location
-
-  type result = Lsp.SignatureHelp.result
-end
-
-(* Handles "textDocument/documentSymbol" LSP messages *)
-module Document_symbol = struct
-  type request = document_location
-
-  type result = FileOutline.outline
-end
-
-(* Handles "textDocument/codeActions" LSP messages *)
-module Code_action = struct
-  type request = {
-    file_path: Path.t;
-    file_contents: string option;
-    range: Ide_api_types.range;
-  }
-
-  type result = Lsp.CodeAction.command_or_action list
-end
-
-module Type_coverage = struct
-  type request = document_and_path
-
-  type result = Coverage_level_defs.result
-end
+type completion_request = { is_manually_invoked: bool }
 
 (** Represents a path corresponding to a file which has changed on disk. We
 don't use `Path.t`:
@@ -158,28 +59,90 @@ type _ t =
       it has responded. *)
   | Shutdown : unit -> unit t
   | Disk_files_changed : changed_file list -> unit t
-  | Ide_file_opened : Ide_file_opened.request -> unit t
-  | Ide_file_changed : Ide_file_changed.request -> unit t
-  | Ide_file_closed : Path.t -> unit t
+  | Ide_file_opened : document -> Errors.t t
+  | Ide_file_changed : document -> Errors.t t
+  | Ide_file_closed : Path.t -> Errors.t t
+      (** This returns diagnostics for the file as it is on disk.
+      This is to serve the following scenario: (1) file was open with
+      modified contents and squiggles appropriate to the modified contents,
+      (2) user closes file without saving. In this scenario we must
+      restore squiggles to what would be appropriate for the file on disk.
+
+      It'd be possible to return an [Errors.t option], and only return [Some]
+      if the file had been closed while modified, if perf here is ever a concern. *)
   | Verbose_to_file : bool -> unit t
-  | Hover : Hover.request -> Hover.result t
-  | Definition : Definition.request -> Definition.result t
-  | Completion : Completion.request -> Completion.result t
-  | Completion_resolve :
-      Completion_resolve.request
-      -> Completion_resolve.result t
+  | Hover : document * location -> HoverService.result t
+  | Definition :
+      document * location
+      -> ServerCommandTypes.Go_to_definition.result t
+  | Completion :
+      document * location * completion_request
+      -> AutocompleteTypes.ide_result t
+      (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      Completion_resolve_location.request
-      -> Completion_resolve_location.result t
-  | Document_highlight :
-      Document_highlight.request
-      -> Document_highlight.result t
-  | Document_symbol : Document_symbol.request -> Document_symbol.result t
+      Path.t * location * SearchUtils.si_kind
+      -> DocblockService.result t
+      (** "completionItem/resolve" LSP messages - if we have file/line/column.
+      The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,
+      and we responded with a completion item that points to a class defined in B.PHP line 10 col 5,
+      and now VSCode requests completionItem/resolve [(B.PHP, {line=10; column=5;}, class)],
+      and this method will look up B.PHP to find the docblock for that class and return it.
+      Typically B.PHP won't even be open. That's why we only provide it as Path.t *)
+  | Completion_resolve :
+      string * SearchUtils.si_kind
+      -> DocblockService.result t
+      (** "completionItem/resolve" LSP messages - if we have symbol name, and [Completion_resolve_location] failed *)
+  | Document_highlight : document * location -> Ide_api_types.range list t
+      (** Handles "textDocument/documentHighlight" LSP messages *)
+  | Document_symbol : document -> FileOutline.outline t
+      (** Handles "textDocument/documentSymbol" LSP messages *)
   | Workspace_symbol : string -> SearchUtils.result t
-  | Type_definition : Type_definition.request -> Type_definition.result t
-  | Type_coverage : Type_coverage.request -> Type_coverage.result t
-  | Signature_help : Signature_help.request -> Signature_help.result t
-  | Code_action : Code_action.request -> Code_action.result t
+  | Find_references :
+      document * location
+      -> ( ServerCommandTypes.Find_refs.ide_result,
+           string * ServerCommandTypes.Find_refs.action )
+         result
+         t
+      (** The result of Find_references is either:
+       - In the success case, a [Find_refs.ide_result], which is an optional tuple of
+         symbol name from [SymbolDefinition.full_name] and positions for that symbol.
+       - In the failure case, we return both a symbol's name from [SymbolDefinition.full_name],
+         and the [Find_refs.action] which describes what the symbol refers to,
+         e.g. Class of class_name, Member of member_name with a Method of method_name. *)
+  | Rename :
+      document * location * string
+      -> ( ServerRenameTypes.patch list option,
+           ServerCommandTypes.Find_refs.action )
+         result
+         t
+  | Type_definition :
+      document * location
+      -> ServerCommandTypes.Go_to_type_definition.result t
+      (** Handles "textDocument/typeDefinition" LSP messages *)
+  | Type_coverage : document -> Coverage_level_defs.result t
+  | Signature_help : document * location -> Lsp.SignatureHelp.result t
+      (** Handles "textDocument/signatureHelp" LSP messages *)
+  | Code_action :
+      document * Ide_api_types.range
+      -> (Lsp.CodeAction.command_or_action list * Errors.t option) t
+      (** Handles "textDocument/codeActions" LSP messages.
+
+      Also, we take this as a handy opportunity to send updated [Errors.t]
+      to clientLsp so it can publish them. We return [None] if the TAST+errors
+      haven't changed since they were last sent to clientLsp (through didOpen,
+      didChange, didClose or an earlier codeAction), and [Some] if they have
+      been changed.
+
+      Why send errors in code-action? It's for the scenario where file A.PHP
+      is open, file B.PHP changes on disk (e.g. due to user saving it), which
+      invalidates the TAST+errors of A.PHP, and we might therefore need to send
+      updated errors. For efficiency we chose to do this lazily when the user
+      interacts with A.PHP or switches tab to it, rather than doing every single
+      open file up-front. We could have sent updated errors on every single action,
+      e.g. hover and go-to-def. But settled for now on only doing it for codeAction
+      because this is called so frequently by VSCode (when you switch tab, and every
+      time the caret moves) in the hope that this will be a good balance of simple
+      code and decent experience. *)
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -196,35 +159,38 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Disk_file_changed(%s%s)" (String.concat files) remainder
   | Ide_file_opened { file_path; _ } ->
     Printf.sprintf "Ide_file_opened(%s)" (Path.to_string file_path)
-  | Ide_file_changed { Ide_file_changed.file_path; _ } ->
+  | Ide_file_changed { file_path; _ } ->
     Printf.sprintf "Ide_file_changed(%s)" (Path.to_string file_path)
   | Ide_file_closed file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)
   | Verbose_to_file verbose -> Printf.sprintf "Verbose_to_file(%b)" verbose
-  | Hover { file_path; _ } ->
+  | Hover ({ file_path; _ }, _) ->
     Printf.sprintf "Hover(%s)" (Path.to_string file_path)
-  | Definition { file_path; _ } ->
+  | Definition ({ file_path; _ }, _) ->
     Printf.sprintf "Definition(%s)" (Path.to_string file_path)
-  | Completion { Completion.document_location = { file_path; _ }; _ } ->
+  | Completion ({ file_path; _ }, _, _) ->
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
-  | Completion_resolve { Completion_resolve.symbol; _ } ->
+  | Completion_resolve (symbol, _) ->
     Printf.sprintf "Completion_resolve(%s)" symbol
-  | Completion_resolve_location
-      { Completion_resolve_location.document_location = { file_path; _ }; _ } ->
+  | Completion_resolve_location (file_path, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
-  | Document_highlight { file_path; _ } ->
+  | Document_highlight ({ file_path; _ }, _) ->
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)
   | Document_symbol { file_path; _ } ->
     Printf.sprintf "Document_symbol(%s)" (Path.to_string file_path)
   | Workspace_symbol query -> Printf.sprintf "Workspace_symbol(%s)" query
-  | Type_definition { file_path; _ } ->
+  | Type_definition ({ file_path; _ }, _) ->
     Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
   | Type_coverage { file_path; _ } ->
     Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
-  | Signature_help { file_path; _ } ->
+  | Signature_help ({ file_path; _ }, _) ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
-  | Code_action { Code_action.file_path; _ } ->
+  | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
+  | Find_references ({ file_path; _ }, _) ->
+    Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
+  | Rename ({ file_path; _ }, _, _) ->
+    Printf.sprintf "Rename(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {
   tracking_id: string;
@@ -259,12 +225,15 @@ type stopped_reason = {
 }
 
 type notification =
+  | Full_index_fallback
+      (** The daemon is falling back to performing a full index of the repo to build a naming table.*)
   | Done_init of (Processing_files.t, stopped_reason) result
   | Processing_files of Processing_files.t
   | Done_processing
 
 let notification_to_string (n : notification) : string =
   match n with
+  | Full_index_fallback -> "Full_index_fallback"
   | Done_init (Ok p) ->
     Printf.sprintf "Done_init(%s)" (Processing_files.to_string p)
   | Done_init (Error edata) ->

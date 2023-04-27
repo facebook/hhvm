@@ -15,9 +15,9 @@ open Aast
 exception Not_static_exn of Pos.t
 
 let rec static_string_exn = function
-  | (_, _, Binop (Ast_defs.Dot, s1, s2)) ->
-    let s1 = static_string_exn s1 in
-    let s2 = static_string_exn s2 in
+  | (_, _, Binop { bop = Ast_defs.Dot; lhs; rhs }) ->
+    let s1 = static_string_exn lhs in
+    let s2 = static_string_exn rhs in
     s1 ^ s2
   | (_, _, String s) -> s
   | (_, p, _) -> raise (Not_static_exn p)

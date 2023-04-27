@@ -6,6 +6,8 @@ non_zoned -> zoned: ok
 non_zoned -> zoned_with:
 Warning: Call to zoned_with() requires [zoned_with] coeffects but non_zoned() provided [defaults] in %s on line 4
  ok
+non_zoned -> leak_safe_local: ok
+non_zoned -> leak_safe_shallow: ok
 non_zoned -> leak_safe: ok
 non_zoned -> globals: ok
 non_zoned -> read_globals: ok
@@ -19,6 +21,8 @@ zoned_local -> zoned: ok
 zoned_local -> zoned_with:
 Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned_local() provided [defaults] in %s on line 8
  ok
+zoned_local -> leak_safe_local: ok
+zoned_local -> leak_safe_shallow: ok
 zoned_local -> leak_safe: ok
 zoned_local -> globals: ok
 zoned_local -> read_globals: ok
@@ -34,6 +38,8 @@ zoned_shallow -> zoned: ok
 zoned_shallow -> zoned_with:
 Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned_shallow() provided [zoned_shallow] in %s on line 12
  ok
+zoned_shallow -> leak_safe_local: ok
+zoned_shallow -> leak_safe_shallow: ok
 zoned_shallow -> leak_safe: ok
 zoned_shallow -> globals:
 Warning: Call to globals() requires [globals] coeffects but zoned_shallow() provided [zoned_shallow] in %s on line 12
@@ -55,6 +61,12 @@ zoned -> zoned: ok
 zoned -> zoned_with:
 Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned() provided [zoned] in %s on line 16
  ok
+zoned -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but zoned() provided [zoned] in %s on line 16
+ ok
+zoned -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but zoned() provided [zoned] in %s on line 16
+ ok
 zoned -> leak_safe: ok
 zoned -> globals:
 Warning: Call to globals() requires [globals] coeffects but zoned() provided [zoned] in %s on line 16
@@ -74,6 +86,12 @@ Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but zoned_wi
  ok
 zoned_with -> zoned: ok
 zoned_with -> zoned_with: ok
+zoned_with -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but zoned_with() provided [zoned_with] in %s on line 20
+ ok
+zoned_with -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but zoned_with() provided [zoned_with] in %s on line 20
+ ok
 zoned_with -> leak_safe: ok
 zoned_with -> globals:
 Warning: Call to globals() requires [globals] coeffects but zoned_with() provided [zoned_with] in %s on line 20
@@ -82,169 +100,245 @@ zoned_with -> read_globals: ok
 zoned_with -> write_props: ok
 zoned_with -> write_this_props: ok
 zoned_with -> pure: ok
+leak_safe_local -> non_zoned: ok
+leak_safe_local -> zoned_local: ok
+leak_safe_local -> zoned_shallow: ok
+leak_safe_local -> zoned: ok
+leak_safe_local -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but leak_safe_local() provided [defaults] in %s on line 24
+ ok
+leak_safe_local -> leak_safe_local: ok
+leak_safe_local -> leak_safe_shallow: ok
+leak_safe_local -> leak_safe: ok
+leak_safe_local -> globals: ok
+leak_safe_local -> read_globals: ok
+leak_safe_local -> write_props: ok
+leak_safe_local -> write_this_props: ok
+leak_safe_local -> pure: ok
+leak_safe_shallow -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> leak_safe_local: ok
+leak_safe_shallow -> leak_safe_shallow: ok
+leak_safe_shallow -> leak_safe: ok
+leak_safe_shallow -> globals:
+Warning: Call to globals() requires [globals] coeffects but leak_safe_shallow() provided [leak_safe_shallow] in %s on line 28
+ ok
+leak_safe_shallow -> read_globals: ok
+leak_safe_shallow -> write_props: ok
+leak_safe_shallow -> write_this_props: ok
+leak_safe_shallow -> pure: ok
 leak_safe -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to non_zoned() requires [defaults] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to zoned() requires [zoned] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to zoned_with() requires [zoned_with] coeffects but leak_safe() provided [leak_safe] in %s on line 32
+ ok
+leak_safe -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 32
+ ok
+leak_safe -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> leak_safe: ok
 leak_safe -> globals:
-Warning: Call to globals() requires [globals] coeffects but leak_safe() provided [leak_safe] in %s on line 24
+Warning: Call to globals() requires [globals] coeffects but leak_safe() provided [leak_safe] in %s on line 32
  ok
 leak_safe -> read_globals: ok
 leak_safe -> write_props: ok
 leak_safe -> write_this_props: ok
 leak_safe -> pure: ok
 globals -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to non_zoned() requires [defaults] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to zoned() requires [zoned] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to zoned_with() requires [zoned_with] coeffects but globals() provided [globals] in %s on line 40
+ ok
+globals -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but globals() provided [globals] in %s on line 40
+ ok
+globals -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> leak_safe:
-Warning: Call to leak_safe() requires [leak_safe] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to leak_safe() requires [leak_safe] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> globals: ok
 globals -> read_globals: ok
 globals -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to write_props() requires [write_props] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> write_this_props:
-Warning: Call to write_this_props() requires [write_this_props] coeffects but globals() provided [globals] in %s on line 32
+Warning: Call to write_this_props() requires [write_this_props] coeffects but globals() provided [globals] in %s on line 40
  ok
 globals -> pure: ok
 read_globals -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to non_zoned() requires [defaults] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to zoned() requires [zoned] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to zoned_with() requires [zoned_with] coeffects but read_globals() provided [read_globals] in %s on line 36
+ ok
+read_globals -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but read_globals() provided [read_globals] in %s on line 36
+ ok
+read_globals -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> leak_safe:
-Warning: Call to leak_safe() requires [leak_safe] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to leak_safe() requires [leak_safe] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> globals:
-Warning: Call to globals() requires [globals] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to globals() requires [globals] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> read_globals: ok
 read_globals -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to write_props() requires [write_props] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> write_this_props:
-Warning: Call to write_this_props() requires [write_this_props] coeffects but read_globals() provided [read_globals] in %s on line 28
+Warning: Call to write_this_props() requires [write_this_props] coeffects but read_globals() provided [read_globals] in %s on line 36
  ok
 read_globals -> pure: ok
 write_props -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to non_zoned() requires [defaults] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to zoned() requires [zoned] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to zoned_with() requires [zoned_with] coeffects but write_props() provided [write_props] in %s on line 44
+ ok
+write_props -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but write_props() provided [write_props] in %s on line 44
+ ok
+write_props -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> leak_safe:
-Warning: Call to leak_safe() requires [leak_safe] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to leak_safe() requires [leak_safe] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> globals:
-Warning: Call to globals() requires [globals] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to globals() requires [globals] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> read_globals:
-Warning: Call to read_globals() requires [read_globals] coeffects but write_props() provided [write_props] in %s on line 36
+Warning: Call to read_globals() requires [read_globals] coeffects but write_props() provided [write_props] in %s on line 44
  ok
 write_props -> write_props: ok
 write_props -> write_this_props: ok
 write_props -> pure: ok
 write_this_props -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to non_zoned() requires [defaults] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to zoned() requires [zoned] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to zoned_with() requires [zoned_with] coeffects but write_this_props() provided [write_this_props] in %s on line 48
+ ok
+write_this_props -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 48
+ ok
+write_this_props -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> leak_safe:
-Warning: Call to leak_safe() requires [leak_safe] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to leak_safe() requires [leak_safe] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> globals:
-Warning: Call to globals() requires [globals] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to globals() requires [globals] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> read_globals:
-Warning: Call to read_globals() requires [read_globals] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to read_globals() requires [read_globals] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+Warning: Call to write_props() requires [write_props] coeffects but write_this_props() provided [write_this_props] in %s on line 48
  ok
 write_this_props -> write_this_props: ok
 write_this_props -> pure: ok
 pure -> non_zoned:
-Warning: Call to non_zoned() requires [defaults] coeffects but pure() provided [] in %s on line 44
+Warning: Call to non_zoned() requires [defaults] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> zoned_local:
-Warning: Call to zoned_local() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 44
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> zoned_shallow:
-Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 44
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> zoned:
-Warning: Call to zoned() requires [zoned] coeffects but pure() provided [] in %s on line 44
+Warning: Call to zoned() requires [zoned] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> zoned_with:
-Warning: Call to zoned_with() requires [zoned_with] coeffects but pure() provided [] in %s on line 44
+Warning: Call to zoned_with() requires [zoned_with] coeffects but pure() provided [] in %s on line 52
+ ok
+pure -> leak_safe_local:
+Warning: Call to leak_safe_local() requires [leak_safe_shallow] coeffects but pure() provided [] in %s on line 52
+ ok
+pure -> leak_safe_shallow:
+Warning: Call to leak_safe_shallow() requires [leak_safe_shallow] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> leak_safe:
-Warning: Call to leak_safe() requires [leak_safe] coeffects but pure() provided [] in %s on line 44
+Warning: Call to leak_safe() requires [leak_safe] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> globals:
-Warning: Call to globals() requires [globals] coeffects but pure() provided [] in %s on line 44
+Warning: Call to globals() requires [globals] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> read_globals:
-Warning: Call to read_globals() requires [read_globals] coeffects but pure() provided [] in %s on line 44
+Warning: Call to read_globals() requires [read_globals] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> write_props:
-Warning: Call to write_props() requires [write_props] coeffects but pure() provided [] in %s on line 44
+Warning: Call to write_props() requires [write_props] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> write_this_props:
-Warning: Call to write_this_props() requires [write_this_props] coeffects but pure() provided [] in %s on line 44
+Warning: Call to write_this_props() requires [write_this_props] coeffects but pure() provided [] in %s on line 52
  ok
 pure -> pure: ok

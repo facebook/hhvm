@@ -1,0 +1,8 @@
+inside
+vec(2) {
+  vec(1) {
+    string(20) "soft_ic_inaccessible"
+  }
+  vec(0) {
+  }
+}

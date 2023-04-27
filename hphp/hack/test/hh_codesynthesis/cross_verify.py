@@ -5,7 +5,7 @@ import glob
 import os
 import subprocess
 import tempfile
-from typing import List, Dict, Set
+from typing import Dict, List, Set
 
 
 class DependencyEdges(object):

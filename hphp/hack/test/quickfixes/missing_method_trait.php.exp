@@ -1,0 +1,18 @@
+Add stubs for missing inherited methods
+
+<?hh
+
+trait FooTrait {
+  abstract public function bar(): void;
+  abstract public function baz(): void;
+}
+
+class Foo {
+  <<__Override>>
+  public function bar(): void {}
+
+  <<__Override>>
+  public function baz(): void {}
+
+  use FooTrait;
+}

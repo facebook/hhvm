@@ -30,11 +30,11 @@ ZipFile::ZipFile() : m_gzFile(nullptr) {
 }
 
 ZipFile::~ZipFile() {
-  ZipFile::closeImpl();
+  ZipFile::close();
 }
 
 void ZipFile::sweep() {
-  closeImpl();
+  ZipFile::close();
   File::sweep();
 }
 
@@ -69,17 +69,11 @@ bool ZipFile::open(const String& filename, const String& mode) {
   return false;
 }
 
-bool ZipFile::close() {
-  return closeImpl();
-}
-
-bool ZipFile::closeImpl() {
+bool ZipFile::close(int*) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_gzFile) {
-      *s_pcloseRet = gzclose(m_gzFile);
-      ret = (*s_pcloseRet == 0);
+      ret = (gzclose(m_gzFile) == 0);
       m_gzFile = nullptr;
     }
     setIsClosed(true);
@@ -91,7 +85,7 @@ bool ZipFile::closeImpl() {
       m_tempFile.reset();
     }
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 

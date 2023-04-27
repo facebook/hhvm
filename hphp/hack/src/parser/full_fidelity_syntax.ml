@@ -59,6 +59,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile _ -> SyntaxKind.EndOfFile
       | Script _ -> SyntaxKind.Script
       | QualifiedName _ -> SyntaxKind.QualifiedName
+      | ModuleName _ -> SyntaxKind.ModuleName
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | PrefixedStringExpression _ -> SyntaxKind.PrefixedStringExpression
@@ -73,6 +74,8 @@ module WithToken (Token : TokenType) = struct
       | EnumClassEnumerator _ -> SyntaxKind.EnumClassEnumerator
       | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
       | ContextAliasDeclaration _ -> SyntaxKind.ContextAliasDeclaration
+      | CaseTypeDeclaration _ -> SyntaxKind.CaseTypeDeclaration
+      | CaseTypeVariant _ -> SyntaxKind.CaseTypeVariant
       | PropertyDeclaration _ -> SyntaxKind.PropertyDeclaration
       | PropertyDeclarator _ -> SyntaxKind.PropertyDeclarator
       | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
@@ -92,9 +95,6 @@ module WithToken (Token : TokenType) = struct
       | MethodishTraitResolution _ -> SyntaxKind.MethodishTraitResolution
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
-      | TraitUsePrecedenceItem _ -> SyntaxKind.TraitUsePrecedenceItem
-      | TraitUseAliasItem _ -> SyntaxKind.TraitUseAliasItem
-      | TraitUseConflictResolution _ -> SyntaxKind.TraitUseConflictResolution
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
@@ -119,7 +119,6 @@ module WithToken (Token : TokenType) = struct
         SyntaxKind.UsingStatementFunctionScoped
       | WhileStatement _ -> SyntaxKind.WhileStatement
       | IfStatement _ -> SyntaxKind.IfStatement
-      | ElseifClause _ -> SyntaxKind.ElseifClause
       | ElseClause _ -> SyntaxKind.ElseClause
       | TryStatement _ -> SyntaxKind.TryStatement
       | CatchClause _ -> SyntaxKind.CatchClause
@@ -213,6 +212,9 @@ module WithToken (Token : TokenType) = struct
       | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
       | ClosureParameterTypeSpecifier _ ->
         SyntaxKind.ClosureParameterTypeSpecifier
+      | TypeRefinement _ -> SyntaxKind.TypeRefinement
+      | TypeInRefinement _ -> SyntaxKind.TypeInRefinement
+      | CtxInRefinement _ -> SyntaxKind.CtxInRefinement
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
@@ -234,6 +236,10 @@ module WithToken (Token : TokenType) = struct
       | ListItem _ -> SyntaxKind.ListItem
       | EnumClassLabelExpression _ -> SyntaxKind.EnumClassLabelExpression
       | ModuleDeclaration _ -> SyntaxKind.ModuleDeclaration
+      | ModuleExports _ -> SyntaxKind.ModuleExports
+      | ModuleImports _ -> SyntaxKind.ModuleImports
+      | ModuleMembershipDeclaration _ -> SyntaxKind.ModuleMembershipDeclaration
+      | PackageExpression _ -> SyntaxKind.PackageExpression
 
     let kind node = to_kind (syntax node)
 
@@ -254,6 +260,8 @@ module WithToken (Token : TokenType) = struct
     let is_script = has_kind SyntaxKind.Script
 
     let is_qualified_name = has_kind SyntaxKind.QualifiedName
+
+    let is_module_name = has_kind SyntaxKind.ModuleName
 
     let is_simple_type_specifier = has_kind SyntaxKind.SimpleTypeSpecifier
 
@@ -285,6 +293,10 @@ module WithToken (Token : TokenType) = struct
 
     let is_context_alias_declaration =
       has_kind SyntaxKind.ContextAliasDeclaration
+
+    let is_case_type_declaration = has_kind SyntaxKind.CaseTypeDeclaration
+
+    let is_case_type_variant = has_kind SyntaxKind.CaseTypeVariant
 
     let is_property_declaration = has_kind SyntaxKind.PropertyDeclaration
 
@@ -326,14 +338,6 @@ module WithToken (Token : TokenType) = struct
     let is_classish_declaration = has_kind SyntaxKind.ClassishDeclaration
 
     let is_classish_body = has_kind SyntaxKind.ClassishBody
-
-    let is_trait_use_precedence_item =
-      has_kind SyntaxKind.TraitUsePrecedenceItem
-
-    let is_trait_use_alias_item = has_kind SyntaxKind.TraitUseAliasItem
-
-    let is_trait_use_conflict_resolution =
-      has_kind SyntaxKind.TraitUseConflictResolution
 
     let is_trait_use = has_kind SyntaxKind.TraitUse
 
@@ -384,8 +388,6 @@ module WithToken (Token : TokenType) = struct
     let is_while_statement = has_kind SyntaxKind.WhileStatement
 
     let is_if_statement = has_kind SyntaxKind.IfStatement
-
-    let is_elseif_clause = has_kind SyntaxKind.ElseifClause
 
     let is_else_clause = has_kind SyntaxKind.ElseClause
 
@@ -585,6 +587,12 @@ module WithToken (Token : TokenType) = struct
     let is_closure_parameter_type_specifier =
       has_kind SyntaxKind.ClosureParameterTypeSpecifier
 
+    let is_type_refinement = has_kind SyntaxKind.TypeRefinement
+
+    let is_type_in_refinement = has_kind SyntaxKind.TypeInRefinement
+
+    let is_ctx_in_refinement = has_kind SyntaxKind.CtxInRefinement
+
     let is_classname_type_specifier = has_kind SyntaxKind.ClassnameTypeSpecifier
 
     let is_field_specifier = has_kind SyntaxKind.FieldSpecifier
@@ -629,6 +637,15 @@ module WithToken (Token : TokenType) = struct
 
     let is_module_declaration = has_kind SyntaxKind.ModuleDeclaration
 
+    let is_module_exports = has_kind SyntaxKind.ModuleExports
+
+    let is_module_imports = has_kind SyntaxKind.ModuleImports
+
+    let is_module_membership_declaration =
+      has_kind SyntaxKind.ModuleMembershipDeclaration
+
+    let is_package_expression = has_kind SyntaxKind.PackageExpression
+
     let is_loop_statement node =
       is_for_statement node
       || is_foreach_statement node
@@ -637,13 +654,14 @@ module WithToken (Token : TokenType) = struct
 
     let is_separable_prefix node =
       match syntax node with
-      | Token t ->
+      | Token t -> begin
         TokenKind.(
-          (match Token.kind t with
+          match Token.kind t with
           | PlusPlus
           | MinusMinus ->
             false
-          | _ -> true))
+          | _ -> true)
+      end
       | _ -> true
 
     let is_specific_token kind node =
@@ -653,17 +671,15 @@ module WithToken (Token : TokenType) = struct
 
     let is_namespace_prefix node =
       match syntax node with
-      | QualifiedName e ->
-        begin
-          match List.last (syntax_node_to_list e.qualified_name_parts) with
-          | None -> false
-          | Some p ->
-            begin
-              match syntax p with
-              | ListItem p -> not (is_missing p.list_separator)
-              | _ -> false
-            end
+      | QualifiedName e -> begin
+        match List.last (syntax_node_to_list e.qualified_name_parts) with
+        | None -> false
+        | Some p -> begin
+          match syntax p with
+          | ListItem p -> not (is_missing p.list_separator)
+          | _ -> false
         end
+      end
       | _ -> false
 
     let has_leading_trivia kind token =
@@ -730,6 +746,9 @@ module WithToken (Token : TokenType) = struct
       | QualifiedName { qualified_name_parts } ->
         let acc = f acc qualified_name_parts in
         acc
+      | ModuleName { module_name_parts } ->
+        let acc = f acc module_name_parts in
+        acc
       | SimpleTypeSpecifier { simple_type_specifier } ->
         let acc = f acc simple_type_specifier in
         acc
@@ -745,12 +764,12 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         let acc = f acc prefixed_code_prefix in
         let acc = f acc prefixed_code_left_backtick in
-        let acc = f acc prefixed_code_expression in
+        let acc = f acc prefixed_code_body in
         let acc = f acc prefixed_code_right_backtick in
         acc
       | VariableExpression { variable_expression } ->
@@ -776,6 +795,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -787,6 +807,7 @@ module WithToken (Token : TokenType) = struct
             enum_right_brace;
           } ->
         let acc = f acc enum_attribute_spec in
+        let acc = f acc enum_modifiers in
         let acc = f acc enum_keyword in
         let acc = f acc enum_name in
         let acc = f acc enum_colon in
@@ -859,6 +880,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -868,6 +891,8 @@ module WithToken (Token : TokenType) = struct
             alias_semicolon;
           } ->
         let acc = f acc alias_attribute_spec in
+        let acc = f acc alias_modifiers in
+        let acc = f acc alias_module_kw_opt in
         let acc = f acc alias_keyword in
         let acc = f acc alias_name in
         let acc = f acc alias_generic_parameter in
@@ -895,6 +920,36 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc ctx_alias_equal in
         let acc = f acc ctx_alias_context in
         let acc = f acc ctx_alias_semicolon in
+        acc
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        let acc = f acc case_type_attribute_spec in
+        let acc = f acc case_type_modifiers in
+        let acc = f acc case_type_case_keyword in
+        let acc = f acc case_type_type_keyword in
+        let acc = f acc case_type_name in
+        let acc = f acc case_type_generic_parameter in
+        let acc = f acc case_type_as in
+        let acc = f acc case_type_bounds in
+        let acc = f acc case_type_equal in
+        let acc = f acc case_type_variants in
+        let acc = f acc case_type_semicolon in
+        acc
+      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
+        let acc = f acc case_type_variant_bar in
+        let acc = f acc case_type_variant_type in
         acc
       | PropertyDeclaration
           {
@@ -1098,42 +1153,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classish_body_left_brace in
         let acc = f acc classish_body_elements in
         let acc = f acc classish_body_right_brace in
-        acc
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        let acc = f acc trait_use_precedence_item_name in
-        let acc = f acc trait_use_precedence_item_keyword in
-        let acc = f acc trait_use_precedence_item_removed_names in
-        acc
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        let acc = f acc trait_use_alias_item_aliasing_name in
-        let acc = f acc trait_use_alias_item_keyword in
-        let acc = f acc trait_use_alias_item_modifiers in
-        let acc = f acc trait_use_alias_item_aliased_name in
-        acc
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        let acc = f acc trait_use_conflict_resolution_keyword in
-        let acc = f acc trait_use_conflict_resolution_names in
-        let acc = f acc trait_use_conflict_resolution_left_brace in
-        let acc = f acc trait_use_conflict_resolution_clauses in
-        let acc = f acc trait_use_conflict_resolution_right_brace in
         acc
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         let acc = f acc trait_use_keyword in
@@ -1354,7 +1373,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         let acc = f acc if_keyword in
@@ -1362,22 +1380,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc if_condition in
         let acc = f acc if_right_paren in
         let acc = f acc if_statement in
-        let acc = f acc if_elseif_clauses in
         let acc = f acc if_else_clause in
-        acc
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        let acc = f acc elseif_keyword in
-        let acc = f acc elseif_left_paren in
-        let acc = f acc elseif_condition in
-        let acc = f acc elseif_right_paren in
-        let acc = f acc elseif_statement in
         acc
       | ElseClause { else_keyword; else_statement } ->
         let acc = f acc else_keyword in
@@ -2257,6 +2260,52 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
         acc
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        let acc = f acc type_refinement_type in
+        let acc = f acc type_refinement_keyword in
+        let acc = f acc type_refinement_left_brace in
+        let acc = f acc type_refinement_members in
+        let acc = f acc type_refinement_right_brace in
+        acc
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        let acc = f acc type_in_refinement_keyword in
+        let acc = f acc type_in_refinement_name in
+        let acc = f acc type_in_refinement_type_parameters in
+        let acc = f acc type_in_refinement_constraints in
+        let acc = f acc type_in_refinement_equal in
+        let acc = f acc type_in_refinement_type in
+        acc
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        let acc = f acc ctx_in_refinement_keyword in
+        let acc = f acc ctx_in_refinement_name in
+        let acc = f acc ctx_in_refinement_type_parameters in
+        let acc = f acc ctx_in_refinement_constraints in
+        let acc = f acc ctx_in_refinement_equal in
+        let acc = f acc ctx_in_refinement_ctx_list in
+        acc
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -2415,16 +2464,61 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         let acc = f acc module_declaration_attribute_spec in
-        let acc = f acc module_declaration_keyword in
+        let acc = f acc module_declaration_new_keyword in
+        let acc = f acc module_declaration_module_keyword in
         let acc = f acc module_declaration_name in
         let acc = f acc module_declaration_left_brace in
+        let acc = f acc module_declaration_exports in
+        let acc = f acc module_declaration_imports in
         let acc = f acc module_declaration_right_brace in
+        acc
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        let acc = f acc module_exports_exports_keyword in
+        let acc = f acc module_exports_left_brace in
+        let acc = f acc module_exports_exports in
+        let acc = f acc module_exports_right_brace in
+        acc
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        let acc = f acc module_imports_imports_keyword in
+        let acc = f acc module_imports_left_brace in
+        let acc = f acc module_imports_imports in
+        let acc = f acc module_imports_right_brace in
+        acc
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        let acc = f acc module_membership_declaration_module_keyword in
+        let acc = f acc module_membership_declaration_name in
+        let acc = f acc module_membership_declaration_semicolon in
+        acc
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        let acc = f acc package_expression_keyword in
+        let acc = f acc package_expression_name in
         acc
 
     (* The order that the children are returned in should match the order
@@ -2437,6 +2531,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> [end_of_file_token]
       | Script { script_declarations } -> [script_declarations]
       | QualifiedName { qualified_name_parts } -> [qualified_name_parts]
+      | ModuleName { module_name_parts } -> [module_name_parts]
       | SimpleTypeSpecifier { simple_type_specifier } -> [simple_type_specifier]
       | LiteralExpression { literal_expression } -> [literal_expression]
       | PrefixedStringExpression { prefixed_string_name; prefixed_string_str }
@@ -2446,13 +2541,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           prefixed_code_prefix;
           prefixed_code_left_backtick;
-          prefixed_code_expression;
+          prefixed_code_body;
           prefixed_code_right_backtick;
         ]
       | VariableExpression { variable_expression } -> [variable_expression]
@@ -2476,6 +2571,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -2488,6 +2584,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           enum_attribute_spec;
+          enum_modifiers;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -2560,6 +2657,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -2570,6 +2669,8 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           alias_attribute_spec;
+          alias_modifiers;
+          alias_module_kw_opt;
           alias_keyword;
           alias_name;
           alias_generic_parameter;
@@ -2599,6 +2700,35 @@ module WithToken (Token : TokenType) = struct
           ctx_alias_context;
           ctx_alias_semicolon;
         ]
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        [
+          case_type_attribute_spec;
+          case_type_modifiers;
+          case_type_case_keyword;
+          case_type_type_keyword;
+          case_type_name;
+          case_type_generic_parameter;
+          case_type_as;
+          case_type_bounds;
+          case_type_equal;
+          case_type_variants;
+          case_type_semicolon;
+        ]
+      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
+        [case_type_variant_bar; case_type_variant_type]
       | PropertyDeclaration
           {
             property_attribute_spec;
@@ -2792,45 +2922,6 @@ module WithToken (Token : TokenType) = struct
           classish_body_left_brace;
           classish_body_elements;
           classish_body_right_brace;
-        ]
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        [
-          trait_use_precedence_item_name;
-          trait_use_precedence_item_keyword;
-          trait_use_precedence_item_removed_names;
-        ]
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        [
-          trait_use_alias_item_aliasing_name;
-          trait_use_alias_item_keyword;
-          trait_use_alias_item_modifiers;
-          trait_use_alias_item_aliased_name;
-        ]
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        [
-          trait_use_conflict_resolution_keyword;
-          trait_use_conflict_resolution_names;
-          trait_use_conflict_resolution_left_brace;
-          trait_use_conflict_resolution_clauses;
-          trait_use_conflict_resolution_right_brace;
         ]
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         [trait_use_keyword; trait_use_names; trait_use_semicolon]
@@ -3034,7 +3125,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -3043,23 +3133,7 @@ module WithToken (Token : TokenType) = struct
           if_condition;
           if_right_paren;
           if_statement;
-          if_elseif_clauses;
           if_else_clause;
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          elseif_keyword;
-          elseif_left_paren;
-          elseif_condition;
-          elseif_right_paren;
-          elseif_statement;
         ]
       | ElseClause { else_keyword; else_statement } ->
         [else_keyword; else_statement]
@@ -3882,6 +3956,55 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_readonly;
           closure_parameter_type;
         ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          type_refinement_type;
+          type_refinement_keyword;
+          type_refinement_left_brace;
+          type_refinement_members;
+          type_refinement_right_brace;
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          type_in_refinement_keyword;
+          type_in_refinement_name;
+          type_in_refinement_type_parameters;
+          type_in_refinement_constraints;
+          type_in_refinement_equal;
+          type_in_refinement_type;
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          ctx_in_refinement_keyword;
+          ctx_in_refinement_name;
+          ctx_in_refinement_type_parameters;
+          ctx_in_refinement_constraints;
+          ctx_in_refinement_equal;
+          ctx_in_refinement_ctx_list;
+        ]
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -4016,18 +4139,64 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         [
           module_declaration_attribute_spec;
-          module_declaration_keyword;
+          module_declaration_new_keyword;
+          module_declaration_module_keyword;
           module_declaration_name;
           module_declaration_left_brace;
+          module_declaration_exports;
+          module_declaration_imports;
           module_declaration_right_brace;
         ]
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        [
+          module_exports_exports_keyword;
+          module_exports_left_brace;
+          module_exports_exports;
+          module_exports_right_brace;
+        ]
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        [
+          module_imports_imports_keyword;
+          module_imports_left_brace;
+          module_imports_imports;
+          module_imports_right_brace;
+        ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          module_membership_declaration_module_keyword;
+          module_membership_declaration_name;
+          module_membership_declaration_semicolon;
+        ]
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        [package_expression_keyword; package_expression_name]
 
     let children node = children_from_syntax node.syntax
 
@@ -4039,6 +4208,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> ["end_of_file_token"]
       | Script { script_declarations } -> ["script_declarations"]
       | QualifiedName { qualified_name_parts } -> ["qualified_name_parts"]
+      | ModuleName { module_name_parts } -> ["module_name_parts"]
       | SimpleTypeSpecifier { simple_type_specifier } ->
         ["simple_type_specifier"]
       | LiteralExpression { literal_expression } -> ["literal_expression"]
@@ -4049,13 +4219,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           "prefixed_code_prefix";
           "prefixed_code_left_backtick";
-          "prefixed_code_expression";
+          "prefixed_code_body";
           "prefixed_code_right_backtick";
         ]
       | VariableExpression { variable_expression } -> ["variable_expression"]
@@ -4079,6 +4249,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -4091,6 +4262,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "enum_attribute_spec";
+          "enum_modifiers";
           "enum_keyword";
           "enum_name";
           "enum_colon";
@@ -4163,6 +4335,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -4173,6 +4347,8 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "alias_attribute_spec";
+          "alias_modifiers";
+          "alias_module_kw_opt";
           "alias_keyword";
           "alias_name";
           "alias_generic_parameter";
@@ -4202,6 +4378,35 @@ module WithToken (Token : TokenType) = struct
           "ctx_alias_context";
           "ctx_alias_semicolon";
         ]
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        [
+          "case_type_attribute_spec";
+          "case_type_modifiers";
+          "case_type_case_keyword";
+          "case_type_type_keyword";
+          "case_type_name";
+          "case_type_generic_parameter";
+          "case_type_as";
+          "case_type_bounds";
+          "case_type_equal";
+          "case_type_variants";
+          "case_type_semicolon";
+        ]
+      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
+        ["case_type_variant_bar"; "case_type_variant_type"]
       | PropertyDeclaration
           {
             property_attribute_spec;
@@ -4403,45 +4608,6 @@ module WithToken (Token : TokenType) = struct
           "classish_body_left_brace";
           "classish_body_elements";
           "classish_body_right_brace";
-        ]
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        [
-          "trait_use_precedence_item_name";
-          "trait_use_precedence_item_keyword";
-          "trait_use_precedence_item_removed_names";
-        ]
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        [
-          "trait_use_alias_item_aliasing_name";
-          "trait_use_alias_item_keyword";
-          "trait_use_alias_item_modifiers";
-          "trait_use_alias_item_aliased_name";
-        ]
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        [
-          "trait_use_conflict_resolution_keyword";
-          "trait_use_conflict_resolution_names";
-          "trait_use_conflict_resolution_left_brace";
-          "trait_use_conflict_resolution_clauses";
-          "trait_use_conflict_resolution_right_brace";
         ]
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         ["trait_use_keyword"; "trait_use_names"; "trait_use_semicolon"]
@@ -4645,7 +4811,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -4654,23 +4819,7 @@ module WithToken (Token : TokenType) = struct
           "if_condition";
           "if_right_paren";
           "if_statement";
-          "if_elseif_clauses";
           "if_else_clause";
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          "elseif_keyword";
-          "elseif_left_paren";
-          "elseif_condition";
-          "elseif_right_paren";
-          "elseif_statement";
         ]
       | ElseClause { else_keyword; else_statement } ->
         ["else_keyword"; "else_statement"]
@@ -5510,6 +5659,55 @@ module WithToken (Token : TokenType) = struct
           "closure_parameter_readonly";
           "closure_parameter_type";
         ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          "type_refinement_type";
+          "type_refinement_keyword";
+          "type_refinement_left_brace";
+          "type_refinement_members";
+          "type_refinement_right_brace";
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          "type_in_refinement_keyword";
+          "type_in_refinement_name";
+          "type_in_refinement_type_parameters";
+          "type_in_refinement_constraints";
+          "type_in_refinement_equal";
+          "type_in_refinement_type";
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          "ctx_in_refinement_keyword";
+          "ctx_in_refinement_name";
+          "ctx_in_refinement_type_parameters";
+          "ctx_in_refinement_constraints";
+          "ctx_in_refinement_equal";
+          "ctx_in_refinement_ctx_list";
+        ]
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -5650,18 +5848,64 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         [
           "module_declaration_attribute_spec";
-          "module_declaration_keyword";
+          "module_declaration_new_keyword";
+          "module_declaration_module_keyword";
           "module_declaration_name";
           "module_declaration_left_brace";
+          "module_declaration_exports";
+          "module_declaration_imports";
           "module_declaration_right_brace";
         ]
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        [
+          "module_exports_exports_keyword";
+          "module_exports_left_brace";
+          "module_exports_exports";
+          "module_exports_right_brace";
+        ]
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        [
+          "module_imports_imports_keyword";
+          "module_imports_left_brace";
+          "module_imports_imports";
+          "module_imports_right_brace";
+        ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          "module_membership_declaration_module_keyword";
+          "module_membership_declaration_name";
+          "module_membership_declaration_semicolon";
+        ]
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        ["package_expression_keyword"; "package_expression_name"]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
       let open Hh_json in
@@ -5761,6 +6005,8 @@ module WithToken (Token : TokenType) = struct
         Script { script_declarations }
       | (SyntaxKind.QualifiedName, [qualified_name_parts]) ->
         QualifiedName { qualified_name_parts }
+      | (SyntaxKind.ModuleName, [module_name_parts]) ->
+        ModuleName { module_name_parts }
       | (SyntaxKind.SimpleTypeSpecifier, [simple_type_specifier]) ->
         SimpleTypeSpecifier { simple_type_specifier }
       | (SyntaxKind.LiteralExpression, [literal_expression]) ->
@@ -5772,14 +6018,14 @@ module WithToken (Token : TokenType) = struct
           [
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           ] ) ->
         PrefixedCodeExpression
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           }
       | (SyntaxKind.VariableExpression, [variable_expression]) ->
@@ -5805,6 +6051,7 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.EnumDeclaration,
           [
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5818,6 +6065,7 @@ module WithToken (Token : TokenType) = struct
         EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5894,6 +6142,8 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.AliasDeclaration,
           [
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5905,6 +6155,8 @@ module WithToken (Token : TokenType) = struct
         AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5935,6 +6187,37 @@ module WithToken (Token : TokenType) = struct
             ctx_alias_context;
             ctx_alias_semicolon;
           }
+      | ( SyntaxKind.CaseTypeDeclaration,
+          [
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          ] ) ->
+        CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          }
+      | ( SyntaxKind.CaseTypeVariant,
+          [case_type_variant_bar; case_type_variant_type] ) ->
+        CaseTypeVariant { case_type_variant_bar; case_type_variant_type }
       | ( SyntaxKind.PropertyDeclaration,
           [
             property_attribute_spec;
@@ -6147,48 +6430,6 @@ module WithToken (Token : TokenType) = struct
             classish_body_left_brace;
             classish_body_elements;
             classish_body_right_brace;
-          }
-      | ( SyntaxKind.TraitUsePrecedenceItem,
-          [
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          ] ) ->
-        TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          }
-      | ( SyntaxKind.TraitUseAliasItem,
-          [
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          ] ) ->
-        TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          }
-      | ( SyntaxKind.TraitUseConflictResolution,
-          [
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          ] ) ->
-        TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
           }
       | ( SyntaxKind.TraitUse,
           [trait_use_keyword; trait_use_names; trait_use_semicolon] ) ->
@@ -6412,7 +6653,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           ] ) ->
         IfStatement
@@ -6422,24 +6662,7 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
-          }
-      | ( SyntaxKind.ElseifClause,
-          [
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          ] ) ->
-        ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
           }
       | (SyntaxKind.ElseClause, [else_keyword; else_statement]) ->
         ElseClause { else_keyword; else_statement }
@@ -7348,6 +7571,58 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_readonly;
             closure_parameter_type;
           }
+      | ( SyntaxKind.TypeRefinement,
+          [
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          ] ) ->
+        TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          }
+      | ( SyntaxKind.TypeInRefinement,
+          [
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          ] ) ->
+        TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          }
+      | ( SyntaxKind.CtxInRefinement,
+          [
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          ] ) ->
+        CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          }
       | ( SyntaxKind.ClassnameTypeSpecifier,
           [
             classname_keyword;
@@ -7500,19 +7775,69 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.ModuleDeclaration,
           [
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           ] ) ->
         ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           }
+      | ( SyntaxKind.ModuleExports,
+          [
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          ] ) ->
+        ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          }
+      | ( SyntaxKind.ModuleImports,
+          [
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          ] ) ->
+        ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          }
+      | ( SyntaxKind.ModuleMembershipDeclaration,
+          [
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          ] ) ->
+        ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          }
+      | ( SyntaxKind.PackageExpression,
+          [package_expression_keyword; package_expression_name] ) ->
+        PackageExpression
+          { package_expression_keyword; package_expression_name }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
       | _ ->
@@ -7522,12 +7847,11 @@ module WithToken (Token : TokenType) = struct
       let rec aux acc nodes =
         match nodes with
         | [] -> acc
-        | h :: t ->
-          begin
-            match syntax h with
-            | Token token -> aux (token :: acc) t
-            | _ -> aux (aux acc (children h)) t
-          end
+        | h :: t -> begin
+          match syntax h with
+          | Token token -> aux (token :: acc) t
+          | _ -> aux (aux acc (children h)) t
+        end
       in
       List.rev (aux [] [node])
 
@@ -7581,6 +7905,11 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_module_name module_name_parts =
+        let syntax = ModuleName { module_name_parts } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_simple_type_specifier simple_type_specifier =
         let syntax = SimpleTypeSpecifier { simple_type_specifier } in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -7602,14 +7931,14 @@ module WithToken (Token : TokenType) = struct
       let make_prefixed_code_expression
           prefixed_code_prefix
           prefixed_code_left_backtick
-          prefixed_code_expression
+          prefixed_code_body
           prefixed_code_right_backtick =
         let syntax =
           PrefixedCodeExpression
             {
               prefixed_code_prefix;
               prefixed_code_left_backtick;
-              prefixed_code_expression;
+              prefixed_code_body;
               prefixed_code_right_backtick;
             }
         in
@@ -7647,6 +7976,7 @@ module WithToken (Token : TokenType) = struct
 
       let make_enum_declaration
           enum_attribute_spec
+          enum_modifiers
           enum_keyword
           enum_name
           enum_colon
@@ -7660,6 +7990,7 @@ module WithToken (Token : TokenType) = struct
           EnumDeclaration
             {
               enum_attribute_spec;
+              enum_modifiers;
               enum_keyword;
               enum_name;
               enum_colon;
@@ -7750,6 +8081,8 @@ module WithToken (Token : TokenType) = struct
 
       let make_alias_declaration
           alias_attribute_spec
+          alias_modifiers
+          alias_module_kw_opt
           alias_keyword
           alias_name
           alias_generic_parameter
@@ -7761,6 +8094,8 @@ module WithToken (Token : TokenType) = struct
           AliasDeclaration
             {
               alias_attribute_spec;
+              alias_modifiers;
+              alias_module_kw_opt;
               alias_keyword;
               alias_name;
               alias_generic_parameter;
@@ -7794,6 +8129,44 @@ module WithToken (Token : TokenType) = struct
               ctx_alias_context;
               ctx_alias_semicolon;
             }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_case_type_declaration
+          case_type_attribute_spec
+          case_type_modifiers
+          case_type_case_keyword
+          case_type_type_keyword
+          case_type_name
+          case_type_generic_parameter
+          case_type_as
+          case_type_bounds
+          case_type_equal
+          case_type_variants
+          case_type_semicolon =
+        let syntax =
+          CaseTypeDeclaration
+            {
+              case_type_attribute_spec;
+              case_type_modifiers;
+              case_type_case_keyword;
+              case_type_type_keyword;
+              case_type_name;
+              case_type_generic_parameter;
+              case_type_as;
+              case_type_bounds;
+              case_type_equal;
+              case_type_variants;
+              case_type_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_case_type_variant case_type_variant_bar case_type_variant_type =
+        let syntax =
+          CaseTypeVariant { case_type_variant_bar; case_type_variant_type }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -8069,57 +8442,6 @@ module WithToken (Token : TokenType) = struct
               classish_body_left_brace;
               classish_body_elements;
               classish_body_right_brace;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_trait_use_precedence_item
-          trait_use_precedence_item_name
-          trait_use_precedence_item_keyword
-          trait_use_precedence_item_removed_names =
-        let syntax =
-          TraitUsePrecedenceItem
-            {
-              trait_use_precedence_item_name;
-              trait_use_precedence_item_keyword;
-              trait_use_precedence_item_removed_names;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_trait_use_alias_item
-          trait_use_alias_item_aliasing_name
-          trait_use_alias_item_keyword
-          trait_use_alias_item_modifiers
-          trait_use_alias_item_aliased_name =
-        let syntax =
-          TraitUseAliasItem
-            {
-              trait_use_alias_item_aliasing_name;
-              trait_use_alias_item_keyword;
-              trait_use_alias_item_modifiers;
-              trait_use_alias_item_aliased_name;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_trait_use_conflict_resolution
-          trait_use_conflict_resolution_keyword
-          trait_use_conflict_resolution_names
-          trait_use_conflict_resolution_left_brace
-          trait_use_conflict_resolution_clauses
-          trait_use_conflict_resolution_right_brace =
-        let syntax =
-          TraitUseConflictResolution
-            {
-              trait_use_conflict_resolution_keyword;
-              trait_use_conflict_resolution_names;
-              trait_use_conflict_resolution_left_brace;
-              trait_use_conflict_resolution_clauses;
-              trait_use_conflict_resolution_right_brace;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -8428,7 +8750,6 @@ module WithToken (Token : TokenType) = struct
           if_condition
           if_right_paren
           if_statement
-          if_elseif_clauses
           if_else_clause =
         let syntax =
           IfStatement
@@ -8438,27 +8759,7 @@ module WithToken (Token : TokenType) = struct
               if_condition;
               if_right_paren;
               if_statement;
-              if_elseif_clauses;
               if_else_clause;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_elseif_clause
-          elseif_keyword
-          elseif_left_paren
-          elseif_condition
-          elseif_right_paren
-          elseif_statement =
-        let syntax =
-          ElseifClause
-            {
-              elseif_keyword;
-              elseif_left_paren;
-              elseif_condition;
-              elseif_right_paren;
-              elseif_statement;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -9672,6 +9973,67 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_type_refinement
+          type_refinement_type
+          type_refinement_keyword
+          type_refinement_left_brace
+          type_refinement_members
+          type_refinement_right_brace =
+        let syntax =
+          TypeRefinement
+            {
+              type_refinement_type;
+              type_refinement_keyword;
+              type_refinement_left_brace;
+              type_refinement_members;
+              type_refinement_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_type_in_refinement
+          type_in_refinement_keyword
+          type_in_refinement_name
+          type_in_refinement_type_parameters
+          type_in_refinement_constraints
+          type_in_refinement_equal
+          type_in_refinement_type =
+        let syntax =
+          TypeInRefinement
+            {
+              type_in_refinement_keyword;
+              type_in_refinement_name;
+              type_in_refinement_type_parameters;
+              type_in_refinement_constraints;
+              type_in_refinement_equal;
+              type_in_refinement_type;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_ctx_in_refinement
+          ctx_in_refinement_keyword
+          ctx_in_refinement_name
+          ctx_in_refinement_type_parameters
+          ctx_in_refinement_constraints
+          ctx_in_refinement_equal
+          ctx_in_refinement_ctx_list =
+        let syntax =
+          CtxInRefinement
+            {
+              ctx_in_refinement_keyword;
+              ctx_in_refinement_name;
+              ctx_in_refinement_type_parameters;
+              ctx_in_refinement_constraints;
+              ctx_in_refinement_equal;
+              ctx_in_refinement_ctx_list;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_classname_type_specifier
           classname_keyword
           classname_left_angle
@@ -9899,19 +10261,83 @@ module WithToken (Token : TokenType) = struct
 
       let make_module_declaration
           module_declaration_attribute_spec
-          module_declaration_keyword
+          module_declaration_new_keyword
+          module_declaration_module_keyword
           module_declaration_name
           module_declaration_left_brace
+          module_declaration_exports
+          module_declaration_imports
           module_declaration_right_brace =
         let syntax =
           ModuleDeclaration
             {
               module_declaration_attribute_spec;
-              module_declaration_keyword;
+              module_declaration_new_keyword;
+              module_declaration_module_keyword;
               module_declaration_name;
               module_declaration_left_brace;
+              module_declaration_exports;
+              module_declaration_imports;
               module_declaration_right_brace;
             }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_exports
+          module_exports_exports_keyword
+          module_exports_left_brace
+          module_exports_exports
+          module_exports_right_brace =
+        let syntax =
+          ModuleExports
+            {
+              module_exports_exports_keyword;
+              module_exports_left_brace;
+              module_exports_exports;
+              module_exports_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_imports
+          module_imports_imports_keyword
+          module_imports_left_brace
+          module_imports_imports
+          module_imports_right_brace =
+        let syntax =
+          ModuleImports
+            {
+              module_imports_imports_keyword;
+              module_imports_left_brace;
+              module_imports_imports;
+              module_imports_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_membership_declaration
+          module_membership_declaration_module_keyword
+          module_membership_declaration_name
+          module_membership_declaration_semicolon =
+        let syntax =
+          ModuleMembershipDeclaration
+            {
+              module_membership_declaration_module_keyword;
+              module_membership_declaration_name;
+              module_membership_declaration_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_package_expression
+          package_expression_keyword package_expression_name =
+        let syntax =
+          PackageExpression
+            { package_expression_keyword; package_expression_name }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

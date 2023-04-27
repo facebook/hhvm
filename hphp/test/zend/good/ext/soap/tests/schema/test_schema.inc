@@ -1,7 +1,7 @@
 <?hh
 
 class LocalSoapClient extends SoapClient {
-  static $input = null;
+  public static $input = null;
 
   function __construct($wsdl) {
     parent::__construct($wsdl);

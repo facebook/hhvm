@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 #include <vector>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -39,6 +39,7 @@ struct UserAutoloadMap final : AutoloadMap {
   Array m_functionFile;
   Array m_constantFile;
   Array m_typeAliasFile;
+  Array m_moduleFile;
   Variant m_failFunc;
 
   UserAutoloadMap(String root,
@@ -46,12 +47,14 @@ struct UserAutoloadMap final : AutoloadMap {
                   Array functionFile,
                   Array constantFile,
                   Array typeAliasFile,
+                  Array moduleFile,
                   Variant failFunc)
       : m_root{std::move(root)},
         m_typeFile{std::move(typeFile)},
         m_functionFile{std::move(functionFile)},
         m_constantFile{std::move(constantFile)},
         m_typeAliasFile{std::move(typeAliasFile)},
+        m_moduleFile{std::move(moduleFile)},
         m_failFunc(std::move(failFunc)) {}
 
   UserAutoloadMap(const UserAutoloadMap&) = default;
@@ -64,6 +67,7 @@ struct UserAutoloadMap final : AutoloadMap {
     m_functionFile.detach();
     m_constantFile.detach();
     m_typeAliasFile.detach();
+    m_moduleFile.detach();
     m_failFunc.setNull();
   }
 
@@ -82,20 +86,25 @@ struct UserAutoloadMap final : AutoloadMap {
 
   Array getAllFiles() const override;
 
-  Optional<String> getTypeFile(const String& typeName) override;
-  Optional<String> getFunctionFile(const String& functionName) override;
-  Optional<String> getConstantFile(const String& constantName) override;
-  Optional<String> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
+  Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getModuleFile(const String& moduleName) override;
 
-  Optional<folly::fs::path> getTypeFile(std::string_view name) override;
-  Optional<folly::fs::path> getFunctionFile(std::string_view name) override;
-  Optional<folly::fs::path> getConstantFile(std::string_view name) override;
-  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeFile(std::string_view name) override;
+  Optional<std::filesystem::path> getFunctionFile(std::string_view name) override;
+  Optional<std::filesystem::path> getConstantFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getModuleFile(std::string_view name) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;
   Array getFileConstants(const String& path) override;
   Array getFileTypeAliases(const String& path) override;
+  Array getFileModules(const String& path) override;
 
   bool canHandleFailure() const override {
     return !m_failFunc.isNull();
@@ -105,8 +114,8 @@ struct UserAutoloadMap final : AutoloadMap {
                                     const Variant& err) const override;
 
  private:
-  Optional<String> getFileFromMap(const Array& map, const String& key) const;
-  Optional<folly::fs::path> getPathFromMap(const Array&, const String&) const;
+  Optional<AutoloadMap::FileResult> getFileFromMap(const Array& map, const String& key) const;
+  Optional<std::filesystem::path> getPathFromMap(const Array&, const String&) const;
 };
 
 //////////////////////////////////////////////////////////////////////

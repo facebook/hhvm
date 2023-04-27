@@ -218,7 +218,7 @@ async function negative_tests() {
 
   A::negative_test1();
 
-  try { HH\class_meth(A::class, 'static_func')(); } catch (Exception $e) { wrap($e); }
+  try { (A::static_func<>)(); } catch (Exception $e) { wrap($e); }
 
   try { new A; } catch (Exception $e) { wrap($e); }
   try { new Vector; } catch (Exception $e) { wrap($e); }

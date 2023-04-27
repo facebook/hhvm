@@ -1,0 +1,8 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "localhost:PORT" ]
+    }
+  },
+  "route": "PoolRoute|A"
+}

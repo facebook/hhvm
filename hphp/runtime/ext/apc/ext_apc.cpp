@@ -18,9 +18,6 @@
 
 #include <fstream>
 
-#ifndef _MSC_VER
-#include <dlfcn.h>
-#endif
 #include <memory>
 #include <set>
 #include <vector>
@@ -64,35 +61,7 @@ std::aligned_storage<
 
 namespace {
 
-using UserAPCCache = folly::AtomicHashMap<uid_t, ConcurrentTableSharedStore*>;
-
-std::aligned_storage<
-  sizeof(UserAPCCache),
-  alignof(UserAPCCache)
->::type s_user_apc_storage;
-
-UserAPCCache& apc_store_local() {
-  void* vpUserStore = &s_user_apc_storage;
-  return *static_cast<UserAPCCache*>(vpUserStore);
-}
-
-ConcurrentTableSharedStore& apc_store_local(uid_t uid) {
-  auto& cache = apc_store_local();
-  auto iter = cache.find(uid);
-  if (iter != cache.end()) return *(iter->second);
-  auto table = new ConcurrentTableSharedStore;
-  auto res = cache.insert(uid, table);
-  if (!res.second) delete table;
-  return *res.first->second;
-}
-
 ConcurrentTableSharedStore& apc_store() {
-  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
-               RuntimeOption::EvalUnixServerQuarantineApc)) {
-    if (auto uc = get_cli_ucred()) {
-      return apc_store_local(uc->uid);
-    }
-  }
   void* vpStore = &s_apc_storage;
   return *static_cast<ConcurrentTableSharedStore*>(vpStore);
 }
@@ -111,11 +80,6 @@ void initialize_apc() {
   // Note: we never destruct APC, currently.
   void* vpStore = &s_apc_storage;
   new (vpStore) ConcurrentTableSharedStore;
-
-  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
-               RuntimeOption::EvalUnixServerQuarantineApc)) {
-    new (&s_user_apc_storage) UserAPCCache(10);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -131,7 +95,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
   Config::Bind(PurgeInterval, ini, config, "Server.APC.PurgeIntervalSeconds",
                PurgeInterval);
-  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
+  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject", true);
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
   Config::Bind(DeferredExpiration, ini, config,
                "Server.APC.DeferredExpiration", DeferredExpiration);
@@ -158,48 +122,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
                    &EnableCLI);
 }
 
-void apcExtension::moduleInit() {
-  if (use_lowptr && !UseUncounted) {
-    Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
-    UseUncounted = true;
-  }
-  apc_store().init();
-
-  HHVM_RC_INT(APC_ITER_TYPE, 0x1);
-  HHVM_RC_INT(APC_ITER_KEY, 0x2);
-  HHVM_RC_INT(APC_ITER_FILENAME, 0x4);
-  HHVM_RC_INT(APC_ITER_DEVICE, 0x8);
-  HHVM_RC_INT(APC_ITER_INODE, 0x10);
-  HHVM_RC_INT(APC_ITER_VALUE, 0x20);
-  HHVM_RC_INT(APC_ITER_MD5, 0x40);
-  HHVM_RC_INT(APC_ITER_NUM_HITS, 0x80);
-  HHVM_RC_INT(APC_ITER_MTIME, 0x100);
-  HHVM_RC_INT(APC_ITER_CTIME, 0x200);
-  HHVM_RC_INT(APC_ITER_DTIME, 0x400);
-  HHVM_RC_INT(APC_ITER_ATIME, 0x800);
-  HHVM_RC_INT(APC_ITER_REFCOUNT, 0x1000);
-  HHVM_RC_INT(APC_ITER_MEM_SIZE, 0x2000);
-  HHVM_RC_INT(APC_ITER_TTL, 0x4000);
-  HHVM_RC_INT(APC_ITER_NONE, 0x0);
-  HHVM_RC_INT(APC_ITER_ALL, 0xFFFFFFFFFF);
-  HHVM_RC_INT(APC_LIST_ACTIVE, 1);
-  HHVM_RC_INT(APC_LIST_DELETED, 2);
-
-  HHVM_FE(apc_add);
-  HHVM_FE(apc_store);
-  HHVM_FE(apc_fetch);
-  HHVM_FE(apc_delete);
-  HHVM_FE(apc_clear_cache);
-  HHVM_FE(apc_inc);
-  HHVM_FE(apc_dec);
-  HHVM_FE(apc_cas);
-  HHVM_FE(apc_exists);
-  HHVM_FE(apc_size);
-  HHVM_FE(apc_extend_ttl);
-  HHVM_FE(apc_cache_info);
-  loadSystemlib();
-}
-
 void apcExtension::moduleShutdown() {
 }
 
@@ -216,7 +138,7 @@ std::string apcExtension::serialize() {
 void apcExtension::deserialize(std::string data) {
   auto sd = StringData::MakeUncounted(data);
   data.clear();
-  apc_store().set(s_internal_preload, Variant{sd}, 0, 0);
+  apc_store().set(s_internal_preload, Variant{sd}, 0, 0, false);
   DecRefUncountedString(sd); // APC did an uncounted inc-ref
 }
 
@@ -247,11 +169,11 @@ uint32_t apcExtension::SizedSampleBytes = 0;
 
 static apcExtension s_apc_extension;
 
-Variant HHVM_FUNCTION(apc_store,
-                      const Variant& key_or_array,
-                      const Variant& var /* = null */,
-                      int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
+Variant apc_store_impl(const Variant& key_or_array,
+                       const Variant& var,
+                       int64_t ttl,
+                       int64_t bump_ttl,
+                       bool pure) {
   if (!apcExtension::Enable) return Variant(false);
 
   if (key_or_array.isArray()) {
@@ -274,7 +196,7 @@ Variant HHVM_FUNCTION(apc_store,
         raise_invalid_argument_warning("apc key: (contains invalid characters)");
         return Variant(false);
       }
-      apc_store().set(strKey, v, ttl, bump_ttl);
+      apc_store().set(strKey, v, ttl, bump_ttl, pure);
       if (RuntimeOption::EnableAPCStats) {
         ServerStats::Log("apc.write", 1);
       }
@@ -296,18 +218,34 @@ Variant HHVM_FUNCTION(apc_store,
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return Variant(false);
   }
-  apc_store().set(strKey, var, ttl, bump_ttl);
+  apc_store().set(strKey, var, ttl, bump_ttl, pure);
   if (RuntimeOption::EnableAPCStats) {
     ServerStats::Log("apc.write", 1);
   }
   return Variant(true);
 }
 
-Variant HHVM_FUNCTION(apc_add,
+Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
                       int64_t bump_ttl /* = 0 */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, false);
+}
+
+Variant HHVM_FUNCTION(apc_store_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, true);
+}
+
+Variant apc_add_impl(const Variant& key_or_array,
+                     const Variant& var,
+                     int64_t ttl,
+                     int64_t bump_ttl,
+                     bool pure) {
   if (!apcExtension::Enable) return false;
 
   if (key_or_array.isArray()) {
@@ -334,7 +272,7 @@ Variant HHVM_FUNCTION(apc_add,
         return false;
       }
 
-      if (!apc_store().add(strKey, v, ttl, bump_ttl)) {
+      if (!apc_store().add(strKey, v, ttl, bump_ttl, pure)) {
         errors.set(strKey, -1);
       }
     }
@@ -357,7 +295,23 @@ Variant HHVM_FUNCTION(apc_add,
   if (RuntimeOption::EnableAPCStats) {
     ServerStats::Log("apc.write", 1);
   }
-  return apc_store().add(strKey, var, ttl, bump_ttl);
+  return apc_store().add(strKey, var, ttl, bump_ttl, pure);
+}
+
+Variant HHVM_FUNCTION(apc_add,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, false);
+}
+
+Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, true);
 }
 
 bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
@@ -367,7 +321,7 @@ bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
   return apc_store().extendTTL(key, new_ttl);
 }
 
-TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
+TypedValue apc_fetch_impl(const Variant& key, bool& success, bool pure) {
   if (!apcExtension::Enable) return make_tv<KindOfBoolean>(false);
 
   Variant v;
@@ -383,7 +337,7 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
         return make_tv<KindOfBoolean>(false);
       }
       auto strKey = k.asCStrRef();
-      if (apc_store().get(strKey, v)) {
+      if (apc_store().get(strKey, v, pure)) {
         if (RuntimeOption::EnableAPCStats) {
           ServerStats::Log("apc.hit", 1);
         }
@@ -395,7 +349,7 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
     return tvReturn(init.toVariant());
   }
 
-  if (apc_store().get(key.toString(), v)) {
+  if (apc_store().get(key.toString(), v, pure)) {
     success = true;
     if (RuntimeOption::EnableAPCStats) {
       ServerStats::Log("apc.hit", 1);
@@ -408,6 +362,14 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
     }
   }
   return tvReturn(std::move(v));
+}
+
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
+  return apc_fetch_impl(key, success, false);
+}
+
+TypedValue HHVM_FUNCTION(apc_fetch_with_pure_wakeup, const Variant& key, bool& success) {
+  return apc_fetch_impl(key, success, true);
 }
 
 Variant HHVM_FUNCTION(apc_delete,
@@ -682,7 +644,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
           rfc1867ApcData->prev_bytes_processed >
           rfc1867ApcData->update_freq) {
         Variant v;
-        if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
+        if (apc_store().get(rfc1867ApcData->tracking_key, v, false)) {
           if (v.isArray()) {
             DictInit track(6);
             track.set(s_total, rfc1867ApcData->content_length);
@@ -751,34 +713,23 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value) {
+String apc_serialize(const_variant_ref value, bool pure) {
   auto const enableApcSerialize = apcExtension::EnableApcSerialize;
   VariableSerializer::Type sType =
     enableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
       VariableSerializer::Type::Internal;
   VariableSerializer vs(sType);
+  if (pure) vs.setPure();
   return vs.serialize(value, true);
 }
 
-Variant apc_unserialize(const char* data, int len) {
+Variant apc_unserialize(const char* data, int len, bool pure) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Internal;
-  return unserialize_ex(data, len, sType);
-}
-
-String apc_reserialize(const String& str) {
-  if (str.empty() ||
-      !apcExtension::EnableApcSerialize) return str;
-
-  VariableUnserializer uns(str.data(), str.size(),
-                           VariableUnserializer::Type::APCSerialize);
-  StringBuffer buf;
-  uns.reserialize(buf);
-
-  return buf.detach();
+  return unserialize_ex(data, len, sType, null_array, pure);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -835,13 +786,61 @@ void apc_sample_by_size() {
   auto entries =
     apc_store().sampleEntriesInfoBySize(apcExtension::SizedSampleBytes);
   StructuredLogEntry sample;
-  for (auto& entry : entries) {
+  for (auto& tuple : entries) {
+    auto& entry = std::get<0>(tuple);
+    auto& weight = std::get<1>(tuple);
     sample.setStr("key", entry.key);
     sample.setInt("in_mem", 1);
     sample.setInt("ttl", entry.ttl);
     sample.setInt("size", entry.size);
+    sample.setInt("weight", weight);
     StructuredLog::log("apc_samples", sample);
   }
+}
+
+void apcExtension::moduleInit() {
+  if (use_lowptr && !UseUncounted) {
+    Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
+    UseUncounted = true;
+  }
+  apc_store().init();
+
+  HHVM_RC_INT(APC_ITER_TYPE, 0x1);
+  HHVM_RC_INT(APC_ITER_KEY, 0x2);
+  HHVM_RC_INT(APC_ITER_FILENAME, 0x4);
+  HHVM_RC_INT(APC_ITER_DEVICE, 0x8);
+  HHVM_RC_INT(APC_ITER_INODE, 0x10);
+  HHVM_RC_INT(APC_ITER_VALUE, 0x20);
+  HHVM_RC_INT(APC_ITER_MD5, 0x40);
+  HHVM_RC_INT(APC_ITER_NUM_HITS, 0x80);
+  HHVM_RC_INT(APC_ITER_MTIME, 0x100);
+  HHVM_RC_INT(APC_ITER_CTIME, 0x200);
+  HHVM_RC_INT(APC_ITER_DTIME, 0x400);
+  HHVM_RC_INT(APC_ITER_ATIME, 0x800);
+  HHVM_RC_INT(APC_ITER_REFCOUNT, 0x1000);
+  HHVM_RC_INT(APC_ITER_MEM_SIZE, 0x2000);
+  HHVM_RC_INT(APC_ITER_TTL, 0x4000);
+  HHVM_RC_INT(APC_ITER_NONE, 0x0);
+  HHVM_RC_INT(APC_ITER_ALL, 0xFFFFFFFFFF);
+  HHVM_RC_INT(APC_LIST_ACTIVE, 1);
+  HHVM_RC_INT(APC_LIST_DELETED, 2);
+
+  HHVM_FE(apc_add);
+  HHVM_FE(apc_add_with_pure_sleep);
+  HHVM_FE(apc_store);
+  HHVM_FE(apc_store_with_pure_sleep);
+  HHVM_FE(apc_fetch);
+  HHVM_FE(apc_fetch_with_pure_wakeup);
+  HHVM_FE(apc_delete);
+  HHVM_FE(apc_clear_cache);
+  HHVM_FE(apc_inc);
+  HHVM_FE(apc_dec);
+  HHVM_FE(apc_cas);
+  HHVM_FE(apc_exists);
+  HHVM_FE(apc_size);
+  HHVM_FE(apc_extend_ttl);
+  HHVM_FE(apc_cache_info);
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

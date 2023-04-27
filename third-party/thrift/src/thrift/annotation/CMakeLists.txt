@@ -12,99 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-thrift_generate(
-  "api" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
+add_library(thriftannotation)
+target_link_libraries(thriftannotation PUBLIC Folly::folly)
 
-thrift_generate(
-  "cpp" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "hack" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "java" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "meta" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "python" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "scope" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "thrift" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-set_property(GLOBAL PROPERTY api-cpp2-SOURCES ${api-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY cpp-cpp2-SOURCES ${cpp-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY hack-cpp2-SOURCES ${hack-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY java-cpp2-SOURCES ${java-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY meta-cpp2-SOURCES ${meta-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY python-cpp2-SOURCES ${python-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY scope-cpp2-SOURCES ${scope-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY thrift-cpp2-SOURCES ${thrift-cpp2-SOURCES})
+foreach (name api cpp hack java meta python scope thrift)
+  thrift_generate(
+    ${name} # file_name
+    "" # services
+    "cpp2" # language
+    "templates,no_metadata" # options
+    "${CMAKE_CURRENT_SOURCE_DIR}" # file_path
+    "${CMAKE_CURRENT_BINARY_DIR}" # output_path
+    "thrift/annotation" # include_prefix
+    THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR})
+  target_sources(thriftannotation PRIVATE ${${name}-cpp2-SOURCES})
+endforeach ()

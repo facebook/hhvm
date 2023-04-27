@@ -12,20 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Install thrift/annotation
 add_subdirectory(annotation)
 
-# Install thrift/compiler
-if(compiler_only OR build_all)
+if (compiler_only OR build_all)
   add_subdirectory(compiler)
-endif(compiler_only OR build_all)
+endif ()
 
-# Install thrift/lib
-if(lib_only OR build_all)
+if (lib_only OR build_all)
   add_subdirectory(lib)
-endif(lib_only OR build_all)
+endif ()
 
-# Install CMake package configuration files for thrift
+# Install CMake package configuration files for thrift.
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   cmake/FBThriftConfig.cmake.in
@@ -48,10 +45,16 @@ install(
 )
 
 install(
-  DIRECTORY annotation "${CMAKE_CURRENT_BINARY_DIR}/annotation"
+  DIRECTORY annotation ${CMAKE_CURRENT_SOURCE_DIR}/annotation
+  DESTINATION include/thrift
+  FILES_MATCHING PATTERN *.thrift
+)
+
+install(
+  DIRECTORY annotation ${CMAKE_CURRENT_BINARY_DIR}/annotation
   DESTINATION include/thrift
   FILES_MATCHING
-    PATTERN "*.h"
-    PATTERN "*.tcc"
+    PATTERN *.h
+    PATTERN *.tcc
     PATTERN CMakeFiles EXCLUDE
 )

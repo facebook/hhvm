@@ -185,7 +185,10 @@ let write_percentage
 type errors_file_error =
   | NothingYet
   | Complete of Telemetry.t [@printer (fun fmt _t -> fprintf fmt "Complete")]
-  | Restarted
+  | Restarted of {
+      user_message: string;
+      log_message: string;
+    } [@printer (fun fmt _ _ -> fprintf fmt "Restarted")]
   | Stopped
   | Killed
   | Build_id_mismatch
@@ -373,7 +376,9 @@ module ErrorsWrite = struct
     result
 
   let new_empty_file
-      ~(clock : Watchman.clock option) ~(ignore_hh_version : bool) : unit =
+      ~(clock : Watchman.clock option)
+      ~(ignore_hh_version : bool)
+      ~(cancel_reason : string * string) : unit =
     match errors_file_path () with
     | None -> ()
     | Some errors_file_path -> begin
@@ -406,9 +411,10 @@ module ErrorsWrite = struct
             clock;
           }
       in
+      let (user_message, log_message) = cancel_reason in
       let fd =
         unlink_sentinel_close
-          Restarted
+          (Restarted { user_message; log_message })
           ~log_message:"new_empty_file"
           ~errors_file_path
           ~after_unlink:(fun () ->

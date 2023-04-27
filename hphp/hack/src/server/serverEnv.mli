@@ -281,6 +281,12 @@ type env = {
           executed . After full check this should be empty, unless that check was
           cancelled mid-flight, in which case full_check_status will be set to
           Full_check_started and entire thing will be retried on next iteration. *)
+  why_needs_server_type_check: string * string;
+      (** Why is a round of ServerTypeCheck needed? For instance, if a typecheck
+      got interrupted+cancelled leaving files still needing to be checked, the
+      reason will be stored here. It's written+read by [ServerTypeCheck.type_check].
+      The first of the two strings is a user-facing message, and the second is additional
+      information for logs. *)
   init_env: init_env;
   full_recheck_on_file_changes: full_recheck_on_file_changes;
       (** Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck

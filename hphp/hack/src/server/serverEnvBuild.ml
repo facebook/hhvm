@@ -77,6 +77,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
     pending_command_needs_writes = None;
     persistent_client_pending_command_needs_full_check = None;
     nonpersistent_client_pending_command_needs_full_check = None;
+    why_needs_server_type_check = ("init", "");
     init_env =
       {
         approach_name = "";

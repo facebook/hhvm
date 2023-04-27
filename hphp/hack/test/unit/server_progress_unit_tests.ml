@@ -28,6 +28,8 @@ let expect_state (expected : string) : unit =
 
 let telemetry = Telemetry.create ()
 
+let cancel_reason = ("test", "")
+
 let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
   let tmp = Tempfile.mkdtemp ~skip_mocking:true in
   Lwt_utils.try_finally
@@ -63,7 +65,8 @@ let test_completed () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report
           (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
         ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
@@ -111,7 +114,8 @@ let test_read_unlinked () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
@@ -130,7 +134,8 @@ let test_read_unlinked_empty () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
@@ -149,12 +154,14 @@ let test_read_restarted () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report an_error;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
         String_asserter.assert_equals
           "Errors [c=1]"
@@ -225,7 +232,8 @@ let test_produce_disordered () : bool Lwt.t =
         expect_state "Absent";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         Lwt.return_unit)
   in
@@ -234,22 +242,26 @@ let test_produce_disordered () : bool Lwt.t =
         (* Actions from state "Reporting[0]"... *)
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         ServerProgress.ErrorsWrite.report an_error;
         expect_state "Reporting[1]";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
         expect_state "Absent";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         ServerProgress.ErrorsWrite.complete telemetry;
         expect_state "Closed";
@@ -260,12 +272,14 @@ let test_produce_disordered () : bool Lwt.t =
         (* Actions from state "Reporting[1]" *)
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report an_error;
         expect_state "Reporting[1]";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         ServerProgress.ErrorsWrite.report an_error;
         expect_state "Reporting[1]";
@@ -275,7 +289,8 @@ let test_produce_disordered () : bool Lwt.t =
         expect_state "Closed";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report an_error;
         expect_state "Reporting[1]";
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
@@ -287,12 +302,14 @@ let test_produce_disordered () : bool Lwt.t =
         (* Actions from state "Closed" *)
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.complete telemetry;
         expect_state "Closed";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         expect_state "Reporting[0]";
         ServerProgress.ErrorsWrite.complete telemetry;
         expect_state "Closed";
@@ -312,7 +329,8 @@ let test_async_read_completed () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report
           (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
         ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
@@ -334,7 +352,8 @@ let test_async_read_partial () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
         let q = ServerProgressLwt.watch_errors_file ~pid fd in
@@ -359,7 +378,8 @@ let test_async_read_unlinked () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:(Some "clock123")
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let open_result = ServerProgress.ErrorsRead.openfile fd in
         let { ServerProgress.ErrorsRead.pid; clock; _ } =
@@ -405,7 +425,8 @@ let test_async_read_killed () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         (* we'll write an incomplete file *)
         let preamble = Marshal_tools.make_preamble 100 in
         Sys_utils.append_file ~file:errors_file_path (Bytes.to_string preamble);
@@ -430,7 +451,8 @@ let test_async_pid_killed () : bool Lwt.t =
         let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
         (* For our test, let us pick a pid which doesn't exist.
@@ -469,7 +491,8 @@ let test_async_read_start () : bool Lwt.t =
         let pid = Unix.getpid () in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         (* oops! we didn't call ServerProgress.ErrorsRead.openfile *)
         let exn =
@@ -526,7 +549,8 @@ let test_check_success () : bool Lwt.t =
         ServerProgress.write ~include_in_logs:false "test1";
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         let env = { env with ClientEnv.root } in
         let connect = ref false in
         let connect_then_close () =
@@ -574,7 +598,8 @@ let test_check_errors () : bool Lwt.t =
         let%lwt () = Lwt_unix.sleep 0.2 in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
-          ~ignore_hh_version:false;
+          ~ignore_hh_version:false
+          ~cancel_reason;
         ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
         ServerProgress.ErrorsWrite.complete telemetry;
         let%lwt (exit_status, _telemetry) = check_future in
@@ -597,7 +622,8 @@ let test_check_connect_success () : bool Lwt.t =
           let%lwt () = future1 in
           ServerProgress.ErrorsWrite.new_empty_file
             ~clock:None
-            ~ignore_hh_version:false;
+            ~ignore_hh_version:false
+            ~cancel_reason;
           let%lwt () = future2 in
           Lwt.return_unit
         in

@@ -210,15 +210,17 @@ let go_streaming_on_fd
         (Exit_status.No_error, telemetry)
       else
         (Exit_status.Type_error, telemetry)
-    | ServerProgress.Restarted ->
+    | ServerProgress.Restarted { user_message; log_message } ->
       Hh_logger.log
-        "Errors-file: on %s, read Restarted"
-        (Sys_utils.show_inode fd);
+        "Errors-file: on %s, read Restarted(%s,%s)"
+        (Sys_utils.show_inode fd)
+        user_message
+        log_message;
+      HackEventLogger.client_check_errors_file_restarted
+        (user_message ^ "\n" ^ log_message);
       (* All errors, warnings, informationals go to stdout. *)
       let msg =
-        Tty.apply_color
-          (Tty.Bold Tty.Red)
-          "Files have changed! Please re-run hh."
+        Tty.apply_color (Tty.Bold Tty.Red) (user_message ^ "\nPlease re-run hh.")
       in
       Printf.printf "\n%s\n%!" msg;
       raise Exit_status.(Exit_with Exit_status.Typecheck_restarted)

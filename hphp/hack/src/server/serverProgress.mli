@@ -162,9 +162,14 @@ type errors_file_error =
       (** There are no new errors yet available, not until server calls [ErrorsWrite.report]. *)
   | Complete of Telemetry.t
       (** The typecheck has finished, i.e. server called [ErrorsWrite.complete]. *)
-  | Restarted
+  | Restarted of {
+      user_message: string;
+      log_message: string;
+    }
       (** The typecheck didn't complete; a new typecheck in a new errors-file has started.
-        i.e. server called [ErrorsWrite.new_empty_file] before [ErrorsWrite.complete]. *)
+        i.e. server called [ErrorsWrite.new_empty_file] before [ErrorsWrite.complete].
+        [user_message] is a human-facing reason for why it was restarted, and [log_message]
+        contains extra logging information. *)
   | Stopped
       (** Hh_server was stopped gracefully so we can't read errors. i.e. server called [ErrorsWrite.unlink]. *)
   | Killed  (** Hh_server was killed so we can't read errors. *)
@@ -180,9 +185,12 @@ module ErrorsWrite : sig
   (** To be called at start of typechecking.
   This creates a new errors file. If there had been a previous errors file, then the previous
   one gets unlinked; and if the previous error file was not yet complete then anyone
-  reading from the previous errors file will now get a [Error Restarted]. *)
+  reading from the previous errors file will now get a [Error (Restarted cancel_reason)]. *)
   val new_empty_file :
-    clock:Watchman.clock option -> ignore_hh_version:bool -> unit
+    clock:Watchman.clock option ->
+    ignore_hh_version:bool ->
+    cancel_reason:string * string ->
+    unit
 
   (** To be called during typechecking.
   Anyone reading the current errors file will get this error report as [Ok errors].

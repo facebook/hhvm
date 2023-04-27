@@ -233,6 +233,7 @@ type env = {
           executed . After full check this should be empty, unless that check was
           cancelled mid-flight, in which case full_check_status will be set to
           Full_check_started and entire thing will be retried on next iteration. *)
+  why_needs_server_type_check: string * string;
   init_env: init_env;
   full_recheck_on_file_changes: full_recheck_on_file_changes;
       (** Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck

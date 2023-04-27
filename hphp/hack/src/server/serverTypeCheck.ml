@@ -543,7 +543,10 @@ module Make : functor (_ : CheckKindType) -> sig
     float ->
     check_reason:string ->
     CgroupProfiler.step_group ->
-    ServerEnv.env * CheckStats.t * Telemetry.t
+    ServerEnv.env
+    * CheckStats.t
+    * Telemetry.t
+    * MultiThreadedCall.cancel_reason option
 end =
 functor
   (CheckKind : CheckKindType)
@@ -684,6 +687,7 @@ functor
       needs_recheck: Relative_path.Set.t;
       total_rechecked_count: int;
       time_first_typing_error: seconds option;
+      cancel_reason: MultiThreadedCall.cancel_reason option;
     }
 
     let do_type_checking
@@ -788,8 +792,10 @@ functor
         Relative_path.Set.union env.needs_recheck lazy_check_later
       in
       (* Remove things that were cancelled from things we started rechecking... *)
-      let cancelled =
-        Option.value_map unfinished_and_reason ~f:fst ~default:[]
+      let (cancelled, cancel_reason) =
+        match unfinished_and_reason with
+        | None -> ([], None)
+        | Some (unfinished, reason) -> (unfinished, Some reason)
       in
       let (files_checked, needs_recheck) =
         List.fold
@@ -834,6 +840,10 @@ functor
       in
 
       let total_rechecked_count = Relative_path.Set.cardinal files_checked in
+      (* TODO(ljw) I wish to prove the invariant (expressed in the type system) that
+         either [cancel_reason=None] or [env.disk_needs_parsing] and [env.need_recheck] are empty.
+         It's quite hard to reason about at the moment in the presence of lazy checks.
+         I'll revisit once they've been removed. *)
       {
         env;
         errors;
@@ -843,6 +853,7 @@ functor
         needs_recheck;
         total_rechecked_count;
         time_first_typing_error;
+        cancel_reason;
       }
 
     let quantile ~index ~count : Relative_path.Set.t -> Relative_path.Set.t =
@@ -1277,6 +1288,7 @@ functor
         needs_recheck;
         total_rechecked_count;
         time_first_typing_error;
+        cancel_reason;
       } =
         do_type_checking
           genv
@@ -1356,6 +1368,16 @@ functor
         |> Telemetry.bool_
              ~key:"typecheck_longlived_workers"
              ~value:genv.local_config.ServerLocalConfig.longlived_workers
+        |> Telemetry.string_opt
+             ~key:"cancel_reason"
+             ~value:
+               (Option.map cancel_reason ~f:(fun r ->
+                    r.MultiThreadedCall.user_message))
+        |> Telemetry.string_opt
+             ~key:"cancel_details"
+             ~value:
+               (Option.map cancel_reason ~f:(fun r ->
+                    r.MultiThreadedCall.log_message))
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
@@ -1480,7 +1502,8 @@ functor
           total_rechecked_count;
           time_first_result = time_first_error;
         },
-        telemetry )
+        telemetry,
+        cancel_reason )
   end
 
 module FC = Make (FullCheckKind)
@@ -1515,7 +1538,7 @@ let type_check_unsafe genv env kind start_time profiling =
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
-    let (env, stats, core_telemetry) =
+    let (env, stats, core_telemetry, cancel_reason) =
       LC.type_check_core genv env start_time ~check_reason profiling
     in
     let telemetry =
@@ -1528,7 +1551,7 @@ let type_check_unsafe genv env kind start_time profiling =
     in
     let stats = CheckStats.record_result_sent_ts stats t_sent_done in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
-    (env, stats, telemetry)
+    (env, stats, telemetry, cancel_reason)
   | CheckKind.Full ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
@@ -1542,7 +1565,7 @@ let type_check_unsafe genv env kind start_time profiling =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
 
-    let (env, stats, core_telemetry) =
+    let (env, stats, core_telemetry, cancel_reason) =
       FC.type_check_core genv env start_time ~check_reason profiling
     in
 
@@ -1561,7 +1584,7 @@ let type_check_unsafe genv env kind start_time profiling =
     let telemetry =
       telemetry |> Telemetry.duration ~key:"sent_done" ~start_time
     in
-    (env, stats, telemetry)
+    (env, stats, telemetry, cancel_reason)
 
 let type_check :
     genv ->
@@ -1636,11 +1659,12 @@ let type_check :
   if CheckKind.is_full_check kind then
     ServerProgress.ErrorsWrite.new_empty_file
       ~ignore_hh_version
-      ~clock:env.clock;
+      ~clock:env.clock
+      ~cancel_reason:env.why_needs_server_type_check;
 
   (* This is the main typecheck function. Its contract is to
      (1) tweak env.errorl as needed based on what was rechecked , (2) write every single error to errors-file. *)
-  let (env, stats, telemetry) =
+  let (env, stats, telemetry, cancel_reason) =
     type_check_unsafe genv env kind start_time cgroup_steps
   in
 
@@ -1665,5 +1689,34 @@ let type_check :
   in
   if CheckKind.is_full_check kind && is_complete then
     ServerProgress.ErrorsWrite.complete telemetry;
+
+  (* If this was a full check, store in [env] whether+why it got interrupted+cancelled. *)
+  let env =
+    if CheckKind.is_full_check kind then
+      match cancel_reason with
+      | Some { MultiThreadedCall.user_message; log_message; timestamp = _ } ->
+        {
+          env with
+          ServerEnv.why_needs_server_type_check = (user_message, log_message);
+        }
+      | None when not is_complete ->
+        (* The typecheck wasn't interrupted, but there are still items to check.
+           This is a weird situation, and one that hopefully won't exist.
+           Once lazy checks have been eliminated, we'll revisit the TODO
+           on this subject at the end of [do_type_checking], and see if we can
+           eliminate this path throgh the typesystem.
+
+           Until that time, what now should we put as the value for [env.why_needs_server_type_check]?
+           Well, the existing value in [env] said why it needed a type check earlier, and it still needs
+           that same type check to be completed, so it is a plausible answer! *)
+        env
+      | None ->
+        {
+          env with
+          ServerEnv.why_needs_server_type_check = ("Type check is complete", "");
+        }
+    else
+      env
+  in
 
   (env, stats, telemetry)

@@ -189,6 +189,8 @@ let client_check_partial _ _ _ = ()
 
 let client_check_bad_exit _ _ _ = ()
 
+let client_check_errors_file_restarted _ = ()
+
 let client_lsp_shellout
     ~root:_ ~command_line:_ ~result_count:_ ~result_extra_telemetry:_ =
   ()

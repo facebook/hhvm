@@ -4097,7 +4097,7 @@ let handle_errors_file_item
            will determine that we've transitioned from an ok state (like we leave it in right now)
            to an error state, and it takes that opportunity to erase all squiggles. *)
         ()
-      | ServerProgress.Restarted ->
+      | ServerProgress.Restarted _ ->
         (* If the typecheck restarted, we'll just leave all existing errors as they are.
            We have no evidence upon which to add or erase anything.
            It will all be fixed in the next typecheck to complete. *)
@@ -4254,7 +4254,8 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
           {
             seek_reason =
               ( ServerProgress.(
-                  NothingYet | Restarted | Stopped | Killed | Build_id_mismatch),
+                  ( NothingYet | Restarted _ | Stopped | Killed
+                  | Build_id_mismatch )),
                 _ );
             _;
           } ->

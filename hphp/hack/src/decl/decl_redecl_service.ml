@@ -573,6 +573,7 @@ let redo_type_decl
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
     ~(defs : FileInfo.names Relative_path.Map.t) : redo_type_decl_result =
+  Hh_logger.log "Decl_redecl_service.redo_type_decl #1";
   let all_defs =
     Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
@@ -592,6 +593,7 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
 
+  Hh_logger.log "Decl_redecl_service.redo_type_decl #2";
   let ((errors, { changed; to_recheck }), old_decl_missing_count) =
     (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
@@ -603,6 +605,7 @@ let redo_type_decl
     else
       parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
+  Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
   let (changed, to_recheck) =
     let AffectedDeps.{ changed = changed'; mro_invalidated = _; needs_recheck }
         =

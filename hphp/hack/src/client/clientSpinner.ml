@@ -40,6 +40,8 @@ let state : state ref =
 
 let get_latest_report () : string option = !state.message
 
+let start_time : float = Unix.gettimeofday ()
+
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
     let%lwt _ = Lwt_unix.sleep 1.0 in
@@ -87,7 +89,10 @@ let report ~(to_stderr : bool) ~(angery_reaccs_only : bool) :
     Option.is_some message
     && not (Option.equal String.equal !state.message message)
   then
-    Hh_logger.log "spinner: [%s]" (Option.value_exn message);
+    Hh_logger.log
+      "spinner %0.1fs: [%s]"
+      (Unix.gettimeofday () -. start_time)
+      (Option.value_exn message);
   let new_state = { !state with message; to_stderr; angery_reaccs_only } in
   update_stderr !state ~new_state;
   state := new_state;

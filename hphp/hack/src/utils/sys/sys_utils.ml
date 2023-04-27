@@ -630,6 +630,10 @@ external processor_info : unit -> processor_info = "hh_processor_info"
 
 let string_of_fd (fd : Unix.file_descr) : string = string_of_int (Obj.magic fd)
 
+let show_inode (fd : Unix.file_descr) : string =
+  let stat = Unix.fstat fd in
+  Printf.sprintf "inode#%d:%d" stat.Unix.st_dev stat.Unix.st_ino
+
 let rec select_non_intr read write exn timeout =
   let start_time = Unix.gettimeofday () in
   try Unix.select read write exn timeout with

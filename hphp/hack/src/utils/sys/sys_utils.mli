@@ -32,6 +32,9 @@ val temp_dir_name : string
 
 val getenv_path : unit -> string option
 
+(** This is a string "fd123:456" which uniquely identifies this file's inode *)
+val show_inode : Unix.file_descr -> string
+
 val open_in_no_fail : string -> in_channel
 
 val open_in_bin_no_fail : string -> in_channel

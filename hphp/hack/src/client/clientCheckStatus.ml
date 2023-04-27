@@ -211,6 +211,9 @@ let go_streaming_on_fd
       else
         (Exit_status.Type_error, telemetry)
     | ServerProgress.Restarted ->
+      Hh_logger.log
+        "Errors-file: on %s, read Restarted"
+        (Sys_utils.show_inode fd);
       (* All errors, warnings, informationals go to stdout. *)
       let msg =
         Tty.apply_color
@@ -444,7 +447,8 @@ let rec keep_trying_to_open
     | Error (end_sentinel, log_message) when not has_already_attempted_connect
       ->
       Hh_logger.log
-        "Errors-file: sentinel %s [%s], so connecting then trying again"
+        "Errors-file: on %s, read sentinel %s [%s], so connecting then trying again"
+        (Sys_utils.show_inode fd)
         (ServerProgress.show_errors_file_error end_sentinel)
         log_message;
       (* If there was an existing file but it was bad -- e.g. came from a dead server,
@@ -466,7 +470,8 @@ let rec keep_trying_to_open
       (* But if there was an existing file that's still bad even after our connection
          attempt, there's not much we can do *)
       Hh_logger.log
-        "Errors-file: sentinel %s [%s], and already connected once, so giving up."
+        "Errors-file: on %s, read sentinel %s [%s], and already connected once, so giving up."
+        (Sys_utils.show_inode fd)
         (ServerProgress.show_errors_file_error end_sentinel)
         log_message;
       progress_callback None;
@@ -487,7 +492,8 @@ let rec keep_trying_to_open
          consistency guarantees. We'll just go with it. This happens for instance
          if the server was started using dfind instead of watchman. *)
       Hh_logger.log
-        "Errors-file: present, without watchman, so just going with it.";
+        "Errors-file: %s is present, without watchman, so just going with it."
+        (Sys_utils.show_inode fd);
       Lwt.return (pid, fd)
     | Ok { ServerProgress.ErrorsRead.clock = Some clock; _ }
       when Option.equal String.equal (Some clock) already_checked_clock ->
@@ -502,7 +508,10 @@ let rec keep_trying_to_open
         ~deadline
         ~root
     | Ok { ServerProgress.ErrorsRead.pid; clock = Some clock; _ } -> begin
-      Hh_logger.log "Errors-file: present at %s, so querying watchman..." clock;
+      Hh_logger.log
+        "Errors-file: %s is present, was started at clock %s, so querying watchman..."
+        (Sys_utils.show_inode fd)
+        clock;
       (* Watchman doesn't support "what files have changed from error.bin's clock until
          hh-invocation clock?". We'll instead use the (less permissive, still correct) query
          "what files have changed from error.bin's clock until now?". *)
@@ -537,7 +546,8 @@ let rec keep_trying_to_open
           (* If there was an existing errors.bin, and no files have changed since then,
              then use it! *)
           Hh_logger.log
-            "Errors-file: present with no changed files at %s, so using it!"
+            "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
+            (Sys_utils.show_inode fd)
             clock;
           Lwt.return (pid, fd)
         end else begin
@@ -549,7 +559,8 @@ let rec keep_trying_to_open
              They're identical, in fact, because they both use the same watchman filter
              [FilesToIgnore.watchman_server_expression_terms] and the same [FindUtils.post_watchman_filter]. *)
           Hh_logger.log
-            "Errors-file: present with changed files at %s [%d changed files], so trying again (witness %s)"
+            "Errors-file: %s is present, was started at clock %s, but watchman reports updates since then, so trying again. %d updates, for example %s"
+            (Sys_utils.show_inode fd)
             clock
             (Relative_path.Set.cardinal updates)
             (Relative_path.Set.choose updates |> Relative_path.suffix);

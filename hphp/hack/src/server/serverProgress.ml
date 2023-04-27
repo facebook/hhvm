@@ -336,11 +336,6 @@ module ErrorsWrite = struct
   necessarily must have come from a now-dead PID. *)
   let write_state : write_state ref = ref Absent
 
-  (** We print fds of error-files to the server log, showing their inode identity. *)
-  let show_fd (fd : Unix.file_descr) : string =
-    let stat = Unix.fstat fd in
-    Printf.sprintf "fd%d:%d" stat.Unix.st_dev stat.Unix.st_ino
-
   (** This helper is called by [new_empty_file] and [unlink_at_server_stop]...
      1. It unlinks the current file, if any (in states [Reporting], [Closed])
      2. It calls the [after_unlink] callback
@@ -364,9 +359,10 @@ module ErrorsWrite = struct
       match !write_state with
       | Reporting (fd, count) ->
         Hh_logger.log
-          "Errors-file: ending old %s with its %d reports"
-          (show_fd fd)
-          count;
+          "Errors-file: ending old %s with its %d reports, with sentinel %s"
+          (Sys_utils.show_inode fd)
+          count
+          (show_errors_file_error error);
         ErrorsFile.write_message
           fd
           (ErrorsFile.End
@@ -430,7 +426,10 @@ module ErrorsWrite = struct
             | None ->
               failwith "Errors-file was created by someone else under our feet"
             | Some fd ->
-              Hh_logger.log "Errors-file: starting new %s" (show_fd fd);
+              Hh_logger.log
+                "Errors-file: starting new %s at clock %s"
+                (Sys_utils.show_inode fd)
+                (Option.value clock ~default:"[none]");
               fd)
       in
       write_state := Reporting (fd, 0)
@@ -451,7 +450,7 @@ module ErrorsWrite = struct
           Hh_logger.log
             "Errors-file: report#%d on %s: %d new errors%s"
             n
-            (show_fd fd)
+            (Sys_utils.show_inode fd)
             (Errors.count errors)
             (if n = 5 then
               " [won't report any more this typecheck...]"
@@ -491,7 +490,7 @@ module ErrorsWrite = struct
       | Reporting (fd, n) ->
         Hh_logger.log
           "Errors-file: completing %s after %d reports"
-          (show_fd fd)
+          (Sys_utils.show_inode fd)
           n;
         ErrorsFile.write_message
           fd

@@ -129,7 +129,7 @@ let parse_options () =
   let root = Path.make "/" (* we use this dummy *) in
 
   let tcopt =
-    GlobalOptions.make
+    GlobalOptions.set
       ~tco_saved_state:
         (GlobalOptions.default_saved_state
         |> GlobalOptions.with_saved_state_manifold_api_key
@@ -138,7 +138,7 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ()
+      GlobalOptions.default
   in
   (* Configure symbol index settings *)
   let namespace_map = ParserOptions.auto_namespace_map tcopt in

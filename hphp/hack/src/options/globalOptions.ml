@@ -249,7 +249,7 @@ let default =
     tco_disallow_unresolved_type_variables = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
-    po_allowed_decl_fixme_codes = ISet.of_list [];
+    po_allowed_decl_fixme_codes = ISet.empty;
     po_allow_new_attribute_syntax = false;
     tco_global_inference = false;
     tco_gi_reinfer_types = [];
@@ -334,295 +334,485 @@ let default =
     tco_rust_elab = false;
   }
 
-let make
-    ~tco_saved_state
-    ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
-    ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
+let set
+    ?tco_saved_state
+    ?po_deregister_php_stdlib
+    ?po_disallow_toplevel_requires
     ?tco_log_large_fanouts_threshold
-    ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
-    ?(tco_experimental_features = default.tco_experimental_features)
-    ?(tco_migration_flags = default.tco_migration_flags)
+    ?tco_log_inference_constraints
+    ?tco_experimental_features
+    ?tco_migration_flags
     ?tco_num_local_workers
     ?tco_max_typechecker_worker_memory_mb
     ?tco_defer_class_declaration_threshold
-    ?(tco_prefetch_deferred_files = default.tco_prefetch_deferred_files)
-    ?(tco_remote_type_check_threshold = default.tco_remote_type_check_threshold)
-    ?(tco_remote_type_check = default.tco_remote_type_check)
+    ?tco_prefetch_deferred_files
+    ?tco_remote_type_check_threshold
+    ?tco_remote_type_check
     ?tco_remote_worker_key
     ?tco_remote_check_id
-    ?(tco_num_remote_workers = default.tco_num_remote_workers)
+    ?tco_num_remote_workers
     ?so_remote_version_specifier
     ?so_naming_sqlite_path
-    ?(po_auto_namespace_map = default.po_auto_namespace_map)
-    ?(tco_language_feature_logging = default.tco_language_feature_logging)
-    ?(tco_timeout = default.tco_timeout)
-    ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
-    ?(tco_disallow_byref_dynamic_calls =
-      default.tco_disallow_byref_dynamic_calls)
-    ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
-    ?(code_agnostic_fixme = default.code_agnostic_fixme)
-    ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
-    ?(log_levels = default.log_levels)
-    ?(po_disable_lval_as_an_expression =
-      default.po_disable_lval_as_an_expression)
-    ?(tco_remote_old_decls_no_limit = default.tco_remote_old_decls_no_limit)
-    ?(tco_fetch_remote_old_decls = default.tco_fetch_remote_old_decls)
-    ?(tco_populate_member_heaps = default.tco_populate_member_heaps)
-    ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
-    ?(tco_skip_tast_checks = default.tco_skip_tast_checks)
-    ?(tco_like_type_hints = default.tco_like_type_hints)
-    ?(tco_union_intersection_type_hints =
-      default.tco_union_intersection_type_hints)
-    ?(tco_coeffects = default.tco_coeffects)
-    ?(tco_coeffects_local = default.tco_coeffects_local)
-    ?(tco_strict_contexts = default.tco_strict_contexts)
-    ?(tco_like_casts = default.tco_like_casts)
-    ?(tco_simple_pessimize = default.tco_simple_pessimize)
-    ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
-    ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
-    ?(tco_disallow_unresolved_type_variables =
-      default.tco_disallow_unresolved_type_variables)
-    ?(po_enable_class_level_where_clauses =
-      default.po_enable_class_level_where_clauses)
-    ?(po_disable_legacy_soft_typehints =
-      default.po_disable_legacy_soft_typehints)
-    ?(po_allowed_decl_fixme_codes = default.po_allowed_decl_fixme_codes)
-    ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
-    ?(tco_global_inference = default.tco_global_inference)
-    ?(tco_gi_reinfer_types = default.tco_gi_reinfer_types)
-    ?(tco_ordered_solving = default.tco_ordered_solving)
-    ?(tco_const_static_props = default.tco_const_static_props)
-    ?(po_disable_legacy_attribute_syntax =
-      default.po_disable_legacy_attribute_syntax)
-    ?(tco_const_attribute = default.tco_const_attribute)
-    ?(po_const_default_func_args = default.po_const_default_func_args)
-    ?(po_const_default_lambda_args = default.po_const_default_lambda_args)
-    ?(po_disallow_silence = default.po_disallow_silence)
-    ?(po_abstract_static_props = default.po_abstract_static_props)
-    ?(po_parser_errors_only = default.po_parser_errors_only)
-    ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
-    ?(glean_service = default.glean_service)
-    ?(glean_hostname = default.glean_hostname)
-    ?(glean_port = default.glean_port)
-    ?(glean_reponame = default.glean_reponame)
-    ?(symbol_write_ownership = default.symbol_write_ownership)
-    ?(symbol_write_root_path = default.symbol_write_root_path)
-    ?(symbol_write_hhi_path = default.symbol_write_hhi_path)
-    ?(symbol_write_ignore_paths = default.symbol_write_ignore_paths)
-    ?(symbol_write_index_paths = default.symbol_write_index_paths)
+    ?po_auto_namespace_map
+    ?po_codegen
+    ?tco_language_feature_logging
+    ?tco_timeout
+    ?tco_disallow_invalid_arraykey
+    ?tco_disallow_byref_dynamic_calls
+    ?tco_disallow_byref_calls
+    ?code_agnostic_fixme
+    ?allowed_fixme_codes_strict
+    ?log_levels
+    ?po_disable_lval_as_an_expression
+    ?tco_remote_old_decls_no_limit
+    ?tco_fetch_remote_old_decls
+    ?tco_populate_member_heaps
+    ?tco_skip_hierarchy_checks
+    ?tco_skip_tast_checks
+    ?tco_like_type_hints
+    ?tco_union_intersection_type_hints
+    ?tco_coeffects
+    ?tco_coeffects_local
+    ?tco_strict_contexts
+    ?tco_like_casts
+    ?tco_simple_pessimize
+    ?tco_check_xhp_attribute
+    ?tco_check_redundant_generics
+    ?tco_disallow_unresolved_type_variables
+    ?po_enable_class_level_where_clauses
+    ?po_disable_legacy_soft_typehints
+    ?po_allowed_decl_fixme_codes
+    ?po_allow_new_attribute_syntax
+    ?tco_global_inference
+    ?tco_gi_reinfer_types
+    ?tco_ordered_solving
+    ?tco_const_static_props
+    ?po_disable_legacy_attribute_syntax
+    ?tco_const_attribute
+    ?po_const_default_func_args
+    ?po_const_default_lambda_args
+    ?po_disallow_silence
+    ?po_abstract_static_props
+    ?po_parser_errors_only
+    ?tco_check_attribute_locations
+    ?glean_service
+    ?glean_hostname
+    ?glean_port
+    ?glean_reponame
+    ?symbol_write_ownership
+    ?symbol_write_root_path
+    ?symbol_write_hhi_path
+    ?symbol_write_ignore_paths
+    ?symbol_write_index_paths
     ?symbol_write_index_paths_file
     ?symbol_write_index_paths_file_output
-    ?(symbol_write_include_hhi = default.symbol_write_include_hhi)
+    ?symbol_write_include_hhi
     ?symbol_write_sym_hash_in
     ?symbol_write_exclude_out
     ?symbol_write_referenced_out
-    ?(symbol_write_sym_hash_out = default.symbol_write_sym_hash_out)
-    ?(po_disallow_func_ptrs_in_constants =
-      default.po_disallow_func_ptrs_in_constants)
-    ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
-    ?(tco_disallow_discarded_nullable_awaitables =
-      default.tco_disallow_discarded_nullable_awaitables)
-    ?(po_enable_xhp_class_modifier = default.po_enable_xhp_class_modifier)
-    ?(po_disable_xhp_element_mangling = default.po_disable_xhp_element_mangling)
-    ?(po_disable_xhp_children_declarations =
-      default.po_disable_xhp_children_declarations)
-    ?(po_enable_enum_classes = default.po_enable_enum_classes)
-    ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
-    ?(po_allow_unstable_features = default.po_allow_unstable_features)
-    ?(tco_is_systemlib = default.tco_is_systemlib)
-    ?(tco_higher_kinded_types = default.tco_higher_kinded_types)
-    ?(tco_method_call_inference = default.tco_method_call_inference)
-    ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
-    ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
-    ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
-    ?(tco_skip_check_under_dynamic = default.tco_skip_check_under_dynamic)
-    ?(tco_ifc_enabled = default.tco_ifc_enabled)
-    ?(tco_global_access_check_enabled = default.tco_global_access_check_enabled)
-    ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
-    ?(po_interpret_soft_types_as_like_types =
-      default.po_interpret_soft_types_as_like_types)
-    ?(tco_enable_strict_string_concat_interp =
-      default.tco_enable_strict_string_concat_interp)
-    ?(tco_ignore_unsafe_cast = default.tco_ignore_unsafe_cast)
-    ?(tco_no_parser_readonly_check = default.tco_no_parser_readonly_check)
-    ?(tco_enable_expression_trees = default.tco_enable_expression_trees)
-    ?(tco_enable_modules = default.tco_enable_modules)
-    ?(tco_allowed_expression_tree_visitors =
-      default.tco_allowed_expression_tree_visitors)
-    ?(tco_math_new_code = default.tco_math_new_code)
-    ?(tco_typeconst_concrete_concrete_error =
-      default.tco_typeconst_concrete_concrete_error)
-    ?(tco_enable_strict_const_semantics =
-      default.tco_enable_strict_const_semantics)
-    ?(tco_strict_wellformedness = default.tco_strict_wellformedness)
-    ?(tco_meth_caller_only_public_visibility =
-      default.tco_meth_caller_only_public_visibility)
-    ?(tco_require_extends_implements_ancestors =
-      default.tco_require_extends_implements_ancestors)
-    ?(tco_strict_value_equality = default.tco_strict_value_equality)
-    ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
-    ?(tco_everything_sdt = default.tco_everything_sdt)
-    ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
-    ?(tco_explicit_consistent_constructors =
-      default.tco_explicit_consistent_constructors)
-    ?(tco_require_types_class_consts = default.tco_require_types_class_consts)
-    ?(tco_type_printer_fuel = default.tco_type_printer_fuel)
-    ?(tco_specify_manifold_api_key = default.tco_specify_manifold_api_key)
-    ?(tco_profile_top_level_definitions =
-      default.tco_profile_top_level_definitions)
-    ?(tco_allow_all_files_for_module_declarations =
-      default.tco_allow_all_files_for_module_declarations)
-    ?(tco_allowed_files_for_module_declarations =
-      default.tco_allowed_files_for_module_declarations)
-    ?(tco_record_fine_grained_dependencies =
-      default.tco_record_fine_grained_dependencies)
-    ?(tco_loop_iteration_upper_bound = default.tco_loop_iteration_upper_bound)
-    ?(tco_expression_tree_virtualize_functions =
-      default.tco_expression_tree_virtualize_functions)
-    ?(tco_substitution_mutation = default.tco_substitution_mutation)
-    ?(tco_use_type_alias_heap = default.tco_use_type_alias_heap)
-    ?(tco_populate_dead_unsafe_cast_heap =
-      default.tco_populate_dead_unsafe_cast_heap)
-    ?(po_disallow_static_constants_in_default_func_args =
-      default.po_disallow_static_constants_in_default_func_args)
-    ?(tco_load_hack_64_distc_saved_state =
-      default.tco_load_hack_64_distc_saved_state)
-    ?(tco_ide_should_use_hack_64_distc =
-      default.tco_ide_should_use_hack_64_distc)
-    ?(tco_tast_under_dynamic = default.tco_tast_under_dynamic)
-    ?(tco_rust_elab = default.tco_rust_elab)
-    () =
+    ?symbol_write_sym_hash_out
+    ?po_disallow_func_ptrs_in_constants
+    ?tco_error_php_lambdas
+    ?tco_disallow_discarded_nullable_awaitables
+    ?po_enable_xhp_class_modifier
+    ?po_disable_xhp_element_mangling
+    ?po_disable_xhp_children_declarations
+    ?po_enable_enum_classes
+    ?po_disable_hh_ignore_error
+    ?po_allow_unstable_features
+    ?tco_is_systemlib
+    ?tco_higher_kinded_types
+    ?tco_method_call_inference
+    ?tco_report_pos_from_reason
+    ?tco_typecheck_sample_rate
+    ?tco_enable_sound_dynamic
+    ?tco_skip_check_under_dynamic
+    ?tco_ifc_enabled
+    ?tco_global_access_check_enabled
+    ?po_enable_enum_supertyping
+    ?po_interpret_soft_types_as_like_types
+    ?tco_enable_strict_string_concat_interp
+    ?tco_ignore_unsafe_cast
+    ?tco_no_parser_readonly_check
+    ?tco_enable_expression_trees
+    ?tco_enable_modules
+    ?tco_allowed_expression_tree_visitors
+    ?tco_math_new_code
+    ?tco_typeconst_concrete_concrete_error
+    ?tco_enable_strict_const_semantics
+    ?tco_strict_wellformedness
+    ?tco_meth_caller_only_public_visibility
+    ?tco_require_extends_implements_ancestors
+    ?tco_strict_value_equality
+    ?tco_enforce_sealed_subclasses
+    ?tco_everything_sdt
+    ?tco_pessimise_builtins
+    ?tco_explicit_consistent_constructors
+    ?tco_require_types_class_consts
+    ?tco_type_printer_fuel
+    ?tco_specify_manifold_api_key
+    ?tco_profile_top_level_definitions
+    ?tco_allow_all_files_for_module_declarations
+    ?tco_allowed_files_for_module_declarations
+    ?tco_record_fine_grained_dependencies
+    ?tco_loop_iteration_upper_bound
+    ?tco_expression_tree_virtualize_functions
+    ?tco_substitution_mutation
+    ?tco_use_type_alias_heap
+    ?tco_populate_dead_unsafe_cast_heap
+    ?po_disallow_static_constants_in_default_func_args
+    ?tco_load_hack_64_distc_saved_state
+    ?tco_ide_should_use_hack_64_distc
+    ?tco_tast_under_dynamic
+    ?tco_rust_elab
+    options =
+  let setting setting option =
+    match setting with
+    | None -> option
+    | Some value -> value
+  in
+  let setting_opt setting option =
+    match setting with
+    | None -> option
+    | Some _ -> setting
+  in
   {
-    tco_saved_state;
-    tco_experimental_features;
-    tco_migration_flags;
-    tco_num_local_workers;
-    tco_max_typechecker_worker_memory_mb;
-    tco_defer_class_declaration_threshold;
-    tco_prefetch_deferred_files;
-    tco_remote_type_check_threshold;
-    tco_remote_type_check;
-    tco_remote_worker_key;
-    tco_remote_check_id;
-    tco_num_remote_workers;
-    so_remote_version_specifier;
-    so_naming_sqlite_path;
-    po_auto_namespace_map;
-    po_codegen = false;
-    code_agnostic_fixme;
-    allowed_fixme_codes_strict;
-    po_deregister_php_stdlib;
-    po_disallow_toplevel_requires;
-    po_allow_unstable_features;
-    tco_log_large_fanouts_threshold;
-    tco_log_inference_constraints;
-    tco_language_feature_logging;
-    tco_timeout;
-    tco_disallow_invalid_arraykey;
-    tco_disallow_byref_dynamic_calls;
-    tco_disallow_byref_calls;
-    log_levels;
-    po_disable_lval_as_an_expression;
-    tco_remote_old_decls_no_limit;
-    tco_fetch_remote_old_decls;
-    tco_populate_member_heaps;
-    tco_skip_hierarchy_checks;
-    tco_skip_tast_checks;
-    tco_like_type_hints;
-    tco_union_intersection_type_hints;
-    tco_coeffects;
-    tco_coeffects_local;
-    tco_strict_contexts;
-    tco_like_casts;
-    tco_simple_pessimize;
-    tco_check_xhp_attribute;
-    tco_check_redundant_generics;
-    tco_disallow_unresolved_type_variables;
-    po_enable_class_level_where_clauses;
-    po_disable_legacy_soft_typehints;
-    po_allowed_decl_fixme_codes;
-    po_allow_new_attribute_syntax;
-    tco_global_inference;
-    tco_gi_reinfer_types;
-    tco_ordered_solving;
-    tco_const_static_props;
-    po_disable_legacy_attribute_syntax;
-    tco_const_attribute;
-    po_const_default_func_args;
-    po_const_default_lambda_args;
-    po_disallow_silence;
-    po_abstract_static_props;
-    po_parser_errors_only;
-    tco_check_attribute_locations;
-    glean_service;
-    glean_hostname;
-    glean_port;
-    glean_reponame;
-    symbol_write_ownership;
-    symbol_write_root_path;
-    symbol_write_hhi_path;
-    symbol_write_ignore_paths;
-    symbol_write_index_paths;
-    symbol_write_index_paths_file;
-    symbol_write_index_paths_file_output;
-    symbol_write_include_hhi;
-    symbol_write_sym_hash_in;
-    symbol_write_exclude_out;
-    symbol_write_referenced_out;
-    symbol_write_sym_hash_out;
-    po_disallow_func_ptrs_in_constants;
-    tco_error_php_lambdas;
-    tco_disallow_discarded_nullable_awaitables;
-    po_enable_xhp_class_modifier;
-    po_disable_xhp_element_mangling;
-    po_disable_xhp_children_declarations;
-    po_enable_enum_classes;
-    po_disable_hh_ignore_error;
-    tco_is_systemlib;
-    tco_higher_kinded_types;
-    tco_method_call_inference;
-    tco_report_pos_from_reason;
-    tco_typecheck_sample_rate;
-    tco_enable_sound_dynamic;
-    tco_skip_check_under_dynamic;
-    tco_ifc_enabled;
-    tco_global_access_check_enabled;
-    po_enable_enum_supertyping;
-    po_interpret_soft_types_as_like_types;
-    tco_enable_strict_string_concat_interp;
-    tco_ignore_unsafe_cast;
-    tco_no_parser_readonly_check;
-    tco_enable_expression_trees;
-    tco_enable_modules;
-    tco_allowed_expression_tree_visitors;
-    tco_math_new_code;
-    tco_typeconst_concrete_concrete_error;
-    tco_enable_strict_const_semantics;
-    tco_strict_wellformedness;
-    tco_meth_caller_only_public_visibility;
-    tco_require_extends_implements_ancestors;
-    tco_strict_value_equality;
-    tco_enforce_sealed_subclasses;
-    tco_everything_sdt;
-    tco_pessimise_builtins;
-    tco_explicit_consistent_constructors;
-    tco_require_types_class_consts;
-    tco_type_printer_fuel;
-    tco_specify_manifold_api_key;
-    tco_profile_top_level_definitions;
-    tco_allow_all_files_for_module_declarations;
-    tco_allowed_files_for_module_declarations;
-    tco_record_fine_grained_dependencies;
-    tco_loop_iteration_upper_bound;
-    tco_expression_tree_virtualize_functions;
-    tco_substitution_mutation;
-    tco_use_type_alias_heap;
-    tco_populate_dead_unsafe_cast_heap;
-    po_disallow_static_constants_in_default_func_args;
-    tco_load_hack_64_distc_saved_state;
-    tco_ide_should_use_hack_64_distc;
-    tco_tast_under_dynamic;
-    tco_rust_elab;
+    tco_saved_state = setting tco_saved_state options.tco_saved_state;
+    tco_experimental_features =
+      setting tco_experimental_features options.tco_experimental_features;
+    tco_migration_flags =
+      setting tco_migration_flags options.tco_migration_flags;
+    tco_num_local_workers =
+      setting_opt tco_num_local_workers options.tco_num_local_workers;
+    tco_max_typechecker_worker_memory_mb =
+      setting_opt
+        tco_max_typechecker_worker_memory_mb
+        options.tco_max_typechecker_worker_memory_mb;
+    tco_defer_class_declaration_threshold =
+      setting_opt
+        tco_defer_class_declaration_threshold
+        options.tco_defer_class_declaration_threshold;
+    tco_prefetch_deferred_files =
+      setting tco_prefetch_deferred_files options.tco_prefetch_deferred_files;
+    tco_remote_type_check_threshold =
+      setting
+        tco_remote_type_check_threshold
+        options.tco_remote_type_check_threshold;
+    tco_remote_type_check =
+      setting tco_remote_type_check options.tco_remote_type_check;
+    tco_remote_worker_key =
+      setting_opt tco_remote_worker_key options.tco_remote_worker_key;
+    tco_remote_check_id =
+      setting_opt tco_remote_check_id options.tco_remote_check_id;
+    tco_num_remote_workers =
+      setting tco_num_remote_workers options.tco_num_remote_workers;
+    so_remote_version_specifier =
+      setting_opt
+        so_remote_version_specifier
+        options.so_remote_version_specifier;
+    so_naming_sqlite_path =
+      setting_opt so_naming_sqlite_path options.so_naming_sqlite_path;
+    po_auto_namespace_map =
+      setting po_auto_namespace_map options.po_auto_namespace_map;
+    po_codegen = setting po_codegen options.po_codegen;
+    code_agnostic_fixme =
+      setting code_agnostic_fixme options.code_agnostic_fixme;
+    allowed_fixme_codes_strict =
+      setting allowed_fixme_codes_strict options.allowed_fixme_codes_strict;
+    po_deregister_php_stdlib =
+      setting po_deregister_php_stdlib options.po_deregister_php_stdlib;
+    po_disallow_toplevel_requires =
+      setting
+        po_disallow_toplevel_requires
+        options.po_disallow_toplevel_requires;
+    po_allow_unstable_features =
+      setting po_allow_unstable_features options.po_allow_unstable_features;
+    tco_log_large_fanouts_threshold =
+      setting_opt
+        tco_log_large_fanouts_threshold
+        options.tco_log_large_fanouts_threshold;
+    tco_log_inference_constraints =
+      setting
+        tco_log_inference_constraints
+        options.tco_log_inference_constraints;
+    tco_language_feature_logging =
+      setting tco_language_feature_logging options.tco_language_feature_logging;
+    tco_timeout = setting tco_timeout options.tco_timeout;
+    tco_disallow_invalid_arraykey =
+      setting
+        tco_disallow_invalid_arraykey
+        options.tco_disallow_invalid_arraykey;
+    tco_disallow_byref_dynamic_calls =
+      setting
+        tco_disallow_byref_dynamic_calls
+        options.tco_disallow_byref_dynamic_calls;
+    tco_disallow_byref_calls =
+      setting tco_disallow_byref_calls options.tco_disallow_byref_calls;
+    log_levels = setting log_levels options.log_levels;
+    po_disable_lval_as_an_expression =
+      setting
+        po_disable_lval_as_an_expression
+        options.po_disable_lval_as_an_expression;
+    tco_remote_old_decls_no_limit =
+      setting
+        tco_remote_old_decls_no_limit
+        options.tco_remote_old_decls_no_limit;
+    tco_fetch_remote_old_decls =
+      setting tco_fetch_remote_old_decls options.tco_fetch_remote_old_decls;
+    tco_populate_member_heaps =
+      setting tco_populate_member_heaps options.tco_populate_member_heaps;
+    tco_skip_hierarchy_checks =
+      setting tco_skip_hierarchy_checks options.tco_skip_hierarchy_checks;
+    tco_skip_tast_checks =
+      setting tco_skip_tast_checks options.tco_skip_tast_checks;
+    tco_like_type_hints =
+      setting tco_like_type_hints options.tco_like_type_hints;
+    tco_union_intersection_type_hints =
+      setting
+        tco_union_intersection_type_hints
+        options.tco_union_intersection_type_hints;
+    tco_coeffects = setting tco_coeffects options.tco_coeffects;
+    tco_coeffects_local =
+      setting tco_coeffects_local options.tco_coeffects_local;
+    tco_strict_contexts =
+      setting tco_strict_contexts options.tco_strict_contexts;
+    tco_like_casts = setting tco_like_casts options.tco_like_casts;
+    tco_simple_pessimize =
+      setting tco_simple_pessimize options.tco_simple_pessimize;
+    tco_check_xhp_attribute =
+      setting tco_check_xhp_attribute options.tco_check_xhp_attribute;
+    tco_check_redundant_generics =
+      setting tco_check_redundant_generics options.tco_check_redundant_generics;
+    tco_disallow_unresolved_type_variables =
+      setting
+        tco_disallow_unresolved_type_variables
+        options.tco_disallow_unresolved_type_variables;
+    po_enable_class_level_where_clauses =
+      setting
+        po_enable_class_level_where_clauses
+        options.po_enable_class_level_where_clauses;
+    po_disable_legacy_soft_typehints =
+      setting
+        po_disable_legacy_soft_typehints
+        options.po_disable_legacy_soft_typehints;
+    po_allowed_decl_fixme_codes =
+      setting po_allowed_decl_fixme_codes options.po_allowed_decl_fixme_codes;
+    po_allow_new_attribute_syntax =
+      setting
+        po_allow_new_attribute_syntax
+        options.po_allow_new_attribute_syntax;
+    tco_global_inference =
+      setting tco_global_inference options.tco_global_inference;
+    tco_gi_reinfer_types =
+      setting tco_gi_reinfer_types options.tco_gi_reinfer_types;
+    tco_ordered_solving =
+      setting tco_ordered_solving options.tco_ordered_solving;
+    tco_const_static_props =
+      setting tco_const_static_props options.tco_const_static_props;
+    po_disable_legacy_attribute_syntax =
+      setting
+        po_disable_legacy_attribute_syntax
+        options.po_disable_legacy_attribute_syntax;
+    tco_const_attribute =
+      setting tco_const_attribute options.tco_const_attribute;
+    po_const_default_func_args =
+      setting po_const_default_func_args options.po_const_default_func_args;
+    po_const_default_lambda_args =
+      setting po_const_default_lambda_args options.po_const_default_lambda_args;
+    po_disallow_silence =
+      setting po_disallow_silence options.po_disallow_silence;
+    po_abstract_static_props =
+      setting po_abstract_static_props options.po_abstract_static_props;
+    po_parser_errors_only =
+      setting po_parser_errors_only options.po_parser_errors_only;
+    tco_check_attribute_locations =
+      setting
+        tco_check_attribute_locations
+        options.tco_check_attribute_locations;
+    glean_service = setting glean_service options.glean_service;
+    glean_hostname = setting glean_hostname options.glean_hostname;
+    glean_port = setting glean_port options.glean_port;
+    glean_reponame = setting glean_reponame options.glean_reponame;
+    symbol_write_ownership =
+      setting symbol_write_ownership options.symbol_write_ownership;
+    symbol_write_root_path =
+      setting symbol_write_root_path options.symbol_write_root_path;
+    symbol_write_hhi_path =
+      setting symbol_write_hhi_path options.symbol_write_hhi_path;
+    symbol_write_ignore_paths =
+      setting symbol_write_ignore_paths options.symbol_write_ignore_paths;
+    symbol_write_index_paths =
+      setting symbol_write_index_paths options.symbol_write_index_paths;
+    symbol_write_index_paths_file =
+      setting_opt
+        symbol_write_index_paths_file
+        options.symbol_write_index_paths_file;
+    symbol_write_index_paths_file_output =
+      setting_opt
+        symbol_write_index_paths_file_output
+        options.symbol_write_index_paths_file_output;
+    symbol_write_include_hhi =
+      setting symbol_write_include_hhi options.symbol_write_include_hhi;
+    symbol_write_sym_hash_in =
+      setting_opt symbol_write_sym_hash_in options.symbol_write_sym_hash_in;
+    symbol_write_exclude_out =
+      setting_opt symbol_write_exclude_out options.symbol_write_exclude_out;
+    symbol_write_referenced_out =
+      setting_opt
+        symbol_write_referenced_out
+        options.symbol_write_referenced_out;
+    symbol_write_sym_hash_out =
+      setting symbol_write_sym_hash_out options.symbol_write_sym_hash_out;
+    po_disallow_func_ptrs_in_constants =
+      setting
+        po_disallow_func_ptrs_in_constants
+        options.po_disallow_func_ptrs_in_constants;
+    tco_error_php_lambdas =
+      setting tco_error_php_lambdas options.tco_error_php_lambdas;
+    tco_disallow_discarded_nullable_awaitables =
+      setting
+        tco_disallow_discarded_nullable_awaitables
+        options.tco_disallow_discarded_nullable_awaitables;
+    po_enable_xhp_class_modifier =
+      setting po_enable_xhp_class_modifier options.po_enable_xhp_class_modifier;
+    po_disable_xhp_element_mangling =
+      setting
+        po_disable_xhp_element_mangling
+        options.po_disable_xhp_element_mangling;
+    po_disable_xhp_children_declarations =
+      setting
+        po_disable_xhp_children_declarations
+        options.po_disable_xhp_children_declarations;
+    po_enable_enum_classes =
+      setting po_enable_enum_classes options.po_enable_enum_classes;
+    po_disable_hh_ignore_error =
+      setting po_disable_hh_ignore_error options.po_disable_hh_ignore_error;
+    tco_is_systemlib = setting tco_is_systemlib options.tco_is_systemlib;
+    tco_higher_kinded_types =
+      setting tco_higher_kinded_types options.tco_higher_kinded_types;
+    tco_method_call_inference =
+      setting tco_method_call_inference options.tco_method_call_inference;
+    tco_report_pos_from_reason =
+      setting tco_report_pos_from_reason options.tco_report_pos_from_reason;
+    tco_typecheck_sample_rate =
+      setting tco_typecheck_sample_rate options.tco_typecheck_sample_rate;
+    tco_enable_sound_dynamic =
+      setting tco_enable_sound_dynamic options.tco_enable_sound_dynamic;
+    tco_skip_check_under_dynamic =
+      setting tco_skip_check_under_dynamic options.tco_skip_check_under_dynamic;
+    tco_ifc_enabled = setting tco_ifc_enabled options.tco_ifc_enabled;
+    tco_global_access_check_enabled =
+      setting
+        tco_global_access_check_enabled
+        options.tco_global_access_check_enabled;
+    po_enable_enum_supertyping =
+      setting po_enable_enum_supertyping options.po_enable_enum_supertyping;
+    po_interpret_soft_types_as_like_types =
+      setting
+        po_interpret_soft_types_as_like_types
+        options.po_interpret_soft_types_as_like_types;
+    tco_enable_strict_string_concat_interp =
+      setting
+        tco_enable_strict_string_concat_interp
+        options.tco_enable_strict_string_concat_interp;
+    tco_ignore_unsafe_cast =
+      setting tco_ignore_unsafe_cast options.tco_ignore_unsafe_cast;
+    tco_no_parser_readonly_check =
+      setting tco_no_parser_readonly_check options.tco_no_parser_readonly_check;
+    tco_enable_expression_trees =
+      setting tco_enable_expression_trees options.tco_enable_expression_trees;
+    tco_enable_modules = setting tco_enable_modules options.tco_enable_modules;
+    tco_allowed_expression_tree_visitors =
+      setting
+        tco_allowed_expression_tree_visitors
+        options.tco_allowed_expression_tree_visitors;
+    tco_math_new_code = setting tco_math_new_code options.tco_math_new_code;
+    tco_typeconst_concrete_concrete_error =
+      setting
+        tco_typeconst_concrete_concrete_error
+        options.tco_typeconst_concrete_concrete_error;
+    tco_enable_strict_const_semantics =
+      setting
+        tco_enable_strict_const_semantics
+        options.tco_enable_strict_const_semantics;
+    tco_strict_wellformedness =
+      setting tco_strict_wellformedness options.tco_strict_wellformedness;
+    tco_meth_caller_only_public_visibility =
+      setting
+        tco_meth_caller_only_public_visibility
+        options.tco_meth_caller_only_public_visibility;
+    tco_require_extends_implements_ancestors =
+      setting
+        tco_require_extends_implements_ancestors
+        options.tco_require_extends_implements_ancestors;
+    tco_strict_value_equality =
+      setting tco_strict_value_equality options.tco_strict_value_equality;
+    tco_enforce_sealed_subclasses =
+      setting
+        tco_enforce_sealed_subclasses
+        options.tco_enforce_sealed_subclasses;
+    tco_everything_sdt = setting tco_everything_sdt options.tco_everything_sdt;
+    tco_pessimise_builtins =
+      setting tco_pessimise_builtins options.tco_pessimise_builtins;
+    tco_explicit_consistent_constructors =
+      setting
+        tco_explicit_consistent_constructors
+        options.tco_explicit_consistent_constructors;
+    tco_require_types_class_consts =
+      setting
+        tco_require_types_class_consts
+        options.tco_require_types_class_consts;
+    tco_type_printer_fuel =
+      setting tco_type_printer_fuel options.tco_type_printer_fuel;
+    tco_specify_manifold_api_key =
+      setting tco_specify_manifold_api_key options.tco_specify_manifold_api_key;
+    tco_profile_top_level_definitions =
+      setting
+        tco_profile_top_level_definitions
+        options.tco_profile_top_level_definitions;
+    tco_allow_all_files_for_module_declarations =
+      setting
+        tco_allow_all_files_for_module_declarations
+        options.tco_allow_all_files_for_module_declarations;
+    tco_allowed_files_for_module_declarations =
+      setting
+        tco_allowed_files_for_module_declarations
+        options.tco_allowed_files_for_module_declarations;
+    tco_record_fine_grained_dependencies =
+      setting
+        tco_record_fine_grained_dependencies
+        options.tco_record_fine_grained_dependencies;
+    tco_loop_iteration_upper_bound =
+      setting
+        tco_loop_iteration_upper_bound
+        options.tco_loop_iteration_upper_bound;
+    tco_expression_tree_virtualize_functions =
+      setting
+        tco_expression_tree_virtualize_functions
+        options.tco_expression_tree_virtualize_functions;
+    tco_substitution_mutation =
+      setting tco_substitution_mutation options.tco_substitution_mutation;
+    tco_use_type_alias_heap =
+      setting tco_use_type_alias_heap options.tco_use_type_alias_heap;
+    tco_populate_dead_unsafe_cast_heap =
+      setting
+        tco_populate_dead_unsafe_cast_heap
+        options.tco_populate_dead_unsafe_cast_heap;
+    po_disallow_static_constants_in_default_func_args =
+      setting
+        po_disallow_static_constants_in_default_func_args
+        options.po_disallow_static_constants_in_default_func_args;
+    tco_load_hack_64_distc_saved_state =
+      setting
+        tco_load_hack_64_distc_saved_state
+        options.tco_load_hack_64_distc_saved_state;
+    tco_ide_should_use_hack_64_distc =
+      setting
+        tco_ide_should_use_hack_64_distc
+        options.tco_ide_should_use_hack_64_distc;
+    tco_tast_under_dynamic =
+      setting tco_tast_under_dynamic options.tco_tast_under_dynamic;
+    tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

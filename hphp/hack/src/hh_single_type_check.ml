@@ -216,6 +216,7 @@ let parse_options () =
     set_mode (Ifc (!ifc_mode, lattice)) ();
     batch_mode := true
   in
+  let config_overrides = ref [] in
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
@@ -318,6 +319,9 @@ let parse_options () =
   let tast_under_dynamic = ref false in
   let options =
     [
+      ( "--config",
+        Arg.String (fun s -> config_overrides := s :: !config_overrides),
+        "<option=value> Set one hhconfig option; can be used multiple times" );
       ( "--no-print-position",
         Arg.Unit (fun _ -> print_position := false),
         " Don't print positions while printing TASTs and NASTs" );
@@ -338,7 +342,7 @@ let parse_options () =
           (fun mode ->
             batch_mode := true;
             set_mode (Shape_analysis mode) ()),
-        " Run the flow analysis" );
+        " Run the shape analysis" );
       ( "--refactor-sound-dynamic",
         (let refactor_analysis_mode = ref "" in
          let refactor_mode = ref "" in
@@ -923,7 +927,7 @@ let parse_options () =
   in
 
   let tcopt : GlobalOptions.t =
-    GlobalOptions.make
+    GlobalOptions.set
       ~tco_saved_state:GlobalOptions.default_saved_state
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_log_inference_constraints:!log_inference_constraints
@@ -1016,8 +1020,21 @@ let parse_options () =
       ~tco_substitution_mutation:!substitution_mutation
       ~tco_tast_under_dynamic:!tast_under_dynamic
       ~tco_rust_elab:!rust_elab
-      ()
+      GlobalOptions.default
   in
+
+  let tcopt =
+    let config =
+      List.fold
+        (List.rev !config_overrides)
+        ~init:(Config_file_common.empty ())
+        ~f:(fun config setting ->
+          let c = Config_file_common.parse_contents setting in
+          Config_file_common.apply_overrides ~from:None ~config ~overrides:c)
+    in
+    ServerConfig.load_config config tcopt
+  in
+
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
   Errors.report_pos_from_reason :=

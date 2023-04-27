@@ -164,7 +164,7 @@ let parse_options () =
 
   let root = Path.make "/" (* if none specified, we use this dummy *) in
   let tcopt =
-    GlobalOptions.make
+    GlobalOptions.set
       ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
@@ -175,7 +175,7 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
-      ()
+      GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;

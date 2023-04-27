@@ -350,8 +350,8 @@ type t = {
 }
 [@@deriving eq, show]
 
-val make :
-  tco_saved_state:saved_state ->
+val set :
+  ?tco_saved_state:saved_state ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
   ?tco_log_large_fanouts_threshold:int ->
@@ -370,6 +370,7 @@ val make :
   ?so_remote_version_specifier:string ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
+  ?po_codegen:bool ->
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
@@ -480,7 +481,7 @@ val make :
   ?tco_ide_should_use_hack_64_distc:bool ->
   ?tco_tast_under_dynamic:bool ->
   ?tco_rust_elab:bool ->
-  unit ->
+  t ->
   t
 
 val default : t

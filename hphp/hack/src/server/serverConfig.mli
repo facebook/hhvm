@@ -21,6 +21,8 @@ val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
 
 val repo_config_path : Relative_path.t
 
+val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
+
 val load : silent:bool -> ServerArgs.options -> t * ServerLocalConfig.t
 
 val is_compatible : t -> t -> bool

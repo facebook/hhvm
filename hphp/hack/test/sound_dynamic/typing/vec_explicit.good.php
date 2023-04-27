@@ -9,6 +9,9 @@ function ret():vec<~int> {
   return vec[2];
 }
 
+<<__NoAutoDynamic>>
+function expectInt(int $_):void { }
+
 function test1(dynamic $d, int $i):void {
   $li = getVec()[0];
   $a = vec<int>[$i];
@@ -21,4 +24,6 @@ function test1(dynamic $d, int $i):void {
   hh_expect_equivalent<vec<~arraykey>>($d);
   $e = vec<~int>[$i];
   hh_expect_equivalent<vec<~int>>($e);
+  $f = vec<vec<int>>[vec[2,3]];
+  expectInt($f[0][1]);
 }

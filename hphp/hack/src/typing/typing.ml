@@ -3426,35 +3426,55 @@ and expr_
      *)
     let (env, expected_with_implicit_like, supertype) =
       match expected with
-      | Some ExpectedTy.{ pos; ty = ety; reason; _ } ->
-        (* If there is an explicit type, under Sound Dynamic we pessimise
-         * the expected element type regardless of whether we have a pessimised
-         * builtin or not.
+      | Some ExpectedTy.{ pos; ty = ety; reason; _ } -> begin
+        (* We add an implicit like type to the expected type of elements if
+         *   There is an explicit type argument on the collection constructor, or
+         *   This is a pessimised builtin (e.g. Vector), or
+         *   There is a runtime-enforced bound (because it does no harm to allow dynamic)
          *)
-        if explicit then
-          let (env, ty) =
-            if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-              Typing_array_access.pessimise_type env ety.et_type
-            else
-              (env, ety.et_type)
-          in
-          (env, Some ExpectedTy.(make pos reason ty), ety.et_type)
-        else begin
-          match Typing_utils.try_strip_dynamic env ety.et_type with
-          | None ->
-            (* Add an implicit like for pessimised builtins or when bounded *)
-            let (env, ty) =
-              if
-                TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-                && (do_pessimise_builtin || Option.is_some bound)
-              then
-                Typing_array_access.pessimise_type env ety.et_type
+        let (env, like_ty) =
+          if
+            TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && (explicit || do_pessimise_builtin || Option.is_some bound)
+          then
+            Typing_array_access.pessimise_type env ety.et_type
+          else
+            (env, ety.et_type)
+        in
+        let expected_with_implicit_like =
+          Some ExpectedTy.(make pos reason like_ty)
+        in
+        let (env, supertype) =
+          if explicit then
+            (env, ety.et_type)
+          else
+            (* Extract the underlying type from the expected type.
+             * If it's an intersection, pick up the type under the like
+             * e.g. For ~int & arraykey we want to pick up int
+             * Otherwise, just strip the like.
+             *)
+            match get_node ety.et_type with
+            | Tintersection tyl ->
+              let (had_dynamic, tyl) =
+                List.map_env false tyl ~f:(fun had_dynamic ty ->
+                    match Typing_utils.try_strip_dynamic env ty with
+                    | None -> (had_dynamic, ty)
+                    | Some ty -> (true, ty))
+              in
+              if had_dynamic then
+                (* Put the intersection back together without the dynamic *)
+                let (env, ty) =
+                  Typing_intersection.simplify_intersections
+                    env
+                    (mk (get_reason ety.et_type, Tintersection tyl))
+                in
+                (env, ty)
               else
                 (env, ety.et_type)
-            in
-            (env, Some ExpectedTy.(make pos reason ty), ety.et_type)
-          | Some ty -> (env, expected, ty)
-        end
+            | _ -> (env, Typing_utils.strip_dynamic env ety.et_type)
+        in
+        (env, expected_with_implicit_like, supertype)
+      end
       | None ->
         let (env, ty) = Env.fresh_type_reason env use_pos r in
         (env, None, ty)

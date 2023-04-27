@@ -9,6 +9,9 @@ function getStrings():~vec<string> {
   return vec[];
 }
 
+<<__NoAutoDynamic>>
+function expectInt(int $_):void { }
+
 function test1(dynamic $dyn, int $i):void {
   $li = getVec()[0];
   $ls = getStrings()[0];
@@ -24,4 +27,6 @@ function test1(dynamic $dyn, int $i):void {
   hh_expect_equivalent<dict<(~string & arraykey),~arraykey>>($d);
   $e = dict<string,int>[$ls => $i];
   hh_expect_equivalent<dict<(~string & arraykey),int>>($e);
+  $f = dict<string, dict<string, int>>['bar' => dict['baz' => 42]];
+  expectInt($f['a']['b']);
 }

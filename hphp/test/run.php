@@ -3219,7 +3219,7 @@ function run_config_server(Options $options, string $test): mixed {
   }
   curl_close($ch);
 
-  return run_config_post(tuple($output, ''), $test, $options);
+  return run_config_post(tuple($output, '', 0), $test, $options);
 }
 
 function run_config_cli(
@@ -3227,7 +3227,7 @@ function run_config_cli(
   string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
-): ?(string, string) {
+): ?(string, string, int) {
   $cmd = timeout_prefix() . $cmd;
 
   if ($options->repo && $options->repo_out is null) {
@@ -3268,9 +3268,9 @@ function run_config_cli(
   $stderr = stream_get_contents($pipes[2]);
   fclose($pipes[1]);
   fclose($pipes[2]);
-  proc_close($process);
+  $exit_code = proc_close($process);
 
-  return tuple($output, $stderr);
+  return tuple($output, $stderr, $exit_code);
 }
 
 function replace_object_resource_ids(string $str, string $replacement): string {
@@ -3282,8 +3282,34 @@ function replace_object_resource_ids(string $str, string $replacement): string {
   );
 }
 
+// Attempt to extract useful crash information from stdout. Ideally we
+// could just print stderr, but a test might output text to stderr (even
+// when the test is working). When we run the test, we direct stderr
+// to stdout anyways. So, any crash information is printed to stdout.
+function trim_error_stdout(string $str): string {
+  $trimmed = vec[];
+  $found_dump = false;
+  // Any of the below strings indicate the beginning of a crash
+  // report, so only return anything starting with that.
+  foreach (explode("\n", $str) as $line) {
+    if (!$found_dump) {
+      if (stripos($line, "Core dumped") === 0 ||
+          stripos($line, "Stack trace in") === 0 ||
+          stripos($line, "Assertion Failure") !== false) {
+        $found_dump = true;
+      }
+    }
+    if ($found_dump) $trimmed[] = $line;
+  }
+  if ($found_dump) return implode("\n", $trimmed);
+  // If we didn't find anything that looked like a crash report, just
+  // supply the last 100. Hopefully there's something there that's
+  // useful.
+  return implode("\n", array_slice(explode("\n", $str), -100));
+}
+
 function run_config_post(
-  (string, string) $outputs,
+  (string, string, int) $outputs,
   string $test,
   Options $options,
 ): mixed {
@@ -3318,23 +3344,45 @@ function run_config_post(
     }
   }
 
-  list($output, $stderr) = $outputs;
+  list($output, $stderr, $exit_code) = $outputs;
   if (!$repeats) {
     $split = vec[trim($output)];
   } else {
     $split = array_map(trim<>, explode(MULTI_REQUEST_SEP, $output));
   }
 
-  file_put_contents(
-    Status::getTestOutputPath($test, 'out'),
-    str_replace(MULTI_REQUEST_SEP, '', $output)
-  );
+  $output = str_replace(MULTI_REQUEST_SEP, '', $output);
+  file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
+
+  // Exit code is 1 for things like fatal errors, which aren't actual
+  // crashes.
+  if (!$check_hhbbc_error) {
+    $exit_code_file = $test . '.exit_code';
+    if (file_exists($exit_code_file)) {
+      $ok = ((int)trim(file_get_contents($exit_code_file)) === $exit_code);
+    } else {
+      $ok = ($exit_code === 0 || $exit_code === 1);
+    }
+
+    if (!$ok) {
+      $trimmed = trim_error_stdout($output);
+      Status::writeDiff(
+        $test,
+        "Test failed because the process returned exit code $exit_code" .
+        (($exit_code === 124) ? " (timed out)" : "") .
+        "\nstderr:\n$stderr\nstdout:\n$trimmed"
+      );
+      return false;
+    }
+  }
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
   if ($stderr && !$check_hhbbc_error) {
+    $trimmed = trim_error_stdout($output);
     Status::writeDiff(
       $test,
-      "Test failed because the process wrote on stderr:\n$stderr"
+      "Test failed because the process wrote on stderr:" .
+      "\n$stderr\nstdout:\n$trimmed"
     );
     return false;
   }
@@ -3401,9 +3449,26 @@ function run_config_post(
   }
 }
 
+// Not all versions of /usr/bin/timeout support the -v option. Test to
+// see if it does.
+<<__Memoize>>
+function timeout_supports_verbose(): string {
+  $output = null;
+  $exit_code = -1;
+  exec(
+    '/usr/bin/timeout -v 1000 /usr/bin/true 2> /dev/null',
+    inout $output,
+    inout $exit_code
+  );
+  if ($exit_code === 0) return ' -v';
+  return '';
+}
+
 function timeout_prefix(): string {
   if (is_executable('/usr/bin/timeout')) {
-    return '/usr/bin/timeout ' . TIMEOUT_SECONDS . ' ';
+    return
+      '/usr/bin/timeout' . timeout_supports_verbose() . ' ' .
+      TIMEOUT_SECONDS . ' ';
   } else {
     return hphp_home() . '/hphp/tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
   }

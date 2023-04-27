@@ -970,7 +970,7 @@ void CLIWorker::doJob(int client) {
 
     Array envArr;
 
-    int ret = 255;
+    int ret = 1;
     init_command_line_session(args.size(), buf.get());
 
     SCOPE_EXIT { Logger::FInfo("Completed command with return code {}", ret); };

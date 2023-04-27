@@ -51,7 +51,6 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
     }
     
     public static class Builder {
-    
         private String sonnet = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL)

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="defaultStruct", builder=DefaultStruct.Builder.class)
 public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public DefaultStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="myLongDFset", requiredness=Requiredness.NONE) final long myLongDFset,
@@ -147,7 +146,6 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
     }
     
     public static class Builder {
-    
         private long myLongDFset = 10L;
         private long myLongDF = 0L;
         private int portDFset = 3456;

@@ -60,7 +60,6 @@ public final class ComplexFieldNames extends org.apache.thrift.TBaseException im
     }
     
     public static class Builder {
-    
         private String errorMessage = null;
         private String internalErrorMessage = null;
     

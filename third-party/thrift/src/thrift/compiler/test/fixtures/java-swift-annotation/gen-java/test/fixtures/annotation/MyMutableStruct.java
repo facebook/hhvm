@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct("MyMutableStruct") @com.foo.Enabled 
 public final class MyMutableStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyMutableStruct() {
       this.intField = 0L;
@@ -30,7 +29,6 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private long intField = 0L;
         private String stringField = null;
     

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="AdaptTemplatedTestStruct", builder=AdaptTemplatedTestStruct.Builder.class)
 public final class AdaptTemplatedTestStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public AdaptTemplatedTestStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="adaptedBool", requiredness=Requiredness.NONE) final boolean adaptedBool,
@@ -105,7 +104,6 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
     }
     
     public static class Builder {
-    
         private boolean adaptedBool = false;
         private byte adaptedByte = 0;
         private short adaptedShort = 0;
@@ -505,7 +503,7 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
       THRIFT_NAMES_TO_IDS.put("doubleTypedefBool", 22);
       FIELD_METADATA.put(22, DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedTestStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedTestStruct"),
         AdaptTemplatedTestStruct.class, AdaptTemplatedTestStruct::read0));
     }
     

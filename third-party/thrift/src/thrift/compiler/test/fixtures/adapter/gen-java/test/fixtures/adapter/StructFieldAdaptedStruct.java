@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructFieldAdaptedStruct", builder=StructFieldAdaptedStruct.Builder.class)
 public final class StructFieldAdaptedStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructFieldAdaptedStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE) final test.fixtures.adapter.AdaptedStruct adaptedStruct,
@@ -45,7 +44,6 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
     }
     
     public static class Builder {
-    
         private test.fixtures.adapter.AdaptedStruct adaptedStruct = null;
         private test.fixtures.adapter.AdaptedStruct adaptedTypedef = null;
         private test.fixtures.adapter.DirectlyAdaptedStruct directlyAdapted = null;
@@ -133,7 +131,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
       THRIFT_NAMES_TO_IDS.put("typedefOfAdapted", 4);
       FIELD_METADATA.put(4, TYPEDEF_OF_ADAPTED_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/StructFieldAdaptedStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/StructFieldAdaptedStruct"),
         StructFieldAdaptedStruct.class, StructFieldAdaptedStruct::read0));
     }
     

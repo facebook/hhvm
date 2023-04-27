@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithUnion", builder=StructWithUnion.Builder.class)
 public final class StructWithUnion implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithUnion(
         @com.facebook.swift.codec.ThriftField(value=1, name="u", requiredness=Requiredness.NONE) final test.fixtures.refs.MyUnion u,
@@ -42,7 +41,6 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private test.fixtures.refs.MyUnion u = null;
         private double aDouble = 0.;
         private test.fixtures.refs.MyField f = null;

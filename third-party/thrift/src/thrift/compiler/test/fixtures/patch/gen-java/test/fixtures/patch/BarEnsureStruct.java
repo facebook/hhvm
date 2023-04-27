@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="BarEnsureStruct", builder=BarEnsureStruct.Builder.class)
 public final class BarEnsureStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public BarEnsureStruct(
         @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.Loop loop
@@ -36,7 +35,6 @@ public final class BarEnsureStruct implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.Loop loop = null;
     
         @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
@@ -73,7 +71,7 @@ public final class BarEnsureStruct implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("loop", -1);
       FIELD_METADATA.put(-1, LOOP_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/BarEnsureStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/BarEnsureStruct"),
         BarEnsureStruct.class, BarEnsureStruct::read0));
     }
     

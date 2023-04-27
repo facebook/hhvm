@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructWithCustomDefault", builder=MyStructWithCustomDefault.Builder.class)
 public final class MyStructWithCustomDefault implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructWithCustomDefault(
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE) final long field1
@@ -36,7 +35,6 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
     }
     
     public static class Builder {
-    
         private long field1 = 1L;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
       THRIFT_NAMES_TO_IDS.put("field1", 1);
       FIELD_METADATA.put(1, FIELD1_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault"),
         MyStructWithCustomDefault.class, MyStructWithCustomDefault::read0));
     }
     

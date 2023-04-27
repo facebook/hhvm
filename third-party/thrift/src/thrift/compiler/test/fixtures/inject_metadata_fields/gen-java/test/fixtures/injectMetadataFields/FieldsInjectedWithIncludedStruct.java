@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="FieldsInjectedWithIncludedStruct", builder=FieldsInjectedWithIncludedStruct.Builder.class)
 public final class FieldsInjectedWithIncludedStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public FieldsInjectedWithIncludedStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="string_field", requiredness=Requiredness.NONE) final String stringField,
@@ -45,7 +44,6 @@ public final class FieldsInjectedWithIncludedStruct implements com.facebook.thri
     }
     
     public static class Builder {
-    
         private String stringField = null;
         private String injectedField = null;
         private String injectedStructuredAnnotationField = null;

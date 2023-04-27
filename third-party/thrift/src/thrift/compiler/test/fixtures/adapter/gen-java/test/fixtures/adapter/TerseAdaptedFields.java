@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="TerseAdaptedFields", builder=TerseAdaptedFields.Builder.class)
 public final class TerseAdaptedFields implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public TerseAdaptedFields(
         @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE) final int intField,
@@ -42,7 +41,6 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     }
     
     public static class Builder {
-    
         private int intField = 0;
         private String stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
         private Set<Integer> setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
@@ -113,7 +111,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
       THRIFT_NAMES_TO_IDS.put("set_field", 3);
       FIELD_METADATA.put(3, SET_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/TerseAdaptedFields"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/TerseAdaptedFields"),
         TerseAdaptedFields.class, TerseAdaptedFields::read0));
     }
     

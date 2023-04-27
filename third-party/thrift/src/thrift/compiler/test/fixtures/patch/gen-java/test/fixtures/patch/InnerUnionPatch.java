@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="InnerUnionPatch", builder=InnerUnionPatch.Builder.class)
 public final class InnerUnionPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public InnerUnionPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.InnerUnion assign,
@@ -48,7 +47,6 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.InnerUnion assign = null;
         private boolean clear = false;
         private test.fixtures.patch.InnerUnionFieldPatch patchPrior = test.fixtures.patch.InnerUnionFieldPatch.defaultInstance();
@@ -153,7 +151,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/InnerUnionPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/InnerUnionPatch"),
         InnerUnionPatch.class, InnerUnionPatch::read0));
     }
     

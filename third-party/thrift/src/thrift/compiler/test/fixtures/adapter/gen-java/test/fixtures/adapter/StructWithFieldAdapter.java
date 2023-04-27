@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithFieldAdapter", builder=StructWithFieldAdapter.Builder.class)
 public final class StructWithFieldAdapter implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithFieldAdapter(
         @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE) final int field,
@@ -45,7 +44,6 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     }
     
     public static class Builder {
-    
         private int field = 0;
         private int sharedField = 0;
         private Integer optSharedField = null;
@@ -133,7 +131,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       THRIFT_NAMES_TO_IDS.put("opt_boxed_field", 4);
       FIELD_METADATA.put(4, OPT_BOXED_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/StructWithFieldAdapter"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/StructWithFieldAdapter"),
         StructWithFieldAdapter.class, StructWithFieldAdapter::read0));
     }
     

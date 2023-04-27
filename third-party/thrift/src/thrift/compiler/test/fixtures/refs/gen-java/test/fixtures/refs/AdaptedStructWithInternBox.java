@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="AdaptedStructWithInternBox", builder=AdaptedStructWithInternBox.Builder.class)
 public final class AdaptedStructWithInternBox implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public AdaptedStructWithInternBox(
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE) final test.fixtures.refs.Empty field1,
@@ -45,7 +44,6 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     }
     
     public static class Builder {
-    
         private test.fixtures.refs.Empty field1 = null;
         private test.fixtures.refs.MyField field2 = null;
         private test.fixtures.refs.Empty field3 = test.fixtures.refs.Empty.defaultInstance();

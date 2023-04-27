@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="ComplexNestedStruct", builder=ComplexNestedStruct.Builder.class)
 public final class ComplexNestedStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public ComplexNestedStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="setOfSetOfInt", requiredness=Requiredness.NONE) final Set<Set<Integer>> setOfSetOfInt,
@@ -87,7 +86,6 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
     }
     
     public static class Builder {
-    
         private Set<Set<Integer>> setOfSetOfInt = null;
         private List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> listofListOfListOfListOfEnum = null;
         private List<List<test.fixtures.complex_struct.MyStruct>> listOfListOfMyStruct = null;

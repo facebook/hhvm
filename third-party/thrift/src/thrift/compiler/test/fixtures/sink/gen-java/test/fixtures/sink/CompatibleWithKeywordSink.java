@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="CompatibleWithKeywordSink", builder=CompatibleWithKeywordSink.Builder.class)
 public final class CompatibleWithKeywordSink implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public CompatibleWithKeywordSink(
         @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE) final String sink
@@ -36,7 +35,6 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     }
     
     public static class Builder {
-    
         private String sink = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE)

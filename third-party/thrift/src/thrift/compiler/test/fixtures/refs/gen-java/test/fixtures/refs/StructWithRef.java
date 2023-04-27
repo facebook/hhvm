@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithRef", builder=StructWithRef.Builder.class)
 public final class StructWithRef implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithRef(
         @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE) final test.fixtures.refs.Empty defField,
@@ -42,7 +41,6 @@ public final class StructWithRef implements com.facebook.thrift.payload.ThriftSe
     }
     
     public static class Builder {
-    
         private test.fixtures.refs.Empty defField = null;
         private test.fixtures.refs.Empty optField = null;
         private test.fixtures.refs.Empty reqField = null;

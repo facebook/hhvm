@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="LateDefStructEnsureStruct", builder=LateDefStructEnsureStruct.Builder.class)
 public final class LateDefStructEnsureStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public LateDefStructEnsureStruct(
     ) {
@@ -31,7 +30,6 @@ public final class LateDefStructEnsureStruct implements com.facebook.thrift.payl
     
     
     public static class Builder {
-    
     
     public Builder() { }
         public Builder(LateDefStructEnsureStruct other) {
@@ -51,7 +49,7 @@ public final class LateDefStructEnsureStruct implements com.facebook.thrift.payl
     private static final TStruct STRUCT_DESC = new TStruct("LateDefStructEnsureStruct");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/LateDefStructEnsureStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/LateDefStructEnsureStruct"),
         LateDefStructEnsureStruct.class, LateDefStructEnsureStruct::read0));
     }
     @java.lang.Override

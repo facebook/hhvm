@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithString", builder=StructWithString.Builder.class)
 public final class StructWithString implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithString(
         @com.facebook.swift.codec.ThriftField(value=1, name="def_unique_string_ref", requiredness=Requiredness.NONE) final String defUniqueStringRef,
@@ -48,7 +47,6 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     }
     
     public static class Builder {
-    
         private String defUniqueStringRef = "...";
         private String defSharedStringRef = "...";
         private String defSharedStringConstRef = "...";

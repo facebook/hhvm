@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="LateDefStructPatch", builder=LateDefStructPatch.Builder.class)
 public final class LateDefStructPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public LateDefStructPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct assign,
@@ -48,7 +47,6 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.LateDefStruct assign = null;
         private boolean clear = false;
         private test.fixtures.patch.LateDefStructFieldPatch patchPrior = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
@@ -153,7 +151,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/LateDefStructPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/LateDefStructPatch"),
         LateDefStructPatch.class, LateDefStructPatch::read0));
     }
     

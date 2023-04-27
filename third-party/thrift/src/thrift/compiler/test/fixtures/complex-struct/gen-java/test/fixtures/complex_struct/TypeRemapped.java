@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="TypeRemapped", builder=TypeRemapped.Builder.class)
 public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public TypeRemapped(
         @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE) final it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap,
@@ -45,7 +44,6 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap = null;
         private it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> ioMap = null;
         private java.math.BigInteger bigInteger = 0;

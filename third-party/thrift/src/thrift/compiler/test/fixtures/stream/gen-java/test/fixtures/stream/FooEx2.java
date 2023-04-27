@@ -41,7 +41,6 @@ public final class FooEx2 extends org.apache.thrift.TBaseException implements co
     
     public static class Builder {
     
-    
     public Builder() { }
         public Builder(FooEx2 other) {
         }

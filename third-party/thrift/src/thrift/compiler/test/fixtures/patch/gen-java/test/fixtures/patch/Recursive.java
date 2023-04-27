@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Recursive", builder=Recursive.Builder.class)
 public final class Recursive implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Recursive(
         @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.TERSE) final Map<String, test.fixtures.patch.Recursive> nodes
@@ -36,7 +35,6 @@ public final class Recursive implements com.facebook.thrift.payload.ThriftSerial
     }
     
     public static class Builder {
-    
         private Map<String, test.fixtures.patch.Recursive> nodes = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
     
         @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.TERSE)
@@ -73,7 +71,7 @@ public final class Recursive implements com.facebook.thrift.payload.ThriftSerial
       THRIFT_NAMES_TO_IDS.put("nodes", -1);
       FIELD_METADATA.put(-1, NODES_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/Recursive"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/Recursive"),
         Recursive.class, Recursive::read0));
     }
     

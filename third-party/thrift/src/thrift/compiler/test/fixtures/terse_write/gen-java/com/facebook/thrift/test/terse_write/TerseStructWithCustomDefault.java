@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="TerseStructWithCustomDefault", builder=TerseStructWithCustomDefault.Builder.class)
 public final class TerseStructWithCustomDefault implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public TerseStructWithCustomDefault(
         @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.TERSE) final boolean boolField,
@@ -81,7 +80,6 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
     }
     
     public static class Builder {
-    
         private boolean boolField = true;
         private byte byteField = (byte)1;
         private short shortField = (short)2;
@@ -345,7 +343,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       THRIFT_NAMES_TO_IDS.put("struct_field", 14);
       FIELD_METADATA.put(14, STRUCT_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault"),
         TerseStructWithCustomDefault.class, TerseStructWithCustomDefault::read0));
     }
     

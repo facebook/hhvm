@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithRefTypeShared", builder=StructWithRefTypeShared.Builder.class)
 public final class StructWithRefTypeShared implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithRefTypeShared(
         @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE) final test.fixtures.refs.Empty defField,
@@ -42,7 +41,6 @@ public final class StructWithRefTypeShared implements com.facebook.thrift.payloa
     }
     
     public static class Builder {
-    
         private test.fixtures.refs.Empty defField = null;
         private test.fixtures.refs.Empty optField = null;
         private test.fixtures.refs.Empty reqField = null;

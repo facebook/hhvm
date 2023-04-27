@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Color", builder=Color.Builder.class)
 public final class Color implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Color(
         @com.facebook.swift.codec.ThriftField(value=1, name="red", requiredness=Requiredness.NONE) final double red,
@@ -45,7 +44,6 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     }
     
     public static class Builder {
-    
         private double red = 0.;
         private double green = 0.;
         private double blue = 0.;

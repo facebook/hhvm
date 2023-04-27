@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructMapFloatThrowExp", builder=MyStructMapFloatThrowExp.Builder.class)
 public final class MyStructMapFloatThrowExp implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructMapFloatThrowExp(
         @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE) final long myLongField,
@@ -39,7 +38,6 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     }
     
     public static class Builder {
-    
         private long myLongField = 0L;
         private Map<Integer, List<List<Float>>> mapListOfFloats = null;
     

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="BinaryMapping", builder=BinaryMapping.Builder.class)
 public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public BinaryMapping(
         @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE) final Map<String, String> binaryMap,
@@ -39,7 +38,6 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
     }
     
     public static class Builder {
-    
         private Map<String, String> binaryMap = null;
         private Map<String, byte[]> regularBinary = null;
     

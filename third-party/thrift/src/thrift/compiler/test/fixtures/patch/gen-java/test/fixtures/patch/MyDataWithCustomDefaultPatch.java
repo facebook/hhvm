@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyDataWithCustomDefaultPatch", builder=MyDataWithCustomDefaultPatch.Builder.class)
 public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyDataWithCustomDefaultPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyDataWithCustomDefault assign,
@@ -48,7 +47,6 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.MyDataWithCustomDefault assign = null;
         private boolean clear = false;
         private test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patchPrior = test.fixtures.patch.MyDataWithCustomDefaultFieldPatch.defaultInstance();
@@ -153,7 +151,7 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch"),
         MyDataWithCustomDefaultPatch.class, MyDataWithCustomDefaultPatch::read0));
     }
     

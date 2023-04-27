@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="WrappedFields", builder=WrappedFields.Builder.class)
 public final class WrappedFields implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public WrappedFields(
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE) final int field1
@@ -36,7 +35,6 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
     }
     
     public static class Builder {
-    
         private int field1 = 7;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
@@ -73,7 +71,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
       THRIFT_NAMES_TO_IDS.put("field1", 1);
       FIELD_METADATA.put(1, FIELD1_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/WrappedFields"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/WrappedFields"),
         WrappedFields.class, WrappedFields::read0));
     }
     

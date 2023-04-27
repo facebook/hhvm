@@ -92,8 +92,6 @@ constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
 constexpr auto kJavaMutableUri = "facebook.com/thrift/annotation/java/Mutable";
 constexpr auto kJavaAnnotationUri =
     "facebook.com/thrift/annotation/java/Annotation";
-constexpr auto kJavaEnableIsSetUri =
-    "facebook.com/thrift/annotation/java/EnableIsSet";
 constexpr auto kJavaAdapterUri = "facebook.com/thrift/annotation/java/Adapter";
 constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
 

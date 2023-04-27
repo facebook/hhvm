@@ -60,7 +60,6 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
     }
     
     public static class Builder {
-    
         private String errorMessage = null;
         private String internalGreatMessage = null;
     

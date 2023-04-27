@@ -42,11 +42,6 @@ struct Annotation {
 @scope.Typedef
 struct BinaryString {}
 
-// When this annotation is applied, thrift compiler will generate isSet() series of methods.
-@scope.Struct
-@scope.Exception
-struct EnableIsSet {}
-
 // An annotation that is applied to a Typedef or field that maps it a Java type Adapter.
 // For example:
 // @java.Adapter{adapterClassName="com.facebook.thrift.TimestampAdapter", typeClassName="java.time.Instant"}

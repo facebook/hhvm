@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct("LegacyStruct")
 public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public LegacyStruct() {
       this.normal = 0;
@@ -30,7 +29,6 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private int normal = 0;
         private int bad = 0;
     

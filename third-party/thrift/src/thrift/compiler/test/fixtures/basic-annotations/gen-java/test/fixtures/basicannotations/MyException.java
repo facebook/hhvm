@@ -41,7 +41,6 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
     
     public static class Builder {
     
-    
     public Builder() { }
         public Builder(MyException other) {
         }

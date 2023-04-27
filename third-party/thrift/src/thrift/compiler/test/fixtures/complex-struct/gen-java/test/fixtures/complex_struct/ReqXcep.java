@@ -60,7 +60,6 @@ public final class ReqXcep extends org.apache.thrift.TBaseException implements c
     }
     
     public static class Builder {
-    
         private String message = null;
         private int errorCode = 0;
     

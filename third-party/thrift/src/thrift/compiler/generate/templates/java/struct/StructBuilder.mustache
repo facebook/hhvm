@@ -16,10 +16,6 @@
 
 }}
 public static class Builder {
-    {{#struct:enableIsSet?}}
-    private final BitSet __optional_isset = new BitSet();
-    {{/struct:enableIsSet?}}
-
     {{#struct:fields}}
     private {{> FieldType}} {{field:javaName}} = {{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> struct/FieldValue}}{{/field:hasWrapper?}};
     {{#field:hasWrapper?}}
@@ -68,16 +64,13 @@ public static class Builder {
             this.{{field:javaName}}{{^last?}},{{/last?}}
             {{/struct:fields}}
         );
-        {{#struct:enableIsSet?}}
-        result.__isset_bit_vector.or(__optional_isset);
-        {{/struct:enableIsSet?}}
         return result;
         {{/struct:hasWrapper?}}
         {{#struct:hasWrapper?}}
         {{> struct/CreateStruct}}
         {{/struct:hasWrapper?}}
         {{/struct:asBean?}}{{!
-        
+
         }}{{#struct:asBean?}}
         {{> struct/CreateStruct}}
         {{/struct:asBean?}}

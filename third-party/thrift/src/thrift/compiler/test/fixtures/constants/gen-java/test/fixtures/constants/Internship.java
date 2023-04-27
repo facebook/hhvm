@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Internship", builder=Internship.Builder.class)
 public final class Internship implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Internship(
         @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED) final int weeks,
@@ -48,7 +47,6 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     }
     
     public static class Builder {
-    
         private int weeks = 0;
         private String title = null;
         private test.fixtures.constants.Company employer = null;

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStruct1", builder=MyStruct1.Builder.class)
 public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStruct1(
         @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE) final long myIntField,
@@ -45,7 +44,6 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
     }
     
     public static class Builder {
-    
         private long myIntField = 0L;
         private String myStringField = null;
         private test.fixtures.basic_swift_bean.MyDataItem myDataField = null;

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithSharedConst", builder=StructWithSharedConst.Builder.class)
 public final class StructWithSharedConst implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithSharedConst(
         @com.facebook.swift.codec.ThriftField(value=1, name="opt_shared_const", requiredness=Requiredness.OPTIONAL) final test.fixtures.refs.MyField optSharedConst,
@@ -42,7 +41,6 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
     }
     
     public static class Builder {
-    
         private test.fixtures.refs.MyField optSharedConst = null;
         private test.fixtures.refs.MyField sharedConst = null;
         private test.fixtures.refs.MyField reqSharedConst = null;

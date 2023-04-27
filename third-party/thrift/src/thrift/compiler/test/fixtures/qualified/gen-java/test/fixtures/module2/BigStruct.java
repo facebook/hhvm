@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="BigStruct", builder=BigStruct.Builder.class)
 public final class BigStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public BigStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE) final test.fixtures.module2.Struct s,
@@ -39,7 +38,6 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     }
     
     public static class Builder {
-    
         private test.fixtures.module2.Struct s = null;
         private int id = 0;
     

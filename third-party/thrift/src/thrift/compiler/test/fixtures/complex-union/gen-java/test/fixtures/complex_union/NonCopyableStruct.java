@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="NonCopyableStruct", builder=NonCopyableStruct.Builder.class)
 public final class NonCopyableStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public NonCopyableStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="num", requiredness=Requiredness.NONE) final long num
@@ -36,7 +35,6 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
     }
     
     public static class Builder {
-    
         private long num = 0L;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="num", requiredness=Requiredness.NONE)

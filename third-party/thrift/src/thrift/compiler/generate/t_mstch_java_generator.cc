@@ -508,7 +508,6 @@ class mstch_java_struct : public mstch_struct {
             {"struct:exceptionMessage", &mstch_java_struct::exception_message},
             {"struct:needsExceptionMessage?",
              &mstch_java_struct::needs_exception_message},
-            {"struct:enableIsSet?", &mstch_java_struct::enable_is_set},
             {"struct:hasTerseField?", &mstch_java_struct::has_terse_field},
             {"struct:hasWrapper?", &mstch_java_struct::has_wrapper},
             {"struct:clearAdapter", &mstch_java_struct::clear_adapter},
@@ -600,10 +599,6 @@ class mstch_java_struct : public mstch_struct {
   mstch::node needs_exception_message() {
     return struct_->is_xception() && struct_->has_annotation("message") &&
         struct_->get_field_by_name("message") == nullptr;
-  }
-  mstch::node enable_is_set() {
-    return struct_->find_structured_annotation_or_null(kJavaEnableIsSetUri) !=
-        nullptr;
   }
 };
 

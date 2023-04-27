@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="RenamedStruct", builder=RenamedStruct.Builder.class)
 public final class RenamedStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public RenamedStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="data", requiredness=Requiredness.NONE) final long data
@@ -36,7 +35,6 @@ public final class RenamedStruct implements com.facebook.thrift.payload.ThriftSe
     }
     
     public static class Builder {
-    
         private long data = 0L;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="data", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class RenamedStruct implements com.facebook.thrift.payload.ThriftSe
       THRIFT_NAMES_TO_IDS.put("data", 1);
       FIELD_METADATA.put(1, DATA_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/RenamedStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/RenamedStruct"),
         RenamedStruct.class, RenamedStruct::read0));
     }
     

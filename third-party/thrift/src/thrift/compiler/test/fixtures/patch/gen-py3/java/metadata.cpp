@@ -17,7 +17,6 @@ namespace java {
   ::apache::thrift::detail::md::StructMetadata<Mutable>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Annotation>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BinaryString>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<EnableIsSet>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Wrapper>::gen(metadata);
   return metadata;

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyDataWithCustomDefaultEnsureStruct", builder=MyDataWithCustomDefaultEnsureStruct.Builder.class)
 public final class MyDataWithCustomDefaultEnsureStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyDataWithCustomDefaultEnsureStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.OPTIONAL) final String data1,
@@ -39,7 +38,6 @@ public final class MyDataWithCustomDefaultEnsureStruct implements com.facebook.t
     }
     
     public static class Builder {
-    
         private String data1 = null;
         private Integer data2 = null;
     
@@ -93,7 +91,7 @@ public final class MyDataWithCustomDefaultEnsureStruct implements com.facebook.t
       THRIFT_NAMES_TO_IDS.put("data2", 2);
       FIELD_METADATA.put(2, DATA2_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct"),
         MyDataWithCustomDefaultEnsureStruct.class, MyDataWithCustomDefaultEnsureStruct::read0));
     }
     

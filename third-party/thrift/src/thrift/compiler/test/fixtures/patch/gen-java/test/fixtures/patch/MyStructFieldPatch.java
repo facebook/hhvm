@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructFieldPatch", builder=MyStructFieldPatch.Builder.class)
 public final class MyStructFieldPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructFieldPatch(
         @com.facebook.swift.codec.ThriftField(value=-32, name="structWithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault,
@@ -132,7 +131,6 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault = test.fixtures.patch.MyDataWithCustomDefaultPatch.defaultInstance();
         private com.facebook.thrift.op.I32Patch i32WithCustomDefault = com.facebook.thrift.op.I32Patch.defaultInstance();
         private test.fixtures.patch.MyStructField30Patch mapMap = test.fixtures.patch.MyStructField30Patch.defaultInstance();
@@ -713,7 +711,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
       THRIFT_NAMES_TO_IDS.put("structWithFieldCustomDefault", 1);
       FIELD_METADATA.put(1, STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructFieldPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructFieldPatch"),
         MyStructFieldPatch.class, MyStructFieldPatch::read0));
     }
     

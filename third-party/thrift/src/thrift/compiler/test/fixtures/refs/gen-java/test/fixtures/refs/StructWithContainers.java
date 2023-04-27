@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructWithContainers", builder=StructWithContainers.Builder.class)
 public final class StructWithContainers implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructWithContainers(
         @com.facebook.swift.codec.ThriftField(value=1, name="list_ref", requiredness=Requiredness.NONE) final List<Integer> listRef,
@@ -51,7 +50,6 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
     }
     
     public static class Builder {
-    
         private List<Integer> listRef = null;
         private Set<Integer> setRef = null;
         private Map<Integer, Integer> mapRef = null;

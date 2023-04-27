@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="SecretStruct", builder=SecretStruct.Builder.class)
 public final class SecretStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public SecretStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
@@ -39,7 +38,6 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private long id = 0L;
         private String password = null;
     

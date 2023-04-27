@@ -51,7 +51,6 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     }
     
     public static class Builder {
-    
         private String name = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)

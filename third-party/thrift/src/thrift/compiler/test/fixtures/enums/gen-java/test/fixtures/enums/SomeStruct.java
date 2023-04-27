@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="SomeStruct", builder=SomeStruct.Builder.class)
 public final class SomeStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public SomeStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="reasonable", requiredness=Requiredness.NONE) final test.fixtures.enums.Metasyntactic reasonable,
@@ -46,7 +45,6 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
     }
     
     public static class Builder {
-    
         private test.fixtures.enums.Metasyntactic reasonable = test.fixtures.enums.Metasyntactic.FOO;
         private test.fixtures.enums.Metasyntactic fine = test.fixtures.enums.Metasyntactic.BAR;
         private test.fixtures.enums.Metasyntactic questionable = test.fixtures.enums.Metasyntactic.fromInteger(-1);
@@ -135,7 +133,7 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
       THRIFT_NAMES_TO_IDS.put("tags", 4);
       FIELD_METADATA.put(4, TAGS_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/SomeStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/SomeStruct"),
         SomeStruct.class, SomeStruct::read0));
     }
     

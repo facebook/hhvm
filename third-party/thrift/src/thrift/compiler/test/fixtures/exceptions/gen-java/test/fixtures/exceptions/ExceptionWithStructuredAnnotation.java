@@ -60,7 +60,6 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
     }
     
     public static class Builder {
-    
         private String messageField = null;
         private int errorCode = 0;
     

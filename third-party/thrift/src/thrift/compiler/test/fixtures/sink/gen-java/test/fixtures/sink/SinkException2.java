@@ -51,7 +51,6 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
     }
     
     public static class Builder {
-    
         private long reason = 0L;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)

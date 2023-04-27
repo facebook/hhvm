@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="HeapAllocated", builder=HeapAllocated.Builder.class)
 public final class HeapAllocated implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public HeapAllocated(
     ) {
@@ -31,7 +30,6 @@ public final class HeapAllocated implements com.facebook.thrift.payload.ThriftSe
     
     
     public static class Builder {
-    
     
     public Builder() { }
         public Builder(HeapAllocated other) {
@@ -51,7 +49,7 @@ public final class HeapAllocated implements com.facebook.thrift.payload.ThriftSe
     private static final TStruct STRUCT_DESC = new TStruct("HeapAllocated");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/HeapAllocated"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/HeapAllocated"),
         HeapAllocated.class, HeapAllocated::read0));
     }
     @java.lang.Override

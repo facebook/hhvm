@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Vehicle", builder=Vehicle.Builder.class)
 public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Vehicle(
         @com.facebook.swift.codec.ThriftField(value=1, name="color", requiredness=Requiredness.NONE) final test.fixtures.optionals.Color color,
@@ -48,7 +47,6 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     }
     
     public static class Builder {
-    
         private test.fixtures.optionals.Color color = null;
         private String licensePlate = null;
         private String description = null;

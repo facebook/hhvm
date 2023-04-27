@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStruct", builder=MyStruct.Builder.class)
 public final class MyStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="myEnum", requiredness=Requiredness.NONE) final test.fixtures.swift.enumstrict.MyEnum myEnum,
@@ -39,7 +38,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
     
     public static class Builder {
-    
         private test.fixtures.swift.enumstrict.MyEnum myEnum = test.fixtures.swift.enumstrict.MyEnum.fromInteger(0);
         private test.fixtures.swift.enumstrict.MyBigEnum myBigEnum = test.fixtures.swift.enumstrict.MyBigEnum.ONE;
     

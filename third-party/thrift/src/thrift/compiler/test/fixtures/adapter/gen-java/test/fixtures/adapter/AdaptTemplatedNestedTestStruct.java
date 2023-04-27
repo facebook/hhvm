@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="AdaptTemplatedNestedTestStruct", builder=AdaptTemplatedNestedTestStruct.Builder.class)
 public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public AdaptTemplatedNestedTestStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE) final test.fixtures.adapter.AdaptTemplatedTestStruct adaptedStruct
@@ -36,7 +35,6 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
     }
     
     public static class Builder {
-    
         private test.fixtures.adapter.AdaptTemplatedTestStruct adaptedStruct = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
       THRIFT_NAMES_TO_IDS.put("adaptedStruct", 1);
       FIELD_METADATA.put(1, ADAPTED_STRUCT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"),
         AdaptTemplatedNestedTestStruct.class, AdaptTemplatedNestedTestStruct::read0));
     }
     

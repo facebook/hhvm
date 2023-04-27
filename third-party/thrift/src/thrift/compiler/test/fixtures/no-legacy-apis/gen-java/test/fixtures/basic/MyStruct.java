@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStruct", builder=MyStruct.Builder.class)
 public final class MyStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="myIntField", requiredness=Requiredness.NONE) final long myIntField,
@@ -39,7 +38,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
     
     public static class Builder {
-    
         private long myIntField = 0L;
         private String myStringField = null;
     
@@ -93,7 +91,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       THRIFT_NAMES_TO_IDS.put("myStringField", 2);
       FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/no-legacy-apis/MyStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/no-legacy-apis/MyStruct"),
         MyStruct.class, MyStruct::read0));
     }
     

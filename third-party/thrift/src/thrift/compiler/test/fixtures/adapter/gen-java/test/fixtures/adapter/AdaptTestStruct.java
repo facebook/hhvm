@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="AdaptTestStruct", builder=AdaptTestStruct.Builder.class)
 public final class AdaptTestStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public AdaptTestStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE) final long delay,
@@ -63,7 +62,6 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private long delay = 0L;
         private byte[] custom = null;
         private long timeout = 0L;
@@ -253,7 +251,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("binary_data", 10);
       FIELD_METADATA.put(10, BINARY_DATA_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTestStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTestStruct"),
         AdaptTestStruct.class, AdaptTestStruct::read0));
     }
     

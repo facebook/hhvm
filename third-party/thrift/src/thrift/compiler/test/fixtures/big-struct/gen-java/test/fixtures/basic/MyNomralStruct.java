@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyNomralStruct", builder=MyNomralStruct.Builder.class)
 public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyNomralStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="msg1", requiredness=Requiredness.NONE) final String msg1,
@@ -123,7 +122,6 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     }
     
     public static class Builder {
-    
         private String msg1 = null;
         private String msg2 = null;
         private String msg3 = null;

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructNestedAnnotation", builder=MyStructNestedAnnotation.Builder.class)
 public final class MyStructNestedAnnotation implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructNestedAnnotation(
         @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE) final String name
@@ -36,7 +35,6 @@ public final class MyStructNestedAnnotation implements com.facebook.thrift.paylo
     }
     
     public static class Builder {
-    
         private String name = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)

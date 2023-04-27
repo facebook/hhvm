@@ -101,30 +101,6 @@
         "is_union" : false,
         "lineno" : 42
       },
-      "EnableIsSet" : {
-        "name" : "EnableIsSet",
-        "structured_annotations": {
-          "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 46
-      },
       "Adapter" : {
         "name" : "Adapter",
         "structured_annotations": {
@@ -157,21 +133,21 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 60,
+            "lineno" : 55,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 63,
+            "lineno" : 58,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 55
+        "lineno" : 50
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -189,21 +165,21 @@
           "wrapperClassName" : {
             "name" : "wrapperClassName",
             "key" : 1,
-            "lineno" : 69,
+            "lineno" : 64,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 72,
+            "lineno" : 67,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 66
+        "lineno" : 61
       }
       },
   "source_path" : "thrift/annotation/java",

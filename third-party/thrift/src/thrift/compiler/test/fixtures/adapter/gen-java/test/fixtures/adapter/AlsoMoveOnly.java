@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="AlsoMoveOnly", builder=AlsoMoveOnly.Builder.class)
 public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public AlsoMoveOnly(
         @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE) final long ptr
@@ -36,7 +35,6 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private long ptr = 0L;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
       THRIFT_NAMES_TO_IDS.put("ptr", 1);
       FIELD_METADATA.put(1, PTR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AlsoMoveOnly"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AlsoMoveOnly"),
         AlsoMoveOnly.class, AlsoMoveOnly::read0));
     }
     

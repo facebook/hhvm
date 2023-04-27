@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="RecursiveEnsureStruct", builder=RecursiveEnsureStruct.Builder.class)
 public final class RecursiveEnsureStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public RecursiveEnsureStruct(
         @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Map<String, test.fixtures.patch.Recursive> nodes
@@ -36,7 +35,6 @@ public final class RecursiveEnsureStruct implements com.facebook.thrift.payload.
     }
     
     public static class Builder {
-    
         private Map<String, test.fixtures.patch.Recursive> nodes = null;
     
         @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
@@ -73,7 +71,7 @@ public final class RecursiveEnsureStruct implements com.facebook.thrift.payload.
       THRIFT_NAMES_TO_IDS.put("nodes", -1);
       FIELD_METADATA.put(-1, NODES_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/RecursiveEnsureStruct"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/RecursiveEnsureStruct"),
         RecursiveEnsureStruct.class, RecursiveEnsureStruct::read0));
     }
     

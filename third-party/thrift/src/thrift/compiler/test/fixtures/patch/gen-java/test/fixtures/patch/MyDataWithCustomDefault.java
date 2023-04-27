@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyDataWithCustomDefault", builder=MyDataWithCustomDefault.Builder.class)
 public final class MyDataWithCustomDefault implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyDataWithCustomDefault(
         @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE) final String data1,
@@ -39,7 +38,6 @@ public final class MyDataWithCustomDefault implements com.facebook.thrift.payloa
     }
     
     public static class Builder {
-    
         private String data1 = "1";
         private int data2 = 2;
     
@@ -93,7 +91,7 @@ public final class MyDataWithCustomDefault implements com.facebook.thrift.payloa
       THRIFT_NAMES_TO_IDS.put("data2", 2);
       FIELD_METADATA.put(2, DATA2_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefault"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataWithCustomDefault"),
         MyDataWithCustomDefault.class, MyDataWithCustomDefault::read0));
     }
     

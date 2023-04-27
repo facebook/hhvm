@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructField26Patch", builder=MyStructField26Patch.Builder.class)
 public final class MyStructField26Patch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructField26Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Short> assign,
@@ -51,7 +50,6 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     }
     
     public static class Builder {
-    
         private List<Short> assign = null;
         private boolean clear = false;
         private Map<Integer, com.facebook.thrift.op.I16Patch> patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
@@ -173,7 +171,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
       THRIFT_NAMES_TO_IDS.put("append", 9);
       FIELD_METADATA.put(9, APPEND_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField26Patch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField26Patch"),
         MyStructField26Patch.class, MyStructField26Patch::read0));
     }
     

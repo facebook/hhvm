@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Foo2", builder=Foo2.Builder.class)
 public final class Foo2 implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Foo2(
         @com.facebook.swift.codec.ThriftField(value=3, name="field1", requiredness=Requiredness.NONE) final int field1,
@@ -42,7 +41,6 @@ public final class Foo2 implements com.facebook.thrift.payload.ThriftSerializabl
     }
     
     public static class Builder {
-    
         private int field1 = 0;
         private int field2 = 0;
         private int field3 = 0;

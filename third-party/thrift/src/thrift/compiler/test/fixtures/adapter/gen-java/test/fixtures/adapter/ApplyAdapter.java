@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="ApplyAdapter", builder=ApplyAdapter.Builder.class)
 public final class ApplyAdapter implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public ApplyAdapter(
     ) {
@@ -31,7 +30,6 @@ public final class ApplyAdapter implements com.facebook.thrift.payload.ThriftSer
     
     
     public static class Builder {
-    
     
     public Builder() { }
         public Builder(ApplyAdapter other) {
@@ -51,7 +49,7 @@ public final class ApplyAdapter implements com.facebook.thrift.payload.ThriftSer
     private static final TStruct STRUCT_DESC = new TStruct("ApplyAdapter");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ApplyAdapter"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ApplyAdapter"),
         ApplyAdapter.class, ApplyAdapter::read0));
     }
     @java.lang.Override

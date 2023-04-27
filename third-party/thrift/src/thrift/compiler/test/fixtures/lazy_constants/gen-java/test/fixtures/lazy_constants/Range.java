@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="Range", builder=Range.Builder.class)
 public final class Range implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public Range(
         @com.facebook.swift.codec.ThriftField(value=1, name="min", requiredness=Requiredness.REQUIRED) final int min,
@@ -39,7 +38,6 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     }
     
     public static class Builder {
-    
         private int min = 0;
         private int max = 0;
     

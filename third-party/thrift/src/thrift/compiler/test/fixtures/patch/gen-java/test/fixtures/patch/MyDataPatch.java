@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyDataPatch", builder=MyDataPatch.Builder.class)
 public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyDataPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyData assign,
@@ -48,7 +47,6 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.MyData assign = null;
         private boolean clear = false;
         private test.fixtures.patch.MyDataFieldPatch patchPrior = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
@@ -153,7 +151,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyDataPatch"),
         MyDataPatch.class, MyDataPatch::read0));
     }
     

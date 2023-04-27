@@ -25,7 +25,4 @@
     result.{{field:javaName}} = this.{{field:javaName}};
 {{/field:hasWrapper?}}
 {{/struct:fields}}
-{{#struct:enableIsSet?}}
-    result.__isset_bit_vector.or(__optional_isset);
-{{/struct:enableIsSet?}}
 return result;

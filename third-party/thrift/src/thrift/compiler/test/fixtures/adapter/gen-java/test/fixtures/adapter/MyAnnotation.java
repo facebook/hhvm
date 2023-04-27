@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyAnnotation", builder=MyAnnotation.Builder.class)
 public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyAnnotation(
         @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE) final String signature,
@@ -39,7 +38,6 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private String signature = null;
         private test.fixtures.adapter.Color color = test.fixtures.adapter.Color.RED;
     
@@ -93,7 +91,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
       THRIFT_NAMES_TO_IDS.put("color", 2);
       FIELD_METADATA.put(2, COLOR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/MyAnnotation"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/MyAnnotation"),
         MyAnnotation.class, MyAnnotation::read0));
     }
     

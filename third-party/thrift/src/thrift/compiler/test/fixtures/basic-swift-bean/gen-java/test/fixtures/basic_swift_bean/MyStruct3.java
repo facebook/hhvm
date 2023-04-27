@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct("MyStruct3")
 public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStruct3() {
       this.myInt16 = (short)42;
@@ -58,7 +57,6 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
     }
     
     public static class Builder {
-    
         private short myInt16 = (short)42;
         private int myInt32 = 422;
         private long myInt64 = 422222222L;

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyMapping", builder=MyMapping.Builder.class)
 public final class MyMapping implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyMapping(
         @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE) final com.foo.FastLongStringMap lsMap,
@@ -45,7 +44,6 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
     }
     
     public static class Builder {
-    
         private com.foo.FastLongStringMap lsMap = null;
         private com.foo.FastIntObjectMap<com.foo.FastIntLongMap> ioMap = null;
         private Map<String, byte[]> binaryMap = null;

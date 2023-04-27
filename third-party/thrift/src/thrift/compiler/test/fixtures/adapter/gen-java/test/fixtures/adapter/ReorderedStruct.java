@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="ReorderedStruct", builder=ReorderedStruct.Builder.class)
 public final class ReorderedStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public ReorderedStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE) final test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted
@@ -36,7 +35,6 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("reordered_dependent_adapted", 1);
       FIELD_METADATA.put(1, REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ReorderedStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ReorderedStruct"),
         ReorderedStruct.class, ReorderedStruct::read0));
     }
     

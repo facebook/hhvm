@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="StructLevelTerseStruct", builder=StructLevelTerseStruct.Builder.class)
 public final class StructLevelTerseStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public StructLevelTerseStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.TERSE) final boolean boolField,
@@ -78,7 +77,6 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
     }
     
     public static class Builder {
-    
         private boolean boolField = false;
         private byte byteField = (byte)0;
         private short shortField = (short)0;
@@ -353,7 +351,7 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
       THRIFT_NAMES_TO_IDS.put("union_field", 15);
       FIELD_METADATA.put(15, UNION_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/StructLevelTerseStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/StructLevelTerseStruct"),
         StructLevelTerseStruct.class, StructLevelTerseStruct::read0));
     }
     

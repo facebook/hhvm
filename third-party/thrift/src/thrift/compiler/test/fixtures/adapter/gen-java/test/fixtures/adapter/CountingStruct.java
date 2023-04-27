@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="CountingStruct", builder=CountingStruct.Builder.class)
 public final class CountingStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public CountingStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="regularInt", requiredness=Requiredness.OPTIONAL) final Long regularInt,
@@ -42,7 +41,6 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
     }
     
     public static class Builder {
-    
         private Long regularInt = null;
         private Long countingInt = null;
         private String regularString = null;
@@ -113,7 +111,7 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
       THRIFT_NAMES_TO_IDS.put("regularString", 3);
       FIELD_METADATA.put(3, REGULAR_STRING_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CountingStruct"), 
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CountingStruct"),
         CountingStruct.class, CountingStruct::read0));
     }
     

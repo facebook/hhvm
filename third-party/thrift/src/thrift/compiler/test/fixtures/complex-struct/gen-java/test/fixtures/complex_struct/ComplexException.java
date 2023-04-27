@@ -96,7 +96,6 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
     }
     
     public static class Builder {
-    
         private String message = null;
         private List<String> listStrings = null;
         private test.fixtures.complex_struct.MyEnum errorEnum = test.fixtures.complex_struct.MyEnum.fromInteger(0);

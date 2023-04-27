@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="ReservedKeyword", builder=ReservedKeyword.Builder.class)
 public final class ReservedKeyword implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public ReservedKeyword(
         @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE) final int reservedField
@@ -36,7 +35,6 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private int reservedField = 0;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)
@@ -73,7 +71,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("reserved_field", 1);
       FIELD_METADATA.put(1, RESERVED_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/ReservedKeyword"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/ReservedKeyword"),
         ReservedKeyword.class, ReservedKeyword::read0));
     }
     

@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="BarPatch", builder=BarPatch.Builder.class)
 public final class BarPatch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public BarPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.Bar assign,
@@ -48,7 +47,6 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.Bar assign = null;
         private boolean clear = false;
         private test.fixtures.patch.BarFieldPatch patchPrior = test.fixtures.patch.BarFieldPatch.defaultInstance();
@@ -153,7 +151,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/BarPatch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/BarPatch"),
         BarPatch.class, BarPatch::read0));
     }
     

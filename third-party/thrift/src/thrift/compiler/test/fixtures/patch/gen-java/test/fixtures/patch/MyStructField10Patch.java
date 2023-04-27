@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="MyStructField10Patch", builder=MyStructField10Patch.Builder.class)
 public final class MyStructField10Patch implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public MyStructField10Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum assign,
@@ -39,7 +38,6 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
     }
     
     public static class Builder {
-    
         private test.fixtures.patch.MyEnum assign = null;
         private boolean clear = false;
     
@@ -93,7 +91,7 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
       THRIFT_NAMES_TO_IDS.put("clear", 2);
       FIELD_METADATA.put(2, CLEAR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField10Patch"), 
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField10Patch"),
         MyStructField10Patch.class, MyStructField10Patch::read0));
     }
     

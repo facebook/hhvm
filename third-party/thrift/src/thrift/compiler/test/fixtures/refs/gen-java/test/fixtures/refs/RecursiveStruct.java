@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="RecursiveStruct", builder=RecursiveStruct.Builder.class)
 public final class RecursiveStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public RecursiveStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="mes", requiredness=Requiredness.OPTIONAL, isRecursive=Recursiveness.TRUE) final List<test.fixtures.refs.RecursiveStruct> mes
@@ -36,7 +35,6 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
     }
     
     public static class Builder {
-    
         private List<test.fixtures.refs.RecursiveStruct> mes = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="mes", requiredness=Requiredness.OPTIONAL, isRecursive=Recursiveness.TRUE)

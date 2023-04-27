@@ -51,7 +51,6 @@ public final class InitialException extends org.apache.thrift.TBaseException imp
     }
     
     public static class Builder {
-    
         private String reason = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)

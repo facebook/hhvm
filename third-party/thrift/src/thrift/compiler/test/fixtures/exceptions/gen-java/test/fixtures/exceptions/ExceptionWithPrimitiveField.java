@@ -60,7 +60,6 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
     }
     
     public static class Builder {
-    
         private String message = null;
         private int errorCode = 0;
     

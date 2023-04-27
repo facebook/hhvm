@@ -22,7 +22,6 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct(value="SimpleStruct", builder=SimpleStruct.Builder.class)
 public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSerializable {
-
     @ThriftConstructor
     public SimpleStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="age", requiredness=Requiredness.NONE) final long age,
@@ -39,7 +38,6 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     }
     
     public static class Builder {
-    
         private long age = 60L;
         private String name = "Batman";
     

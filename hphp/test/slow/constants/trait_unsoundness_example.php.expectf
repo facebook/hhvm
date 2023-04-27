@@ -1,1 +1,1 @@
-Fatal error: B cannot inherit the type constant T from %rT|B%r, because it was previously inherited from A in %s/hphp/test/slow/constants/trait_unsoundness_example.php on line 11
+Fatal error: B cannot inherit the type constant T from %|{T|B}, because it was previously inherited from A in %s/hphp/test/slow/constants/trait_unsoundness_example.php on line 11

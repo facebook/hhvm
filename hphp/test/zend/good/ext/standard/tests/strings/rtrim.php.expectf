@@ -15,7 +15,7 @@ string(10) "rtrim test"
 string(10) "rtrim test"
 
 *** String with embedded NULL ***
-string(22) "234%r\x00%r05678%r\x00%r00efgh\xijkl"
+string(22) "234%h{00}05678%h{00}00efgh\xijkl"
 
  *** Using heredoc string ***
 string(18) "us

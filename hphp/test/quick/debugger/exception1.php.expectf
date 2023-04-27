@@ -3,20 +3,20 @@ exception MyException
 Breakpoint 1 set right before throwing MyException
 But note that class MyException has yet been loaded.
 break list
-  1%r\x09%rALWAYS    right before throwing MyException (unbound)
+  1%tALWAYS    right before throwing MyException (unbound)
 run
 Program %s/exception1.php exited normally.
 exception NotAnException
 Breakpoint 2 not set right before throwing NotAnException
 Because class NotAnException is not an exception.
 break list
-  1%r\x09%rALWAYS    right before throwing MyException
+  1%tALWAYS    right before throwing MyException
 break clear all
 All breakpoints are cleared.
 exception Exception
 Breakpoint 1 set right before throwing Exception
 break list
-  1%r\x09%rALWAYS    right before throwing Exception
+  1%tALWAYS    right before throwing Exception
 @ throw_exception()
 Breakpoint 1 reached: Throwing Exception at throw_exception() on line 11 of %s/exception1.php
   10   function throw_exception() {

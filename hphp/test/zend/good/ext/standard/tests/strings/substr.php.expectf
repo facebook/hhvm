@@ -108,10 +108,10 @@ string(1) "c"
 bool(false)
 
 *** Testing for string with null characters ***
-string(6) "c%r\x00%rxy%r\x00%rz"
+string(6) "c%h{00}xy%h{00}z"
 
 *** Testing for string with international characters ***
-string(26) "%r\xc3\xb1%rt%r\xc3\xab%rrn%r\xc3\xa2%rti%r\xc3\xb4%rn%r\xc3\xa0%rliz%r\xc3\xa6%rti%r\xc3\xb8%rn"
+string(26) "%h{c3}%h{b1}t%h{c3}%h{ab}rn%h{c3}%h{a2}ti%h{c3}%h{b4}n%h{c3}%h{a0}liz%h{c3}%h{a6}ti%h{c3}%h{b8}n"
 
 *** Start before the first char ***
 string(4) "abcd"

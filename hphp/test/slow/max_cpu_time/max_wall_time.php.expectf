@@ -1,3 +1,3 @@
 string(1) "1"
 
-Fatal error: %r(Maximum execution time of 1 seconds exceeded|entire web request took longer than 1 seconds and timed out)%r in %s/max_wall_time.php on line %d
+Fatal error: %|{Maximum execution time of 1 seconds exceeded|entire web request took longer than 1 seconds and timed out} in %s/max_wall_time.php on line %d

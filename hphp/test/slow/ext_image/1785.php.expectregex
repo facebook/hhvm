@@ -1,4 +1,0 @@
-
-Warning\: (Not a directory|No such file or directory) in [^\r\n]+\/test\/slow\/ext_image\/1785\.php on line 8
-
-Warning\: failed to open stream\: test\/images\/smile\.happy\.png in [^\r\n]+\/test\/slow\/ext_image\/1785\.php on line 8

@@ -2207,6 +2207,16 @@ static int execute_program_impl(int argc, char** argv) {
           jit::tc::dump();
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
+
+        if (i < po.count-1) {
+          // If we're running an unit test with multiple runs, provide
+          // a separator between the runs.
+          if (auto const sep = getenv("HHVM_MULTI_COUNT_SEP")) {
+            fflush(stderr);
+            printf("%s", sep);
+            fflush(stdout);
+          }
+        }
       }
     }
 

@@ -1853,6 +1853,15 @@ void run_command_on_cli_server(const char* sock_path,
     if (!r) return;
     ret = *r;
     count--;
+    if (count > 0) {
+      // If we're running an unit test with multiple runs, provide
+      // a separator between the runs.
+      if (auto const sep = getenv("HHVM_MULTI_COUNT_SEP")) {
+        fflush(stderr);
+        printf("%s", sep);
+        fflush(stdout);
+      }
+    }
   }
   hphp_process_exit();
   exit(ret);

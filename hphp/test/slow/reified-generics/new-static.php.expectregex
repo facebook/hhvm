@@ -1,1 +1,0 @@
-Fatal error\: Cannot call new static since class( D)? has reified generics in [^\r\n]+ on line 8

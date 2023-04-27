@@ -4,10 +4,10 @@
 string(1) " "
 
 -- Iteration 2 --
-string(19) "hello%r\x00%rworld hello%r\x00%r "
+string(19) "hello%h{00}world hello%h{00} "
 
 -- Iteration 3 --
-string(19) "@#$%&* s,   UF %r\x01%r   "
+string(19) "@#$%%&* s,   UF %h{01}   "
 
 -- Iteration 4 --
 string(34) "      sund mond       tuesday wedn"
@@ -18,7 +18,7 @@ using heredoc. abcdef 123456 3993
 4849 string __"
 
 -- Iteration 6 --
-string(6) "% %s s"
+string(6) "%% %s s"
 
 -- Iteration 7 --
 string(18) "one two three four"

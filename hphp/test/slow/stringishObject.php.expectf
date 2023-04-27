@@ -86,8 +86,8 @@ bool(true)
 bool(true)
 vec(3) {
   string(15) "StringishObject"
-  string(%d) "%r(XHPChild|Stringish)%r"
-  string(%d) "%r(XHPChild|Stringish)%r"
+  string(%d) "%|{XHPChild|Stringish}"
+  string(%d) "%|{XHPChild|Stringish}"
 }
 bool(true)
 bool(true)
@@ -95,8 +95,8 @@ bool(true)
 bool(true)
 vec(3) {
   string(15) "StringishObject"
-  string(%d) "%r(XHPChild|Stringish)%r"
-  string(%d) "%r(XHPChild|Stringish)%r"
+  string(%d) "%|{XHPChild|Stringish}"
+  string(%d) "%|{XHPChild|Stringish}"
 }
 bool(true)
 bool(true)
@@ -104,8 +104,8 @@ bool(true)
 bool(true)
 vec(3) {
   string(15) "StringishObject"
-  string(%d) "%r(XHPChild|Stringish)%r"
-  string(%d) "%r(XHPChild|Stringish)%r"
+  string(%d) "%|{XHPChild|Stringish}"
+  string(%d) "%|{XHPChild|Stringish}"
 }
 bool(false)
 bool(false)
@@ -113,8 +113,8 @@ bool(false)
 bool(false)
 vec(3) {
   string(15) "StringishObject"
-  string(%d) "%r(XHPChild|Stringish)%r"
-  string(%d) "%r(XHPChild|Stringish)%r"
+  string(%d) "%|{XHPChild|Stringish}"
+  string(%d) "%|{XHPChild|Stringish}"
 }
 bool(true)
 bool(true)

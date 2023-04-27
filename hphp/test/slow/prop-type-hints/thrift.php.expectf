@@ -56,11 +56,11 @@ Warning: Property 'TestStruct7::p5' declared as type HH\Vector, HH\vec assigned 
 
 Warning: Property 'TestStruct7::p6' declared as type HH\Set, HH\keyset assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p7' declared as type %r(HH\\d)?%rarray, HH\Map assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p7' declared as type HH\darray, HH\Map assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p8' declared as type %r(HH\\v)?%rarray, HH\Vector assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p8' declared as type HH\varray, HH\Vector assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p9' declared as type %r(HH\\d)?%rarray, HH\Set assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p9' declared as type HH\darray, HH\Set assigned in %s/thrift.php on line 8
 =============================================================
 ===================== compact deserializing ==================
 
@@ -72,11 +72,11 @@ Warning: Property 'TestStruct7::p5' declared as type HH\Vector, HH\vec assigned 
 
 Warning: Property 'TestStruct7::p6' declared as type HH\Set, HH\keyset assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p7' declared as type %r(HH\\d)?%rarray, HH\Map assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p7' declared as type HH\darray, HH\Map assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p8' declared as type %r(HH\\v)?%rarray, HH\Vector assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p8' declared as type HH\varray, HH\Vector assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p9' declared as type %r(HH\\d)?%rarray, HH\Set assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p9' declared as type HH\darray, HH\Set assigned in %s/thrift.php on line 16
 ==============================================================
 ===================== binary deserializing ==================
 

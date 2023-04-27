@@ -27,13 +27,13 @@ memoWithArg passed
 >>>>> from inaccessible
   Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
-Hash: %Inaccessible%
+Hash: %%Inaccessible%%
 memoNoArg passed
   After: Implicit context is set to inaccessible
 ------------------------
   Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
-Hash: %Inaccessible%
+Hash: %%Inaccessible%%
 memoWithArg passed
   After: Implicit context is set to inaccessible
 ------------------------
@@ -44,7 +44,7 @@ Expected nonnull, got null
 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
 Expected nonnull, got null
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible%
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible%%
 memoNoArg passed
   After: 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
@@ -56,7 +56,7 @@ Expected nonnull, got null
 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
 Expected nonnull, got null
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible%
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible%%
 memoWithArg passed
   After: 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
@@ -65,13 +65,13 @@ Expected nonnull, got null
 >>>>> from soft run with
   Before: Expected nonnull, got null
 Expected nonnull, got null
-Hash: %SoftSet%%=E3=08SOFT_KEY
+Hash: %%SoftSet%%%%=E3=08SOFT_KEY
 memoNoArg passed
   After: Expected nonnull, got null
 ------------------------
   Before: Expected nonnull, got null
 Expected nonnull, got null
-Hash: %SoftSet%%=E3=08SOFT_KEY
+Hash: %%SoftSet%%%%=E3=08SOFT_KEY
 memoWithArg passed
   After: Expected nonnull, got null
 ------------------------

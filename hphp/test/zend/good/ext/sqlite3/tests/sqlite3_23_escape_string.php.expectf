@@ -14,7 +14,7 @@ dict(2) {
   [0]=>
   int(%d)
   [1]=>
-  string(7) "test''%"
+  string(7) "test''%%"
 }
 Closing database
 bool(true)

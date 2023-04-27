@@ -1,1 +1,0 @@
-Fatal error\: Cannot call new static since class( C)? has reified generics in [^\r\n]+ on line 5

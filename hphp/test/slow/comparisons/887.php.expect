@@ -1,0 +1,22 @@
+1	NNNN	'php' === true	
+2	NNNN	'php' === false	
+3	NNNN	'php' === 1	
+4	NNNN	'php' === 0	
+5	NNNN	'php' === -1	
+6	NNNN	'php' === '1'	
+7	NNNN	'php' === '0'	
+8	NNNN	'php' === '-1'	
+9	NNNN	'php' === null	
+10	NNNN	'php' === array()	
+11	NNNN	'php' === array(1)	
+12	NNNN	'php' === array(2)	
+13	NNNN	'php' === array('1')	
+14	NNNN	'php' === array('0' => '1')	
+15	NNNN	'php' === array('a')	
+16	NNNN	'php' === array('a' => 1)	
+17	NNNN	'php' === array('b' => 1)	
+18	NNNN	'php' === array('a' => 1, 'b' => 2)	
+19	NNNN	'php' === array(array('a' => 1))	
+20	NNNN	'php' === array(array('b' => 1))	
+21	YYYY	'php' === 'php'	
+22	NNNN	'php' === ''

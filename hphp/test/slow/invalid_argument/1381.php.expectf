@@ -86,17 +86,17 @@ string(5) "de_DE"
 Warning: Invalid argument: locale name is too long: a%w in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
 
-Warning: Invalid argument: Type %r\xf4%r: unknown format code in %s/test/slow/invalid_argument/1381.php on line %d
+Warning: Invalid argument: Type %h{f4}: unknown format code in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
 
 Warning: Invalid argument: 4 arguments unused in %s/test/slow/invalid_argument/1381.php on line %d
-string(5) "%r\x00\x00\x00\x00\x00%r"
+string(5) "%h{00}%h{00}%h{00}%h{00}%h{00}"
 
 Warning: Invalid argument: Type h: illegal hex digit - in %s/test/slow/invalid_argument/1381.php on line %d
-string(1) "%r\x00%r"
-string(1) "%r\x01%r"
+string(1) "%h{00}"
+string(1) "%h{01}"
 
-Warning: Invalid argument: Invalid format type %r\xf4%r in %s/test/slow/invalid_argument/1381.php on line %d
+Warning: Invalid argument: Invalid format type %h{f4} in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
 NULL
 

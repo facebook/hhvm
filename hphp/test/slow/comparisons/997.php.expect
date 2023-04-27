@@ -1,0 +1,22 @@
+1	EEEE	array('a' => 1) > true	
+2	EEEE	array('a' => 1) > false	
+3	EEEE	array('a' => 1) > 1	
+4	EEEE	array('a' => 1) > 0	
+5	EEEE	array('a' => 1) > -1	
+6	EEEE	array('a' => 1) > '1'	
+7	EEEE	array('a' => 1) > '0'	
+8	EEEE	array('a' => 1) > '-1'	
+9	EEEE	array('a' => 1) > null	
+10	EEEE	array('a' => 1) > array()	
+11	EEEE	array('a' => 1) > array(1)	
+12	EEEE	array('a' => 1) > array(2)	
+13	EEEE	array('a' => 1) > array('1')	
+14	EEEE	array('a' => 1) > array('0' => '1')	
+15	EEEE	array('a' => 1) > array('a')	
+16	EEEE	array('a' => 1) > array('a' => 1)	
+17	EEEE	array('a' => 1) > array('b' => 1)	
+18	EEEE	array('a' => 1) > array('a' => 1, 'b' => 2)	
+19	EEEE	array('a' => 1) > array(array('a' => 1))	
+20	EEEE	array('a' => 1) > array(array('b' => 1))	
+21	EEEE	array('a' => 1) > 'php'	
+22	EEEE	array('a' => 1) > ''

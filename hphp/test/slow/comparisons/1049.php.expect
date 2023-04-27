@@ -1,0 +1,22 @@
+1	NNNN	'' >= true	
+2	YYYY	'' >= false	
+3	NNNN	'' >= 1	
+4	YYYY	'' >= 0	
+5	YYYY	'' >= -1	
+6	NNNN	'' >= '1'	
+7	NNNN	'' >= '0'	
+8	NNNN	'' >= '-1'	
+9	YYYY	'' >= null	
+10	EEEE	'' >= array()	
+11	EEEE	'' >= array(1)	
+12	EEEE	'' >= array(2)	
+13	EEEE	'' >= array('1')	
+14	EEEE	'' >= array('0' => '1')	
+15	EEEE	'' >= array('a')	
+16	EEEE	'' >= array('a' => 1)	
+17	EEEE	'' >= array('b' => 1)	
+18	EEEE	'' >= array('a' => 1, 'b' => 2)	
+19	EEEE	'' >= array(array('a' => 1))	
+20	EEEE	'' >= array(array('b' => 1))	
+21	NNNN	'' >= 'php'	
+22	YYYY	'' >= ''

@@ -1,5 +1,5 @@
 >>>>> from soft inaccessible
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible%
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible%%
 soft_ic_inaccessible2 is a soft IC inaccessible memoized function, but it is called with a soft inaccessible state implicit context on %s:21
 Blame is:
 vec(2) {
@@ -10,7 +10,7 @@ vec(2) {
     string(9) "SOFT_KEY2"
   }
 }
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible=E3=15soft_ic_inaccessible2%=
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible=E3=15soft_ic_inaccessible2%%=
 =E3=09SOFT_KEY2
 ok
 >>>>> from soft run with
@@ -23,7 +23,7 @@ vec(2) {
     string(9) "SOFT_KEY1"
   }
 }
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible%=E3=09SOFT_KEY1
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible%%=E3=09SOFT_KEY1
 soft_ic_inaccessible2 is a soft IC inaccessible memoized function, but it is called with a soft inaccessible state implicit context on %s:21
 Blame is:
 vec(2) {
@@ -35,6 +35,6 @@ vec(2) {
     string(9) "SOFT_KEY2"
   }
 }
-Hash: %SoftInaccessible%=E3=14soft_ic_inaccessible=E3=15soft_ic_inaccessible2%=
+Hash: %%SoftInaccessible%%=E3=14soft_ic_inaccessible=E3=15soft_ic_inaccessible2%%=%h{0d}
 =E3=09SOFT_KEY1=E3=09SOFT_KEY2
 ok

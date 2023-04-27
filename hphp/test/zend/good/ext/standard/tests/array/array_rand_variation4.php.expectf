@@ -1,0 +1,86 @@
+*** Testing array_rand() : with associative arrays ***
+
+-- Iteration 1 --
+
+With default argument
+int(%i)
+
+With num_req = 1
+int(%i)
+
+With num_req = 2
+vec(2) {
+  int(%i)
+  int(%i)
+}
+
+-- Iteration 2 --
+
+With default argument
+string(%i) "%A"
+
+With num_req = 1
+string(%i) "%A"
+
+With num_req = 2
+vec(2) {
+  string(%i) "%A"
+  string(%i) "%A"
+}
+
+-- Iteration 3 --
+
+With default argument
+int(%i)
+
+With num_req = 1
+int(%i)
+
+With num_req = 2
+vec(2) {
+  int(%i)
+  int(%i)
+}
+
+-- Iteration 4 --
+
+With default argument
+int(%i)
+
+With num_req = 1
+int(%i)
+
+With num_req = 2
+vec(2) {
+  int(%i)
+  int(%i)
+}
+
+-- Iteration 5 --
+
+With default argument
+int(%i)
+
+With num_req = 1
+int(%i)
+
+With num_req = 2
+vec(2) {
+  int(%i)
+  int(%i)
+}
+
+-- Iteration 6 --
+
+With default argument
+string(%i) "%A"
+
+With num_req = 1
+string(%i) "%A"
+
+With num_req = 2
+vec(2) {
+  string(%i) "%A"
+  string(%i) "%A"
+}
+Done

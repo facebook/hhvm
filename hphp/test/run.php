@@ -7,6 +7,8 @@ use namespace HH\Lib\C;
 
 const int TIMEOUT_SECONDS = 300;
 
+const string MULTI_REQUEST_SEP = '//<>!<>&&|MULTI_REQUEST_SEP|&&<>!<>\\';
+
 function get_argv(): vec<string> {
   return \HH\FIXME\UNSAFE_CAST<vec<mixed>,vec<string>>(
     \HH\global_get('argv') as vec<_>
@@ -60,9 +62,6 @@ function get_expect_file_and_type(
   $types = vec[
     'expect',
     'expectf',
-    'expectregex',
-    'hhvm.expect',
-    'hhvm.expectf',
   ];
   if ($options->repo) {
     if (file_exists($test . '.hphpc_assert')) {
@@ -568,7 +567,6 @@ function find_test_files(string $file): vec<string>{
     'fastcgi'  => 'hphp/test/server/fastcgi/tests',
     'zend'     => 'hphp/test/zend/good',
     'facebook' => 'hphp/facebook/test',
-    'taint'    => 'hphp/test/taint',
 
     // subset of slow we run with CLI server too
     'slow_ext_hsl' => 'hphp/test/slow/ext_hsl',
@@ -2549,22 +2547,430 @@ function skipif_should_skip_test(
   return shape('valid' => false, 'error' => "invalid skipif output '$output'");
 }
 
-function comp_line(string $l1, string $l2, bool $is_reg): bool {
-  if ($is_reg) {
-    return (bool)preg_match('/^'. $l1 . '$/s', $l2);
-  } else {
-    return !strcmp($l1, $l2);
+class BadExpectfPattern extends Exception {
+  public function __construct(string $str, string $pattern, int $offset) {
+    parent::__construct(
+      "$str (at offset $offset, context: \"" .
+      substr($pattern, max($offset - 25, 0), 50) .
+      "\")"
+    );
+  }
+}
+
+class ExpectfParser {
+  private string $str;
+
+  private string $pstr;
+  private vec<?(function(int): vec<(int, int)>)> $pattern = vec[];
+  private int $pindex = 0;
+
+  private bool $found_wildcard = false;
+  private bool $success = false;
+
+  public function __construct(string $str, string $pattern) {
+    $this->str = $str;
+    $this->pstr = $pattern;
+    $this->parse();
+    $this->success = $this->run();
+  }
+
+  public function succeeded(): bool { return $this->success; }
+  public function foundWildcard(): bool { return $this->found_wildcard; }
+
+  private function literal(string $s): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if (!strlen($s)) return vec[tuple($sindex, $next)];
+      if ($sindex + strlen($s) > strlen($this->str)) return vec[];
+      if (substr_compare($this->str, $s, $sindex, strlen($s)) !== 0) {
+        return vec[];
+      }
+      return vec[tuple($sindex + strlen($s), $next)];
+    };
+  }
+
+  private function any(): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex)  ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function anyBut(string $s): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      if ($s === $this->str[$sindex]) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function func((function(string): bool) $f): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      if (!$f($this->str[$sindex])) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function or(vec<(function(): void)> $choices): void {
+    $start = count($this->pattern);
+    $this->pattern[] = null;
+
+    $choice_indices = vec[];
+    $jmp_indices = vec[];
+    foreach ($choices as $c) {
+      $choice_indices[] = count($this->pattern);
+      $c();
+      $jmp_indices[] = count($this->pattern);
+      $this->pattern[] = null;
+    }
+    $end = count($this->pattern);
+
+    $this->pattern[$start] = (int $sindex) ==> {
+      $v = vec[];
+      foreach ($choice_indices as $i) $v[] = tuple($sindex, $i);
+      return $v;
+    };
+
+    foreach ($jmp_indices as $i) {
+      $this->pattern[$i] = (int $sindex) ==> {
+        return vec[tuple($sindex, $end)];
+      };
+    }
+  }
+
+  private function orSub(): void {
+    $start = count($this->pattern);
+    $this->pattern[] = null;
+
+    $choice_indices = vec[];
+    $jmp_indices = vec[];
+    $finished = false;
+    do {
+      $choice_indices[] = count($this->pattern);
+      $finished = $this->parse('|');
+      $jmp_indices[] = count($this->pattern);
+      $this->pattern[] = null;
+    } while (!$finished);
+    $end = count($this->pattern);
+
+    $this->pattern[$start] = (int $sindex) ==> {
+      $v = vec[];
+      foreach ($choice_indices as $i) $v[] = tuple($sindex, $i);
+      return $v;
+    };
+
+    foreach ($jmp_indices as $i) {
+      $this->pattern[$i] = (int $sindex) ==> {
+        return vec[tuple($sindex, $end)];
+      };
+    }
+  }
+
+  private function zeroOrMore((function(): void) $c): void {
+    $index1 = count($this->pattern);
+    $this->pattern[] = null;
+    $c();
+    $this->pattern[] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1)];
+    };
+    $index2 = count($this->pattern);
+    $this->pattern[$index1] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1+1), tuple($sindex, $index2)];
+    };
+  }
+
+  private function oneOrMore((function(): void) $c): void {
+    $start = count($this->pattern);
+    $c();
+    $end = count($this->pattern);
+    $this->pattern[] = (int $sindex) ==> {
+      return vec[tuple($sindex, $start), tuple($sindex, $end + 1)];
+    };
+  }
+
+  private function opt((function(): void) $c): void {
+    $index1 = count($this->pattern);
+    $this->pattern[] = null;
+    $c();
+    $index2 = count($this->pattern);
+    $this->pattern[$index1] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1+1), tuple($sindex, $index2)];
+    };
+  }
+
+  private function plusMinus(): void {
+    $this->or(vec[() ==> $this->literal('-'), () ==> $this->literal('+')]);
+  }
+
+  private function whitespace(): void {
+    $this->func(ctype_space<>);
+  }
+  private function digit(): void {
+    $this->func(ctype_digit<>);
+  }
+  private function hexdigit(): void {
+    $this->func(ctype_xdigit<>);
+  }
+  private function notnewline(): void {
+    $this->anyBut("\n");
+  }
+
+  private function parse(?string $sub = null): bool {
+    $current_literal = '';
+
+    $size = strlen($this->pstr);
+    while ($this->pindex < $size) {
+      $token = $this->pstr[$this->pindex];
+      ++$this->pindex;
+      if ($token !== '%') {
+        if ($sub is nonnull) {
+          if ($token === '}') {
+            if (strlen($current_literal)) $this->literal($current_literal);
+            return true;
+          }
+          if ($token === '|' && $sub === '|') {
+            if (strlen($current_literal)) $this->literal($current_literal);
+            return false;
+          }
+        }
+        $current_literal .= $token;
+        continue;
+      }
+
+      if ($this->pindex == $size) {
+        throw new BadExpectfPattern(
+          "Unterminated wildcard at end of pattern", $this->pstr, $this->pindex
+        );
+      }
+      $token = $this->pstr[$this->pindex];
+      ++$this->pindex;
+
+      if ($token !== '%' && $token !== 't' && $token !== 'h') {
+        $this->found_wildcard = true;
+        if (strlen($current_literal)) {
+          $this->literal($current_literal);
+          $current_literal = '';
+        }
+      }
+
+      switch ($token) {
+        case '%':
+          $current_literal .= '%';
+          break;
+        case 't':
+          $current_literal .= "\t";
+          break;
+        case 'c':
+          $this->any();
+          break;
+        case 'd':
+          $this->oneOrMore(() ==> $this->digit());
+          break;
+        case 'x':
+          $this->oneOrMore(() ==> $this->hexdigit());
+          break;
+        case 's':
+          $this->oneOrMore(() ==> $this->notnewline());
+          break;
+        case 'a':
+          $this->oneOrMore(() ==> $this->any());
+          break;
+        case 'w':
+          $this->zeroOrMore(() ==> $this->whitespace());
+          break;
+        case 'C':
+          $this->opt(() ==> $this->any());
+          break;
+        case 'S':
+          $this->zeroOrMore(() ==> $this->notnewline());
+          break;
+        case 'A':
+          $this->zeroOrMore(() ==> $this->any());
+          break;
+        case 'i':
+          $this->opt(() ==> $this->plusMinus());
+          $this->oneOrMore(() ==> $this->digit());
+          break;
+        case 'f':
+          // This is more permissive than necessary, but good enough.
+          $this->opt(() ==> $this->plusMinus());
+          $this->opt(() ==> $this->literal('.'));
+          $this->oneOrMore(() ==> $this->digit());
+          $this->opt(() ==> $this->literal('.'));
+          $this->zeroOrMore(() ==> $this->digit());
+          $this->opt(() ==> {
+            $this->or(
+              vec[() ==> $this->literal('E'), () ==> $this->literal('e')]
+            );
+            $this->opt(() ==> $this->plusMinus());
+            $this->oneOrMore(() ==> $this->digit());
+          });
+          break;
+        case 'h':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $h1 = $this->pstr[$this->pindex];
+          if (!ctype_xdigit($h1)) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but got '$h1'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $h2 = $this->pstr[$this->pindex];
+          if (!ctype_xdigit($h2)) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but got '$h2'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '}', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '}') {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '}', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $current_literal .= chr(hexdec($h1 . $h2));
+          break;
+        case '|':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %|, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %|, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->orSub();
+          break;
+        case '?':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %?, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %?, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->opt(() ==> { $this->parse('?'); return; });
+          break;
+        case '*':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %*, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %*, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->zeroOrMore(() ==> { $this->parse('*'); return; });
+          break;
+        default:
+          throw new BadExpectfPattern(
+            "Unknown wildcard %$token (escape with % if not a wildcard)",
+            $this->pstr, $this->pindex
+          );
+      }
+    }
+
+    if ($sub is nonnull) {
+      throw new BadExpectfPattern(
+        "While parsing %$sub, expected '}', but reached end of pattern",
+        $this->pstr, $this->pindex
+      );
+    }
+    if (strlen($current_literal)) $this->literal($current_literal);
+    return false;
+  }
+
+  private function run(): bool {
+    $states = dict[];
+    $states[0] = keyset[];
+    $states[0][] = 0;
+
+    do {
+      $newStates = dict[];
+      foreach ($states as $pindex => $sindices) {
+        foreach ($sindices as $sindex) {
+          if ($pindex === count($this->pattern)) {
+            if ($sindex === strlen($this->str)) return true;
+            continue;
+          }
+          foreach (($this->pattern[$pindex] as nonnull)($sindex) as list($s, $p)) {
+            $newStates[$p] ??= keyset[];
+            $newStates[$p][] = $s;
+          }
+        }
+      }
+      $states = $newStates;
+    } while ($states);
+    return false;
   }
 }
 
 function count_array_diff(
-  vec<string> $ar1, vec<string> $ar2, bool $is_reg,
+  vec<string> $ar1, vec<string> $ar2,
   int $idx1, int $idx2, int $cnt1, int $cnt2, num $steps,
+  (function(string, string): bool) $cmp
 ): int {
   $equal = 0;
 
-  while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2],
-                                                     $is_reg)) {
+  while ($idx1 < $cnt1 && $idx2 < $cnt2 && $cmp($ar1[$idx1], $ar2[$idx2])) {
     $idx1++;
     $idx2++;
     $equal++;
@@ -2577,8 +2983,8 @@ function count_array_diff(
 
     for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st > 0; $ofs1++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $ofs1, $idx2, $cnt1,
-                              $cnt2, $st);
+      $eq = @count_array_diff($ar1, $ar2, $ofs1, $idx2, $cnt1,
+                              $cnt2, $st, $cmp);
 
       if ($eq > $eq1) {
         $eq1 = $eq;
@@ -2590,7 +2996,8 @@ function count_array_diff(
 
     for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st > 0; $ofs2++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $ofs2, $cnt1, $cnt2, $st);
+      $eq = @count_array_diff($ar1, $ar2, $idx1, $ofs2, $cnt1,
+                              $cnt2, $st, $cmp);
       if ($eq > $eq2) {
         $eq2 = $eq;
       }
@@ -2609,8 +3016,8 @@ function count_array_diff(
 function generate_array_diff(
   vec<string> $ar1,
   vec<string> $ar2,
-  bool $is_reg,
   vec<string> $w,
+  (function(string, string): bool) $cmp
 ): vec<string> {
   $idx1 = 0; $cnt1 = @count($ar1);
   $idx2 = 0; $cnt2 = @count($ar2);
@@ -2618,15 +3025,15 @@ function generate_array_diff(
   $old2 = dict[];
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2) {
-    if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
+    if ($cmp($ar1[$idx1], $ar2[$idx2])) {
       $idx1++;
       $idx2++;
       continue;
     } else {
-      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $idx1+1, $idx2, $cnt1,
-                              $cnt2, 10);
-      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2+1, $cnt1,
-                              $cnt2, 10);
+      $c1 = @count_array_diff($ar1, $ar2, $idx1+1, $idx2, $cnt1,
+                              $cnt2, 10, $cmp);
+      $c2 = @count_array_diff($ar1, $ar2, $idx1, $idx2+1, $cnt1,
+                              $cnt2, 10, $cmp);
 
       if ($c1 > $c2) {
         $old1[$idx1+1] = sprintf("%03d- ", $idx1+1) . $w[$idx1];
@@ -2689,37 +3096,40 @@ function generate_array_diff(
   return $diff;
 }
 
-function generate_diff(
-  string $wanted,
-  ?string $wanted_re,
-  string $output
-): string {
-  $m = null;
-  $w = explode("\n", $wanted);
-  $o = explode("\n", $output);
-  if (is_null($wanted_re)) {
-    $r = $w;
-  } else {
-    if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
-      $t = explode("\n", $m[1] as string);
-      $r = vec[];
-      $w2 = vec[];
-      for ($i = 0; $i < (int)$m[2]; $i++) {
-        foreach ($t as $v) {
-          $r[] = $v;
-        }
-        foreach ($w as $v) {
-          $w2[] = $v;
-        }
-      }
-      $w = $wanted === $wanted_re ? $r : $w2;
+function escape_unprintables(string $str): string {
+  $out = '';
+  for ($i = 0; $i < strlen($str); $i++) {
+    $s = $str[$i];
+    if (ctype_print($s)) {
+      $out .= $s;
+    } else if ($s === "\n") {
+      $out .= '\n';
+    } else if ($s === "\r") {
+      $out .= '\r';
+    } else if ($s === "\t") {
+      $out .= '\t';
     } else {
-      $r = explode("\n", $wanted_re);
+      $h = dechex(ord($s));
+      if (strlen($h) < 2) $h = "0" . $h;
+      $out .= '\x' . $h;
     }
   }
-  $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
+  return $out;
+}
 
-  return implode("\r\n", $diff);
+function generate_diff(
+  string $wanted,
+  string $output,
+  (function(string, string): bool) $cmp
+): string {
+  $w = explode("\n", $wanted);
+  $o = explode("\n", $output);
+  $diff = generate_array_diff($w, $o, $w, $cmp);
+  if (count($diff) > 200) {
+    $diff = array_slice($diff, 0, 200);
+    $diff[] = "(truncated)";
+  }
+  return implode("\n", array_map(escape_unprintables<>, $diff));
 }
 
 function dump_hhas_cmd(
@@ -2832,6 +3242,12 @@ function run_config_cli(
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 
+  if ($options->retranslate_all is nonnull ||
+      $options->recycle_tc is nonnull ||
+      $options->cli_server) {
+    $cmd_env['HHVM_MULTI_COUNT_SEP'] = MULTI_REQUEST_SEP;
+  }
+
   $descriptorspec = dict[
     0 => vec["pipe", "r"],
     1 => vec["pipe", "w"],
@@ -2849,7 +3265,6 @@ function run_config_cli(
   $pipes as nonnull;
   fclose($pipes[0]);
   $output = stream_get_contents($pipes[1]);
-  $output = trim($output);
   $stderr = stream_get_contents($pipes[2]);
   fclose($pipes[1]);
   fclose($pipes[2]);
@@ -2872,21 +3287,21 @@ function run_config_post(
   string $test,
   Options $options,
 ): mixed {
-  list($output, $stderr) = $outputs;
-  file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
+
+  list($file, $type) = get_expect_file_and_type($test, $options);
+  if ($file is null || $type is null) {
+    Status::writeDiff(
+      $test,
+      "No $test.expect or $test.expectf. " .
+      "If $test is meant to be included by other tests, " .
+      "use a different file extension.\n"
+    );
+    return false;
+  }
 
   $check_hhbbc_error = $options->repo
     && (file_exists($test . '.hhbbc_assert') ||
         file_exists($test . '.hphpc_assert'));
-
-  // hhvm redirects errors to stdout, so anything on stderr is really bad.
-  if ($stderr && !$check_hhbbc_error) {
-    Status::writeDiff(
-      $test,
-      "Test failed because the process wrote on stderr:\n$stderr"
-    );
-    return false;
-  }
 
   $repeats = 0;
   if (!$check_hhbbc_error) {
@@ -2903,137 +3318,87 @@ function run_config_post(
     }
   }
 
-  list($file, $type) = get_expect_file_and_type($test, $options);
-  if ($file is null || $type is null) {
+  list($output, $stderr) = $outputs;
+  if (!$repeats) {
+    $split = vec[trim($output)];
+  } else {
+    $split = array_map(trim<>, explode(MULTI_REQUEST_SEP, $output));
+  }
+
+  file_put_contents(
+    Status::getTestOutputPath($test, 'out'),
+    str_replace(MULTI_REQUEST_SEP, '', $output)
+  );
+
+  // hhvm redirects errors to stdout, so anything on stderr is really bad.
+  if ($stderr && !$check_hhbbc_error) {
     Status::writeDiff(
       $test,
-      "No $test.expect, $test.expectf, $test.hhvm.expect, " .
-      "$test.hhvm.expectf, or $test.expectregex. " .
-      "If $test is meant to be included by other tests, " .
-      "use a different file extension.\n"
+      "Test failed because the process wrote on stderr:\n$stderr"
     );
     return false;
   }
 
-  $wanted = null;
-  if ($type === 'expect' || $type === 'hhvm.expect') {
-    $wanted = trim(file_get_contents($file));
+  if ($repeats > 0 && count($split) != $repeats) {
+    Status::writeDiff(
+      $test,
+      count($split) . ' sets of output returned, expected ' . $repeats
+    );
+    return false;
+  }
+
+  $wanted = trim(file_get_contents($file));
+
+  if ($type === 'expect') {
     if ($options->ignore_oids || $options->repo) {
-      $output = replace_object_resource_ids($output, 'n');
+      $split = array_map($s ==> replace_object_resource_ids($s, 'n'), $split);
       $wanted = replace_object_resource_ids($wanted, 'n');
     }
 
-    if (!$repeats) {
-      $passed = !strcmp($output, $wanted);
-      if (!$passed) {
-        Status::writeDiff($test, generate_diff($wanted, null, $output));
+    foreach ($split as $s) {
+      if (strcmp($s, $wanted)) {
+        Status::writeDiff(
+          $test,
+          generate_diff($wanted, $s, ($l1, $l2) ==> !strcmp($l1, $l2))
+        );
+        return false;
       }
-      return $passed;
     }
-    $wanted_re = preg_quote($wanted, '/');
-  } else if ($type === 'expectf' || $type === 'hhvm.expectf') {
-    $wanted = trim(file_get_contents($file));
+    return true;
+  } else if ($type === 'expectf') {
     if ($options->ignore_oids || $options->repo) {
       $wanted = replace_object_resource_ids($wanted, '%d');
     }
-    $wanted_re = $wanted;
 
-    // do preg_quote, but miss out any %r delimited sections.
-    $temp = "";
-    $r = "%r";
-    $startOffset = 0;
-    $length = strlen($wanted_re);
-    while ($startOffset < $length) {
-      $start = strpos($wanted_re, $r, $startOffset);
-      if ($start !== false) {
-        // we have found a start tag.
-        $end = strpos($wanted_re, $r, $start+2);
-        if ($end === false) {
-          // unbalanced tag, ignore it.
-          $start = $length;
-          $end = $length;
+    try {
+      foreach ($split as $s) {
+        $parser = new ExpectfParser($s, $wanted);
+        if (!$parser->foundWildcard()) {
+          Status::writeDiff(
+            $test,
+            'Bad expectf file: File contains no actual wildcards. ' .
+            'Use expect instead'
+          );
+          return false;
         }
-      } else {
-        // no more %r sections.
-        $start = $length;
-        $end = $length;
+        if (!$parser->succeeded()) {
+          $diff = generate_diff(
+            $wanted,
+            $s,
+            ($l1, $l2) ==> (new ExpectfParser($l2, $l1))->succeeded()
+          );
+          Status::writeDiff($test, $diff);
+          return false;
+        }
       }
-      // quote a non re portion of the string.
-      $temp = $temp.preg_quote(substr($wanted_re, $startOffset,
-                                      ($start - $startOffset)),  '/');
-      // add the re unquoted.
-      if ($end > $start) {
-        $temp = $temp.'('.substr($wanted_re, $start+2, ($end - $start-2)).')';
-      }
-      $startOffset = $end + 2;
+      return true;
+    } catch (BadExpectfPattern $e) {
+      Status::writeDiff($test, 'Bad expectf file: ' . $e->getMessage());
+      return false;
     }
-    $wanted_re = $temp;
-
-    $wanted_re = str_replace(
-      vec['%binary_string_optional%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%unicode_string_optional%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%unicode\|string%', '%string\|unicode%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%u\|b%', '%b\|u%'],
-      '',
-      $wanted_re
-    );
-    // Stick to basics.
-    $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-    $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-    $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-    $wanted_re = str_replace('%a', '.+', $wanted_re);
-    $wanted_re = str_replace('%A', '.*', $wanted_re);
-    $wanted_re = str_replace('%w', '\s*', $wanted_re);
-    $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-    $wanted_re = str_replace('%d', '\d+', $wanted_re);
-    $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-    // %f allows two points "-.0.0" but that is the best *simple* expression.
-    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
-                             $wanted_re);
-    $wanted_re = str_replace('%c', '.', $wanted_re);
-    // must be last.
-    $wanted_re = str_replace('%%', '%%?', $wanted_re);
-
-    // Normalize newlines.
-    $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
-    $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
-  } else if ($type === 'expectregex') {
-    $wanted_re = trim(file_get_contents($file));
   } else {
     throw new Exception("Unsupported expect file type: ".$type);
   }
-
-  if ($repeats) {
-    $wanted_re = "($wanted_re\s*)".'{'.$repeats.'}';
-  }
-  if ($wanted is null) $wanted = $wanted_re;
-  $passed = @preg_match("/^$wanted_re\$/s", $output);
-  if ($passed) return true;
-  if ($passed === false && $repeats) {
-    // $repeats can cause the regex to become too big, and fail
-    // to compile.
-    return 'skip-repeats-fail';
-  }
-  $diff = generate_diff($wanted_re, $wanted_re, $output);
-  if ($passed === false && $diff === "") {
-    // the preg match failed, probably because the regex was too complex,
-    // but since the line by line diff came up empty, we're fine
-    return true;
-  }
-  Status::writeDiff($test, $diff);
-  return false;
 }
 
 function timeout_prefix(): string {

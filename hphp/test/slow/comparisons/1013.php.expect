@@ -1,0 +1,22 @@
+1	YYYY	null <= true	
+2	YYYY	null <= false	
+3	YYYY	null <= 1	
+4	YYYY	null <= 0	
+5	YYYY	null <= -1	
+6	YYYY	null <= '1'	
+7	YYYY	null <= '0'	
+8	YYYY	null <= '-1'	
+9	YYYY	null <= null	
+10	EEEE	null <= array()	
+11	EEEE	null <= array(1)	
+12	EEEE	null <= array(2)	
+13	EEEE	null <= array('1')	
+14	EEEE	null <= array('0' => '1')	
+15	EEEE	null <= array('a')	
+16	EEEE	null <= array('a' => 1)	
+17	EEEE	null <= array('b' => 1)	
+18	EEEE	null <= array('a' => 1, 'b' => 2)	
+19	EEEE	null <= array(array('a' => 1))	
+20	EEEE	null <= array(array('b' => 1))	
+21	YYYY	null <= 'php'	
+22	YYYY	null <= ''

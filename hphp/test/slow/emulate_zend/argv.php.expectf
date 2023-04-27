@@ -1,4 +1,4 @@
-string(%d) "/%s/hhvm%s --php -n %S/test/slow/emulate_zend/argv.inc foo bar"
+string(%d) "/%s/hhvm%S --php -n %S/test/slow/emulate_zend/argv.inc foo bar"
 vec(3) {
   string(%d) "%s/test/slow/emulate_zend/argv.inc"
   string(3) "foo"

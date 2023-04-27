@@ -1,0 +1,1 @@
+Fatal error: Cannot call new static since class%?{ D} has reified generics in %s on line 8

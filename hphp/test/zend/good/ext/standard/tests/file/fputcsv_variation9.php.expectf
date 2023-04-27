@@ -404,7 +404,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in r+b --
@@ -415,7 +415,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in r+t --
@@ -426,7 +426,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(%d) "%^water^ ^fruit^%
+string(%d) "%%^water^ ^fruit^%%
 "
 
 -- file opened in a+ --
@@ -437,7 +437,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in a+b --
@@ -448,7 +448,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in a+t --
@@ -459,7 +459,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(%d) "%^water^ ^fruit^%
+string(%d) "%%^water^ ^fruit^%%
 "
 
 -- file opened in w+ --
@@ -470,7 +470,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in w+b --
@@ -481,7 +481,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in w+t --
@@ -492,7 +492,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(%d) "%^water^ ^fruit^%
+string(%d) "%%^water^ ^fruit^%%
 "
 
 -- file opened in x+ --
@@ -503,7 +503,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in x+b --
@@ -514,7 +514,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(18) "%^water^ ^fruit^%
+string(18) "%%^water^ ^fruit^%%
 "
 
 -- file opened in x+t --
@@ -525,7 +525,7 @@ Notice: %s
 int(18)
 int(18)
 bool(false)
-string(%d) "%^water^ ^fruit^%
+string(%d) "%%^water^ ^fruit^%%
 "
 
 -- file opened in r+ --

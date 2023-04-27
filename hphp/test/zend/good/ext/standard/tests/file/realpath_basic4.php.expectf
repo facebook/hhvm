@@ -1,2 +1,2 @@
-1. %s%erealpath_basic4%ehome
-2. %s%erealpath_basic4%ehome%etest
+1. %s/realpath_basic4/home
+2. %s/realpath_basic4/home/test

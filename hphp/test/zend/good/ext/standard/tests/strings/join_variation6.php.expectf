@@ -1,4 +1,0 @@
-*** Testing join() : usage variationsi - binary safe ***
-string(23) "Red,%r\x00%r Green,%r\x00%r White,%r\x00%r 1"
-string(20) "Red, Green, White, 1"
-Done

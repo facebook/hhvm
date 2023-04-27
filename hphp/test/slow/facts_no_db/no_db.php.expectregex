@@ -1,8 +1,0 @@
-Failed to update native autoloader, not natively autoloading [^\r\n]+\/hphp\/test\/slow\/facts_no_db\. Exception while querying watcher: std::runtime_error: Couldn't open native Facts DB\.
-(You may be able to fix this by running 'arc reset facts'[\r\n]+)?Key: SQLiteKey\(Path: [^\r\n]+, Group: <unset>, Create Permissions: 0600, Mode: READ\/WRITE, Path Permissions: 
-(\(\/[^\r\n]*(\/[^\r\n]+)* -> [0-7]{4} [^\r\n]+\/[^\r\n]+\)[\r\n]*)+
-\(\/[^\r\n]*(\/[^\r\n]+)* -> unknown\/may not exist \?\?\/\?\?\)
- Reason: SQLiteExc \[14\]: unable to open database file
-
-
-HH\\Facts\\enabled\(\) = false

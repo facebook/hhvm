@@ -3,7 +3,7 @@
 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
 Expected nonnull, got null
-Hash: %SoftInaccessible%=E3=09memoNoArg%
+Hash: %%SoftInaccessible%%=E3=09memoNoArg%%
 memoNoArg passed
   After: Expected nonnull, got null
 ------------------------
@@ -11,7 +11,7 @@ memoNoArg passed
 
 Warning: Implicit context is set to soft inaccessible in %s on line 31
 Expected nonnull, got null
-Hash: %SoftInaccessible%=E3=0BmemoWithArg%
+Hash: %%SoftInaccessible%%=E3=0BmemoWithArg%%
 memoWithArg passed
   After: Expected nonnull, got null
 ------------------------

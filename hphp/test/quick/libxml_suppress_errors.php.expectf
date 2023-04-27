@@ -10,7 +10,7 @@ vec(1) {
     ["code"]=>
     int(76)
     ["column"]=>
-    int(%r51|56%r)
+    int(%|{51|56})
     ["message"]=>
     string(57) "Opening and ending tag mismatch: titles line 4 and title
 "

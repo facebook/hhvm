@@ -38,12 +38,6 @@ These are the allowed extensions:
 * `.php` - The source of the test.
 * `.php.expect` - The exact string expected output.
 * `.php.expectf` - The exact string expected output with formating characters.
-* `.php.hhvm.expect` - The exact string expected output. Same as `.php.expect`.
-* `.php.hhvm.expectf` - The exact string expected output with formating characters. Same as `.php.expectf`.
-* `.php.typechecker.expect` - The exact string expected output for typechecker tests.
-* `.php.typechecker.expectf` - The exact string expected output for typechecker tests with formatting characters.
-* `.php.expectregex` - A regex that matches the output.
-* `.php.in` - When you run the test, the input will be obtained from here.
 * `.php.out` - When you run the test, the output will be stored here.
 * `.php.opts` - Runtime options to pass to hhvm.
 * `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).
@@ -93,19 +87,24 @@ typechecker errors as well.
 
 ## Format Characters
 
-These can appear in `.expectf` or `typechecker.expectf` files.
+These can appear in `.expectf` files.
 
-| Char    | Description                                | Regex
-|---------|--------------------------------------------|-------
-| %e      | Path separator                             | \/
-| %s      | Any characters except newlines             | [^\r\n]+
-| %S      | Optionally any characters except newlines  | [^\r\n]*
-| %a      | Any characters                             | .+
-| %A      | Optionally any characters                  | .*
-| %w      | Optional whitespace                        | \s*
-| %i      | Integer with optional sign                 | [+-]?\d+
-| %d      | Digits                                     | \d+
-| %x      | Hex                                        | [0-9a-fA-F]+
-| %f      | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
-| %c      | Character                                  | .
-| %r...%r | The ... is a regex                         | The part that is ...
+| Char        | Description
+|-------------|----------------------------------------------------------
+| %s          | Any characters except newlines                          |
+| %S          | Optionally any characters except newlines               |
+| %a          | Any characters                                          |
+| %A          | Optionally any characters                               |
+| %w          | Optional whitespace                                     |
+| %i          | Integer with optional sign                              |
+| %d          | Digits                                                  |
+| %x          | Hex                                                     |
+| %f          | Float                                                   |
+| %c          | Character                                               |
+| %C          | Optional character                                      |
+| %t          | Tab                                                     |
+| %%          | %                                                       |
+| %h{xx}      | Literal byte with the value given inside {} (in hex)    |
+| %?{...}     | Optionally the sub pattern inside {}                    |
+| %|{...|...} | One of the sub patterns inside {} (separated by |)      |
+| %*{...}     | Zero or more of the sub pattern inside {}               |

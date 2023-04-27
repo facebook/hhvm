@@ -57,6 +57,7 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH})
 
 # Find required dependencies.
+find_package(fmt CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -98,7 +99,6 @@ if(lib_only OR build_all)
   find_package(Glog REQUIRED)
   find_package(folly CONFIG REQUIRED)
   find_package(fizz CONFIG REQUIRED)
-  find_package(fmt CONFIG REQUIRED)
   find_package(wangle CONFIG REQUIRED)
   find_package(ZLIB REQUIRED)
   find_package(Zstd REQUIRED)

@@ -66,10 +66,11 @@ let rec of_decl_ty (ty : decl_ty) : string =
       TShapeMap.fold (fun key ty acc -> of_shape_field key ty :: acc) fields []
     in
     let fields_with_ellipsis =
-      if Option.is_some kind then
-        fields @ ["..."]
-      else
+      if is_nothing kind (* Closed shape *) then
         fields
+      (* Open shape TODO akenn non-mixed open *)
+      else
+        fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields_with_ellipsis)
   | Tvar _ -> "mixed"

@@ -280,7 +280,7 @@ and _ ty_ =
   | Ttuple : 'phase ty list -> 'phase ty_
       (** Tuple, with ordered list of the types of the elements of the tuple. *)
   | Tshape :
-      type_origin * 'phase ty option * 'phase shape_field_type TShapeMap.t
+      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
       -> 'phase ty_
       (** Whether all fields of this shape are known, types of each of the
        * known arms.
@@ -633,12 +633,7 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tshape (_, a0, a1) ->
       Format.fprintf fmt "(@[<2>Tshape (@,";
-      (match a0 with
-      | None -> Format.pp_print_string fmt "None"
-      | Some x ->
-        Format.pp_print_string fmt "(Some ";
-        pp_ty fmt x;
-        Format.pp_print_string fmt ")");
+      pp_ty fmt a0;
       Format.fprintf fmt ",@ ";
       TShapeMap.pp pp_shape_field_type fmt a1;
       Format.fprintf fmt "@,))@]"

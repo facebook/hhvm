@@ -437,15 +437,16 @@ module Full = struct
       shape_map ~fuel fdm f_field
     in
     let (fuel, fields_doc) =
-      match shape_kind with
-      | None -> (fuel, fields_doc)
-      | Some ty ->
-        if open_mixed then
+      begin
+        if Typing_defs.is_nothing shape_kind then
+          (fuel, fields_doc)
+        else if open_mixed then
           (fuel, fields_doc @ [text "..."])
         else
-          let (fuel, ty_doc) = k ~fuel ty in
+          let (fuel, ty_doc) = k ~fuel shape_kind in
           ( fuel,
             fields_doc @ [Concat [text "_"; Space; text "=>"; Space; ty_doc]] )
+      end
     in
     list ~fuel "shape(" id fields_doc ")"
 
@@ -692,20 +693,16 @@ module Full = struct
               (tparam, Ast_defs.Constraint_as, ty))
 
   let rec is_open_mixed env t =
-    match t with
-    | None -> false
-    | Some t ->
+    match get_node t with
+    | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
+      is_open_mixed env ty
+    | Toption t ->
+      let (_, t) = Typing_inference_env.expand_type env.inference_env t in
       (match get_node t with
-      | Tnewtype (n, _, ty)
-        when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env)
-        ->
-        is_open_mixed env (Some ty)
-      | Toption t ->
-        let (_, t) = Typing_inference_env.expand_type env.inference_env t in
-        (match get_node t with
-        | Tnonnull -> true
-        | _ -> false)
+      | Tnonnull -> true
       | _ -> false)
+    | _ -> false
 
   (* Prints a locl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
@@ -1525,7 +1522,7 @@ module Json = struct
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
     | (p, Tshape (_, shape_kind, fl)) ->
-      let fields_known = Option.is_none shape_kind in
+      let fields_known = is_nothing shape_kind in
       obj
       @@ kind p "shape"
       @ is_array false
@@ -1820,9 +1817,9 @@ module Json = struct
             >>= fun (fields_known, _fields_known_keytrace) ->
             let shape_kind =
               if fields_known then
-                None
+                Typing_make_type.nothing Reason.Rnone
               else
-                Some (Typing_make_type.mixed Reason.Rnone)
+                Typing_make_type.mixed Reason.Rnone
             in
             let fields =
               List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->

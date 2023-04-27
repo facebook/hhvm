@@ -374,6 +374,11 @@ let is_dynamic t =
   | Tdynamic -> true
   | _ -> false
 
+let is_nothing t =
+  match get_node t with
+  | Tunion [] -> true
+  | _ -> false
+
 let is_nonnull t =
   match get_node t with
   | Tnonnull -> true
@@ -528,10 +533,7 @@ let rec is_denotable ty =
   | Taccess (ty, _) -> is_denotable ty
   | Tshape (_, unknown_field_type, sm) ->
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
-    &&
-    (match unknown_field_type with
-    | None -> true
-    | Some ty -> is_mixed ty)
+    && unknown_field_type_is_denotable unknown_field_type
   | Tfun { ft_params; ft_ret; _ } ->
     is_denotable ft_ret.et_type
     && List.for_all ft_params ~f:(fun { fp_type; _ } ->
@@ -550,8 +552,9 @@ let rec is_denotable ty =
   | Tunapplied_alias _ ->
     false
 
-and is_mixed ty =
+and unknown_field_type_is_denotable ty =
   match get_node ty with
+  | Tunion [] -> true
   | Tintersection [] -> true
   | Toption ty -> begin
     match get_node ty with
@@ -734,12 +737,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       end
       | n -> n
     end
-    | ( Tshape (shape_origin1, unknown_fields1, fields1),
-        Tshape (shape_origin2, unknown_fields2, fields2) ) ->
+    | ( Tshape (shape_origin1, unknown_fields_type1, fields1),
+        Tshape (shape_origin2, unknown_fields_type2, fields2) ) ->
       if same_type_origin shape_origin1 shape_origin2 then
         0
       else begin
-        match Option.compare ty_compare unknown_fields1 unknown_fields2 with
+        match ty_compare unknown_fields_type1 unknown_fields_type2 with
         | 0 ->
           List.compare
             (fun (k1, v1) (k2, v2) ->

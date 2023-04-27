@@ -5332,21 +5332,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
+        let pos = self.get_pos(open);
+        let reason = self.alloc(Reason::hint(pos));
         let kind = match open.token_kind() {
             // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
-            Some(TokenKind::DotDotDot) => {
-                let pos = self.get_pos(open);
-                let reason = self.alloc(Reason::hint(pos));
-                Some(self.alloc(Ty(
-                    reason,
-                    if self.implicit_sdt() {
-                        self.make_supportdyn(pos, Ty_::Tmixed)
-                    } else {
-                        Ty_::Tmixed
-                    },
-                )))
-            }
-            _ => None,
+            Some(TokenKind::DotDotDot) => self.alloc(Ty(
+                reason,
+                if self.implicit_sdt() {
+                    self.make_supportdyn(pos, Ty_::Tmixed)
+                } else {
+                    Ty_::Tmixed
+                },
+            )),
+            // Closed shapes are expressed using `nothing` (empty union) as the type of unknown fields
+            _ => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
         };
         let pos = self.merge_positions(shape, rparen);
         let origin = TypeOrigin::MissingOrigin;

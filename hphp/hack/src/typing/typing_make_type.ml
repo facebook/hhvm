@@ -34,8 +34,6 @@ let keyed_traversable r kty vty =
 let keyed_container r kty vty =
   class_type r SN.Collections.cKeyedContainer [kty; vty]
 
-let shape r kind map = mk (r, Tshape (Missing_origin, kind, map))
-
 let awaitable r ty = class_type r SN.Classes.cAwaitable [ty]
 
 let generator r key value send =
@@ -114,11 +112,20 @@ let locl_like r ty =
 let supportdyn r ty =
   match get_node ty with
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
+  | Tunion [] -> ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
 
 let supportdyn_nonnull r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
+
+let nothing r = mk (r, Tunion [])
+
+let shape r kind map = mk (r, Tshape (Missing_origin, kind, map))
+
+let closed_shape r map = mk (r, Tshape (Missing_origin, nothing r, map))
+
+let open_shape r map = mk (r, Tshape (Missing_origin, mixed r, map))
 
 let supportdyn_mixed ?(mixed_reason = Reason.Rnone) r =
   supportdyn r (mixed mixed_reason)
@@ -148,8 +155,6 @@ let nullable_locl r ty =
   | Toption _ as ty_ -> mk (r, ty_)
   | Tunion [] -> null r
   | _ -> mk (r, Toption ty)
-
-let nothing r = mk (r, Tunion [])
 
 let apply r id tyl = mk (r, Tapply (id, tyl))
 

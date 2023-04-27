@@ -255,10 +255,13 @@ and hint_ p env = function
     Tintersection tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_kind =
-      if nsi_allows_unknown_fields then
-        Some (hint env (p, Hmixed))
-      else
-        None
+      hint
+        env
+        ( p,
+          if nsi_allows_unknown_fields then
+            Hmixed
+          else
+            Hnothing )
     in
     let fdm =
       List.fold_left

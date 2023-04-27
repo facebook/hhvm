@@ -58,7 +58,7 @@ class type ['env] type_mapper_type =
     method on_tshape :
       'env ->
       Reason.t ->
-      locl_ty option ->
+      locl_ty ->
       locl_phase shape_field_type TShapeMap.t ->
       'env * locl_ty
 

@@ -157,18 +157,20 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (_, None, fields) when TShapeMap.is_empty fields -> Always_falsy
-  | Tshape (_, _, fields) ->
-    let has_non_optional_fields =
-      TShapeMap.fold
-        (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
-        fields
-        false
-    in
-    if has_non_optional_fields then
-      Always_truthy
+  | Tshape (_, shape_kind, fields) ->
+    if is_nothing shape_kind && TShapeMap.is_empty fields then
+      Always_falsy
     else
-      Possibly_falsy
+      let has_non_optional_fields =
+        TShapeMap.fold
+          (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
+          fields
+          false
+      in
+      if has_non_optional_fields then
+        Always_truthy
+      else
+        Possibly_falsy
   | Ttuple [] -> Always_falsy
   | Ttuple (_ :: _) ->
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)

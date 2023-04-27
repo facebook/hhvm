@@ -262,7 +262,7 @@ and _ ty_ =
    * known arms.
    *)
   | Tshape :
-      type_origin * 'phase ty option * 'phase shape_field_type TShapeMap.t
+      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
       -> 'phase ty_
   | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter

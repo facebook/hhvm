@@ -144,13 +144,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
             { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
             TShapeMap.empty
         in
-        let upper_shape_ty =
-          mk
-            ( r,
-              Tshape
-                (Missing_origin, Some (MakeType.mixed Reason.Rnone), upper_fdm)
-            )
-        in
+        let upper_shape_ty = MakeType.open_shape r upper_fdm in
         ((env, None), Some upper_shape_ty))
   end
   | _ -> ((env, None), None)

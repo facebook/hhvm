@@ -2245,11 +2245,11 @@ and simplify_subtype_i
                       sft.sft_ty
                       ty_super)
               (TShapeMap.values sftl)
-            &&&
-            (match unknown_fields_type with
-            | None -> valid
-            | Some ty ->
-              simplify_subtype ~subtype_env ~sub_supportdyn ty ty_super)
+            &&& simplify_subtype
+                  ~subtype_env
+                  ~sub_supportdyn
+                  unknown_fields_type
+                  ty_super
           | (_, Tclass ((_, class_id), _exact, tyargs)) ->
             let class_def_sub = Typing_env.get_class env class_id in
             (match class_def_sub with
@@ -2954,18 +2954,17 @@ and simplify_subtype_shape
       | ((_, Tunion []), true) -> `Absent
       | (_, true) -> `Optional (make_supportdyn sft_ty)
       | (_, false) -> `Required (make_supportdyn sft_ty))
-    | None -> begin
-      match shape_kind with
-      | Some ty ->
+    | None ->
+      if Typing_utils.is_nothing env shape_kind then
+        `Absent
+      else
         let printable_name = TUtils.get_printable_shape_field_name field_name in
         let ty =
           with_reason
-            ty
+            shape_kind
             (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
         in
         `Optional (make_supportdyn ty)
-      | None -> `Absent
-    end
   in
   (*
     For two particular projections `p1` and `p2`, `p1` <: `p2` iff:
@@ -3089,9 +3088,12 @@ and simplify_subtype_shape
       field_name
       res
   in
-  match (shape_kind_sub, shape_kind_super) with
+  match
+    ( Typing_utils.is_nothing env shape_kind_sub,
+      Typing_utils.is_nothing env shape_kind_super )
+  with
   (* An open shape cannot subtype a closed shape *)
-  | (Some _, None) ->
+  | (false, true) ->
     let fail =
       Option.map
         subtype_env.on_error

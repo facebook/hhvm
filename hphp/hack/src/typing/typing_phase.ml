@@ -131,10 +131,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       Typing_utils.strip_supportdyn env lty
     in
     match deref stripped_lty with
-    | (r, Tshape (origin, Some ty, shape_fields)) when is_supportdyn ->
+    | (r, Tshape (origin, ty, shape_fields)) when is_supportdyn ->
       MakeType.supportdyn
         r
-        (mk (r, Tshape (origin, Some (MakeType.supportdyn r ty), shape_fields)))
+        (mk (r, Tshape (origin, MakeType.supportdyn r ty, shape_fields)))
     | _ -> lty
   in
   let tvar_or_localize ~ety_env env r ty ~i =
@@ -397,13 +397,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         tym
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    let ((env, ty_err_opt2), shape_kind) =
-      match shape_kind with
-      | None -> ((env, None), None)
-      | Some ty ->
-        let (x, ty) = localize ~ety_env env ty in
-        (x, Some ty)
-    in
+    let ((env, ty_err_opt2), shape_kind) = localize ~ety_env env shape_kind in
     let ty_err_opt =
       Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
     in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ca870972eab58d24e438619c590419f>>
+// @generated SignedSource<<1d6b8d315044e1fe90fcde484acbfc77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -553,11 +553,7 @@ pub enum Ty_ {
     Ttuple(Vec<Ty>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    Tshape(
-        TypeOrigin,
-        Option<Ty>,
-        t_shape_map::TShapeMap<ShapeFieldType>,
-    ),
+    Tshape(TypeOrigin, Ty, t_shape_map::TShapeMap<ShapeFieldType>),
     Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which

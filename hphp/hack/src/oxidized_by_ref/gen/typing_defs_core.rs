@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3ac436f5b727f7f4fa029a4cb7ac1a0>>
+// @generated SignedSource<<98bb90092191004a6b6ed1cf5d65aad8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -490,7 +490,7 @@ pub enum Ty_<'a> {
     Tshape(
         &'a (
             TypeOrigin<'a>,
-            Option<&'a Ty<'a>>,
+            &'a Ty<'a>,
             t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),
     ),

@@ -205,7 +205,7 @@ fn trefinements<TY: Display>(
 
 fn tshape<R: Reason>(
     f: &mut Formatter<'_>,
-    kind: &Option<Ty<R>>,
+    kind: &Ty<R>,
     fields: &BTreeMap<TshapeFieldName, ShapeFieldType<R>>,
 ) -> fmt::Result {
     write!(f, "shape(")?;
@@ -227,9 +227,10 @@ fn tshape<R: Reason>(
         }
         write!(f, " => {}", sft.ty)?;
     }
-    match kind {
-        None => {}
-        Some(_) => {
+    match &**kind.node() {
+        // Closed shape is represented by unknown fields having type nothing
+        Ty_::Tunion(tys) if tys.is_empty() => {}
+        _ => {
             if !is_first {
                 write!(f, ", ")?;
             }

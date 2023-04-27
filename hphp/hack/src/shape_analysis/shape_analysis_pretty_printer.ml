@@ -14,7 +14,7 @@ type 'constraint_ show_constraint_ =
   Typing_env_types.env -> 'constraint_ -> string
 
 let mk_shape field_map =
-  T.(mk (Typing_reason.Rnone, Tshape (Missing_origin, None, field_map)))
+  Typing_make_type.closed_shape Typing_reason.Rnone field_map
 
 let show_entity = function
   | Literal pos -> Format.asprintf "%a" Pos.pp pos

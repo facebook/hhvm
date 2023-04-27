@@ -26,7 +26,7 @@
            (Typing_defs.TCConcrete
               { Typing_defs.tc_type =
                 (Rhint ([9:23-11:4]),
-                 (Tshape (None,
+                 (Tshape ((Rhint ([Pos.none]), (Tunion [])),
                     { (Typing_defs_core.TSFclass_const (
                          ([10:5-9], "\\NS1\\NS2\\C"), ([10:11-14], "KEY"))) ->
                       { sft_optional = false;

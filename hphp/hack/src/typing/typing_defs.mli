@@ -218,6 +218,8 @@ val is_dynamic : 'a ty -> bool
 
 val is_nonnull : 'a ty -> bool
 
+val is_nothing : 'a ty -> bool
+
 val is_fun : 'a ty -> bool
 
 val is_any : 'a ty -> bool

@@ -133,9 +133,10 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
       }
     in
     let sh_kind =
-      match kind with
-      | Some t -> Open_shape (ty t)
-      | None -> Closed_shape
+      if T.is_nothing kind then
+        Closed_shape
+      else
+        Open_shape (ty kind)
     in
     Tshape { sh_kind; sh_fields = Typing_defs.TShapeMap.map lift fields }
   (* ---  types below are not yet supported *)

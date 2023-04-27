@@ -79,12 +79,7 @@ let refine_shape field_name pos env shape =
     env
     ~r:(Reason.Rwitness pos)
     shape
-    (mk
-       ( Reason.Rnone,
-         Tshape
-           ( Missing_origin,
-             Some (MakeType.mixed Reason.Rnone),
-             TShapeMap.singleton field_name sft ) ))
+    (MakeType.open_shape Reason.Rnone (TShapeMap.singleton field_name sft))
 
 let make_locl_like_type env ty =
   if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
@@ -118,10 +113,10 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
   match get_node stripped_shape with
   | Tshape (_, shape_kind, fields) ->
     let fields =
-      match shape_kind with
-      | None -> TShapeMap.remove field_name fields
+      if is_nothing shape_kind then
+        TShapeMap.remove field_name fields
       (* TODO akenn: check this *)
-      | Some _ ->
+      else
         let printable_name = TUtils.get_printable_shape_field_name field_name in
         let nothing =
           MakeType.nothing (Reason.Runset_field (pos, printable_name))
@@ -191,10 +186,7 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
           let sft_ty =
             match TShapeMap.find_opt field ftm with
             | Some { sft_ty; _ } -> sft_ty
-            | None ->
-              Option.value
-                ~default:(MakeType.mixed (Reason.Rwitness p))
-                shape_kind
+            | None -> shape_kind
           in
           let (env, sft_ty) =
             Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) sft_ty
@@ -225,12 +217,9 @@ let shapes_idx_not_null env shape_ty fld =
   (env, res)
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
-  mk
-    ( Reason.Rshape (shape_pos, fun_name),
-      Tshape
-        ( Missing_origin,
-          Some (MakeType.mixed Reason.Rnone),
-          TShapeMap.singleton field_name field_ty ) )
+  MakeType.open_shape
+    (Reason.Rshape (shape_pos, fun_name))
+    (TShapeMap.singleton field_name field_ty)
 
 (* Typing rules for Shapes::idx
  *
@@ -313,8 +302,7 @@ let to_collection env pos shape_ty res return_type =
       inherit! Type_mapper.tvar_expanding_type_mapper
 
       method! on_tshape env r shape_kind fdm =
-        match shape_kind with
-        | None ->
+        if Typing_utils.is_nothing env shape_kind then
           let keys = TShapeMap.keys fdm in
           let (env, keys) =
             List.map_env env keys ~f:(fun env key ->
@@ -346,7 +334,8 @@ let to_collection env pos shape_ty res return_type =
           let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
           let (env, value) = Typing_union.union_list env r values in
           return_type env (get_reason res) key value
-        | Some _ -> (env, res)
+        else
+          (env, res)
 
       method! on_tunion env r tyl =
         let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
@@ -578,14 +567,11 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
         (mk
            ( Reason.Rnone,
              Toption
-               (mk
-                  ( Reason.Rwitness_from_decl param1.fp_pos,
-                    Tshape
-                      ( Missing_origin,
-                        Some (MakeType.mixed Reason.Rnone),
-                        TShapeMap.singleton
-                          field_name
-                          { sft_optional = true; sft_ty = field_ty } ) )) ))
+               (MakeType.open_shape
+                  (Reason.Rwitness_from_decl param1.fp_pos)
+                  (TShapeMap.singleton
+                     field_name
+                     { sft_optional = true; sft_ty = field_ty })) ))
     in
     match nargs with
     | 2 ->
@@ -636,14 +622,11 @@ let transform_at_fun_ty (field_name : tshape_field_name) fty =
     let param1 =
       update_param
         param1
-        (mk
-           ( Reason.Rwitness_from_decl param1.fp_pos,
-             Tshape
-               ( Missing_origin,
-                 Some (MakeType.mixed Reason.Rnone),
-                 TShapeMap.singleton
-                   field_name
-                   { sft_optional = true; sft_ty = field_ty } ) ))
+        (MakeType.open_shape
+           (Reason.Rwitness_from_decl param1.fp_pos)
+           (TShapeMap.singleton
+              field_name
+              { sft_optional = true; sft_ty = field_ty }))
     in
     [param1; param2]
   in

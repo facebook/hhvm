@@ -720,7 +720,6 @@ let load_
     ~current_version
     ~current_rolled_out_flag_idx
     ~deactivate_saved_state_rollout
-    ~project_metadata_w_flags_www_ready
     overrides : t =
   let config = Config_file.parse_local_config system_config_path in
   let (experiments_config_meta, config) =
@@ -1405,7 +1404,6 @@ let load_
           };
         rollouts = saved_state_flags;
         project_metadata_w_flags;
-        project_metadata_w_flags_www_ready;
       };
     min_log_level;
     attempt_fix_credentials;
@@ -1527,7 +1525,6 @@ let load :
     current_version:Config_file_version.version ->
     current_rolled_out_flag_idx:int ->
     deactivate_saved_state_rollout:bool ->
-    project_metadata_w_flags_www_ready:bool ->
     Config_file_common.t ->
     t =
   load_ system_config_path

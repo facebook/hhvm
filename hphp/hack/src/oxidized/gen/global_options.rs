@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<963587cfb6deea501bbae10894d0747b>>
+// @generated SignedSource<<40cfa09fe5ec61e3ea1e1d902f3a0298>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -62,7 +62,6 @@ pub struct SavedState {
     pub loading: SavedStateLoading,
     pub rollouts: saved_state_rollouts::SavedStateRollouts,
     pub project_metadata_w_flags: bool,
-    pub project_metadata_w_flags_www_ready: bool,
 }
 
 /// Naming conventions for fields in this struct:

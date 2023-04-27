@@ -104,6 +104,11 @@ struct InlineAdapter {
   static T fromThrift(U&& value) {
     return T{std::forward<U>(value)};
   }
+
+  template <typename U>
+  static bool isEmpty(const U& value) {
+    return value.empty();
+  }
 };
 
 } // namespace thrift

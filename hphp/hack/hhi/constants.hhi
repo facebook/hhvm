@@ -11,7 +11,6 @@
 const string PHP_EOL;
 
 const string PHP_OS;
-const string PHP_BINARY;
 
 const string PHP_VERSION;
 const int PHP_MAJOR_VERSION;

@@ -62,13 +62,19 @@ function array_unmark_legacy_recursive(mixed $v)[]: mixed {
 <<__Native, __IsFoldable>>
 function is_array_marked_legacy(mixed $v)[]: bool;
 
-
-
 /**
  * This function is a kludge that returns the last argument it receives
  */
 <<__Native>>
 function sequence(mixed ... $args): mixed;
+
+namespace __internal {
+/*
+ * Return the current hhvm runtime executable path
+ */
+<<__Native>>
+function hhvm_binary(): string;
+}
 
 }
 

@@ -158,7 +158,7 @@ function verifyBpHit($path, $breakpoint, $hitCount = 1, $relative = false) {
 }
 
 function getHhvmPath() {
-  return PHP_BINARY;
+  return HH\__internal\hhvm_binary();
 }
 
 function skipMessages($skip) {

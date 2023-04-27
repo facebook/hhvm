@@ -188,11 +188,6 @@ struct Extension;
   Native::registerClassConstant<KindOfBoolean>(s_##class_name.get(), \
     makeStaticString(#const_name), bool{const_value});
 
-// Register a dynamic constant. This will not be optimized by hhbbc
-#define HHVM_RC_DYNAMIC(const_name, const_value_cell)           \
-  Native::registerConstant(makeStaticString(#const_name),       \
-                           const_value_cell, true);
-
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
@@ -572,12 +567,10 @@ using ConstantMap = std::map<const StringData*,TypedValueAux>;
 extern ConstantMap s_constant_map;
 
 inline
-bool registerConstant(const StringData* cnsName, TypedValue cns,
-                      bool dynamic = false) {
+bool registerConstant(const StringData* cnsName, TypedValue cns) {
   assertx(tvIsPlausible(cns) && cns.m_type != KindOfUninit);
   auto& dst = s_constant_map[cnsName];
   *static_cast<TypedValue*>(&dst) = cns;
-  dst.dynamic() = dynamic;
   return bindPersistentCns(cnsName, cns);
 }
 

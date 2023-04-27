@@ -27,14 +27,16 @@ function entrypoint_core_predefined_constants2(): void {
   trace("PHP_DEBUG", PHP_DEBUG);
   trace("PHP_MAXPATHLEN", PHP_MAXPATHLEN);
   trace("PHP_OS", PHP_OS);
-  trace("PHP_SAPI", PHP_SAPI);
+  // HHVM doesn't have this
+  // trace("PHP_SAPI", PHP_SAPI);
   trace("PHP_EOL", PHP_EOL);
   trace("DEFAULT_INCLUDE_PATH", DEFAULT_INCLUDE_PATH);
   trace("PEAR_INSTALL_DIR", PEAR_INSTALL_DIR);
   trace("PEAR_EXTENSION_DIR", PEAR_EXTENSION_DIR);
   trace("PHP_EXTENSION_DIR", PHP_EXTENSION_DIR);
   trace("PHP_PREFIX", PHP_PREFIX);
-  trace("PHP_BINDIR", PHP_BINDIR);
+  // HHVM doesn't have this
+  // trace("PHP_BINDIR", PHP_BINDIR);
   // HHVM doesn't have this
   // trace("PHP_MANDIR", PHP_MANDIR);
   trace("PHP_LIBDIR", PHP_LIBDIR);

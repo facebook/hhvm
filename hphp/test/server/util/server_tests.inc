@@ -135,7 +135,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $sandboxHomeConfig = ' -vSandbox.Home='.$home;
   $serverId ??= $test_run_id;
 
-  $hhvm = PHP_BINARY;
+  $hhvm = HH\__internal\hhvm_binary();
 
   if (ini_get('hhvm.repo.authoritative')) {
     if (count(ServerUtilServerTests::$repo_builds) === 0) {

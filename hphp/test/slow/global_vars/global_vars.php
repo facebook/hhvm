@@ -22,7 +22,7 @@ function entrypoint_global_vars(): void {
     // it should be fixed in ini level. so compatible with it for now
     $arg_str = $arg ? " -dvariables_order=$arg " : " ";
 
-    $cmd = PHP_BINARY . $arg_str . __FILE__ . " dummy";
+    $cmd = HH\__internal\hhvm_binary() . $arg_str . __FILE__ . " dummy";
 
     $pipes = null;
     $proc = proc_open($cmd, $descriptorspec, inout $pipes);

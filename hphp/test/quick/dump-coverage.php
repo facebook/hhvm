@@ -30,7 +30,7 @@ main
     ;
 
   system(
-    PHP_BINARY.
+    HH\__internal\hhvm_binary().
       ' -m dumpcoverage '.
       __FILE__
       ,

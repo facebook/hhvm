@@ -51,5 +51,5 @@ var_dump(!version_compare("1.3.0.dev", "1.1.2", "<"));
 
 $arr = get_defined_constants(true);
 var_dump(count($arr["user"]) === 2);
-var_dump(HH\Lib\C\any($arr["Core"], $elt ==> HH\Lib\Legacy_FIXME\eq($elt, 'PHP_BINARY')));
+var_dump(HH\Lib\C\any($arr["Core"], $elt ==> HH\Lib\Legacy_FIXME\eq($elt, 'PHP_OS')));
 }

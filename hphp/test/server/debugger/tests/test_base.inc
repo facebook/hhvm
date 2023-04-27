@@ -11,7 +11,7 @@ function startDebuggerClient($debugPort, $input_path, inout $pipes) {
 
 
   $home = hphp_home().'/hphp/test/server/debugger';
-  $hhvm = PHP_BINARY;
+  $hhvm = HH\__internal\hhvm_binary();
   $host = ' -h localhost';
   $port = ' --debug-port '.$debugPort;
   $user = ' --user debugger';

@@ -478,6 +478,10 @@ Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
   return more(value1, value2) ? value2 : value1;
 }
 
+String HHVM_FUNCTION(hhvm_binary) {
+  return String(current_executable_path());
+}
+
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
     HHVM_FALIAS(HH\\server_warmup_status_monotonic,
@@ -504,6 +508,7 @@ void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\is_array_marked_legacy, is_array_marked_legacy);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
+    HHVM_FALIAS(HH\\__internal\\hhvm_binary, hhvm_binary);
 
     HHVM_RC_BOOL(TRUE, true);
     HHVM_RC_BOOL(true, true);
@@ -548,16 +553,7 @@ void StandardExtension::initMisc() {
                             IniSetting::PHP_INI_PERDIR |
                             IniSetting::PHP_INI_USER);
 
-    HHVM_RC_DYNAMIC(PHP_BINARY,
-                    make_tv<KindOfPersistentString>(
-                      makeStaticString(current_executable_path())));
-    HHVM_RC_DYNAMIC(PHP_BINDIR,
-                    make_tv<KindOfPersistentString>(
-                      makeStaticString(current_executable_directory())));
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
-    HHVM_RC_DYNAMIC(PHP_SAPI,
-                    make_tv<KindOfPersistentString>(
-                      makeStaticString(HHVM_FN(php_sapi_name()))));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);

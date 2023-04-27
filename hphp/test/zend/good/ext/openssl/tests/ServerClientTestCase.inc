@@ -48,7 +48,11 @@ class ServerClientTestCase
 
     private function spawnWorkerProcess($code)
     {
-        $cmd = sprintf('%s "%s" %s', PHP_BINARY, __FILE__, WORKER_ARGV_VALUE);
+        $cmd = sprintf('%s "%s" %s',
+          HH\__internal\hhvm_binary(),
+          __FILE__,
+          WORKER_ARGV_VALUE
+        );
 
         $this->workerHandle = proc_open($cmd, varray[varray['pipe', 'r'], varray['pipe', 'w'], STDERR], $pipes);
         $this->workerStdIn = $pipes[0];

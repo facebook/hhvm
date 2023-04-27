@@ -19,7 +19,7 @@ function locate_hh(string $client_name): ?string {
     }
   }
 
-  $base = \dirname(\PHP_BINARY);
+  $base = \dirname(\HH\__internal\hhvm_binary());
 
   $next_to_hhvm = $base . '/' . $client_name;
   if (\is_executable($next_to_hhvm)) {

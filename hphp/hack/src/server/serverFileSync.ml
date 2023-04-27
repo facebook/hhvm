@@ -31,10 +31,15 @@ let get_file_content = function
     (* In case of errors, proceed with empty file contents *)
     |> Option.value ~default:""
 
-let open_file ~predeclare env path content =
+let open_file
+    ~(predeclare : bool)
+    (env : ServerEnv.env)
+    (path : string)
+    (content : string) : ServerEnv.env =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
-  let new_env =
-    try_relativize_path path >>= fun path ->
+  match try_relativize_path path with
+  | None -> env
+  | Some path ->
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
      * which makes incremental mode perform better. *)
@@ -66,18 +71,16 @@ let open_file ~predeclare env path content =
       Relative_path.Set.add env.disk_needs_parsing path
     in
     let last_command_time = Unix.gettimeofday () in
-    Some
-      {
-        env with
-        editor_open_files;
-        ide_needs_parsing;
-        last_command_time;
-        disk_needs_parsing;
-      }
-  in
-  Option.value new_env ~default:env
+    {
+      env with
+      editor_open_files;
+      ide_needs_parsing;
+      last_command_time;
+      disk_needs_parsing;
+    }
 
-let close_relative_path env path =
+let close_relative_path (env : ServerEnv.env) (path : Relative_path.t) :
+    ServerEnv.env =
   let editor_open_files = Relative_path.Set.remove env.editor_open_files path in
   let contents =
     match File_provider.get_unsafe path with
@@ -102,7 +105,7 @@ let close_relative_path env path =
     disk_needs_parsing;
   }
 
-let close_file env path =
+let close_file (env : ServerEnv.env) (path : string) : ServerEnv.env =
   let new_env = try_relativize_path path >>| close_relative_path env in
   Option.value new_env ~default:env
 

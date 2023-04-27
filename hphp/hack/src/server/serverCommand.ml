@@ -416,10 +416,8 @@ let handle
            at why things don't seem to be proceeding.
            * In [ServerMain.watchman_interrupt_handler], if a file on disk is modified, then
              the typecheck will resume.
-           * In [ServerMain.recheck_until_no_changes_left], if there is a pending "hh" command
-             still connected via RPC, and it's been 5.0s or more since the last Edit, then the typecheck
-             will resume. (Note that this doesn't apply to streaming-errors in [ClientCheckStatus.go_streaming],
-             since these aren't done via RPC to hh_server). *)
+           * In [ServerMain.recheck_until_no_changes_left], if it's been 5.0s or more since the last Edit,
+             then the typecheck will resume. *)
         reason = ServerCommandTypesUtils.debug_describe_cmd msg;
       }
   end else if full_recheck_needed then begin

@@ -392,35 +392,55 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
         { env with disk_needs_parsing; full_check_status = Full_check_started }
   in
   let telemetry = Telemetry.duration telemetry ~key:"got_updates" ~start_time in
+
+  (* If the client went away (e.g. user pressed Ctrl+C while waiting for the typecheck),
+     let's clean up now. *)
   let env =
     match env.nonpersistent_client_pending_command_needs_full_check with
-    (* We need to auto-restart the recheck to make progress towards handling
-     * this command... *)
-    | Some (_command, reason, client)
+    | Some (_command, _reason, client)
       when is_full_check_needed env.full_check_status
-           (*... but we don't want to get into a battle with IDE edits stopping
-            * rechecks and us restarting them. We're going to heavily favor edits and
-            * restart only after a longer period since last edit. Note that we'll still
-            * start full recheck immediately after any file save. *)
-           && Float.(start_time - env.last_command_time > 5.0) ->
-      let still_there =
-        try
-          ClientProvider.ping client;
-          true
-        with
-        | ClientProvider.Client_went_away -> false
-      in
-      if still_there then (
-        Hh_logger.log "Restarting full check due to %s" reason;
-        { env with full_check_status = Full_check_started }
-      ) else (
+           && Float.(start_time - env.last_command_time > 5.0) -> begin
+      try
+        ClientProvider.ping client;
+        env
+      with
+      | ClientProvider.Client_went_away ->
         ClientProvider.shutdown_client client;
         {
           env with
           nonpersistent_client_pending_command_needs_full_check = None;
         }
-      )
+    end
     | _ -> env
+  in
+
+  (* If a typecheck had been suspended due to IDE edits, then we want to resume it eventually...
+     To recap: if an IDE edit comes in, it takes us time to suspend the current typecheck,
+     handle the edit, then resume the current typecheck. If we did this every edit then we'd
+     get sluggish perf. We have two "debounce" mechanisms to avoid resuming too eagerly:
+     * If we handled any IDE action, then we won't accept any further CLI clients until
+       the IDE tells us it has no further pending work which it does by sending IDE_IDLE.
+       The code to deny further clients is when [ServerMain.serve_one_iteration] calls
+       [ClientProvider.sleep_and_check]. The code to reset upon IDE_IDLE is in [ServerRpc.handle]
+       when it receives IDE_IDLE.
+     * If we handled an IDE edit action, then we won't resume any typechecking work until either
+       5.0s has elapsed or there was a disk change. The code to suspend typechecking work is when
+       [ServerCommand.handle] returns [Needs_writes {recheck_restart_is_needed=false}] and
+       its caller [ServerMain.persistent_client_interrupt_handler] sets [env.full_check_status=Full_check_needed].
+       This has effect because [ServerMain.recheck_until_no_changes_left] is in charge of deciding
+       whether a check is needed, and it decides "no" unless [ServerEnv.is_full_check_started].
+       The code to resume typechecking work is right here! We'll restart only after 5.0s.
+     * These mechanisms notwithstanding, we'll still start full recheck immediately
+       upon any file save. *)
+  let env =
+    if
+      is_full_check_needed env.full_check_status
+      && Float.(start_time > env.last_command_time + 5.0)
+    then begin
+      Hh_logger.log "Restarting full check after 5.0s";
+      { env with full_check_status = Full_check_started }
+    end else
+      env
   in
   (* Same as above, but for persistent clients *)
   let env =
@@ -720,10 +740,17 @@ let serve_one_iteration genv env client_provider =
       ->
       ServerProgress.write ~include_in_logs:false "hh_client:active"
     | ClientProvider.(Select_nothing | Select_exception _) ->
-      ServerProgress.write
-        ~include_in_logs:false
-        ~disposition:ServerProgress.DReady
-        "ready"
+      (* There's some subtle IDE behavior, described in [ServerCommand.handle]
+         and [ServerMain.recheck_until_no_changes_left]... If an EDIT was received
+         over the persistent connection, then we won't resume typechecking
+         until either a file-save comes in or 5.0s has elapsed. *)
+      let (disposition, msg) =
+        match env.full_check_status with
+        | Full_check_needed -> (ServerProgress.DWorking, "will resume")
+        | Full_check_started -> (ServerProgress.DWorking, "typechecking")
+        | Full_check_done -> (ServerProgress.DReady, "ready")
+      in
+      ServerProgress.write ~include_in_logs:false ~disposition "%s" msg
     | ClientProvider.Not_selecting_hg_updating ->
       ServerProgress.write ~include_in_logs:false "hg-transaction"
     | ClientProvider.Select_new _

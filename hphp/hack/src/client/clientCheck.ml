@@ -195,10 +195,7 @@ let rpc_with_connection
     (command : 'a ServerCommandTypes.t)
     (call : connect_fun -> desc:string -> 'a ServerCommandTypes.t -> 'b Lwt.t) :
     'b Lwt.t =
-  let use_priority_pipe =
-    (not @@ ServerCommand.rpc_command_needs_full_check command)
-    && (not @@ ServerCommand.rpc_command_needs_writes command)
-  in
+  let use_priority_pipe = ServerCommand.use_priority_pipe command in
   let conn () = connect args ~use_priority_pipe in
   let%lwt result = call conn ~desc:args.desc @@ command in
   Lwt.return result

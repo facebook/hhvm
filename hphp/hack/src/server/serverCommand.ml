@@ -13,8 +13,8 @@ open ServerCommandTypes
 
 exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 
-(* Some client commands require full check to be run in order to update global
- * state that they depend on *)
+(** Some client commands require full check to be run in order to update global
+state that they depend on *)
 let rpc_command_needs_full_check : type a. a t -> bool =
  fun msg ->
   match msg with
@@ -113,17 +113,22 @@ let is_edit : type a. a command -> bool = function
   | Rpc (_metadata, EDIT_FILE _) -> true
   | _ -> false
 
-let rpc_command_needs_writes : type a. a t -> bool = function
-  | OPEN_FILE _ -> true
-  | EDIT_FILE _ -> true
-  | CLOSE_FILE _ -> true
-  (* DISCONNECT involves CLOSE-ing all previously opened files *)
-  | DISCONNECT -> true
-  | _ -> false
-
-let commands_needs_writes = function
-  | Rpc (_metadata, x) -> rpc_command_needs_writes x
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
+let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
+    bool =
+  match command with
+  | _ when rpc_command_needs_full_check command -> false
+  | OPEN_FILE (path, _)
+  | EDIT_FILE (path, _)
+  | CLOSE_FILE path ->
+    HackEventLogger.invariant_violation_bug
+      "Asked whether to use priority-pipe for persistent-connection-only command"
+      ~data:path;
+    false
+  | DISCONNECT ->
+    HackEventLogger.invariant_violation_bug
+      "Asked whether to use priority-pipe for persistent-connection-only command";
+    false
+  | _ -> true
 
 let full_recheck_if_needed' genv env reason profiling =
   if
@@ -323,18 +328,67 @@ let handle
     r
   in
 
-  if commands_needs_writes msg then begin
-    (* IDE edits can come in quick succession and be immediately followed
-     * by time sensitivie queries (like autocomplete). There is a constant cost
-     * to stopping and resuming the global typechecking jobs, which leads to
-     * flaky experience. To avoid this, we don't restart the global rechecking
-     * after IDE edits - you need to save the file again to restart it. *)
+  (* The sense of [command_needs_writes] is a little confusing.
+     Recall that for editor_open_files, hh_server deems that the IDE is the
+     source of truth for the contents of those files. Thus, the act of
+     opening/closing/editing an IDE file is equivalent to altering ("writing")
+     the content of the file.
+
+     With these IDE actions, in order to avoid races, we will have the
+     current typecheck stop [MultiThreadedCall.Cancel] before processing
+     the open/edit/close command. That way, in case the current typecheck
+     had previously read one version of the file contents, we'll be sure that
+     the same typecheck won't read the new version of the file contents.
+     Note that "cancel" in this context means cancel remaining fanout-typechecking
+     work in the current round of [ServerTypeCheck.type_check], but don't throw
+     away results from the files we've already typechecked; as soon as we've
+     cancelled and handled this command, then continue on to the next round
+     of [ServerTypeCheck.type_check] i.e. recalculate naming table and fanout
+     and then typecheck this new fanout.
+
+     (It's interesting to compare these to watchman, which does have races...
+     all that watchman allows us is to get a notification *after the fact* that
+     the file content has changed. The typecheck still gets cancelled, but it
+     might have read conflicting file contents prior to cancellation.) *)
+  let command_needs_writes (type a) (msg : a command) : bool =
+    match msg with
+    | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
+    | Rpc (_metadata, OPEN_FILE _)
+    | Rpc (_metadata, EDIT_FILE _)
+    | Rpc (_metadata, CLOSE_FILE _)
+    | Rpc (_metadata, DISCONNECT) ->
+      (* DISCONNECT involves CLOSE-ing all previously opened files *)
+      true
+    | Rpc (_metadata, _) -> false
+  in
+  if command_needs_writes msg then begin
     send_progress " write";
     ServerUtils.Needs_writes
       {
         env;
         finish_command_handling = handle_command;
         recheck_restart_is_needed = not (is_edit msg);
+        (* What is [recheck_restart_is_needed] for? ...
+           IDE edits can come in quick succession and be immediately followed
+           by time sensitivie queries (like autocomplete). There is a constant cost
+           to stopping and resuming the global typechecking jobs, which leads to
+           flaky experience. Here we set the flag [recheck_restart_is_needed] to [false] for
+           Edit, meaning that after we've finished handling the edit then
+           [ServerMain.persistent_client_interrupt_handler] will stop the natural
+           full check from taking place (by setting [env.full_check_status = Full_check_needed]).
+           The flag only has effect in the "false" direction which stops the full check
+           from taking place; setting it to "true" won't force an already-stopped full check to resume.
+
+           So what does cause a full check to resume? There are two heuristics, both of them crummy,
+           aimed at making a decentishuser experience where (1) we don't resume so aggressively
+           that we pay the heavy cost of starting+stopping, (2) the user is rarely too perplexed
+           at why things don't seem to be proceeding.
+           * In [ServerMain.watchman_interrupt_handler], if a file on disk is modified, then
+             the typecheck will resume.
+           * In [ServerMain.recheck_until_no_changes_left], if there is a pending "hh" command
+             still connected via RPC, and it's been 5.0s or more since the last Edit, then the typecheck
+             will resume. (Note that this doesn't apply to streaming-errors in [ClientCheckStatus.go_streaming],
+             since these aren't done via RPC to hh_server). *)
         reason = ServerCommandTypesUtils.debug_describe_cmd msg;
       }
   end else if full_recheck_needed then begin

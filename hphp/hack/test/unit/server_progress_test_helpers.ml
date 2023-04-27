@@ -9,7 +9,8 @@
 open Hh_prelude
 open Asserter
 
-let show_errors (errors : Errors.error list Relative_path.Map.t) : string =
+let show_errors (errors : Errors.finalized_error list Relative_path.Map.t) :
+    string =
   let counts =
     errors
     |> Relative_path.Map.bindings

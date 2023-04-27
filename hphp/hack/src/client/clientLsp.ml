@@ -4164,10 +4164,7 @@ let handle_errors_file_item
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
-              publish
-                (file_errors
-                |> List.map ~f:User_error.to_absolute
-                |> hack_errors_to_lsp_diagnostic path);
+              publish (hack_errors_to_lsp_diagnostic path file_errors);
               UriMap.add uri timestamp acc)
     in
     state := Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };

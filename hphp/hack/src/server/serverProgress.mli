@@ -225,9 +225,10 @@ module ErrorsRead : sig
     Unix.file_descr -> (open_success, errors_file_error * log_message) result
 
   (** This is the return type for [read_next_errors]. In case of success, it includes
-  a timestamp when they were reported. *)
+  a timestamp when they were reported. The paths in the [Relative_path.Map.t] are guaranteed
+  to all be root-relative. (it doesn't even make sense to report errors on other files...) *)
   type read_result =
-    ( Errors.error list Relative_path.Map.t * float,
+    ( Errors.finalized_error list Relative_path.Map.t * float,
       errors_file_error * log_message )
     result
 

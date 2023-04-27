@@ -770,6 +770,35 @@ let test_no_load () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_hhi_error () : bool Lwt.t =
+  let%lwt () =
+    (* This test the ability of streaming-errors to render an error that mentions an hhi file.
+       It should produce "stdClass::f doesn't exist; see this definition of stdClass in hhi..." *)
+    let use_hhi_php =
+      ("use_hhi.php", "<?hh\nfunction test_use_hhi(): void { stdClass::f(); }\n")
+    in
+    try_with_server [use_hhi_php] (fun ~tmp ~root ~hhi:_ ->
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--no-load";
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "consume_streaming_errors=true";
+              "--error-format";
+              "plain";
+            |]
+        in
+        assert_substring stdout ~substring:"Exit_status.Type_error";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -788,6 +817,7 @@ let () =
       ("test_start", test_start);
       ("test_no_start", test_no_start);
       ("test_no_load", test_no_load);
+      ("test_hhi_error", test_hhi_error);
     ]
     |> List.map ~f:(fun (name, f) ->
            ( name,

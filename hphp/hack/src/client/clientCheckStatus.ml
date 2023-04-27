@@ -154,7 +154,7 @@ let go_streaming_on_fd
           Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
               List.iter errors_in_file ~f:(fun error ->
                   incr found_new;
-                  print_error ~error_format (User_error.to_absolute error)));
+                  print_error ~error_format error));
           Printf.printf "%!"
         with
         | Sys_error msg when String.equal msg "Broken pipe" ->

@@ -240,7 +240,11 @@ module ErrorsFile = struct
             (** the watchclock at which the typecheck began, i.e. reflecting all file-changes up to here *)
       }
     | Report of {
-        errors: Errors.error list Relative_path.Map.t;
+        errors: Errors.finalized_error list Relative_path.Map.t;
+            (** we convert to finalized_error (i.e. turn paths absolute) before writing in the file,
+            because consumers don't know hhi paths. As for the [Relative_path.Map.t], it
+            is guaranteed to only have root-relative paths. (we don't have a type to indicate
+            "I am the suffix of a root-relative path" so this is the best we can do.) *)
         timestamp: float;
             (** the errors were detected by reading the files not later than this time. *)
       }
@@ -458,7 +462,17 @@ module ErrorsWrite = struct
           errors
           |> Errors.drop_fixmed_errors_in_files
           |> Errors.as_map
-          |> Relative_path.Map.map ~f:Errors.sort
+          |> Relative_path.Map.filter ~f:(fun path _errors ->
+                 let is_root =
+                   Relative_path.is_root (Relative_path.prefix path)
+                 in
+                 if not is_root then
+                   HackEventLogger.invariant_violation_bug
+                     "error in file outside root"
+                     ~path;
+                 is_root)
+          |> Relative_path.Map.map ~f:(fun errors ->
+                 errors |> Errors.sort |> List.map ~f:User_error.to_absolute)
         in
         ErrorsFile.write_message
           fd
@@ -529,7 +543,7 @@ module ErrorsRead = struct
   }
 
   type read_result =
-    ( Errors.error list Relative_path.Map.t * float,
+    ( Errors.finalized_error list Relative_path.Map.t * float,
       errors_file_error * log_message )
     result
 

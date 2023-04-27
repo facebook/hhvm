@@ -86,6 +86,108 @@ type method_instantiation = {
 }
 
 (*****************************************************************************)
+(* Localization caching.                                                     *)
+(*****************************************************************************)
+
+module type CACHESETTINGS = sig
+  val capacity : int
+
+  val node_count_threshold : int
+end
+
+module MakeTyCache (Settings : CACHESETTINGS) : sig
+  val add : env -> string -> locl_ty -> unit
+
+  val get : env -> string -> locl_ty option
+end = struct
+  include
+    Lru.M.Make
+      (String)
+      (struct
+        type t = locl_ty
+
+        let weight _ = 1
+      end)
+
+  let cache = create Settings.capacity
+
+  let should_cache_type lty =
+    let exception NodeLimitReached in
+    let size_visitor =
+      object
+        inherit [int] Type_visitor.locl_type_visitor as super
+
+        method! on_type acc ty =
+          if acc >= Settings.node_count_threshold then raise NodeLimitReached;
+          super#on_type (acc + 1) ty
+      end
+    in
+    match size_visitor#on_type 0 lty with
+    | _count -> false
+    | exception NodeLimitReached -> true
+
+  let clear () =
+    (* The only reliable way to empty the LRU cache. *)
+    resize 0 cache;
+    trim cache;
+    resize Settings.capacity cache;
+    assert (is_empty cache)
+
+  let active_context = ref (Relative_path.default, None)
+
+  (* We invalidate the cache as soon as we are processing a new file or
+   * module because those affect how types are expanded (e.g., newtypes
+   * are unfolded only in the file that defines them). *)
+  let maybe_invalidate env =
+    let context = (Env.get_file env, Env.get_current_module env) in
+    let valid =
+      [%eq: Relative_path.t * string option] !active_context context
+    in
+    if not valid then begin
+      active_context := context;
+      clear ()
+    end
+
+  let add env alias lty =
+    let () = maybe_invalidate env in
+    if should_cache_type lty then begin
+      add alias lty cache;
+      trim cache
+    end
+
+  let get env alias =
+    let () = maybe_invalidate env in
+    promote alias cache;
+    find alias cache
+end
+
+(* Since the typechecker options defining the cache parameters will be
+ * available only when we have an environment, the add/get functions are
+ * stored in references initially set to stubs that update themselves
+ * during their first call. *)
+let rec locl_cache_add =
+  ref (fun env ->
+      setup_cache env;
+      !locl_cache_add env)
+
+and locl_cache_get =
+  ref (fun env ->
+      setup_cache env;
+      !locl_cache_get env)
+
+and setup_cache env =
+  let tcopts = Env.get_tcopt env in
+  let module Settings = struct
+    let capacity = TypecheckerOptions.locl_cache_capacity tcopts
+
+    let node_count_threshold =
+      TypecheckerOptions.locl_cache_node_threshold tcopts
+  end in
+  let module Cache = MakeTyCache (Settings) in
+  locl_cache_add := Cache.add;
+  locl_cache_get := Cache.get
+
+(*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
  * common operations that are necessary for this operation, specifically:
  *   > Expand newtype/types
@@ -110,19 +212,45 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     | Tapply ((_pos, cid), []) -> Some cid
     | _ -> None
   in
-  let set_type_origin lty =
+  let set_origin_and_cache origin_opt final_env ty_err_opt lty =
     (* When the type resulting from the localize call originates from a
      * decl type with a succinct unambiguous form (e.g., Cls or Cls::T) we
      * store a serialized version of the decl alias in an *origin* field
      * of the locl type returned. Currently, only shape types have an
-     * origin field.
-     *)
+     * origin field. *)
+    let cache_result () =
+      (* Under the following conditions we may cache the localized
+       * type:
+       *
+       *   1/ We did not encounter cycles during expansion,
+       *   2/ localization was error-free,
+       *   3/ we are expanding under regular assumptions (local
+       *      newtypes are visible), and
+       *   4/ the expansion has not created new global type params.
+       *
+       * Case 4 happens when we bogusly create type params for
+       * abstract type constants.
+       * Cycles are not reported systematically as errors, so we
+       * track them separately with a reference in ety_env. *)
+      let no_new_global_type_params =
+        Type_parameter_env.size final_env.tpenv
+        <= Type_parameter_env.size env.tpenv
+      in
+      (not (Typing_defs.cyclic_expansion ety_env))
+      && Option.is_none ty_err_opt
+      && ety_env.expand_visible_newtype
+      && no_new_global_type_params
+    in
     match deref lty with
     | (r, Tshape (_, shape_kind, shape_fields)) -> begin
-      match find_origin dty with
+      match origin_opt with
       | None -> lty
       | Some origin ->
-        mk (r, Tshape (From_alias origin, shape_kind, shape_fields))
+        let lty =
+          mk (r, Tshape (From_alias origin, shape_kind, shape_fields))
+        in
+        if cache_result () then !locl_cache_add env origin lty;
+        lty
     end
     | _ -> lty
   in
@@ -288,29 +416,37 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     localize ~ety_env env decl_ty
   | Tapply (((_p, cid) as cls), argl) ->
-    let ((env, ty_err_opt), lty) =
-      begin
-        match Env.get_class_or_typedef env cid with
-        | Some (Env.ClassResult class_info) ->
-          localize_class_instantiation ~ety_env env r cls argl (Some class_info)
-        | Some (Env.TypedefResult typedef_info) ->
-          localize_typedef_instantiation
-            ~ety_env
-            env
-            r
-            (get_reason dty)
-            cid
-            argl
-            (Some typedef_info)
-        | None -> localize_class_instantiation ~ety_env env r cls argl None
-      end
+    let (env_err, lty) =
+      match Env.get_class_or_typedef env cid with
+      | Some (Env.ClassResult class_info) ->
+        localize_class_instantiation ~ety_env env r cls argl (Some class_info)
+      | Some (Env.TypedefResult typedef_info) ->
+        let origin_opt = find_origin dty in
+        let ((env, ty_err_opt), lty) =
+          match Option.bind origin_opt ~f:(!locl_cache_get env) with
+          | Some lty -> ((env, None), with_reason lty r)
+          | None ->
+            localize_typedef_instantiation
+              ~ety_env
+              env
+              r
+              (get_reason dty)
+              cid
+              argl
+              (Some typedef_info)
+        in
+        let lty = set_origin_and_cache origin_opt env ty_err_opt lty in
+        ((env, ty_err_opt), lty)
+      | None -> localize_class_instantiation ~ety_env env r cls argl None
     in
-    ( (env, ty_err_opt),
+    let lty =
       (* If we have supportdyn<t> then push supportdyn into open shape fields *)
       if String.equal cid Naming_special_names.Classes.cSupportDyn then
         push_supportdyn_into_shape lty
       else
-        set_type_origin lty )
+        lty
+    in
+    (env_err, lty)
   | Ttuple tyl ->
     let (env, tyl) =
       List.map_env_ty_err_opt
@@ -341,54 +477,59 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let (env, ty) = Typing_intersection.intersect_list env r tyl in
     ((env, ty_err_opt), ty)
   | Taccess (root_ty, id) ->
-    let rec allow_abstract_tconst ty =
-      match get_node ty with
-      | Tthis
-      | Tgeneric _ ->
-        (*
-         * When the root of an access is 'this', abstract type constants
-         * are allowed and localized as rigid type variables (Tgeneric).
-         * This happens when typing generic code in an abstract class
-         * that deals with data whose type is going to be set later in
-         * derived classes.
-         *
-         * In case the root is a generic, we also accept accesses to
-         * abstract constant to type check the dangerous and ubiquitous
-         * pattern:
-         *
-         *   function get<TBox as Box, T>(TBox $foo) : T where T = TBox::T
-         *                                                         ^^^^^^^
-         *)
-        true
-      | Taccess (ty, _) -> allow_abstract_tconst ty
-      | _ -> false
-    in
-    let allow_abstract_tconst = allow_abstract_tconst root_ty in
-    let ((env, e1), root_ty) = localize ~ety_env env root_ty in
-    let ((env, e2), ty) =
-      TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst
-    in
-    (* Elaborate reason with information about expression dependent types and
-     * the original location of the Taccess type
-     *)
-    let elaborate_reason expand_reason =
-      let taccess_string =
-        lazy (Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id)
+    let origin_opt = find_origin dty in
+    (match Option.bind origin_opt ~f:(!locl_cache_get env) with
+    | Some lty -> ((env, None), with_reason lty r)
+    | None ->
+      let rec allow_abstract_tconst ty =
+        match get_node ty with
+        | Tthis
+        | Tgeneric _ ->
+          (*
+           * When the root of an access is 'this', abstract type constants
+           * are allowed and localized as rigid type variables (Tgeneric).
+           * This happens when typing generic code in an abstract class
+           * that deals with data whose type is going to be set later in
+           * derived classes.
+           *
+           * In case the root is a generic, we also accept accesses to
+           * abstract constant to type check the dangerous and ubiquitous
+           * pattern:
+           *
+           *   function get<TBox as Box, T>(TBox $foo) : T where T = TBox::T
+           *                                                         ^^^^^^^
+           *)
+          true
+        | Taccess (ty, _) -> allow_abstract_tconst ty
+        | _ -> false
       in
-      (* If the root is an expression dependent type, change the primary
-       * reason to be for the full Taccess type to preserve the position where
-       * the expression dependent type was derived from.
+      let allow_abstract_tconst = allow_abstract_tconst root_ty in
+      let ((env, e1), root_ty) = localize ~ety_env env root_ty in
+      let ((env, e2), ty) =
+        TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst
+      in
+      (* Elaborate reason with information about expression dependent types and
+       * the original location of the Taccess type
        *)
-      let reason =
-        match get_reason root_ty with
-        | Reason.Rexpr_dep_type (_, p, e) -> Reason.Rexpr_dep_type (r, p, e)
-        | _ -> r
+      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+      let ty = set_origin_and_cache origin_opt env ty_err_opt ty in
+      let elaborate_reason expand_reason =
+        let taccess_string =
+          lazy (Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id)
+        in
+        (* If the root is an expression dependent type, change the primary
+         * reason to be for the full Taccess type to preserve the position where
+         * the expression dependent type was derived from.
+         *)
+        let reason =
+          match get_reason root_ty with
+          | Reason.Rexpr_dep_type (_, p, e) -> Reason.Rexpr_dep_type (r, p, e)
+          | _ -> r
+        in
+        Reason.Rtype_access (expand_reason, [(reason, taccess_string)])
       in
-      Reason.Rtype_access (expand_reason, [(reason, taccess_string)])
-    in
-    let ty = map_reason ty ~f:elaborate_reason in
-    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-    ((env, ty_err_opt), set_type_origin ty)
+      let ty = map_reason ty ~f:elaborate_reason in
+      ((env, ty_err_opt), ty))
   | Tshape (_, shape_kind, tym) ->
     let ((env, ty_err_opt1), tym) =
       ShapeFieldMap.map_env_ty_err_opt

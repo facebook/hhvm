@@ -263,6 +263,9 @@ module Type_expansions : sig
   val ids : t -> string list
 
   val positions : t -> Pos_or_decl.t list
+
+  (** Returns true if there was an attempt to add a cycle to the expansion list. *)
+  val cyclic_expansion : t -> bool
 end = struct
   type t = {
     report_cycle: (Pos.t * string) option;
@@ -272,16 +275,18 @@ end = struct
     expansions: (Pos_or_decl.t * string) list;
         (** A list of the type defs and type access we have expanded thus far. Used
             to prevent entering into a cycle when expanding these types. *)
+    cyclic_expansion: bool ref;
   }
 
-  let empty_w_cycle_report ~report_cycle = { report_cycle; expansions = [] }
+  let empty_w_cycle_report ~report_cycle =
+    { report_cycle; expansions = []; cyclic_expansion = ref false }
 
   let empty = empty_w_cycle_report ~report_cycle:None
 
-  let add { report_cycle; expansions } exp =
-    { report_cycle; expansions = exp :: expansions }
+  let add ({ expansions; _ } as exps) exp =
+    { exps with expansions = exp :: expansions }
 
-  let has_expanded { report_cycle; expansions } x =
+  let has_expanded { report_cycle; expansions; _ } x =
     match report_cycle with
     | Some (p, x') when String.equal x x' -> Some (Some p)
     | Some _
@@ -292,10 +297,11 @@ end = struct
 
   let add_and_check_cycles exps (p, id) =
     let has_cycle = has_expanded exps id in
+    if Option.is_some has_cycle then exps.cyclic_expansion := true;
     let exps = add exps (p, id) in
     (exps, has_cycle)
 
-  let as_list { report_cycle; expansions } =
+  let as_list { report_cycle; expansions; _ } =
     (report_cycle
     |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
     |> Option.to_list)
@@ -304,6 +310,8 @@ end = struct
   let ids exps = as_list exps |> List.map ~f:snd
 
   let positions exps = as_list exps |> List.map ~f:fst
+
+  let cyclic_expansion exps = !(exps.cyclic_expansion)
 end
 
 (** Tracks information about how a type was expanded *)
@@ -339,6 +347,8 @@ let add_type_expansion_check_cycles env exp =
   in
   let env = { env with type_expansions } in
   (env, has_cycle)
+
+let cyclic_expansion env = Type_expansions.cyclic_expansion env.type_expansions
 
 let get_var t =
   match get_node t with

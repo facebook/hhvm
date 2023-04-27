@@ -67,6 +67,10 @@ type t = {
   tco_remote_check_id: string option;
   (* Dictates the number of remote type checking workers *)
   tco_num_remote_workers: int;
+  (* The capacity of the localization cache for large types *)
+  tco_locl_cache_capacity: int;
+  (* The number of nodes a type has to exceed to enter the localization cache *)
+  tco_locl_cache_node_threshold: int;
   so_remote_version_specifier: string option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
@@ -366,6 +370,8 @@ val set :
   ?tco_remote_worker_key:string ->
   ?tco_remote_check_id:string ->
   ?tco_num_remote_workers:int ->
+  ?tco_locl_cache_capacity:int ->
+  ?tco_locl_cache_node_threshold:int ->
   ?so_remote_version_specifier:string ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->

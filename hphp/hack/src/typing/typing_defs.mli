@@ -200,6 +200,9 @@ val empty_expand_env_with_on_error :
 val add_type_expansion_check_cycles :
   expand_env -> Pos_or_decl.t * string -> expand_env * Pos.t option option
 
+(** Returns whether there was an attempt at expanding a cyclic type. *)
+val cyclic_expansion : expand_env -> bool
+
 val get_var : 'a ty -> Ident.t option
 
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option

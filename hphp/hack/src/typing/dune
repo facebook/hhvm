@@ -295,7 +295,8 @@
   typing_log
   typing_utils
   typing_visibility
-  decl_typedef_expand)
+  decl_typedef_expand
+  lru)
  (preprocess
   (pps ppx_deriving.std)))
 

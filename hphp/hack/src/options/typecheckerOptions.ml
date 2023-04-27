@@ -305,3 +305,7 @@ let ide_should_use_hack_64_distc t =
 let tast_under_dynamic t = t.GlobalOptions.tco_tast_under_dynamic
 
 let rust_elab t = t.GlobalOptions.tco_rust_elab
+
+let locl_cache_capacity t = t.GlobalOptions.tco_locl_cache_capacity
+
+let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold

@@ -77,6 +77,8 @@ type t = {
   tco_remote_worker_key: string option;
   tco_remote_check_id: string option;
   tco_num_remote_workers: int;
+  tco_locl_cache_capacity: int;
+  tco_locl_cache_node_threshold: int;
   so_remote_version_specifier: string option;
   so_naming_sqlite_path: string option;
   po_auto_namespace_map: (string * string) list;
@@ -211,6 +213,8 @@ let default =
     tco_remote_type_check = true;
     tco_remote_worker_key = None;
     tco_remote_check_id = None;
+    tco_locl_cache_capacity = 30;
+    tco_locl_cache_node_threshold = 10_000;
     tco_num_remote_workers = 4;
     so_remote_version_specifier = None;
     so_naming_sqlite_path = None;
@@ -349,6 +353,8 @@ let set
     ?tco_remote_worker_key
     ?tco_remote_check_id
     ?tco_num_remote_workers
+    ?tco_locl_cache_capacity
+    ?tco_locl_cache_node_threshold
     ?so_remote_version_specifier
     ?so_naming_sqlite_path
     ?po_auto_namespace_map
@@ -504,6 +510,12 @@ let set
       setting_opt tco_remote_check_id options.tco_remote_check_id;
     tco_num_remote_workers =
       setting tco_num_remote_workers options.tco_num_remote_workers;
+    tco_locl_cache_capacity =
+      setting tco_locl_cache_capacity options.tco_locl_cache_capacity;
+    tco_locl_cache_node_threshold =
+      setting
+        tco_locl_cache_node_threshold
+        options.tco_locl_cache_node_threshold;
     so_remote_version_specifier =
       setting_opt
         so_remote_version_specifier

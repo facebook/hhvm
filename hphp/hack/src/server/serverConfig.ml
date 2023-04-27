@@ -285,6 +285,8 @@ let load_config config options =
     ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
     ?tco_disallow_unresolved_type_variables:
       (bool_opt "disallow_unresolved_type_variables" config)
+    ?tco_locl_cache_capacity:(int_opt "locl_cache_capacity" config)
+    ?tco_locl_cache_node_threshold:(int_opt "locl_cache_node_threshold" config)
     ?po_enable_class_level_where_clauses:
       (bool_opt "class_level_where_clauses" config)
     ?po_disable_legacy_soft_typehints:

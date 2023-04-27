@@ -16,13 +16,7 @@ type expand_typedef =
 
 val expand_typedef_ref : expand_typedef ref
 
-val expand_typedef :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+val expand_typedef : expand_typedef
 
 type sub_type =
   Typing_env_types.env ->

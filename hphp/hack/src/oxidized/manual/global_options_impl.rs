@@ -46,6 +46,8 @@ impl Default for GlobalOptions {
             tco_remote_worker_key: None,
             tco_remote_check_id: None,
             tco_num_remote_workers: 0, // 4 in ocaml
+            tco_locl_cache_capacity: 30,
+            tco_locl_cache_node_threshold: 10_000,
             so_remote_version_specifier: None,
             so_naming_sqlite_path: None,
             po_auto_namespace_map: vec![],

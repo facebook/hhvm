@@ -161,6 +161,12 @@ impl HhConfig {
                 "allowed_expression_tree_visitors" => {
                     go.tco_allowed_expression_tree_visitors = parse_svec(&value);
                 }
+                "locl_cache_capacity" => {
+                    go.tco_locl_cache_capacity = parse_json(&value)?;
+                }
+                "locl_cache_node_threshold" => {
+                    go.tco_locl_cache_node_threshold = parse_json(&value)?;
+                }
                 "math_new_code" => {
                     go.tco_math_new_code = parse_json(&value)?;
                 }

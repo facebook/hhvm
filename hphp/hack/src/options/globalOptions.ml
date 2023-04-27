@@ -48,7 +48,7 @@ let default_saved_state =
   {
     loading = default_saved_state_loading;
     rollouts = Saved_state_rollouts.default;
-    project_metadata_w_flags = false;
+    project_metadata_w_flags = true;
     project_metadata_w_flags_www_ready = false;
   }
 

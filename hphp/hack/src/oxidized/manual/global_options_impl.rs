@@ -26,7 +26,7 @@ impl Default for SavedState {
         Self {
             loading: SavedStateLoading::default(),
             rollouts: SavedStateRollouts::default(),
-            project_metadata_w_flags: false,
+            project_metadata_w_flags: true,
             project_metadata_w_flags_www_ready: false,
         }
     }

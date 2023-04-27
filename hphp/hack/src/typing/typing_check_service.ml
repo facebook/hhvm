@@ -897,7 +897,7 @@ let rec event_loop
     ~(hhdg_path : string) :
     [> `Success of typing_result * 'env
     | `Error of log_message
-    | `Cancel of 'env
+    | `Cancel of 'env * MultiThreadedCall.cancel_reason
     ] =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
@@ -950,7 +950,7 @@ let rec event_loop
           | (_, false) ->
             (* skip handlers whose fd isn't ready *)
             (env, decision, handlers)
-          | (MultiThreadedCall.Cancel, _) ->
+          | (MultiThreadedCall.Cancel _, _) ->
             (* if a previous handler has decided to cancel, skip further handlers *)
             (env, decision, handlers)
           | (MultiThreadedCall.Continue, true) ->
@@ -965,9 +965,9 @@ let rec event_loop
     in
     let interrupt = { interrupt with MultiThreadedCall.env } in
     match decision with
-    | MultiThreadedCall.Cancel ->
+    | MultiThreadedCall.Cancel reason ->
       let () = Hh_distc_ffi.cancel handle in
-      `Cancel interrupt.MultiThreadedCall.env
+      `Cancel (interrupt.MultiThreadedCall.env, reason)
     | MultiThreadedCall.Continue ->
       event_loop
         ~done_count
@@ -1000,7 +1000,7 @@ let process_with_hh_distc
     ~(check_info : check_info) :
     [> `Success of typing_result * 'env
     | `Error of log_message
-    | `Cancel of 'env
+    | `Cancel of 'env * MultiThreadedCall.cancel_reason
     ] =
   (* TODO: Plumb extra --config name=value args through to spawn() *)
   (* We don't want to use with_tempdir because we need to keep the folder around
@@ -1050,7 +1050,7 @@ let process_in_parallel
     * Delegate.state
     * Telemetry.t
     * _
-    * Relative_path.t list
+    * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
     * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let record = Measure.create () in
   (* [record] is used by [next] *)
@@ -1152,7 +1152,7 @@ let process_in_parallel
         (on_cancelled next workitems_to_process workitems_in_progress)
       ~interrupt
   in
-  let paths_of (cancelled_results : job_progress list) : Relative_path.t list =
+  let paths_of (unfinished : job_progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : job_progress) =
       let cancelled_computations = cancelled_progress.progress.remaining in
       let paths_of paths (cancelled_workitem : workitem) =
@@ -1162,7 +1162,11 @@ let process_in_parallel
       in
       List.fold cancelled_computations ~init:[] ~f:paths_of
     in
-    List.concat (List.map cancelled_results ~f:paths_of)
+    List.concat (List.map unfinished ~f:paths_of)
+  in
+  let cancelled_results =
+    Option.map cancelled_results ~f:(fun (unfinished, reason) ->
+        (paths_of unfinished, reason))
   in
   let _ =
     if controller_started then
@@ -1184,10 +1188,11 @@ let process_in_parallel
     !delegate_state,
     telemetry,
     env,
-    paths_of cancelled_results,
+    cancelled_results,
     (!diagnostic_pusher, !time_first_error) )
 
-type 'a job_result = 'a * Relative_path.t list
+type 'a job_result =
+  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -1211,7 +1216,9 @@ module TestMocking = struct
 
   let is_cancelled x = Relative_path.Set.mem !cancelled x
 
-  let with_test_mocking fnl f =
+  let with_test_mocking
+      (fnl : workitem BigList.t) (f : workitem BigList.t -> 'a job_result) :
+      'a job_result =
     let (mock_cancelled, fnl) =
       List.partition_map (BigList.as_list fnl) ~f:(fun computation ->
           match computation with
@@ -1224,8 +1231,21 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, cancelled) = f (BigList.create fnl) in
-    (res, mock_cancelled @ cancelled)
+    let (res, unfinished_and_reason) = f (BigList.create fnl) in
+    let unfinished_and_reason =
+      match unfinished_and_reason with
+      | None when List.is_empty mock_cancelled -> None
+      | None ->
+        Some
+          ( mock_cancelled,
+            {
+              MultiThreadedCall.user_message = "mock cancel";
+              log_message = "mock cancel";
+              timestamp = 0.0;
+            } )
+      | Some (cancelled, reason) -> Some (mock_cancelled @ cancelled, reason)
+    in
+    (res, unfinished_and_reason)
 end
 
 module Mocking =
@@ -1312,7 +1332,7 @@ let go_with_interrupt
         delegate_state,
         telemetry,
         env,
-        cancelled_fnl,
+        cancelled_fnl_and_reason,
         diagnostic_pusher ) =
     let will_use_distc =
       use_hh_distc_instead_of_hulk
@@ -1322,8 +1342,9 @@ let go_with_interrupt
       if will_use_distc then (
         match process_with_hh_distc ~root ~interrupt ~check_info with
         | `Success (typing_result, env) ->
-          Some (typing_result, delegate_state, telemetry, env, [], (None, None))
-        | `Cancel env ->
+          Some
+            (typing_result, delegate_state, telemetry, env, None, (None, None))
+        | `Cancel (env, reason) ->
           (* Typecheck is cancelled due to interrupt *)
           Some
             ( {
@@ -1334,7 +1355,7 @@ let go_with_interrupt
               delegate_state,
               telemetry,
               env,
-              original_fnl,
+              Some (original_fnl, reason),
               (None, None) )
         | `Error msg ->
           Hh_logger.log "Error with hh_distc: %s" msg;
@@ -1369,7 +1390,7 @@ let go_with_interrupt
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
   in
   ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
-    cancelled_fnl )
+    cancelled_fnl_and_reason )
 
 let go
     (ctx : Provider_context.t)
@@ -1384,7 +1405,7 @@ let go
     ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (((), result), cancelled) =
+  let (((), result), unfinished_and_reason) =
     go_with_interrupt
       ?diagnostic_pusher:None
       ctx
@@ -1400,5 +1421,5 @@ let go
       ~hh_distc_fanout_threshold
       ~check_info
   in
-  assert (List.is_empty cancelled);
+  assert (Option.is_none unfinished_and_reason);
   result

@@ -57,7 +57,7 @@ let rpc_persistent :
   try%lwt
     let fd = Unix.descr_of_out_channel oc in
     let oc = Lwt_io.of_unix_fd fd ~mode:Lwt_io.Output in
-    let metadata = { ServerCommandTypes.from = "hh_client"; desc } in
+    let metadata = { ServerCommandTypes.from = "IDE"; desc } in
     let buffer = Marshal.to_string (Rpc (metadata, cmd)) [] in
     let%lwt () = Lwt_io.write oc buffer in
     let%lwt () = Lwt_io.flush oc in

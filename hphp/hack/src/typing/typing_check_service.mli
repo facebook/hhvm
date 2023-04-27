@@ -7,7 +7,8 @@
  *
  *)
 
-type 'a job_result = 'a * Relative_path.t list
+type 'a job_result =
+  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
 
 type seconds_since_epoch = float
 

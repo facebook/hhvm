@@ -722,7 +722,11 @@ functor
             .ServerLocalConfig.hh_distc_fanout_threshold
       in
       let cgroup_typecheck_telemetry = ref None in
-      let (errorl', telemetry, env, cancelled, time_first_typing_error) =
+      let ( errorl',
+            telemetry,
+            env,
+            unfinished_and_reason,
+            time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.step_start_end
           cgroup_steps
@@ -784,6 +788,9 @@ functor
         Relative_path.Set.union env.needs_recheck lazy_check_later
       in
       (* Remove things that were cancelled from things we started rechecking... *)
+      let cancelled =
+        Option.value_map unfinished_and_reason ~f:fst ~default:[]
+      in
       let (files_checked, needs_recheck) =
         List.fold
           cancelled

@@ -149,7 +149,7 @@ let call_with_interrupt
     Hh_logger.log "single_threaded_call called with zero workers";
     ( single_threaded_call job merge neutral next,
       interrupt.MultiThreadedCall.env,
-      [] )
+      None )
 
 let next ?progress_fn ?max_size workers =
   Hh_bucket.make

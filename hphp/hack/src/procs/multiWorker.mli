@@ -120,7 +120,7 @@ val call_with_interrupt :
   neutral:'c ->
   next:'a Hh_bucket.next ->
   interrupt:'d interrupt_config ->
-  'c * 'd * 'a list
+  'c * 'd * ('a list * MultiThreadedCall.cancel_reason) option
 
 (* Creates a pool of workers. *)
 val make :

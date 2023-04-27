@@ -879,6 +879,43 @@ let serve_one_iteration genv env client_provider =
   in
   env
 
+(** This synthesizes a [MultiThreadedCall.Cancel] in the event that we want
+a typecheck cancelled due to files changing on disk. It constructs the
+human-readable [user_message] and also [log_message] appropriately. *)
+let cancel_due_to_watchman
+    (updates : Relative_path.Set.t) (clock : Watchman.clock option) :
+    MultiThreadedCall.interrupt_result =
+  assert (not (Relative_path.Set.is_empty updates));
+  let size = Relative_path.Set.cardinal updates in
+  let examples =
+    (List.take (Relative_path.Set.elements updates) 5
+    |> List.map ~f:Relative_path.suffix)
+    @
+    if size > 5 then
+      ["..."]
+    else
+      []
+  in
+  let timestamp = Unix.gettimeofday () in
+  let tm = Unix.localtime timestamp in
+  MultiThreadedCall.Cancel
+    {
+      MultiThreadedCall.user_message =
+        Printf.sprintf
+          "Files have changed on disk! [%02d:%02d:%02d] %s"
+          tm.Unix.tm_hour
+          tm.Unix.tm_min
+          tm.Unix.tm_sec
+          (List.hd_exn examples);
+      log_message =
+        Printf.sprintf
+          "watchman interrupt handler at clock %s. %d files changed. [%s]"
+          (ServerEnv.show_clock clock)
+          (Relative_path.Set.cardinal updates)
+          (String.concat examples ~sep:",");
+      timestamp;
+    }
+
 let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
  fun env ->
   let start_time = Unix.gettimeofday () in
@@ -899,7 +936,7 @@ let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
           Relative_path.Set.union env.disk_needs_parsing updates;
         clock;
       },
-      MultiThreadedCall.Cancel )
+      cancel_due_to_watchman updates clock )
   ) else
     (env, MultiThreadedCall.Continue)
 
@@ -930,7 +967,7 @@ let priority_client_interrupt_handler genv client_provider :
           Relative_path.Set.union env.disk_needs_parsing updates;
         clock;
       },
-      MultiThreadedCall.Cancel )
+      cancel_due_to_watchman updates clock )
   ) else
     let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
     let use_tracker_v2 =
@@ -1011,6 +1048,11 @@ let priority_client_interrupt_handler genv client_provider :
           Some recheck_id )
         when String.equal paused_recheck_id recheck_id ->
         MultiThreadedCall.Cancel
+          {
+            MultiThreadedCall.user_message = "Pause via 'hh --pause'";
+            log_message = "";
+            timestamp = Unix.gettimeofday ();
+          }
       | _ -> MultiThreadedCall.Continue
     in
     (env, decision)
@@ -1044,8 +1086,7 @@ let persistent_client_interrupt_handler genv :
         },
         MultiThreadedCall.Continue )
     | ServerUtils.Needs_writes
-        { env; finish_command_handling; recheck_restart_is_needed; reason = _ }
-      ->
+        { env; finish_command_handling; recheck_restart_is_needed; reason } ->
       let full_check_status =
         match env.full_check_status with
         | Full_check_started when not recheck_restart_is_needed ->
@@ -1060,7 +1101,15 @@ let persistent_client_interrupt_handler genv :
           pending_command_needs_writes = Some finish_command_handling;
           full_check_status;
         },
-        MultiThreadedCall.Cancel )
+        MultiThreadedCall.Cancel
+          {
+            MultiThreadedCall.user_message =
+              Printf.sprintf
+                "Interrupted [%s]\n(Sorry about this nuisance... we're working to fix it T92870399)"
+                reason;
+            log_message = "";
+            timestamp = Unix.gettimeofday ();
+          } )
     | ServerUtils.Done env ->
       ServerProgress.write "typechecking";
       (env, MultiThreadedCall.Continue))

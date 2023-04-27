@@ -21,8 +21,32 @@ exception Coalesced_failures of WorkerController.worker_failure list
 val coalesced_failures_to_string :
   WorkerController.worker_failure list -> string
 
+(** If an interrupt handler wants the typecheck to be cancelled, it must
+always give a reason. *)
+type cancel_reason = {
+  user_message: string;
+      (** This string followed by "\nPlease re-run hh" will be printed to stdout by clientCheckStatus.ml,
+      in the event that the typecheck got cancelled. *)
+  log_message: string;
+      (** This goes only to logs. The logs will have both [user_message] and [log_message].
+      A typical use of log_message is a callstack or exception message. *)
+  timestamp: float;
+      (** This goes only to logs. We might decide to write the timestamp at which
+    the interrupt was generated, or at which it was handled. *)
+}
+
+(** An interrupt is set up as a pair [Unix.file_descr * 'env interrupt_handler].
+Our interrupts are set up in serverMain.ml...
+* The file-descr for our watchman subscription and a handler which processes the watchman event;
+* The file-descr for our persistent connection and a handler which processes the RPC;
+* The file-descr for our "priority channel" i.e. new hh_client connections and a handler for them.
+
+For instance the watchman handler might determine that a .php file changed on disk, in
+which cas it returns [Cancel] and MultiThreadCall stops itself and returns all unfinished
+workitems back to its caller; or might determine that no material disk changes
+happened in which case it returns [Continue] and MultiThreadedCall will continue. *)
 type interrupt_result =
-  | Cancel
+  | Cancel of cancel_reason
   | Continue
 
 type 'env interrupt_handler = 'env -> 'env * interrupt_result
@@ -70,6 +94,6 @@ val call_with_interrupt :
      unit ->
     'a list) ->
   'd interrupt_config ->
-  'c * 'd * 'a list
+  'c * 'd * ('a list * cancel_reason) option
 
 val on_exception : (Exception.t -> unit) -> unit

@@ -25,13 +25,15 @@ let () =
   | Coalesced_failures failures -> Some (coalesced_failures_to_string failures)
   | _ -> None
 
-type interrupt_result =
-  | Cancel
-  | Continue
+type cancel_reason = {
+  user_message: string;
+  log_message: string;
+  timestamp: float;
+}
 
-let is_cancel = function
-  | Cancel -> true
-  | _ -> false
+type interrupt_result =
+  | Cancel of cancel_reason
+  | Continue
 
 type 'env interrupt_handler = 'env -> 'env * interrupt_result
 
@@ -67,7 +69,8 @@ let multi_threaded_call
     (neutral : acc)
     (next : job_input Hh_bucket.next)
     ?(on_cancelled : (unit -> job_input list) option)
-    (interrupt : env interrupt_config) : (acc * env) * job_input list =
+    (interrupt : env interrupt_config) :
+    (acc * env) * (job_input list * cancel_reason) option =
   incr call_id;
   let call_id = !call_id in
   (* Split workers into those that are free, and those that are still doing
@@ -105,24 +108,25 @@ let multi_threaded_call
       List.fold
         handlers
         ~init:(env, Continue, handlers)
-        ~f:(fun (env, decision, handlers) (fd, handler) ->
-          if
-            is_cancel decision
-            || (not @@ List.mem ~equal:Poly.( = ) ready_fds fd)
-          then
-            (env, decision, handlers)
-          else
+        ~f:(fun (env, prior_decision, handlers) (fd, handler) ->
+          let is_fd_for_this_handler =
+            List.mem ~equal:Poly.( = ) ready_fds fd
+          in
+          match prior_decision with
+          | Cancel _ -> (env, prior_decision, handlers)
+          | Continue when not is_fd_for_this_handler ->
+            (env, prior_decision, handlers)
+          | Continue ->
             let (env, decision) = handler env in
             (* Re-raise the exception even if handler have caught and ignored it *)
             Option.iter !nested_exception ~f:(fun e -> Exception.reraise e);
-
-            (* running a handler could have changed the handlers,
-             * so need to regenerate them based on new environment *)
+            (* running a handler could have changed the handlers, so need to regenerate them based on new environment *)
             let handlers = interrupt.handlers env in
             (env, decision, handlers))
     in
     let res = (acc, env, handlers) in
-    if is_cancel decision then (
+    match decision with
+    | Cancel reason ->
       WorkerController.cancel handles;
       let unfinished =
         match on_cancelled with
@@ -131,9 +135,8 @@ let multi_threaded_call
           let unfinished = List.map handles ~f:WorkerController.get_job in
           add_pending unfinished
       in
-      (res, Some unfinished)
-    ) else
-      (res, None)
+      (res, Some (unfinished, reason))
+    | Continue -> (res, None)
   in
   let rec dispatch workers handles acc =
     (* 'worker' represents available workers. *)
@@ -142,7 +145,7 @@ let multi_threaded_call
     match workers with
     | None when not @@ List.exists handles ~f:is_current ->
       (* No more handles at this recursion level *)
-      (unpack_result acc, [])
+      (unpack_result acc, None)
     | None (* No more jobs to start *)
     | Some [] ->
       (* No worker available: wait for some workers to finish. *)
@@ -205,7 +208,8 @@ let multi_threaded_call
       raise (Coalesced_failures failures)
     else
       match check_cancel waiters ready_fds acc with
-      | (acc, Some unfinished) -> (unpack_result acc, unfinished)
+      | (acc, Some unfinished_and_reason) ->
+        (unpack_result acc, Some unfinished_and_reason)
       | (acc, None) ->
         (* And continue.. *)
         dispatch (Some workers) waiters acc
@@ -223,19 +227,19 @@ let multi_threaded_call
     Exception.reraise e
 
 let call_with_worker_id workers job merge neutral next =
-  let ((res, ()), unfinished) =
+  let ((res, ()), unfinished_and_reason) =
     multi_threaded_call workers job merge neutral next (no_interrupt ())
   in
-  assert (List.is_empty unfinished);
+  assert (Option.is_none unfinished_and_reason);
   res
 
 let call workers job merge neutral next =
   let job (_id, a) b = job a b in
   let merge (_id, a) b = merge a b in
-  let ((res, ()), unfinished) =
+  let ((res, ()), unfinished_and_reason) =
     multi_threaded_call workers job merge neutral next (no_interrupt ())
   in
-  assert (List.is_empty unfinished);
+  assert (Option.is_none unfinished_and_reason);
   res
 
 let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
@@ -247,10 +251,10 @@ let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
         Option.is_none @@ WorkerController.get_handle_UNSAFE x));
   let job (_id, a) b = job a b in
   let merge (_id, a) b = merge a b in
-  let ((res, interrupt_env), unfinished) =
+  let ((res, interrupt_env), unfinished_and_reason) =
     multi_threaded_call workers job merge neutral next ?on_cancelled interrupt
   in
   SharedMem.set_allow_removes true;
-  (res, interrupt_env, unfinished)
+  (res, interrupt_env, unfinished_and_reason)
 
 let on_exception f = on_exception_ref := f

@@ -1564,6 +1564,7 @@ and simplify_subtype_i
             else
               finish
         in
+
         let stripped_dynamic =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
             TUtils.try_strip_dynamic_from_union env r tyl_super
@@ -1571,42 +1572,23 @@ and simplify_subtype_i
             None
         in
         match stripped_dynamic with
-        | Some ty
-          when is_sub_type_for_union_i
-                 env
-                 (LoclType ty)
-                 (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)) ->
-          (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
-          let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
-            if TL.is_valid p1 then
-              (env, p1)
-            else
-              let (env, p2) = f env in
-              if TL.is_unsat p2 then
-                (env, p1)
-              else
-                (env, TL.disj ~fail p1 p2)
+        | Some ty ->
+          let delay_push =
+            is_sub_type_for_union_i
+              env
+              (LoclType ty)
+              (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r))
           in
-          simplify_subtype_i
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like:true
-            ty_sub
-            (LoclType ty)
-            env
-          ||| dyn_finish ty
-        | _ ->
           (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
-           * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
-           *   t <: ~C<t1,...,tn> iff
-           *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
-           * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
-           *)
+             * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
+             *   t <: ~C<t1,...,tn> iff
+             *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
+             * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
+          *)
           let try_push env =
-            match stripped_dynamic with
-            | None -> finish env
-            | Some ty ->
+            if delay_push then
+              dyn_finish ty env
+            else
               (* For generic parameters with lower bounds, try like-pushing wrt
                * these lower bounds. For example, we want
                * vec<~int> <: ~T if vec<int> <: T
@@ -1619,7 +1601,7 @@ and simplify_subtype_i
                 | _ -> ty
               in
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
-              (match opt_ty with
+              match opt_ty with
               | None ->
                 if is_tyvar ty then
                   env
@@ -1632,7 +1614,7 @@ and simplify_subtype_i
                        (LoclType ty)
                   ||| dyn_finish ty
                 else
-                  finish env
+                  dyn_finish ty env
               | Some ty ->
                 let simplify_pushed_like env =
                   env
@@ -1649,9 +1631,29 @@ and simplify_subtype_i
                         ty_sub
                         (LoclType ty)
                 in
-                env |> simplify_pushed_like ||| finish)
+                env |> simplify_pushed_like ||| dyn_finish ty
           in
-
+          (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
+          let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
+            if TL.is_valid p1 then
+              (env, p1)
+            else
+              let (env, p2) = f env in
+              if TL.is_unsat p2 then
+                (env, p1)
+              else
+                (env, TL.disj ~fail p1 p2)
+          in
+          simplify_subtype_i
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:delay_push
+            ty_sub
+            (LoclType ty)
+            env
+          ||| try_push
+        | _ ->
           (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
            * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
            * But we deal with unions on the left first (see case above), so this
@@ -1661,7 +1663,7 @@ and simplify_subtype_i
            *)
           let rec try_disjuncts tys env =
             match tys with
-            | [] -> try_push env
+            | [] -> invalid_env env
             | ty :: tys ->
               let ty = LoclType ty in
               env

@@ -1,1 +1,12 @@
-No errors
+File "generics_bounds.php", line 7, characters 17-18:
+Invalid argument (Typing[4110])
+  File "generics_bounds.php", line 4, characters 24-27:
+  Expected `dynamic`
+  File "generics_bounds.php", line 6, characters 25-25:
+  But got `T as ~int`
+File "generics_bounds.php", line 8, characters 17-18:
+Invalid argument (Typing[4110])
+  File "generics_bounds.php", line 5, characters 24-27:
+  Expected `dynamic`
+  File "generics_bounds.php", line 6, characters 25-25:
+  But got `T as ~int`

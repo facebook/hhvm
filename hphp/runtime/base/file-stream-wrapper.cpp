@@ -156,10 +156,8 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
   for (p = dir + 1; *p; p++) {
     if (FileUtil::isDirSeparator(*p)) {
       *p = '\0';
-      if (::access(dir, F_OK) < 0) {
-        if (::mkdir(dir, mode) < 0) {
-          return -1;
-        }
+      if (::mkdir(dir, mode) < 0) {
+        if (!*(p+1) || errno != EEXIST) return -1;
       }
       *p = FileUtil::getDirSeparator();
     }

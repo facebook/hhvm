@@ -7076,7 +7076,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod foo_service {
 
             pub struct simple_rpc<'mock> {
@@ -7090,7 +7090,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> simple_rpc<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -7137,7 +7137,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> simple_rpc<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -7184,7 +7184,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> ping<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -7229,7 +7229,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> getRandomData<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -7274,7 +7274,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> sink<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64| panic!(
                             "{}::{} is not mocked",
@@ -7319,7 +7319,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> putDataById<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64, _: ::std::string::String| panic!(
                             "{}::{} is not mocked",
@@ -7364,7 +7364,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> hasDataById<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64| panic!(
                             "{}::{} is not mocked",
@@ -7409,7 +7409,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> getDataById<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64| panic!(
                             "{}::{} is not mocked",
@@ -7454,7 +7454,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> deleteDataById<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64| panic!(
                             "{}::{} is not mocked",
@@ -7499,7 +7499,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> lobDataById<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i64, _: ::std::string::String| panic!(
                             "{}::{} is not mocked",
@@ -7544,7 +7544,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> invalid_return_for_hack<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -7589,7 +7589,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> rpc_skipped_codegen<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -7636,7 +7636,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> getDataByKey0<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::string::String| panic!(
                             "{}::{} is not mocked",
@@ -7681,7 +7681,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> getDataByKey1<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::string::String| panic!(
                             "{}::{} is not mocked",

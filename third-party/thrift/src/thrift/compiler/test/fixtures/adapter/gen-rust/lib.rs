@@ -2219,7 +2219,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod service {
 
             pub struct func<'mock> {
@@ -2233,7 +2233,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> func<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::StringWithAdapter, _: ::std::string::String, _: crate::types::Foo| panic!(
                             "{}::{} is not mocked",
@@ -2280,7 +2280,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> count<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -2325,7 +2325,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> adaptedTypes<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::HeapAllocated| panic!(
                             "{}::{} is not mocked",

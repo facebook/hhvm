@@ -111,7 +111,7 @@
 
     {{/service:extendedServices}}{{!
     }}{{/program:services}}
-    mod r#impl {{>lib/block}}{{!
+    pub mod r#impl {{>lib/block}}{{!
     }}{{#program:services}}
         pub mod {{service:snake}} {{>lib/block}}{{!
 
@@ -134,7 +134,7 @@
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> {{function:rust_name}}<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|{{!
                             }}{{#function:args}}{{!

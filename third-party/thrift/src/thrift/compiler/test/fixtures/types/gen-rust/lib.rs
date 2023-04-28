@@ -1312,7 +1312,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod some_service {
 
             pub struct bounce_map<'mock> {
@@ -1326,7 +1326,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> bounce_map<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: included::types::SomeMap| panic!(
                             "{}::{} is not mocked",
@@ -1371,7 +1371,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> binary_keyed_map<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::vec::Vec<::std::primitive::i64>| panic!(
                             "{}::{} is not mocked",

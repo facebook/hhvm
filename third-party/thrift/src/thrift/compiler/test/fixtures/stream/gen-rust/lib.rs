@@ -6530,7 +6530,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod pub_sub_streaming_service {
 
             pub struct returnstream<'mock> {
@@ -6544,7 +6544,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> returnstream<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32, _: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6589,7 +6589,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> streamthrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6634,7 +6634,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> servicethrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6679,7 +6679,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> servicethrows2<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6724,7 +6724,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> boththrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6769,7 +6769,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> responseandstreamstreamthrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6814,7 +6814,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> responseandstreamservicethrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6859,7 +6859,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> responseandstreamboththrows<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",
@@ -6904,7 +6904,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> returnstreamFast<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32, _: ::std::primitive::i32| panic!(
                             "{}::{} is not mocked",

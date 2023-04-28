@@ -2597,7 +2597,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod my_root {
 
             pub struct do_root<'mock> {
@@ -2611,7 +2611,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> do_root<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -2658,7 +2658,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> do_mid<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -2705,7 +2705,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> do_leaf<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",

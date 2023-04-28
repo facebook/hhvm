@@ -1973,7 +1973,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod c {
 
             pub struct f<'mock> {
@@ -1987,7 +1987,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> f<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -2032,7 +2032,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> numbers<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                             "{}::{} is not mocked",
@@ -2077,7 +2077,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> thing<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32, _: ::std::string::String, _: ::std::collections::BTreeSet<::std::primitive::i32>| panic!(
                             "{}::{} is not mocked",

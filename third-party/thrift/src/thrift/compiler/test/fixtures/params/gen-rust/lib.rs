@@ -2428,7 +2428,7 @@ pub mod mock {
         }
     }
 
-    mod r#impl {
+    pub mod r#impl {
         pub mod nested_containers {
 
             pub struct mapList<'mock> {
@@ -2442,7 +2442,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> mapList<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>| panic!(
                             "{}::{} is not mocked",
@@ -2487,7 +2487,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> mapSet<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>| panic!(
                             "{}::{} is not mocked",
@@ -2532,7 +2532,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> listMap<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>| panic!(
                             "{}::{} is not mocked",
@@ -2577,7 +2577,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> listSet<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::vec::Vec<::std::collections::BTreeSet<::std::primitive::i32>>| panic!(
                             "{}::{} is not mocked",
@@ -2622,7 +2622,7 @@ pub mod mock {
 
             #[allow(clippy::redundant_closure)]
             impl<'mock> turtles<'mock> {
-                pub fn unimplemented() -> Self {
+                pub(crate) fn unimplemented() -> Self {
                     Self {
                         closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>>| panic!(
                             "{}::{} is not mocked",

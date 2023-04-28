@@ -552,8 +552,6 @@ function find_test_files(string $file): vec<string>{
 
     // Subsets of zend tests.
     'zend_ext'    => 'hphp/test/zend/good/ext',
-    'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',
-    'zend_ext_nz' => 'hphp/test/zend/good/ext/[n-z]*',
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
   ];

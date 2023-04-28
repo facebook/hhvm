@@ -321,22 +321,34 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     assignOr(*data_.remove()).insert(std::forward<U>(val));
   }
 
-  void apply(T& val) const {
-    if (applyAssignOrClear(val)) {
+  template <class Visitor>
+  void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(T{});
+      v.clear();
+      v.remove(T{});
+      v.add(T{});
+    }
+
+    if (Base::template customVisitAssignAndClear(v)) {
       return;
     }
 
-    erase_all(val, *data_.remove());
-    val.insert(data_.add()->begin(), data_.add()->end());
+    v.remove(*data_.remove());
+    v.add(*data_.add());
   }
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      remove(*std::forward<U>(next).toThrift().remove());
-      add(*std::forward<U>(next).toThrift().add());
-    }
+  void apply(T& val) const {
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+      void clear() { v.clear(); }
+      void remove(const T& t) { erase_all(v, t); }
+      void add(const T& t) { v.insert(t.begin(), t.end()); }
+    };
+
+    return customVisit(Visitor{val});
   }
 
  private:

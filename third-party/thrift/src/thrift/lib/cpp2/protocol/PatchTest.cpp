@@ -1261,9 +1261,9 @@ TEST_F(PatchTest, GeneratedUnionClearAndAssign) {
 
 TEST_F(PatchTest, GeneratedUnionPatch) {
   test::patch::MyUnionPatch patch;
-  *patch.patchIfSet()->option1() = "Hi";
+  *patch.patchIfSetDeprecated()->option1() = "Hi";
   patch.ensure().option1_ref() = "Bye";
-  *patch.patchIfSet()->option1() += " World!";
+  *patch.patchIfSetDeprecated()->option1() += " World!";
 
   test::patch::MyUnion hi, bye;
   hi.option1_ref() = "Hi World!";
@@ -1290,7 +1290,8 @@ TEST_F(PatchTest, GeneratedUnionPatch) {
 
 TEST_F(PatchTest, GeneratedUnionPatchInner) {
   test::patch::MyUnionPatch patch;
-  *patch.patchIfSet()->option3()->patchIfSet()->option1() = "World";
+  *patch.patchIfSetDeprecated()->option3()->patchIfSetDeprecated()->option1() =
+      "World";
 
   test::patch::MyUnion a, b;
   a.option3_ref().ensure().option1_ref() = "Hello";

@@ -757,9 +757,9 @@ TEST(UnionPatchTest, Patch) {
 
 TEST(UnionPatchTest, PatchIfSet) {
   MyUnionPatch patch;
-  *patch.patchIfSet()->option1() = "Hi";
+  *patch.patchIfSetDeprecated()->option1() = "Hi";
   patch.ensure().option1_ref() = "Bye";
-  *patch.patchIfSet()->option1() += " World!";
+  *patch.patchIfSetDeprecated()->option1() += " World!";
 
   MyUnion hi, bye;
   hi.option1_ref() = "Hi World!";
@@ -778,8 +778,8 @@ TEST(UnionPatchTest, PatchIfSet) {
 
 TEST(UnionPatchTest, PatchIfSetPredicate) {
   MyUnionPatch patch;
-  patch.patchIfSet()->option1() = "Hi";
-  patch.patchIfSet()->option2() = 5;
+  patch.patchIfSetDeprecated()->option1() = "Hi";
+  patch.patchIfSetDeprecated()->option2() = 5;
 
   MyUnion option1;
   option1.option1_ref() = "";
@@ -794,7 +794,8 @@ TEST(UnionPatchTest, PatchIfSetPredicate) {
 
 TEST(UnionPatchTest, PatchInner) {
   MyUnionPatch patch;
-  *patch.patchIfSet()->option3()->patchIfSet()->option1() = "World";
+  *patch.patchIfSetDeprecated()->option3()->patchIfSetDeprecated()->option1() =
+      "World";
 
   MyUnion a, b;
   a.option3_ref().ensure().option1_ref() = "Hello";

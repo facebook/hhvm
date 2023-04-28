@@ -444,7 +444,7 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   }
 
   /// Patch any set value.
-  FOLLY_NODISCARD P& patchIfSet() {
+  FOLLY_NODISCARD P& patchIfSetDeprecated() {
     if (hasValue(data_.ensure())) {
       return *data_.patch();
     } else if (*data_.clear()) {

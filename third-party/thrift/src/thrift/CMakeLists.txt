@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(annotation)
-
 if (THRIFT_COMPILER_ONLY OR build_all)
   add_subdirectory(compiler)
 endif ()
 
 if (THRIFT_LIB_ONLY OR build_all)
+  add_subdirectory(annotation)
   add_subdirectory(lib)
 endif ()
 
-# Install CMake package configuration files for thrift.
+# Install CMake package configuration files for Thrift.
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   cmake/FBThriftConfig.cmake.in

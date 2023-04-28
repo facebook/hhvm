@@ -57,7 +57,7 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH})
 
 # Find required dependencies.
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED filesystem)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 

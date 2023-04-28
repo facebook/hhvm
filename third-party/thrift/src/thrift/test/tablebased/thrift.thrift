@@ -17,8 +17,10 @@
 namespace cpp2 facebook.thrift.test
 
 include "thrift/test/tablebased/include.thrift"
+include "thrift/annotation/cpp.thrift"
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 enum Enum {
   A = 1,
@@ -44,9 +46,8 @@ struct StructWithRef {
 }
 
 struct StructWithCppType {
-  1: optional map<string, StructA> (
-    cpp.type = "std::unordered_map<std::string, StructA>",
-  ) field;
+  @cpp.Type{name = "std::unordered_map<std::string, StructA>"}
+  1: optional map<string, StructA> field;
 }
 
 struct StructB {
@@ -59,7 +60,7 @@ struct StructB {
   8: byte byte_field;
   9: bool bool_field;
   10: set<i32> set_field;
-  11: string iobuf_field (cpp.type = "folly::IOBuf");
+  11: string iobuf_field;
   12: double double_field;
   13: float float_field;
 }

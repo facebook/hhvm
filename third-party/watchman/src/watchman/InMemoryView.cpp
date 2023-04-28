@@ -473,6 +473,9 @@ InMemoryView::InMemoryView(
           config_.getBool("content_hash_warming", false)),
       maxFilesToWarmInContentCache_(
           size_t(config_.getInt("content_hash_max_warm_per_settle", 1024))),
+      maxFileSizeToWarmInContentCache_(int64_t(config_.getInt(
+          "content_hash_max_file_size_to_warm",
+          10 * 1024 * 1024))),
       syncContentCacheWarming_(
           config_.getBool("content_hash_warm_wait_before_settle", false)) {
   json_int_t in_memory_view_ring_log_size =
@@ -1197,7 +1200,9 @@ void InMemoryView::warmContentCache() {
         break;
       }
 
-      if (f->exists && f->stat.isFile()) {
+      if (f->exists && f->stat.isFile() &&
+          (maxFileSizeToWarmInContentCache_ <= 0 ||
+           f->stat.size <= maxFileSizeToWarmInContentCache_)) {
         // Note: we could also add an expression to further constrain
         // the things we warm up here.  Let's see if we need it before
         // going ahead and adding.

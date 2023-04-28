@@ -414,6 +414,9 @@ class InMemoryView final : public QueryableView {
   bool enableContentCacheWarming_{false};
   // How many of the most recent files to warm up when settling?
   size_t maxFilesToWarmInContentCache_{1024};
+  // Do not warm up files whose size is greater than this. A size of 0 is
+  // equivalent to unlimited.
+  int64_t maxFileSizeToWarmInContentCache_{10 * 1024 * 1024};
   // If true, we will wait for the items to be hashed before
   // dispatching the settle to watchman clients
   bool syncContentCacheWarming_{false};

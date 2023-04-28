@@ -311,6 +311,7 @@ final class Options {
     public bool $repo_single = false;
     public bool $repo_separate = false;
     public bool $only_remote_executable = false;
+    public bool $only_remote_executable_with_loopback = false;
     public bool $only_non_remote_executable = false;
     public ?string $repo_threads;
     public bool $hhbbc2 = false;
@@ -379,6 +380,7 @@ function get_options(
     'verbose' => 'v',
     'testpilot' => '',
     'only-remote-executable' => '',
+    'only-remote-executable-with-loopback' => '',
     'only-non-remote-executable' => '',
     'threads:' => '',
     '*args:' => 'a:',
@@ -2414,9 +2416,16 @@ function should_skip_test_simple(
     return 'skip-norepo';
   }
 
-  if ($options->only_remote_executable && file_exists("$test.no_remote")) {
-    return 'skip-only_running_remote_executable_tests';
+  if ($options->only_remote_executable &&
+      (file_exists("$test.no_remote") || file_exists("$test.uses_loopback"))) {
+    return 'skip-only_running_remote_executable_tests_not_requiring_loopback';
   }
+
+  if ($options->only_remote_executable_with_loopback &&
+      (file_exists("$test.no_remote") || !file_exists("$test.uses_loopback"))) {
+    return 'skip-only_running_remote_executable_tests_requiring_loopback';
+  }
+
   if ($options->only_non_remote_executable && !file_exists("$test.no_remote")) {
     return 'skip-only_running_NON_remote_executable_tests';
   }

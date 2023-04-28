@@ -47,6 +47,7 @@ target_link_libraries(
 # The base library.
 add_library(
   compiler_base
+  STATIC
 
   detail/system.cc
   diagnostic.cc

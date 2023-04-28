@@ -83,6 +83,10 @@ class ThriftRequestCore : public ResponseChannelRequest {
     return kind_ == RpcKind::SINGLE_REQUEST_NO_RESPONSE;
   }
 
+  bool includeInRecentRequests() const {
+    return stateMachine_.includeInRecentRequests();
+  }
+
   protocol::PROTOCOL_TYPES getProtoId() const {
     return static_cast<protocol::PROTOCOL_TYPES>(header_.getProtocolId());
   }

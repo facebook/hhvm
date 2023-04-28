@@ -2,7 +2,7 @@
 
 function init() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
 }
 
 function runTest($testController, $customArgs = '', $repoArgs = '') {

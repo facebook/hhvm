@@ -2,7 +2,7 @@
 
 function init() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
   require __DIR__ . '/../Adoy/Client.php';
 
   ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';

@@ -22,11 +22,11 @@ abstract final class Sweeper {
   }
 
   public static function mkdtemp(string $name): string {
-    return HH\Lib\_Private\_OS\mkdtemp(sys_get_temp_dir().'/'.$name);
+    return HH\Lib\_Private\_OS\mkdtemp(ServerUtilServerTests::working_dir().'/'.$name);
   }
 
   public static function removeDir(string $dir): void {
-    if (strpos($dir, sys_get_temp_dir()) !== 0) return;
+    if (strpos($dir, ServerUtilServerTests::working_dir()) !== 0) return;
 
     $files = scandir($dir);
     foreach ($files as $file) {
@@ -288,7 +288,7 @@ function runSandboxTest(
   string $repoArgs = '',
 ) {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
 
   if ($file === null) {
     $file = basename(hphp_debug_caller_info()['file']);

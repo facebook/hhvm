@@ -2,7 +2,7 @@
 
 function init() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hphpd';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hphpd';
 }
 
 function startDebuggerClient($debugPort, $input_path, inout $pipes) {

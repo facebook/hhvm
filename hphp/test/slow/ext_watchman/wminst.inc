@@ -17,7 +17,7 @@ class WatchmanInstance {
     // Not atomic but PHP doesn't support this. Should be fine.
     $this->repo_root = $tmpdir;
     $this->logfile = $this->tempfile();
-    $this->sockname = $this->tempfile();
+    $this->sockname = tempnam(getenv('HPHP_TEST_SOCKETDIR'), 'wat');
     $this->config_file = $this->tempfile();
     $config_json = '{}';
     file_put_contents($this->config_file, $config_json);

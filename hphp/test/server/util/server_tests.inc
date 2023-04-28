@@ -14,6 +14,16 @@ abstract final class ServerUtilServerTests {
   }
 
   <<__Memoize>>
+  public static function working_dir() {
+    return getenv('HPHP_TEST_TMPDIR') ?? sys_get_temp_dir();
+  }
+
+  <<__Memoize>>
+  public static function socket_dir() {
+    return getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+  }
+
+  <<__Memoize>>
   public static function error_log_file() {
     return fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::test_run_id().".log", 'w');
   }

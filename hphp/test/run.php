@@ -100,17 +100,10 @@ function has_multi_request_mode(Options $options): bool {
   return count(multi_request_modes($options)) != 0;
 }
 
-function test_repo(Options $options, string $test): string {
-  if ($options->repo_out is nonnull) {
-    return $options->repo_out . '/' . str_replace('/', '.', $test) . '.repo';
-  }
-  return Status::getTestTmpPath($test, 'repo');
-}
-
 function jit_serialize_option(
   string $cmd, string $test, Options $options, bool $serialize,
 ): string {
-  $serialized = test_repo($options, $test) . "/jit.dump";
+  $serialized = Status::getTestWorkingDir($test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $jit_serialize = (int)($options->jit_serialize ?? 0);
   $cmds[0] .=
@@ -244,10 +237,6 @@ function bin_root(): string {
   return $home . $routes["cmake"];
 }
 
-function unit_cache_file(): string {
-  return Status::getTmpPathFile('unit-cache.sql');
-}
-
 function read_opts_file(?string $file): string {
   if ($file is null || !file_exists($file)) {
     return "";
@@ -324,7 +313,6 @@ final class Options {
     public bool $only_remote_executable = false;
     public bool $only_non_remote_executable = false;
     public ?string $repo_threads;
-    public ?string $repo_out;
     public bool $hhbbc2 = false;
     public ?string $mode;
     public bool $server = false;
@@ -358,7 +346,6 @@ final class Options {
     public ?string $ignore_oids;
     public ?string $jitsample;
     public ?string $hh_single_type_check;
-    public bool $write_to_checkout = false;
     public bool $bespoke = false;
 
     // Additional state added for convenience since Options is plumbed
@@ -475,12 +462,6 @@ function get_options(
 
   \HH\global_set('recorded_options', $recorded);
 
-  $repo_out = $options->repo_out;
-  if ($repo_out is string && !is_dir($repo_out)) {
-    if (!mkdir($repo_out) && !is_dir($repo_out)) {
-      error("Unable to create repo-out dir " . $repo_out);
-    }
-  }
   if ($options->hhbbc2) {
     $options->repo_separate = true;
     if ($options->repo || $options->repo_single) {
@@ -515,10 +496,6 @@ function get_options(
   if (count($multi_request_modes) > 1) {
     error("The options\n -" . implode("\n -", $multi_request_modes) .
           "\nare mutually exclusive options");
-  }
-
-  if ($options->write_to_checkout) {
-    Status::$write_to_checkout = true;
   }
 
   return tuple($options, $files);
@@ -807,9 +784,6 @@ function find_debug_config(string $test, string $name): string {
 
 function mode_cmd(Options $options): vec<string> {
   $repo_args = '';
-  if (!$options->repo) {
-    $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
-  }
   $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
   $mode = $options->mode ?? '';
@@ -843,6 +817,7 @@ function extra_compiler_args(Options $options): string {
 
 function hhvm_cmd_impl(
   Options $options,
+  string $test,
   string $config,
   ?string $autoload_db_prefix,
   string ...$extra_args
@@ -873,8 +848,8 @@ function hhvm_cmd_impl(
 
       // use the temp path for embedded data
       '-vEval.EmbeddedDataExtractPath='.
-      Status::getRunTmpDir().
-      escapeshellarg('/hhvm_%{type}_%{buildid}'),
+      Status::getTestWorkingDir($test).
+      escapeshellarg('/embedded_%{type}_%{buildid}'),
 
       // Stick to a single thread for retranslate-all
       '-vEval.JitWorkerThreads=1',
@@ -965,8 +940,9 @@ function hhvm_cmd(
   invariant($config is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
     $options,
+    $test,
     $config,
-    Status::getTestTmpPath($test, 'autoloadDB'),
+    Status::getTestWorkingDir($test) . '/autoloadDB',
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
     $extra_opts,
@@ -997,7 +973,7 @@ function hhvm_cmd(
   if (file_exists($test.'.ini')) {
     $contents = file_get_contents($test.'.ini');
     if (strpos($contents, '{PWD}') !== false) {
-      $test_ini = tempnam('/tmp', $test).'.ini';
+      $test_ini = Status::getTestWorkingDir($test) . '/config.ini';
       file_put_contents($test_ini,
                         str_replace('{PWD}', dirname($test), $contents));
       $cmd .= " -c $test_ini";
@@ -1006,7 +982,7 @@ function hhvm_cmd(
   if ($hdf !== "") {
     $contents = file_get_contents($test.$hdf_suffix);
     if (strpos($contents, '{PWD}') !== false) {
-      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      $test_hdf = Status::getTestWorkingDir($test) . '/config' . $hdf_suffix;
       file_put_contents($test_hdf,
                         str_replace('{PWD}', dirname($test), $contents));
       $cmd .= " -c $test_hdf";
@@ -1017,12 +993,12 @@ function hhvm_cmd(
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
     $hhbbc_repo =
-      "\"" . test_repo($options, $test) . "/hhvm.$repo_suffix\"";
+      "\"" . Status::getTestWorkingDir($test) . "/hhvm.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
 
     $file_cache =
-      "\"" . test_repo($options, $test) . "/file.cache\"";
+      "\"" . Status::getTestWorkingDir($test) . "/file.cache\"";
     $cmd .= " -vServer.FileCache=$file_cache";
   }
 
@@ -1086,14 +1062,12 @@ function hphp_cmd(Options $options, string $test): string {
   if ($hdf !== "") {
     $contents = file_get_contents($test.$hdf_suffix);
     if (strpos($contents, '{PWD}') !== false) {
-      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      $test_hdf = Status::getTestWorkingDir($test) . '/config' . $hdf_suffix;
       file_put_contents($test_hdf,
                         str_replace('{PWD}', dirname($test), $contents));
       $hdf = " -c $test_hdf";
     }
   }
-
-  $test_repo = test_repo($options, $test);
 
   return implode(" ", vec[
     hphpc_path($options),
@@ -1114,10 +1088,10 @@ function hphp_cmd(Options $options, string $test): string {
     '-vCachePHPFile=true',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '-l1',
-    '-o "' . $test_repo . '"',
-    '--file-cache="'.$test_repo.'/file.cache"',
+    '-o "' . Status::getTestWorkingDir($test) . '"',
+    '--file-cache="'.Status::getTestWorkingDir($test).'/file.cache"',
     "\"$test\"",
-    "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
+    "-vExternWorker.WorkingDir=".Status::getTestWorkingDir($test),
     $extra_args,
     $compiler_args,
     read_opts_file(find_test_ext($test, 'hphp_opts')),
@@ -1129,7 +1103,7 @@ function hphpc_path(Options $options): string {
 }
 
 function hhbbc_cmd(Options $options, string $test): string {
-  $test_repo = test_repo($options, $test);
+  $working_dir = Status::getTestWorkingDir($test);
   return implode(" ", vec[
     hphpc_path($options),
     '--hhbbc',
@@ -1137,9 +1111,9 @@ function hhbbc_cmd(Options $options, string $test): string {
     '--no-cores',
     '--parallel-num-threads=' . ($options->repo_threads ?? 1),
     '--parallel-final-threads=' . ($options->repo_threads ?? 1),
-    '--extern-worker-working-dir=' . Status::getTestTmpPath($test, 'work'),
+    '--extern-worker-working-dir=' . $working_dir,
     read_opts_file("$test.hhbbc_opts"),
-    "-o \"$test_repo/hhvm.hhbbc\" \"$test_repo/hhvm.hhbc\"",
+    "-o \"$working_dir/hhvm.hhbbc\" \"$working_dir/hhvm.hhbc\"",
   ]);
 }
 
@@ -1266,8 +1240,8 @@ class Queue {
   // is received, and the chunks can be reassembled.
   private Map<int, Vector<string>> $partials = Map {};
 
-  public function __construct(?string $dir = null): void {
-    $path = \tempnam($dir ?? \sys_get_temp_dir(), "queue.mkfifo.");
+  public function __construct(string $dir): void {
+    $path = \tempnam($dir, "queue.mkfifo.");
     \unlink($path);
     if (!\posix_mkfifo($path, 0700)) {
       // Only certain directories support "posix_mkfifo()".
@@ -1463,8 +1437,8 @@ final class Status {
   private static float $overall_start_time = 0.0;
   private static float $overall_end_time = 0.0;
 
-  private static string $tmpdir = "";
-  public static bool $write_to_checkout = false;
+  private static string $workdir = "";
+  private static string $sockdir = "";
 
   public static int $passed = 0;
   public static int $skipped = 0;
@@ -1488,93 +1462,97 @@ final class Status {
   const int YELLOW = 33;
   const int BLUE = 34;
 
-  public static function createTmpDir(?string $working_dir): void {
+  public static function createWorkingDir(?string $working_dir): void {
     $parent = $working_dir ?? sys_get_temp_dir();
-    if (substr($parent, -1) !== "/") {
-      $parent .= "/";
-    }
-    self::$tmpdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
+    if (substr($parent, -1) !== "/") $parent .= "/";
+    self::$workdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
+    self::$sockdir = self::$workdir . '/sock';
+    mkdir(self::$sockdir, 0777, false);
   }
 
-  public static function getRunTmpDir(): string {
-    return self::$tmpdir;
+  public static function getWorkingDir(): string {
+    return self::$workdir;
   }
 
-  // Return a path in the run tmpdir that's unique to this test and ext.
-  // Remember to teach clean_intermediate_files to clean up all the exts you use
-  public static function getTestTmpPath(string $test, string $ext): string {
-    return self::$tmpdir . '/' . $test . '.' . $ext;
+  // Paths for Unix sockets have size limitations, so provide a
+  // separate shorter path to put them in.
+  public static function getSocketDir(): string {
+    return self::$sockdir;
   }
 
-  public static function getTmpPathFile(string $filename): string {
-    return self::$tmpdir . '/' . $filename;
+  public static function createTestWorkingDir(string $test): void {
+    $path = self::getTestWorkingDir($test);
+    mkdir($path, 0777, true);
+    mkdir($path . '/temp', 0777, false);
   }
 
-  // Similar to getTestTmpPath, but if we're run with --write-to-checkout
-  // then we put the files next to the test instead of in the tmpdir.
-  public static function getTestOutputPath(string $test, string $ext): string {
-    if (self::$write_to_checkout) {
-      return "$test.$ext";
-    }
-    return static::getTestTmpPath($test, $ext);
+  public static function getTestWorkingDir(string $test): string {
+    return self::$workdir . '/' . $test;
   }
 
-  public static function createTestTmpDir(string $test): string {
-    $test_temp_dir = self::getTestTmpPath($test, 'tmpdir');
-    @mkdir($test_temp_dir, 0777, true);
-    return $test_temp_dir;
+  public static function getTestTempDir(string $test): string {
+    return self::getTestWorkingDir($test) . '/temp';
+  }
+
+  public static function createServerWorkingDir(): string {
+    return HH\Lib\_Private\_OS\mkdtemp(self::$workdir . '/server-XXXXXX');
   }
 
   public static function writeDiff(string $test, string $diff): void {
-    $path = Status::getTestOutputPath($test, 'diff');
-    @mkdir(dirname($path), 0777, true);
+    $path = self::getTestWorkingDir($test) . '/diff';
     file_put_contents($path, $diff);
   }
 
   public static function diffForTest(string $test): string {
-    $diff = @file_get_contents(Status::getTestOutputPath($test, 'diff'));
+    $path = self::getTestWorkingDir($test) . '/diff';
+    $diff = @file_get_contents($path);
     return $diff === false ? '' : $diff;
   }
 
-  public static function removeDirectory(string $dir): void {
-    $files = scandir($dir);
+  public static function cleanupTestWorkingDir(string $test): void {
+    self::removeDirectory(self::getTestWorkingDir($test));
+  }
+
+  private static function cleanupWorkingDir(): void {
+    self::removeDirectory(self::$workdir);
+  }
+
+  private static function cleanupEmptyWorkingDir(): void {
+    self::removeEmptyDirectories(self::$workdir);
+  }
+
+  private static function removeDirectory(string $dir): void {
+    $files = @scandir($dir);
+    if ($files === false) return;
     foreach ($files as $file) {
-      if ($file === '.' || $file === '..') {
-        continue;
-      }
+      if ($file === '.' || $file === '..') continue;
       $path = $dir . "/" . $file;
       if (is_dir($path)) {
         self::removeDirectory($path);
       } else {
-        unlink($path);
+        @unlink($path);
       }
     }
-    rmdir($dir);
+    @rmdir($dir);
   }
 
-  // This is similar to removeDirectory but it only removes empty directores
-  // and won't enter directories whose names end with '.tmpdir'. This allows
-  // us to clean up paths like test/quick/vec in our run's temporary directory
-  // if all the tests in them passed, but it leaves test tmpdirs of failed
-  // tests (that we didn't remove with clean_intermediate_files because the
-  // test failed) and directores under them alone even if they're empty.
-  public static function removeEmptyTestParentDirs(string $dir): bool {
+  // This is similar to removeDirectory but it only removes empty
+  // directores. This allows us to clean up paths like test/quick/vec
+  // in our run's temporary directory if all the tests in them passed,
+  // but it leaves test workdirs of failed tests (that we didn't
+  // remove with clean_test_files because the test failed) and
+  // directores under them alone even if they're empty.
+  private static function removeEmptyDirectories(string $dir): bool {
     $is_now_empty = true;
     $files = scandir($dir);
     foreach ($files as $file) {
-      if ($file === '.' || $file === '..') {
-        continue;
-      }
-      if (strrpos($file, '.tmpdir') === (strlen($file) - strlen('.tmpdir'))) {
-        $is_now_empty = false;
-        continue;
-      }
+      if ($file === '.' || $file === '..') continue;
       $path = $dir . "/" . $file;
       if (!is_dir($path)) {
         $is_now_empty = false;
         continue;
       }
-      if (self::removeEmptyTestParentDirs($path)) {
+      if (self::removeEmptyDirectories($path)) {
         rmdir($path);
       } else {
         $is_now_empty = false;
@@ -1636,12 +1614,14 @@ final class Status {
           break;
         case TempDirRemove::ON_RUN_SUCCESS:
           if (self::$return_value !== 0) {
-            self::removeEmptyTestParentDirs(self::$tmpdir);
+            self::cleanupEmptyWorkingDir();
             break;
           }
-          // FALLTHROUGH
+          self::cleanupWorkingDir();
+          break;
         case TempDirRemove::ALWAYS:
-          self::removeDirectory(self::$tmpdir);
+          self::cleanupWorkingDir();
+          break;
       }
     }
   }
@@ -1983,64 +1963,15 @@ final class Status {
   public static function getQueue(): Queue {
     if (!self::$queue) {
       if (self::$killed) error("Killed!");
-      self::$queue = new Queue(self::$tmpdir);
+      self::$queue = new Queue(self::$workdir);
     }
     return self::$queue;
   }
 }
 
-function clean_intermediate_files(string $test, Options $options): void {
-  if ($options->no_clean) {
-    return;
-  }
-  if ($options->write_to_checkout) {
-    // in --write-to-checkout mode, normal test output goes next to the test
-    $exts = vec[
-      'out',
-      'diff',
-    ];
-    foreach ($exts as $ext) {
-      $file = "$test.$ext";
-      if (file_exists($file)) {
-        unlink($file);
-      }
-    }
-  }
-  $tmp_exts = vec[
-    // normal test output goes here by default
-    'out',
-    'diff',
-    // scratch directory the test may write to
-    'tmpdir',
-    // tests in --hhas-round-trip mode
-    'round_trip.hhas',
-    // tests in --hhbbc2 mode
-    'before.round_trip.hhas',
-    'after.round_trip.hhas',
-    // temporary autoloader DB and associated cruft
-    // We have at most two modes for now - see hhvm_cmd_impl
-    'autoloadDB.0',
-    'autoloadDB.0-journal',
-    'autoloadDB.0-shm',
-    'autoloadDB.0-wal',
-    'autoloadDB.1',
-    'autoloadDB.1-journal',
-    'autoloadDB.1-shm',
-    'autoloadDB.1-wal',
-  ];
-  foreach ($tmp_exts as $ext) {
-    $file = Status::getTestTmpPath($test, $ext);
-    if (is_dir($file)) {
-      Status::removeDirectory($file);
-    } else if (file_exists($file)) {
-      unlink($file);
-    }
-  }
-  // repo mode uses a directory that may or may not be in the run's tmpdir
-  $repo = test_repo($options, $test);
-  if (is_dir($repo)) {
-    Status::removeDirectory($repo);
-  }
+function clean_test_files(string $test, Options $options): void {
+  if ($options->no_clean) return;
+  Status::cleanupTestWorkingDir($test);
 }
 
 function child_main(
@@ -2167,7 +2098,7 @@ function runif_test_for_feature(
   string $test,
   string $bool_expression,
 ): bool {
-  $tmp = tempnam(sys_get_temp_dir(), 'test-run-runif-');
+  $tmp = tempnam(Status::getWorkingDir(), 'test-run-runif-');
   file_put_contents(
     $tmp,
     "<?hh\n" .
@@ -3146,8 +3077,11 @@ function dump_hhas_cmd(
   return $cmd;
 }
 
-function dump_hhas_to_temp(string $hhvm_cmd, string $test): ?string {
-  $temp_file = Status::getTestTmpPath($test, 'round_trip.hhas');
+function dump_hhas_to_temp(string $hhvm_cmd,
+                           string $test,
+                           string $prefix = ''): ?string {
+  $temp_file =
+    Status::getTestWorkingDir($test) .  '/' . $prefix . 'round_trip.hhas';
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   $ret = -1;
   system("$cmd &> /dev/null", inout $ret);
@@ -3195,7 +3129,7 @@ function can_run_server_test(string $test, Options $options): bool {
   return true;
 }
 
-const int SERVER_TIMEOUT = 45;
+const int SERVER_TIMEOUT = 60;
 
 function run_config_server(Options $options, string $test): mixed {
   invariant(
@@ -3203,7 +3137,6 @@ function run_config_server(Options $options, string $test): mixed {
     'should_skip_test_simple should have skipped this',
   );
 
-  Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini') ?? '';
   $servers = $options->servers as Servers;
   $port = $servers->configs[$config]->port;
@@ -3230,12 +3163,9 @@ function run_config_cli(
 ): ?(string, string, int) {
   $cmd = timeout_prefix() . $cmd;
 
-  if ($options->repo && $options->repo_out is null) {
-    // we already created it in run_test
-    $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTmpPath($test, 'tmpdir');
-  } else {
-    $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
-  }
+  $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTempDir($test);
+  $cmd_env['TMPDIR'] = Status::getTestTempDir($test);
+  $cmd_env['HPHP_TEST_SOCKETDIR'] = Status::getSocketDir();
   $cmd_env['HPHP_TEST_SOURCE_FILE'] = $test;
   if ($options->log) {
     $cmd_env['TRACE'] = 'printir:1';
@@ -3352,7 +3282,7 @@ function run_config_post(
   }
 
   $output = str_replace(MULTI_REQUEST_SEP, '', $output);
-  file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
+  file_put_contents(Status::getTestWorkingDir($test) . '/out', $output);
 
   // Exit code is 1 for things like fatal errors, which aren't actual
   // crashes.
@@ -3449,25 +3379,26 @@ function run_config_post(
   }
 }
 
-// Not all versions of /usr/bin/timeout support the -v option. Test to
+// Not all versions of /usr/bin/timeout support the options we want. Test to
 // see if it does.
 <<__Memoize>>
-function timeout_supports_verbose(): string {
+function timeout_supports_options(): string {
   $output = null;
   $exit_code = -1;
+  $opts = ' -v -k 30';
   exec(
-    '/usr/bin/timeout -v 1000 /usr/bin/true 2> /dev/null',
+    '/usr/bin/timeout' . $opts . ' 1000 /usr/bin/true 2> /dev/null',
     inout $output,
     inout $exit_code
   );
-  if ($exit_code === 0) return ' -v';
+  if ($exit_code === 0) return $opts;
   return '';
 }
 
 function timeout_prefix(): string {
   if (is_executable('/usr/bin/timeout')) {
     return
-      '/usr/bin/timeout' . timeout_supports_verbose() . ' ' .
+      '/usr/bin/timeout' . timeout_supports_options() . ' ' .
       TIMEOUT_SECONDS . ' ';
   } else {
     return hphp_home() . '/hphp/tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
@@ -3494,6 +3425,7 @@ function run_foreach_config(
 function run_and_log_test(Options $options, string $test): void {
   $stime = time();
   $time = mtime();
+  Status::createTestWorkingDir($test);
   $status = run_test($options, $test);
   $time = mtime() - $time;
   $etime = time();
@@ -3506,7 +3438,7 @@ function run_and_log_test(Options $options, string $test): void {
     Status::fail($test, $time, $stime, $etime, $diff);
   } else if ($status === true) {
     Status::pass($test, $time, $stime, $etime);
-    clean_intermediate_files($test, $options);
+    clean_test_files($test, $options);
   } else if ($status is string) {
     invariant(
       preg_match('/^skip-[\w-]+$/', $status),
@@ -3514,7 +3446,7 @@ function run_and_log_test(Options $options, string $test): void {
       $status
     );
     Status::skip($test, substr($status, 5), $time, $stime, $etime);
-    clean_intermediate_files($test, $options);
+    clean_test_files($test, $options);
   } else {
     invariant_violation("invalid status type %s", gettype($status));
   }
@@ -3572,15 +3504,15 @@ function run_test(Options $options, string $test): mixed {
       substr($test, -5) !== ".hhas",
       'should_skip_test_simple should have skipped this',
     );
-    // create tmpdir now so that we can write hhas
-    Status::createTestTmpDir($test);
     // dumping hhas, not running code so arbitrarily picking a mode
     $hhas_temp = dump_hhas_to_temp($hhvm[0], $test);
     if ($hhas_temp is null) {
       $err = "system failed: " .
-        dump_hhas_cmd($hhvm[0], $test,
-          Status::getTestTmpPath($test, 'round_trip.hhas')) .
-        "\n";
+        dump_hhas_cmd(
+          $hhvm[0],
+          $test,
+          Status::getTestWorkingDir($test) . '/round_trip.hhas'
+      ) . "\n";
       Status::writeDiff($test, $err);
       return false;
     }
@@ -3600,18 +3532,6 @@ function run_repo_test(
   vec<string> $hhvm,
   dict<string, mixed> $hhvm_env,
 ): mixed {
-  $test_repo = test_repo($options, $test);
-  if ($options->repo_out is nonnull) {
-    // we may need to clean up after a previous run
-    $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc', 'file.cache'];
-    foreach ($repo_files as $repo_file) {
-      @unlink("$test_repo/$repo_file");
-    }
-  } else {
-    // create tmpdir now so that we can write repos
-    Status::createTestTmpDir($test);
-  }
-
   if (file_exists($test . '.hphpc_assert')) {
     $hphp = hphp_cmd($options, $test);
     return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
@@ -3636,21 +3556,20 @@ function run_repo_test(
       count($hhvm) === 1,
       "get_options forbids modes because we're not running code"
     );
-    // create tmpdir now so that we can write hhas
-    Status::createTestTmpDir($test);
-    $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
+    $hhas_temp1 = dump_hhas_to_temp($hhvm[0], $test, 'before');
     if ($hhas_temp1 is null) {
       Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
       return false;
     }
-    shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
+    $working_dir = Status::getTestWorkingDir($test);
+    shell_exec("mv $working_dir/hhvm.hhbbc $working_dir/hhvm.hhbc");
     $hhbbc = hhbbc_cmd($options, $test);
     $result = exec_with_stack($hhbbc);
     if ($result is string) {
       Status::writeDiff($test, $result);
       return false;
     }
-    $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
+    $hhas_temp2 = dump_hhas_to_temp($hhvm[0], $test, 'after');
     if ($hhas_temp2 is null) {
       Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
       return false;
@@ -3731,20 +3650,20 @@ function print_commands(
       $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if ($options->hhbbc2) {
+        $working_dir = Status::getTestWorkingDir($test);
         foreach ($commands as $c) {
           $hhbbc_cmds .=
-            $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
+            $c." -vEval.DumpHhas=1 > $working_dir.before.round_trip.hhas\n";
         }
-        $test_repo = test_repo($options, $test);
         $hhbbc_cmds .=
-          "mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc\n";
+          "mv $working_dir/hhvm.hhbbc $working_dir/hhvm.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
         foreach ($commands as $c) {
           $hhbbc_cmds .=
-            $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+            $c." -vEval.DumpHhas=1 > $working_dir.after.round_trip.hhas\n";
         }
         $hhbbc_cmds .=
-          "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
+          "diff $working_dir.before.round_trip.hhas $working_dir.after.round_trip.hhas\n";
       }
     }
     if ($options->jit_serialize is nonnull) {
@@ -3885,10 +3804,10 @@ function print_failure(
   sort(inout $failed);
 
   $failing_tests_file = $options->failure_file ??
-    Status::getRunTmpDir() . '/test-failures';
+    Status::getWorkingDir() . '/test-failures';
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   if ($passed) {
-    $passing_tests_file = Status::getRunTmpDir() . '/tests-passed';
+    $passing_tests_file = Status::getWorkingDir() . '/tests-passed';
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   } else {
     $passing_tests_file = "";
@@ -3907,8 +3826,8 @@ function print_failure(
   print make_header("See failed test output and expectations:");
   foreach ($failed as $n => $test) {
     if ($n !== 0) print "\n";
-    print 'cat ' . Status::getTestOutputPath($test, 'diff') . "\n";
-    print 'cat ' . Status::getTestOutputPath($test, 'out') . "\n";
+    print 'cat ' . Status::getTestWorkingDir($test) . "/diff\n";
+    print 'cat ' . Status::getTestWorkingDir($test) . "/out\n";
     $expect_file = get_expect_file_and_type($test, $options)[0];
     if ($expect_file is null) {
       print "# no expect file found for $test\n";
@@ -3963,8 +3882,9 @@ function start_server_proc(
   string $config,
   int $port,
 ): Server {
+  $working_dir = Status::createServerWorkingDir();
   if ($options->cli_server) {
-    $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
+    $cli_sock = "$working_dir/hhvm-cli";
   } else {
     // still want to test that an unwritable socket works...
     $cli_sock = '/var/run/hhvm-cli.sock';
@@ -3974,14 +3894,15 @@ function start_server_proc(
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
   $prelude = $options->server
-    ? '-vEval.PreludePath=' . Status::getRunTmpDir() . '/server-prelude.php'
+    ? '-vEval.PreludePath=' . Status::getWorkingDir() . '/server-prelude.php'
     : "";
   $command = hhvm_cmd_impl(
     $options,
+    basename($working_dir),
     $config,
     // Provide a temporary file for `Autoload.DB.Path`: without this, we'll fail
     // to run the server with native autoloading.
-    tempnam(Status::getRunTmpDir(), 'autoloadDB_%{schema}_'),
+    "$working_dir/autoloadDB",
     '-m', 'server',
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",
@@ -4058,15 +3979,18 @@ function start_servers(
   keyset<string> $configs,
 ): Servers {
   if ($options->server) {
+    $socket_dir = Status::getSocketDir();
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
-  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}.tmpdir");
+  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}/temp");
+  putenv("TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}/temp");
+  putenv("HPHP_TEST_SOCKETDIR=$socket_dir");
 }
 EOT;
     file_put_contents(
-      Status::getRunTmpDir() . '/server-prelude.php',
-      str_replace('BASEDIR', Status::getRunTmpDir(), $prelude),
+      Status::getWorkingDir() . '/server-prelude.php',
+      str_replace('BASEDIR', Status::getWorkingDir(), $prelude),
     );
   }
 
@@ -4157,7 +4081,7 @@ function main(vec<string> $argv): int {
     error(help());
   }
 
-  Status::createTmpDir($options->working_dir);
+  Status::createWorkingDir($options->working_dir);
 
   if ($options->list_tests) {
     list_tests($files, $options);
@@ -4304,13 +4228,13 @@ function main(vec<string> $argv): int {
   $json_results_files = vec[];
   if (Status::$nofork) {
     Status::registerCleanup($options->no_clean);
-    $json_results_file = tempnam('/tmp', 'test-run-');
+    $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
     $json_results_files[] = $json_results_file;
     invariant(count($test_buckets) === 1, "nofork was set erroneously");
     $return_value = child_main($options, $test_buckets[0], $json_results_file);
   } else {
     foreach ($test_buckets as $test_bucket) {
-      $json_results_file = tempnam('/tmp', 'test-run-');
+      $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
       $json_results_files[] = $json_results_file;
       $pid = pcntl_fork();
       if ($pid === -1) {

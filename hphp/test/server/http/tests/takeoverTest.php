@@ -3,7 +3,8 @@
 function runTakeoverTest() {
 
   $pid = posix_getpid();
-  $takeoverFile = '/tmp/takeover.'.ServerUtilServerTests::test_run_id();
+
+  $takeoverFile = ServerUtilServerTests::socket_dir() . '/hphp-takeover.' . ServerUtilServerTests::test_run_id();
   $serverProc = $serverPort = $adminPort = null;
   $debugPort = false;
   $serverHome = __DIR__.'/..';
@@ -71,6 +72,6 @@ function runTakeoverTest() {
 <<__EntryPoint>>
 function main() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
   runTakeoverTest();
 }

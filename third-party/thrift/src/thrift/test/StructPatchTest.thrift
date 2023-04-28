@@ -28,6 +28,7 @@ namespace py3 thrift.test
 
 enum MyEnum {
   MyValue0 = 0,
+  MyValue9 = 9,
 }
 
 typedef list<i64> (cpp.template = "std::deque") LongList
@@ -110,3 +111,7 @@ struct IncludePatchStruct {
 union IncludePatchUnion {
   1: StructPatchTestInclude.MyDataPatch patch (py3.hidden);
 } (py3.hidden)
+
+struct Strings {
+  list<string> strings;
+}

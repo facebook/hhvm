@@ -4078,9 +4078,21 @@ function runner_precheck(): void {
   }
 }
 
+function error_handler(int $type,
+                       string $message,
+                       string $file,
+                       int $line,
+                       mixed $_1,
+                       mixed $_2,
+                       mixed $_3): bool {
+  if (!($type & error_reporting())) return true;
+  throw new ErrorException($message, 0, $type, $file, $line);
+}
+
 function main(vec<string> $argv): int {
   runner_precheck();
 
+  set_error_handler(error_handler<>);
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);

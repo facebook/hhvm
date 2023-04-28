@@ -613,7 +613,7 @@ version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
- "clap 3.2.24",
+ "clap 3.2.25",
  "heck 0.4.0",
  "indexmap",
  "log",
@@ -690,13 +690,13 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.24"
+version = "3.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eef2b3ded6a26dfaec672a742c93c8cf6b689220324da509ec5caa20de55dc83"
+checksum = "4ea181bf566f71cb9a5d17a59e1871af638180a18fb0035c92ae62b705207123"
 dependencies = [
  "atty",
  "bitflags",
- "clap_derive 3.2.24",
+ "clap_derive 3.2.25",
  "clap_lex 0.2.2",
  "indexmap",
  "once_cell",
@@ -737,9 +737,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.2.24"
+version = "3.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d756c5824fc5c0c1ee8e36000f576968dbcb2081def956c83fad6f40acd46f96"
+checksum = "ae6371b8bdc8b7d3959e9cf7b22d4435ef3e79e138688421ec654acf8c81b008"
 dependencies = [
  "heck 0.4.0",
  "proc-macro-error",
@@ -1875,7 +1875,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.2.24",
+ "clap 3.2.25",
 ]
 
 [[package]]
@@ -2611,7 +2611,7 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
- "clap 3.2.24",
+ "clap 3.2.25",
  "gen_hhi_contents_lib",
  "generate_hhi_lib",
  "walkdir",
@@ -3067,7 +3067,7 @@ name = "lrgen"
 version = "0.0.0"
 dependencies = [
  "cfgrammar",
- "clap 3.2.24",
+ "clap 3.2.25",
  "lrlex",
 ]
 
@@ -3359,7 +3359,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bumpalo",
- "clap 3.2.24",
+ "clap 3.2.25",
  "direct_decl_parser",
  "files_to_ignore",
  "find_utils",

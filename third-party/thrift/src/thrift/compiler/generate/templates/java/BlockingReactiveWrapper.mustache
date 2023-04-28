@@ -97,9 +97,9 @@ public class {{service:javaCapitalName}}BlockingReactiveWrapper {{#service:exten
     {{/service:sinkFunctions}}
     {{#service:interactions}}
     public class {{service:name}}Impl implements {{service:name}} {
-        private {{service:parent}}.{{service:name}} _delegateInteraction;
+        private {{service:javaParentCapitalName}}.{{service:name}} _delegateInteraction;
 
-        {{service:name}}Impl({{service:parent}}.{{service:name}} delegateInteraction) {
+        {{service:name}}Impl({{service:javaParentCapitalName}}.{{service:name}} delegateInteraction) {
             this._delegateInteraction = delegateInteraction;
         }
 
@@ -139,7 +139,7 @@ public class {{service:javaCapitalName}}BlockingReactiveWrapper {{#service:exten
                         _sink.error(_e);
                     }
                 });
-                
+
                 if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
                     _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
                 }

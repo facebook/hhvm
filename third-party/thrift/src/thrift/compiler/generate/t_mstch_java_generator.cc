@@ -612,6 +612,8 @@ class mstch_java_service : public mstch_service {
         {
             {"service:javaPackage", &mstch_java_service::java_package},
             {"service:javaCapitalName", &mstch_java_service::java_capital_name},
+            {"service:javaParentCapitalName",
+             &mstch_java_service::java_parent_capital_name},
             {"service:onewayFunctions",
              &mstch_java_service::get_oneway_functions},
             {"service:requestResponseFunctions",
@@ -628,6 +630,10 @@ class mstch_java_service : public mstch_service {
   }
   mstch::node java_capital_name() {
     return java::mangle_java_name(service_->get_name(), true);
+  }
+  mstch::node java_parent_capital_name() {
+    return java::mangle_java_name(
+        context_.options.at("parent_service_name"), true);
   }
   mstch::node get_oneway_functions() {
     std::vector<t_function*> funcs;

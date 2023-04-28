@@ -59,9 +59,9 @@ public class {{service:javaCapitalName}}AsyncReactiveWrapper {{#service:extends}
     {{/service:sinkFunctions}}
     {{#service:interactions}}
     public class {{service:name}}Impl implements {{service:name}} {
-        private {{service:parent}}.Async.{{service:name}} _delegateInteraction;
+        private {{service:javaParentCapitalName}}.Async.{{service:name}} _delegateInteraction;
 
-        {{service:name}}Impl({{service:parent}}.Async.{{service:name}} delegateInteraction) {
+        {{service:name}}Impl({{service:javaParentCapitalName}}.Async.{{service:name}} delegateInteraction) {
             this._delegateInteraction = delegateInteraction;
         }
 

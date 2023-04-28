@@ -114,7 +114,7 @@ public class MyServiceBlockingReactiveWrapper
                         _sink.error(_e);
                     }
                 });
-                
+
                 if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
                     _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
                 }
@@ -198,7 +198,7 @@ public class MyServiceBlockingReactiveWrapper
                         _sink.error(_e);
                     }
                 });
-                
+
                 if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
                     _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
                 }

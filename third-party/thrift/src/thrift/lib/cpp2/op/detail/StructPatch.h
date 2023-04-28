@@ -164,6 +164,12 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return ensure<Id>();
   }
 
+  /// Returns the proper patch object for the given field.
+  template <typename Id>
+  decltype(auto) patchIfSet() {
+    return ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
+  }
+
  protected:
   using Base::data_;
   using Base::hasAssign;
@@ -286,12 +292,6 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     } else {
       Base::template ensure<Id>().assign(std::forward<U>(val));
     }
-  }
-
-  /// Returns the proper patch object for the given field.
-  template <typename Id>
-  decltype(auto) patchIfSet() {
-    return Base::template ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
   }
 
   void apply(T& val) const {
@@ -441,16 +441,6 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
-  }
-
-  /// Patch any set value.
-  FOLLY_NODISCARD P& patchIfSetDeprecated() {
-    if (hasValue(data_.ensure())) {
-      return *data_.patch();
-    } else if (*data_.clear()) {
-      folly::throw_exception<bad_patch_access>();
-    }
-    return *data_.patchPrior();
   }
 
   void apply(T& val) const {

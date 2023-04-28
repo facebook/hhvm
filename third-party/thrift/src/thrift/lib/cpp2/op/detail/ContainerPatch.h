@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -180,52 +181,49 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     return data_.patch()->operator[](ListPatchIndex(pos));
   }
 
-  void apply(T& val) const {
-    if (applyAssignOrClear(val)) {
+  template <class Visitor>
+  void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(T{});
+      v.clear();
+      v.patchIfSet(std::unordered_map<ListPatchIndex, VP>{});
+      v.remove(std::vector<typename T::value_type>{});
+      v.prepend(T{});
+      v.append(T{});
+    }
+
+    if (Base::template customVisitAssignAndClear(v)) {
       return;
     }
 
-    for (const auto& ep : *data_.patch()) {
-      auto idx = ep.first.position();
-      if (idx >= 0 && idx < val.size()) {
-        ep.second.apply(val[idx]);
-      }
-    }
-
-    remove_all_values(val, *data_.remove());
-    val.insert(val.begin(), data_.prepend()->begin(), data_.prepend()->end());
-    val.insert(val.end(), data_.append()->begin(), data_.append()->end());
+    v.patchIfSet(*data_.patch());
+    v.remove(*data_.remove());
+    v.prepend(*data_.prepend());
+    v.append(*data_.append());
   }
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (mergeAssignAndClear(std::forward<U>(next))) {
-      return;
-    }
-
-    {
-      decltype(auto) rhs = *std::forward<U>(next).toThrift().patch();
-      auto& patch = data_.patch().value();
-      for (auto&& el : rhs) {
-        patch[el.first].merge(std::forward<decltype(el)>(el).second);
+  void apply(T& val) const {
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+      void clear() { v.clear(); }
+      void patchIfSet(const VPMap& patches) {
+        for (const auto& ep : patches) {
+          auto idx = ep.first.position();
+          if (idx < v.size()) {
+            ep.second.apply(v[idx]);
+          }
+        }
       }
-    }
+      void remove(const std::vector<typename T::value_type>& t) {
+        remove_all_values(v, t);
+      }
+      void prepend(const T& t) { v.insert(v.begin(), t.begin(), t.end()); }
+      void append(const T& t) { v.insert(v.end(), t.begin(), t.end()); }
+    };
 
-    {
-      decltype(auto) rhs = *std::forward<U>(next).toThrift().remove();
-      data_.remove()->reserve(data_.remove()->size() + rhs.size());
-      data_.remove()->insert(data_.remove()->end(), rhs.begin(), rhs.end());
-    }
-    // TODO(afuller): Optimize the r-value reference case.
-    if (!next.toThrift().prepend()->empty()) {
-      decltype(auto) rhs = *std::forward<U>(next).toThrift().prepend();
-      data_.prepend()->insert(data_.prepend()->begin(), rhs.begin(), rhs.end());
-    }
-    if (!next.toThrift().append()->empty()) {
-      decltype(auto) rhs = *std::forward<U>(next).toThrift().append();
-      data_.append()->insert(data_.append()->end(), rhs.begin(), rhs.end());
-    }
+    return customVisit(Visitor{val});
   }
 
  private:
@@ -234,6 +232,13 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::data_;
   using Base::hasAssign;
   using Base::mergeAssignAndClear;
+
+  // Needed for merge(...). We can consider making this a public API.
+  void patchIfSet(const VPMap& patches) {
+    for (const auto& ep : patches) {
+      patchAt(ep.first.position()).merge(ep.second);
+    }
+  }
 };
 
 /// Patch for a Thrift set.

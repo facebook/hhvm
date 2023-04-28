@@ -107,7 +107,7 @@ target_link_libraries(
   PUBLIC
     concurrency
     transport
-    ${Boost_LIBRARIES}
+    Boost::boost
     Folly::folly
     wangle::wangle
     ${GLOG_LIBRARIES}

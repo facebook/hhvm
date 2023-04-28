@@ -57,6 +57,7 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH})
 
 # Find required dependencies.
+find_package(Boost REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
@@ -110,7 +111,6 @@ if (THRIFT_LIB_ONLY OR build_all)
     ${GLOG_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR}
     ${ZSTD_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIRS}
   )
   add_definitions("-DTHRIFT_HAVE_LIBSNAPPY=0")
   if (THRIFT_LIB_ONLY)

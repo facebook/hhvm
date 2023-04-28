@@ -41,6 +41,7 @@ add_library(
 target_link_libraries(
   compiler_ast
   ${OPENSSL_LIBRARIES}
+  Boost::boost
   fmt::fmt
 )
 
@@ -74,7 +75,7 @@ target_compile_definitions(
 target_link_libraries(
   compiler_base
   compiler_ast
-  ${Boost_LIBRARIES}
+  Boost::filesystem
   fmt::fmt
 )
 
@@ -95,7 +96,7 @@ add_library(
 target_link_libraries(
   compiler
   compiler_ast
-  ${Boost_LIBRARIES}
+  Boost::filesystem
   fmt::fmt
 )
 
@@ -109,7 +110,7 @@ add_library(
   detail/mustache/token.cpp
   detail/mustache/utils.cpp
 )
-target_link_libraries(mustache ${Boost_LIBRARIES})
+target_link_libraries(mustache Boost::boost)
 
 add_subdirectory(generate)
 
@@ -136,7 +137,6 @@ target_link_libraries(
   compiler_ast
   compiler_base
   ${GENERATE_LINKED}
-  ${Boost_LIBRARIES}
 )
 # Force compiler_generators linking (compiler will optimize it out otherwise).
 if (MSVC)

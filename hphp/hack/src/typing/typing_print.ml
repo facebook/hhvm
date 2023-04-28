@@ -1497,6 +1497,9 @@ module Json = struct
     | (p, Tgeneric (s, tyargs)) ->
       obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
     | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
+    | (_, Tnewtype (s, _, ty))
+      when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
+      from_type env ty
     | (p, Tnewtype (s, _, ty))
       when Decl_provider.get_class env.decl_env.Decl_env.ctx s
            >>| Cls.enum_type

@@ -16,7 +16,6 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_handlers.h"
 #endif
 #include "thrift/annotation/gen-py3cpp/cpp_types.h"
-#include "thrift/annotation/gen-py3cpp/meta_types.h"
 
 namespace folly {
   class IOBuf;

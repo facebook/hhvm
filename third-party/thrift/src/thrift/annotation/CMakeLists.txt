@@ -15,7 +15,7 @@
 add_library(thriftannotation)
 target_link_libraries(thriftannotation PUBLIC Folly::folly)
 
-foreach (name api cpp hack java meta python scope thrift)
+foreach (name cpp hack java python scope thrift)
   thrift_generate(
     ${name} # file_name
     "" # services
@@ -27,3 +27,4 @@ foreach (name api cpp hack java meta python scope thrift)
     THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR})
   target_sources(thriftannotation PRIVATE ${${name}-cpp2-SOURCES})
 endforeach ()
+

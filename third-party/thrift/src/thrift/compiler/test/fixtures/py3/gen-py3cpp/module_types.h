@@ -10,7 +10,6 @@
 
 
 #include "thrift/annotation/gen-py3cpp/cpp_types.h"
-#include "thrift/annotation/gen-py3cpp/meta_types.h"
 
 namespace apache {
 namespace thrift {
@@ -28,7 +27,6 @@ struct hidden_field;
 struct field1;
 struct field2;
 struct field3;
-struct the;
 struct best;
 struct test;
 struct structOne;
@@ -95,10 +93,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field2);
 #ifndef APACHE_THRIFT_ACCESSOR_field3
 #define APACHE_THRIFT_ACCESSOR_field3
 APACHE_THRIFT_DEFINE_ACCESSOR(field3);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_the
-#define APACHE_THRIFT_ACCESSOR_the
-APACHE_THRIFT_DEFINE_ACCESSOR(the);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_best
 #define APACHE_THRIFT_ACCESSOR_best
@@ -312,7 +306,6 @@ class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
 class HiddenTypeFieldsStruct;
-class GeneratedStruct;
 namespace detail {
 class AdaptedUnion;
 } // namespace detail
@@ -1651,154 +1644,6 @@ class HiddenTypeFieldsStruct final  {
 
 template <class Protocol_>
 unsigned long HiddenTypeFieldsStruct::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
-
-class GeneratedStruct final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-    ::apache::thrift::ident::the
-  >;
-
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i16_t
-  >;
-
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template<class T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
-    )
-  >;
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = GeneratedStruct;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  GeneratedStruct() :
-      __fbthrift_field_the() {
-  }
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  GeneratedStruct(apache::thrift::FragileConstructor, ::std::int16_t the__arg);
-
-  GeneratedStruct(GeneratedStruct&&) = default;
-
-  GeneratedStruct(const GeneratedStruct&) = default;
-
-
-  GeneratedStruct& operator=(GeneratedStruct&&) = default;
-
-  GeneratedStruct& operator=(const GeneratedStruct&) = default;
- private:
-  ::std::int16_t __fbthrift_field_the;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
-
- public:
-
-  bool operator==(const GeneratedStruct&) const;
-  bool operator<(const GeneratedStruct&) const;
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> the_ref() const& {
-    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> the_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> the_ref() & {
-    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> the_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> the() const& {
-    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> the() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> the() & {
-    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> the() && {
-    return {static_cast<T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
-  }
-
-  ::std::int16_t get_the() const {
-    return __fbthrift_field_the;
-  }
-
-  [[deprecated("Use `FOO.the_ref() = BAR;` instead of `FOO.set_the(BAR);`")]]
-  ::std::int16_t& set_the(::std::int16_t the_) {
-    the_ref() = the_;
-    return __fbthrift_field_the;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<GeneratedStruct>;
-  friend void swap(GeneratedStruct& a, GeneratedStruct& b);
-};
-
-template <class Protocol_>
-unsigned long GeneratedStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

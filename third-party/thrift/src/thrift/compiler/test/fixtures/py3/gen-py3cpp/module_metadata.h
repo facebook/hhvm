@@ -11,7 +11,6 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include "thrift/annotation/gen-py3cpp/cpp_metadata.h"
-#include "thrift/annotation/gen-py3cpp/meta_metadata.h"
 
 namespace py3 {
 namespace simple {
@@ -63,11 +62,6 @@ class StructMetadata<::py3::simple::SimpleStruct> {
 };
 template <>
 class StructMetadata<::py3::simple::HiddenTypeFieldsStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::py3::simple::GeneratedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

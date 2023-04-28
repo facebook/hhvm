@@ -27,7 +27,6 @@ using folly::dynamic;
 using folly::StringPiece;
 using folly::json::stripComments;
 using std::string;
-using std::vector;
 
 namespace facebook {
 namespace memcache {
@@ -296,14 +295,14 @@ class ConfigPreprocessor::Macro {
   Macro(
       const ConfigPreprocessor& prep,
       StringPiece name,
-      const vector<dynamic>& params,
+      const std::vector<dynamic>& params,
       Func f,
       bool autoExpand = true)
       : prep_(prep), f_(std::move(f)), autoExpand_(autoExpand), name_(name) {
     initParams(params);
   }
 
-  dynamic getResult(const vector<StringPiece>& params, const Context& ctx)
+  dynamic getResult(const std::vector<StringPiece>& params, const Context& ctx)
       const {
     checkLogic(
         minParamCnt_ <= params.size(),
@@ -367,12 +366,12 @@ class ConfigPreprocessor::Macro {
   Func f_;
   bool autoExpand_{true};
   // name, default, required?
-  vector<std::tuple<string, dynamic, bool>> params_;
+  std::vector<std::tuple<string, dynamic, bool>> params_;
   size_t maxParamCnt_{0};
   size_t minParamCnt_{0};
   StringPiece name_;
 
-  void initParams(const vector<dynamic>& params) {
+  void initParams(const std::vector<dynamic>& params) {
     maxParamCnt_ = minParamCnt_ = params.size();
     bool needOptional = false;
     for (const auto& param : params) {
@@ -536,7 +535,7 @@ class ConfigPreprocessor::BuiltIns {
         dictionary.typeName());
 
     const auto& key = ctx.at("key");
-    vector<std::pair<StringPiece, double>> weights;
+    std::vector<std::pair<StringPiece, double>> weights;
     for (const auto& it : dictionary.items()) {
       auto name = it.first.stringPiece();
       checkLogic(
@@ -852,7 +851,7 @@ class ConfigPreprocessor::BuiltIns {
     auto dict = asStringPiece(ctx.at("dictionary"), "Split: dictionary");
     auto delim = asStringPiece(ctx.at("delim"), "Split: delim");
 
-    vector<StringPiece> result;
+    std::vector<StringPiece> result;
     folly::split(delim, dict, result);
     return folly::dynamic(result.begin(), result.end());
   }
@@ -1228,7 +1227,7 @@ class ConfigPreprocessor::BuiltIns {
   static dynamic sortMacro(Context&& ctx) {
     auto dict = ctx.move("dictionary");
     checkLogic(dict.isArray(), "sort: dictionary is not an array");
-    vector<dynamic> v;
+    std::vector<dynamic> v;
     v.reserve(dict.size());
     for (size_t i = 0; i < dict.size(); ++i) {
       v.push_back(std::move(dict[i]));
@@ -1795,7 +1794,7 @@ void ConfigPreprocessor::addConst(StringPiece name, folly::dynamic result) {
 
 void ConfigPreprocessor::addMacro(
     StringPiece name,
-    const vector<dynamic>& params,
+    const std::vector<dynamic>& params,
     Macro::Func func,
     bool autoExpand) {
   auto it = macros_.emplace(name, nullptr).first;
@@ -1844,9 +1843,10 @@ dynamic ConfigPreprocessor::replaceParams(
   return buf;
 }
 
-vector<StringPiece> ConfigPreprocessor::getCallParams(StringPiece str) const {
+std::vector<StringPiece> ConfigPreprocessor::getCallParams(
+    StringPiece str) const {
   // all params are substituted. But inner macro calls are possible.
-  vector<StringPiece> result;
+  std::vector<StringPiece> result;
   while (true) {
     if (str.empty()) {
       // it is one parameter - empty string e.g. @a() is call with one parameter
@@ -1906,7 +1906,7 @@ dynamic ConfigPreprocessor::expandStringMacro(
 
   // macro in string
   StringPiece name;
-  vector<StringPiece> innerParams;
+  std::vector<StringPiece> innerParams;
 
   auto paramStart = findUnescaped(str, '(');
   if (paramStart != string::npos) {
@@ -2050,7 +2050,7 @@ void ConfigPreprocessor::parseMacroDef(
 
   if (objType == "macroDef") {
     const auto& res = tryGet(obj, "result", "Macro definition");
-    vector<dynamic> params;
+    std::vector<dynamic> params;
     auto paramsIt = obj.find("params");
     if (paramsIt != obj.items().end()) {
       checkLogic(

@@ -887,10 +887,25 @@ let update_state_files (state : state) (files : open_files_state) : state =
   | Initialized istate -> Initialized { istate with ifiles = files }
   | _ -> failwith ("Update_state_files: unexpected " ^ state_to_log_string state)
 
+(** We avoid showing typing errors if there are parsing errors. *)
+let get_user_facing_errors
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : Errors.t =
+  let (_, ast_errors) =
+    Ast_provider.compute_parser_return_and_ast_errors
+      ~popt:(Provider_context.get_popt ctx)
+      ~entry
+  in
+  if Errors.is_empty ast_errors then
+    let { Tast_provider.Compute_tast_and_errors.errors = all_errors; _ } =
+      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    all_errors
+  else
+    ast_errors
+
 (** Computes the Errors.t for what's on disk at a given path.
 We provide [istate] just in case we can benefit from a cached answer. *)
-let get_errors_for_path (istate : istate) (path : Relative_path.t) :
-    Errors.finalized_error list =
+let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
   let disk_content_opt =
     Sys_utils.cat_or_failed (Relative_path.to_absolute path)
   in
@@ -928,15 +943,12 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) :
   match entry_opt with
   | None ->
     (* file couldn't be read off disk (maybe absent); therefore, by definition, no errors *)
-    []
+    Errors.empty
   | Some entry ->
     (* Here we'll get either cached errors from the cached entry, or will recompute errors
        from the partially cached entry, or will compute errors from the file on disk. *)
     let ctx = make_singleton_ctx istate.icommon entry in
-    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
-    in
-    Errors.sort_and_finalize errors
+    get_user_facing_errors ~ctx ~entry
 
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
@@ -1042,7 +1054,7 @@ let handle_request
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let errors = get_errors_for_path istate path in
+    let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
     let files = close_file istate.ifiles path in
     Lwt.return (update_state_files state files, Ok errors)
   (* IDE File Opened *)
@@ -1056,9 +1068,7 @@ let handle_request
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in
-    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
-    in
+    let errors = get_user_facing_errors ~ctx ~entry in
     published_errors_ref := Some errors;
     Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* IDE File Changed *)
@@ -1072,9 +1082,7 @@ let handle_request
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in
-    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
-    in
+    let errors = get_user_facing_errors ~ctx ~entry in
     published_errors_ref := Some errors;
     Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* Document Symbol *)
@@ -1225,9 +1233,7 @@ let handle_request
        mainly -- it's simpler to perform+handle this logic in just a few places rather than
        everywhere, and also because codeAction is called so frequently (e.g. upon changing
        tabs) that it's the best opportunity we have. *)
-    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
-    in
+    let errors = get_user_facing_errors ~ctx ~entry in
     let errors_opt =
       match !published_errors_ref with
       | Some published_errors when phys_equal published_errors errors ->

@@ -7186,8 +7186,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_live_squiggles(self) -> None:
-        ### This tests that "live squiggles" (those from clientIdeDaemon) are correctly
-        ### produced by didOpen, didChange, codeAction and publishDiagnostics.
+        """This tests that "live squiggles" (those from clientIdeDaemon) are correctly
+        produced by didOpen, didChange, codeAction and publishDiagnostics."""
         variables = dict(
             self.prepare_serverless_ide_environment(use_standalone_ide=True)
         )
@@ -7205,7 +7205,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .write_to_disk(
                 comment="create file errors_a.php",
                 uri="${errors_a_uri}",
-                contents="<?hh\nfunction aaa(): int { return 1 }\n",
+                contents="<?hh\nfunction aaa() { }\n",
                 notify=False,
             )
             .notification(
@@ -7216,7 +7216,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         "uri": "${errors_a_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "<?hh\nfunction aaa(): int { return 1 }\n",
+                        "text": "<?hh\nfunction aaa() { }\n",
                     }
                 },
             )
@@ -7228,13 +7228,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 1, "character": 31},
-                                "end": {"line": 1, "character": 31},
+                                "start": {"line": 1, "character": 9},
+                                "end": {"line": 1, "character": 12},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 4030,
                             "source": "Hack",
-                            "message": "A semicolon ; is expected here.",
+                            "message": "Was expecting a return type hint",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -7265,13 +7265,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 2, "character": 31},
-                                "end": {"line": 2, "character": 31},
+                                "start": {"line": 2, "character": 9},
+                                "end": {"line": 2, "character": 12},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 4030,
                             "source": "Hack",
-                            "message": "A semicolon ; is expected here.",
+                            "message": "Was expecting a return type hint",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -7307,13 +7307,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 2, "character": 31},
-                                "end": {"line": 2, "character": 31},
+                                "start": {"line": 2, "character": 9},
+                                "end": {"line": 2, "character": 12},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 4030,
                             "source": "Hack",
-                            "message": "A semicolon ; is expected here.",
+                            "message": "Was expecting a return type hint",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -7332,13 +7332,117 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 1, "character": 31},
-                                "end": {"line": 1, "character": 31},
+                                "start": {"line": 1, "character": 9},
+                                "end": {"line": 1, "character": 12},
+                            },
+                            "severity": 1,
+                            "code": 4030,
+                            "source": "Hack",
+                            "message": "Was expecting a return type hint",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [],
+                },
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_parsing_squiggles_priority(self) -> None:
+        """This tests that parsing squiggles suppress typing squiggles from clientIdeDaemon"""
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        variables.update({"errors_a_uri": errors_a_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_parsing_squiggles_priority"),
+                use_serverless_ide=True,
+                supports_status=False,
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return $undefined }\n",
+                notify=False,
+            )
+            .notification(
+                comment="open errors_a.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction aaa(): int { return $undefined }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="didOpen should report only a parsing squiggle in errors_a.php",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 40},
+                                "end": {"line": 1, "character": 40},
                             },
                             "severity": 1,
                             "code": 1002,
                             "source": "Hack",
                             "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="change errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 39},
+                                "end": {"line": 1, "character": 39},
+                            },
+                            "text": ";",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                comment="didChange should update live squiggles in errors_a.php (now revealing the typing error)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 29},
+                                "end": {"line": 1, "character": 39},
+                            },
+                            "severity": 1,
+                            "code": 2050,
+                            "source": "Hack",
+                            "message": "Variable $undefined is undefined, or not always defined.",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }

@@ -7093,7 +7093,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("test_standalone_status"),
+                LspTestSpec("test_standalone_errors"),
                 use_serverless_ide=True,
                 supports_status=True,
             )
@@ -7180,6 +7180,179 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 comment="standalone should clean up squiggles - b",
                 method="textDocument/publishDiagnostics",
                 params={"uri": "${errors_b_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_live_squiggles(self) -> None:
+        ### This tests that "live squiggles" (those from clientIdeDaemon) are correctly
+        ### produced by didOpen, didChange, codeAction and publishDiagnostics.
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        errors_b_uri = self.repo_file_uri("errors_b.php")
+        variables.update({"errors_a_uri": errors_a_uri, "errors_b_uri": errors_b_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_live_squiggles"),
+                use_serverless_ide=True,
+                supports_status=False,
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return 1 }\n",
+                notify=False,
+            )
+            .notification(
+                comment="open errors_a.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction aaa(): int { return 1 }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="didOpen should report a live squiggle in errors_a.php",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="change errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 0},
+                            },
+                            "text": "\n",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                comment="didChange should update live squiggles in errors_a.php (one line down from what we got in didOpen)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 31},
+                                "end": {"line": 2, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .write_to_disk(
+                comment="create file errors_b.php and send didChangeWatchedFiles",
+                uri="${errors_b_uri}",
+                contents="<?hh\nfunction bbb(): int { return 2; }\n",
+                notify=True,
+            )
+            .request(
+                line=line(),
+                comment="send codeAction to trigger errors to be refreshed",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "range": {
+                        "start": {"line": 0, "character": 0},
+                        "end": {"line": 0, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                comment="codeAction should update live squiggles in errors_a.php (same as what we had from didChange)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 31},
+                                "end": {"line": 2, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                method="textDocument/didClose",
+                params={"textDocument": {"uri": "${errors_a_uri}"}},
+            )
+            .wait_for_notification(
+                comment="didClose should update live squiggles in (unsaved) errors_a.php back to what they were on disk",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [],
+                },
             )
             .notification(method="exit", params={})
         )

@@ -1329,6 +1329,15 @@ let hack_errors_to_lsp_diagnostic
   let location_message (message : Pos.absolute * string) :
       Lsp.Location.t * string =
     let (pos, message) = message in
+    (* It's known and expected that hh_server sometimes sends an error
+       with empty filename in its list of messages. These implicitly
+       refer to the file in which the error is reported. *)
+    let pos =
+      if String.is_empty (Pos.filename pos) then
+        Pos.set_file filename pos
+      else
+        pos
+    in
     let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
     ({ Location.uri; range }, Markdown_lite.render message)
   in
@@ -3941,14 +3950,20 @@ let warn_truncated_diagnostic_list is_truncated =
     figure out which file to report. In this case we'll report on the root.
     Nuclide and VSCode both display this fine, though they obviously don't
     let you click-to-go-to-file on it. *)
-let fix_empty_paths_in_error_map errors_per_file =
+let fix_empty_paths_in_error_map
+    (errors_per_file : Errors.finalized_error list SMap.t) :
+    Errors.finalized_error list SMap.t =
   let default_path = get_root_exn () |> Path.to_string in
   match SMap.find_opt "" errors_per_file with
   | None -> errors_per_file
   | Some errors ->
-    HackEventLogger.invariant_violation_bug "missing path for diagnostics";
+    let data =
+      Option.value_map (List.hd errors) ~f:Errors.to_string ~default:"[none]"
+    in
+    HackEventLogger.invariant_violation_bug "missing path for diagnostics" ~data;
     Hh_logger.log
-      "missing path for diagnostics %s"
+      "missing path for diagnostics [%s] %s"
+      data
       (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     SMap.remove "" errors_per_file
     |> SMap.add ~combine:( @ ) default_path errors

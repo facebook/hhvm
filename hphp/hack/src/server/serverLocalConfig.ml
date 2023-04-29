@@ -473,8 +473,6 @@ type t = {
   allow_unstable_features: bool;
       (** Allows unstable features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
-  naming_sqlite_in_hack_64: bool;
-      (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
   rollout_group: string option;
@@ -485,8 +483,6 @@ type t = {
   specify_manifold_api_key: bool;
   remote_old_decls_no_limit: bool;
       (**  Remove remote old decl fetching limit *)
-  no_marshalled_naming_table_in_saved_state: bool;
-      (** Remove marshalled naming table from saved state *)
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
   use_shallow_decls_saved_state: bool;
@@ -600,12 +596,10 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
-    naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
     rollout_group = None;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
-    no_marshalled_naming_table_in_saved_state = false;
     cache_remote_decls = false;
     use_shallow_decls_saved_state = false;
     shallow_decls_manifold_path = None;
@@ -1238,13 +1232,6 @@ let load_
       ~current_version
       config
   in
-  let naming_sqlite_in_hack_64 =
-    bool_if_min_version
-      "naming_sqlite_in_hack_64"
-      ~default:default.naming_sqlite_in_hack_64
-      ~current_version
-      config
-  in
   let workload_quantile =
     int_list_opt "workload_quantile" config >>= fun l ->
     match l with
@@ -1269,13 +1256,6 @@ let load_
     bool_if_min_version
       "remote_old_decls_no_limit"
       ~default:default.remote_old_decls_no_limit
-      ~current_version
-      config
-  in
-  let no_marshalled_naming_table_in_saved_state =
-    bool_if_min_version
-      "no_marshalled_naming_table_in_saved_state"
-      ~default:default.no_marshalled_naming_table_in_saved_state
       ~current_version
       config
   in
@@ -1498,12 +1478,10 @@ let load_
     allow_unstable_features;
     watchman;
     force_remote_type_check;
-    naming_sqlite_in_hack_64;
     workload_quantile;
     rollout_group;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
-    no_marshalled_naming_table_in_saved_state;
     cache_remote_decls;
     use_shallow_decls_saved_state;
     shallow_decls_manifold_path;
@@ -1535,7 +1513,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_saved_state_age_and_distance =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);
-      naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
@@ -1546,8 +1523,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
-      no_marshalled_naming_table_in_saved_state =
-        options.no_marshalled_naming_table_in_saved_state;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;

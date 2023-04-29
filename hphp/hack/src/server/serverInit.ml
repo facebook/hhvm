@@ -54,7 +54,7 @@ let save_state
   if not do_save_state then
     None
   else
-    let result = SaveStateService.save_state genv env output_filename in
+    let result = SaveStateService.save_state env output_filename in
     Some result
 
 let post_init genv (env, _t) =

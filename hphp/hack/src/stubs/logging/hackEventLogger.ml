@@ -43,7 +43,6 @@ let serialize_globals () = Serialized_globals
 
 type rollout_flags = {
   log_saved_state_age_and_distance: bool;
-  naming_sqlite_in_hack_64: bool;
   fetch_remote_old_decls: bool;
   ide_max_num_decls: int;
   ide_max_num_shallow_decls: int;
@@ -55,7 +54,6 @@ type rollout_flags = {
   shm_use_sharded_hashtbl: bool;
   shm_cache_size: int;
   remote_old_decls_no_limit: bool;
-  no_marshalled_naming_table_in_saved_state: bool;
   use_manifold_cython_client: bool;
   disable_naming_table_fallback_loading: bool;
   use_type_alias_heap: bool;

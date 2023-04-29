@@ -190,7 +190,8 @@ type errors_file_error =
       log_message: string;
     } [@printer (fun fmt _ _ -> fprintf fmt "Restarted")]
   | Stopped
-  | Killed
+  | Killed of Exit_status.finale_data option
+      [@printer (fun fmt _ -> fprintf fmt "Killed")]
   | Build_id_mismatch
 [@@deriving show { with_path = false }]
 
@@ -311,7 +312,7 @@ module ErrorsFile = struct
              to avoid allocating say a 20gb bytes array and having the machine get stuck. *)
           assert (size < 20_000_000);
           (match Sys_utils.read_non_intr fd size with
-          | None -> synthesize_end Killed "no payload"
+          | None -> synthesize_end (Killed None) "no payload"
           | Some payload ->
             let message : message = Marshal.from_bytes payload 0 in
             message))
@@ -574,7 +575,9 @@ module ErrorsRead = struct
         in
         Error (Build_id_mismatch, msg)
       else if not (Proc.is_alive ~pid ~expected:cmdline) then
-        Error (Killed, "Errors-file is from defunct PID")
+        let server_finale_file = ServerFiles.server_finale_file pid in
+        let finale_data = Exit_status.get_finale_data server_finale_file in
+        Error (Killed finale_data, "Errors-file is from defunct PID")
       else
         Ok { pid; clock; timestamp }
     | _ -> failwith "impossible message combination"

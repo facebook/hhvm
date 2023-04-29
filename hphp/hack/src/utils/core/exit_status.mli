@@ -13,8 +13,8 @@ type t =
   | Input_error
   | Kill_error
   | No_server_running_should_retry
-  | Server_hung_up_should_retry
-  | Server_hung_up_should_abort
+  | Server_hung_up_should_retry of finale_data option
+  | Server_hung_up_should_abort of finale_data option
   | Out_of_time
   | Out_of_retries
   | Server_already_exists
@@ -75,7 +75,7 @@ type t =
   | Sql_cantopen
   | Sql_corrupt
   | Sql_misuse
-  | Uncaught_exception
+  | Uncaught_exception of Exception.t
   | Decl_not_found
   | Big_rebase_detected
   | Failed_to_load_should_retry
@@ -112,3 +112,6 @@ val unpack : Unix.process_status -> string * int
 with json-formatted data describing the detailed nature of the exit including callstack.
 This method retrieves that file, if it exists. *)
 val get_finale_data : string -> finale_data option
+
+(** like [show], but prints a lot more information including callstacks *)
+val show_expanded : t -> string

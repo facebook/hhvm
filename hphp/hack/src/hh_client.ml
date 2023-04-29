@@ -148,15 +148,12 @@ let () =
     let (es, lvl) =
       match exn with
       | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)
-      | _ -> (Exit_status.Uncaught_exception, Hh_logger.Level.Error)
+      | _ -> (Exit_status.Uncaught_exception e, Hh_logger.Level.Error)
     in
     Hh_logger.log
       ~lvl
-      "CLIENT_BAD_EXIT client_command=%s exit_status=%s exit_code=%d exn=%s stack=%s"
+      "CLIENT_BAD_EXIT [%s] %s"
       command_name
-      (Exit_status.show es)
-      (Exit_status.exit_code es)
-      (Exception.get_ctor_string e)
-      (Exception.get_backtrace_string e |> Exception.clean_stack);
+      (Exit_status.show_expanded es);
     HackEventLogger.client_bad_exit ~command_name es e;
     Exit.exit es

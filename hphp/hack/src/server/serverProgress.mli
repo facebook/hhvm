@@ -172,7 +172,8 @@ type errors_file_error =
         contains extra logging information. *)
   | Stopped
       (** Hh_server was stopped gracefully so we can't read errors. i.e. server called [ErrorsWrite.unlink]. *)
-  | Killed  (** Hh_server was killed so we can't read errors. *)
+  | Killed of Exit_status.finale_data option
+      (** Hh_server was killed so we can't read errors. *)
   | Build_id_mismatch
       (** The hh_server that produced these errors is incompatible with the current binary. *)
 [@@deriving show]

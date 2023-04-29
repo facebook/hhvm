@@ -904,7 +904,7 @@ let rec check_and_run_loop
           "Probably an uncaught exception rethrown each retry. Exiting. %s"
           (Exception.to_string e);
         HackEventLogger.monitor_giving_up_exception e;
-        Exit.exit Exit_status.Uncaught_exception
+        Exit.exit (Exit_status.Uncaught_exception e)
       );
       Hh_logger.log
         "check_and_run_loop_ threw with exception: %s"

@@ -165,7 +165,7 @@ let exit_on_exception (e : Exception.t) =
   | Exit_status.Exit_with ec -> Exit.exit ec
   | _ ->
     Hh_logger.exception_ e;
-    Exit.exit Exit_status.Uncaught_exception
+    Exit.exit (Exit_status.Uncaught_exception e)
 
 let with_exit_on_exception f =
   try f () with

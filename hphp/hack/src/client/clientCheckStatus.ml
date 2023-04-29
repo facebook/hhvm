@@ -225,6 +225,10 @@ let go_streaming_on_fd
       Printf.printf "\n%s\n%!" msg;
       raise Exit_status.(Exit_with Exit_status.Typecheck_restarted)
     | _ ->
+      Hh_logger.log
+        "Errors-file: on %s, read %s"
+        (Sys_utils.show_inode fd)
+        (ServerProgress.show_errors_file_error end_sentinel);
       Printf.printf
         "Hh_server has terminated. [%s]\n%!"
         (ServerProgress.show_errors_file_error end_sentinel);
@@ -479,9 +483,11 @@ let rec keep_trying_to_open
       progress_callback None;
       match end_sentinel with
       | ServerProgress.Build_id_mismatch ->
-        raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
-      | ServerProgress.Killed ->
-        raise Exit_status.(Exit_with Exit_status.Server_hung_up_should_abort)
+        raise (Exit_status.Exit_with Exit_status.Build_id_mismatch)
+      | ServerProgress.Killed finale_data ->
+        raise
+          (Exit_status.Exit_with
+             (Exit_status.Server_hung_up_should_abort finale_data))
       | _ ->
         failwith
           (Printf.sprintf

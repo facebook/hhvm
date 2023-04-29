@@ -157,16 +157,6 @@ let rec wait_for_server_message
       let client_stack =
         e |> Exception.get_backtrace_string |> Exception.clean_stack
       in
-      (* log to logfile *)
-      log
-        ~connection_log_id
-        "SERVER_HUNG_UP [%s]\nfinale_data: %s\n%s"
-        client_exn
-        (Option.value_map
-           finale_data
-           ~f:Exit_status.show_finale_data
-           ~default:"[none]")
-        client_stack;
       (* stderr *)
       let msg =
         match (exn, finale_data) with
@@ -185,21 +175,21 @@ let rec wait_for_server_message
       (* exception, caught by hh_client.ml and logged.
          In most cases we report that find_hh.sh should simply retry the failed command.
          There are only two cases where we say it shouldn't. *)
-      let underlying_exit_status =
+      let server_exit_status =
         Option.map finale_data ~f:(fun d -> d.Exit_status.exit_status)
       in
       let external_exit_status =
-        match underlying_exit_status with
+        match server_exit_status with
         | Some
             Exit_status.(
               Failed_to_load_should_abort | Server_non_opt_build_mode) ->
-          Exit_status.Server_hung_up_should_abort
-        | _ -> Exit_status.Server_hung_up_should_retry
+          Exit_status.Server_hung_up_should_abort finale_data
+        | _ -> Exit_status.Server_hung_up_should_retry finale_data
       in
       (* log to telemetry *)
       HackEventLogger.server_hung_up
         ~external_exit_status
-        ~underlying_exit_status
+        ~server_exit_status
         ~client_exn
         ~client_stack
         ~server_stack:

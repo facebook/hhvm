@@ -207,7 +207,8 @@ let test_read_dead_pid () : bool Lwt.t =
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         begin
           match ServerProgress.ErrorsRead.openfile fd with
-          | Error (ServerProgress.Killed, "Errors-file is from defunct PID") ->
+          | Error (ServerProgress.Killed _, "Errors-file is from defunct PID")
+            ->
             ()
           | Ok _ -> failwith "Expected a dead-pid failure, not success"
           | Error e -> failwith ("Expected Killed, not " ^ show_read (Error e))

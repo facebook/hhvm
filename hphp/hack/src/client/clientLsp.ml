@@ -1580,8 +1580,8 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
       match Exception.unwrap exn with
       | Exit_with Build_id_mismatch
       | Exit_with No_server_running_should_retry
-      | Exit_with Server_hung_up_should_retry
-      | Exit_with Server_hung_up_should_abort ->
+      | Exit_with (Server_hung_up_should_retry _)
+      | Exit_with (Server_hung_up_should_abort _) ->
         Hh_server_stopped
       | Exit_with Out_of_retries
       | Exit_with Out_of_time ->
@@ -2185,7 +2185,7 @@ let merge_statuses_standalone
     | ( { disposition = DReady; _ },
         SeekingErrors
           {
-            seek_reason = (ServerProgress.(NothingYet | Killed), log_message);
+            seek_reason = (ServerProgress.(NothingYet | Killed _), log_message);
             _;
           } ) ->
       ( DStopped,
@@ -4091,7 +4091,7 @@ let handle_errors_file_item
           ^ " "
           ^ log_message)
       | ServerProgress.Stopped
-      | ServerProgress.Killed ->
+      | ServerProgress.Killed _ ->
         (* At this point we'd like to erase all the squiggles that came from hh_server.
            All we'll do is leave the errors for now, and then a subsequent [try_open_errors_file]
            will determine that we've transitioned from an ok state (like we leave it in right now)
@@ -4254,7 +4254,7 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
           {
             seek_reason =
               ( ServerProgress.(
-                  ( NothingYet | Restarted _ | Stopped | Killed
+                  ( NothingYet | Restarted _ | Stopped | Killed _
                   | Build_id_mismatch )),
                 _ );
             _;

@@ -1080,7 +1080,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
       | Exit_status.Exit_with exit_status -> exit_status
       | _ ->
         Printf.eprintf "Uncaught exception: %s\n" (Exception.get_ctor_string e);
-        Exit_status.Uncaught_exception
+        Exit_status.Uncaught_exception e
     in
     begin
       match (exit_status, !partial_telemetry_ref) with
@@ -1090,15 +1090,14 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
            it can't write errors to the pipe. *)
         HackEventLogger.client_check_partial exit_status spinner telemetry;
         Hh_logger.log
-          "CLIENT_CHECK_PARTIAL %s [%s]"
-          (Exit_status.show exit_status)
+          "CLIENT_CHECK_PARTIAL [%s] %s"
           (Option.value spinner ~default:"")
+          (Exit_status.show exit_status)
       | _ ->
         HackEventLogger.client_check_bad_exit exit_status spinner e;
         Hh_logger.log
-          "CLIENT_CHECK_EXIT %s [%s]\n%s"
-          (Exit_status.show exit_status)
+          "CLIENT_CHECK_EXIT [%s] %s"
           (Option.value spinner ~default:"")
-          (Exception.to_string e |> Exception.clean_stack)
+          (Exit_status.show_expanded exit_status)
     end;
     Exit.exit exit_status

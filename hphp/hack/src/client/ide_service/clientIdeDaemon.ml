@@ -56,8 +56,11 @@ type common_state = {
 [@@deriving show]
 
 type open_files_state = {
-  open_files: Provider_context.entries;
-      (** all open files, along with caches of their ASTs and TASTs and errors *)
+  open_files:
+    (Provider_context.entry * Errors.t option ref) Relative_path.Map.t;
+      (** The [entry] caches the TAST+errors; the [Errors.t option] stores what was
+      the most recent version of the errors to have been returned to clientLsp
+      by didOpen/didChange/didClose/codeAction. *)
   changed_files_to_process: Relative_path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily
   whittled down one by one in `serve` as we get around to processing them
@@ -549,7 +552,8 @@ let batch_update_naming_table_and_invalidate_caches
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
     ~(local_memory : Provider_backend.local_memory)
-    ~(open_files : Provider_context.entries)
+    ~(open_files :
+       (Provider_context.entry * Errors.t option ref) Relative_path.Map.t)
     (changes : Relative_path.Set.t) : ClientIdeIncremental.Batch.update_result =
   let ({ ClientIdeIncremental.Batch.changes = changes_results; _ } as
       update_naming_table_result) =
@@ -565,7 +569,8 @@ let batch_update_naming_table_and_invalidate_caches
       Option.iter
         old_file_info
         ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory));
-  Provider_utils.invalidate_tast_cache_of_entries open_files;
+  Relative_path.Map.iter open_files ~f:(fun _path (entry, _) ->
+      Provider_utils.invalidate_tast_cache_of_entry entry);
   update_naming_table_result
 
 (** An empty ctx with no entries *)
@@ -665,9 +670,10 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
            path |> Path.to_string |> Relative_path.create_detect_prefix)
     |> List.map ~f:(fun path ->
            ( path,
-             Provider_context.make_entry
-               ~path
-               ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
+             ( Provider_context.make_entry
+                 ~path
+                 ~contents:Provider_context.Raise_exn_on_attempt_to_read,
+               ref None ) ))
     |> Relative_path.Map.of_list
   in
   log_debug "initialize1.done";
@@ -802,7 +808,10 @@ let open_or_change_file_during_init
       ~contents:(Provider_context.Provided_contents contents)
   in
   let open_files =
-    Relative_path.Map.add dstate.dfiles.open_files ~key:path ~data:entry
+    Relative_path.Map.add
+      dstate.dfiles.open_files
+      ~key:path
+      ~data:(entry, ref None)
   in
   { dstate with dfiles = { dstate.dfiles with open_files } }
 
@@ -822,47 +831,52 @@ will be left intact; if the file wasn't already open then we
 throw an exception. *)
 let update_file
     (files : open_files_state) (document : ClientIdeMessage.document) :
-    open_files_state * Provider_context.entry =
+    open_files_state * Provider_context.entry * Errors.t option ref =
   let path =
     document.ClientIdeMessage.file_path
     |> Path.to_string
     |> Relative_path.create_detect_prefix
   in
   let contents = document.ClientIdeMessage.file_contents in
-  let entry =
+  let (entry, published_errors) =
     match Relative_path.Map.find_opt files.open_files path with
     | None ->
       (* This is a common scenario although I'm not quite sure why *)
-      Provider_context.make_entry
-        ~path
-        ~contents:(Provider_context.Provided_contents contents)
-    | Some entry
+      ( Provider_context.make_entry
+          ~path
+          ~contents:(Provider_context.Provided_contents contents),
+        ref None )
+    | Some (entry, published_errors)
       when Option.equal
              String.equal
              (Some contents)
              (Provider_context.get_file_contents_if_present entry) ->
       (* we can just re-use the existing entry; contents haven't changed *)
-      entry
+      (entry, published_errors)
     | Some _ ->
       (* we'll create a new entry; existing entry caches, if present, will be dropped. *)
-      Provider_context.make_entry
-        ~path
-        ~contents:(Provider_context.Provided_contents contents)
+      ( Provider_context.make_entry
+          ~path
+          ~contents:(Provider_context.Provided_contents contents),
+        ref None )
   in
   let open_files =
-    Relative_path.Map.add files.open_files ~key:path ~data:entry
+    Relative_path.Map.add
+      files.open_files
+      ~key:path
+      ~data:(entry, published_errors)
   in
-  ({ files with open_files }, entry)
+  ({ files with open_files }, entry, published_errors)
 
 (** like [update_file], but for convenience also produces a ctx for
 use in typechecking. Also ensures that hhi files haven't been deleted
 by tmp_cleaner, so that type-checking will succeed. *)
 let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
-    istate * Provider_context.t * Provider_context.entry =
+    istate * Provider_context.t * Provider_context.entry * Errors.t option ref =
   let istate = restore_hhi_root_if_necessary istate in
-  let (ifiles, entry) = update_file istate.ifiles document in
+  let (ifiles, entry, published_errors) = update_file istate.ifiles document in
   let ctx = make_singleton_ctx istate.icommon entry in
-  ({ istate with ifiles }, ctx, entry)
+  ({ istate with ifiles }, ctx, entry, published_errors)
 
 (** Simple helper. It updates the [ifiles] or [dfiles] member of Initialized
 or During_init states, respectively. Will throw if you call it on any other
@@ -890,11 +904,13 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
       None
     | ( Some disk_content,
         Some
-          ({
-             Provider_context.contents =
-               Provider_context.(Contents_from_disk str | Provided_contents str);
-             _;
-           } as entry) )
+          ( ({
+               Provider_context.contents =
+                 Provider_context.(
+                   Contents_from_disk str | Provided_contents str);
+               _;
+             } as entry),
+            _ ) )
       when String.equal disk_content str ->
       (* file on disk was the same as what we currently have in the entry, and
          the entry very likely already has errors computed for it, so as an optimization
@@ -1036,10 +1052,13 @@ let handle_request
     let dstate = open_or_change_file_during_init dstate path file_contents in
     Lwt.return (During_init dstate, Ok Errors.empty)
   | (Initialized istate, Ide_file_opened document) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, published_errors_ref) =
+      update_file_ctx istate document
+    in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
+    published_errors_ref := Some errors;
     Lwt.return (Initialized istate, Ok errors)
   (* IDE File Changed *)
   | (During_init dstate, Ide_file_changed { file_path; file_contents }) ->
@@ -1049,16 +1068,19 @@ let handle_request
     let dstate = open_or_change_file_during_init dstate path file_contents in
     Lwt.return (During_init dstate, Ok Errors.empty)
   | (Initialized istate, Ide_file_changed document) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, published_errors_ref) =
+      update_file_ctx istate document
+    in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
+    published_errors_ref := Some errors;
     Lwt.return (Initialized istate, Ok errors)
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
       Document_symbol document ) ->
-    let (files, entry) = update_file files document in
+    let (files, entry, _) = update_file files document in
     let result =
       FileOutline.outline_entry_no_comments ~popt:common.popt ~entry
     in
@@ -1086,7 +1108,7 @@ let handle_request
   (************************* NORMAL HANDLING AFTER INIT ******)
   (***********************************************************)
   | (Initialized istate, Hover (document, { line; column })) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHover.go_quarantined ~ctx ~entry ~line ~column)
@@ -1095,7 +1117,7 @@ let handle_request
     (* textDocument/rename - localvar only *)
   | (Initialized istate, Rename (document, { line; column }, new_name)) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
@@ -1110,7 +1132,7 @@ let handle_request
   | (Initialized istate, Find_references (document, { line; column })) ->
     let open Result.Monad_infix in
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
@@ -1133,7 +1155,7 @@ let handle_request
         (document, { line; column }, { ClientIdeMessage.is_manually_invoked })
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
@@ -1169,7 +1191,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok result)
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column)
@@ -1177,7 +1199,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok results)
   (* Signature help *)
   | (Initialized istate, Signature_help (document, { line; column })) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
@@ -1185,7 +1207,9 @@ let handle_request
     Lwt.return (Initialized istate, Ok results)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action (document, range)) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, published_errors_ref) =
+      update_file_ctx istate document
+    in
 
     let path = Path.to_string document.file_path in
     (* TODO: should be using RelativePath.t, not string *)
@@ -1193,12 +1217,44 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.go ~ctx ~entry ~path ~range)
     in
-    let errors_TODO = None in
-    (* TODO(ljw): maybe produce errors *)
-    Lwt.return (Initialized istate, Ok (results, errors_TODO))
+
+    (* We'll take this opportunity to make sure we've returned the latest errors.
+       Why only return errors from didOpen,didChange,didClose,codeAction, and not also all
+       the other methods like "hover" which might have recomputed TAST+errors? -- simplicity,
+       mainly -- it's simpler to perform+handle this logic in just a few places rather than
+       everywhere, and also because codeAction is called so frequently (e.g. upon changing
+       tabs) that it's the best opportunity we have. *)
+    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    let errors_opt =
+      match !published_errors_ref with
+      | Some published_errors when phys_equal published_errors errors ->
+        (* If the previous errors we returned are physically equal, that's an indication
+           that the entry's TAST+errors hasn't been recomputed since last we returned errors
+           back to clientLsp, so no need to do anything.
+           And we actively WANT to do nothing in this case, since codeAction is called so frequently --
+           e.g. every time the caret moves -- and we wouldn't want errors to be republished that
+           frequently. *)
+        None
+      | Some _
+      | None ->
+        (* [Some _] -> This case indicates either that we'd previously returned errors back to clientLsp
+           but the TAST+errors has changed since then, e.g. maybe the TAST+errors were invalidated
+           due to a decl change, and some other action like hover recomputed the TAST+errors but
+           didn't return them to clientLsp (because hover doesn't return errors), and so it's
+           fallen to us to send them back. Note: only didOpen,didChange,didClose,codeAction
+           ever return errors back to clientLsp. *)
+        (* [None] -> This case indicates that we don't have a record of previous errors returned back to clientLsp.
+           Might happen because a decl change invalidated TAST+errors and we are the first action since
+           the decl change. Or because for some reason didOpen didn't arrive prior to codeAction. *)
+        published_errors_ref := Some errors;
+        Some errors
+    in
+    Lwt.return (Initialized istate, Ok (results, errors_opt))
   (* Go to definition *)
   | (Initialized istate, Definition (document, { line; column })) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column)
@@ -1206,7 +1262,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok result)
   (* Type Definition *)
   | (Initialized istate, Type_definition (document, { line; column })) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
@@ -1214,7 +1270,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok result)
   (* Type Coverage *)
   | (Initialized istate, Type_coverage document) ->
-    let (istate, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)
@@ -1297,7 +1353,8 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     ~f:
       (Provider_utils.invalidate_local_decl_caches_for_file
          istate.icommon.local_memory);
-  Provider_utils.invalidate_tast_cache_of_entries istate.ifiles.open_files;
+  Relative_path.Map.iter istate.ifiles.open_files ~f:(fun _path (entry, _) ->
+      Provider_utils.invalidate_tast_cache_of_entry entry);
   let changed_files_denominator =
     if Relative_path.Set.is_empty changed_files_to_process then
       0

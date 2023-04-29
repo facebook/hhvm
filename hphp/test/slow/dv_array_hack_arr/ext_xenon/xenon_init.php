@@ -49,7 +49,6 @@ function entrypoint_xenon_init(): void {
   $required_functions = varray[
     'HH\Asio\join',
     'HH\Asio\v',
-    'HH\Asio\result',
 
     'fa0',
     'fa1',
@@ -63,6 +62,7 @@ function entrypoint_xenon_init(): void {
   $optional_functions = varray[
     'include',
     'count',
+    'HH\Asio\result',
     Vector::class.'::__construct',
     AwaitAllWaitHandle::class.'::fromVec',
     RescheduleWaitHandle::class.'::create',

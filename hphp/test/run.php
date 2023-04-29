@@ -2416,8 +2416,7 @@ function should_skip_test_simple(
     }
   }
 
-  if (has_multi_request_mode($options) || $options->repo ||
-      $options->server) {
+  if (has_multi_request_mode($options) || $options->server) {
     if (file_exists($test . ".verify")) {
       return 'skip-verify';
     }
@@ -2454,8 +2453,10 @@ function should_skip_test_simple(
     return 'skip-onlyrepo';
   }
 
-  if ($options->repo && file_exists($test.'.norepo')) {
-    return 'skip-norepo';
+  if ($options->repo) {
+    if (file_exists($test.'.norepo')) return 'skip-norepo';
+    if (file_exists($test.'.verify')) return 'skip-verify';
+    if (find_debug_config($test, 'hphpd.ini')) return 'skip-debugger';
   }
 
   if ($options->only_remote_executable &&

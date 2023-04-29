@@ -1,15 +1,15 @@
 %A
 %w%d: Int 1
-%w%d: FCallFuncD <SkipRepack EnforceMutableReturn> 1 1 "" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "" "" - "" "var_dump"
 %A
 %w%d: Int 2
-%w%d: FCallFuncD <SkipRepack EnforceMutableReturn> 1 1 "" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "" "" - "" "var_dump"
 %A
 %w%d: Int 3
-%w%d: FCallFuncD <SkipRepack EnforceMutableReturn> 1 1 "" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "" "" - "" "var_dump"
 %A
 %w%d: Int 3
-%w%d: FCallFuncD <SkipRepack EnforceMutableReturn> 1 1 "" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "" "" - "" "var_dump"
 %A
 int(1)
 int(2)

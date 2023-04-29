@@ -2,25 +2,42 @@
 
 <<__NEVER_INLINE>>
 function rfunc1<reify Ta, reify Tb>() { echo __FUNCTION__."\n"; }
+<<__NEVER_INLINE>>
 function rfunc2<reify Ta, Tb>() { echo __FUNCTION__."\n"; }
+<<__NEVER_INLINE>>
 function rfunc3<Ta, reify Tb>() { echo __FUNCTION__."\n"; }
+<<__NEVER_INLINE>>
 function rfunc4<Ta, Tb>() { echo __FUNCTION__."\n"; }
+<<__NEVER_INLINE>>
 function rfunc5<Ta, reify Tb, Tc>() { echo __FUNCTION__."\n"; }
+<<__NEVER_INLINE>>
 function rfunc6<reify Ta, Tb, reify Tc>() { echo __FUNCTION__."\n"; }
 
 class T {
+  <<__NEVER_INLINE>>
   function rmeth1<reify Ta, reify Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   function rmeth2<reify Ta, Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   function rmeth3<Ta, reify Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   function rmeth4<Ta, Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   function rmeth5<Ta, reify Tb, Tc>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   function rmeth6<reify Ta, Tb, reify Tc>() { echo __METHOD__."\n"; }
 
+  <<__NEVER_INLINE>>
   static function rsmeth1<reify Ta, reify Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   static function rsmeth2<reify Ta, Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   static function rsmeth3<Ta, reify Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   static function rsmeth4<Ta, Tb>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   static function rsmeth5<Ta, reify Tb, Tc>() { echo __METHOD__."\n"; }
+  <<__NEVER_INLINE>>
   static function rsmeth6<reify Ta, Tb, reify Tc>() { echo __METHOD__."\n"; }
 }
 

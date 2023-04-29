@@ -3,7 +3,7 @@ vec(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
-    int(11)
+    int(12)
     ["function"]=>
     string(3) "bar"
     ["class"]=>
@@ -22,7 +22,7 @@ vec(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
-    int(18)
+    int(19)
     ["function"]=>
     string(3) "foo"
     ["class"]=>
@@ -50,7 +50,7 @@ vec(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
-    int(11)
+    int(12)
     ["function"]=>
     string(3) "bar"
     ["class"]=>
@@ -69,7 +69,7 @@ vec(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
     ["line"]=>
-    int(19)
+    int(20)
     ["function"]=>
     string(3) "foo"
     ["class"]=>

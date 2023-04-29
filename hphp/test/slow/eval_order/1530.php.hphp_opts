@@ -1,2 +1,1 @@
---inputs=test/slow/eval_order/1530.inc
 --inputs=__DIR__/1530.inc

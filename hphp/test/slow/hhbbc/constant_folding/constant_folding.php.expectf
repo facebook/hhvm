@@ -1,15 +1,15 @@
 %A
 %w%d: CnsE "FOO"
-%w%d: FCallFuncD <EnforceMutableReturn> 1 1 "0" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "0" "" - "" "var_dump"
 %A
 %w%d: CnsE "BAR"
-%w%d: FCallFuncD <EnforceMutableReturn> 1 1 "0" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "0" "" - "" "var_dump"
 %A
 %w%d: CnsE "BAZ"
-%w%d: FCallFuncD <EnforceMutableReturn> 1 1 "0" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "0" "" - "" "var_dump"
 %A
 %w%d: CnsE "QUX"
-%w%d: FCallFuncD <EnforceMutableReturn> 1 1 "0" "" - "" "var_dump"
+%w%d: FCallFuncD <%s> 1 1 "0" "" - "" "var_dump"
 %A
 int(1)
 int(2)

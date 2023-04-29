@@ -346,7 +346,6 @@ endif()
 install(
   TARGETS
     rpcmetadata
-    thriftannotation
     thriftmetadata
     thriftfrozen2
     thrifttyperep

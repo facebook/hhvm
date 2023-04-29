@@ -28,3 +28,5 @@ foreach (name cpp hack java python scope thrift)
   target_sources(thriftannotation PRIVATE ${${name}-cpp2-SOURCES})
 endforeach ()
 
+install(TARGETS thriftannotation EXPORT fbthrift-exports
+        DESTINATION ${LIB_INSTALL_DIR})

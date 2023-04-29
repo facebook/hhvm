@@ -4,6 +4,7 @@
 */
 
 use namespace HH\Lib\C;
+use namespace HH\Lib\Str;
 
 const int TIMEOUT_SECONDS = 300;
 
@@ -1440,6 +1441,8 @@ final class Status {
   private static string $workdir = "";
   private static string $sockdir = "";
 
+  public static vec<string> $tests = vec[];
+
   public static int $passed = 0;
   public static int $skipped = 0;
   public static dict<string, int> $skip_reasons = dict[];
@@ -1468,6 +1471,7 @@ final class Status {
     self::$workdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
     self::$sockdir = self::$workdir . '/sock';
     mkdir(self::$sockdir, 0777, false);
+    file_put_contents(self::$workdir . '/work-queue', '0');
   }
 
   public static function getWorkingDir(): string {
@@ -1967,6 +1971,41 @@ final class Status {
     }
     return self::$queue;
   }
+
+  private static function nextTestIndex(): int {
+    $path = self::$workdir . '/work-queue';
+    $file = fopen($path, "r+");
+    try {
+      $would_block = false;
+      if (!flock($file, LOCK_EX, inout $would_block)) {
+        invariant_violation("unable to lock %s", $path);
+      }
+      $str = fread($file, 16);
+      if ($str === false) {
+        invariant_violation("unable to read from %s", $path);
+      }
+      $idx = Str\to_int($str);
+      if ($idx is null) {
+        invariant_violation("read non-integer \"%s\" from %s", $str, $path);
+      }
+      if (fseek($file, 0) < 0) {
+        invariant_violation("unable to seek to beginning of %s", $path);
+      }
+      fprintf($file, "%s", $idx + 1);
+      fflush($file);
+      return $idx;
+    } finally {
+      if ($file is resource) {
+        fclose($file);
+      }
+    }
+  }
+
+  public static function nextTest(): ?string {
+    $idx = self::nextTestIndex();
+    if ($idx >= count(self::$tests)) return null;
+    return self::$tests[$idx];
+  }
 }
 
 function clean_test_files(string $test, Options $options): void {
@@ -1976,10 +2015,15 @@ function clean_test_files(string $test, Options $options): void {
 
 function child_main(
   Options $options,
-  vec<string> $tests,
+  vec<string> $serial_tests,
   string $json_results_file,
 ): int {
-  foreach ($tests as $test) {
+  foreach ($serial_tests as $test) {
+    run_and_log_test($options, $test);
+  }
+  while (true) {
+    $test = Status::nextTest();
+    if ($test is null) break;
     run_and_log_test($options, $test);
   }
   $results = Status::getResults();
@@ -4173,38 +4217,16 @@ function main(vec<string> $argv): int {
   // the serial bucket. However if we only have one thread, we don't split
   // out serial tests.
   $parallel_threads = min(get_num_threads($options), \count($tests)) as int;
-  if ($parallel_threads === 1) {
-    $test_buckets = vec[$tests];
-  } else {
-    if (count($serial_tests) > 0) {
-      // reserve a thread for serial tests
-      $parallel_threads--;
-    }
-
-    $test_buckets = vec[];
-    for ($i = 0; $i < $parallel_threads; $i++) {
-      $test_buckets[] = vec[];
-    }
-
-    $i = 0;
-    foreach ($tests as $test) {
-      if (!in_array($test, $serial_tests)) {
-        $test_buckets[$i][] = $test;
-        $i = ($i + 1) % $parallel_threads;
-      }
-    }
-
-    if (count($serial_tests) > 0) {
-      // The last bucket is serial.
-      $test_buckets[] = $serial_tests;
-    }
+  foreach ($tests as $test) {
+    if (in_array($test, $serial_tests)) continue;
+    Status::$tests[] = $test;
   }
 
   // Remember that the serial tests are also in the tests array too,
   // so they are part of the total count.
   if (!$options->testpilot) {
     print "Running ".count($tests)." tests in ".
-      count($test_buckets)." threads (" . count($serial_tests) .
+      $parallel_threads ." threads (" . count($serial_tests) .
       " in serial)\n";
   }
 
@@ -4249,10 +4271,9 @@ function main(vec<string> $argv): int {
     Status::registerCleanup($options->no_clean);
     $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
     $json_results_files[] = $json_results_file;
-    invariant(count($test_buckets) === 1, "nofork was set erroneously");
-    $return_value = child_main($options, $test_buckets[0], $json_results_file);
+    $return_value = child_main($options, $serial_tests, $json_results_file);
   } else {
-    foreach ($test_buckets as $test_bucket) {
+    for ($i = 0; $i < $parallel_threads; ++$i) {
       $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
       $json_results_files[] = $json_results_file;
       $pid = pcntl_fork();
@@ -4261,8 +4282,8 @@ function main(vec<string> $argv): int {
       } else if ($pid) {
         $children[$pid] = $pid;
       } else {
-        invariant($test_bucket is vec<_>, "%s", __METHOD__);
-        exit(child_main($options, $test_bucket, $json_results_file));
+        $serial = ($i === 0) ? $serial_tests : vec[];
+        exit(child_main($options, $serial, $json_results_file));
       }
     }
 
@@ -4400,15 +4421,20 @@ function main(vec<string> $argv): int {
     print_failure($argv, $results, $options);
   }
 
+  $overall_time = Status::getOverallEndTime() - Status::getOverallStartTime();
+  $serial_time = Status::addTestTimesSerial($results);
+
+  $per_test = (count($tests) > 0) ? ($overall_time / count($tests)) : 0.0;
+  $serial_per_test = (count($tests) > 0) ? ($serial_time / count($tests)) : 0.0;
+
   Status::sayColor("\nTotal time for all executed tests as run: ",
                    Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::getOverallEndTime() -
-                   Status::getOverallStartTime()));
+                   sprintf("%.2fs (%.2fs/test)\n",
+                           $overall_time, $per_test));
   Status::sayColor("Total time for all executed tests if run serially: ",
                    Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::addTestTimesSerial($results)));
+                   sprintf("%.2fs (%.2fs/test)\n",
+                           $serial_time, $serial_per_test));
 
   return $return_value;
 }

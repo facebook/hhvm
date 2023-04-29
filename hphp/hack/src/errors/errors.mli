@@ -44,6 +44,13 @@ module ErrorSet : Caml.Set.S with type elt := error
 
 module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
 
+(** [t] is an efficient for use inside hh_server or other places that compute errors,
+which also supports incremental updates based on file/phase.
+But it should not be transferred to other processes such as [hh_client] since they
+for instance won't know the Hhi path that was used, and hence can't print errors.
+They should use [finalized_error list] instead. *)
+val sort_and_finalize : t -> finalized_error list
+
 val phases_up_to_excl : phase -> phase list
 
 module Parsing : Error_category.S
@@ -219,6 +226,8 @@ val as_telemetry : t -> Telemetry.t
 val choose_code_opt : t -> int option
 
 val compare : error -> error -> int
+
+val compare_finalized : finalized_error -> finalized_error -> int
 
 val sort : error list -> error list
 

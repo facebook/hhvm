@@ -124,7 +124,7 @@ val try_delete : unit -> unit
     Errors.error list Relative_path.map along with timestamp,
     followed by an "end sentinel" if the typecheck has finished or been interrupted.
     Let's call each of these maps an error report. Each encompasses
-    several files, and for each file it has a list of errors. Currently we make
+    several files, and for each file it has a sorted list of errors. Currently we make
     one report for all "duplicate name" errors across the project if any, followed by
     one report per batch that had errors. This means that a file might be mentioned
     twice, once in a "duplicate name" report, once later. This will change in future

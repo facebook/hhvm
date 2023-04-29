@@ -107,7 +107,13 @@ type server_conn = {
 }
 
 type errors_from =
-  | Errors_from_clientIdeDaemon
+  | Errors_from_clientIdeDaemon of {
+      errors: Errors.finalized_error list;
+      validated: bool;
+    }
+      (** TEMPORARY, FOR VALIDATION ONLY. The validated flag says whether we've validated that
+      errors-file contained the exact same errors as this list. Once we've done validation,
+      we'll need neither. *)
   | Errors_from_errors_file
 [@@deriving show { with_path = false }]
 
@@ -3715,7 +3721,10 @@ let do_codeAction_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params) :
-    (CodeAction.command_or_action list * Path.t * Errors.t option) Lwt.t =
+    (CodeAction.command_or_action list
+    * Path.t
+    * Errors.finalized_error list option)
+    Lwt.t =
   let file_path =
     Path.make
       (lsp_uri_to_path
@@ -4017,10 +4026,214 @@ let do_server_diagnostics
     uris_with_server_diagnostics
     errors_per_file
 
+(** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399 *)
+let validate_error_TEMPORARY
+    (uri : documentUri)
+    (lenv : Lost_env.t)
+    (actual : float * errors_from)
+    ~(expected : Errors.finalized_error list)
+    ~(start_time : float) : (float * errors_from) * string list =
+  (* helper to diff two sorted lists: "list_diff ([],[]) xs ys" will return a pair
+     (only_xs, only_ys) with those elements that are only in xs, and those only in ys. *)
+  let rec list_diff (only_xs, only_ys) xs ys ~compare =
+    match (xs, ys) with
+    | ([], ys) -> (only_xs, ys @ only_ys)
+    | (xs, []) -> (xs @ only_xs, only_ys)
+    | (x :: xs, y :: ys) ->
+      let c = compare x y in
+      if c < 0 then
+        list_diff (x :: only_xs, ys) xs (y :: ys) ~compare
+      else if c > 0 then
+        list_diff (only_xs, y :: only_ys) (x :: xs) ys ~compare
+      else
+        list_diff (only_xs, only_ys) xs ys ~compare
+  in
+
+  (* helper to accumulate log output into [diff] *)
+  let format_diff (disposition : string) (errors : Errors.finalized_error list)
+      : string list =
+    List.map errors ~f:(fun { User_error.claim = (pos, msg); code; _ } ->
+        let (line, start, end_) = Pos.info_pos pos in
+        Printf.sprintf
+          "%s: [%d] %s(%d:%d-%d) %s"
+          disposition
+          code
+          (Pos.filename pos)
+          line
+          start
+          end_
+          msg)
+  in
+
+  match actual with
+  | (_timestamp, Errors_from_errors_file) ->
+    (* What was most recently published for [uri] came from a previous errors-file *)
+    (actual, [])
+  | (timestamp, Errors_from_clientIdeDaemon _)
+    when Float.(timestamp > start_time) ->
+    (* What was most recently published for [uri] came from clientIdeDaemon, but
+       came from something (e.g. a didChange) that happened after the start of the typecheck,
+       so it might reflect something that hh_server wasn't aware of, so we can't make a useful check. *)
+    (actual, [])
+  | (_timestamp, Errors_from_clientIdeDaemon _)
+    when UriSet.mem uri lenv.Lost_env.uris_with_unsaved_changes ->
+    (* What was most recently published for [uri] came from clientIdeDaemon, but it
+       reflects unsaved changes, and hence reflects something that hh_server isn't aware of,
+       so we can't make a useful check *)
+    (actual, [])
+  | (_timestamp, Errors_from_clientIdeDaemon _)
+    when Option.is_none (UriMap.find_opt uri lenv.Lost_env.editor_open_files) ->
+    (* What was most recently published for [uri] came from clientIdeDaemon before the start of the
+       typecheck, but it was closed prior to the start of the typecheck, so we don't know if hh_server
+       is looking at file-changes to it after it had been closed and we can't make a useful check. *)
+    (actual, [])
+  | (_timestamp, Errors_from_clientIdeDaemon { validated = true; _ }) ->
+    (* Here is an open file whose errors were published from clientIdeDaemon prior to the start of not only this
+       current typecheck, but also prior to the start of the *previous* typecheck. We need no further validation. *)
+    (actual, [])
+  | (timestamp, Errors_from_clientIdeDaemon { errors; _ }) ->
+    let (absent_from_clientIdeDaemon, extra_in_clientIdeDaemon) =
+      list_diff ([], []) expected errors ~compare:Errors.compare_finalized
+    in
+    let diff =
+      format_diff "absent_from_clientIdeDaemon" absent_from_clientIdeDaemon
+      @ format_diff "extra_in_clientIdeDaemon" extra_in_clientIdeDaemon
+    in
+    ((timestamp, Errors_from_clientIdeDaemon { errors; validated = true }), diff)
+
+(** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399
+Validates that errors reported by clientIdeDaemon are same as what was reported by hh_server.
+
+This function is called by [handle_errors_file_item] when it receives a new report
+of errors from the errors-file. It validates that, if there are any open unmodified files
+which had last received errors from clientIdeDaemon prior the start of the typecheck, then
+are those clientIdeDaemon errors identical to the ones reported in the errors file?
+It also has the side effect of storing, in [lenv.uris_with_standalone_diagnostics],
+that these particular clientIdeDaemon have been validated against the errors-file;
+this fact is used in [validate_error_absence].
+
+Why do we only look at unmodified files whose last received clientIdeDaemon errors were from
+prior to the start of the typecheck? -- because for sure clientIdeDaemon and hh_server
+both saw the same source text for them. Why can't we look at closed files? -- because
+they might have been modified on disk after they were closed. *)
+let validate_error_item_TEMPORARY
+    (lenv : Lost_env.t)
+    (ide_service : ClientIdeService.t ref option)
+    (expected : Errors.finalized_error list Relative_path.Map.t)
+    ~(start_time : float) : Lost_env.t =
+  (* helper to do logging *)
+  let log_diff uri reason ~expected diff =
+    HackEventLogger.live_squiggle_diff
+      ~uri:(string_of_uri uri)
+      ~reason
+      ~expected_error_count:(List.length expected)
+      diff;
+    if not (List.is_empty diff) then
+      Hh_logger.log
+        "LIVE_SQUIGGLE_DIFF_ERROR[item] %s\n%s"
+        (string_of_uri uri)
+        (String.concat ~sep:"\n" diff)
+  in
+
+  let lenv =
+    Relative_path.Map.fold expected ~init:lenv ~f:(fun path expected lenv ->
+        let path = Relative_path.to_absolute path in
+        let uri = path_to_lsp_uri path ~default_path:path in
+        let actual_opt =
+          UriMap.find_opt uri lenv.Lost_env.uris_with_standalone_diagnostics
+        in
+        let status =
+          ClientIdeService.get_status !(Option.value_exn ide_service)
+        in
+        (* We use [Option.value_exn] because this function [validate_error_item_TEMPORARY]
+           is only ever called under ide_standalone=true, which implies ide_serverless=true,
+           so hence there must be an ide_service. *)
+        match (actual_opt, status) with
+        | (Some actual, _) ->
+          (* If we got a report of errors in [uri] from the errors-file, and we've
+             previously published diagnostics for [uri], we'll validate that what
+             we previously published is correct... *)
+          let (actual, diff) =
+            validate_error_TEMPORARY uri lenv actual ~expected ~start_time
+          in
+          log_diff uri "item-reported" ~expected diff;
+          let uris_with_standalone_diagnostics =
+            UriMap.add uri actual lenv.Lost_env.uris_with_standalone_diagnostics
+          in
+          { lenv with Lost_env.uris_with_standalone_diagnostics }
+        | (None, ClientIdeService.Status.Ready) ->
+          (* We got a report of errors in [uri] from the errors-file, but we don't
+             currently have any diagnostics published [uri]. I wonder why not? ...
+             The following function only validates at files which are open and unmodified
+             in the editor. If an open and unmodified file has no published diagnostics,
+             we don't know when it claimed to have no diagnostics, whether that was
+             before the typecheck started (in which case errors-file should agree that it has
+             no diagnostics), or following a didSave after the typecheck started (in which case
+             we can't tell). Let's pretend, for sake of "good-enough" telemetry, that it
+             was before the typecheck started and see whether errors-file agrees. *)
+          let pretend_actual =
+            ( start_time,
+              Errors_from_clientIdeDaemon { validated = false; errors = [] } )
+          in
+          let (_pretend_actual, diff) =
+            validate_error_TEMPORARY
+              uri
+              lenv
+              pretend_actual
+              ~expected
+              ~start_time
+          in
+          log_diff uri "item-unreported" ~expected diff;
+          lenv
+        | ( None,
+            ClientIdeService.Status.(
+              Initializing | Processing_files _ | Rpc _ | Stopped _) ) ->
+          (* We got a report of errors in [uri] from the errors-file, but we don't
+             currently have any diagnostics published for [uri] because clientIdeDaemon
+             isn't even ready yet. Nothing worth checking. *)
+          lenv)
+  in
+  lenv
+
+(** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399
+Validates that clientIdeDaemon didn't report additional errors beyond what was reported
+by hh_server.
+
+This function is called when [handle_errors_file_item] is told that the errors-file is
+completed. It validates that, if there are any unmodified files which had last received
+errors from clientIdeDaemon prior to the start of the typecheck, then all of them
+have [Errors_from.validated] flag true, meaning that they have been checked against
+the errors-file by [validate_error_presence]. If a file hasn't, then it's a false
+positive reported by clientIdeStandalone. *)
+let validate_error_complete_TEMPORARY (lenv : Lost_env.t) ~(start_time : float)
+    : Lost_env.t =
+  let uris_with_standalone_diagnostics =
+    UriMap.mapi
+      (fun uri actual ->
+        let (actual, diff) =
+          validate_error_TEMPORARY uri lenv actual ~expected:[] ~start_time
+        in
+        HackEventLogger.live_squiggle_diff
+          ~uri:(string_of_uri uri)
+          ~reason:"complete"
+          ~expected_error_count:0
+          diff;
+        if not (List.is_empty diff) then
+          Hh_logger.log
+            "LIVE_SQUIGGLE_DIFF_ERROR[complete] %s\n%s"
+            (string_of_uri uri)
+            (String.concat ~sep:"\n" diff);
+        actual)
+      lenv.Lost_env.uris_with_standalone_diagnostics
+  in
+  { lenv with Lost_env.uris_with_standalone_diagnostics }
+
 (** Used to publish clientIdeDaemon errors in [ide_standalone] mode. *)
 let publish_errors_if_standalone
-    (env : env) (state : state) (file_path : Path.t) (errors : Errors.t) : state
-    =
+    (env : env)
+    (state : state)
+    (file_path : Path.t)
+    (errors : Errors.finalized_error list) : state =
   match (env.serverless_ide, state) with
   | ((Ide_hh_server | Ide_serverless), _) -> state
   | (Ide_standalone, Pre_init) ->
@@ -4031,24 +4244,18 @@ let publish_errors_if_standalone
   | (Ide_standalone, Lost_server lenv) ->
     let file_path = Path.to_string file_path in
     let uri = path_to_lsp_uri file_path ~default_path:file_path in
-    let errors_by_file =
-      errors
-      |> Errors.drop_fixmed_errors_in_files
-      |> Errors.as_map
-      |> Relative_path.Map.elements
-    in
     let uris = lenv.Lost_env.uris_with_standalone_diagnostics in
-    let (uris_with_standalone_diagnostics, errors_in_file) =
-      match errors_by_file with
-      | [] -> (UriMap.remove uri uris, [])
-      | [(file, e)] when String.equal (Relative_path.to_absolute file) file_path
-        ->
-        ( UriMap.add uri (Unix.gettimeofday (), Errors_from_clientIdeDaemon) uris,
-          List.map ~f:User_error.to_absolute e )
-      | _ ->
-        failwith "why we got errors for anything other than the expected file?"
+    let uris_with_standalone_diagnostics =
+      if List.is_empty errors then
+        UriMap.remove uri uris
+      else
+        UriMap.add
+          uri
+          ( Unix.gettimeofday (),
+            Errors_from_clientIdeDaemon { errors; validated = false } )
+          uris
     in
-    let params = hack_errors_to_lsp_diagnostic file_path errors_in_file in
+    let params = hack_errors_to_lsp_diagnostic file_path errors in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
     let new_state =
@@ -4062,7 +4269,9 @@ Principles: (1) don't touch open files, since they are governed solely by client
 (2) only update an existing diagnostic if the scrape's start_time is newer than it,
 since these will have come recently from clientIdeDaemon, to which we grant primacy. *)
 let handle_errors_file_item
-    ~(state : state ref) (item : ServerProgress.ErrorsRead.read_result option) :
+    ~(state : state ref)
+    ~(ide_service : ClientIdeService.t ref option)
+    (item : ServerProgress.ErrorsRead.read_result option) :
     result_telemetry option Lwt.t =
   (* a small helper, to send the actual lsp message *)
   let publish params =
@@ -4127,6 +4336,7 @@ let handle_errors_file_item
            It will all be fixed in the next typecheck to complete. *)
         ()
       | ServerProgress.Complete _telemetry ->
+        let lenv = validate_error_complete_TEMPORARY lenv ~start_time in
         (* If the typecheck completed, then we can erase all diagnostics (from closed-files)
            that were reported prior to the start of the typecheck - regardless of whether that
            diagnostic had most recently been reported from errors-file or from clientIdeDaemon.
@@ -4134,12 +4344,12 @@ let handle_errors_file_item
            and our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
         let uris_with_standalone_diagnostics =
           lenv.Lost_env.uris_with_standalone_diagnostics
-          |> UriMap.filter_map (fun uri (existing_time, powered_by) ->
+          |> UriMap.filter_map (fun uri (existing_time, errors_from) ->
                  if
                    UriMap.mem uri lenv.Lost_env.editor_open_files
                    || Float.(existing_time > start_time)
                  then begin
-                   Some (existing_time, powered_by)
+                   Some (existing_time, errors_from)
                  end else begin
                    publish (empty_diagnostics uri);
                    None
@@ -4151,6 +4361,9 @@ let handle_errors_file_item
     end;
     Lwt.return_none
   | Some (Ok (errors, timestamp)) ->
+    let lenv =
+      validate_error_item_TEMPORARY lenv ide_service errors ~start_time
+    in
     (* If the php file is closed and has no diagnostics newer than start_time, replace or add.
 
        Why only for closed files? well, if the file is currently open in the IDE, then
@@ -4185,7 +4398,7 @@ let handle_errors_file_item
             acc
           else
             match UriMap.find_opt uri acc with
-            | Some (existing_timestamp, _powered_by)
+            | Some (existing_timestamp, _errors_from)
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
@@ -6150,7 +6363,8 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           handle_client_ide_notification ~notification
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
-        | Errors_file result -> handle_errors_file_item ~state result
+        | Errors_file result ->
+          handle_errors_file_item ~state ~ide_service result
         | Shell_out_hh_feature_complete (result, shellable_type) ->
           handle_shell_out_hh_feature result shellable_type
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time

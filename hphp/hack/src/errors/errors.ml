@@ -352,7 +352,13 @@ let phase_of_string (value : string) : phase option =
   | "typing" -> Some Typing
   | _ -> None
 
-let compare_internal (x : error) (y : error) ~compare_code : int =
+let compare_internal
+    (x : ('a, 'b) User_error.t)
+    (y : ('a, 'b) User_error.t)
+    ~compare_code
+    ~compare_claim_fn
+    ~compare_claim
+    ~compare_reason : int =
   let User_error.
         {
           code = x_code;
@@ -375,9 +381,7 @@ let compare_internal (x : error) (y : error) ~compare_code : int =
   in
   (* The primary sort order is by file *)
   let comparison =
-    Relative_path.compare
-      (fst x_claim |> Pos.filename)
-      (fst y_claim |> Pos.filename)
+    compare_claim_fn (fst x_claim |> Pos.filename) (fst y_claim |> Pos.filename)
   in
   (* Then within each file, sort by phase *)
   let comparison =
@@ -389,7 +393,7 @@ let compare_internal (x : error) (y : error) ~compare_code : int =
   (* If the error codes are the same, sort by position *)
   let comparison =
     if comparison = 0 then
-      Pos.compare (fst x_claim) (fst y_claim)
+      compare_claim (fst x_claim) (fst y_claim)
     else
       comparison
   in
@@ -404,22 +408,56 @@ let compare_internal (x : error) (y : error) ~compare_code : int =
      the reason messages (which indicate the reason why Hack believes
      there is an error reported in the claim message) *)
   if comparison = 0 then
-    (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
+    (List.compare (Message.compare compare_reason)) x_messages y_messages
   else
     comparison
 
 let compare (x : error) (y : error) : int =
-  compare_internal x y ~compare_code:Int.compare
+  compare_internal
+    x
+    y
+    ~compare_code:Int.compare
+    ~compare_claim_fn:Relative_path.compare
+    ~compare_claim:Pos.compare
+    ~compare_reason:Pos_or_decl.compare
+
+let compare_finalized (x : finalized_error) (y : finalized_error) : int =
+  compare_internal
+    x
+    y
+    ~compare_code:Int.compare
+    ~compare_claim_fn:String.compare
+    ~compare_claim:Pos.compare_absolute
+    ~compare_reason:Pos.compare_absolute
 
 let sort (err : error list) : error list =
   let compare_exact_code = Int.compare in
   let compare_phase x_code y_code =
     Int.compare (x_code / 1000) (y_code / 1000)
   in
+  let compare_claim_fn = Relative_path.compare in
+  let compare_claim = Pos.compare in
+  let compare_reason = Pos_or_decl.compare in
   (* Sort using the exact code to ensure sort stability, but use the phase to deduplicate *)
-  let equal x y = compare_internal ~compare_code:compare_phase x y = 0 in
+  let equal x y =
+    compare_internal
+      ~compare_code:compare_phase
+      ~compare_claim_fn
+      ~compare_claim
+      ~compare_reason
+      x
+      y
+    = 0
+  in
   List.sort
-    ~compare:(fun x y -> compare_internal ~compare_code:compare_exact_code x y)
+    ~compare:(fun x y ->
+      compare_internal
+        ~compare_code:compare_exact_code
+        ~compare_claim_fn
+        ~compare_claim
+        ~compare_reason
+        x
+        y)
     err
   |> List.remove_consecutive_duplicates
        ~equal:(fun x y -> equal x y)
@@ -427,6 +465,9 @@ let sort (err : error list) : error list =
 
 let get_sorted_error_list ?(drop_fixmed = true) err =
   sort (files_t_to_list (drop_fixmes_if err drop_fixmed))
+
+let sort_and_finalize (errors : t) : finalized_error list =
+  errors |> get_sorted_error_list |> List.map ~f:User_error.to_absolute
 
 (* Getters and setter for passed-in map, based on current context *)
 let get_current_file_t file_t_map =

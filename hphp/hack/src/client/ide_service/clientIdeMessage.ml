@@ -59,9 +59,9 @@ type _ t =
       it has responded. *)
   | Shutdown : unit -> unit t
   | Disk_files_changed : changed_file list -> unit t
-  | Ide_file_opened : document -> Errors.t t
-  | Ide_file_changed : document -> Errors.t t
-  | Ide_file_closed : Path.t -> Errors.t t
+  | Ide_file_opened : document -> Errors.finalized_error list t
+  | Ide_file_changed : document -> Errors.finalized_error list t
+  | Ide_file_closed : Path.t -> Errors.finalized_error list t
       (** This returns diagnostics for the file as it is on disk.
       This is to serve the following scenario: (1) file was open with
       modified contents and squiggles appropriate to the modified contents,
@@ -124,7 +124,9 @@ type _ t =
       (** Handles "textDocument/signatureHelp" LSP messages *)
   | Code_action :
       document * Ide_api_types.range
-      -> (Lsp.CodeAction.command_or_action list * Errors.t option) t
+      -> (Lsp.CodeAction.command_or_action list
+         * Errors.finalized_error list option)
+         t
       (** Handles "textDocument/codeActions" LSP messages.
 
       Also, we take this as a handy opportunity to send updated [Errors.t]

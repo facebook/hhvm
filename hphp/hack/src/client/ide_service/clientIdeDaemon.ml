@@ -889,7 +889,8 @@ let update_state_files (state : state) (files : open_files_state) : state =
 
 (** Computes the Errors.t for what's on disk at a given path.
 We provide [istate] just in case we can benefit from a cached answer. *)
-let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
+let get_errors_for_path (istate : istate) (path : Relative_path.t) :
+    Errors.finalized_error list =
   let disk_content_opt =
     Sys_utils.cat_or_failed (Relative_path.to_absolute path)
   in
@@ -927,7 +928,7 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
   match entry_opt with
   | None ->
     (* file couldn't be read off disk (maybe absent); therefore, by definition, no errors *)
-    Errors.empty
+    []
   | Some entry ->
     (* Here we'll get either cached errors from the cached entry, or will recompute errors
        from the partially cached entry, or will compute errors from the file on disk. *)
@@ -935,7 +936,7 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
-    errors
+    Errors.sort_and_finalize errors
 
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
@@ -1036,7 +1037,7 @@ let handle_request
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let files = close_file files path in
-    Lwt.return (update_state_files state files, Ok Errors.empty)
+    Lwt.return (update_state_files state files, Ok [])
   | (Initialized istate, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
@@ -1050,7 +1051,7 @@ let handle_request
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let dstate = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (During_init dstate, Ok Errors.empty)
+    Lwt.return (During_init dstate, Ok [])
   | (Initialized istate, Ide_file_opened document) ->
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
@@ -1059,14 +1060,14 @@ let handle_request
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
     published_errors_ref := Some errors;
-    Lwt.return (Initialized istate, Ok errors)
+    Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* IDE File Changed *)
   | (During_init dstate, Ide_file_changed { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let dstate = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (During_init dstate, Ok Errors.empty)
+    Lwt.return (During_init dstate, Ok [])
   | (Initialized istate, Ide_file_changed document) ->
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
@@ -1075,7 +1076,7 @@ let handle_request
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
     published_errors_ref := Some errors;
-    Lwt.return (Initialized istate, Ok errors)
+    Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
@@ -1249,7 +1250,7 @@ let handle_request
            Might happen because a decl change invalidated TAST+errors and we are the first action since
            the decl change. Or because for some reason didOpen didn't arrive prior to codeAction. *)
         published_errors_ref := Some errors;
-        Some errors
+        Some (Errors.sort_and_finalize errors)
     in
     Lwt.return (Initialized istate, Ok (results, errors_opt))
   (* Go to definition *)

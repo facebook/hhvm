@@ -7,9 +7,6 @@
  *
  *)
 
-(** care: the integers provided by deriving-enum should not be exposed
-to callers, and are not the same as the 'exit-code' function.
-We use deriving-enum solely to power exit_code_to_string. *)
 type t =
   | No_error
   | Checkpoint_error
@@ -87,9 +84,14 @@ type t =
   | Failed_to_load_should_abort
   | Server_non_opt_build_mode
   | Not_restarting_server_with_precomputed_saved_state
-[@@deriving show, enum]
+[@@deriving show]
 
-let (_ignored : t -> int) = to_enum
+and finale_data = {
+  exit_status: t;
+  msg: string option;
+  stack: Utils.callstack;
+  telemetry: Telemetry.t option;
+}
 
 exception Exit_with of t
 
@@ -186,23 +188,56 @@ let exit_code = function
   | Not_restarting_server_with_precomputed_saved_state -> 223
 
 let exit_code_to_string (code : int) : string =
-  let rec f acc candidate_i =
-    match of_enum candidate_i with
-    | Some candidate when exit_code candidate = code ->
-      f (show candidate :: acc) (candidate_i + 1)
-    | _ when candidate_i > max ->
-      (* If an ocaml binary exits with an uncaught exception, it produces exit code 2.
-         We'll reconstruct that fact here. However our binaries should avoid exiting
-         in this manner, since exit code 2 also means "hh_check completed successfully"! *)
-      if code = 2 then
-        "Uncaught_exception_ocaml" :: acc
-      else
-        acc
-    | _ -> f acc (candidate_i + 1)
+  (* We will return the string "See Exit_status.ml for meaning of this code".
+     But, let's hard-code a few of the more common ones just as a convenience
+     to the reader. *)
+  let common_codes =
+    [
+      Interrupted;
+      Client_broken_pipe;
+      No_error;
+      Kill_error;
+      Type_error;
+      Uncaught_exception;
+      Hhconfig_changed;
+      Package_config_changed;
+      Typecheck_restarted;
+      Typecheck_abandoned;
+      No_server_running_should_retry;
+      Server_hung_up_should_retry;
+      Out_of_time;
+      Out_of_retries;
+      Build_id_mismatch;
+      Monitor_connection_failure;
+      Failed_to_load_should_retry;
+      Failed_to_load_should_abort;
+      Server_hung_up_should_abort;
+      Watchman_failed;
+      Server_non_opt_build_mode;
+    ]
   in
-  match f [] min with
-  | [] -> "?"
-  | candidates -> String.concat "/" candidates
+  let matches =
+    List.filter_map
+      (fun exit_status ->
+        if exit_code exit_status = code then
+          Some (show exit_status)
+        else
+          None)
+      common_codes
+  in
+  (* If an ocaml binary exits with an uncaught exception, it produces exit code 2.
+      We'll reconstruct that fact here. However our binaries should avoid exiting
+      in this manner, since exit code 2 also means "hh_check completed successfully"! *)
+  let matches =
+    if code = 2 then
+      "Uncaught_exception_ocaml" :: matches
+    else
+      matches
+  in
+  match matches with
+  | [] ->
+    Printf.sprintf "(see Exit_status.exit_code for meaning of code %d)" code
+  | _ -> String.concat "/" matches
 
 let unpack = function
   | Unix.WEXITED n -> ("exit", n)
@@ -221,3 +256,31 @@ let () =
       | Exit_with exit_status ->
         Some (Printf.sprintf "Exit_status.Exit_with(%s)" (show exit_status))
       | _ -> None)
+
+let get_finale_data (server_finale_file : string) : finale_data option =
+  try
+    let ic = Stdlib.open_in_bin server_finale_file in
+    let contents : finale_data = Marshal.from_channel ic in
+    Stdlib.close_in ic;
+    Some contents
+  with
+  | _ -> None
+
+(* I can't figure out how to suppress [@@deriving show] for finale_data.
+   So here I'll suppressed the "unused show_finale_data" warning in preparation
+   for defining my own version of the function. *)
+let _ = show_finale_data
+
+let show_finale_data (data : finale_data) : string =
+  let telemetry =
+    match data.telemetry with
+    | None -> ""
+    | Some telemetry -> Telemetry.to_string telemetry
+  in
+  let (Utils.Callstack stack) = data.stack in
+  Printf.sprintf
+    "Exit status [%s] %s\n%s\n%s"
+    (show data.exit_status)
+    (Option.value data.msg ~default:"")
+    telemetry
+    stack

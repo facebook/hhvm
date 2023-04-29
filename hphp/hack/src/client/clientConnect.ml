@@ -150,7 +150,7 @@ let rec wait_for_server_message
     | (End_of_file | Sys_error _ | M.Monitor_failed_to_handoff) as exn ->
       let e = Exception.wrap exn in
       let finale_data =
-        Exit.get_finale_data
+        Exit_status.get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
       in
       let client_exn = Exception.get_ctor_string e in
@@ -164,7 +164,7 @@ let rec wait_for_server_message
         client_exn
         (Option.value_map
            finale_data
-           ~f:Exit.show_finale_data
+           ~f:Exit_status.show_finale_data
            ~default:"[none]")
         client_stack;
       (* stderr *)
@@ -176,8 +176,8 @@ let rec wait_for_server_message
         | (_, Some finale_data) ->
           Printf.sprintf
             "Hack server disconnected suddenly [%s]\n%s"
-            (Exit_status.show finale_data.Exit.exit_status)
-            (Option.value ~default:"" finale_data.Exit.msg)
+            (Exit_status.show finale_data.Exit_status.exit_status)
+            (Option.value ~default:"" finale_data.Exit_status.msg)
       in
       Printf.eprintf "%s\n" msg;
       (* spinner *)
@@ -186,7 +186,7 @@ let rec wait_for_server_message
          In most cases we report that find_hh.sh should simply retry the failed command.
          There are only two cases where we say it shouldn't. *)
       let underlying_exit_status =
-        Option.map finale_data ~f:(fun d -> d.Exit.exit_status)
+        Option.map finale_data ~f:(fun d -> d.Exit_status.exit_status)
       in
       let external_exit_status =
         match underlying_exit_status with
@@ -205,8 +205,8 @@ let rec wait_for_server_message
         ~server_stack:
           (Option.map
              finale_data
-             ~f:(fun { Exit.stack = Utils.Callstack stack; _ } -> stack))
-        ~server_msg:(Option.bind finale_data ~f:(fun d -> d.Exit.msg));
+             ~f:(fun { Exit_status.stack = Utils.Callstack stack; _ } -> stack))
+        ~server_msg:(Option.bind finale_data ~f:(fun d -> d.Exit_status.msg));
       raise (Exit_status.Exit_with external_exit_status)
 
 let wait_for_server_hello

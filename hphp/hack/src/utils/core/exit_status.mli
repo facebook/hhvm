@@ -7,12 +7,6 @@
  *
  *)
 
-(* This `.mli` file was generated automatically. It may include extra
-   definitions that should not actually be exposed to the caller. If you notice
-   that this interface file is a poor interface, please take a few minutes to
-   clean it up manually, and then delete this comment once the interface is in
-   shape. *)
-
 type t =
   | No_error
   | Checkpoint_error
@@ -90,6 +84,22 @@ type t =
   | Not_restarting_server_with_precomputed_saved_state
 [@@deriving show]
 
+and finale_data = {
+  exit_status: t;
+      (** exit_status is shown to the user in CLI and LSP,
+      just so they have an error code they can quote back at
+      developers. It's also used by hh_client to decide, on the
+      basis of that hh_server exit_status, whether to auto-restart
+      hh_server or not. And it appears in logs and telemetry. *)
+  msg: string option;
+      (** msg is a human-readable message for the end-user to explain why
+      hh_server stopped. It appears in the CLI, and in LSP in a
+      hover tooltip. It also is copied into the logs. *)
+  stack: Utils.callstack;
+  telemetry: Telemetry.t option;
+      (** telemetry is unstructured data, for logging, not shown to users *)
+}
+
 exception Exit_with of t
 
 val exit_code : t -> int
@@ -97,3 +107,8 @@ val exit_code : t -> int
 val exit_code_to_string : int -> string
 
 val unpack : Unix.process_status -> string * int
+
+(** If the server dies through a controlled exit, it leaves behind a "finale file" <pid>.fin
+with json-formatted data describing the detailed nature of the exit including callstack.
+This method retrieves that file, if it exists. *)
+val get_finale_data : string -> finale_data option

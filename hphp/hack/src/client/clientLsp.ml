@@ -6150,13 +6150,13 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           match !state with
           | Main_loop { Main_env.conn; _ }
           | In_init { In_init_env.conn; _ } ->
-            Exit.get_finale_data
+            Exit_status.get_finale_data
               conn.server_specific_files.ServerCommandTypes.server_finale_file
           | _ -> None
         in
         let server_finale_stack =
           match server_finale_data with
-          | Some { Exit.stack = Utils.Callstack s; _ } ->
+          | Some { Exit_status.stack = Utils.Callstack s; _ } ->
             s |> Exception.clean_stack
           | _ -> ""
         in
@@ -6183,8 +6183,8 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         (* down and giving them a button to restart.                            *)
         let explanation =
           match server_finale_data with
-          | Some { Exit.msg = Some msg; _ } -> msg
-          | Some { Exit.msg = None; exit_status; _ } ->
+          | Some { Exit_status.msg = Some msg; _ } -> msg
+          | Some { Exit_status.msg = None; exit_status; _ } ->
             Printf.sprintf
               "hh_server: stopped [%s]"
               (Exit_status.show exit_status)
@@ -6203,8 +6203,11 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         let trigger_on_lock_file =
           match server_finale_data with
           | Some
-              { Exit.exit_status = Exit_status.Failed_to_load_should_abort; _ }
-            ->
+              {
+                Exit_status.exit_status =
+                  Exit_status.Failed_to_load_should_abort;
+                _;
+              } ->
             false
           | _ -> true
         in

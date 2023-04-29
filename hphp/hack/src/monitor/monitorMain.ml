@@ -674,19 +674,18 @@ let update_status_ (env : env msg_update) monitor_config :
         in
         let (telemetry, exit_status) =
           match
-            Exit.get_finale_data
+            Exit_status.get_finale_data
               process.server_specific_files
                 .ServerCommandTypes.server_finale_file
           with
           | None -> (telemetry, None)
           | Some
-              Exit.
-                {
-                  exit_status;
-                  msg;
-                  stack = Utils.Callstack stack;
-                  telemetry = finale_telemetry;
-                } ->
+              {
+                Exit_status.exit_status;
+                msg;
+                stack = Utils.Callstack stack;
+                telemetry = finale_telemetry;
+              } ->
             let telemetry =
               telemetry
               |> Telemetry.string_

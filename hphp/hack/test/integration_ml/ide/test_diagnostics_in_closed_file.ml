@@ -73,7 +73,7 @@ let test () =
   Test.assert_no_errors env;
   Test.assert_no_diagnostics loop_output;
 
-  (* Open both files and make an edit to foo that reslts in errors in bar *)
+  (* Open both files and make an edit to foo that results in errors in bar *)
   let env = Test.open_file env foo_name in
   let env = Test.open_file env bar_name in
   let (env, _) = Test.edit_file env foo_name foo_returns_string in
@@ -85,7 +85,7 @@ let test () =
   let (env, _) = Test.close_file env bar_name in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_no_diagnostics loop_output;
+  Test.assert_diagnostics_string loop_output bar_diagnostics;
 
   (* Fix foo, check that the error in bar was cleared - even though the
    * file is not currently open in IDE *)

@@ -387,10 +387,10 @@ let close_file ?(ignore_response = false) env name =
   (env, loop_output)
 
 let wait env =
-  (* We simulate waiting one second since last command by manipulating
+  (* We simulate waiting a while since last command by manipulating
    * last_command_time. Will not work on timers that compare against other
    * counters. *)
-  ServerEnv.{ env with last_command_time = env.last_command_time -. 1.0 }
+  ServerEnv.{ env with last_command_time = env.last_command_time -. 60.0 }
 
 let coverage_levels env filename =
   let file_input = ServerCommandTypes.FileName filename in
@@ -470,12 +470,6 @@ let start_initial_full_check env =
      and return the number of rechecked non-dummy files. *)
   assert (total_rechecked_count >= 1);
   (env, total_rechecked_count - 1)
-
-let assert_no_diagnostics loop_output =
-  match loop_output.push_messages with
-  | DIAGNOSTIC _ :: _ -> fail "Did not expect to receive push diagnostics."
-  | NEW_CLIENT_CONNECTED :: _ -> fail "Unexpected push message"
-  | _ -> ()
 
 let assert_has_diagnostics loop_output =
   match
@@ -768,6 +762,17 @@ let get_diagnostics loop_output : diagnostic_errors =
        ~f:
          (SMap.union ~combine:(fun _ err _ ->
               (* Only take the most recent diagnostic per file *) Some err))
+
+let assert_no_diagnostics loop_output =
+  match loop_output.push_messages with
+  | DIAGNOSTIC _ :: _ ->
+    let diagnostics = get_diagnostics loop_output in
+    let diagnostics_as_string = diagnostics_to_string diagnostics in
+    fail
+      ("Did not expect to receive push diagnostics. Got:\n"
+      ^ diagnostics_as_string)
+  | NEW_CLIENT_CONNECTED :: _ -> fail "Unexpected push message"
+  | _ -> ()
 
 let assert_diagnostics loop_output (expected : error_messages_per_file) =
   let diagnostics = get_diagnostics loop_output in

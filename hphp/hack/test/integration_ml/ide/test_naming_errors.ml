@@ -96,7 +96,7 @@ Invalid return type (Typing[4110])
   But got `int`
 
 /foo_returns_int.php:
-
+/foo_returns_string_name.php:
 "
 
 let root = "/"

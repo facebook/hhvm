@@ -161,8 +161,7 @@ let test () =
   let (env, _) = Test.edit_file env bar_106_name "" in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output bar106_cleared;
-  let (env, loop_output) = Test.full_check_status env in
+  Test.assert_diagnostics_in loop_output ~filename:bar_106_name bar106_cleared;
   (* Notice that foo position is back to line 3 *)
   Test.assert_diagnostics_in
     loop_output

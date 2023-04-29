@@ -4486,14 +4486,14 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
     let is_ok conn =
       match conn with
       | TailingErrors _ -> true
-      | SeekingErrors { seek_reason = (ServerProgress.Complete _, _); _ } ->
+      | SeekingErrors
+          { seek_reason = (ServerProgress.(Restarted _ | Complete _), _); _ } ->
         true
       | SeekingErrors
           {
             seek_reason =
               ( ServerProgress.(
-                  ( NothingYet | Restarted _ | Stopped | Killed _
-                  | Build_id_mismatch )),
+                  NothingYet | Stopped | Killed _ | Build_id_mismatch),
                 _ );
             _;
           } ->

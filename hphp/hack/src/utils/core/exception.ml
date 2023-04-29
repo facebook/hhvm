@@ -54,11 +54,7 @@ let wrap_unraised ?(frames = 100) exn =
   let backtrace = Printexc.get_callstack frames in
   { exn; backtrace }
 
-let get_ctor_string { exn; backtrace = _ } =
-  match exn with
-  | Exit_status.Exit_with status ->
-    Printf.sprintf "Exit_status.Exit_with(%s)" (Exit_status.show status)
-  | _ -> Printexc.to_string exn
+let get_ctor_string { exn; backtrace = _ } = Printexc.to_string exn
 
 let register_printer printer = Printexc.register_printer printer
 

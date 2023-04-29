@@ -215,3 +215,9 @@ let unpack = function
      *)
     ("signaled", n)
   | Unix.WSTOPPED n -> ("stopped", n)
+
+let () =
+  Exception.register_printer (function
+      | Exit_with exit_status ->
+        Some (Printf.sprintf "Exit_status.Exit_with(%s)" (show exit_status))
+      | _ -> None)

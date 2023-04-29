@@ -106,6 +106,11 @@ type server_conn = {
       (** ones that arrived during current rpc *)
 }
 
+type errors_from =
+  | Errors_from_clientIdeDaemon
+  | Errors_from_errors_file
+[@@deriving show { with_path = false }]
+
 (** This type describes our connection to the errors.bin file, where hh_server writes
 errors discovered during its current typecheck.
 
@@ -182,7 +187,7 @@ module Lost_env = struct
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
-    uris_with_standalone_diagnostics: float UriMap.t;
+    uris_with_standalone_diagnostics: (float * errors_from) UriMap.t;
         (** these are diagnostics which arrived from serverless-ide or shelling out to hh check,
         each with a timestamp of when they were discovered. The timestamp lets us calculate
         for instance whether a diagnostic discovered by clientIdeDaemon is more recent
@@ -2513,8 +2518,12 @@ let state_to_rage (state : state) : string =
     List.map uris ~f:(fun (DocumentUri uri) -> uri) |> String.concat ~sep:","
   in
   let timestamped_uris_to_string uris =
-    List.map uris ~f:(fun (DocumentUri uri, timestamp) ->
-        Printf.sprintf "%s @ %0.2f" uri timestamp)
+    List.map uris ~f:(fun (DocumentUri uri, (timestamp, errors_from)) ->
+        Printf.sprintf
+          "%s [%s] @ %0.2f"
+          (show_errors_from errors_from)
+          uri
+          timestamp)
     |> String.concat ~sep:","
   in
   let details =
@@ -4034,7 +4043,7 @@ let publish_errors_if_standalone
       | [] -> (UriMap.remove uri uris, [])
       | [(file, e)] when String.equal (Relative_path.to_absolute file) file_path
         ->
-        ( UriMap.add uri (Unix.gettimeofday ()) uris,
+        ( UriMap.add uri (Unix.gettimeofday (), Errors_from_clientIdeDaemon) uris,
           List.map ~f:User_error.to_absolute e )
       | _ ->
         failwith "why we got errors for anything other than the expected file?"
@@ -4119,17 +4128,18 @@ let handle_errors_file_item
         ()
       | ServerProgress.Complete _telemetry ->
         (* If the typecheck completed, then we can erase all diagnostics (from closed-files)
-           that were reported prior to the start of the typecheck. Why only from closed-files? ...
-           because diagnostics for open files are produced by clientIdeDaemon instead, and
-           our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
+           that were reported prior to the start of the typecheck - regardless of whether that
+           diagnostic had most recently been reported from errors-file or from clientIdeDaemon.
+           Why only from closed-files? ... because diagnostics for open files are produced live by clientIdeDaemon,
+           and our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
         let uris_with_standalone_diagnostics =
           lenv.Lost_env.uris_with_standalone_diagnostics
-          |> UriMap.filter_map (fun uri existing_time ->
+          |> UriMap.filter_map (fun uri (existing_time, powered_by) ->
                  if
                    UriMap.mem uri lenv.Lost_env.editor_open_files
                    || Float.(existing_time > start_time)
                  then begin
-                   Some existing_time
+                   Some (existing_time, powered_by)
                  end else begin
                    publish (empty_diagnostics uri);
                    None
@@ -4175,12 +4185,12 @@ let handle_errors_file_item
             acc
           else
             match UriMap.find_opt uri acc with
-            | Some existing_timestamp
+            | Some (existing_timestamp, _powered_by)
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
               publish (hack_errors_to_lsp_diagnostic path file_errors);
-              UriMap.add uri timestamp acc)
+              UriMap.add uri (timestamp, Errors_from_errors_file) acc)
     in
     state := Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
     Lwt.return_none

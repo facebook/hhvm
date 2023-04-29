@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * fopen() binds a named resource, specified by filename, to a stream.
  *
@@ -1471,3 +1473,18 @@ function scandir(string $directory,
  */
 <<__Native>>
 function closedir(?resource $dir_handle = null): void;
+
+}
+
+namespace HH {
+
+<<__Native>>
+function stdin(): resource;
+
+<<__Native>>
+function stdout(): resource;
+
+<<__Native>>
+function stderr(): resource;
+
+}

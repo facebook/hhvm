@@ -2106,6 +2106,30 @@ void HHVM_FUNCTION(closedir,
   d->close();
 }
 
+namespace {
+template<typename T>
+Resource get_stdio(const char* stream, T f) {
+  if (!RuntimeOption::ServerExecutionMode()) {
+    return f().asCResRef();
+  }
+  SystemLib::throwRuntimeExceptionObject(
+    folly::sformat("{} is not available in server mode", stream)
+  );
+}
+}
+
+Resource HHVM_FUNCTION(get_stdin) {
+  return get_stdio("stdin", [] { return BuiltinFiles::getSTDIN(); });
+}
+
+Resource HHVM_FUNCTION(get_stdout) {
+  return get_stdio("stdout", [] { return BuiltinFiles::getSTDOUT(); });
+}
+
+Resource HHVM_FUNCTION(get_stderr) {
+  return get_stdio("stderr", [] { return BuiltinFiles::getSTDERR(); });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -2151,6 +2175,9 @@ void StandardExtension::initFile() {
   Native::registerConstant(s_STDIN.get(),  BuiltinFiles::getSTDIN);
   Native::registerConstant(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
   Native::registerConstant(s_STDERR.get(), BuiltinFiles::getSTDERR);
+  HHVM_FALIAS(HH\\stdin, get_stdin);
+  HHVM_FALIAS(HH\\stdout, get_stdout);
+  HHVM_FALIAS(HH\\stderr, get_stderr);
 
   HHVM_RC_INT(INI_SCANNER_NORMAL, k_INI_SCANNER_NORMAL);
   HHVM_RC_INT(INI_SCANNER_RAW,    k_INI_SCANNER_RAW);

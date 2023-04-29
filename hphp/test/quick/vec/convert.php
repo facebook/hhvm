@@ -117,7 +117,7 @@ function convert_to($from) {
   convert_to(new IterableObj);
   convert_to(new ThrowIterableObj);
   convert_to(new stdClass);
-  convert_to(STDIN);
+  convert_to(HH\stdin());
   convert_to(Vector{1, 2, 3});
   convert_to(Map{'a' => 100, 200 => 'b'});
   convert_to(Pair{'a', 'b'});

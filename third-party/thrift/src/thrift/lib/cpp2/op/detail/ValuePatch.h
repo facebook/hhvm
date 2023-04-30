@@ -41,19 +41,23 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
-  void apply(T& val) const { applyAssign(val); }
+  template <typename Visitor>
+  void customVisit(Visitor&& v) const {
+    if (auto p = data_.assign()) {
+      std::forward<Visitor>(v).assign(*p);
+    }
+  }
 
-  /// Merges another patch into the current patch. After the merge
-  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
-  /// `next.apply(patch.apply(value))`.
-  template <typename U>
-  void merge(U&& next) {
-    mergeAssign(std::forward<U>(next));
+  void apply(T& val) const {
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+    };
+    return customVisit(Visitor{val});
   }
 
  private:
-  using Base::applyAssign;
-  using Base::mergeAssign;
+  using Base::data_;
 };
 
 /// Patch for a Thrift bool.

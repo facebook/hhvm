@@ -109,7 +109,9 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
     return derived();
   }
 
-  /// @copydoc AssignPatch::merge
+  /// Merges another patch into the current patch. After the merge
+  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
+  /// `next.apply(patch.apply(value))`.
   template <typename U>
   void merge(U&& next) {
     if (this == std::addressof(next)) {

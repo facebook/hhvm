@@ -14,9 +14,9 @@ function curl_cli_server_start() {
 	$router = "responder/get.inc";
 
 	$descriptorspec = darray[
-		0 => STDIN,
-		1 => STDOUT,
-		2 => STDERR,
+		0 => HH\stdin(),
+		1 => HH\stdout(),
+		2 => HH\stderr(),
 	];
 
 	if (substr(PHP_OS, 0, 3) == 'WIN') {

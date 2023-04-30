@@ -6,7 +6,7 @@ use namespace HH\Lib\_Private\_OS;
 function main(): void {
   $stdout = _OS\request_stdio_fd(_OS\STDOUT_FILENO);
   _OS\write($stdout, "Closing STDOUT\n");
-  \fclose(\STDOUT);
+  \fclose(\HH\stdout());
   try {
     // should fail
     _OS\write($stdout, "BUT I SURVIVED! (bad)\n");

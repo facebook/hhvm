@@ -1,7 +1,7 @@
 Test
 External command executed
 External command exit: 0
-STDOUT: testtext
+stdout: testtext
 
-STDERR: 
+stderr: 
 ===DONE===

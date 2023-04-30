@@ -102,7 +102,7 @@ $values = vec[
   dict[1 => 'a', 2 => 'b'],
   keyset[],
   keyset[100, 'abc', 200],
-  STDIN,
+  HH\stdin(),
   new stdClass,
   new IterableObj,
   new ThrowIterableObj,

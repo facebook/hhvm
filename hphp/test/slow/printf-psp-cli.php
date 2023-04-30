@@ -3,8 +3,8 @@
 function print_it($mode) {
   echo "echo $mode\n";
   file_put_contents("php://stdout", "file_put_contents $mode\n");
-  fwrite(STDOUT, "fwrite $mode\n");
-  fflush(STDOUT);
+  fwrite(HH\stdout(), "fwrite $mode\n");
+  fflush(HH\stdout());
 }
 
 <<__EntryPoint>>

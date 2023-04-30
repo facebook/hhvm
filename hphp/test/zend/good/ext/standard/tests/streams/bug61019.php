@@ -57,8 +57,8 @@ if(is_resource($process))
 
 	proc_close($process);
 
-	echo "STDOUT: ".$stdin_stream."\n";
-	echo "STDERR: ".$stderr_stream."\n";
+	echo "stdout: ".$stdin_stream."\n";
+	echo "stderr: ".$stderr_stream."\n";
 }
 else
 {

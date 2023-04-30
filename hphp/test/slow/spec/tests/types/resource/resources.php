@@ -8,15 +8,15 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
-var_dump(STDIN);
-var_dump(is_resource(STDIN));
-var_dump(get_resource_type(STDIN));
+var_dump(HH\stdin());
+var_dump(is_resource(HH\stdin()));
+var_dump(get_resource_type(HH\stdin()));
 
-var_dump(STDOUT);
-var_dump(is_resource(STDOUT));
-var_dump(get_resource_type(STDOUT));
+var_dump(HH\stdout());
+var_dump(is_resource(HH\stdout()));
+var_dump(get_resource_type(HH\stdout()));
 
-var_dump(STDERR);
-var_dump(is_resource(STDERR));
-var_dump(get_resource_type(STDERR));
+var_dump(HH\stderr());
+var_dump(is_resource(HH\stderr()));
+var_dump(get_resource_type(HH\stderr()));
 }

@@ -22,7 +22,7 @@ function main() {
   f(1);
   f(0);
   f("0");
-  f(STDIN);
+  f(HH\stdin());
   f(vec[1]);
   f(vec['1']);
   f(Vector{1});
@@ -63,10 +63,10 @@ function f($arg) {
     case 42.5:
       echo "42.5";
       break;
-    case STDIN:
+    case HH\stdin():
       echo "stdin";
       break;
-    case STDOUT:
+    case HH\stdout():
       echo "stdout";
       break;
     case new Derp():

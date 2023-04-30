@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1693() {
-fclose(STDOUT);
+fclose(HH\stdout());
 echo 'test';
 ob_start();
 }

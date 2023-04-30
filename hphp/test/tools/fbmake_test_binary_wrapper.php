@@ -8,7 +8,7 @@
 
 // Output is in the format expected by JsonTestRunner.
 function say($val) {
-  fwrite(STDERR, json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
+  fwrite(HH\stderr(), json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
 }
 
 function finish($status) {

@@ -57,7 +57,7 @@ function main() {
   try { var_dump($o1 >= $o3); } catch (Exception $e) { var_dump($e->getMessage()); }
 
   try { var_dump(new stdClass() <  $o3);   } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { var_dump(STDOUT         <= $o3);   } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { var_dump(HH\stdout()    <= $o3);   } catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump($o1            >  vec[]); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump($o1            >= "123"); } catch (Exception $e) { var_dump($e->getMessage()); }
 
@@ -65,7 +65,7 @@ function main() {
   try { __SystemLib\unwrap_opaque_value(42, $o2); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { __SystemLib\unwrap_opaque_value(1337, $o3); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { __SystemLib\unwrap_opaque_value(1335, $o4); } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { __SystemLib\unwrap_opaque_value(0, STDOUT); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { __SystemLib\unwrap_opaque_value(0, HH\stdout()); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { __SystemLib\unwrap_opaque_value(0, new stdClass()); } catch (Exception $e) { var_dump($e->getMessage()); }
 
   var_dump(__SystemLib\unwrap_opaque_value(42, $o1));

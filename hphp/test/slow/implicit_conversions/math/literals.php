@@ -42,7 +42,7 @@ function plus(): void {
   with_exn(() ==> print(1.234 + INF));
   with_exn(() ==> print(NAN + true));
   with_exn(() ==> print(false + null));
-  with_exn(() ==> print(STDIN + "string"));
+  with_exn(() ==> print(HH\stdin() + "string"));
   with_exn(() ==> print(varray[42] + dict['foobar' => false]));
   with_exn(() ==> print(new Foo() + -INF));
 
@@ -57,7 +57,7 @@ function plus(): void {
   with_exnio(inout $i, (inout $o) ==> { $o += NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o += true; });
   with_exnio(inout $i, (inout $o) ==> { $o += false; });
-  with_exnio(inout $i, (inout $o) ==> { $o += STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o += HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o += "string"; });
   with_exnio(inout $i, (inout $o) ==> { $o += new Foo(); });
   echo $i;
@@ -70,7 +70,7 @@ function minus(): void {
   with_exn(() ==> print(1.234 - INF));
   with_exn(() ==> print(NAN - true));
   with_exn(() ==> print(false - null));
-  with_exn(() ==> print(STDIN - "string"));
+  with_exn(() ==> print(HH\stdin() - "string"));
   with_exn(() ==> print(varray[42] - dict['foobar' => false]));
   with_exn(() ==> print(new Foo() - -INF));
   echo ">\n";
@@ -84,7 +84,7 @@ function minus(): void {
   with_exnio(inout $i, (inout $o) ==> { $o -= NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o -= true; });
   with_exnio(inout $i, (inout $o) ==> { $o -= false; });
-  with_exnio(inout $i, (inout $o) ==> { $o -= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o -= "string"; });
   with_exnio(inout $i, (inout $o) ==> { $o -= new Foo(); });
   echo $i;
@@ -97,7 +97,7 @@ function mul(): void {
   with_exn(() ==> print(1.234 * INF));
   with_exn(() ==> print(NAN * true));
   with_exn(() ==> print(false * null));
-  with_exn(() ==> print(STDIN * "string"));
+  with_exn(() ==> print(HH\stdin() * "string"));
   with_exn(() ==> print(varray[42] * dict['foobar' => false]));
   with_exn(() ==> print(new Foo() * -INF));
   echo ">\n";
@@ -111,7 +111,7 @@ function mul(): void {
   with_exnio(inout $i, (inout $o) ==> { $o *= NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o *= true; });
   with_exnio(inout $i, (inout $o) ==> { $o *= false; });
-  with_exnio(inout $i, (inout $o) ==> { $o *= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o *= "string"; });
   with_exnio(inout $i, (inout $o) ==> { $o *= new Foo(); });
   echo $i;
@@ -124,7 +124,7 @@ function div(): void {
   with_exn(() ==> print(1.234 / INF));
   with_exn(() ==> print(null / true));
   with_exn(() ==> print(false / NAN));
-  with_exn(() ==> print("string" / STDIN));
+  with_exn(() ==> print("string" / HH\stdin()));
   with_exn(() ==> print(varray[42] / dict['foobar' => false]));
   with_exn(() ==> print(-INF / new Foo()));
   echo ">\n";
@@ -136,7 +136,7 @@ function div(): void {
   with_exnio(inout $i, (inout $o) ==> { $o /= INF; });
   with_exnio(inout $i, (inout $o) ==> { $o /= NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o /= true; });
-  with_exnio(inout $i, (inout $o) ==> { $o /= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o /= "12string"; });
   with_exnio(inout $i, (inout $o) ==> { $o /= new Foo(); });
   echo $i;
@@ -148,7 +148,7 @@ function mod(): void {
   with_exn(() ==> print(0 % -10));
   with_exn(() ==> print(null % true));
   with_exn(() ==> print(false % NAN));
-  with_exn(() ==> print(STDIN % "12string"));
+  with_exn(() ==> print(HH\stdin() % "12string"));
   with_exn(() ==> print(varray[42] % dict['foobar' => false]));
   with_exn(() ==> print(-INF % new Foo()));
   echo ">\n";
@@ -159,7 +159,7 @@ function mod(): void {
   with_exnio(inout $i, (inout $o) ==> { $o %= 1.234; });
   with_exnio(inout $i, (inout $o) ==> { $o %= NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o %= true; });
-  with_exnio(inout $i, (inout $o) ==> { $o %= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o %= "12string"; });
   with_exnio(inout $i, (inout $o) ==> { $o %= varray[42]; });
   with_exnio(inout $i, (inout $o) ==> { $o %= dict['foobar' => false]; });
@@ -174,7 +174,7 @@ function pow_(): void {
   with_exn(() ==> print(1.234 ** INF));
   with_exn(() ==> print(NAN ** true));
   with_exn(() ==> print(false ** null));
-  with_exn(() ==> print(STDIN ** "string"));
+  with_exn(() ==> print(HH\stdin() ** "string"));
   with_exn(() ==> print(varray[42] ** dict['foobar' => false]));
   with_exn(() ==> print(new Foo() ** -INF));
   echo ">\n";
@@ -188,7 +188,7 @@ function pow_(): void {
   with_exnio(inout $i, (inout $o) ==> { $o **=  NAN; });
   with_exnio(inout $i, (inout $o) ==> { $o **=  true; });
   with_exnio(inout $i, (inout $o) ==> { $o **=  false; });
-  with_exnio(inout $i, (inout $o) ==> { $o **=  STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  HH\stdin(); });
   with_exnio(inout $i, (inout $o) ==> { $o **=  "string"; });
   with_exnio(inout $i, (inout $o) ==> { $o **=  varray[42]; });
   with_exnio(inout $i, (inout $o) ==> { $o **=  dict['foobar' => false]; });

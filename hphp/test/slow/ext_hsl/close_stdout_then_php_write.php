@@ -10,11 +10,11 @@ function main(): void {
 
   set_error_handler(
     (int $_code, $message, $_file, $line) ==> {
-      \fprintf(\STDERR, "Error: '%s' at line %d\n", $message, $line);
+      \fprintf(\HH\stderr(), "Error: '%s' at line %d\n", $message, $line);
     }
   );
 
-  \fwrite(\STDOUT, "I should fail\n");
+  \fwrite(\HH\stdout(), "I should fail\n");
   echo "I should also fail\n";
-  \fwrite(\STDERR, "STDERRR is still alive\n");
+  \fwrite(\HH\stderr(), "STDERRR is still alive\n");
 }

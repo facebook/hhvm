@@ -10,7 +10,7 @@ class BadCounted implements Countable {
   public function count() { throw new Exception("y u do dis"); }
 }
 
-function res() { return count(STDIN); }
+function res() { return count(HH\stdin()); }
 function staticArr() { return count(varray[3,2,1,0]); }
 function packed() { return count(varray[3,2,1,new stdClass]); }
 function vect() { return count(HH\Vector{5,7,8,3}); }

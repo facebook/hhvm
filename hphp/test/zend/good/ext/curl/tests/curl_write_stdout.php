@@ -7,7 +7,7 @@ fwrite($fp, "test");
 fclose($fp);
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_FILE, STDOUT);
+curl_setopt($ch, CURLOPT_FILE, HH\stdout());
 curl_setopt($ch, CURLOPT_URL, 'file://' . $log_file);
 curl_exec($ch);
 curl_close($ch);

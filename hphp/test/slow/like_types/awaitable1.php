@@ -18,7 +18,7 @@ async function main(): Awaitable<void> {
   await g(1.5);
   await g('foo');
   await g(false);
-  await g(STDIN);
+  await g(HH\stdin());
   await g(new stdClass());
   await g(tuple(1, 2, 3));
   await g(shape('a' => 1, 'b' => 2));

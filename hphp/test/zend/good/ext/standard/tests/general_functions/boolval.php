@@ -10,5 +10,5 @@ var_dump(boolval("abc"));
 var_dump(boolval(0.5));
 var_dump(boolval(100));
 var_dump(boolval(new stdClass()));
-var_dump(boolval(STDIN));
+var_dump(boolval(HH\stdin()));
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function lol() { return STDIN; }
+function lol() { return HH\stdin(); }
 function foo() {
   $x = lol();
   unset($x[0]['id']);

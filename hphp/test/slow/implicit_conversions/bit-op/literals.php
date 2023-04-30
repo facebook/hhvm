@@ -33,7 +33,7 @@ function and(): void {
   echo with_exn(() ==> 1.234 & INF);
   echo with_exn(() ==> NAN & true);
   echo with_exn(() ==> false & null);
-  echo with_exn(() ==> STDIN & "string");
+  echo with_exn(() ==> HH\stdin() & "string");
   echo with_exn(() ==> "string" & "string");
   echo with_exn(() ==> varray[42] & dict['foobar' => false]);
   echo ">\n";
@@ -47,7 +47,7 @@ function and(): void {
   $i = with_exn(() ==> { $i &= NAN; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= true; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= false; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i &= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= "string"; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= varray[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= dict['foobar' => false]; return $i; }) ?? $i;
@@ -64,7 +64,7 @@ function or(): void {
   echo with_exn(() ==> 1.234 | INF);
   echo with_exn(() ==> NAN | true);
   echo with_exn(() ==> false | null);
-  echo with_exn(() ==> STDIN | "string");
+  echo with_exn(() ==> HH\stdin() | "string");
   echo with_exn(() ==> "string" | "string");
   echo with_exn(() ==> varray[42] | dict['foobar' => false]);
   echo ">\n";
@@ -78,7 +78,7 @@ function or(): void {
   $i = with_exn(() ==> { $i |= NAN; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= true; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= false; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i |= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= "string"; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= varray[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= dict['foobar' => false]; return $i; }) ?? $i;
@@ -95,7 +95,7 @@ function xor(): void {
   echo with_exn(() ==> 1.234 ^ INF);
   echo with_exn(() ==> NAN ^ true);
   echo with_exn(() ==> false ^ null);
-  echo with_exn(() ==> STDIN ^ "string");
+  echo with_exn(() ==> HH\stdin() ^ "string");
   echo with_exn(() ==> "string" ^ "string");
   echo with_exn(() ==> varray[42] ^ dict['foobar' => false]);
   echo ">\n";
@@ -109,7 +109,7 @@ function xor(): void {
   $i = with_exn(() ==> { $i ^= NAN; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= true; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= false; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i ^= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= "string"; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= varray[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= dict['foobar' => false]; return $i; }) ?? $i;
@@ -126,7 +126,7 @@ function shl(): void {
   echo with_exn(() ==> 1.234 << INF);
   echo with_exn(() ==> NAN << true);
   echo with_exn(() ==> false << null);
-  echo with_exn(() ==> STDIN << "string");
+  echo with_exn(() ==> HH\stdin() << "string");
   echo with_exn(() ==> "string" << "string");
   echo with_exn(() ==> varray[42] << dict['foobar' => false]);
   echo ">\n";
@@ -140,7 +140,7 @@ function shl(): void {
   $i = with_exn(() ==> { $i <<= NAN; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= true; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= false; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i <<= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= "string"; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= varray[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= dict['foobar' => false]; return $i; }) ?? $i;
@@ -157,7 +157,7 @@ function shr(): void {
   echo with_exn(() ==> 1.234 >> INF);
   echo with_exn(() ==> NAN >> true);
   echo with_exn(() ==> false >> null);
-  echo with_exn(() ==> STDIN >> "string");
+  echo with_exn(() ==> HH\stdin() >> "string");
   echo with_exn(() ==> "string" >> "string");
   echo with_exn(() ==> varray[42] >> dict['foobar' => false]);
   echo ">\n";
@@ -171,7 +171,7 @@ function shr(): void {
   $i = with_exn(() ==> { $i >>= NAN; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= true; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= false; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i >>= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= "string"; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= varray[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= dict['foobar' => false]; return $i; }) ?? $i;

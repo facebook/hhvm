@@ -42,7 +42,6 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
   using Base::get;
-  using Base::toThrift;
 
   template <typename T>
   static FieldPatch createFrom(T&& val) {
@@ -62,21 +61,6 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   void customVisit(Visitor&& v) const {
     for_each_field_id<Patch>(
         [&](auto id) { v.template patchIfSet<decltype(id)>(*get(id)); });
-  }
-
-  template <typename T>
-  void apply(T& val) const {
-    for_each_field_id<Patch>(
-        [&](auto id) { get(id)->apply(op::get<>(id, val)); });
-  }
-
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    auto&& tval = std::forward<U>(next).toThrift();
-    for_each_field_id<Patch>([&](auto id) {
-      get(id)->merge(*op::get<>(id, std::forward<decltype(tval)>(tval)));
-    });
   }
 
  private:
@@ -367,34 +351,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
   using Base::data_;
-  using Base::get;
-  using Base::mergeAssignAndClear;
-
-  // We can not use `using Base::patchPrior` since using-declaration can't be
-  // used to introduce the name of a dependent member template as a
-  // template-name.
-  // https://en.cppreference.com/w/cpp/language/using_declaration#Notes
-  template <typename Id>
-  decltype(auto) patchPrior() {
-    return Base::template patchPrior<Id>();
-  }
-
-  template <typename Id>
-  decltype(auto) ensures() const {
-    return Base::template ensures<Id>();
-  }
-
-  template <typename Id, typename U>
-  static decltype(auto) getEnsure(U&& data) {
-    return Base::template getEnsure<Id, U>(std::forward<U>(data));
-  }
-
-  template <typename Id>
-  decltype(auto) patchAfter() {
-    return Base::template patchAfter<Id>();
-  }
 };
 
 /// Patch for a Thrift union.
@@ -444,10 +401,8 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
   using Base::data_;
   using Base::ensurePatchable;
-  using Base::mergeAssignAndClear;
   using Base::resetAnd;
 
   template <typename U = T>

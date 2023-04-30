@@ -38,23 +38,6 @@ class bad_patch_access : public std::runtime_error {
 
 namespace detail {
 
-template <typename T, typename U>
-if_opt_type<T, bool> sameType(const T& opt1, const U& opt2) {
-  return opt1.has_value() == opt2.has_value();
-}
-template <typename T, typename U>
-bool sameType(field_ref<T> unn1, const U& unn2) {
-  return unn1->getType() == unn2.getType();
-}
-template <typename T, typename U>
-bool sameType(terse_field_ref<T> unn1, const U& unn2) {
-  return unn1->getType() == unn2.getType();
-}
-template <typename T, typename U>
-bool sameType(terse_intern_boxed_field_ref<T&> unn1, const U& unn2) {
-  return as_const_intern_box(unn1)->getType() == unn2.getType();
-}
-
 /// Base class for all patch types.
 /// - Patch: The Thrift struct representation for the patch.
 /// - Derived: The leaf type deriving from this class.
@@ -194,27 +177,6 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   FOLLY_NODISCARD value_type& assignOr(value_type& value) noexcept {
     return hasAssign() ? *data_.assign() : value;
   }
-
-  bool applyAssign(value_type& val) const {
-    if (hasAssign()) {
-      val = *data_.assign();
-      return true;
-    }
-    return false;
-  }
-
-  template <typename U>
-  bool mergeAssign(U&& next) {
-    if (hasValue(next.toThrift().assign())) {
-      data_ = std::forward<U>(next).toThrift();
-      return true;
-    }
-    if (hasAssign()) {
-      next.apply(*data_.assign());
-      return true;
-    }
-    return false;
-  }
 };
 
 /// Base class for clearable patch types.
@@ -258,27 +220,11 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
  protected:
   template <typename, typename>
   friend class BaseEnsurePatch;
-  using Base::applyAssign;
   using Base::data_;
   using Base::derived;
   using Base::hasAssign;
-  using Base::mergeAssign;
   using Base::resetAnd;
   ~BaseClearPatch() = default;
-
-  template <typename U>
-  bool mergeAssignAndClear(U&& next) {
-    // Clear is slightly stronger than assigning a 'cleared' value in some
-    // cases. For example a struct with non-terse, non-optional fields with
-    // custom defaults and missmatched schemas... it's also smaller, so prefer
-    // it.
-    if (*next.toThrift().clear() && !hasValue(next.toThrift().assign())) {
-      // Next patch completely replaces this one.
-      data_ = std::forward<U>(next).toThrift();
-      return true;
-    }
-    return mergeAssign(std::forward<U>(next));
-  }
 
   template <typename Visitor>
   bool customVisitAssignAndClear(Visitor&& v) const {
@@ -288,17 +234,6 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
     }
     if (data_.clear() == true) {
       std::forward<Visitor>(v).clear();
-    }
-    return false;
-  }
-
-  template <typename Tag>
-  bool applyAssignAndClear(T& val) const {
-    if (applyAssign(val)) {
-      return true;
-    }
-    if (data_.clear() == true) {
-      op::clear<Tag>(val);
     }
     return false;
   }
@@ -324,20 +259,8 @@ class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
   using Base::clear;
 
  protected:
-  using Base::applyAssign;
   using Base::data_;
   ~BaseContainerPatch() = default; // Abstract base class.
-
-  /// Returns true if assign was applied, and no more patchs should be applied.
-  bool applyAssignOrClear(T& val) const {
-    if (applyAssign(val)) {
-      return true;
-    }
-    if (data_.clear() == true) {
-      val.clear();
-    }
-    return false;
-  }
 };
 
 } // namespace detail

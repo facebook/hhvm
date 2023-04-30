@@ -227,11 +227,9 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
   using Base::hasAssign;
-  using Base::mergeAssignAndClear;
 
   // Needed for merge(...). We can consider making this a public API.
   void patchIfSet(const VPMap& patches) {
@@ -352,10 +350,8 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 };
 
 /// Patch for a Thrift map.
@@ -531,10 +527,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
-  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 
   VP dummy_;
 };

@@ -113,7 +113,6 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
  private:
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 
   friend BoolPatch operator!(BoolPatch val) { return (val.invert(), val); }
 };
@@ -204,7 +203,6 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
  private:
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 
   template <typename U>
   friend NumberPatch operator+(NumberPatch lhs, U&& rhs) {
@@ -344,10 +342,8 @@ class StringPatch : public BaseStringPatch<Patch, StringPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 };
 
 /// Patch for a Thrift Binary.
@@ -409,10 +405,8 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssignAndClear;
 };
 
 } // namespace detail

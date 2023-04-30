@@ -245,6 +245,7 @@ UnitEmitterSerdeWrapper output(
 
   meta.m_symbol_refs = std::move(ue->m_symbol_refs);
   meta.m_filepath = ue->m_filepath;
+  meta.m_module_use = ue->m_moduleName;
 
   for (auto const pce : ue->preclasses()) {
     if (pce->attrs() & AttrEnum) {
@@ -1572,15 +1573,35 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
       }
     }
 
-    auto parseMetas = HPHP_CORO_AWAIT(callback(group.m_files));
-    always_assert(parseMetas.size() == workItems);
-
-    m_total += workItems;
+    // The callback takes a group of files and returns the parse metas
+    // associated with these files. During the emit process, the units that
+    // do not belong to the active deployment will not produce parse metas
+    // as they do not need to be part of the final repo product.
+    // This will mean that the size of the parse metas does not need to be
+    // equal to number of files sent to the callback.
+    // One problem this creates is that we need to be able to associate
+    // parse metas with original group order. In order to do this,
+    // we also return a fixup list consisting of original indicies of the
+    // omitted units. We later use this fixup list to compute the original
+    // indicies of each unit.
+    auto parseMetasAndItemsToSkip = HPHP_CORO_AWAIT(callback(group.m_files));
+    auto& [parseMetas, itemsToSkip] = parseMetasAndItemsToSkip;
+    if (RO::EvalActiveDeployment.empty()) {
+      // If a deployment is not set, then we should have gotten results for
+      // all files
+      always_assert(parseMetas.size() == workItems);
+    }
+    m_total += parseMetas.size();
 
     // Process the outputs
     OndemandInfo ondemand;
+    size_t numSkipped = 0;
     for (size_t i = 0; i < workItems; i++) {
-      auto const& meta = parseMetas[i];
+      if (itemsToSkip.contains(i)) {
+        numSkipped++;
+        continue;
+      }
+      auto const& meta = parseMetas[i - numSkipped];
       if (!meta.m_abort.empty()) {
         // The unit had an ICE and we're configured to treat that as a
         // fatal error. Here is where we die on it.

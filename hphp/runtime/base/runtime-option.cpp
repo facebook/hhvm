@@ -270,8 +270,7 @@ using RepoOptionCache = tbb::concurrent_hash_map<
 >;
 RepoOptionCache s_repoOptionCache;
 
-constexpr char* kHhvmConfigHdf = ".hhvmconfig.hdf";
-constexpr char* kPackagesToml = "PACKAGES.toml";
+constexpr const char* kHhvmConfigHdf = ".hhvmconfig.hdf";
 
 template<class F>
 bool walkDirTree(std::string fpath, F func) {

@@ -1,0 +1,3 @@
+In foo
+
+Fatal error: Call to undefined function bar() in %s on line 8

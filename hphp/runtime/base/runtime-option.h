@@ -50,6 +50,8 @@ struct FilesMatch;
 struct Hdf;
 struct IniSettingMap;
 
+constexpr const char* kPackagesToml = "PACKAGES.toml";
+
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
 using StringToIntMap = std::unordered_map<std::string, int>;

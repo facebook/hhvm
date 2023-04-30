@@ -1129,6 +1129,31 @@ bool process(const CompilerOptions &po) {
     );
   }
 
+  hphp_fast_set<const StringData*> moduleInDeployment;
+  if (!RO::EvalActiveDeployment.empty()) {
+    // Many files will be in the same module, so it is better to precompute
+    // a mapping of whether a given module is in the current deployment
+    auto const& packageInfo =
+      RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+    auto const it = packageInfo.deployments().find(RO::EvalActiveDeployment);
+    if (it == end(packageInfo.deployments())) {
+      Logger::FError("The active deployment is set to {}; "
+                     "however, it is not defined in the {}/{} file",
+                     RO::EvalActiveDeployment,
+                     po.repoOptionsDir,
+                     kPackagesToml);
+      return false;
+    }
+
+    moduleInDeployment.reserve(index->modules.size());
+    for (auto const& [module, _] : index->modules) {
+      assertx(!moduleInDeployment.contains(module));
+      if (packageInfo.moduleInDeployment(module, it->second)) {
+        moduleInDeployment.insert(module);
+      }
+    }
+  }
+
   Optional<RepoAutoloadMapBuilder> autoload;
   Optional<RepoFileBuilder> repo;
   std::atomic<uint32_t> nextSn{0};
@@ -1301,14 +1326,22 @@ bool process(const CompilerOptions &po) {
   // Emit a group of files that were parsed remotely
   auto const emitRemoteUnit = [&] (
       const std::vector<std::filesystem::path>& rpaths
-  ) -> coro::Task<Package::ParseMetaVec> {
+  ) -> coro::Task<Package::EmitCallBackResult> {
     Package::ParseMetaVec parseMetas;
-    parseMetas.reserve(rpaths.size());
+    Package::ParseMetaItemsToSkipSet itemsToSkip;
+
+    auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
+      if (RO::EvalActiveDeployment.empty()) return true;
+      // If the unit defines any modules, then it is always included
+      if (!p.m_definitions.m_modules.empty()) return true;
+      return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
+    };
 
     if (RO::EvalUseHHBBC) {
       // Retrieve HHBBC WPI (Key, Ref<Value>) pairs that were already parsed.
       // No Async I/O is necessary in this case.
-      for (auto& rpath : rpaths) {
+      for (size_t i = 0, n = rpaths.size(); i < n; ++i) {
+        auto& rpath = rpaths[i];
         auto it = parsedFiles->find(rpath.native());
         if (it == parsedFiles->end()) {
           // If you see this error in a test case, add a line to to test.php.hphp_opts:
@@ -1322,6 +1355,15 @@ bool process(const CompilerOptions &po) {
         parseMetas.emplace_back(std::move(pf->parseMeta));
         auto& p = parseMetas.back();
         if (!p.m_filepath) continue;
+        if (!shouldIncludeInBuild(p)) {
+          Logger::FVerbose("Dropping {} from the repo build because module {} is "
+                           "not part of {} deployment",
+                           p.m_filepath,
+                           p.m_module_use ? p.m_module_use->data() : "top-level",
+                           RO::EvalActiveDeployment);
+          itemsToSkip.insert(i);
+          continue;
+        }
         // We don't have unit-emitters to do uniqueness checking, but
         // the parse metadata has the definitions we can use instead.
         unique->add(p.m_definitions, p.m_filepath);
@@ -1330,14 +1372,16 @@ bool process(const CompilerOptions &po) {
           hhbbcInputs->add(std::move(e.first), std::move(e.second));
         }
       }
-      HPHP_CORO_MOVE_RETURN(parseMetas);
+      HPHP_CORO_RETURN(std::make_pair(std::move(parseMetas),
+                                      std::move(itemsToSkip)));
     }
 
-    // Otherwise, retrieve PraseMeta and load unit-emitters from a normal
+    // Otherwise, retrieve ParseMeta and load unit-emitters from a normal
     // ParseJob, then emit the unit-emitters.
     std::vector<Ref<UnitEmitterSerdeWrapper>> ueRefs;
     ueRefs.reserve(rpaths.size());
-    for (auto& rpath : rpaths) {
+    for (size_t i = 0, n = rpaths.size(); i < n; ++i) {
+      auto& rpath = rpaths[i];
       auto it = parsedFiles->find(rpath);
       if (it == parsedFiles->end()) {
         // If you see this error in a test case, add a line to to test.php.hphp_opts:
@@ -1348,6 +1392,16 @@ bool process(const CompilerOptions &po) {
         continue;
       }
       auto& pf = it->second;
+      auto& p = pf->parseMeta;
+      if (!shouldIncludeInBuild(p)) {
+        Logger::FVerbose("Dropping {} from the repo build because module {} is "
+                         "not part of {} deployment",
+                         p.m_filepath,
+                         p.m_module_use ? p.m_module_use->data() : "top-level",
+                         RO::EvalActiveDeployment);
+        itemsToSkip.insert(i);
+        continue;
+      }
       parseMetas.emplace_back(std::move(pf->parseMeta));
       ueRefs.emplace_back(std::move(*pf->ueRef));
     }
@@ -1361,7 +1415,8 @@ bool process(const CompilerOptions &po) {
       if (!wrapper.m_ue) continue;
       emitUnit(std::move(wrapper.m_ue));
     }
-    HPHP_CORO_MOVE_RETURN(parseMetas);
+    HPHP_CORO_RETURN(std::make_pair(std::move(parseMetas),
+                                    std::move(itemsToSkip)));
   };
 
   {

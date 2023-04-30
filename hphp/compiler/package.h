@@ -208,12 +208,17 @@ struct Package {
     // File path copied from UnitEmitter::m_filepath
     const StringData* m_filepath{nullptr};
 
+    // Name of the module that this unit belongs to
+    const StringData* m_module_use{nullptr};
+
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_missing)
         (m_symbol_refs)
         (m_abort)
         (m_definitions)
-        (m_filepath);
+        (m_filepath)
+        (m_module_use)
+        ;
     }
   };
 
@@ -262,8 +267,10 @@ struct Package {
                                           const std::vector<UnitDecls>&);
 
   using LocalCallback = std::function<coro::Task<void>(UEVec)>;
+  using ParseMetaItemsToSkipSet = hphp_fast_set<size_t>;
+  using EmitCallBackResult = std::pair<ParseMetaVec, ParseMetaItemsToSkipSet>;
   using EmitCallback = std::function<
-    coro::Task<ParseMetaVec>(const std::vector<std::filesystem::path>&)
+    coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&)
   >;
   coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
                         const LocalCallback&, const std::filesystem::path&);

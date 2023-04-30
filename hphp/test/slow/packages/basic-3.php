@@ -1,5 +1,7 @@
 <?hh
 
+module a;
+
 <<__EntryPoint>>
 function main() {
   var_dump(ini_get('hhvm.active_deployment'));

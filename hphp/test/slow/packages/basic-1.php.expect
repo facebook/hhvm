@@ -14,7 +14,7 @@ Packages
   foo
     includes => []
     soft_includes => []
-    uses => [a.*]
+    uses => [a]
 Deployments
   my-prod
     domains => [.*\.website\.com$, www\.my-prod\.com]

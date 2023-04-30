@@ -1,0 +1,4 @@
+-vRuntime.Eval.ActiveDeployment="one"
+--dir=__DIR__
+--exclude-dir=__DIR__/inc/inc1
+-vForceEnableSymbolRefs=true

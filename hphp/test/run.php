@@ -1041,6 +1041,21 @@ function hhvm_cmd(
     $env["TERM"] = "dumb";
   }
 
+  $env['HPHP_TEST_TMPDIR'] = Status::getTestTempDir($test);
+  $env['TMPDIR'] = Status::getTestTempDir($test);
+  $env['HPHP_TEST_SOCKETDIR'] = Status::getSocketDir();
+  $env['HPHP_TEST_SOURCE_FILE'] = $test;
+  if ($options->log) {
+    $env['TRACE'] = 'printir:2';
+    $env['HPHP_TRACE_FILE'] = $test . '.log';
+  }
+
+  if ($options->retranslate_all is nonnull ||
+      $options->recycle_tc is nonnull ||
+      $options->cli_server) {
+    $env['HHVM_MULTI_COUNT_SEP'] = MULTI_REQUEST_SEP;
+  }
+
   foreach ($cmds as $idx => $_) {
     $cmds[$idx] .= $cmd;
   }
@@ -3215,21 +3230,6 @@ function run_config_cli(
 ): ?(string, string, int) {
   $cmd = timeout_prefix() . $cmd;
 
-  $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTempDir($test);
-  $cmd_env['TMPDIR'] = Status::getTestTempDir($test);
-  $cmd_env['HPHP_TEST_SOCKETDIR'] = Status::getSocketDir();
-  $cmd_env['HPHP_TEST_SOURCE_FILE'] = $test;
-  if ($options->log) {
-    $cmd_env['TRACE'] = 'printir:1';
-    $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
-  }
-
-  if ($options->retranslate_all is nonnull ||
-      $options->recycle_tc is nonnull ||
-      $options->cli_server) {
-    $cmd_env['HHVM_MULTI_COUNT_SEP'] = MULTI_REQUEST_SEP;
-  }
-
   $descriptorspec = dict[
     0 => vec["pipe", "r"],
     1 => vec["pipe", "w"],
@@ -3688,10 +3688,20 @@ function print_commands(
   }
 
   foreach ($tests as $test) {
-    list($commands, $_) = hhvm_cmd($options, $test);
+    list($commands, $env) = hhvm_cmd($options, $test);
+
+    $envstr = '';
+    foreach ($env as $k => $v) {
+      if (strlen($envstr) > 0) $envstr .= ',';
+      if (strpos($k, "HPHP_TEST_") === 0 || $k === 'TMPDIR') {
+        $envstr .= $k . "=" . (string)$v;
+      }
+    }
+    if (strlen($envstr) > 0) $envstr .= ' ';
+
     if (!$options->repo) {
       foreach ($commands as $c) {
-        print "$c\n";
+        print $envstr . $c . "\n";
       }
       continue;
     }
@@ -3721,13 +3731,13 @@ function print_commands(
     if ($options->jit_serialize is nonnull) {
       invariant(count($commands) === 1, 'get_options enforces jit mode only');
       $hhbbc_cmds .=
-        jit_serialize_option($commands[0], $test, $options, true) . "\n";
+        $envstr . jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $hhbbc_cmds .=
-        jit_serialize_option($commands[0], $test, $options, true) . "\n";
+        $envstr . jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $commands[0] = jit_serialize_option($commands[0], $test, $options, false);
     }
     foreach ($commands as $c) {
-      $hhbbc_cmds .= $c."\n";
+      $hhbbc_cmds .= $envstr . $c . "\n";
     }
     print "$hhbbc_cmds\n";
   }

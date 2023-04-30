@@ -59,7 +59,7 @@ abstract final class ExtBzip2ExtBzip2Php {
 <<__EntryPoint>>
 function entrypoint_ext_bzip2(): void {
 
-  ExtBzip2ExtBzip2Php::$tmpfile = tempnam('/tmp', 'hhbztest.tmp');
+  ExtBzip2ExtBzip2Php::$tmpfile = tempnam(sys_get_temp_dir(), 'hhbztest.tmp');
 
   test_bzwrite();
   test_bzerrstr();

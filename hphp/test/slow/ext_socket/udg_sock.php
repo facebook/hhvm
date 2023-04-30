@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_udg_sock() {
-$socket = '/tmp/socktest'.rand();
+$socket = sys_get_temp_dir().'/socktest'.rand();
 $data = 'Data to be sent';
 
 // Create the server side

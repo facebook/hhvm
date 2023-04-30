@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $original = str_repeat(b"hallo php",4096);
-$filename = tempnam("/tmp", "phpt");
+$filename = tempnam(sys_get_temp_dir(), "phpt");
 
 $fp = gzopen($filename, "wb");
 gzwrite($fp, $original);

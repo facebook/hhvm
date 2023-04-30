@@ -19,7 +19,7 @@ var_dump(openssl_x509_export($c, inout $output3));    // read an invalid cert, f
 var_dump(openssl_x509_export($d, inout $output4));    // read cert from a resource
 var_dump(openssl_x509_export($e, inout $output5));    // read an array, fails
 
-$outfilename = tempnam("/tmp", "ssl");
+$outfilename = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfilename === false)
         die("failed to get a temporary filename!");
 

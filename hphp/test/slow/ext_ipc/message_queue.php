@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_message_queue() {
 $s_msg_qnum = "msg_qnum";
-$filename = tempnam('/tmp', 'vmmsgqueue');
+$filename = tempnam(sys_get_temp_dir(), 'vmmsgqueue');
 
 $token = ftok($filename, "a");
 if (msg_queue_exists($token)) { echo "queue exists\n"; exit(1); }

@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_imagescale() {
 $im = imagecreate(256, 256);
-$tmpfile = tempnam('/tmp', 'testimagescale.png');
+$tmpfile = tempnam(sys_get_temp_dir(), 'testimagescale.png');
 imagejpeg($im, $tmpfile);
 $info = null;
 list($width, $height, $type, $attr) = getimagesize($tmpfile, inout $info);

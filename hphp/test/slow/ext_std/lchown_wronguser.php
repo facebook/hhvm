@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_lchown_wronguser() {
-$file = tempnam('/tmp', 'lchown');
-$link = tempnam('/tmp', 'lchown');
+$file = tempnam(sys_get_temp_dir(), 'lchown');
+$link = tempnam(sys_get_temp_dir(), 'lchown');
 touch($file);
 @symlink($file, $link);
 

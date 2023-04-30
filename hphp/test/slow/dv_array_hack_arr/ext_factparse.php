@@ -109,14 +109,14 @@ file_put_contents($garbage_file, "<?hh }");
 try {
   $res = HH\facts_parse(
     null,
-    varray[$garbage_file, 'garbage_filename', '/tmp'],
+    varray[$garbage_file, 'garbage_filename', sys_get_temp_dir()],
     true,
     false,
   );
   var_dump($res);
   if ($res[$garbage_file] === null
     && $res['garbage_filename'] === null
-    && $res['/tmp'] === null
+    && $res[sys_get_temp_dir()] === null
   ) {
     print "PASSED erroneous files test\n";
   } else {

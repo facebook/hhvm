@@ -10,8 +10,9 @@ if (!socket_set_nonblock($socket)) {
 $buf = null;
 $from = null;
 $port = null;
+$sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
 var_dump(socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port)); //false (EAGAIN, no warning)
-$address = sprintf("/tmp/%s.sock", uniqid());
+$address = sprintf("%s/%s.sock", $sockdir, uniqid());
 if (!socket_bind($socket, $address)) {
     die("Unable to bind to $address");
 }

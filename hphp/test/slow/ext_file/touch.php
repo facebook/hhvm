@@ -3,18 +3,18 @@
 
 <<__EntryPoint>>
 function main_touch() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 touch($tempfile);
 var_dump(file_exists($tempfile));
 
-$tempfile2 = tempnam('/tmp', 'vmextfiletest');
+$tempfile2 = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 var_dump(file_exists($tempfile2));
 copy($tempfile, $tempfile2);
 var_dump(file_exists($tempfile2));
 
-$tempfile3 = tempnam('/tmp', 'vmextfiletest');
+$tempfile3 = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 var_dump(file_exists($tempfile2));
 rename($tempfile2, $tempfile3);

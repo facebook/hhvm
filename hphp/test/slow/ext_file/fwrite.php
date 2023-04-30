@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_fwrite() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fwrite($f, "testing fwrite", 7);

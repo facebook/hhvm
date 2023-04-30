@@ -8,7 +8,7 @@ function flock_or_die($filename, $resource, $flock_op) {
 
 <<__EntryPoint>>
 function main_1689() {
-$filename = '/tmp/flock_file.dat';
+$filename = sys_get_temp_dir().'/flock_file.dat';
 $resource = fopen($filename, 'w');
 flock_or_die($filename, $resource, LOCK_EX);
 flock_or_die($filename, $resource, LOCK_UN);

@@ -58,7 +58,7 @@ VERIFY(count(darray($ret)) != 0);
 
 VERIFY(posix_getsid(posix_getpid()) !== false);
 
-$tmpfifo = tempnam('/tmp', 'vmmkfifotest');
+$tmpfifo = tempnam(sys_get_temp_dir(), 'vmmkfifotest');
 unlink($tmpfifo);
 VERIFY(posix_mkfifo($tmpfifo, 0));
 

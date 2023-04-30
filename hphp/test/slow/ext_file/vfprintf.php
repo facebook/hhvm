@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_vfprintf() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 vfprintf($f, "%s %s", varray["testing", "vfprintf"]);

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_fputcsv() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $fields = varray['apple', "\"banana\""];
 $f = fopen($tempfile, 'w');

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_require_once_twice_modified() {
-$file = tempnam('/tmp', 'require_once_twice.inc');
+$file = tempnam(sys_get_temp_dir(), 'require_once_twice.inc');
 
 file_put_contents($file, "<?hh\n"
                          ."function f() { return 3; }\n");

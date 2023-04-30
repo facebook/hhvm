@@ -15,8 +15,8 @@ function main_lwp() {
 $output = shell_exec("echo hello");
 VS($output, "hello\n");
 
-chdir("/tmp/");
-VS(shell_exec("/bin/pwd"), "/tmp\n");
+chdir(sys_get_temp_dir());
+VS(shell_exec("/bin/pwd"), sys_get_temp_dir()."\n");
 
 pcntl_signal_dispatch();
 
@@ -26,25 +26,25 @@ VS($output, varray["hello", "world"]);
 VS($last_line, "world");
 VS($ret, 0);
 
-chdir("/tmp/");
-VS(exec("/bin/pwd", inout $output, inout $ret), "/tmp");
+chdir(sys_get_temp_dir());
+VS(exec("/bin/pwd", inout $output, inout $ret), sys_get_temp_dir());
 
 echo "heh\n";
 
 passthru("echo hello; echo world;", inout $ret);
 VS($ret, 0);
 
-chdir("/tmp/");
+chdir(sys_get_temp_dir());
 passthru("/bin/pwd", inout $ret);
 
 $last_line = system("echo hello; echo world;", inout $ret);
 VS($last_line, "world");
 VS($ret, 0);
 
-chdir("/tmp/");
-VS(system("/bin/pwd", inout $ret), "/tmp");
+chdir(sys_get_temp_dir());
+VS(system("/bin/pwd", inout $ret), sys_get_temp_dir());
 
-$errout = tempnam('/tmp', 'vmtesterrout');
+$errout = tempnam(sys_get_temp_dir(), 'vmtesterrout');
 unlink($errout);
 
 $descriptorspec =
@@ -73,7 +73,7 @@ $descriptorspec =
   varray[varray["pipe", "r"],
         varray["pipe", "w"],
         varray["file", $errout, "a"]];
-$cwd = "/tmp";
+$cwd = sys_get_temp_dir();
 
 $process = proc_open("sh", darray($descriptorspec), inout $pipes, $cwd);
 VERIFY($process != false);

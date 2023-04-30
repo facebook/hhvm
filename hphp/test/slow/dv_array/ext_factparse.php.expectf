@@ -15,7 +15,7 @@ dict(3) {
       string(24) "entrypoint_ext_factparse"
     }
     ["sha1sum"]=>
-    string(40) "e0ab2b065da6632724582f5672f1f05cec83e491"
+    string(40) "45bc6c24c1b81019a0c13cca3554b39a8889a504"
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -176,7 +176,7 @@ dict(3) {
       string(27) "NS\entrypoint_ext_factparse"
     }
     ["sha1sum"]=>
-    string(40) "777708b69a9a5ac8e590fc83c6576caf1dda8687"
+    string(40) "104505bdef96347ab0965f017bf6afabd508c304"
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -337,7 +337,7 @@ dict(3) {
       string(30) "NS\NS\entrypoint_ext_factparse"
     }
     ["sha1sum"]=>
-    string(40) "7fc3a25fd7a55691068d3173a4bb7d9b0a41026e"
+    string(40) "d2de29b5a3323ddea5f382ea4a3c398166528ef2"
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -489,7 +489,7 @@ dict(3) {
   NULL
   ["garbage_filename"]=>
   NULL
-  ["/tmp"]=>
+  ["%s/temp"]=>
   NULL
 }
 PASSED erroneous files test

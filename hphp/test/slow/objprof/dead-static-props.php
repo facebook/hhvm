@@ -27,7 +27,7 @@ function visit_root($node) {
 function entrypoint_deadstaticprops(): void {
 
   echo "start\n";
-  \HH\global_set('filename', '/tmp/dead-static-props.php');
+  \HH\global_set('filename', sys_get_temp_dir().'/dead-static-props.php');
   gen();
   include \HH\global_get('filename');
   $c = new C;

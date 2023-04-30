@@ -21,7 +21,7 @@ VS(gzuncompress(gzcompress("testing gzcompress")), "testing gzcompress");
 VS(gzinflate(gzdeflate("testing gzdeflate")), "testing gzdeflate");
 
 $zipped = gzencode("testing gzencode");
-$tmpfile = tempnam('/tmp', 'vmzlibtest');
+$tmpfile = tempnam(sys_get_temp_dir(), 'vmzlibtest');
 $f = fopen($tmpfile, "w");
 fwrite($f, $zipped);
 fclose($f);

@@ -3,10 +3,10 @@
 
 <<__EntryPoint>>
 function main_predicates() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 var_dump(is_file($tempfile));
 var_dump(is_dir($tempfile));
-var_dump(is_dir('/tmp'));
+var_dump(is_dir(sys_get_temp_dir()));
 var_dump(is_link($tempfile));
 var_dump(is_executable($tempfile));
 chmod($tempfile, 0777);

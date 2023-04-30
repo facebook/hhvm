@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_imageaffine() {
-$base_img = tempnam('/tmp', 'test-imageaffine');
-$tgt_img = tempnam('/tmp', 'test-imageaffine');
+$base_img = tempnam(sys_get_temp_dir(), 'test-imageaffine');
+$tgt_img = tempnam(sys_get_temp_dir(), 'test-imageaffine');
 
 $toDelete = varray[$base_img, $tgt_img];
 
@@ -36,7 +36,7 @@ $drawtriangle = imagefilledpolygon($RSR_base, $triangle,
 imagepng($RSR_base, $tgt_img);
 var_dump(md5_file($tgt_img));
 foreach($arrAffine as $aff) {
-    $dst = tempnam('/tmp', 'test-imageaffine');
+    $dst = tempnam(sys_get_temp_dir(), 'test-imageaffine');
     $toDelete[] = $dst;
     $RSRaff2 = imageaffine($RSR_base, $aff, $arrClip);
     imagepng($RSRaff2, $dst, 9);

@@ -1,2 +1,2 @@
 
-Warning: Unable to open '/tmp/foo' for writing in %s on line 10
+Warning: Unable to open '%s/foo' for writing in %s on line 10

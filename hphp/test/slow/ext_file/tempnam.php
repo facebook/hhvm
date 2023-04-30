@@ -3,12 +3,12 @@
 
 <<__EntryPoint>>
 function main_tempnam() {
-$x = tempnam("/tmp/", "xxxx");
+$x = tempnam(sys_get_temp_dir()."/", "xxxx");
 var_dump(strpos($x, '//') === false);
 
-$x = tempnam("/tmp//", "xxxx");
+$x = tempnam(sys_get_temp_dir()."//", "xxxx");
 var_dump(strpos($x, '//') === false);
 
-$x = tempnam("/tmp///", "xxxx");
+$x = tempnam(sys_get_temp_dir()."///", "xxxx");
 var_dump(strpos($x, '//') === false);
 }

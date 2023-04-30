@@ -85,7 +85,7 @@ function do_request($scheme, $port, $context) {
 
 <<__EntryPoint>>
 function main_persistent_socket() {
-$pemfile = tempnam('/tmp', 'sslservertest');
+$pemfile = tempnam(sys_get_temp_dir(), 'sslservertest');
 
 $certdata = darray['countryName' => 'US',
                   'stateOrProvinceName' => 'California',

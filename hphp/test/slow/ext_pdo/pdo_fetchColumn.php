@@ -22,7 +22,7 @@ function cleanupSqliteTestTable($tmp_sqlite) {
 
 <<__EntryPoint>>
 function main_pdo_fetch_column() {
-$tmp_sqlite = tempnam('/tmp', 'vmpdotest');
+$tmp_sqlite = tempnam(sys_get_temp_dir(), 'vmpdotest');
 
 createSqliteTestTable($tmp_sqlite);
 

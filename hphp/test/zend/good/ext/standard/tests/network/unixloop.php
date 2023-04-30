@@ -1,13 +1,14 @@
 <?hh <<__EntryPoint>> function main(): void {
+$sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
 $uniqid = uniqid();
-if (file_exists("/tmp/$uniqid.sock"))
+if (file_exists($sockdir."/$uniqid.sock"))
     die('Temporary socket already exists.');
 
 /* Setup socket server */
 $errno = null;
 $errstr = null;
 $server = stream_socket_server(
-  "unix:///tmp/$uniqid.sock",
+  "unix://".$sockdir."/$uniqid.sock",
   inout $errno,
   inout $errstr
 );
@@ -16,7 +17,7 @@ if (!$server) {
 }
 
 /* Connect to it */
-$client = stream_socket_client("unix:///tmp/$uniqid.sock", inout $errno, inout $errstr);
+$client = stream_socket_client("unix://".$sockdir."/$uniqid.sock", inout $errno, inout $errstr);
 if (!$client) {
     die('Unable to create AF_UNIX socket [client]');
 }
@@ -36,5 +37,5 @@ var_dump($data);
 fclose($client);
 fclose($socket);
 fclose($server);
-unlink("/tmp/$uniqid.sock");
+unlink($sockdir."/$uniqid.sock");
 }

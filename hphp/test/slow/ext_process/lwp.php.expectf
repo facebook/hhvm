@@ -8,12 +8,12 @@ heh
 hello
 world
 bool(true)
-/tmp
+%s/temp
 hello
 world
 bool(true)
 bool(true)
-/tmp
+%s/temp
 bool(true)
 bool(true)
 please

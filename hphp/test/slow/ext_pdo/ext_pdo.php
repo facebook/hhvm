@@ -35,7 +35,7 @@ class MyStatement extends PDOStatement {
 
 <<__EntryPoint>>
 function main_ext_pdo() {
-  $tmp_sqllite = tempnam('/tmp', 'vmpdotest');
+  $tmp_sqllite = tempnam(sys_get_temp_dir(), 'vmpdotest');
 
   ///////////////////////////////////////////////////////////////////////////////
 

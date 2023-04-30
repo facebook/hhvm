@@ -1,22 +1,25 @@
 <?hh
 function test() {
-  unlink('/tmp/1link');
-  unlink('/tmp/1tmp');
-  unlink('/tmp/testfile1');
+  $f1 = sys_get_temp_dir() . '/1link';
+  $f2 = sys_get_temp_dir() . '/1tmp';
+  $f3 = sys_get_temp_dir() . '/testfile1';
+  unlink($f1);
+  unlink($f2);
+  unlink($f3);
 
-  file_put_contents('/tmp/testfile1', 'ok');
-  symlink('/tmp/testfile1', '/tmp/1tmp');
-  rename('/tmp/1tmp', '/tmp/1link');
-  echo file_get_contents('/tmp/1link')."\n";
+  file_put_contents($f3, 'ok');
+  symlink($f3, $f2);
+  rename($f2, $f1);
+  echo file_get_contents($f1)."\n";
 
-  unlink('/tmp/1link');
+  unlink($f1);
   clearstatcache(true);
 
-  echo file_get_contents('/tmp/1link')."\n";
+  echo file_get_contents($f1)."\n";
 
-  unlink('/tmp/1link');
-  unlink('/tmp/1tmp');
-  unlink('/tmp/testfile1');
+  unlink($f1);
+  unlink($f2);
+  unlink($f3);
 }
 <<__EntryPoint>> function main(): void {
 @test();

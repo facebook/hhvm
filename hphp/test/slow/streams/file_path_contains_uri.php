@@ -6,7 +6,7 @@
  * /tmp/foo/http - if it is, an unknown stream type warning will be raised.
  */
 function main() {
-  $root = tempnam('/tmp', 'hhvmtest');
+  $root = tempnam(sys_get_temp_dir(), 'hhvmtest');
   unlink($root);
   mkdir($root);
   $fnam = $root.'/http://example.com';

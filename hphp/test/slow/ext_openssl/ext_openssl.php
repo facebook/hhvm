@@ -14,7 +14,7 @@ function test_openssl_csr_export_to_file() {
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
 
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   openssl_csr_export_to_file($csr, $tmp);
@@ -93,7 +93,7 @@ function test_openssl_pkcs12_export_to_file() {
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
 
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   openssl_pkcs12_export_to_file($scert, $tmp, $privkey, "1234");
@@ -128,8 +128,8 @@ function test_openssl_pkcs7_sign() {
   VERIFY($pubkey != null);
 
   $data = "some secret data";
-  $infile = tempnam('/tmp', 'invmtestopenssl');
-  $outfile = tempnam('/tmp', 'outvmtestopenssl');
+  $infile = tempnam(sys_get_temp_dir(), 'invmtestopenssl');
+  $outfile = tempnam(sys_get_temp_dir(), 'outvmtestopenssl');
   unlink($infile);
   unlink($outfile);
   file_put_contents($infile, $data);
@@ -138,7 +138,7 @@ function test_openssl_pkcs7_sign() {
          ($infile, $outfile, $scert, $privkey,
           darray["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
 
-  $tmp = tempnam('/tmp', 'x509vmtestopenssl');
+  $tmp = tempnam(sys_get_temp_dir(), 'x509vmtestopenssl');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));
@@ -150,7 +150,7 @@ function test_openssl_pkcs7_sign() {
 }
 
 function test_openssl_pkey_export_to_file() {
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
 
@@ -298,7 +298,7 @@ function test_openssl_x509_export_to_file() {
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
 
-  $tmp = tempnam('/tmp', 'x509vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'x509vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($cert, $tmp));

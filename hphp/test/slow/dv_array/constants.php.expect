@@ -7,9 +7,6 @@ vec(2) {
   int(100)
   string(5) "value"
 }
-vec(1) {
-  resource(1) of type (stream)
-}
 dict(2) {
   ["a"]=>
   int(100)
@@ -22,12 +19,6 @@ dict(2) {
   [500]=>
   int(800)
 }
-dict(1) {
-  [100]=>
-  resource(1) of type (stream)
-}
-bool(true)
-bool(true)
 bool(true)
 bool(true)
 bool(true)

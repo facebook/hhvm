@@ -1,18 +1,5 @@
 <?hh
 
-const vec<mixed> VALS = vec[
-  null,
-  false,
-  true,
-  0,
-  42,
-  1.234,
-  'foobar',
-  '',
-  '1234',
-  '1.234',
-  STDIN,
-];
 
 function with_exn(inout $x, $fn): void {
   try {
@@ -24,11 +11,24 @@ function with_exn(inout $x, $fn): void {
 
 <<__EntryPoint>>
 function main(): void {
-  $preinc  = VALS;
-  $postinc = VALS;
-  $predec  = VALS;
-  $postdec = VALS;
-  foreach (VALS as $i => $val) {
+  $vals = vec[
+    null,
+    false,
+    true,
+    0,
+    42,
+    1.234,
+    'foobar',
+    '',
+    '1234',
+    '1.234',
+    HH\stdin(),
+  ];
+  $preinc  = $vals;
+  $postinc = $vals;
+  $predec  = $vals;
+  $postdec = $vals;
+  foreach ($vals as $i => $val) {
     var_dump($val);
     echo "preinc<";
     with_exn(inout $preinc[$i], (inout $o) ==> ++$o);

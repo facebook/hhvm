@@ -1,24 +1,23 @@
 <?hh
 
-const vec<mixed> VALS = vec[
-  0,
-  -10,
-  1.234,
-  INF,
-  NAN,
-  true,
-  false,
-  null,
-  STDIN,
-  "string",
-  varray[42],
-  dict['foobar' => false],
-];
-
 <<__EntryPoint>>
 function main(): void {
-  foreach(VALS as $i) {
-    foreach(VALS as $j) {
+  $vals = vec[
+    0,
+    -10,
+    1.234,
+    INF,
+    NAN,
+    true,
+    false,
+    null,
+    HH\stdin(),
+    "string",
+    varray[42],
+    dict['foobar' => false],
+  ];
+  foreach($vals as $i) {
+    foreach($vals as $j) {
       echo '$i '; var_dump($i); echo '$j '; var_dump($j);
       do_the_thing($i, $j);
     }

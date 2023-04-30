@@ -25,7 +25,7 @@ class A {
   public varray $p5a = varray[1, 2, 3]; /* TODO: remove */
   public varray $p5b = varray[1, 2, 3];
   public darray $p5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
-  public resource $p6 = STDIN;
+  public ?resource $p6 = null;
   public nonnull $p7 = 123;
   public num $p8 = 456;
   public arraykey $p9 = 'abc';
@@ -177,7 +177,7 @@ class A {
   public static varray $s5a = varray[1, 2, 3];
   public static varray $s5b = varray[1, 2, 3];
   public static darray $s5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
-  public static resource $s6 = STDIN;
+  public static ?resource $s6 = null;
   public static nonnull $s7 = 123;
   public static num $s8 = 456;
   public static arraykey $s9 = 'abc';

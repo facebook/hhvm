@@ -1,19 +1,5 @@
 <?hh
 
-const vec<mixed> VALS = vec[
-  0,
-  -10,
-  1.234,
-  INF,
-  NAN,
-  true,
-  false,
-  null,
-  STDIN,
-  "string",
-  varray[42],
-  dict['foobar' => false],
-];
 
 function with_exn($fn): mixed {
   try {
@@ -26,7 +12,21 @@ function with_exn($fn): mixed {
 
 <<__EntryPoint>>
 function main(): void {
-  foreach(VALS as $i) {
+  $vals = vec[
+    0,
+    -10,
+    1.234,
+    INF,
+    NAN,
+    true,
+    false,
+    null,
+    HH\stdin(),
+    "string",
+    varray[42],
+    dict['foobar' => false],
+  ];
+  foreach($vals as $i) {
     if ($i is float || $i is int) {
       echo '$i '; var_dump($i);
       echo 'not<';
@@ -34,7 +34,7 @@ function main(): void {
       echo with_exn(() ==> ~$i);
       echo ">\n";
     }
-    foreach(VALS as $j) {
+    foreach($vals as $j) {
       echo '$i '; var_dump($i); echo '$j '; var_dump($j);
       and($i, $j);
       or($i, $j);

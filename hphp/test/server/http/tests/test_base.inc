@@ -16,9 +16,10 @@ function runTest($testController, $customArgs = '', $repoArgs = '') {
     $testController($serverPort);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
-    error_log("Caught exception, test failed, pid=$pid, exn=".$e->getMessage());
+    error_log("Caught exception, test failed, pid=$pid, exn=\n".(string)$e);
     killChildren($pid);
     if ($serverProc) proc_close($serverProc);
     error_log('test failed');
+    exit(-1);
   }
 }

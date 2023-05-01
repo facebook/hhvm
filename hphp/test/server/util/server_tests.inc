@@ -52,37 +52,38 @@ function dumpLogFilesToStdoutAndDie() {
   sleep(1);
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test$test_run_id.log");
+  @readfile("{$LOG_ROOT}_test$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server$test_run_id.log");
+  @readfile("{$LOG_ROOT}_test_server$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stdout$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  @readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stderr$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  @readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_client$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_client$test_run_id.log");
+  @readfile("{$LOG_ROOT}_test_client$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_sandbox_access.log'");
-  readfile("{$LOG_ROOT}_test_sandbox_access.log");
+  @readfile("{$LOG_ROOT}_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_curl$test_run_id.log'");
-  readfile("{$LOG_ROOT}_curl$test_run_id.log");
+  @readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
 
-  $log_data = file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
+  $log_data = @file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
   $hits = null;
   if (
+    $log_data !== false &&
     preg_match_with_matches(
       '#\nStack trace in ([a-zA-Z0-9._/-]+)\n#',
       $log_data,

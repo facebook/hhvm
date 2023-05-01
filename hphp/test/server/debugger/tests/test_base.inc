@@ -65,10 +65,11 @@ function runTest($testName, $testController) {
     echo stream_get_contents($pipes[2]);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
-    error_log("Caught exception, test failed, pid=$pid");
+    error_log("Caught exception, test failed, pid=$pid, exn=\n".(string)$e);
     killChildren(posix_getpid());
     if ($serverProc) proc_close($serverProc);
     error_log('test failed');
+    exit(-1);
   }
 }
 

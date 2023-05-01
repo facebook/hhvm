@@ -223,9 +223,10 @@ class TestWebServer implements IDisposable {
     } catch (Exception $e) {
       $pid = posix_getpid();
       error_log(
-        "Caught exception, test failed, pid=$pid, exn=".$e->getMessage()
+        "Caught exception, test failed, pid=$pid, exn=\n".(string)$e
       );
       $this->killServer();
+      exit(-1);
     }
   }
 

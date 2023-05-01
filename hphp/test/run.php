@@ -856,6 +856,8 @@ function hhvm_cmd_impl(
       '-vEval.JitWorkerThreads=1',
       '-vEval.JitWorkerThreadsForSerdes=1',
 
+      '-vDebug.CoreDumpReportDirectory='.Status::getWorkingDir(),
+
       extra_args($options),
     ];
 
@@ -1094,6 +1096,7 @@ function hphp_cmd(Options $options, string $test): string {
     $hdf,
     '--repo-options-dir='.\dirname($test),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
+    '-vRuntime.Debug.CoreDumpReportDirectory='.Status::getWorkingDir(),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.
     // In order to test those optimizations (which are part of a normal prod
@@ -1133,94 +1136,185 @@ function hhbbc_cmd(Options $options, string $test): string {
   ]);
 }
 
-// Execute $cmd and return its output on failure, including any stacktrace.log
-// file it generated. Return null on success.
-function exec_with_stack(string $cmd): ?string {
+// Split the output into everything before a stack trace dump and
+// everything after (including the dump).
+function split_stack_trace_from_output(string $str): (string, string) {
+  $before = vec[];
+  $after = vec[];
+  $found = false;
+  // Any of the below strings indicate the beginning of a crash
+  // report.
+  foreach (explode("\n", $str) as $line) {
+    if (!$found) {
+      if (stripos($line, "Core dumped") === 0 ||
+          stripos($line, "Stack trace in") === 0 ||
+          stripos($line, "Assertion Failure") !== false) {
+        $found = true;
+      }
+    }
+    if ($found) {
+      $after[] = $line;
+    } else {
+      $before[] = $line;
+    }
+  }
+  // Only provide the last 200 lines of before the dump.
+  return tuple(
+    implode("\n", array_slice($before, -200)),
+    implode("\n", $after)
+  );
+}
+
+// Run the specified command with a TIMEOUT_SECONDS timeout. If the
+// command is successful, return a tuple containing the command's
+// output and true. If unsuccessful, return a tuple containing an
+// error message containing useful information and false. A command is
+// judged to fail if it returns a non-successful error code, writes to
+// stderr (we redirect stderr to stdout), or times out.
+function exec_with_timeout(string $cmd,
+                           ?dict<string, mixed> $env = null,
+                           ?keyset<int> $success_codes = null): (string, bool) {
+  if ($success_codes is null) $success_codes = keyset[0];
+
   $pipes = null;
-  $proc = proc_open($cmd,
-                    dict[0 => vec['pipe', 'r'],
-                          1 => vec['pipe', 'w'],
-                          2 => vec['pipe', 'w']], inout $pipes);
+  // Use exec so that the shell execs the command directly instead of
+  // forking. Redirect stderr to stdout because the tests will write
+  // to both.
+  $proc = proc_open(
+    'exec ' . $cmd . ' 2>&1',
+    dict[0 => vec['pipe', 'r'],
+         1 => vec['pipe', 'w'],
+         2 => vec['pipe', 'w']],
+    inout $pipes,
+    null,
+    $env
+  );
   $pipes as nonnull;
   fclose($pipes[0]);
-  $s = '';
-  $all_selects_failed=true;
+
+  stream_set_blocking($pipes[1], false);
+  stream_set_blocking($pipes[2], false);
+
+  $stdout = '';
+  $stderr = '';
+
+  // Loop, reading stdout and stderr until both stdout and stderr are
+  // closed, the process terminates, or we timeout.
   $end = mtime() + TIMEOUT_SECONDS;
-  $timedout = false;
+  $status = proc_get_status($proc);
   while (true) {
     $now = mtime();
     if ($now >= $end) break;
-    $read = vec[$pipes[1], $pipes[2]];
+
+    $read = vec[];
+    if (!feof($pipes[1])) $read[] = $pipes[1];
+    if (!feof($pipes[2])) $read[] = $pipes[2];
+    if (!count($read)) break;
+
     $write = null;
     $except = null;
+
+    // Don't wait longer than 5 seconds at a time so we can poll for
+    // the process exiting without closing stdout/stderr. This can
+    // happen if the process forks (the forked child can survive and
+    // keep the output open). If the process has already exited, don't
+    // sleep at all, because we're trying to drain all output.
+    $timeout = (int)min(
+      ($end - $now) * 1000000,
+      $status['running'] ? 5000000 : 0
+    );
     $available = @stream_select(
       inout $read,
       inout $write,
       inout $except,
-      (int)($end - $now),
+      0,
+      $timeout
     );
-    if ($available === false) {
-      usleep(1000);
-      $s .= "select failed:\n" . print_r(error_get_last(), true);
+    if ($available === false) continue;
+    if ($available === 0) {
+      if ($status['running']) $status = proc_get_status($proc);
+      if (!$status['running']) break;
       continue;
     }
-    $all_selects_failed=false;
-    if ($available === 0) continue;
+
     $read as nonnull;
     foreach ($read as $pipe) {
-      $t = fread($pipe, 4096);
+      $t = fread($pipe, 8*1024);
       if ($t === false) continue;
-      $s .= $t;
+      if ($pipe === $pipes[1]) {
+        $stdout .= $t;
+      } else if ($pipe === $pipes[2]) {
+        $stderr .= $t;
+      }
     }
-    if (feof($pipes[1]) && feof($pipes[2])) break;
   }
-  fclose($pipes[1]);
-  fclose($pipes[2]);
-  while (true) {
+  @fclose($pipes[1]);
+  @fclose($pipes[2]);
+
+  $timedout = false;
+  while ($status['running']) {
     $status = proc_get_status($proc);
     if (!$status['running']) break;
     $now = mtime();
     if ($now >= $end) {
       $timedout = true;
-      $output = null;
-      $return_var = -1;
-      exec('pkill -P ' . $status['pid'] . ' 2> /dev/null', inout $output, inout $return_var);
-      posix_kill($status['pid'], SIGTERM);
+      $ignore1 = '';
+      $ignore2 = 0;
+      // We've timed out. Kill the command and any children it might
+      // have created.
+      @exec(
+        'pkill --signal 9 -P ' . $status['pid'] . ' 2> /dev/null',
+        inout $ignore1,
+        inout $ignore2
+      );
+      posix_kill($status['pid'], SIGKILL);
     }
-    usleep(1000);
+    // Sleep then loop until the process actually terminates.
+    usleep(500000);
   }
+
+  $exit_code = $status['exitcode'];
   proc_close($proc);
+
+  if (!$timedout && C\contains($success_codes, $exit_code) && !$stderr) {
+    return tuple($stdout, true);
+  }
+
+  // The command failed. Construct a useful error message.
+  $error = "Running '$cmd' failed ";
   if ($timedout) {
-    if ($all_selects_failed) {
-      return "All selects failed running `$cmd'\n\n$s";
-    }
-    return "Timed out running `$cmd'\n\n$s";
+    $error .= ' (timed out and was killed)';
+  } else {
+    $error .= " (exit-code $exit_code)";
   }
-  if (
-    !$status['exitcode'] &&
-    !preg_match('/\\b(error|exception|fatal)\\b/', $s)
-  ) {
-    return null;
-  }
+  if ($stderr) $error .= ' (wrote to stderr)';
+
+  list($before_dump, $dump) = split_stack_trace_from_output($stdout);
+
   $pid = $status['pid'];
-  $stack =
-    @file_get_contents("/tmp/stacktrace.$pid.log") ?:
-    @file_get_contents("/var/tmp/cores/stacktrace.$pid.log");
-  if ($stack !== false) {
-    $s .= "\n" . $stack;
+  $stack_file = Status::getWorkingDir(). "/stacktrace.$pid.log";
+  $stack = @file_get_contents($stack_file);
+
+  if ($stack) {
+    $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
+    $error .= "\nContents of $stack_file:\n$stack";
+  } else if ($dump) {
+    $error .= "\nstdout:\n$dump\nstderr:\n$stderr";
+  } else {
+    $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
   }
-  return "Running `$cmd' failed (".$status['exitcode']."):\n\n$s";
+  return tuple($error, false);
 }
 
 function repo_mode_compile(Options $options, string $test): bool {
   $hphp = hphp_cmd($options, $test);
-  $result = exec_with_stack($hphp);
-  if ($result is null && repo_separate($options, $test)) {
+  list($output, $success) = exec_with_timeout($hphp);
+  if ($success && repo_separate($options, $test)) {
     $hhbbc = hhbbc_cmd($options, $test);
-    $result = exec_with_stack($hhbbc);
+    list($output, $success) = exec_with_timeout($hhbbc);
   }
-  if ($result is null) return true;
-  Status::writeDiff($test, $result);
+  if ($success) return true;
+  Status::writeDiff($test, $output);
   return false;
 }
 
@@ -3219,40 +3313,26 @@ function run_config_server(Options $options, string $test): mixed {
   }
   curl_close($ch);
 
-  return run_config_post(tuple($output, '', 0), $test, $options);
+  return run_config_post($output, $test, $options, false);
 }
 
 function run_config_cli(
-  Options $options,
   string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
-): ?(string, string, int) {
-  $cmd = timeout_prefix() . $cmd;
-
-  $descriptorspec = dict[
-    0 => vec["pipe", "r"],
-    1 => vec["pipe", "w"],
-    2 => vec["pipe", "w"],
-  ];
-  $pipes = null;
-  $process = proc_open(
-    "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
-  );
-  if (!is_resource($process)) {
-    Status::writeDiff($test, "Couldn't invoke $cmd");
+  bool $assert_verify = false
+): ?string {
+  $exit_codes = $assert_verify ? keyset[255, 127] : keyset[0, 1];
+  $file = $test.'.exit_code';
+  if (file_exists($file)) {
+    $exit_codes = keyset[(int)trim(file_get_contents($file))];
+  }
+  list($output, $success) = exec_with_timeout($cmd, $cmd_env, $exit_codes);
+  if (!$success) {
+    Status::writeDiff($test, $output);
     return null;
   }
-
-  $pipes as nonnull;
-  fclose($pipes[0]);
-  $output = stream_get_contents($pipes[1]);
-  $stderr = stream_get_contents($pipes[2]);
-  fclose($pipes[1]);
-  fclose($pipes[2]);
-  $exit_code = proc_close($process);
-
-  return tuple($output, $stderr, $exit_code);
+  return $output;
 }
 
 function replace_object_resource_ids(string $str, string $replacement): string {
@@ -3264,38 +3344,12 @@ function replace_object_resource_ids(string $str, string $replacement): string {
   );
 }
 
-// Attempt to extract useful crash information from stdout. Ideally we
-// could just print stderr, but a test might output text to stderr (even
-// when the test is working). When we run the test, we direct stderr
-// to stdout anyways. So, any crash information is printed to stdout.
-function trim_error_stdout(string $str): string {
-  $trimmed = vec[];
-  $found_dump = false;
-  // Any of the below strings indicate the beginning of a crash
-  // report, so only return anything starting with that.
-  foreach (explode("\n", $str) as $line) {
-    if (!$found_dump) {
-      if (stripos($line, "Core dumped") === 0 ||
-          stripos($line, "Stack trace in") === 0 ||
-          stripos($line, "Assertion Failure") !== false) {
-        $found_dump = true;
-      }
-    }
-    if ($found_dump) $trimmed[] = $line;
-  }
-  if ($found_dump) return implode("\n", $trimmed);
-  // If we didn't find anything that looked like a crash report, just
-  // supply the last 100. Hopefully there's something there that's
-  // useful.
-  return implode("\n", array_slice(explode("\n", $str), -100));
-}
-
 function run_config_post(
-  (string, string, int) $outputs,
+  string $output,
   string $test,
   Options $options,
-): mixed {
-
+  bool $assert_verify
+): bool {
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file is null || $type is null) {
     Status::writeDiff(
@@ -3307,26 +3361,19 @@ function run_config_post(
     return false;
   }
 
-  $check_hhbbc_error = $options->repo
-    && (file_exists($test . '.hhbbc_assert') ||
-        file_exists($test . '.hphpc_assert'));
-
   $repeats = 0;
-  if (!$check_hhbbc_error) {
+  if (!$assert_verify) {
     if ($options->retranslate_all is nonnull) {
       $repeats = (int)$options->retranslate_all * 2;
     }
-
     if ($options->recycle_tc is nonnull) {
       $repeats = (int)$options->recycle_tc;
     }
-
     if ($options->cli_server) {
       $repeats = 3;
     }
   }
 
-  list($output, $stderr, $exit_code) = $outputs;
   if (!$repeats) {
     $split = vec[trim($output)];
   } else {
@@ -3335,39 +3382,6 @@ function run_config_post(
 
   $output = str_replace(MULTI_REQUEST_SEP, '', $output);
   file_put_contents(Status::getTestWorkingDir($test) . '/out', $output);
-
-  // Exit code is 1 for things like fatal errors, which aren't actual
-  // crashes.
-  if (!$check_hhbbc_error) {
-    $exit_code_file = $test . '.exit_code';
-    if (file_exists($exit_code_file)) {
-      $ok = ((int)trim(file_get_contents($exit_code_file)) === $exit_code);
-    } else {
-      $ok = ($exit_code === 0 || $exit_code === 1);
-    }
-
-    if (!$ok) {
-      $trimmed = trim_error_stdout($output);
-      Status::writeDiff(
-        $test,
-        "Test failed because the process returned exit code $exit_code" .
-        (($exit_code === 124) ? " (timed out)" : "") .
-        "\nstderr:\n$stderr\nstdout:\n$trimmed"
-      );
-      return false;
-    }
-  }
-
-  // hhvm redirects errors to stdout, so anything on stderr is really bad.
-  if ($stderr && !$check_hhbbc_error) {
-    $trimmed = trim_error_stdout($output);
-    Status::writeDiff(
-      $test,
-      "Test failed because the process wrote on stderr:" .
-      "\n$stderr\nstdout:\n$trimmed"
-    );
-    return false;
-  }
 
   if ($repeats > 0 && count($split) != $repeats) {
     Status::writeDiff(
@@ -3431,44 +3445,19 @@ function run_config_post(
   }
 }
 
-// Not all versions of /usr/bin/timeout support the options we want. Test to
-// see if it does.
-<<__Memoize>>
-function timeout_supports_options(): string {
-  $output = null;
-  $exit_code = -1;
-  $opts = ' -v -k 30';
-  exec(
-    '/usr/bin/timeout' . $opts . ' 1000 /usr/bin/true 2> /dev/null',
-    inout $output,
-    inout $exit_code
-  );
-  if ($exit_code === 0) return $opts;
-  return '';
-}
-
-function timeout_prefix(): string {
-  if (is_executable('/usr/bin/timeout')) {
-    return
-      '/usr/bin/timeout' . timeout_supports_options() . ' ' .
-      TIMEOUT_SECONDS . ' ';
-  } else {
-    return hphp_home() . '/hphp/tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
-  }
-}
-
 function run_foreach_config(
   Options $options,
   string $test,
   vec<string> $cmds,
   dict<string, mixed> $cmd_env,
-): mixed {
+  bool $assert_verify = false
+): bool {
   invariant(count($cmds) > 0, "run_foreach_config: no modes");
   $result = false;
   foreach ($cmds as $cmd) {
-    $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
-    if ($outputs is null) return false;
-    $result = run_config_post($outputs, $test, $options);
+    $output = run_config_cli($test, $cmd, $cmd_env, $assert_verify);
+    if ($output is null) return false;
+    $result = run_config_post($output, $test, $options, $assert_verify);
     if (!$result) return $result;
   }
   return $result;
@@ -3586,22 +3575,23 @@ function run_repo_test(
 ): mixed {
   if (file_exists($test . '.hphpc_assert')) {
     $hphp = hphp_cmd($options, $test);
-    return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
+    return run_foreach_config($options, $test, vec[$hphp], $hhvm_env, true);
   } else if (file_exists($test . '.hhbbc_assert')) {
     $hphp = hphp_cmd($options, $test);
     if (repo_separate($options, $test)) {
-      $result = exec_with_stack($hphp);
-      if ($result is string) return false;
+      list($output, $success) = exec_with_timeout($hphp);
+      if (!$success) {
+        Status::writeDiff($test, $output);
+        return false;
+      }
       $hhbbc = hhbbc_cmd($options, $test);
-      return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
+      return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env, true);
     } else {
-      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
+      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env, true);
     }
   }
 
-  if (!repo_mode_compile($options, $test)) {
-    return false;
-  }
+  if (!repo_mode_compile($options, $test)) return false;
 
   if ($options->hhbbc2) {
     invariant(
@@ -3616,9 +3606,9 @@ function run_repo_test(
     $working_dir = Status::getTestWorkingDir($test);
     shell_exec("mv $working_dir/hhvm.hhbbc $working_dir/hhvm.hhbc");
     $hhbbc = hhbbc_cmd($options, $test);
-    $result = exec_with_stack($hhbbc);
-    if ($result is string) {
-      Status::writeDiff($test, $result);
+    list($output, $success) = exec_with_timeout($hhbbc);
+    if (!$success) {
+      Status::writeDiff($test, $output);
       return false;
     }
     $hhas_temp2 = dump_hhas_to_temp($hhvm[0], $test, 'after');
@@ -3636,11 +3626,11 @@ function run_repo_test(
   if ($options->jit_serialize is nonnull) {
     invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
     $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-    $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-    if ($outputs is null) return false;
+    $output = run_config_cli($test, $cmd, $hhvm_env);
+    if ($output is null) return false;
     $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-    $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-    if ($outputs is null) return false;
+    $output = run_config_cli($test, $cmd, $hhvm_env);
+    if ($output is null) return false;
     $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
   }
 

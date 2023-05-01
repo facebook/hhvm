@@ -1117,18 +1117,12 @@ let full_init
       env
       cgroup_steps
   in
+  ServerInitCommon.validate_no_errors Errors.Parsing env.errorl;
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
       ~source:SearchUtils.Init;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let defs_per_file =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:defs_per_file
-  in
   let fnl = Relative_path.Map.keys defs_per_file in
   let env =
     if is_check_mode then
@@ -1322,16 +1316,10 @@ let post_saved_state_initialization
         ~telemetry_label:"post_ss1.naming"
         ~cgroup_steps
     in
+    ServerInitCommon.validate_no_errors Errors.Parsing env.errorl;
 
     (* Add all files from defs_per_file to the files_info object *)
     let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-    let defs_per_file =
-      Relative_path.Set.fold
-        failed_parsing
-        ~f:(fun x m -> Relative_path.Map.remove m x)
-        ~init:defs_per_file
-    in
     (* Separate the dirty files from the files whose decl only changed *)
     (* Here, for each dirty file, we compare its hash to the one saved
        in the saved state. If the hashes are the same, then the declarations

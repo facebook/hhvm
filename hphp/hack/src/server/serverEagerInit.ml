@@ -96,14 +96,8 @@ let init
       ~telemetry_label:"eager.init.naming"
       ~cgroup_steps
   in
+  ServerInitCommon.validate_no_errors Errors.Parsing env.errorl;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let defs_per_file =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:defs_per_file
-  in
   let (env, t) =
     match lazy_level with
     | Off -> type_decl genv env defs_per_file t

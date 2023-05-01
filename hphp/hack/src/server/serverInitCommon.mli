@@ -42,6 +42,9 @@ val update_reverse_naming_table_from_env_and_get_duplicate_name_errors :
   cgroup_steps:CgroupProfiler.step_group ->
   ServerEnv.env * float
 
+(** Just a quick validation that there are no errors in this phase *)
+val validate_no_errors : Errors.phase -> Errors.t -> unit
+
 (** This function has two different behaviors:
 - For the normal case, it adds the provided list of files into [env.needs_recheck].
   It also sets [env.full_check_status=Full_check_started] which is important for

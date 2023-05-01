@@ -104,6 +104,25 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
+let validate_no_errors (phase : Errors.phase) (errors : Errors.t) : unit =
+  let witness_opt =
+    Errors.fold_errors
+      ~phase
+      errors
+      ~init:None
+      ~f:(fun path _phase error _acc -> Some (path, error))
+  in
+  match witness_opt with
+  | None -> ()
+  | Some (path, error) ->
+    let error = User_error.to_absolute error |> Errors.to_string in
+    Hh_logger.log "Unexpected error during init: %s" error;
+    HackEventLogger.invariant_violation_bug
+      "unexpected error during init"
+      ~path
+      ~data:error;
+    ()
+
 let log_type_check_end
     env
     genv

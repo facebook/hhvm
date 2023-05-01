@@ -813,10 +813,17 @@ functor
          inside [Typing_check_service.go_with_interrupt] because they want to push errors
          as soon as they're discovered.
 
-         This code is honestly a bit mysterious: errorl' includes mostly [phase=Errors.Typing] errors,
-         but in places where it called Ast_provider then it also includes [phase=Errors.Parsing] errors.
-         The following call will erase from [errors] all pre-existing [Errors.Typing] that came
-         in [files_checked]. But shouldn't it also erase pre-existing [Errors.Parsing] ones too? *)
+         How exactly does it work? The first call removes from [errors] every [Errors.Parsing] error
+         that was in [files_checked], and the second call removes every [Errors.Typing] error that
+         was in [files_checked]. The second call also adds every error in [errorl'] which we expect
+         consists soley of [Errors.Parsing|Typing] in a subset of [files_checked]. *)
+      let errors =
+        Errors.incremental_update
+          ~old:errors
+          ~new_:Errors.empty
+          ~rechecked:files_checked
+          Errors.Parsing
+      in
       let errors =
         Errors.incremental_update
           ~old:errors
@@ -970,20 +977,6 @@ functor
       let errors = env.errorl in
       let (env, defs_per_file_parsed) =
         indexing genv env files_to_parse cgroup_steps
-      in
-      (* The following function removes from [errors] any [phase=Errors.Parsing] errors
-         whose filename is in the set [files_to_parse]. How might they have gotten there? ...
-         from [do_typing] in a previous typecheck. *)
-      let (env, errors, time_errors_pushed) =
-        push_and_accumulate_errors
-          (env, errors)
-          Errors.empty
-          ~do_errors_file:false
-          ~rechecked:files_to_parse
-          ~phase:Errors.Parsing
-      in
-      let time_first_error =
-        Option.first_some time_first_error time_errors_pushed
       in
 
       let hs = SharedMem.SMTelemetry.heap_size () in
@@ -1237,7 +1230,7 @@ functor
       (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
          will report all errors in [files_to_check] mostly using the Errors.Typing phase, but also
          Errors.Parsing phase for those that arose from ast_provider.ml.
-         But there might be other Errors.Typing errors in env.errorl from a previous round of typecheck,
+         But there might be other [Errors.Typing|Parsing] errors in [env.errorl] from a previous round of typecheck,
          but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
          It remains open for discussion whether the user-experience would be better to have these
          not-in-fanout errors reported here before the typecheck starts, or later after the typecheck

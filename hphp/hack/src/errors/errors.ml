@@ -15,8 +15,6 @@ type error_code = int
 type phase =
   | Naming
       (** these errors come from [ServerTypeCheck.type_check_core] when it indexes files that have changed, to update the naming table *)
-  | Decl
-      (** I don't believe errors in this phase are ever created, anywhere in the codebase... *)
   | Typing
       (** these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file *)
 [@@deriving eq, show, enum]
@@ -62,7 +60,6 @@ module PhaseMap = struct
 
     let rank = function
       | Naming -> 2
-      | Decl -> 3
       | Typing -> 4
 
     let compare x y = rank x - rank y
@@ -341,13 +338,11 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 let phase_to_string (phase : phase) : string =
   match phase with
   | Naming -> "Naming"
-  | Decl -> "Decl"
   | Typing -> "Typing"
 
 let phase_of_string (value : string) : phase option =
   match Caml.String.lowercase_ascii value with
   | "naming" -> Some Naming
-  | "decl" -> Some Decl
   | "typing" -> Some Typing
   | _ -> None
 

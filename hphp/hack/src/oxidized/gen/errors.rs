@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<49727d475b28fc8d2b44456105323b6d>>
+// @generated SignedSource<<d92f9c21cf95e69ee0e989da68bf7f13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,8 +49,6 @@ pub type ErrorCode = isize;
 pub enum Phase {
     /// these errors come from [ServerTypeCheck.type_check_core] when it indexes files that have changed, to update the naming table
     Naming,
-    /// I don't believe errors in this phase are ever created, anywhere in the codebase...
-    Decl,
     /// these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file
     Typing,
 }

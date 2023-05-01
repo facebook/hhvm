@@ -1288,6 +1288,7 @@ let post_saved_state_initialization
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper
   in
+  let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
     ~source:SearchUtils.TypeChecker;
@@ -1315,14 +1316,40 @@ let post_saved_state_initialization
     in
     ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
 
-    (* Add all files from defs_per_file to the files_info object *)
-    let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-    (* Separate the dirty files from the files whose decl only changed *)
-    (* Here, for each dirty file, we compare its hash to the one saved
-       in the saved state. If the hashes are the same, then the declarations
-       on the file have not changed and we only need to retypecheck that file,
-       not all of its dependencies.
-       We call these files "similar" to their previous versions. *)
+    let env =
+      {
+        env with
+        clock;
+        naming_table = Naming_table.combine old_naming_table env.naming_table;
+        disk_needs_parsing = Relative_path.Set.empty;
+        needs_recheck =
+          Relative_path.Set.union env.needs_recheck files_with_old_errors;
+      }
+    in
+
+    (***********************************************************
+      FANOUT.
+      What files should be checked?
+
+      We've already said that files-with-errors from the dirty saved state must be
+      rechecked. And we've already produced "duplicate name" errors if needed from
+      all the changed files. The question remaining is, what fanout should be checked?
+
+      Here, for each changed file, we compare its hash to the one saved
+      in the saved state. If the hashes are the same, then the declarations
+      on the file have not changed and we only need to retypecheck that file,
+      not all of its dependencies.
+      We call these files "similar" to their previous versions.
+
+      A similar check is also made later, inside [calculate_fanout_and_defer_or_do_type_check]
+      when it calls [get_files_to_recheck] which calls [Decl_redecl_service.redo_type_decl].
+      That obtains old decls from an online service and uses that for decl-diffing.
+
+      Anyway, the effect of this phase is to calculate fanout, techniques to determine
+      decl-diffing, using the prechecked algorithm too. Then, the fanout files are
+      combined into [env.needs_recheck], as a way of deferring the check until
+      the first iteration of ServerTypeCheck.
+    *)
     let partition_similar dirty_files =
       Relative_path.Set.partition
         (fun f ->
@@ -1342,27 +1369,21 @@ let post_saved_state_initialization
     let (dirty_local_files_unchanged_hash, dirty_local_files_changed_hash) =
       partition_similar dirty_local_files
     in
-    let env =
-      {
-        env with
-        clock;
-        naming_table = Naming_table.combine old_naming_table env.naming_table;
-        disk_needs_parsing = Relative_path.Set.empty;
-        needs_recheck =
-          Relative_path.Set.union env.needs_recheck files_with_old_errors;
-      }
+
+    let (env, t) =
+      calculate_fanout_and_defer_or_do_type_check
+        genv
+        env
+        old_naming_table
+        defs_per_file
+        ~dirty_master_files_unchanged_hash
+        ~dirty_master_files_changed_hash
+        ~dirty_local_files_unchanged_hash
+        ~dirty_local_files_changed_hash
+        t
+        cgroup_steps
     in
-    calculate_fanout_and_defer_or_do_type_check
-      genv
-      env
-      old_naming_table
-      defs_per_file
-      ~dirty_master_files_unchanged_hash
-      ~dirty_master_files_changed_hash
-      ~dirty_local_files_unchanged_hash
-      ~dirty_local_files_changed_hash
-      t
-      cgroup_steps
+    (env, t)
 
 let saved_state_init
     ~(do_indexing : bool)

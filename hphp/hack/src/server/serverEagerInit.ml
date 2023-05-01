@@ -70,23 +70,16 @@ let init
   let (get_next, t) =
     ServerInitCommon.indexing ~telemetry_label:"eager.init.indexing" genv
   in
-  let lazy_parse =
-    match lazy_level with
-    | Parse -> true
-    | _ -> false
-  in
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let (env, t) =
     ServerInitCommon.parsing
-      ~lazy_parse
       genv
       env
       ~get_next
       t
       ~trace
       ~cache_decls:true
-      ~always_cache_asts:false
       ~telemetry_label:"eager.init.parsing"
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper

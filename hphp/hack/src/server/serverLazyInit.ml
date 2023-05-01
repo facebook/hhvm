@@ -950,19 +950,14 @@ let initialize_naming_table
       in
       (get_next, None, t)
   in
-  (* The full_fidelity_parser currently works better in both memory and time
-     with a full parse rather than parsing decl asts and then parsing full ones *)
-  let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
   (* full init - too many files to trace all of them *)
   let trace = false in
   let (env, t) =
     ServerInitCommon.parsing
-      ~lazy_parse
       genv
       env
       ~get_next
       ?count
-      ~always_cache_asts:false
       t
       ~trace
       ~cache_decls
@@ -1273,10 +1268,8 @@ let post_saved_state_initialization
     ServerInitCommon.parsing
       genv
       env
-      ~lazy_parse:true
       ~get_next:next
       ~count:(List.length parsing_files_list)
-      ~always_cache_asts:false
       t
       ~trace
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)

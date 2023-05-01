@@ -14,12 +14,10 @@ val indexing :
   Relative_path.t list Bucket.next * float
 
 val parsing :
-  lazy_parse:bool ->
   ServerEnv.genv ->
   ServerEnv.env ->
   get_next:Relative_path.t list Bucket.next ->
   ?count:int ->
-  always_cache_asts:bool ->
   float ->
   trace:bool ->
   cache_decls:bool ->

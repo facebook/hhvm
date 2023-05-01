@@ -214,8 +214,7 @@ let parse_name_and_decl ctx files_contents =
       (* Decl.make_env has the side effect of updating the decl heap, and
          reporting errors. *)
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
-          Errors.run_in_context fn Errors.Decl (fun () ->
-              Decl.make_env ~sh:SharedMem.Uses ctx fn));
+          Decl.make_env ~sh:SharedMem.Uses ctx fn);
       files_info)
 
 let scan_files_for_symbol_index

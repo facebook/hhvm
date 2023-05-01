@@ -1366,8 +1366,7 @@ let parse_name_and_decl ctx files_contents =
           in
           Errors.merge_into_current errors);
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
-          Errors.run_in_context fn Errors.Decl (fun () ->
-              Decl.make_env ~sh:SharedMem.Uses ctx fn));
+          Decl.make_env ~sh:SharedMem.Uses ctx fn);
 
       files_info)
 
@@ -1376,8 +1375,7 @@ let add_decls_to_heap ctx files_contents =
   Errors.ignore_ (fun () ->
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
-          Errors.run_in_context fn Errors.Decl (fun () ->
-              Decl.make_env ~sh:SharedMem.Uses ctx fn)));
+          Decl.make_env ~sh:SharedMem.Uses ctx fn));
   ()
 
 (** This function doesn't have side-effects. Its sole job is to return shallow decls. *)

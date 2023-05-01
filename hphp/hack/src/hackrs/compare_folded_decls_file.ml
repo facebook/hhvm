@@ -373,8 +373,7 @@ let () =
       in
       (* Compute OCaml folded decls *)
       List.iter files ~f:(fun filename ->
-          Errors.run_in_context filename Errors.Decl (fun () ->
-              Decl.make_env ~sh:SharedMem.Uses ctx filename));
+          Decl.make_env ~sh:SharedMem.Uses ctx filename);
       (* Compute rupro folded decls *)
       let rupro_decls =
         match

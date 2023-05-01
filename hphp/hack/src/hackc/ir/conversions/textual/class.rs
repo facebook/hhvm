@@ -67,6 +67,13 @@ impl IsStatic {
     pub(crate) fn as_bool(&self) -> bool {
         matches!(self, IsStatic::Static)
     }
+
+    pub(crate) fn as_attr(self) -> ir::Attr {
+        match self {
+            IsStatic::NonStatic => ir::Attr::AttrNone,
+            IsStatic::Static => ir::Attr::AttrStatic,
+        }
+    }
 }
 
 struct ClassState<'a, 'b, 'c> {
@@ -192,8 +199,8 @@ impl ClassState<'_, '_, '_> {
             name,
             mut flags,
             ref attributes,
-            visibility: ir_visibility,
-            ref initial_value,
+            visibility: _,
+            initial_value: _,
             ref type_info,
             doc_comment: _,
         } = *prop;
@@ -242,14 +249,6 @@ impl ClassState<'_, '_, '_> {
                 }
                 tx_attributes.push(FieldAttribute::Parameterized { name, parameters });
             }
-        }
-
-        if ir_visibility == ir::Visibility::Private {
-            self.txf.write_comment(&format!("TODO: private {name}"))?;
-        }
-        if let Some(initial_value) = initial_value {
-            self.txf
-                .write_comment(&format!("TODO: initial value {initial_value:?}"))?;
         }
 
         let ty = convert_ty(&type_info.enforced, &self.unit_state.strings);

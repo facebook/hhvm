@@ -5,20 +5,16 @@
 
 use std::sync::Arc;
 
-use ir::instr::Call;
-use ir::instr::CallDetail;
 use ir::instr::Hhbc;
-use ir::FCallArgsFlags;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::Instr;
+use ir::LocId;
 use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::MethodFlags;
-use ir::MethodId;
 use ir::SpecialClsRef;
 use ir::StringInterner;
-use ir::UnitBytesId;
 use log::trace;
 
 use crate::func::FuncInfo;
@@ -42,11 +38,6 @@ pub(crate) fn lower_func<'a>(
             if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
                 load_closure_vars(&mut func, method_info, &strings);
             }
-
-            // We want 86pinit to be 'instance' but hackc marks it as 'static'.
-            if method_info.name.is_86pinit(&strings) {
-                method_info.is_static = crate::class::IsStatic::NonStatic;
-            }
         }
         FuncInfo::Function(_) => {}
     }
@@ -60,24 +51,9 @@ pub(crate) fn lower_func<'a>(
 
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
 
-    // 86pinit needs to call its base
     match func_info {
-        FuncInfo::Method(mi) if mi.class.base.is_some() && mi.name.is_86pinit(&strings) => {
-            let clsref = SpecialClsRef::ParentCls;
-            let method = MethodId::_86pinit(&strings);
-            let detail = CallDetail::FCallClsMethodSD { clsref, method };
-            let call = Instr::call(Call {
-                operands: Default::default(),
-                context: UnitBytesId::NONE,
-                detail,
-                flags: FCallArgsFlags::default(),
-                num_rets: 0,
-                inouts: None,
-                readonly: None,
-                loc: builder.func.loc_id,
-            });
-            let iid = builder.func.alloc_instr(call);
-            builder.func.blocks[Func::ENTRY_BID].iids.insert(0, iid);
+        FuncInfo::Method(mi) if mi.name.is_86pinit(&strings) => {
+            rewrite_86pinit(&mut builder, mi);
         }
         _ => {}
     }
@@ -105,6 +81,44 @@ pub(crate) fn lower_func<'a>(
     );
 
     func
+}
+
+fn call_base_func(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>, loc: LocId) {
+    if method_info.class.base.is_some() {
+        let clsref = SpecialClsRef::ParentCls;
+        let method = method_info.name;
+        builder.emit(Instr::method_call_special(clsref, method, &[], loc));
+    }
+}
+
+fn rewrite_86pinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) {
+    // In HHVM 86pinit is only used to initialize "complex" properties (and
+    // doesn't exist if there aren't any). For textual we change that to use it
+    // to initialize all properties and be guaranteed to exist.
+
+    builder.start_block(Func::ENTRY_BID);
+    let saved = std::mem::take(&mut builder.cur_block_mut().iids);
+    let loc = builder.func.loc_id;
+
+    call_base_func(builder, method_info, loc);
+
+    // Init the properties.
+    for prop in &method_info.class.properties {
+        match prop {
+            ir::Property {
+                name,
+                flags,
+                initial_value: Some(initial_value),
+                ..
+            } if !flags.is_static() => {
+                let vid = builder.emit_constant(initial_value.clone().into());
+                MemberOpBuilder::base_h(loc).emit_set_m_pt(builder, *name, vid);
+            }
+            _ => {}
+        }
+    }
+
+    builder.cur_block_mut().iids.extend(saved);
 }
 
 fn load_closure_vars(func: &mut Func<'_>, method_info: &MethodInfo<'_>, strings: &StringInterner) {

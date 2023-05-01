@@ -332,19 +332,39 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C._86pinit
-  // CHECK: define C._86pinit($this: *C$static) : *HackMixed {
+  // CHECK: define C._86pinit($this: *C) : *HackMixed {
   // CHECK: #b0:
+  // CHECK:   n0 = &$this
+  // CHECK:   n1 = $builtins.hack_string("prop1")
+  // CHECK:   n2 = $builtins.hack_dim_field_get(n0, n1)
+  // CHECK:   n3 = $builtins.hack_int(42)
+  // CHECK:   store n2 <- n3: *HackMixed
+  // CHECK:   n4 = &$this
+  // CHECK:   n5 = $builtins.hack_string("prop2")
+  // CHECK:   n6 = $builtins.hack_dim_field_get(n4, n5)
+  // CHECK:   n7 = $builtins.hack_string("hello")
+  // CHECK:   store n6 <- n7: *HackMixed
+  // CHECK:   n8 = &$this
+  // CHECK:   n9 = $builtins.hack_string("prop5")
+  // CHECK:   n10 = $builtins.hack_dim_field_get(n8, n9)
+  // CHECK:   n11 = null
+  // CHECK:   store n10 <- n11: *HackMixed
+  // CHECK:   n12 = &$this
+  // CHECK:   n13 = $builtins.hack_string("type")
+  // CHECK:   n14 = $builtins.hack_dim_field_get(n12, n13)
+  // CHECK:   n15 = $builtins.hack_int(2)
+  // CHECK:   store n14 <- n15: *HackMixed
   // CHECK:   jmp b1, b2
   // CHECK: #b1:
   // CHECK:   prune $builtins.hack_is_true($builtins.hack_bool(false))
   // CHECK:   jmp b3
   // CHECK: #b2:
   // CHECK:   prune ! $builtins.hack_is_true($builtins.hack_bool(false))
-  // CHECK:   n0: *HackMixed = load &const::D$static::C
-  // CHECK:   n1 = &$this
-  // CHECK:   n2 = $builtins.hack_string("prop5")
-  // CHECK:   n3 = $builtins.hack_dim_field_get(n1, n2)
-  // CHECK:   store n3 <- n0: *HackMixed
+  // CHECK:   n16: *HackMixed = load &const::D$static::C
+  // CHECK:   n17 = &$this
+  // CHECK:   n18 = $builtins.hack_string("prop5")
+  // CHECK:   n19 = $builtins.hack_dim_field_get(n17, n18)
+  // CHECK:   store n19 <- n16: *HackMixed
   // CHECK:   jmp b3
   // CHECK: #b3:
   // CHECK:   ret null

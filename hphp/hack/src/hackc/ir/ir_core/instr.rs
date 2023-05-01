@@ -1188,6 +1188,24 @@ impl Instr {
         })
     }
 
+    pub fn method_call_special(
+        clsref: SpecialClsRef,
+        method: MethodId,
+        operands: &[ValueId],
+        loc: LocId,
+    ) -> Instr {
+        Self::call(Call {
+            operands: operands.into(),
+            context: UnitBytesId::NONE,
+            detail: CallDetail::FCallClsMethodSD { clsref, method },
+            flags: FCallArgsFlags::default(),
+            num_rets: 0,
+            inouts: None,
+            readonly: None,
+            loc,
+        })
+    }
+
     pub fn jmp(bid: BlockId, loc: LocId) -> Instr {
         Instr::Terminator(Terminator::Jmp(bid, loc))
     }

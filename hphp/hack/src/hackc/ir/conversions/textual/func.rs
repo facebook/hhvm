@@ -105,6 +105,8 @@ pub(crate) fn write_func(
     mut func: ir::Func<'_>,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
+    let strings = Arc::clone(&unit_state.strings);
+
     let params = std::mem::take(&mut func.params);
     let (param_names, param_tys, param_lids) = compute_func_params(&params, unit_state, this_ty)?;
     let tx_params = param_names
@@ -113,7 +115,7 @@ pub(crate) fn write_func(
         .zip(param_tys.iter())
         .collect_vec();
 
-    let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
+    let ret_ty = convert_ty(&func.return_type.enforced, &strings);
 
     let lids = func
         .body_instrs()
@@ -125,31 +127,36 @@ pub(crate) fn write_func(
     let mut locals = lids
         .into_iter()
         .filter(|lid| !param_lids.contains(lid))
-        .sorted_by(|x, y| cmp_lid(&unit_state.strings, x, y))
+        .sorted_by(|x, y| cmp_lid(&strings, x, y))
         .zip(std::iter::repeat(&local_ty))
         .collect::<Vec<_>>();
 
     // See if we need a temp var for use by member_ops.
     let base_ty;
     if member_op::func_needs_base_var(&func) {
-        let base = member_op::base_var(&unit_state.strings);
+        let base = member_op::base_var(&strings);
         base_ty = textual::Ty::mixed();
         locals.push((base, &base_ty));
     }
 
-    let name_str = match *func_info {
-        FuncInfo::Method(ref mi) => FunctionName::method(mi.class.name, mi.is_static, mi.name),
+    let name = match *func_info {
+        FuncInfo::Method(ref mi) => match mi.name {
+            name if name.is_86pinit(&strings) => {
+                FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
+            }
+            _ => FunctionName::method(mi.class.name, mi.is_static, mi.name),
+        },
         FuncInfo::Function(ref fi) => FunctionName::Function(fi.name),
     };
 
     let span = func.loc(func.loc_id).clone();
-    txf.define_function(&name_str, &span, &tx_params, &ret_ty, &locals, {
+    txf.define_function(&name, &span, &tx_params, &ret_ty, &locals, {
         let func_info = Arc::clone(&func_info);
         |fb| {
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
 
-            let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, func_info);
+            let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
 
             for bid in func.block_ids() {
                 write_block(&mut state, bid)?;
@@ -159,16 +166,22 @@ pub(crate) fn write_func(
         }
     })?;
 
-    // For a static method also generate an instance stub which forwards to the
-    // static method.
+    // For a user static method also generate an instance stub which forwards to
+    // the static method.
 
-    match *func_info {
-        FuncInfo::Method(ref mi) => {
-            if mi.is_static == IsStatic::Static {
-                write_instance_stub(txf, unit_state, mi, &tx_params, &ret_ty, &span)?;
-            }
+    match (&*func_info, name) {
+        (
+            FuncInfo::Method(
+                mi @ MethodInfo {
+                    is_static: IsStatic::Static,
+                    ..
+                },
+            ),
+            FunctionName::Method(..) | FunctionName::Unmangled(..),
+        ) => {
+            write_instance_stub(txf, unit_state, mi, &tx_params, &ret_ty, &span)?;
         }
-        FuncInfo::Function(_) => {}
+        _ => {}
     }
 
     Ok(())
@@ -964,7 +977,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::NewCol(CollectionType::Vector) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColVector), ())
                     }
-                    Constant::Uninit => textual_todo! { textual::Expr::null() },
+                    Constant::Uninit => textual::Expr::null(),
                     Constant::Named(..) | Constant::NewCol(_) => unreachable!(),
                 }
             }

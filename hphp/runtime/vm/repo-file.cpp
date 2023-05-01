@@ -446,16 +446,6 @@ void RepoFile::destroy() {
   s_repoFileData.reset();
 }
 
-void RepoFile::postfork() {
-  if (!s_repoFileData) return;
-  // Save the file path, then destroy and re-init state.
-  auto const path = s_repoFileData->path;
-  auto const globalsLoaded = s_repoFileData->loadedGlobalTables.load();
-  RepoFile::destroy();
-  RepoFile::init(path);
-  if (globalsLoaded) RepoFile::loadGlobalTables(false);
-}
-
 const RepoGlobalData& RepoFile::globalData() {
   assertx(s_repoFileData);
   return s_repoFileData->globalData;

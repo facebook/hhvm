@@ -163,10 +163,6 @@ struct RepoFile {
   // cannot be called concurrently.
   static void destroy();
 
-  // Called after a fork. Tears down RepoFile state and re-initializes
-  // it.
-  static void postfork();
-
   // Retrieve the RepoGlobalData which was stored in this repo
   // file. The data is actually loaded during init(), so this does no
   // file I/O. Unlike other querying functions, this does not require

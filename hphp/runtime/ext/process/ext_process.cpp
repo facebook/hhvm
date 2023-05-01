@@ -117,7 +117,6 @@ bool cantPrefork() {
 
 void postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
-  RepoFile::postfork();
   XboxServer::Restart();
   if (pid == 0) {
     Logger::ResetPid();

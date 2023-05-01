@@ -44,17 +44,15 @@ let parsing
     | Some c -> ServerProgress.write "parsing %d files" c
   end;
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (defs_per_file, errorl, _failed_parsing) =
-    ( Direct_decl_service.go
-        ctx
-        ~worker_call
-        genv.workers
-        ~ide_files:Relative_path.Set.empty
-        ~get_next
-        ~trace
-        ~cache_decls,
-      Errors.empty,
-      Relative_path.Set.empty )
+  let defs_per_file =
+    Direct_decl_service.go
+      ctx
+      ~worker_call
+      genv.workers
+      ~ide_files:Relative_path.Set.empty
+      ~get_next
+      ~trace
+      ~cache_decls
   in
   let naming_table = Naming_table.update_many env.naming_table defs_per_file in
   let hs = SharedMem.SMTelemetry.heap_size () in
@@ -69,9 +67,7 @@ let parsing
     hs
     ~parsed_count:count
     ~desc:telemetry_label;
-  let env =
-    { env with naming_table; errorl = Errors.merge errorl env.errorl }
-  in
+  let env = { env with naming_table } in
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
 let naming

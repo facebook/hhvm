@@ -1222,28 +1222,17 @@ let post_saved_state_initialization
     }
   in
 
-  let (decl_and_typing_error_files, naming_and_parsing_error_files) =
-    SaveStateService.partition_error_files_tf
-      old_errors
-      [Errors.Decl; Errors.Typing]
+  let (naming_error_files, _non_naming_error_files) =
+    SaveStateService.partition_error_files_tf old_errors [Errors.Naming]
   in
-  let (_old_parsing_phase, old_parsing_error_files) =
-    match
-      List.find old_errors ~f:(fun (phase, _files) ->
-          match phase with
-          | Errors.Parsing -> true
-          | _ -> false)
-    with
-    | Some (a, b) -> (a, b)
-    | None -> (Errors.Parsing, Relative_path.Set.empty)
-  in
+  let files_with_old_errors = SaveStateService.fold_error_files old_errors in
   Hh_logger.log
-    "Number of files with Decl and Typing errors: %d"
-    (Relative_path.Set.cardinal decl_and_typing_error_files);
+    "Number of files with errors: %d"
+    (Relative_path.Set.cardinal files_with_old_errors);
 
   Hh_logger.log
-    "Number of files with Naming and Parsing errors: %d"
-    (Relative_path.Set.cardinal naming_and_parsing_error_files);
+    "Number of files with Naming errors: %d"
+    (Relative_path.Set.cardinal naming_error_files);
 
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
@@ -1281,7 +1270,7 @@ let post_saved_state_initialization
       ~init:Relative_path.Set.empty
       ~f:Relative_path.Set.union
       [
-        naming_and_parsing_error_files;
+        naming_error_files;
         dirty_naming_files;
         dirty_master_files;
         dirty_local_files;
@@ -1373,11 +1362,9 @@ let post_saved_state_initialization
         env with
         clock;
         naming_table = Naming_table.combine old_naming_table env.naming_table;
-        (* The only reason old_parsing_error_files are added to disk_needs_parsing
-                   here is because of an issue that seems to be already tracked in T30786759 *)
-        disk_needs_parsing = old_parsing_error_files;
+        disk_needs_parsing = Relative_path.Set.empty;
         needs_recheck =
-          Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
+          Relative_path.Set.union env.needs_recheck files_with_old_errors;
       }
     in
     calculate_fanout_and_defer_or_do_type_check

@@ -1248,8 +1248,35 @@ let post_saved_state_initialization
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
 
-  (* Parse and name all dirty files uniformly *)
-  let dirty_files =
+  (***********************************************************
+    NAMING TABLE.
+    Plan: we'll adjust the forward and reverse naming table to reflect
+    changes to files which changed since the saved-state. We'll also
+    reflect changes in files which had [phase=Errors.(Naming|Parsing)]
+    as well. Notionally that's because our current mechanism for handling
+    duplicate-name-errors requires all affected files to go through
+    the "update reverse naming table" procedure. (but it's redundant
+    because, elsewhere, we don't allow saved-state-generation in case
+    of naming errors...)
+
+    The actual implementation is confusing because it stores fragments
+    of naming-table in places you wouldn't expect:
+
+    1. [old_naming_table], which we got from the saved-state, is a [NamingTable.t]
+       that's "backed" i.e. it reflects just the sqlite file plus a delta, initially empty.
+    2. [env.naming_table] starts out as [Naming_table.empty] as it was created in
+       [ServerMain.setup_server]. We will add to it the forward-naming-table FileInfo.t
+       for all files discussed above, [parsing_files]
+    3. The reverse naming-table is made up of global mutable shmem delta with
+       eventual fallback to sqlite. We will write into that delta the reverse-names
+       that arise from the [parsing_files]. The same step also gathers any
+       duplicate-name errors.
+    4. Finally we'll merge the [env.naming_table] (which is only [parsed_files] at the moment)
+       into [old_naming_table] (which represents the sqlite file), and store the result
+       back in [env.naming_table]. At this point the naming-table, forward and reverse,
+       is complete. *)
+  let t = Unix.gettimeofday () in
+  let naming_files =
     List.fold
       ~init:Relative_path.Set.empty
       ~f:Relative_path.Set.union
@@ -1258,24 +1285,22 @@ let post_saved_state_initialization
         dirty_naming_files;
         dirty_master_files;
         dirty_local_files;
+        changed_while_parsing;
       ]
-  in
-  let t = Unix.gettimeofday () in
-  let dirty_files = Relative_path.Set.union dirty_files changed_while_parsing in
-  let parsing_files =
-    Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
+    |> Relative_path.Set.filter ~f:FindUtils.path_filter
   in
   ( CgroupProfiler.step_start_end cgroup_steps "remove fixmes"
-  @@ fun _cgroup_step -> Fixme_provider.remove_batch parsing_files );
-  let parsing_files_list = Relative_path.Set.elements parsing_files in
+  @@ fun _cgroup_step -> Fixme_provider.remove_batch naming_files );
   (* Parse dirty files only *)
-  let next = MultiWorker.next genv.workers parsing_files_list in
   let (env, t) =
     ServerInitCommon.parse_files_and_update_forward_naming_table
       genv
       env
-      ~get_next:next
-      ~count:(List.length parsing_files_list)
+      ~get_next:
+        (MultiWorker.next
+           genv.workers
+           (Relative_path.Set.elements naming_files))
+      ~count:(Relative_path.Set.cardinal naming_files)
       t
       ~trace
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
@@ -1291,7 +1316,7 @@ let post_saved_state_initialization
     remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
       ctx
       old_naming_table
-      parsing_files
+      naming_files
       naming_table_fallback_fn
       t
       ~cgroup_steps

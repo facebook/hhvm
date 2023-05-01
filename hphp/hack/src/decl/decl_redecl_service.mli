@@ -20,8 +20,6 @@ type fanout = {
 }
 
 type redo_type_decl_result = {
-  errors: Errors.t;
-      (** Decl errors that were emitted when checking the provided symbols. *)
   fanout: fanout;
   old_decl_missing_count: int;
       (** The number of old decls we didn't have when calculating the redecl. *)

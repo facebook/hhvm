@@ -23,7 +23,6 @@ type fanout = {
 }
 
 type redo_type_decl_result = {
-  errors: Errors.t;
   fanout: fanout;
   old_decl_missing_count: int;
 }
@@ -45,14 +44,6 @@ let compute_deps_neutral = (empty_fanout, 0)
 module OnTheFlyStore = GlobalStorage.Make (struct
   type t = Naming_table.defs_per_file
 end)
-
-(** Compute the decls in a file *)
-let decl_file ctx errors fn =
-  let (decl_errors, ()) =
-    Errors.do_with_context fn Errors.Decl (fun () ->
-        Decl.make_env ~sh:SharedMem.Uses ctx fn)
-  in
-  Errors.merge decl_errors errors
 
 (** Given a set of functions, compare the old and the new decl and deduce
   what must be rechecked accordingly. *)
@@ -105,7 +96,7 @@ let compare_modules_and_get_fanout
 
 (** Compute decls in files. Return errors raised during decling. *)
 let redeclare_files ctx filel =
-  List.fold_left filel ~f:(decl_file ctx) ~init:Errors.empty
+  List.iter filel ~f:(fun fn -> Decl.make_env ~sh:SharedMem.Uses ctx fn)
 
 (** Invalidate local caches and compute decls in files. Return errors raised during decling. *)
 let decl_files ctx filel =
@@ -166,8 +157,8 @@ let compare_decls_and_get_fanout
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-(** Invalidate local caches and compute decls in files. Return the file count and errors raised during decling. *)
-let decl_files_job ctx _ filel =
+(** Invalidate local caches and compute decls in files. Return the file count. *)
+let decl_files_job ctx filel =
   try (List.length filel, decl_files ctx filel) with
   | exn ->
     let e = Exception.wrap exn in
@@ -194,8 +185,7 @@ let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
 (* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
-let merge_on_the_fly
-    files_initial_count files_declared_count (count, errorl1) errorl2 =
+let merge_on_the_fly files_initial_count files_declared_count (count, ()) () =
   files_declared_count := !files_declared_count + count;
   ServerProgress.write_percentage
     ~operation:"declaring"
@@ -203,8 +193,7 @@ let merge_on_the_fly
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:None;
-
-  Errors.merge errorl1 errorl2
+  ()
 
 let merge_compute_deps
     files_initial_count
@@ -243,7 +232,7 @@ let parallel_redecl_compare_and_get_fanout
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
     (defs_per_file : FileInfo.names Relative_path.Map.t)
-    (fnl : Relative_path.t list) : (Errors.t * fanout) * int =
+    (fnl : Relative_path.t list) : fanout * int =
   try
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
@@ -256,14 +245,12 @@ let parallel_redecl_compare_and_get_fanout
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    let errors =
-      MultiWorker.call
-        workers
-        ~job:(decl_files_job ctx)
-        ~neutral:Errors.empty
-        ~merge:(merge_on_the_fly files_initial_count files_declared_count)
-        ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
-    in
+    MultiWorker.call
+      workers
+      ~job:(fun () -> decl_files_job ctx)
+      ~neutral:()
+      ~merge:(merge_on_the_fly files_initial_count files_declared_count)
+      ~next:(MultiWorker.next ~max_size:bucket_size workers fnl);
     let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
     Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
@@ -285,7 +272,7 @@ let parallel_redecl_compare_and_get_fanout
       Hh_logger.log_duration ~lvl "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
-    ((errors, fanout), old_decl_missing_count)
+    (fanout, old_decl_missing_count)
   with
   | exn ->
     let e = Exception.wrap exn in
@@ -594,14 +581,14 @@ let redo_type_decl
   let fnl = Relative_path.Map.keys defs in
 
   Hh_logger.log "Decl_redecl_service.redo_type_decl #2";
-  let ((errors, { changed; to_recheck }), old_decl_missing_count) =
+  let ({ changed; to_recheck }, old_decl_missing_count) =
     (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
-      let errors = decl_files ctx fnl in
+      let () = decl_files ctx fnl in
       let (fanout, old_decl_missing_count) =
         compare_decls_and_get_fanout ctx defs fnl
       in
-      ((errors, fanout), old_decl_missing_count)
+      (fanout, old_decl_missing_count)
     else
       parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
@@ -630,7 +617,7 @@ let redo_type_decl
   Hh_logger.log "  changed: %d" (DepSet.cardinal changed);
   Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
 
-  { errors; fanout = { changed; to_recheck }; old_decl_missing_count }
+  { fanout = { changed; to_recheck }; old_decl_missing_count }
 
 (** Mark all provided [defs] as old, as long as they were not previously
 oldified. *)

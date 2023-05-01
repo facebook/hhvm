@@ -630,9 +630,8 @@ functor
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let ctx = Provider_utils.ctx_from_server_env env in
       let {
-        Decl_redecl_service.errors = _;
+        Decl_redecl_service.old_decl_missing_count;
         fanout = { Decl_redecl_service.changed; to_recheck = to_recheck_deps };
-        old_decl_missing_count;
       } =
         CgroupProfiler.step_start_end cgroup_steps "redecl"
         @@ fun _cgroup_step ->

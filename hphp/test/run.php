@@ -3682,8 +3682,8 @@ function print_commands(
 
     $envstr = '';
     foreach ($env as $k => $v) {
-      if (strlen($envstr) > 0) $envstr .= ',';
       if (strpos($k, "HPHP_TEST_") === 0 || $k === 'TMPDIR') {
+        if (strlen($envstr) > 0) $envstr .= ' ';
         $envstr .= $k . "=" . (string)$v;
       }
     }

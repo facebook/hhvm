@@ -59,7 +59,8 @@ add_library(
   parse/lexer.h
   parse/parser.cc
   parse/parser.h
-  parse/parsing_driver.cc
+  parse/parse_ast.cc
+  parse/parse_ast.h
   parse/token.cc
   parse/token.h
   sema/const_checker.cc

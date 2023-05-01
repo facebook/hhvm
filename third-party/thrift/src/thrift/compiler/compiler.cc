@@ -34,6 +34,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <set>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -45,7 +46,7 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/mutator/mutator.h>
-#include <thrift/compiler/parse/parsing_driver.h>
+#include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
 #include <thrift/compiler/validator/validator.h>
@@ -457,16 +458,16 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     const std::string& filename,
     parsing_params params,
     bool return_nullptr_on_failure) {
-  parsing_driver driver(sm, ctx, filename, std::move(params));
-  auto program = driver.parse();
-  if (program != nullptr) {
-    auto result = standard_mutators()(ctx, *program);
-    if (result.unresolvable_typeref && return_nullptr_on_failure) {
-      // Stop processing if there is unresolvable typeref
-      program = nullptr;
-    }
+  auto programs = parse_ast(sm, ctx, filename, std::move(params));
+  if (!programs) {
+    return {};
   }
-  return program;
+  auto result = standard_mutators()(ctx, *programs);
+  if (result.unresolvable_typeref && return_nullptr_on_failure) {
+    // Stop processing if there is unresolvable typeref.
+    programs = nullptr;
+  }
+  return programs;
 }
 
 std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
@@ -513,8 +514,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
       sm,
       [](const diagnostic& d) { fmt::print(stderr, "{}\n", d.str()); },
       diagnostic_params::only_errors());
-  parsing_driver driver(sm, ctx, filename, std::move(pparams));
-  return driver.parse();
+  return parse_ast(sm, ctx, filename, std::move(pparams));
 }
 
 compile_result compile(const std::vector<std::string>& arguments) {

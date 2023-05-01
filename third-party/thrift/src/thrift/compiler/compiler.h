@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <thrift/compiler/ast/diagnostic_context.h>
-#include <thrift/compiler/parse/parsing_driver.h>
+#include <thrift/compiler/parse/parse_ast.h> // parsing_params
 
 namespace apache {
 namespace thrift {

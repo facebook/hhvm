@@ -68,12 +68,12 @@ let init
 
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =
-    ServerInitCommon.indexing ~telemetry_label:"eager.init.indexing" genv
+    ServerInitCommon.directory_walk ~telemetry_label:"eager.init.indexing" genv
   in
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let (env, t) =
-    ServerInitCommon.parsing
+    ServerInitCommon.parse_files_and_update_forward_naming_table
       genv
       env
       ~get_next
@@ -89,7 +89,8 @@ let init
       env.naming_table
       ~source:SearchUtils.Init;
   let (env, t) =
-    ServerInitCommon.naming
+    ServerInitCommon
+    .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env
       t
       ~telemetry_label:"eager.init.naming"
@@ -109,7 +110,7 @@ let init
     | _ -> (env, t)
   in
   (* Type-checking everything *)
-  ServerInitCommon.type_check
+  ServerInitCommon.defer_or_do_type_check
     genv
     env
     (Relative_path.Map.keys defs_per_file)

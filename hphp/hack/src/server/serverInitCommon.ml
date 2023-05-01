@@ -11,7 +11,8 @@ open Hh_prelude
 module Bucket = Hack_bucket
 open ServerEnv
 
-let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
+let directory_walk
+    ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
   ServerProgress.write "indexing";
   let t = Unix.gettimeofday () in
@@ -25,7 +26,7 @@ let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
   let t = Hh_logger.log_duration ("indexing " ^ telemetry_label) t in
   (get_next, t)
 
-let parsing
+let parse_files_and_update_forward_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     ~(get_next : Relative_path.t list Bucket.next)
@@ -70,7 +71,7 @@ let parsing
   let env = { env with naming_table } in
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
-let naming
+let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     (env : ServerEnv.env)
     (t : float)
     ~(telemetry_label : string)
@@ -134,7 +135,7 @@ let log_type_check_end
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~start_t
 
-let type_check
+let defer_or_do_type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (files_to_check : Relative_path.t list)

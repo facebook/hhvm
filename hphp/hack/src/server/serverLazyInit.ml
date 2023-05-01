@@ -473,11 +473,13 @@ let use_precomputed_state_exn
     naming_table_manifold_path = None;
   }
 
-(** This function ensures the naming-table is ready for us to do "naming" on the dirty files
-("parsing_files"), i.e. check all the symbols in them, add them to the naming table, and report
-errors if any of the dirty files had duplicate names.
+(** This function ensures the naming-table is ready for us to do [update_reverse_naming_table_from_env_and_get_duplicate_name_errors]
+on the [env.naming_table] forward-naming-table files.
+- In the case of saved-state-init, [env.naming_table] has dirty files so we'll
+  remove them from the global naming table
+- In the case of full init, I don't believe this is ever called...!
 *)
-let naming_from_saved_state
+let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
     (ctx : Provider_context.t)
     (old_naming_table : Naming_table.t)
     (parsing_files : Relative_path.Set.t)
@@ -525,6 +527,8 @@ let naming_from_saved_state
               backend
               (modules |> List.map ~f:snd))
     | None ->
+      HackEventLogger.invariant_violation_bug
+        "unexpected saved-state build-new-reverse-naming-table";
       (* Name all the files from the old naming-table (except the new ones we parsed since
          they'll be named by our caller, next). We assume the old naming-table came from a clean
          state, which is why we skip checking for "already bound" conditions. *)
@@ -692,7 +696,7 @@ let get_files_to_recheck
  * similar_files: we only need to typecheck these,
  *    not their dependencies since their decl are unchanged
  * *)
-let type_check_dirty
+let calculate_fanout_and_defer_or_do_type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
@@ -880,7 +884,7 @@ let type_check_dirty
         |> Telemetry.int_opt ~key:"state_age" ~value:state_age)
     in
     let result =
-      ServerInitCommon.type_check
+      ServerInitCommon.defer_or_do_type_check
         genv
         env
         files_to_check
@@ -946,14 +950,14 @@ let initialize_naming_table
         Unix.gettimeofday () )
     | None ->
       let (get_next, t) =
-        ServerInitCommon.indexing ~telemetry_label:"lazy.nt.indexing" genv
+        ServerInitCommon.directory_walk ~telemetry_label:"lazy.nt.indexing" genv
       in
       (get_next, None, t)
   in
   (* full init - too many files to trace all of them *)
   let trace = false in
   let (env, t) =
-    ServerInitCommon.parsing
+    ServerInitCommon.parse_files_and_update_forward_naming_table
       genv
       env
       ~get_next
@@ -966,7 +970,8 @@ let initialize_naming_table
       ~worker_call:MultiWorker.wrapper
   in
   if do_naming then
-    ServerInitCommon.naming
+    ServerInitCommon
+    .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env
       t
       ~telemetry_label:"lazy.nt.do_naming.naming"
@@ -980,7 +985,8 @@ let write_symbol_info
     (cgroup_steps : CgroupProfiler.step_group)
     (t : float) : ServerEnv.env * float =
   let (env, t) =
-    ServerInitCommon.naming
+    ServerInitCommon
+    .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env
       t
       ~telemetry_label:"write_symbol_info.naming"
@@ -1134,7 +1140,7 @@ let full_init
     else
       env
   in
-  ServerInitCommon.type_check
+  ServerInitCommon.defer_or_do_type_check
     genv
     env
     fnl
@@ -1265,7 +1271,7 @@ let post_saved_state_initialization
   (* Parse dirty files only *)
   let next = MultiWorker.next genv.workers parsing_files_list in
   let (env, t) =
-    ServerInitCommon.parsing
+    ServerInitCommon.parse_files_and_update_forward_naming_table
       genv
       env
       ~get_next:next
@@ -1282,7 +1288,7 @@ let post_saved_state_initialization
     ~source:SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
-    naming_from_saved_state
+    remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
       ctx
       old_naming_table
       parsing_files
@@ -1295,7 +1301,8 @@ let post_saved_state_initialization
   else
     (* Do global naming on all dirty files *)
     let (env, t) =
-      ServerInitCommon.naming
+      ServerInitCommon
+      .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
         env
         t
         ~telemetry_label:"post_ss1.naming"
@@ -1355,7 +1362,7 @@ let post_saved_state_initialization
           Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
       }
     in
-    type_check_dirty
+    calculate_fanout_and_defer_or_do_type_check
       genv
       env
       old_naming_table

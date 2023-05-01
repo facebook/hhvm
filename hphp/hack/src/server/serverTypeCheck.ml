@@ -1639,7 +1639,7 @@ let type_check :
     will be restarted on that next round, and the act of restarting will close the current errors-file.
 
   How do we guarantee that hh_server produces an errors-file upon startup?
-  It boils down to ServerInitCommon.type_check, called as the final step of both
+  It boils down to ServerInitCommon.defer_or_do_type_check, called as the final step of both
   full init and saved-state init. Its design is to defer an initial typecheck
   to the first round of [ServerTypeCheck.type_check] (i.e. us!) which it causes
   to happen after its (synchronous, non-interruptible) init has finished. It does

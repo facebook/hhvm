@@ -41,11 +41,10 @@ let type_decl
   ServerProgress.write "evaluating type declarations";
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let errorl = Decl_service.go ~bucket_size ctx genv.workers defs_per_file in
+  Decl_service.go ~bucket_size ctx genv.workers defs_per_file;
   Stats.(stats.init_heap_size <- SharedMem.SMTelemetry.heap_size ());
   HackEventLogger.type_decl_end t;
   let t = Hh_logger.log_duration "Type-decl" t in
-  let env = { env with errorl = Errors.merge errorl env.errorl } in
   (env, t)
 
 let init

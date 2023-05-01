@@ -1936,7 +1936,7 @@ final class Status {
       $row ==> self::jsonEncode($row) . "\n",
       $args
     );
-    fwrite(STDERR, implode("", $data));
+    fwrite(HH\stderr(), implode("", $data));
   }
 
   <<__Memoize>>
@@ -4250,7 +4250,7 @@ function main(vec<string> $argv): int {
   if ($options->record_failures is nonnull) {
     Status::setMode(Status::MODE_RECORD_FAILURES);
   }
-  Status::setUseColor($options->color || posix_isatty(STDOUT));
+  Status::setUseColor($options->color || posix_isatty(HH\stdout()));
 
   Status::$nofork = count($tests) === 1 && !$servers;
 

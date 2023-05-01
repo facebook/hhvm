@@ -38,14 +38,8 @@ let from_options ~paths ~paths_file =
       |> List.map ~f:from_file;
     ]
 
-let from_naming_table naming_table ~failed_parsing ~exclude_hhi ~ignore_paths =
+let from_naming_table naming_table ~exclude_hhi ~ignore_paths =
   let defs_per_file = Naming_table.to_defs_per_file naming_table in
-  let defs_per_file =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:defs_per_file
-  in
   Relative_path.Map.fold defs_per_file ~init:[] ~f:(fun path _ acc ->
       match Naming_table.get_file_info naming_table path with
       | None -> acc

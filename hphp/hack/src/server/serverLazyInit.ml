@@ -1004,11 +1004,8 @@ let write_symbol_info
     if List.length paths > 0 || Option.is_some paths_file then
       Symbol_indexable.from_options ~paths ~paths_file
     else
-      let naming_table = env.naming_table in
-      let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
       Symbol_indexable.from_naming_table
-        naming_table
-        ~failed_parsing
+        env.naming_table
         ~exclude_hhi
         ~ignore_paths
   in

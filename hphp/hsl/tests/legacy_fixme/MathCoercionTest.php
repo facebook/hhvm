@@ -36,7 +36,7 @@ final class MathCoercionTest extends HackTest {
     )->toEqualWithDelta(9.5, .01);
     expect(
       (
-        Legacy_FIXME\cast_for_arithmetic(STDIN) /
+        Legacy_FIXME\cast_for_arithmetic(HH\stdin()) /
         Legacy_FIXME\cast_for_arithmetic(4)
       ) as float,
     )->toEqualWithDelta(0.25, .01);
@@ -53,7 +53,7 @@ final class MathCoercionTest extends HackTest {
     expect(Legacy_FIXME\cast_for_exponent('12ab') ** 2)->toEqual(144);
     expect((Legacy_FIXME\cast_for_exponent('2.5foo') ** 2) as float)
       ->toEqualWithDelta(6.25, .01);
-    expect(Legacy_FIXME\cast_for_exponent(STDOUT) ** 2)->toEqual(4);
+    expect(Legacy_FIXME\cast_for_exponent(HH\stdout()) ** 2)->toEqual(4);
     expect(Legacy_FIXME\cast_for_exponent(vec['bananas']) ** 2)->toEqual(0);
     expect(
       Legacy_FIXME\cast_for_exponent(Legacy_FIXME\cast_for_exponent<>) ** 2,

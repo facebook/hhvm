@@ -8,21 +8,21 @@ use namespace HH\Lib\{C, Dict, Keyset, Str};
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
   if (!\HH\Facts\enabled()) {
-    \fwrite(\STDERR, "ext_facts is required\n");
+    \fwrite(\HH\stderr(), "ext_facts is required\n");
     exit(1);
   }
   if (\ini_get('hhvm.hsl_systemlib_enabled')) {
-    \fwrite(\STDERR, "HSL Systemlib must be disabled\n");
+    \fwrite(\HH\stderr(), "HSL Systemlib must be disabled\n");
     exit(1);
   }
   if (!\function_exists("HH\\Lib\\Vec\\map")) {
-    \fwrite(\STDERR, "Native autoloader must be configured; couldn't find HSL\n");
+    \fwrite(\HH\stderr(), "Native autoloader must be configured; couldn't find HSL\n");
     exit(1);
   }
 
   if (!\class_exists(HackTest::class)) {
     \fprintf(
-      \STDERR,
+      \HH\stderr(),
       "Native autoloader must be configured; couldn't find %s\n",
       HackTest::class,
     );
@@ -56,7 +56,7 @@ async function main(): Awaitable<void> {
   }
 
   if (C\is_empty($test_classes)) {
-    \fwrite(\STDERR, "No tests selected.\n");
+    \fwrite(\HH\stderr(), "No tests selected.\n");
     exit(1);
   }
 

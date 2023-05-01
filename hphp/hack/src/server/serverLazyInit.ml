@@ -1114,7 +1114,7 @@ let full_init
       env
       cgroup_steps
   in
-  ServerInitCommon.validate_no_errors Errors.Parsing env.errorl;
+  ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
@@ -1313,7 +1313,7 @@ let post_saved_state_initialization
         ~telemetry_label:"post_ss1.naming"
         ~cgroup_steps
     in
-    ServerInitCommon.validate_no_errors Errors.Parsing env.errorl;
+    ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
 
     (* Add all files from defs_per_file to the files_info object *)
     let defs_per_file = Naming_table.to_defs_per_file env.naming_table in

@@ -314,7 +314,7 @@ let test_initially_no_client _ =
   ()
 
 let test_disconnects _ =
-  let phase = Errors.Parsing in
+  let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
 
   let errors = Errors.from_file_error_list ~phase [(file1, error1)] in
@@ -660,8 +660,8 @@ let test_multiple_phases _ =
   let pusher = Diagnostic_pusher.init in
   connect_persistent ();
 
-  (* Parsing phase. One parsing error in file 1. *)
-  let phase = Errors.Parsing in
+  (* Typechecking phase. One error in file 1. *)
+  let phase = Errors.Typing in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
@@ -681,7 +681,7 @@ let test_multiple_phases _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  (* Changing phase. One additional naming error in file 1.
+  (* Naming phase. One additional naming error in file 1.
    * Errors from previous phases should be kept around. *)
   let phase = Errors.Naming in
   let (pusher, _) =
@@ -704,8 +704,8 @@ let test_multiple_phases _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  (* Changing phase. One additional typing error in file 1.
-   * Errors from previous phases should be kept around. *)
+  (* Typing phase. One additional typing error in file 1.
+   * Errors from previous Naming phase should be kept around. *)
   let phase = Errors.Typing in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors
@@ -720,18 +720,14 @@ let test_multiple_phases _ =
       ServerCommandTypes.DIAGNOSTIC
         {
           errors =
-            SMap.of_list
-              [
-                ( file1_absolute,
-                  [error1_absolute; error2_absolute; error3_absolute] );
-              ];
+            SMap.of_list [(file1_absolute, [error2_absolute; error3_absolute])];
           is_truncated = None;
         };
     ]
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  (* Back to previous phase. Error2 is fixed, and errors from other phases should be preserved. *)
+  (* Back to Naming phase. Error2 is fixed, and errors from other phases should be preserved. *)
   let phase = Errors.Naming in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors
@@ -745,8 +741,7 @@ let test_multiple_phases _ =
     [
       ServerCommandTypes.DIAGNOSTIC
         {
-          errors =
-            SMap.of_list [(file1_absolute, [error1_absolute; error3_absolute])];
+          errors = SMap.of_list [(file1_absolute, [error3_absolute])];
           is_truncated = None;
         };
     ]
@@ -760,8 +755,8 @@ let test_multiple_phases_common _ =
   let pusher = Diagnostic_pusher.init in
   connect_persistent ();
 
-  (* Parsing phase. No errors *)
-  let phase = Errors.Parsing in
+  (* Typing phase. No errors *)
+  let phase = Errors.Typing in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
@@ -808,8 +803,8 @@ let test_multiple_phases_common _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  (* Back to parsing phase. Still no parsing error, typing error should be preserved. *)
-  let phase = Errors.Parsing in
+  (* Back to Typing phase. Typing error should be removed. *)
+  let phase = Errors.Typing in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
@@ -818,7 +813,12 @@ let test_multiple_phases_common _ =
       Errors.empty
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
-  let expected_pushed_messages = [] in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = SMap.of_list [(file1_absolute, [])]; is_truncated = None };
+    ]
+  in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   let (_ : Diagnostic_pusher.t) = pusher in

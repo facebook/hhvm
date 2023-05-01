@@ -140,7 +140,7 @@ let dump_naming_errors_decls
     let errors_in_phases : saved_state_errors =
       List.map
         ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-        [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
+        [Errors.Decl; Errors.Naming; Errors.Typing]
     in
     save_contents (get_errors_filename output_filename) errors_in_phases);
   ()
@@ -151,7 +151,7 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
   let errors_in_phases =
     List.map
       ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-      [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
+      [Errors.Decl; Errors.Naming; Errors.Typing]
   in
   let errors = fold_error_files errors_in_phases in
   let errors_json =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83a47f395776b0d4cf31fec5fd40465d>>
+// @generated SignedSource<<49727d475b28fc8d2b44456105323b6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,9 +47,11 @@ pub type ErrorCode = isize;
 #[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
 #[repr(u8)]
 pub enum Phase {
-    Parsing,
+    /// these errors come from [ServerTypeCheck.type_check_core] when it indexes files that have changed, to update the naming table
     Naming,
+    /// I don't believe errors in this phase are ever created, anywhere in the codebase...
     Decl,
+    /// these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file
     Typing,
 }
 impl TrivialDrop for Phase {}

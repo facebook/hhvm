@@ -288,7 +288,7 @@ let test_phases () =
   let a_path = create_path "A" in
   let (errors, ()) =
     Errors.do_ (fun () ->
-        Errors.run_in_context a_path Errors.Parsing (fun () ->
+        Errors.run_in_context a_path Errors.Typing (fun () ->
             Errors.add_parsing_error
             @@ Parsing_error.Parsing_error
                  { pos = Pos.make_from a_path; msg = ""; quickfixes = [] });
@@ -314,19 +314,19 @@ let test_incremental_update () =
   let a_path = create_path "A" in
   let b_path = create_path "B" in
   let (foo_error_a, ()) =
-    Errors.do_with_context a_path Errors.Parsing (fun () ->
+    Errors.do_with_context a_path Errors.Typing (fun () ->
         error_in "foo1";
         error_in "foo2";
         ())
   in
   let (bar_error_a, ()) =
-    Errors.do_with_context a_path Errors.Parsing (fun () ->
+    Errors.do_with_context a_path Errors.Typing (fun () ->
         error_in "bar1";
         error_in "bar2";
         ())
   in
   let (baz_error_b, ()) =
-    Errors.do_with_context b_path Errors.Parsing (fun () ->
+    Errors.do_with_context b_path Errors.Typing (fun () ->
         error_in "baz1";
         error_in "baz2";
         ())
@@ -336,7 +336,7 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:bar_error_a
       ~rechecked:(Relative_path.Set.singleton a_path)
-      Errors.Parsing
+      Errors.Typing
   in
   let expected =
     "File \"/bar2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -352,7 +352,7 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:baz_error_b
       ~rechecked:(Relative_path.Set.singleton b_path)
-      Errors.Parsing
+      Errors.Typing
   in
   let expected =
     "File \"/foo1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -370,7 +370,7 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:Errors.empty
       ~rechecked:(Relative_path.Set.singleton a_path)
-      Errors.Parsing
+      Errors.Typing
   in
   Asserter.Bool_asserter.assert_equals
     true

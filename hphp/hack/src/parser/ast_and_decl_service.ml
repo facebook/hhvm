@@ -92,7 +92,7 @@ let parse ctx ~quick ~show_all_errors ~trace ~cache_decls popt acc fn =
   else
     let start_time = Unix.gettimeofday () in
     let res =
-      Errors.do_with_context fn Errors.Parsing @@ fun () ->
+      Errors.do_with_context fn Errors.Typing @@ fun () ->
       Full_fidelity_ast.ast_and_decls_from_file ~quick ~show_all_errors popt fn
     in
     process_parse_result

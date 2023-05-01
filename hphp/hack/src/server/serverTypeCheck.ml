@@ -811,19 +811,7 @@ functor
       (* Here we do errors paradigm (1) env.errorl: merge in typecheck results, to flow into [env.errorl].
          As for paradigms (2) persistent-connection and (3) errors-file, they're handled
          inside [Typing_check_service.go_with_interrupt] because they want to push errors
-         as soon as they're discovered.
-
-         How exactly does it work? The first call removes from [errors] every [Errors.Parsing] error
-         that was in [files_checked], and the second call removes every [Errors.Typing] error that
-         was in [files_checked]. The second call also adds every error in [errorl'] which we expect
-         consists soley of [Errors.Parsing|Typing] in a subset of [files_checked]. *)
-      let errors =
-        Errors.incremental_update
-          ~old:errors
-          ~new_:Errors.empty
-          ~rechecked:files_checked
-          Errors.Parsing
-      in
+         as soon as they're discovered. *)
       let errors =
         Errors.incremental_update
           ~old:errors
@@ -1228,18 +1216,13 @@ functor
       in
 
       (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
-         will report all errors in [files_to_check] mostly using the Errors.Typing phase, but also
-         Errors.Parsing phase for those that arose from ast_provider.ml.
-         But there might be other [Errors.Typing|Parsing] errors in [env.errorl] from a previous round of typecheck,
+         will report all errors in [files_to_check] using the [Errors.Typing] phase.
+         But there might be other [Errors.Typing] errors in [env.errorl] from a previous round of typecheck,
          but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
          It remains open for discussion whether the user-experience would be better to have these
          not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
          has finished. We'll report them here for now. *)
       if do_errors_file then begin
-        push_errors_outside_files_to_errors_file
-          errors
-          ~files:files_to_check
-          ~phase:Errors.Parsing;
         push_errors_outside_files_to_errors_file
           errors
           ~files:files_to_check

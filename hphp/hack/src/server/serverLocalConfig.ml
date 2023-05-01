@@ -147,9 +147,7 @@ module RemoteTypeCheck = struct
              | None -> acc)
     in
     let disabled_on_errors =
-      List.filter
-        [Errors.Typing; Errors.Decl; Errors.Parsing; Errors.Naming]
-        ~f:(fun phase ->
+      List.filter [Errors.Typing; Errors.Decl; Errors.Naming] ~f:(fun phase ->
           not
             (List.exists enabled_on_errors ~f:(fun enabled_phase ->
                  Errors.equal_phase enabled_phase phase)))

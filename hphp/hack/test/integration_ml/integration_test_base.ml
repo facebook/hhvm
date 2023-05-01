@@ -275,7 +275,7 @@ let connect_persistent_client env =
 let assert_errors_in_phase
     (env : ServerEnv.env) (expected_count : int) (phase : Errors.phase) :
     ServerEnv.env =
-  let all_phases = [Errors.Decl; Errors.Naming; Errors.Typing] in
+  let all_phases = [Errors.Naming; Errors.Typing] in
   let errors_in_phases =
     List.map
       ~f:(fun (phase : Errors.phase) ->

@@ -585,12 +585,6 @@ let log_unexpected error path desc =
   ()
 
 let add_error_impl error =
-  let () =
-    match !current_context with
-    | (path, Decl) ->
-      log_unexpected error path "didn't expect to see Errors.Decl"
-    | _ -> ()
-  in
   if !accumulate_errors then
     let () =
       match !current_context with

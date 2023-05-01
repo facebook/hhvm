@@ -325,14 +325,6 @@ module type CheckKindType = sig
   *)
   val get_files_to_parse : ServerEnv.env -> Relative_path.Set.t
 
-  (* files to parse, should we stop if there are parsing errors *)
-
-  val get_defs_to_redecl :
-    reparsed:Relative_path.Set.t ->
-    env:ServerEnv.env ->
-    ctx:Provider_context.t ->
-    Relative_path.Set.t
-
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
     reparsed:Relative_path.Set.t ->
@@ -364,17 +356,6 @@ module FullCheckKind : CheckKindType = struct
   let get_files_to_parse env =
     Relative_path.Set.(env.ide_needs_parsing |> union env.disk_needs_parsing)
 
-  let get_defs_to_redecl ~reparsed ~(env : env) ~ctx =
-    (* Besides the files that actually changed, we want to also redeclare
-     * those that have decl errors referring to files that were
-     * reparsed, since positions in those errors can be now stale *)
-    get_files_with_stale_errors
-      ~reparsed
-      ~filter:None
-      ~phases:[Errors.Decl]
-      ~errors:env.errorl
-      ~ctx
-
   let get_defs_to_recheck
       ~reparsed
       ~defs_per_file
@@ -401,7 +382,7 @@ module FullCheckKind : CheckKindType = struct
       get_files_with_stale_errors
         ~reparsed
         ~filter:None
-        ~phases:[Errors.Decl; Errors.Typing]
+        ~phases:[Errors.Typing]
         ~errors:env.errorl
         ~ctx
     in
@@ -460,16 +441,6 @@ module LazyCheckKind : CheckKindType = struct
     Relative_path.Set.mem (some_ide_diagnosed_files env) x
     || Relative_path.Set.mem env.editor_open_files x
 
-  let get_defs_to_redecl ~reparsed ~env ~ctx =
-    (* Same as FullCheckKind.get_defs_to_redecl, but we limit returned set only
-     * to files that are relevant to IDE *)
-    get_files_with_stale_errors
-      ~reparsed
-      ~filter:(Some (some_ide_diagnosed_files env))
-      ~phases:[Errors.Decl]
-      ~errors:env.errorl
-      ~ctx
-
   let get_defs_to_recheck
       ~reparsed
       ~defs_per_file
@@ -496,7 +467,7 @@ module LazyCheckKind : CheckKindType = struct
         ~ctx
         ~reparsed
         ~filter:(Some (some_ide_diagnosed_files env))
-        ~phases:[Errors.Decl; Errors.Typing]
+        ~phases:[Errors.Typing]
         ~errors:env.errorl
     in
     let to_recheck = Relative_path.Set.union to_recheck stale_errors in
@@ -1023,8 +994,7 @@ functor
       (* REDECL PHASE 1 ********************************************************)
       (* The things we redecl `defs_per_file` come from the current content of
          files changed `defs_per_files_parsed`, plus the previous content `add_old_decls`,
-         plus those that had duplicate names `failed_naming`, plus every def from a file mentioned
-         in one of the error reasons that has been changed `get_defs_to_redecl`. *)
+         plus those that had duplicate names `failed_naming` *)
       ServerProgress.write "determining changes";
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
@@ -1032,9 +1002,7 @@ functor
 
       Hh_logger.log "(Recomputing type declarations in relation to naming)";
       (* failed_naming can be a superset of keys in defs_per_file - see comment in Naming_global.ndecl_file *)
-      let failed_decl =
-        CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
-      in
+      let failed_decl = Relative_path.Set.empty in
       (* The term [defs_per_file] doesn't mean anything. It's just exactly the same as defs_per_file_parsed,
          that is a filename->FileInfo.t map of the files we just parsed,
          except it's just filename->FileInfo.names -- i.e. purely the names, without positions. *)

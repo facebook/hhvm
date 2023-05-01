@@ -533,30 +533,28 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     }
 }
 
-fn make_init_method<'a, 'arena, 'decl, F>(
+fn make_init_method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     properties: &mut [PropAndInit<'arena>],
-    filter: F,
+    filter: impl Fn(&Property<'arena>) -> bool,
     name: &'static str,
     span: Span,
-) -> Result<Option<Method<'arena>>>
-where
-    F: Fn(&Property<'arena>) -> bool,
-{
-    if properties
-        .iter()
-        .any(|p| p.init.is_some() && filter(&p.prop))
-    {
-        let instrs = InstrSeq::gather(
-            properties
-                .iter_mut()
-                .filter_map(|p| match p.init {
-                    Some(_) if filter(&p.prop) => p.init.take(),
-                    Some(_) | None => None,
-                })
-                .collect(),
-        );
+) -> Result<Option<Method<'arena>>> {
+    let mut has_inits = false;
+    let instrs = InstrSeq::gather(
+        properties
+            .iter_mut()
+            .filter_map(|p| match p.init {
+                Some(_) if filter(&p.prop) => {
+                    has_inits = true;
+                    p.init.take()
+                }
+                _ => None,
+            })
+            .collect(),
+    );
+    if has_inits {
         let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::ret_c()]);
         Ok(Some(make_86method(
             alloc,
@@ -729,15 +727,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
-    let pinit_filter = |p: &Property<'_>| !p.flags.is_static();
-    let sinit_filter = |p: &Property<'_>| p.flags.is_static() && !p.flags.is_lsb();
-    let linit_filter = |p: &Property<'_>| p.flags.is_static() && p.flags.is_lsb();
-
     let pinit_method = make_init_method(
         alloc,
         emitter,
         &mut properties,
-        pinit_filter,
+        |p| !p.flags.is_static(),
         "86pinit",
         span,
     )?;
@@ -745,7 +739,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         alloc,
         emitter,
         &mut properties,
-        sinit_filter,
+        |p| p.flags.is_static() && !p.flags.is_lsb(),
         "86sinit",
         span,
     )?;
@@ -753,7 +747,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         alloc,
         emitter,
         &mut properties,
-        linit_filter,
+        |p| p.flags.is_static() && p.flags.is_lsb(),
         "86linit",
         span,
     )?;

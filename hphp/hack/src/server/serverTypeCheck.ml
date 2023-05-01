@@ -1001,7 +1001,6 @@ functor
 
       Hh_logger.log "(Recomputing type declarations in relation to naming)";
       (* failed_naming can be a superset of keys in defs_per_file - see comment in Naming_global.ndecl_file *)
-      let failed_decl = Relative_path.Set.empty in
       (* The term [defs_per_file] doesn't mean anything. It's just exactly the same as defs_per_file_parsed,
          that is a filename->FileInfo.t map of the files we just parsed,
          except it's just filename->FileInfo.names -- i.e. purely the names, without positions. *)
@@ -1014,13 +1013,6 @@ functor
           defs_per_file
           naming_table
           failed_naming
-      in
-      let defs_per_file =
-        ServerCheckUtils.extend_defs_per_file
-          genv
-          defs_per_file
-          naming_table
-          failed_decl
       in
       let defs_per_file = add_old_decls env.naming_table defs_per_file in
 

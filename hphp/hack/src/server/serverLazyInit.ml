@@ -1343,14 +1343,6 @@ let post_saved_state_initialization
         ~f:(fun x m -> Relative_path.Map.remove m x)
         ~init:defs_per_file
     in
-    let env =
-      {
-        env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
-        clock;
-      }
-    in
     (* Separate the dirty files from the files whose decl only changed *)
     (* Here, for each dirty file, we compare its hash to the one saved
        in the saved state. If the hashes are the same, then the declarations
@@ -1379,6 +1371,7 @@ let post_saved_state_initialization
     let env =
       {
         env with
+        clock;
         naming_table = Naming_table.combine old_naming_table env.naming_table;
         (* The only reason old_parsing_error_files are added to disk_needs_parsing
                    here is because of an issue that seems to be already tracked in T30786759 *)

@@ -19,6 +19,7 @@ use oxidized::aast_defs;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::ast_defs::ShapeFieldName;
 
@@ -141,8 +142,6 @@ fn shape_field_to_entry<'arena>(
             tparams,
             targ_map,
             &sfi.hint,
-            false,
-            false,
             type_refinement_in_hint,
         )?,
     ));
@@ -366,17 +365,8 @@ fn hint_to_type_constant_list<'arena>(
             let mut r = bumpalo::vec![in alloc];
             r.push(encode_kind(TypeStructureKind::T_fun));
             let single_hint = |name: &str, h| {
-                hint_to_type_constant(
-                    alloc,
-                    opts,
-                    tparams,
-                    targ_map,
-                    h,
-                    false,
-                    false,
-                    type_refinement_in_hint,
-                )
-                .map(|tc| bumpalo::vec![in alloc; encode_entry(alloc.alloc_str(name), tc)])
+                hint_to_type_constant(alloc, opts, tparams, targ_map, h, type_refinement_in_hint)
+                    .map(|tc| bumpalo::vec![in alloc; encode_entry(alloc.alloc_str(name), tc)])
             };
             let mut return_type = single_hint("return_type", &hf.return_ty)?;
             let mut variadic_type = hf.variadic_ty.as_ref().map_or_else(
@@ -480,17 +470,36 @@ fn hint_to_type_constant_list<'arena>(
     })
 }
 
+pub(crate) fn typedef_to_type_structure<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    opts: &Options,
+    tparams: &[&str],
+    typedef: &'a ast::Typedef,
+) -> Result<TypedValue<'arena>> {
+    let mut tconsts = hint_to_type_constant_list(
+        alloc,
+        opts,
+        tparams,
+        &BTreeMap::new(),
+        TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef
+        &typedef.kind,
+    )?;
+    tconsts.append(&mut get_typevars(alloc, tparams));
+    if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
+        tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
+    };
+    Ok(TypedValue::dict(tconsts.into_bump_slice()))
+}
+
 pub(crate) fn hint_to_type_constant<'arena>(
     alloc: &'arena bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: &Hint,
-    is_typedef: bool,
-    is_opaque: bool,
     type_refinement_in_hint: TypeRefinementInHint,
 ) -> Result<TypedValue<'arena>> {
-    let mut tconsts = hint_to_type_constant_list(
+    let tconsts = hint_to_type_constant_list(
         alloc,
         opts,
         tparams,
@@ -498,12 +507,6 @@ pub(crate) fn hint_to_type_constant<'arena>(
         type_refinement_in_hint,
         hint,
     )?;
-    if is_typedef {
-        tconsts.append(&mut get_typevars(alloc, tparams));
-    };
-    if is_opaque {
-        tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
-    };
     Ok(TypedValue::dict(tconsts.into_bump_slice()))
 }
 
@@ -517,18 +520,7 @@ fn hints_to_type_constant<'arena>(
 ) -> Result<TypedValue<'arena>> {
     hints
         .iter()
-        .map(|h| {
-            hint_to_type_constant(
-                alloc,
-                opts,
-                tparams,
-                targ_map,
-                h,
-                false,
-                false,
-                type_refinement_in_hint,
-            )
-        })
+        .map(|h| hint_to_type_constant(alloc, opts, tparams, targ_map, h, type_refinement_in_hint))
         .collect::<Result<Vec<_>>>()
         .map(|hs| TypedValue::vec(alloc.alloc_slice_fill_iter(hs.into_iter())))
 }

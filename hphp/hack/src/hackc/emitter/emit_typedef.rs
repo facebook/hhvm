@@ -2,20 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::collections::BTreeMap;
-
 use env::emitter::Emitter;
 use error::Result;
 use hhbc::ClassName;
 use hhbc::Span;
 use hhbc::TypeInfo;
-use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::aast_defs::Hint;
 use oxidized::ast;
 
-use super::TypeRefinementInHint;
 use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_type_constant;
@@ -45,12 +41,13 @@ fn emit_typedef<'a, 'arena, 'decl>(
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
     let type_info_res = kind_to_type_info(emitter.alloc, &tparams, &typedef.kind);
-    let type_structure_res = kind_to_type_structure(
-        emitter,
+    let type_structure_res = emit_type_constant::typedef_to_type_structure(
+        emitter.alloc,
+        emitter.options(),
         &tparams,
-        typedef.kind.clone(),
-        typedef.vis.is_opaque() || typedef.vis.is_opaque_module(),
+        typedef,
     );
+
     let span = Span::from_pos(&typedef.span);
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrPersistent, emitter.systemlib());
@@ -79,22 +76,4 @@ fn kind_to_type_info<'arena>(
 ) -> Result<TypeInfo<'arena>> {
     use emit_type_hint::Kind;
     emit_type_hint::hint_to_type_info(alloc, &Kind::TypeDef, false, h.1.is_hoption(), tparams, h)
-}
-
-fn kind_to_type_structure<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    tparams: &[&str],
-    h: Hint,
-    is_opaque: bool,
-) -> Result<TypedValue<'arena>> {
-    emit_type_constant::hint_to_type_constant(
-        emitter.alloc,
-        emitter.options(),
-        tparams,
-        &BTreeMap::new(),
-        &h,
-        true,
-        is_opaque,
-        TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef`
-    )
 }

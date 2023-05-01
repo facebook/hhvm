@@ -206,8 +206,6 @@ fn from_type_constant<'a, 'arena, 'decl>(
                 &[],
                 &BTreeMap::new(),
                 init,
-                false,
-                false,
                 TypeRefinementInHint::Disallowed,
             )?)
         }

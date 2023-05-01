@@ -353,8 +353,6 @@ pub(crate) fn get_type_structure_for_hint<'arena, 'decl>(
         tparams,
         &targ_map,
         hint,
-        false,
-        false,
         type_refinement_in_hint,
     )?;
     emit_adata::typed_value_into_instr(e, tv)

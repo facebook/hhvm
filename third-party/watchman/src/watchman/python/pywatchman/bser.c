@@ -425,6 +425,10 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   }
 
   numkeys = PySequence_Length(keys);
+  if (numkeys == 0) {
+    PyErr_Format(PyExc_ValueError, "Expected non-empty ARRAY in TEMPLATE");
+    return NULL;
+  }
 
   // Load number of array elements
   if (!bunser_int(ptr, end, &nitems)) {
@@ -438,7 +442,7 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     return NULL;
   }
 
-  arrval = PyList_New((Py_ssize_t)nitems);
+  arrval = PyList_New(0);
   if (!arrval) {
     Py_DECREF(keys);
     return NULL;
@@ -497,8 +501,11 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
       }
     }
 
-    PyList_SET_ITEM(arrval, i, dict);
-    // DECREF(obj) not required as SET_ITEM steals the ref
+    int error = PyList_Append(arrval, dict);
+    Py_DECREF(dict);
+    if (error != 0) {
+      goto fail;
+    }
   }
 
   Py_DECREF(keys);

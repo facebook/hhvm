@@ -50,6 +50,17 @@ let search ctx target include_defs files genv =
   in
   strip_ns res
 
+let search_single_file ctx target include_defs file =
+  if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+    Hh_logger.debug
+      "ServerFindRefs.search file %s"
+      (Relative_path.to_absolute file);
+  (* Get all the references to the provided target in the files *)
+  let res =
+    FindRefsService.find_references_single_worker ctx target include_defs [file]
+  in
+  strip_ns res
+
 let handle_prechecked_files genv env dep f =
   (* We need to handle prechecked files here to get accurate results. *)
   let dep = Typing_deps.DepSet.singleton dep in
@@ -83,6 +94,15 @@ let search_function ctx function_name include_defs genv env =
     |> Relative_path.Set.elements
   in
   search ctx (FindRefsService.IFunction function_name) include_defs files genv
+
+let search_single_file_for_function ctx function_name filename include_defs =
+  let function_name = add_ns function_name in
+  Hh_logger.debug "ServerFindRefs.search_function: %s" function_name;
+  search_single_file
+    ctx
+    (FindRefsService.IFunction function_name)
+    include_defs
+    filename
 
 let search_member
     ctx
@@ -125,6 +145,34 @@ let search_member
   in
   search ctx target include_defs files genv
 
+let search_single_file_for_member
+    ctx
+    (class_name : string)
+    (member : member)
+    ~(include_defs : bool)
+    ~(naming_table : Naming_table.t)
+    (filename : Relative_path.t) : (string * Pos.t) list =
+  let class_name = add_ns class_name in
+  let origin_class_name =
+    FindRefsService.get_origin_class_name ctx class_name member
+  in
+  let descendant_class_files =
+    Relative_path.Set.add Relative_path.Set.empty filename
+  in
+  let descendant_classes =
+    FindRefsService.find_child_classes
+      ctx
+      origin_class_name
+      naming_table
+      descendant_class_files
+  in
+  let class_and_descendants = SSet.add descendant_classes origin_class_name in
+  let target =
+    FindRefsService.IMember
+      (FindRefsService.Class_set class_and_descendants, member)
+  in
+  search_single_file ctx target include_defs filename
+
 let search_gconst ctx cst_name include_defs genv env =
   let cst_name = add_ns cst_name in
   handle_prechecked_files genv env Typing_deps.(Dep.(make (GConst cst_name)))
@@ -137,6 +185,14 @@ let search_gconst ctx cst_name include_defs genv env =
     |> Relative_path.Set.elements
   in
   search ctx (FindRefsService.IGConst cst_name) include_defs files genv
+
+let search_single_file_for_gconst ctx cst_name filename include_defs =
+  let cst_name = add_ns cst_name in
+  search_single_file
+    ctx
+    (FindRefsService.IGConst cst_name)
+    include_defs
+    filename
 
 let search_class ctx class_name include_defs include_all_ci_types genv env =
   let class_name = add_ns class_name in
@@ -156,6 +212,17 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
     |> Relative_path.Set.elements
   in
   search ctx target include_defs files genv
+
+let search_single_file_for_class
+    ctx class_name include_defs filename include_all_ci_types =
+  let class_name = add_ns class_name in
+  let target =
+    if include_all_ci_types then
+      FindRefsService.IClass class_name
+    else
+      FindRefsService.IExplicitClass class_name
+  in
+  search_single_file ctx target include_defs filename
 
 let search_localvar ~ctx ~entry ~line ~char =
   let results = ServerFindLocals.go ~ctx ~entry ~line ~char in
@@ -191,6 +258,52 @@ let go ctx action include_defs genv env =
         ~contents:file_content
     in
     (env, Done (search_localvar ~ctx ~entry ~line ~char))
+
+let go_for_single_file
+    ~(ctx : Provider_context.t)
+    ~(action : ServerCommandTypes.Find_refs.action)
+    ~(filename : Relative_path.t)
+    ~(include_defs : bool)
+    ~(name : string)
+    ~(naming_table : Naming_table.t) =
+  let _ = name in
+  match action with
+  | Member (class_name, member) ->
+    search_single_file_for_member
+      ctx
+      class_name
+      member
+      filename
+      ~include_defs
+      ~naming_table
+  | Function function_name ->
+    search_single_file_for_function ctx function_name filename include_defs
+  | Class class_name ->
+    let include_all_ci_types = true in
+    search_single_file_for_class
+      ctx
+      class_name
+      include_defs
+      filename
+      include_all_ci_types
+  | ExplicitClass class_name ->
+    let include_all_ci_types = false in
+    search_single_file_for_class
+      ctx
+      class_name
+      include_defs
+      filename
+      include_all_ci_types
+  | GConst cst_name ->
+    search_single_file_for_gconst ctx cst_name filename include_defs
+  | LocalVar { filename; file_content; line; char } ->
+    let (ctx, entry) =
+      Provider_context.add_or_overwrite_entry_contents
+        ~ctx
+        ~path:filename
+        ~contents:file_content
+    in
+    search_localvar ~ctx ~entry ~line ~char
 
 let go_for_localvar ctx action =
   match action with

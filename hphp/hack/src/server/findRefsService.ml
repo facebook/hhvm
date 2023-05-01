@@ -418,6 +418,25 @@ let find_references ctx workers target include_defs files =
   else
     results
 
+let find_references_single_worker ctx target include_defs files =
+  Hh_logger.debug "find_references_single_worker: %d files" (List.length files);
+  let results = find_refs ctx target [] files in
+  let () =
+    Hh_logger.debug
+      "find_references_single_worker: %d results"
+      (List.length results)
+  in
+  if include_defs then
+    let defs = get_definitions ctx target in
+    let () =
+      Hh_logger.debug
+        "find_references_single_worker: +%d defs"
+        (List.length defs)
+    in
+    List.rev_append defs results
+  else
+    results
+
 let get_dependent_files_function ctx _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set_function ctx f_name

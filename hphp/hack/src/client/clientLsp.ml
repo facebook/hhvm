@@ -224,8 +224,12 @@ module Lost_env = struct
   }
 
   and shellable_type =
-    | FindRefs of lsp_id * string * ServerCommandTypes.Find_refs.action
-      (* lsp_id, symbol_name, FindRefs action *)
+    | FindRefs of {
+        lsp_id: lsp_id;
+        symbol: string;
+        find_refs_action: ServerCommandTypes.Find_refs.action;
+        ide_calculated_refs: Pos.absolute list UriMap.t;
+      }
     | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
     | Rename of
         lsp_id
@@ -236,7 +240,7 @@ module Lost_env = struct
 end
 
 let get_lsp_id_of_shell_out = function
-  | Lost_env.FindRefs (lsp_id, _, _) -> lsp_id
+  | Lost_env.FindRefs { lsp_id; _ } -> lsp_id
   | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
   | Lost_env.Rename (lsp_id, _, _, _, _) -> lsp_id
 
@@ -2430,9 +2434,9 @@ let kickoff_shell_out_and_maybe_cancel
     let cmd =
       begin
         match shellable_type with
-        | Lost_env.FindRefs (_lsp_id, symbol_name, action) ->
+        | Lost_env.FindRefs { symbol; find_refs_action; _ } ->
           let symbol_action_arg =
-            Find_refs.symbol_and_action_to_string_exn symbol_name action
+            Find_refs.symbol_and_action_to_string_exn symbol find_refs_action
           in
           let cmd =
             compose_shellout_cmd
@@ -3407,23 +3411,35 @@ let do_findReferences_local
   let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
+  let all_open_documents =
+    UriMap.fold
+      (fun fn _val accum ->
+        {
+          ClientIdeMessage.file_path =
+            Path.make @@ Lsp_helpers.lsp_uri_to_path fn;
+          file_contents = get_document_contents editor_open_files fn;
+        }
+        :: accum)
+      editor_open_files
+      []
+  in
   let%lwt response =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Find_references (document, location))
+      (ClientIdeMessage.Find_references (document, location, all_open_documents))
   in
   let state =
     match response with
-    | Ok None ->
+    | ClientIdeMessage.Invalid_symbol ->
       respond_jsonrpc
         ~powered_by:Serverless_ide
         lsp_id
         (FindReferencesResult []);
       Lwt.return state
-    | Ok (Some (_name, positions)) ->
+    | ClientIdeMessage.Local_var_result (Some (_name, positions)) ->
       let filename =
         Lsp_helpers.lsp_textDocumentIdentifier_to_filename
           params.FindReferences.loc.TextDocumentPositionParams.textDocument
@@ -3436,22 +3452,27 @@ let do_findReferences_local
         lsp_id
         (FindReferencesResult positions);
       Lwt.return state
-    | Error (_symbol_name, action) when ServerFindRefs.is_local action ->
-      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
-      let str =
-        Printf.sprintf
-          "ClientIDEDaemon failed to find-refs for localvar %s"
-          (ServerCommandTypes.Find_refs.show_action action)
-      in
-      log "%s" str;
-      HackEventLogger.invariant_violation_bug str;
-      failwith "ClientIDEDaemon failed to find-refs for a localvar"
-    | Error (symbol_name, action) ->
+    | ClientIdeMessage.Local_var_result None ->
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        lsp_id
+        (FindReferencesResult []);
+      Lwt.return state
+    | ClientIdeMessage.Shell_out_and_augment
+        (symbol_name, action, ide_calculated_refs) ->
       (* ClientIdeMessage.Find_references only supports localvar.
          Receiving an error with a non-localvar action indicates that we attempted to
          try and find references for a non-localvar
       *)
-      let shellable_type = Lost_env.FindRefs (lsp_id, symbol_name, action) in
+      let shellable_type =
+        Lost_env.FindRefs
+          {
+            lsp_id;
+            symbol = symbol_name;
+            find_refs_action = action;
+            ide_calculated_refs;
+          }
+      in
       (* If we reach kickoff a shell-out to hh_server, processing that response
          also invokes respond_jsonrpc
       *)
@@ -4509,8 +4530,8 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
 
 let respond_jsonrpc_for_shell
     (shellable_type : Lost_env.shellable_type) (stdout : string) :
-    (int * Telemetry.t) option =
-  let parse_lsp_locations stdout : (Lsp.Location.t list, unit) result =
+    (int * Telemetry.t) option Lwt.t =
+  let parse_lsp_locations stdout : (Lsp.Location.t list, string) result =
     let json = Yojson.Safe.from_string stdout in
     match json with
     | `List positions ->
@@ -4526,7 +4547,17 @@ let respond_jsonrpc_for_shell
             ide_shell_out_pos_to_lsp_location pos)
       in
       Ok lsp_locations
-    | _ -> Error ()
+    | `Int _
+    | `Tuple _
+    | `Bool _
+    | `Intlit _
+    | `Null
+    | `Variant _
+    | `Assoc _
+    | `Float _
+    | `String _ ->
+      let str = Printf.sprintf "Expected list, got json like %s" stdout in
+      Error str
   in
   let parse_patch_list stdout =
     let json = Yojson.Safe.from_string stdout in
@@ -4597,39 +4628,101 @@ let respond_jsonrpc_for_shell
             SMap.add uri new_edits acc)
       in
       Ok { WorkspaceEdit.changes }
-    | _ -> Error ()
+    | `Int _
+    | `Tuple _
+    | `Bool _
+    | `Intlit _
+    | `Null
+    | `Variant _
+    | `Assoc _
+    | `Float _
+    | `String _ ->
+      let str = Printf.sprintf "Expected list, got json like %s" stdout in
+      Error str
   in
-
   let lsp_id = get_lsp_id_of_shell_out shellable_type in
   match shellable_type with
-  | Lost_env.FindRefs _ -> begin
+  | Lost_env.FindRefs { ide_calculated_refs; _ } -> begin
     match parse_lsp_locations stdout with
-    | Ok lsp_locations ->
-      let _ =
+    | Ok parsed_stdout_lsp_locations ->
+      (* lsp_locations return a file for each position. To support unsaved, edited files
+         let's discard locations for files that we previously fetched from ClientIDEDaemon.
+
+         First: filter out locations for any where the documentUri matches a relative_path
+         in the returned map
+         Second: augment above list with values in `ide_calculated_refs`
+      *)
+      let lsp_locations_to_keep =
+        List.filter
+          ~f:(fun location ->
+            let uri = location.Lsp.Location.uri in
+            not @@ UriMap.mem uri ide_calculated_refs)
+          parsed_stdout_lsp_locations
+      in
+      let ide_calculated_locations =
+        UriMap.bindings ide_calculated_refs
+        |> List.map ~f:(fun (lsp_uri, pos_list) ->
+               let filename = Lsp.string_of_uri lsp_uri in
+               let lsp_locations =
+                 List.map
+                   ~f:(hack_pos_to_lsp_location ~default_path:filename)
+                   pos_list
+               in
+               lsp_locations)
+        |> List.concat
+      in
+      let lsp_locations =
+        List.rev_append ide_calculated_locations lsp_locations_to_keep
+      in
+      let () =
         respond_jsonrpc
           ~powered_by:Serverless_ide
           lsp_id
           (FindReferencesResult lsp_locations)
       in
-      Some (List.length lsp_locations, Telemetry.create ())
-    | Error _ -> None
+      Lwt.return @@ Some (List.length lsp_locations, Telemetry.create ())
+    | Error str ->
+      let () =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (FindReferencesResult [])
+      in
+      let error_telemetry =
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"name" ~value:"shellout_find_refs"
+        |> Telemetry.string_ ~key:"error" ~value:str
+      in
+      Lwt.return @@ Some (0, error_telemetry)
   end
   | Lost_env.GoToImpl _ -> begin
     match parse_lsp_locations stdout with
     | Ok lsp_locations ->
-      let _ =
+      let () =
         respond_jsonrpc
           ~powered_by:Serverless_ide
           lsp_id
           (ImplementationResult lsp_locations)
       in
-      Some (List.length lsp_locations, Telemetry.create ())
-    | Error _ -> None
+      Lwt.return @@ Some (List.length lsp_locations, Telemetry.create ())
+    | Error str ->
+      let () =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (ImplementationResult [])
+      in
+      let error_telemetry =
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"name" ~value:"shellout_go_to_impl"
+        |> Telemetry.string_ ~key:"error" ~value:str
+      in
+      Lwt.return @@ Some (0, error_telemetry)
   end
   | Lost_env.Rename _ -> begin
     match parse_patch_list stdout with
     | Ok result ->
-      let _ =
+      let () =
         respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
       in
       let result_count =
@@ -4644,9 +4737,21 @@ let respond_jsonrpc_for_shell
              ~key:"files"
              ~value:(SMap.cardinal result.WorkspaceEdit.changes)
       in
-
-      Some (result_count, result_extra_telemetry)
-    | Error _ -> None
+      Lwt.return @@ Some (result_count, result_extra_telemetry)
+    | Error str ->
+      let empty_changes = { WorkspaceEdit.changes = SMap.empty } in
+      let () =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (RenameResult empty_changes)
+      in
+      let error_telemetry =
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"name" ~value:"shellout_rename"
+        |> Telemetry.string_ ~key:"error" ~value:str
+      in
+      Lwt.return @@ Some (0, error_telemetry)
   end
 
 let handle_shell_out_hh_feature
@@ -4655,44 +4760,49 @@ let handle_shell_out_hh_feature
   let telemetry =
     match result with
     | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
-      match respond_jsonrpc_for_shell shellable_type stdout with
+      match%lwt respond_jsonrpc_for_shell shellable_type stdout with
       | Some (length, telemetry) ->
-        Some
-          {
-            result_count = length;
-            result_extra_telemetry =
-              Some
-                (telemetry
-                |> Telemetry.float_
-                     ~key:"duration"
-                     ~value:(end_time -. start_time));
-          }
+        Lwt.return
+        @@ Some
+             {
+               result_count = length;
+               result_extra_telemetry =
+                 Some
+                   (telemetry
+                   |> Telemetry.float_
+                        ~key:"duration"
+                        ~value:(end_time -. start_time));
+             }
       | None ->
-        Some
-          {
-            result_count = 0;
-            result_extra_telemetry =
-              Some
-                (Telemetry.create ()
-                |> Telemetry.float_
-                     ~key:"duration"
-                     ~value:(end_time -. start_time));
-          }
+        Lwt.return
+        @@ Some
+             {
+               result_count = 0;
+               result_extra_telemetry =
+                 Some
+                   (Telemetry.create ()
+                   |> Telemetry.float_
+                        ~key:"duration"
+                        ~value:(end_time -. start_time));
+             }
     end
     | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
-      Some
-        {
-          result_count = 0;
-          result_extra_telemetry =
-            Some
-              (Telemetry.create ()
-              |> Telemetry.float_ ~key:"duration" ~value:(end_time -. start_time)
-              |> Telemetry.string_
-                   ~key:"exn"
-                   ~value:(Lwt_utils.Process_failure.to_string e));
-        }
+      Lwt.return
+      @@ Some
+           {
+             result_count = 0;
+             result_extra_telemetry =
+               Some
+                 (Telemetry.create ()
+                 |> Telemetry.float_
+                      ~key:"duration"
+                      ~value:(end_time -. start_time)
+                 |> Telemetry.string_
+                      ~key:"exn"
+                      ~value:(Lwt_utils.Process_failure.to_string e));
+           }
   in
-  Lwt.return telemetry
+  telemetry
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.

@@ -34,6 +34,14 @@ type location = {
   column: int;
 }
 
+type find_refs_result =
+  | Invalid_symbol
+  | Local_var_result of ServerCommandTypes.Find_refs.ide_result
+  | Shell_out_and_augment of
+      (string
+      * ServerCommandTypes.Find_refs.action
+      * Pos.absolute list Lsp.UriMap.t)
+
 type completion_request = { is_manually_invoked: bool }
 
 (** Represents a path corresponding to a file which has changed on disk. We
@@ -97,18 +105,17 @@ type _ t =
   | Document_symbol : document -> FileOutline.outline t
       (** Handles "textDocument/documentSymbol" LSP messages *)
   | Workspace_symbol : string -> SearchUtils.result t
-  | Find_references :
-      document * location
-      -> ( ServerCommandTypes.Find_refs.ide_result,
-           string * ServerCommandTypes.Find_refs.action )
-         result
-         t
-      (** The result of Find_references is either:
-       - In the success case, a [Find_refs.ide_result], which is an optional tuple of
+  | Find_references : document * location * document list -> find_refs_result t
+      (** The result of Find_references is one of:
+       - Local_var_success of a [Find_refs.ide_result], which is an optional tuple of
          symbol name from [SymbolDefinition.full_name] and positions for that symbol.
-       - In the failure case, we return both a symbol's name from [SymbolDefinition.full_name],
-         and the [Find_refs.action] which describes what the symbol refers to,
-         e.g. Class of class_name, Member of member_name with a Method of method_name. *)
+       - Invalid_symbol, indicating find-refs on something that isn't a symbol
+       - Shell_out_and_augment, where we return a triple of:
+          - a symbol's name from [SymbolDefinition.full_name],
+          - the [Find_refs.action] which describes what the symbol refers to,
+            e.g. Class of class_name, Member of member_name with a Method of method_name.
+          - A mapping of the URI of a file to the absolute positions that ClientIDEDaemon discovered
+          *)
   | Rename :
       document * location * string
       -> ( ServerRenameTypes.patch list option,
@@ -189,7 +196,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
   | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
-  | Find_references ({ file_path; _ }, _) ->
+  | Find_references ({ file_path; _ }, _, _) ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
   | Rename ({ file_path; _ }, _, _) ->
     Printf.sprintf "Rename(%s)" (Path.to_string file_path)

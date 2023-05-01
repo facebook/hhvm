@@ -1138,24 +1138,87 @@ let handle_request
     in
     Lwt.return (Initialized istate, Ok result)
     (* textDocument/references - localvar only *)
-  | (Initialized istate, Find_references (document, { line; column })) ->
+  | ( Initialized istate,
+      Find_references (document, { line; column }, document_list) ) ->
     let open Result.Monad_infix in
     (* Update the state of the world with the document as it exists in the IDE *)
     let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let result =
+    let (istate, result) =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
           | Some (name, action) when ServerFindRefs.is_local action ->
-            ServerFindRefs.go_for_localvar ctx action
-            >>| ServerFindRefs.to_ide name
-            |> Result.map_error ~f:(fun action -> (name, action))
+            let result =
+              ServerFindRefs.go_for_localvar ctx action
+              >>| ServerFindRefs.to_ide name
+            in
+            let result =
+              match result with
+              | Ok ide_result -> ClientIdeMessage.Local_var_result ide_result
+              | Error _action ->
+                let err =
+                  Printf.sprintf "Failed to find refs for localvar %s" name
+                in
+                log "%s" err;
+                HackEventLogger.invariant_violation_bug err;
+                failwith "ClientIDEDaemon failed to find-refs for a localvar"
+            in
+            (istate, result)
             (* clientLsp should raise if we return a LocalVar action *)
           | None ->
             (* Clicking a line+col that isn't a symbol *)
-            Ok None
+            (istate, ClientIdeMessage.Invalid_symbol)
           | Some (name, action) ->
-            (* Not a localvar, must defer to hh_server *)
-            Error (name, action))
+            (* Not a localvar, so we do the following:
+               1) For all open files that we know about in ClientIDEDaemon, uesd the
+               cached TASTs to return positions of references
+               2) Return this list, alongside the name and action
+               3) ClientLSP, upon receiving, will shellout to hh_server
+               and reject all server-provided positions for files that ClientIDEDaemon
+               knew about, under the assumption that our cached TAST provides edited
+               file info, if applicable.
+
+               We use the result Error constructor to tell clientLsp that not all
+               references are guaranteed to be returned.
+            *)
+            let (istate, single_file_refs) =
+              List.fold
+                ~f:(fun (istate, accum) document ->
+                  let (istate, ctx, _entry, _errors) =
+                    update_file_ctx istate document
+                  in
+                  let stringified_path =
+                    Path.to_string document.ClientIdeMessage.file_path
+                  in
+                  let filename =
+                    Relative_path.create_detect_prefix stringified_path
+                  in
+                  let include_defs = false in
+                  let single_file_ref =
+                    ServerFindRefs.go_for_single_file
+                      ~ctx
+                      ~action
+                      ~filename
+                      ~include_defs
+                      ~name
+                      ~naming_table:istate.naming_table
+                    |> ServerFindRefs.to_absolute
+                    |> List.map ~f:snd
+                  in
+                  let urikey =
+                    Lsp_helpers.path_to_lsp_uri
+                      stringified_path
+                      ~default_path:stringified_path
+                  in
+                  let updated_map =
+                    Lsp.UriMap.add urikey single_file_ref accum
+                  in
+                  (istate, updated_map))
+                document_list
+                ~init:(istate, Lsp.UriMap.empty)
+            in
+            ( istate,
+              ClientIdeMessage.Shell_out_and_augment
+                (name, action, single_file_refs) ))
     in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete *)

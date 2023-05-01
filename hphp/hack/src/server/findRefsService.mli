@@ -37,6 +37,13 @@ val find_references :
   Relative_path.t list ->
   (string * Pos.t) list
 
+val find_references_single_worker :
+  Provider_context.t ->
+  action_internal ->
+  bool ->
+  Relative_path.t list ->
+  (string * Pos.t) list
+
 val find_child_classes :
   Provider_context.t ->
   string ->

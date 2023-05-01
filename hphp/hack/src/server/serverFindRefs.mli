@@ -37,6 +37,19 @@ val go :
   ServerEnv.env * server_result_or_retry
 
 (**
+ Like `go`, but only looks for references in the cached TAST from the supplied filename.
+ `go` uses ideps to look for references for ALL files.
+*)
+val go_for_single_file :
+  ctx:Provider_context.t ->
+  action:ServerCommandTypes.Find_refs.action ->
+  filename:Relative_path.t ->
+  include_defs:bool ->
+  name:string ->
+  naming_table:Naming_table.t ->
+  server_result
+
+(**
  * Given a position in a file, returns the name of the symbol
  * and data ("action") that represents if it's a class, method, etc.
  *)

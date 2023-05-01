@@ -19,6 +19,7 @@ You can also learn more about this project in the original Facebook Code [blog p
 
 Table of Contents
 =========================
+
 * [About Thrift](#about-thrift)
   * [A Code Generator](#a-code-generator)
   * [A Serialization Framework](#a-serialization-framework)
@@ -29,7 +30,6 @@ Table of Contents
   * [Thrift Files](#thrift-files)
 * [C++ Static Reflection](#c-static-reflection)
 * [C++ Server Metrics](#c-server-metrics)
-
 
 ## About Thrift
 At a high level, Thrift is three major things:
@@ -59,22 +59,21 @@ There are several key goals for these components:
 * Backwards compatibility:
   Thrift allows fields to be added to and removed from serializable types in a manner that preserves backward and forward compatibility.
 
----
-
 ## Building
 
 ### Dependencies
 
-On Linux or MacOS (with homebrew installed) you can install system dependencies
-to save building them:
+On Linux or MacOS (with [Homebrew](https://brew.sh/) installed) you can install
+system dependencies to avoid building them:
 
     # Clone the repo
     git clone https://github.com/facebook/fbthrift
     # Install dependencies
     cd fbthrift
-    sudo ./build/fbcode_builder/getdeps.py install-system-deps --recursive fbthrift
+    ./build/fbcode_builder/getdeps.py install-system-deps --recursive fbthrift
 
-On other platforms or if on Linux and without system dependencies `getdeps.py` will mostly download and build them for you during the build step.
+On other platforms or if on Linux and without system dependencies `getdeps.py`
+will mostly download and build them for you during the build step.
 
 Some of the dependencies `getdeps.py` uses and installs are:
 
@@ -139,23 +138,15 @@ your project. This includes the following macro to help building Thrift files:
 
 This generates a library called `file_name-<language>`. That is, for
 `Test.thrift` compiled as cpp2, it will generate the library `Test-cpp2`.
- This should be added as a dependency to any source or header file that contains
+This should be added as a dependency to any source or header file that contains
 an include to generated code.
-
----
 
 ## C++ Static Reflection
 
 Information regarding C++ Static Reflection support can be found under the [static reflection library directory](thrift/lib/cpp2/reflection/), in the corresponding [`README` file](thrift/lib/cpp2/reflection/README.md).
-
----
 
 ## C++ Server Metrics
 
 To collect runtime stats from a Thrift server, e.g. the number of active requests/connections, the C++ Thrift server supports an observer API that installs callbacks at a set of specific execution points in the server.
 
 To expose collected metrics out of the server process, one way is to use `fb303` interfaces, see [fb303 Github repo](https://github.com/facebook/fb303).
-
----
-
-<img src="https://avatars2.githubusercontent.com/u/69631?s=200&v=4" width="50"></img>

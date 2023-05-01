@@ -92,7 +92,6 @@ module.exports = {
         id: 'spec/index'
       },
       items: [
-        "spec/about",
         {
           type: 'category',
           label: 'Definitions',

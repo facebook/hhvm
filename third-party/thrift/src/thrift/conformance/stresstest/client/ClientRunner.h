@@ -23,6 +23,7 @@
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
+#include <thrift/conformance/stresstest/client/PoissonLoadGenerator.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
@@ -58,6 +59,8 @@ class ClientRunner {
   bool started_{false};
   bool stopped_{false};
   bool continuous_{false};
+  bool useLoadGenerator_;
+  PoissonLoadGenerator loadGenerator_;
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };
 

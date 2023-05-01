@@ -49,6 +49,13 @@ DEFINE_int64(
 DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 DEFINE_int64(warmup_s, 2, "Warmup time of test in seconds");
+DEFINE_uint32(target_qps, 1000, "Target QPS for generated load");
+DEFINE_bool(
+    gen_load, false, "Generate constant QPS load instead of using concurrency");
+DEFINE_uint64(
+    gen_load_interval,
+    5,
+    "interval in milliseconds used by the generated load");
 
 namespace apache::thrift::stress {
 
@@ -77,6 +84,12 @@ namespace apache::thrift::stress {
   connCfg.ioUring = FLAGS_io_uring;
 
   ClientConfig config{};
+
+  // Configure qps load generator
+  config.useLoadGenerator = FLAGS_gen_load;
+  config.gen_load_interval = std::chrono::milliseconds(FLAGS_gen_load_interval);
+  config.targetQps = FLAGS_target_qps;
+
   config.numClientThreads = FLAGS_client_threads <= 0
       ? std::thread::hardware_concurrency()
       : static_cast<uint64_t>(FLAGS_client_threads);

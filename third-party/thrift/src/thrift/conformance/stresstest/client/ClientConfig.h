@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <gflags/gflags.h>
 #include <folly/SocketAddress.h>
 
@@ -34,6 +35,9 @@ DECLARE_int64(stats_interval);
 DECLARE_bool(io_uring);
 DECLARE_int64(runtime_s);
 DECLARE_int64(warmup_s);
+DECLARE_uint32(target_qps);
+DECLARE_bool(gen_load);
+DECLARE_uint64(gen_load_interval);
 
 namespace apache::thrift::stress {
 
@@ -57,6 +61,9 @@ struct ClientConfig {
   uint64_t numConnectionsPerThread;
   uint64_t numClientsPerConnection;
   bool continuous{false};
+  bool useLoadGenerator;
+  uint32_t targetQps;
+  std::chrono::duration<int64_t, std::milli> gen_load_interval;
   ClientConnectionConfig connConfig;
 
   static ClientConfig createFromFlags();

@@ -30,6 +30,11 @@ THRIFT_STRESS_TEST(Echo256b) {
   co_await client->co_echo(s);
 }
 
+THRIFT_STRESS_TEST(Echo256b_eb) {
+  static std::string const s(256, '?');
+  co_await client->co_echoEb(s);
+}
+
 THRIFT_STRESS_TEST(Echo4096b) {
   static std::string const s(4096, '?');
   co_await client->co_echo(s);

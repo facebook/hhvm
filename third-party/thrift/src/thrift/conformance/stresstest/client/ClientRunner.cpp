@@ -64,10 +64,16 @@ std::unique_ptr<folly::EventBaseBackendBase> getDefaultBackend() {
 
 class ClientThread : public folly::HHWheelTimer::Callback {
  public:
-  explicit ClientThread(const ClientConfig& cfg, size_t index)
+  explicit ClientThread(
+      const ClientConfig& cfg,
+      size_t index,
+      BaseLoadGenerator& loadGenerator,
+      bool useLoadGenerator)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
+        useLoadGenerator_(useLoadGenerator),
         testDoneTimeout_(testDone_),
-        warmupDoneTimeout_(rpcStats_) {
+        warmupDoneTimeout_(rpcStats_),
+        loadGenerator_(loadGenerator) {
     continuous_ = cfg.continuous;
 
     auto ebm = folly::EventBaseManager::get();
@@ -98,20 +104,47 @@ class ClientThread : public folly::HHWheelTimer::Callback {
         [clients = std::move(clients_)]() {});
   }
 
-  folly::SemiFuture<folly::Unit> run(const StressTestBase* test) {
+  void checkIsContinuous() {
     if (!continuous_) {
       thread_->getEventBase()->timer().scheduleTimeout(
           &testDoneTimeout_,
           std::chrono::seconds(FLAGS_warmup_s + FLAGS_runtime_s));
     }
+  }
+
+  void warmup() {
     if (FLAGS_warmup_s >= 0) {
       thread_->getEventBase()->timer().scheduleTimeout(
           &warmupDoneTimeout_, std::chrono::seconds(FLAGS_warmup_s));
     }
+  }
+
+  void concurrentRun(const StressTestBase* test) {
     for (auto& client : clients_) {
-      scope_.add(
-          runInternal(client.get(), test).scheduleOn(thread_->getEventBase()));
+      scope_.add(runConcurrentInternal(client.get(), test)
+                     .scheduleOn(thread_->getEventBase()));
     }
+  }
+
+  void loadGeneratedRun(const StressTestBase* test) {
+    for (auto& client : clients_) {
+      scope_.add(runLoadGeneratorInternal(client.get(), test)
+                     .scheduleOn(thread_->getEventBase()));
+    }
+  }
+
+  folly::SemiFuture<folly::Unit> run(const StressTestBase* test) {
+    checkIsContinuous();
+    warmup();
+
+    if (useLoadGenerator_) {
+      LOG(INFO) << "starting load generator run";
+      loadGeneratedRun(test);
+    } else {
+      LOG(INFO) << "starting concurrent run";
+      concurrentRun(test);
+    }
+
     return scope_.joinAsync()
         .semi()
         .via(thread_->getEventBase())
@@ -144,10 +177,25 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   }
 
  private:
-  folly::coro::Task<void> runInternal(
+  folly::coro::Task<void> runConcurrentInternal(
       StressTestClient* client, const StressTestBase* test) {
     while (!testDone_ && client->connectionGood()) {
       co_await test->runWorkload(client);
+    }
+  }
+
+  folly::coro::Task<void> runLoadGeneratorInternal(
+      StressTestClient* client, const StressTestBase* test) {
+    auto signals = loadGenerator_.getRequestCount();
+    while (auto s = co_await signals.next()) {
+      if (testDone_) {
+        break;
+      }
+
+      auto v = *s;
+      while (v-- > 0) {
+        test->runWorkload(client).semi().via(thread_->getEventBase());
+      }
     }
   }
 
@@ -158,15 +206,21 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   std::vector<std::unique_ptr<StressTestClient>> clients_;
   std::unique_ptr<folly::ScopedEventBaseThread> thread_;
   bool continuous_{false};
+  bool useLoadGenerator_{false};
   bool testDone_{false};
   TestDoneTimeout testDoneTimeout_;
   WarmupDoneTimeout warmupDoneTimeout_;
+  BaseLoadGenerator& loadGenerator_;
 };
 
 ClientRunner::ClientRunner(const ClientConfig& config)
-    : continuous_(config.continuous), clientThreads_() {
+    : continuous_(config.continuous),
+      useLoadGenerator_(config.useLoadGenerator),
+      loadGenerator_(config.targetQps, config.gen_load_interval),
+      clientThreads_() {
   for (size_t i = 0; i < config.numClientThreads; i++) {
-    clientThreads_.emplace_back(std::make_unique<ClientThread>(config, i));
+    clientThreads_.emplace_back(std::make_unique<ClientThread>(
+        config, i, loadGenerator_, config.useLoadGenerator));
   }
 }
 
@@ -177,9 +231,15 @@ ClientRunner::~ClientRunner() {
 void ClientRunner::run(const StressTestBase* test) {
   CHECK(!started_) << "ClientRunner was already started";
   std::vector<folly::SemiFuture<folly::Unit>> starts;
+
   for (auto& clientThread : clientThreads_) {
     starts.push_back(clientThread->run(test));
   }
+
+  if (useLoadGenerator_) {
+    loadGenerator_.start();
+  }
+
   folly::collect(std::move(starts)).get();
   started_ = true;
 }

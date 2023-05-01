@@ -300,15 +300,6 @@ let main_internal
   | MODE_GEN_PREFETCH_DIR dirname ->
     let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_PREFETCH_DIR dirname in
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_GEN_REMOTE_DECLS_FULL ->
-    let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_REMOTE_DECLS_FULL in
-    Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_GEN_REMOTE_DECLS_INCREMENTAL ->
-    let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_REMOTE_DECLS_INCREMENTAL in
-    Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_GEN_SHALLOW_DECLS_DIR dir ->
-    let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_SHALLOW_DECLS_DIR dir in
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_GO_TO_IMPL_CLASS class_name ->
     let%lwt results =
       rpc_with_retry args

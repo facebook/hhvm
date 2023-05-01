@@ -521,8 +521,6 @@
   serverFileSync
   serverFormat
   serverGenPrefetchDir
-  serverGenRemoteDecls
-  serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
   serverTastHolesBatch

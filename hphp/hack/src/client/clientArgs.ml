@@ -406,18 +406,6 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),
         " generate a directory of decls and typecheck dependencies to use for prefetching"
         ^ " Usage: --gen-prefetch-dir ~/prefetched-dir" );
-      ( "--gen-remote-decls-full",
-        Arg.Unit (fun () -> set_mode MODE_GEN_REMOTE_DECLS_FULL),
-        " generate a directory of decls and typecheck dependencies to use for prefetching"
-        ^ " Usage: --gen-remote-decls-full" );
-      ( "--gen-remote-decls-incremental",
-        Arg.Unit (fun () -> set_mode MODE_GEN_REMOTE_DECLS_INCREMENTAL),
-        " generate a directory of decls and typecheck dependencies to use for prefetching"
-        ^ " Usage: --gen-remote-decls-incremental" );
-      ( "--gen-shallow-decls-dir",
-        Arg.String (fun x -> set_mode (MODE_GEN_SHALLOW_DECLS_DIR x)),
-        " generate a directory of decls and typecheck dependencies to use for prefetching"
-        ^ " Usage: --gen-shallow-decls-dir <target_dir>" );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         " generate a saved state even if there are type errors (default: false)."

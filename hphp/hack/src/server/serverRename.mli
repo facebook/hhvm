@@ -43,6 +43,19 @@ val go_ide :
     string )
   result
 
+val go_ide_with_find_refs_action :
+  Provider_context.t ->
+  find_refs_action:ServerCommandTypes.Find_refs.action ->
+  new_name:string ->
+  filename:string ->
+  symbol_definition:string SymbolDefinition.t ->
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  ( ServerEnv.env
+    * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t,
+    string )
+  result
+
 val go_for_localvar :
   Provider_context.t ->
   ServerCommandTypes.Find_refs.action ->

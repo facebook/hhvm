@@ -270,6 +270,7 @@
   serverRenameTypes
   tastHolesService)
  (libraries
+  base64
   connection_tracker
   full_fidelity
   hh_json

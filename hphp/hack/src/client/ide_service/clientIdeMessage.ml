@@ -42,6 +42,12 @@ type find_refs_result =
       * ServerCommandTypes.Find_refs.action
       * Pos.absolute list Lsp.UriMap.t)
 
+type rename_result =
+  | Invalid_rename_symbol
+  | Local_var_rename_result of ServerRenameTypes.patch list option
+  | Shell_out_rename_and_augment of
+      (string SymbolDefinition.t * ServerCommandTypes.Find_refs.action)
+
 type completion_request = { is_manually_invoked: bool }
 
 (** Represents a path corresponding to a file which has changed on disk. We
@@ -116,12 +122,14 @@ type _ t =
             e.g. Class of class_name, Member of member_name with a Method of method_name.
           - A mapping of the URI of a file to the absolute positions that ClientIDEDaemon discovered
           *)
-  | Rename :
-      document * location * string
-      -> ( ServerRenameTypes.patch list option,
-           ServerCommandTypes.Find_refs.action )
-         result
-         t
+  | Rename : document * location * string -> rename_result t
+      (** The result of Rename is onne of:
+       - Local_var_success of a [ServerRenameTypes.patch list option], which is an optional list
+       of Insert, Delete or Replace patches with positions and new_names.
+       - Invalid_symbol, indicating rename on something that isn't a symbol
+       - In the failure case, we return both a symbol's definition from [SymbolDefinition.t],
+         and the find_refs action corresponding to this Rename attempt
+         e.g. Class of class_name, Member of member_name with a Method of method_name. *)
   | Type_definition :
       document * location
       -> ServerCommandTypes.Go_to_type_definition.result t

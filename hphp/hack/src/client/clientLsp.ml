@@ -231,18 +231,19 @@ module Lost_env = struct
         ide_calculated_refs: Pos.absolute list UriMap.t;
       }
     | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
-    | Rename of
-        lsp_id
-        * string
-        * int
-        * int
-        * string (* lsp_id, filename, line, col, new_name *)
+    | Rename of {
+        lsp_id: lsp_id;
+        symbol_definition: string SymbolDefinition.t;
+        find_refs_action: ServerCommandTypes.Find_refs.action;
+        new_name: string;
+        filename: string;
+      }
 end
 
 let get_lsp_id_of_shell_out = function
   | Lost_env.FindRefs { lsp_id; _ } -> lsp_id
   | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
-  | Lost_env.Rename (lsp_id, _, _, _, _) -> lsp_id
+  | Lost_env.Rename { lsp_id; _ } -> lsp_id
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
@@ -2454,15 +2455,20 @@ let kickoff_shell_out_and_maybe_cancel
               file_line_col
           in
           cmd
-        | Lost_env.Rename (_, filename, line, col, new_name) ->
-          let file_line_col_symbol =
-            Printf.sprintf "%s:%d:%d:%s" filename line col new_name
+        | Lost_env.Rename
+            { symbol_definition; find_refs_action; new_name; filename; _ } ->
+          let name_action_definition_string =
+            ServerCommandTypes.Rename.arguments_to_string_exn
+              new_name
+              find_refs_action
+              filename
+              symbol_definition
           in
           let cmd =
             compose_shellout_cmd
               ~from:"rename"
-              "--ide-refactor"
-              file_line_col_symbol
+              "--ide-rename-by-symbol"
+              name_action_definition_string
           in
           cmd
       end
@@ -3898,28 +3904,24 @@ let do_documentRename_local
   in
   let state =
     match response with
-    | Ok None ->
+    | ClientIdeMessage.Invalid_rename_symbol
+    | ClientIdeMessage.Local_var_rename_result None ->
       let patches = patches_to_workspace_edit [] in
       respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
       Lwt.return state
-    | Ok (Some patch_list) ->
+    | ClientIdeMessage.Local_var_rename_result (Some patch_list) ->
       let patches = patches_to_workspace_edit patch_list in
       respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
       Lwt.return state
-    | Error action when ServerFindRefs.is_local action ->
-      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
-      let str =
-        Printf.sprintf
-          "ClientIDEDaemon failed to rename for localvar %s"
-          (ServerCommandTypes.Find_refs.show_action action)
-      in
-      log "%s" str;
-      failwith "ClientIDEDaemon failed to rename for a localvar"
-    | Error _action ->
+    | ClientIdeMessage.Shell_out_rename_and_augment
+        (symbol_definition, find_refs_action) ->
       (* clientIdeDaemon returns errors if we try to rename a non-localvar *)
-      let (filename, line, col) = lsp_file_position_to_hack document_position in
+      let (filename, _line, _col) =
+        lsp_file_position_to_hack document_position
+      in
       let shellable_type =
-        Lost_env.Rename (lsp_id, filename, line, col, new_name)
+        Lost_env.Rename
+          { lsp_id; symbol_definition; find_refs_action; new_name; filename }
       in
       let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
       Lwt.return state

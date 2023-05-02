@@ -404,6 +404,22 @@ let main_internal
       ClientRename.go_ide conn ~desc:args.desc args filename line char new_name
     in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
+  | MODE_IDE_RENAME_BY_SYMBOL arg ->
+    let open ServerCommandTypes in
+    let (new_name, action, filename, symbol_definition) =
+      Rename.string_to_args arg
+    in
+    let%lwt results =
+      rpc_with_retry args
+      @@ Rpc.IDE_RENAME_BY_SYMBOL (action, new_name, filename, symbol_definition)
+    in
+    begin
+      match results with
+      | Ok patches ->
+        ClientRename.go_ide_from_patches patches args.output_json;
+        Lwt.return (Exit_status.No_error, Telemetry.create ())
+      | Error _msg -> raise Exit_status.(Exit_with Input_error)
+    end
   | MODE_EXTRACT_STANDALONE name ->
     let open ServerCommandTypes.Extract_standalone in
     let target =

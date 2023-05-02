@@ -1129,12 +1129,34 @@ let handle_request
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
-          | None -> Ok None (* Clicking a line+col that isn't a symbol *)
-          | Some (_name, action) when ServerFindRefs.is_local action ->
-            ServerRename.go_for_localvar ctx action new_name
-          | Some (_name, action) ->
-            Error action (* not a localvar, must defer to hh_server *))
+          match
+            ServerFindRefs.go_from_file_ctx_with_symbol_definition
+              ~ctx
+              ~entry
+              ~line
+              ~column
+          with
+          | None ->
+            ClientIdeMessage.Invalid_rename_symbol
+            (* Clicking a line+col that isn't a symbol *)
+          | Some (_definition, action) when ServerFindRefs.is_local action ->
+          begin
+            match ServerRename.go_for_localvar ctx action new_name with
+            | Ok patch_list ->
+              ClientIdeMessage.Local_var_rename_result patch_list
+            | Error action ->
+              let str =
+                Printf.sprintf
+                  "ClientIDEDaemon failed to rename for localvar %s"
+                  (ServerCommandTypes.Find_refs.show_action action)
+              in
+              log "%s" str;
+              failwith "ClientIDEDaemon failed to rename for a localvar"
+          end
+          | Some (symbol_definition, action) ->
+            ClientIdeMessage.Shell_out_rename_and_augment
+              (symbol_definition, action)
+          (* not a localvar, must defer to hh_server *))
     in
     Lwt.return (Initialized istate, Ok result)
     (* textDocument/references - localvar only *)

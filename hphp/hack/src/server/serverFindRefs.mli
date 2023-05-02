@@ -50,6 +50,18 @@ val go_for_single_file :
   server_result
 
 (**
+ * Given a position in a file, returns the [SymbolDefinition.t]
+ * and data ("action") that represents if it's a class, method, etc.
+ * This is the same as `go_from_file_ctx` but sends the entire SymbolDefinition back.
+ *)
+val go_from_file_ctx_with_symbol_definition :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  line:int ->
+  column:int ->
+  (string SymbolDefinition.t * action) option
+
+(**
  * Given a position in a file, returns the name of the symbol
  * and data ("action") that represents if it's a class, method, etc.
  *)

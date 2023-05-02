@@ -204,7 +204,9 @@ module Find_refs = struct
         Printf.sprintf "Member,%s,%s,%s" str "Class_const" s
       | Member (str, Typeconst s) ->
         Printf.sprintf "Member,%s,%s,%s" str "Typeconst" s
-      | LocalVar _ -> failwith "Invalid action"
+      | LocalVar _ ->
+        Printf.eprintf "Invalid action\n";
+        raise Exit_status.(Exit_with Input_error)
     in
     Printf.sprintf "%s|%s" symbol_name action_serialized
 
@@ -219,11 +221,8 @@ module Find_refs = struct
   let string_to_symbol_and_action_exn arg =
     let pair = Str.split (Str.regexp "|") arg in
     let (symbol_name, action_arg) =
-      try
-        match pair with
-        | [symbol_name; action_arg] -> (symbol_name, action_arg)
-        | _ -> raise Exit
-      with
+      match pair with
+      | [symbol_name; action_arg] -> (symbol_name, action_arg)
       | _ ->
         Printf.eprintf "Invalid input\n";
         raise Exit_status.(Exit_with Input_error)
@@ -243,7 +242,9 @@ module Find_refs = struct
         Member (str, Class_const member_name)
       | ["Member"; str; "Typeconst"; member_name] ->
         Member (str, Typeconst member_name)
-      | _ -> raise Exit_status.(Exit_with Input_error)
+      | _ ->
+        Printf.eprintf "Invalid input for action, got %s\n" action_arg;
+        raise Exit_status.(Exit_with Input_error)
     in
     (symbol_name, action)
 end
@@ -256,6 +257,45 @@ module Rename = struct
   type ide_result_or_retry = ide_result Done_or_retry.t
 
   type result_or_retry = result Done_or_retry.t
+
+  (** Returns a string in the form of
+   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|FILENAME|OCaml_marshalled_SymbolDefinition.T
+  *)
+  let arguments_to_string_exn
+      (new_name : string)
+      (action : Find_refs.action)
+      (filename : string)
+      (symbol_def : string SymbolDefinition.t) : string =
+    let symbol_and_action =
+      Find_refs.symbol_and_action_to_string_exn new_name action
+    in
+    let marshalled_def = Marshal.to_string symbol_def [] in
+    let encoded = Base64.encode_exn marshalled_def in
+    Printf.sprintf "%s|%s|%s" symbol_and_action filename encoded
+
+  (** Expects a string in the form of
+   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|filename|OCaml_marshalled_SymbolDefinition.T
+   * For example, a valid entry is
+   * HackTypecheckerQueryBase::WWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir|foo.php|<byte_string>
+  *)
+  let string_to_args arg :
+      string * Find_refs.action * string * string SymbolDefinition.t =
+    let split_arg = Str.split (Str.regexp "|") arg in
+    let (symbol_name, action_arg, filename, marshalled_def) =
+      match split_arg with
+      | [symbol_name; action_arg; filename; marshalled_def] ->
+        (symbol_name, action_arg, filename, marshalled_def)
+      | _ ->
+        Printf.eprintf "Invalid input\n";
+        raise Exit_status.(Exit_with Input_error)
+    in
+    let str = Printf.sprintf "%s|%s" symbol_name action_arg in
+    let (new_name, action) = Find_refs.string_to_symbol_and_action_exn str in
+    let decoded_str = Base64.decode_exn marshalled_def in
+    let symbol_definition : string SymbolDefinition.t =
+      Marshal.from_string decoded_str 0
+    in
+    (new_name, action, filename, symbol_definition)
 end
 
 module Symbol_type = struct
@@ -456,6 +496,9 @@ type _ t =
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
   | RENAME_CHECK_SD : ServerRenameTypes.action -> string Done_or_retry.t t
   | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
+  | IDE_RENAME_BY_SYMBOL :
+      Find_refs.action * string * string * string SymbolDefinition.t
+      -> Rename.ide_result_or_retry t
   | CODEMOD_SDT :
       string
       -> (ServerRenameTypes.patch list

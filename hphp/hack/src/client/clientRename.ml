@@ -128,6 +128,12 @@ let go_ide
     apply_patches patches;
   Lwt.return_unit
 
+let go_ide_from_patches patches json =
+  if json then
+    print_patches_json patches
+  else
+    apply_patches patches
+
 let go
     (conn : unit -> ClientConnect.conn Lwt.t)
     ~(desc : string)

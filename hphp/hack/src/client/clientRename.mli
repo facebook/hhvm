@@ -31,6 +31,8 @@ val go_ide :
   string ->
   unit Lwt.t
 
+val go_ide_from_patches : ServerRenameTypes.patch list -> bool -> unit
+
 val go_sound_dynamic :
   (unit -> ClientConnect.conn Lwt.t) ->
   ClientEnv.client_check_env ->

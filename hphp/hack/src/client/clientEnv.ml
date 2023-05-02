@@ -43,6 +43,7 @@ type client_mode =
   | MODE_IDE_GO_TO_IMPL of string
   | MODE_IDE_HIGHLIGHT_REFS of string
   | MODE_IDE_RENAME of string
+  | MODE_IDE_RENAME_BY_SYMBOL of string
   | MODE_IDENTIFY_SYMBOL1 of string
   | MODE_IDENTIFY_SYMBOL2 of string
   | MODE_IDENTIFY_SYMBOL3 of string

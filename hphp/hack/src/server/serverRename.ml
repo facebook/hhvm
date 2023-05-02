@@ -652,6 +652,66 @@ let go_for_localvar ctx action new_name =
     changes
   | _ -> Error action
 
+(**
+  Like go_ide, but rather than looking up a symbolDefinition manually from a file and
+  converting a ServerRenameTypes.action to a Find_refs.action, we supply a Find_refs.action
+  directly.
+*)
+let go_ide_with_find_refs_action
+    ctx ~find_refs_action ~new_name ~filename ~symbol_definition genv env =
+  let include_defs = true in
+  ServerFindRefs.go ctx find_refs_action include_defs genv env
+  |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
+         let changes =
+           List.fold_left
+             refs
+             ~f:
+               begin
+                 fun acc x ->
+                   let replacement =
+                     { pos = Pos.to_absolute (snd x); text = new_name }
+                   in
+                   let patch = Replace replacement in
+                   patch :: acc
+               end
+             ~init:[]
+         in
+         let deprecated_wrapper_patch =
+           let open ServerCommandTypes.Find_refs in
+           match find_refs_action with
+           | Function _ ->
+             get_deprecated_wrapper_patch
+               ~filename:(Some filename)
+               ~definition:(Some symbol_definition)
+               ~ctx
+               new_name
+           | Member (class_name, Method old_name) ->
+             if
+               method_might_support_dynamic
+                 ctx
+                 ~class_name
+                 ~method_name:old_name
+             then
+               get_deprecated_wrapper_patch
+                 ~filename:(Some filename)
+                 ~definition:(Some symbol_definition)
+                 ~ctx
+                 new_name
+             else
+               None
+           | Class _
+           | Member _
+           | ExplicitClass _
+           | LocalVar _
+           | GConst _ ->
+             None
+         in
+         Option.value_map
+           deprecated_wrapper_patch
+           ~default:changes
+           ~f:(fun patch -> patch :: changes))
+  |> fun rename_patches -> Ok rename_patches
+
 let go_ide ctx (filename, line, column) new_name genv env =
   let open SymbolDefinition in
   let (ctx, entry) =

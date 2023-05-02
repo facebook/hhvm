@@ -331,6 +331,22 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         with
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
+  | IDE_RENAME_BY_SYMBOL (action, new_name, filename, symbol_definition) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
+        match
+          ServerRename.go_ide_with_find_refs_action
+            ctx
+            ~find_refs_action:action
+            ~new_name
+            ~filename
+            ~symbol_definition
+            genv
+            env
+        with
+        | Error e -> (env, Done (Error e))
+        | Ok r -> map_env r ~f:(fun x -> Ok x))
   | CODEMOD_SDT codemod_line ->
     let patches = Sdt_analysis.patches_of_codemod_line codemod_line in
     (env, patches)

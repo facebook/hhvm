@@ -482,6 +482,10 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_IDE_RENAME x)),
         " (mode) rename a symbol, Usage: --ide-refactor "
         ^ " <filename>:<line number>:<col number>:<new name>" );
+      ( "--ide-rename-by-symbol",
+        Arg.String (fun x -> set_mode (MODE_IDE_RENAME_BY_SYMBOL x)),
+        " (mode) like --ide-refactor, but takes a Find_refs.action. Usage: "
+        ^ " <new name>|<comma_separated_action>" );
       ( "--identify-function",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x)),
         " (mode) print the full function name at the position "

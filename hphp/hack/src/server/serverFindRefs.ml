@@ -1,4 +1,5 @@
 (*
+
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -354,13 +355,14 @@ let get_action symbol (filename, file_content, line, char) =
   (* TODO(toyang): find references doesn't work for enum labels yet *)
   | SO.EnumClassLabel _ -> None
 
-let go_from_file_ctx
+let go_from_file_ctx_with_symbol_definition
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
-    ~(column : int) : (string * ServerCommandTypes.Find_refs.action) option =
+    ~(column : int) :
+    (string SymbolDefinition.t * ServerCommandTypes.Find_refs.action) option =
   (* Find the symbol at given position *)
-  ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
+  ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
   |> (* If there are few, arbitrarily pick the first *)
   List.hd
   >>= fun (occurrence, definition) ->
@@ -373,4 +375,13 @@ let go_from_file_ctx
       source_text.Full_fidelity_source_text.text,
       line,
       column )
-  >>= fun action -> Some (definition.SymbolDefinition.full_name, action)
+  >>= fun action -> Some (definition, action)
+
+let go_from_file_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : (string * ServerCommandTypes.Find_refs.action) option =
+  go_from_file_ctx_with_symbol_definition ~ctx ~entry ~line ~column
+  |> Option.map ~f:(fun (def, action) ->
+         (def.SymbolDefinition.full_name, action))

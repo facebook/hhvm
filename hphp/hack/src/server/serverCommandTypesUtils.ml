@@ -29,6 +29,7 @@ let debug_describe_t : type a. a t -> string = function
   | RENAME _ -> "RENAME"
   | RENAME_CHECK_SD _ -> "RENAME_CHECK_SD"
   | IDE_RENAME _ -> "IDE_RENAME"
+  | IDE_RENAME_BY_SYMBOL _ -> "IDE_RENAME_BY_SYMBOL"
   | DUMP_SYMBOL_INFO _ -> "DUMP_SYMBOL_INFO"
   | REMOVE_DEAD_FIXMES _ -> "REMOVE_DEAD_FIXMES"
   | CODEMOD_SDT _ -> "CODEMOD_SDT"

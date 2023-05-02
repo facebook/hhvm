@@ -125,7 +125,6 @@ class t_hack_generator : public t_concat_generator {
     }
 
     out_dir_base_ = "gen-hack";
-    array_keyword_ = array_migration_ ? "darray" : "dict";
   }
 
   /**
@@ -1181,8 +1180,6 @@ class t_hack_generator : public t_concat_generator {
    * True to generate type aliases for typedefs defined
    */
   bool typedef_;
-
-  std::string array_keyword_;
 
   bool has_hack_namespace;
 
@@ -6728,7 +6725,7 @@ std::string t_hack_generator::type_to_typehint(
         (no_use_hack_collections_ ||
          (variations[TypeToTypehintVariations::IS_SHAPE] &&
           array_migration_))) {
-      prefix = no_use_hack_collections_ ? "darray" : array_keyword_;
+      prefix = "darray";
     } else if (
         arrays_ || no_use_hack_collections_ ||
         variations[TypeToTypehintVariations::IS_SHAPE]) {
@@ -6754,7 +6751,7 @@ std::string t_hack_generator::type_to_typehint(
     if (variations[TypeToTypehintVariations::IS_ANY_SHAPE] &&
         (arraysets_ ||
          (!arrays_ && variations[TypeToTypehintVariations::IS_SHAPE]))) {
-      prefix = array_keyword_;
+      prefix = array_migration_ ? "darray" : "dict";
     } else if (arraysets_) {
       prefix = "dict";
     } else if (arrays_) {

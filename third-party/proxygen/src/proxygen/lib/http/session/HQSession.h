@@ -475,11 +475,6 @@ class HQSession
     return sock_ && sock_->good() ? sock_->getPeerAddress() : peerAddr_;
   }
 
-  // Returns creation time point for logging of handshake duration
-  const std::chrono::steady_clock::time_point& getCreatedTime() const {
-    return createTime_;
-  }
-
   void enablePingProbes(std::chrono::seconds /*interval*/,
                         std::chrono::seconds /*timeout*/,
                         bool /*extendIntervalOnIngress*/,
@@ -670,7 +665,6 @@ class HQSession
         dropping_(false),
         inLoopCallback_(false),
         unidirectionalReadDispatcher_(*this, direction),
-        createTime_(std::chrono::steady_clock::now()),
         sessionObserverAccessor_(this),
         sessionObserverContainer_(&sessionObserverAccessor_) {
     codec_.add<HTTPChecks>();
@@ -1888,9 +1882,6 @@ class HQSession
   // Buffer for priority updates without an active stream
   folly::EvictingCacheMap<quic::StreamId, HTTPPriority> priorityUpdatesBuffer_{
       kMaxBufferedPriorityUpdates};
-
-  // Creation time (for handshake time tracking)
-  std::chrono::steady_clock::time_point createTime_;
 
   // Lookup maps for matching PushIds to StreamIds
   folly::F14FastMap<hq::PushId, quic::StreamId> pushIdToStreamId_;

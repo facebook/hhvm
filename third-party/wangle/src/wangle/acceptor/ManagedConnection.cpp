@@ -21,7 +21,9 @@
 namespace wangle {
 
 ManagedConnection::ManagedConnection()
-    : connectionManager_(nullptr), connectionAgeTimeout_{*this} {}
+    : connectionManager_(nullptr),
+      connectionAgeTimeout_{*this},
+      creationTime_{std::chrono::steady_clock::now()} {}
 
 ManagedConnection::~ManagedConnection() {
   if (connectionManager_) {

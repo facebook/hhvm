@@ -156,6 +156,10 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
   virtual folly::Optional<std::chrono::milliseconds>
   getLastActivityElapsedTime() const;
 
+  [[nodiscard]] std::chrono::steady_clock::time_point getCreationTime() const {
+    return creationTime_;
+  }
+
  protected:
   ~ManagedConnection() override;
 
@@ -177,6 +181,8 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
   ConnectionManager* connectionManager_;
   ConnectionAgeTimeout connectionAgeTimeout_;
   folly::Optional<std::chrono::steady_clock::time_point> latestActivity_;
+
+  const std::chrono::steady_clock::time_point creationTime_;
 
   folly::SafeIntrusiveListHook listHook_;
 };

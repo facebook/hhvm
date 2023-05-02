@@ -267,14 +267,8 @@ class ast_parser : public parser_actions {
     diags_.report(
         src.start, diagnostic_level::info, "Scanning {} for includes\n", path);
     mode_ = parsing_mode::INCLUDES;
-    try {
-      if (!compiler::parse(lexer, *this, diags_)) {
-        diags_.error(*program_, "Parser error during include pass.");
-        end_parsing();
-      }
-    } catch (const std::string& x) {
-      diags_.error(source_location(), "{}", x);
-      assert(false);
+    if (!compiler::parse(lexer, *this, diags_)) {
+      diags_.error(*program_, "Parser error during include pass.");
       end_parsing();
     }
 
@@ -330,14 +324,8 @@ class ast_parser : public parser_actions {
     mode_ = parsing_mode::PROGRAM;
     diags_.report(
         src.start, diagnostic_level::info, "Parsing {} for types\n", path);
-    try {
-      if (!compiler::parse(lexer, *this, diags_)) {
-        diags_.error(*program_, "Parser error during types pass.");
-        end_parsing();
-      }
-    } catch (const std::string& x) {
-      diags_.error(source_location(), "{}", x);
-      assert(false);
+    if (!compiler::parse(lexer, *this, diags_)) {
+      diags_.error(*program_, "Parser error during types pass.");
       end_parsing();
     }
   }

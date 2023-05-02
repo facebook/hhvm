@@ -42,6 +42,7 @@ package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type
 namespace py3 apache.thrift.type
+namespace java.swift com.facebook.thrift.type
 
 /**
  * An unordered set of value ids, that can contain *at most one* value of any type.

@@ -1622,7 +1622,7 @@ module Primary = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot call this CrossPackage method using package %s from %s"
+              "Cannot reference this CrossPackage method using package %s from %s"
               target_package
               current_package )
       and reason =
@@ -6626,6 +6626,11 @@ and Secondary : sig
         reason_sub: Pos_or_decl.t Message.t list Lazy.t;
         reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
+    | Cross_package_mismatch of {
+        pos: Pos_or_decl.t;
+        reason_sub: Pos_or_decl.t Message.t list Lazy.t;
+        reason_super: Pos_or_decl.t Message.t list Lazy.t;
+      }
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
         ty_name: string Lazy.t;
@@ -6909,6 +6914,11 @@ end = struct
     | Readonly_mismatch of {
         pos: Pos_or_decl.t;
         kind: [ `fn | `fn_return | `param ];
+        reason_sub: Pos_or_decl.t Message.t list Lazy.t;
+        reason_super: Pos_or_decl.t Message.t list Lazy.t;
+      }
+    | Cross_package_mismatch of {
+        pos: Pos_or_decl.t;
         reason_sub: Pos_or_decl.t Message.t list Lazy.t;
         reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
@@ -7493,6 +7503,15 @@ end = struct
     in
     (Error_code.ReadonlyMismatch, reasons, [])
 
+  let cross_package_mismatch pos reason_sub reason_super =
+    let reasons =
+      Lazy.(
+        reason_sub >>= fun reason_sub ->
+        reason_super >>= fun reason_super ->
+        return (((pos, "Cross package mismatch") :: reason_sub) @ reason_super))
+    in
+    (Error_code.InvalidCrossPackage, reasons, [])
+
   let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
       Common.typing_too_many_args pos decl_pos actual expected
@@ -7830,6 +7849,8 @@ end = struct
            parent_pos)
     | Readonly_mismatch { pos; kind; reason_sub; reason_super } ->
       Eval_result.single (readonly_mismatch pos kind reason_sub reason_super)
+    | Cross_package_mismatch { pos; reason_sub; reason_super } ->
+      Eval_result.single (cross_package_mismatch pos reason_sub reason_super)
     | Typing_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (typing_too_many_args pos decl_pos actual expected)
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->

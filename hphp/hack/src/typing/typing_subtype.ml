@@ -4249,12 +4249,20 @@ and readonly_subtype (r_sub : bool) (r_super : bool) =
     false (* A readonly value is a supertype of a mutable one *)
   | _ -> true
 
+and cross_package_subtype (c_sub : string option) (c_super : string option) =
+  match (c_sub, c_super) with
+  | (Some s, Some t) -> String.equal s t
+  | (Some _, None) -> false
+  | (None, Some _) -> true
+  | (None, None) -> true
+
 (* Helper function for subtyping on function types: performs all checks that
  * don't involve actual types:
  *   <<__ReturnDisposable>> attribute
  *   variadic arity
  *  <<__Policied>> attribute
  *  Readonlyness
+ * <<__CrossPackage>> attribute
  *)
 and simplify_subtype_funs_attributes
     ~subtype_env
@@ -4269,6 +4277,17 @@ and simplify_subtype_funs_attributes
     | FDPolicied (Some s) -> s
     | FDPolicied None -> "the existential policy"
     | FDInferFlows -> "an inferred policy"
+  in
+  let print_cross_pkg_reason (c : string option) (is_sub : bool) =
+    match c with
+    | Some s when is_sub ->
+      Printf.sprintf
+        "This function is marked `<<__CrossPackage(%s)>>`, so it's only compatible with other functions marked `<<__CrossPackage(%s)>>`"
+        s
+        s
+    | Some s ->
+      Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
+    | None -> "This function is not cross package"
   in
   (env, TL.valid)
   |> check_with
@@ -4330,6 +4349,34 @@ and simplify_subtype_funs_attributes
                              ( p_super,
                                "This function does not return a readonly value"
                              );
+                           ];
+                     }))
+  |> check_with
+       (cross_package_subtype ft_sub.ft_cross_package ft_super.ft_cross_package)
+       (Option.map
+          subtype_env.on_error
+          ~f:
+            Typing_error.(
+              fun on_error ->
+                apply_reasons ~on_error
+                @@ Secondary.Cross_package_mismatch
+                     {
+                       pos = p_sub;
+                       reason_sub =
+                         lazy
+                           [
+                             ( p_sub,
+                               print_cross_pkg_reason
+                                 ft_sub.ft_cross_package
+                                 true );
+                           ];
+                       reason_super =
+                         lazy
+                           [
+                             ( p_super,
+                               print_cross_pkg_reason
+                                 ft_super.ft_cross_package
+                                 false );
                            ];
                      }))
   |> check_with

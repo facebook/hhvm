@@ -1,0 +1,49 @@
+Parsing[1002] A semicolon ; is expected here. [1]
+
+cross_package_access_with_crosspackage_attr_complex_inheritance.php--b.php:2:12
+    1 | <?hh
+[1] 2 | module b.b1_
+    3 | class B extends A { // ok because pkg2 includes pkg1
+    4 |   <<__CrossPackage("pkg1")>> // this will unnecessarily error, but it's also redundant: pkg1 is always included
+    5 |   public function foo(): void {} // TODO: give a better error message instead of erroring
+
+Typing[4472] Invalid argument [1]
+-> Cross package mismatch [2]
+-> This function is marked <<__CrossPackage(pkg2)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg2)>> [2]
+-> This function is not cross package [3]
+
+cross_package_access_with_crosspackage_attr_complex_inheritance.php--a.php:18:15
+     7 | }
+     8 | <<__CrossPackage("pkg2")>>
+[2]  9 | function foo(): void {}
+    10 | 
+    11 | // can't pass cross package functions here
+[3] 12 | function takes_fun((function(): void) $f) : void {
+    13 |   $f();
+    14 | }
+    15 | 
+    16 | function test(): void {
+    17 |   if (package pkg2) {
+[1] 18 |     takes_fun(foo<>); // error
+    19 |   }
+    20 | }
+
+Typing[4341] The method foo is not compatible with the overridden method [1]
+-> Cross package mismatch [1]
+-> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [1]
+-> This function is not cross package [2]
+
+cross_package_access_with_crosspackage_attr_complex_inheritance.php--b.php:5:19
+    3 | class B extends A { // ok because pkg2 includes pkg1
+    4 |   <<__CrossPackage("pkg1")>> // this will unnecessarily error, but it's also redundant: pkg1 is always included
+[1] 5 |   public function foo(): void {} // TODO: give a better error message instead of erroring
+    6 | }
+
+cross_package_access_with_crosspackage_attr_complex_inheritance.php--a.php:6:19
+    4 | 
+    5 | class A {
+[2] 6 |   public function foo(): void {}
+    7 | }
+    8 | <<__CrossPackage("pkg2")>>
+
+3 errors found.

@@ -634,9 +634,9 @@ static char *php_ap_memstr(char *haystack, int haystacklen, char *needle,
 
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf,
-                                 int bytes, int *end) {
-  int len, max;
+static size_t multipart_buffer_read(multipart_buffer *self, char *buf,
+                                    size_t bytes, int *end) {
+  size_t len, max;
   char *bound;
 
   /* fill buffer if needed */
@@ -688,11 +688,14 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf,
 static char *multipart_buffer_read_body(multipart_buffer *self,
                                         unsigned int *len) {
   char buf[FILLUNIT], *out=nullptr;
-  int total_bytes=0, read_bytes=0;
+  size_t total_bytes=0, read_bytes=0;
 
   while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), nullptr))) {
+    // Check for overflow
+    always_assert((total_bytes + read_bytes + 1) > total_bytes);
     out = (char *)realloc(out, total_bytes + read_bytes + 1);
     memcpy(out + total_bytes, buf, read_bytes);
+    // Already checked above that this can't overflow.
     total_bytes += read_bytes;
   }
 

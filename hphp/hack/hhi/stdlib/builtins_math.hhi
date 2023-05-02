@@ -66,9 +66,9 @@ function round(
   int $mode = 1,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function deg2rad(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function deg2rad(float $number)[]: float;
 <<__PHPStdLib>>
-function rad2deg(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function rad2deg(float $number)[]: float;
 <<__PHPStdLib>>
 function decbin(
   HH\FIXME\MISSING_PARAM_TYPE $number,

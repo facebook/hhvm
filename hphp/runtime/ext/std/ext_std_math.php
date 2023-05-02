@@ -1,5 +1,23 @@
 <?hh // partial
 
+const float M_PI       = 3.1415926535898;
+const float M_PI_2     = 1.5707963267949;
+const float M_PI_4     = 0.78539816339745;
+const float M_1_PI     = 0.31830988618379;
+const float M_2_PI     = 0.63661977236758;
+const float M_2_SQRTPI = 1.1283791670955;
+const float M_E        = 2.718281828459;
+const float M_EULER    = 0.57721566490153;
+const float M_LN10     = 2.302585092994;
+const float M_LN2      = 0.69314718055995;
+const float M_LNPI     = 1.1447298858494;
+const float M_LOG10E   = 0.43429448190325;
+const float M_LOG2E    = 1.442695040889;
+const float M_SQRT1_2  = 0.70710678118655;
+const float M_SQRT2    = 1.4142135623731;
+const float M_SQRT3    = 1.7320508075689;
+const float M_SQRTPI   = 1.7724538509055;
+
 /**
  * @return float - The value of pi as float.
  *
@@ -148,8 +166,10 @@ function round(mixed $val,
  * @return float - The radian equivalent of number
  *
  */
-<<__IsFoldable, __Native>>
-function deg2rad(float $number)[]: float;
+<<__IsFoldable>>
+function deg2rad(float $number)[]: float {
+  return $number / 180.0 * M_PI;
+}
 
 /**
  * This function converts number from radian to degrees.
@@ -159,8 +179,11 @@ function deg2rad(float $number)[]: float;
  * @return float - The equivalent of number in degrees
  *
  */
-<<__IsFoldable, __Native>>
-function rad2deg(float $number)[]: float;
+<<__IsFoldable>>
+function rad2deg(float $number)[]: float {
+  return $number / M_PI * 180.0;
+}
+
 
 /**
  * Returns a string containing a binary representation of the given number

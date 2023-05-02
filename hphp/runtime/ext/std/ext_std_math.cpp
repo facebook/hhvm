@@ -28,24 +28,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const double k_M_PI       = 3.1415926535898;
-const double k_M_1_PI     = 0.31830988618379;
-const double k_M_2_PI     = 0.63661977236758;
-const double k_M_2_SQRTPI = 1.1283791670955;
-const double k_M_E        = 2.718281828459;
-const double k_M_EULER    = 0.57721566490153;
-const double k_M_LN10     = 2.302585092994;
-const double k_M_LN2      = 0.69314718055995;
-const double k_M_LNPI     = 1.1447298858494;
-const double k_M_LOG10E   = 0.43429448190325;
-const double k_M_LOG2E    = 1.442695040889;
-const double k_M_PI_2     = 1.5707963267949;
-const double k_M_PI_4     = 0.78539816339745;
-const double k_M_SQRT1_2  = 0.70710678118655;
-const double k_M_SQRT2    = 1.4142135623731;
-const double k_M_SQRT3    = 1.7320508075689;
-const double k_M_SQRTPI   = 1.7724538509055;
-
 Variant HHVM_FUNCTION(min, const Variant& value, const Array& args) {
   if (args.empty()) {
     const auto& cell_value = *value.asTypedValue();
@@ -196,9 +178,6 @@ Variant HHVM_FUNCTION(round,
   dval = php_math_round(dval, precision, mode);
   return dval;
 }
-
-double HHVM_FUNCTION(deg2rad, double number) { return number / 180.0 * k_M_PI;}
-double HHVM_FUNCTION(rad2deg, double number) { return number / k_M_PI * 180.0;}
 
 String HHVM_FUNCTION(decbin, const Variant& number) {
   return string_long_to_base(number.toInt64(), 2);
@@ -403,24 +382,6 @@ void StandardExtension::initMath() {
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_ODD);
 
-  HHVM_RC_DBL(M_PI, k_M_PI);
-  HHVM_RC_DBL(M_1_PI, k_M_1_PI);
-  HHVM_RC_DBL(M_2_PI, k_M_2_PI);
-  HHVM_RC_DBL(M_2_SQRTPI, k_M_2_SQRTPI);
-  HHVM_RC_DBL(M_E, k_M_E);
-  HHVM_RC_DBL(M_EULER, k_M_EULER);
-  HHVM_RC_DBL(M_LN10, k_M_LN10);
-  HHVM_RC_DBL(M_LN2, k_M_LN2);
-  HHVM_RC_DBL(M_LNPI, k_M_LNPI);
-  HHVM_RC_DBL(M_LOG10E, k_M_LOG10E);
-  HHVM_RC_DBL(M_LOG2E, k_M_LOG2E);
-  HHVM_RC_DBL(M_PI_2, k_M_PI_2);
-  HHVM_RC_DBL(M_PI_4, k_M_PI_4);
-  HHVM_RC_DBL(M_SQRT1_2, k_M_SQRT1_2);
-  HHVM_RC_DBL(M_SQRT2, k_M_SQRT2);
-  HHVM_RC_DBL(M_SQRT3, k_M_SQRT3);
-  HHVM_RC_DBL(M_SQRTPI, k_M_SQRTPI);
-
   HHVM_FE(min);
   HHVM_FE(max);
   HHVM_FE(abs);
@@ -430,8 +391,6 @@ void StandardExtension::initMath() {
   HHVM_FE(ceil);
   HHVM_FE(floor);
   HHVM_FE(round);
-  HHVM_FE(deg2rad);
-  HHVM_FE(rad2deg);
   HHVM_FE(decbin);
   HHVM_FE(dechex);
   HHVM_FE(decoct);

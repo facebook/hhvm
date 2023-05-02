@@ -247,14 +247,20 @@ module Enforce (ContextAccess : ContextAccess) :
              in Typing_enforceability when we are typechecking the function/property definition
              it is part of. *)
           match ContextAccess.get_class_or_typedef ctx name with
-          | Some (TypedefResult { td_vis; td_type; _ }) ->
+          | Some (TypedefResult { td_vis; td_type; td_tparams; _ }) ->
             (* Expand type definition one step and compute its enforcement. *)
             let exp_ty =
-              enforcement
-                ~is_dynamic_enforceable
-                ctx
-                (SSet.add name visited)
-                td_type
+              (* If there is an arity error then assume enforced because this is
+               * used to fake a Tany at localization time
+               *)
+              if Int.equal (List.length td_tparams) (List.length tyl) then
+                enforcement
+                  ~is_dynamic_enforceable
+                  ctx
+                  (SSet.add name visited)
+                  td_type
+              else
+                Enforced td_type
             in
             Aast.(
               (match td_vis with

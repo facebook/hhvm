@@ -176,8 +176,6 @@ class CompilerTest(unittest.TestCase):
                 self.tmp,
                 "-o",
                 os.path.join(self.tmp, fixture_dir),
-                "--allow-experimental-features",
-                "all",
                 "--gen",
                 args[0],
                 *args[1:],

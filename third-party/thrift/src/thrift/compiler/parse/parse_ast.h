@@ -18,7 +18,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
@@ -68,13 +67,6 @@ struct parsing_params {
    * useful for codemod tooling.
    */
   bool allow_missing_includes = false;
-
-  /**
-   * Which experimental features should be allowed.
-   *
-   * 'all' can be used to enable all experimental features.
-   */
-  std::unordered_set<std::string> allow_experimental_features;
 
   /**
    * Search path for includes.

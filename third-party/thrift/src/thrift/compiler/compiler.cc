@@ -104,10 +104,6 @@ void usage() {
       "  --allow-64bit-consts  Do not print warnings about using 64-bit constants\n");
   fprintf(
       stderr,
-      "  --allow-experimental-features feature[,feature]\n"
-      "              Enable experimental features. Use 'all' to enable all experimental features.\n");
-  fprintf(
-      stderr,
       "  --gen STR   Generate code with a dynamically-registered generator.\n"
       "              STR has the form language[:key1=val1[,key2,[key3=val3]]].\n"
       "              Keys and values are options passed to the generator.\n"
@@ -135,10 +131,6 @@ bool isPathSeparator(const char& c) {
 #else
   return c == ':';
 #endif
-}
-
-bool isComma(const char& c) {
-  return c == ',';
 }
 
 // Returns the input file name if successful, otherwise returns an empty
@@ -191,14 +183,7 @@ std::string parse_args(
     }
 
     // Interpret flag.
-    if (flag == "allow-experimental-features") {
-      auto* arg = consume_arg("feature");
-      if (arg == nullptr) {
-        return {};
-      }
-      boost::algorithm::split(
-          pparams.allow_experimental_features, *arg, isComma);
-    } else if (flag == "debug") {
+    if (flag == "debug") {
       dparams.debug = true;
     } else if (flag == "nowarn") {
       dparams.warn_level = 0;

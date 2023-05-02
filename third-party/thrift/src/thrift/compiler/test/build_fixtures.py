@@ -168,8 +168,6 @@ for name, index in zip(fixture_names, range(len(fixture_names))):
             os.path.abspath(fixture_root),
             "-o",
             os.path.abspath(fixture_src),
-            "--allow-experimental-features",
-            "all",
             "--gen",
         ]
         if "mstch_cpp" in args[0]:

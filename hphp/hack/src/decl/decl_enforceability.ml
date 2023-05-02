@@ -268,12 +268,22 @@ module Enforce (ContextAccess : ContextAccess) :
           | Some (ClassResult cls) ->
             (match ContextAccess.get_enum_type cls with
             | Some et ->
+              (* for `enum E : int`, pessimising `E` to `~E & int` violates the
+               * opacity of the enum, allowing the value to flow to a position
+               * expecting `int`. We instead weaken our pessimised type to
+               * `~E & arraykey`. For transparent enums `enum F : int as int`,
+               * we pessimise to `~F & int`. *)
+              let intersected_type =
+                Option.value
+                  ~default:(Typing_make_type.arraykey (get_reason et.te_base))
+                  et.te_constraint
+              in
               make_unenforced
                 (enforcement
                    ~is_dynamic_enforceable
                    ctx
                    (SSet.add name visited)
-                   et.te_base)
+                   intersected_type)
             | None ->
               List.Or_unequal_lengths.(
                 (match

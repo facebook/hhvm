@@ -13,7 +13,7 @@ proc-macro = true
 
 [dependencies]
 proc-macro-error = "1.0"
-proc-macro2 = "1.0.46"
+proc-macro2 = { version = "1.0.46", features = ["span-locations"] }
 quote = "1.0"
 
 [dev-dependencies]

@@ -13,7 +13,7 @@ path = "hh_codegen.rs"
 anyhow = "1.0.65"
 clap = { version = "4.2.4", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 hash = { version = "0.0.0", path = "../utils/hash" }
-proc-macro2 = "1.0.46"
+proc-macro2 = { version = "1.0.46", features = ["span-locations"] }
 quote = "1.0"
 signed_source = { version = "0.0.0", path = "../utils/rust/signed_source" }
 syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

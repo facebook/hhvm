@@ -16,12 +16,15 @@
 
 namespace cpp2 facebook.thrift.benchmarks
 
+include "thrift/annotation/cpp.thrift"
+
 struct TwoInts {
   1: optional i32 x;
   2: optional i32 y;
 }
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 struct Chunk {
   1: binary header;

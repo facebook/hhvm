@@ -100,22 +100,40 @@ let flag_name flag = String.lowercase (show_flag flag)
 
 (* We need to guarantee that for all flag combinations, there is an available saved
    state corresponding to that combination. There are however an exponential number
-   of flag combinations.
+   of flag combinations: 2^n where n is the total number of flags.
    What follows allows restricting the number of possible combinations per www revision
-   to just two (one for the production saved state, one for the candidate saved state).
+   to just two (one for the production saved state, one for the candidate saved state),
+   by allowing only one flag to be rolled out at a time (per www revision).
 
-   We specify a rollout order below, and .hhconfig provides
-     current_saved_state_rollout_flag_index = N
-   which specifies which flag is currently being rolled out for that www revision
-   using that order (current_saved_state_rollout_flag_index is an integer).
-   Only that flag will get its value from JustKnob,
+   We do so by specifying a rollout order for the flags, in this function.
+   Just like at the butcher, where each customer takes a ticket with a number
+   to enter the queue, each new flag gets assigned a number by the developer
+   adding the flag below.
+
+   Then for each www revision, .hhconfig specifies which flag can be rolled
+   out for that revision, using the following flag:
+
+       current_saved_state_rollout_flag_index = N
+
+   That flag is the equivalent of the counter at the butcher calling customers to be served.
+   It means that for all www revisions with this value N in .hhconfig,
+   only the flag assigned number N will get its value from JustKnob,
    while the other flags' values are determined by their order:
-   flags whose order is lower than the current flag index are considered to have been already
-   rolled out and therefore have there values set to true, while flags whose order is greater
-   are yet to be rollout and therefore have their values set to false. *)
+   * flags whose order is lower than the current flag index are considered to have
+     been already rolled out and therefore have their values set to true,
+   * flags whose order is greater are yet to be rollout and therefore have their
+     values set to false. *)
 let rollout_order =
   (* This needs to be specified manually instead of using ppx_enum
-     because we want the indices to stay consistent when we remove flags. *)
+     because we want the indices to stay consistent when we remove flags.
+
+     When adding a flag here, do follow these two rules:
+     * The chosen number should be different from than any other assigned number.
+     * The chosen number should be greater than the current value for
+       current_saved_state_rollout_flag_index in .hhconfig.
+
+     It's ok to reassign numbers to flags that haven't yet been rolled out
+     if you want your new flag to be rolled out first. *)
   function
   | Dummy_one -> 0
   | Dummy_two -> 1

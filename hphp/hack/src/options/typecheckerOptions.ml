@@ -263,6 +263,11 @@ let saved_state t = t.GlobalOptions.tco_saved_state
 
 let saved_state_loading t = GlobalOptions.(t.tco_saved_state.loading)
 
+let saved_state_rollouts t = GlobalOptions.(t.tco_saved_state.rollouts)
+
+let dummy_one t =
+  GlobalOptions.(t.tco_saved_state.rollouts).Saved_state_rollouts.dummy_one
+
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions
 

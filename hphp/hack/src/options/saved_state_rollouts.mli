@@ -8,7 +8,12 @@
 
 type flag_name = string
 
-type t [@@deriving eq, show]
+type t = {
+  dummy_one: bool;  (** Some documentation for dummy_one *)
+  dummy_two: bool;  (** Some documentation for dummy_two *)
+  dummy_three: bool;  (** Some documentation for dummy_three *)
+}
+[@@deriving eq, show]
 
 val default : t
 

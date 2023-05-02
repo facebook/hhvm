@@ -513,6 +513,10 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
           shape(
           )

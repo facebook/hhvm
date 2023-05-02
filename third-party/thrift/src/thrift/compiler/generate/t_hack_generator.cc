@@ -1609,6 +1609,10 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
   if (!typedef_) {
     return;
   }
+  if (t_typedef::get_first_structured_annotation_or_null(
+          ttypedef, kHackSkipCodegenUri)) {
+    return;
+  };
   bool is_mod_int = has_hack_module_internal(ttypedef);
   auto typedef_name = hack_name(ttypedef, true);
   auto [wrapper, name, ns] = find_hack_wrapper(ttypedef, false);
@@ -2845,8 +2849,12 @@ bool t_hack_generator::is_valid_hack_type(const t_type* type) {
 }
 
 bool t_hack_generator::skip_codegen(const t_field* field) {
-  const auto skip_codegen_field =
+  auto skip_codegen_field =
       field->find_structured_annotation_or_null(kHackSkipCodegenUri);
+  if (!skip_codegen_field) {
+    skip_codegen_field = t_typedef::get_first_structured_annotation_or_null(
+        field->get_type(), kHackSkipCodegenUri);
+  }
   bool is_valid_type = is_valid_hack_type(field->get_type());
   if (!is_valid_type && skip_codegen_field == nullptr) {
     throw std::runtime_error(

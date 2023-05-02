@@ -129,6 +129,14 @@
       "SkipCodegen" : {
         "name" : "SkipCodegen",
         "structured_annotations": {
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
           "scope.Field" : {
         "type" : {
   "type" : "struct",
@@ -150,7 +158,7 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 84,
+            "lineno" : 85,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
@@ -165,21 +173,21 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 92,
+            "lineno" : 93,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "reason" : {
             "name" : "reason",
             "key" : 2,
-            "lineno" : 93,
+            "lineno" : 94,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 91
+        "lineno" : 92
       },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
@@ -197,7 +205,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 99,
+            "lineno" : 100,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -207,7 +215,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 97
+        "lineno" : 98
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -241,14 +249,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 107,
+            "lineno" : 108,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 103
+        "lineno" : 104
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -256,7 +264,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 112,
+            "lineno" : 113,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -266,7 +274,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 111
+        "lineno" : 112
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -298,7 +306,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 115
+        "lineno" : 116
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -362,7 +370,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 121
+        "lineno" : 122
       }
       },
   "source_path" : "thrift/annotation/hack",

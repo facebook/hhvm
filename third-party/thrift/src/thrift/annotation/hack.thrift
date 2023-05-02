@@ -78,6 +78,7 @@ struct Adapter {
   1: string name;
 }
 
+@scope.Typedef
 @scope.Field
 @scope.Function
 struct SkipCodegen {

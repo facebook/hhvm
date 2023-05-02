@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/hack.thrift"
+
+@hack.SkipCodegen{reason = "Invalid key type"}
+typedef set<float> InvalidSetTypedef
+
+@hack.SkipCodegen{reason = "Invalid key type"}
+typedef list<InvalidSetTypedef> ListOfInvalidSetTypedef
+
 struct Foo {
   1: list<string> a;
   2: map<string, list<set<i32>>> b;
+  3: ListOfInvalidSetTypedef map_of_MyDataItem_to_MyDataItem;
 }
 
 service Bar {

@@ -1824,7 +1824,13 @@ Array cli_env() {
   return tl_env ? *tl_env : empty_dict_array();
 }
 
-bool is_cli_server_mode() { return tl_cliSock != -1; }
+bool is_cli_server_mode() {
+  return tl_cliSock !=  -1;
+}
+
+bool is_any_cli_mode() {
+  return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
+}
 
 uint64_t cli_server_api_version() {
   if (s_cliServerComputedVersion != 0) {

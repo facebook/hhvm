@@ -377,6 +377,9 @@ function closedir(
 }
 
 namespace HH {
+  <<__PHPStdLib>> function try_stdin()[]: ?resource;
+  <<__PHPStdLib>> function try_stdout()[]: ?resource;
+  <<__PHPStdLib>> function try_stderr()[]: ?resource;
   <<__PHPStdLib>> function stdin()[]: resource;
   <<__PHPStdLib>> function stdout()[]: resource;
   <<__PHPStdLib>> function stderr()[]: resource;

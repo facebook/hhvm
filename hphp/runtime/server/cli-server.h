@@ -92,6 +92,12 @@ uint64_t cli_server_api_version();
 bool is_cli_server_mode();
 
 /*
+ * Returns true if the current request is executing in CLI client/server mode
+ * or normal CLI mode.
+ */
+bool is_any_cli_mode();
+
+/*
  * Create a unix socket at socket_path and begin running a thread to handle
  * connection events. The socket will be writable by the world (connecting to
  * a local socket requires write access).

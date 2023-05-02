@@ -1479,12 +1479,42 @@ function closedir(?resource $dir_handle = null): void;
 namespace HH {
 
 <<__Native>>
-function stdin(): resource;
+function try_stdin(): ?resource;
 
 <<__Native>>
-function stdout(): resource;
+function try_stdout(): ?resource;
 
 <<__Native>>
-function stderr(): resource;
+function try_stderr(): ?resource;
+
+function stdin(): resource {
+  $s = try_stdin();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
+
+function stdout(): resource {
+  $s = try_stdout();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
+
+function stderr(): resource {
+  $s = try_stderr();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
 
 }

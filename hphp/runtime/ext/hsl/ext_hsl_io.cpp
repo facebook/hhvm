@@ -22,10 +22,6 @@
 
 namespace HPHP {
 namespace {
-  bool is_any_cli_mode() {
-    return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
-  }
-
   Array HHVM_FUNCTION(HH_io_pipe) {
     int fds[2];
     if (::pipe(fds) != 0) {

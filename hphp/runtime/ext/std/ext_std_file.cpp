@@ -2108,26 +2108,21 @@ void HHVM_FUNCTION(closedir,
 
 namespace {
 template<typename T>
-Resource get_stdio(const char* stream, T f) {
-  if (!RuntimeOption::ServerExecutionMode()) {
-    return f().asCResRef();
-  }
-  SystemLib::throwRuntimeExceptionObject(
-    folly::sformat("{} is not available in server mode", stream)
-  );
-}
+Variant try_stdio(T f) {
+  return is_any_cli_mode() ? f().asCResRef() : Resource();
 }
 
-Resource HHVM_FUNCTION(get_stdin) {
-  return get_stdio("stdin", [] { return BuiltinFiles::getSTDIN(); });
+Variant HHVM_FUNCTION(try_stdin) {
+  return try_stdio([] { return BuiltinFiles::getSTDIN(); });
 }
 
-Resource HHVM_FUNCTION(get_stdout) {
-  return get_stdio("stdout", [] { return BuiltinFiles::getSTDOUT(); });
+Variant HHVM_FUNCTION(try_stdout) {
+  return try_stdio([] { return BuiltinFiles::getSTDOUT(); });
 }
 
-Resource HHVM_FUNCTION(get_stderr) {
-  return get_stdio("stderr", [] { return BuiltinFiles::getSTDERR(); });
+Variant HHVM_FUNCTION(try_stderr) {
+  return try_stdio([] { return BuiltinFiles::getSTDERR(); });
+}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2175,9 +2170,9 @@ void StandardExtension::initFile() {
   Native::registerConstant(s_STDIN.get(),  BuiltinFiles::getSTDIN);
   Native::registerConstant(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
   Native::registerConstant(s_STDERR.get(), BuiltinFiles::getSTDERR);
-  HHVM_FALIAS(HH\\stdin, get_stdin);
-  HHVM_FALIAS(HH\\stdout, get_stdout);
-  HHVM_FALIAS(HH\\stderr, get_stderr);
+  HHVM_FALIAS(HH\\try_stdin, try_stdin);
+  HHVM_FALIAS(HH\\try_stdout, try_stdout);
+  HHVM_FALIAS(HH\\try_stderr, try_stderr);
 
   HHVM_RC_INT(INI_SCANNER_NORMAL, k_INI_SCANNER_NORMAL);
   HHVM_RC_INT(INI_SCANNER_RAW,    k_INI_SCANNER_RAW);

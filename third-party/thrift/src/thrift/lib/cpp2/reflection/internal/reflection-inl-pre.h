@@ -38,6 +38,10 @@ struct thru_field_ref_fn {
     return ref.value_unchecked();
   }
   template <typename T>
+  FOLLY_ERASE constexpr T operator()(terse_field_ref<T> ref) const noexcept {
+    return *ref;
+  }
+  template <typename T>
   FOLLY_ERASE constexpr optional_boxed_field_ref<T> operator()(
       optional_boxed_field_ref<T> ref) const noexcept {
     return ref;
@@ -98,6 +102,11 @@ struct is_set_fn {
 
   template <class T>
   bool operator()(const std::shared_ptr<T>&) const {
+    return true;
+  }
+
+  template <class T>
+  bool operator()(terse_field_ref<T>) const {
     return true;
   }
 

@@ -603,7 +603,8 @@ class t_hack_generator : public t_concat_generator {
   std::string get_stream_function_return_typehint(
       const t_stream_response* tstream);
   std::string get_sink_function_return_typehint(const t_sink* tsink);
-
+  std::string get_container_keyword(
+      const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations);
   std::string type_to_typehint(
       const t_type* ttype,
       std::map<TypeToTypehintVariations, bool> variations = {
@@ -6598,6 +6599,34 @@ void t_hack_generator::generate_php_docstring_stream_exceptions(
     out << ")";
   }
 }
+
+std::string t_hack_generator::get_container_keyword(
+    const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations) {
+  std::string hack_collection, hack_array, php_array;
+  bool immutable_collections =
+      variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] ||
+      const_collections_;
+  if (ttype->is_map()) {
+    hack_array = "dict";
+    php_array = "darray";
+    hack_collection = immutable_collections ? "\\ConstMap" : "Map";
+  } else if (ttype->is_list()) {
+    hack_array = "vec";
+    php_array = "varray";
+    hack_collection = immutable_collections ? "\\ConstVector" : "Vector";
+  }
+
+  if (arrays_) {
+    return hack_array;
+  } else if (no_use_hack_collections_) {
+    return variations[TypeToTypehintVariations::IS_ANY_SHAPE] ? php_array
+                                                              : hack_array;
+  } else if (variations[TypeToTypehintVariations::IS_SHAPE]) {
+    return array_migration_ ? php_array : hack_array;
+  }
+  return hack_collection;
+}
+
 /**
  * Generate an appropriate string for a php typehint
  */
@@ -6614,10 +6643,6 @@ std::string t_hack_generator::type_to_typehint(
   bool ignore_wrapper =
       variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
       variations[TypeToTypehintVariations::IGNORE_WRAPPER];
-
-  bool immutable_collections =
-      variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] ||
-      const_collections_;
   bool nullable = variations[TypeToTypehintVariations::NULLABLE];
 
   variations[TypeToTypehintVariations::IGNORE_WRAPPER] =
@@ -6669,6 +6694,9 @@ std::string t_hack_generator::type_to_typehint(
     return type_to_typehint(ttypedef->get_type(), variations);
   }
 
+  variations[TypeToTypehintVariations::NULLABLE] = false;
+  variations[TypeToTypehintVariations::IGNORE_ADAPTER] = false;
+
   ttype = ttype->get_true_type();
   if (ttype->is_base_type()) {
     switch (((t_base_type*)ttype)->get_base()) {
@@ -6700,43 +6728,11 @@ std::string t_hack_generator::type_to_typehint(
     return (nullable ? "?" : "") + hack_name(ttype) +
         (variations[TypeToTypehintVariations::IS_SHAPE] ? "::TShape" : "");
   } else if (const auto* tlist = dynamic_cast<const t_list*>(ttype)) {
-    std::string prefix;
-    if (variations[TypeToTypehintVariations::IS_ANY_SHAPE] && !arrays_ &&
-        (no_use_hack_collections_ ||
-         (variations[TypeToTypehintVariations::IS_SHAPE] &&
-          array_migration_))) {
-      prefix = "varray";
-    } else if (
-        arrays_ || no_use_hack_collections_ ||
-        variations[TypeToTypehintVariations::IS_SHAPE]) {
-      prefix = "vec";
-    } else {
-      prefix = immutable_collections ? "\\ConstVector" : "Vector";
-    }
-    variations[TypeToTypehintVariations::NULLABLE] = false;
-    variations[TypeToTypehintVariations::IGNORE_ADAPTER] = false;
-    variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] =
-        immutable_collections;
+    std::string prefix = get_container_keyword(ttype, variations);
     return prefix + "<" + type_to_typehint(tlist->get_elem_type(), variations) +
         ">";
   } else if (const auto* tmap = dynamic_cast<const t_map*>(ttype)) {
-    std::string prefix;
-    if (variations[TypeToTypehintVariations::IS_ANY_SHAPE] && !arrays_ &&
-        (no_use_hack_collections_ ||
-         (variations[TypeToTypehintVariations::IS_SHAPE] &&
-          array_migration_))) {
-      prefix = "darray";
-    } else if (
-        arrays_ || no_use_hack_collections_ ||
-        variations[TypeToTypehintVariations::IS_SHAPE]) {
-      prefix = "dict";
-    } else {
-      prefix = immutable_collections ? "\\ConstMap" : "Map";
-    }
-    variations[TypeToTypehintVariations::NULLABLE] = false;
-    variations[TypeToTypehintVariations::IGNORE_ADAPTER] = false;
-    variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] =
-        immutable_collections;
+    std::string prefix = get_container_keyword(ttype, variations);
     std::string key_type = type_to_typehint(tmap->get_key_type(), variations);
     if (variations[TypeToTypehintVariations::IS_SHAPE] && shape_arraykeys_ &&
         key_type == "string") {
@@ -6748,27 +6744,25 @@ std::string t_hack_generator::type_to_typehint(
         type_to_typehint(tmap->get_val_type(), variations) + ">";
   } else if (const auto* tset = dynamic_cast<const t_set*>(ttype)) {
     std::string prefix;
-    if (variations[TypeToTypehintVariations::IS_ANY_SHAPE] &&
-        (arraysets_ ||
-         (!arrays_ && variations[TypeToTypehintVariations::IS_SHAPE]))) {
-      prefix = array_migration_ ? "darray" : "dict";
-    } else if (arraysets_) {
-      prefix = "dict";
+    std::string suffix = ">";
+    if (arraysets_) {
+      if (variations[TypeToTypehintVariations::IS_ANY_SHAPE]) {
+        prefix = array_migration_ ? "darray" : "dict";
+      } else {
+        prefix = "dict";
+      }
+      suffix = ", bool>";
     } else if (arrays_) {
       prefix = "keyset";
+    } else if (variations[TypeToTypehintVariations::IS_SHAPE]) {
+      prefix = array_migration_ ? "darray" : "dict";
+      suffix = ", bool>";
     } else {
-      prefix = immutable_collections ? "\\ConstSet" : "Set";
+      prefix = variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] ||
+              const_collections_
+          ? "\\ConstSet"
+          : "Set";
     }
-    std::string suffix =
-        (arraysets_ ||
-         (variations[TypeToTypehintVariations::IS_SHAPE] && !arrays_))
-        ? ", bool>"
-        : ">";
-
-    variations[TypeToTypehintVariations::NULLABLE] = false;
-    variations[TypeToTypehintVariations::IGNORE_ADAPTER] = false;
-    variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] =
-        immutable_collections;
     std::string key_type = !is_type_arraykey(tset->get_elem_type())
         ? "arraykey"
         : type_to_typehint(tset->get_elem_type(), variations);

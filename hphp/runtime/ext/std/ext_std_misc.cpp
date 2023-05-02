@@ -57,8 +57,6 @@ RDS_LOCAL(std::string, s_misc_highlight_default_html);
 RDS_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
-const double k_INF = std::numeric_limits<double>::infinity();
-const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 const int64_t k_CONNECTION_NORMAL = 0;
 const int64_t k_CONNECTION_ABORTED = 1;
@@ -519,8 +517,6 @@ void StandardExtension::initMisc() {
 
     HHVM_RC_BOOL(ZEND_THREAD_SAFE, true);
 
-    HHVM_RC_DBL(INF, k_INF);
-    HHVM_RC_DBL(NAN, k_NAN);
     HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
 #ifndef NDEBUG
     HHVM_RC_BOOL(PHP_DEBUG, true);

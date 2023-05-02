@@ -155,9 +155,6 @@ struct Extension;
 #define HHVM_RC_INT(const_name, const_value)                         \
   Native::registerConstant<KindOfInt64>(                             \
     makeStaticString(#const_name), int64_t{const_value});
-#define HHVM_RC_DBL(const_name, const_value)                         \
-  Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double{const_value});
 #define HHVM_RC_BOOL(const_name, const_value)                        \
   Native::registerConstant<KindOfBoolean>(                           \
     makeStaticString(#const_name), bool{const_value});
@@ -168,9 +165,6 @@ struct Extension;
 #define HHVM_RC_INT_SAME(const_name)                                 \
   Native::registerConstant<KindOfInt64>(                             \
     makeStaticString(#const_name), int64_t{const_name});
-#define HHVM_RC_DBL_SAME(const_name)                                 \
-  Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double{const_name});
 #define HHVM_RC_BOOL_SAME(const_name)                                \
   Native::registerConstant<KindOfBoolean>(                           \
     makeStaticString(#const_name), bool{const_name});

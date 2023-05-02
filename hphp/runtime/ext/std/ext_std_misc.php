@@ -80,6 +80,9 @@ function hhvm_binary(): string;
 
 namespace {
 
+const float INF = 1e308 + 1e308;
+const float NAN = (1e308 + 1e308) - (1e308 + 1e308);
+
 /** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.
  */

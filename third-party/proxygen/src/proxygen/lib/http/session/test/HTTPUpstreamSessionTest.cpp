@@ -514,27 +514,52 @@ TEST_F(HTTP2UpstreamSessionTest, IngressGoawaySessionError) {
   // Session will delete itself after the abort
 }
 
+MATCHER_P(HasAbsoluteValue, value, "") {
+  return arg == std::abs(value);
+}
+
 TEST_F(HTTP2UpstreamSessionTest, TestUnderLimitOnWriteError) {
   InSequence enforceOrder;
-  auto handler = openTransaction();
 
+  NiceMock<MockHTTPSessionStats> stats, nextStats;
+  httpSession_->setSessionStats(&stats);
+
+  constexpr size_t bodyLen = 70000;
+
+  // create request and send headers
+  auto handler = openTransaction();
   auto req = getPostRequest();
   handler->txn_->sendHeaders(req);
-  // pause writes
+
+  // pause writes to prevent onWriteSuccess callbacks
   pauseWrites_ = true;
+  EXPECT_CALL(stats, _recordPendingBufferedWriteBytes(bodyLen));
   handler->expectEgressPaused();
+  // invoked via writechain when writing headers > 0
+  EXPECT_CALL(stats, _recordPendingBufferedWriteBytes(Gt(0)));
 
   // send body
-  handler->txn_->sendBody(makeBuf(70000));
+  handler->txn_->sendBody(makeBuf(bodyLen));
   eventBase_.loopOnce();
+
+  // setting another stats should "transfer" PendingBufferedWriteBytes
+  int64_t bufferedWrites{0};
+  EXPECT_CALL(stats, _recordPendingBufferedWriteBytes)
+      .WillOnce(SaveArg<0>(&bufferedWrites));
+  EXPECT_CALL(nextStats,
+              _recordPendingBufferedWriteBytes(
+                  HasAbsoluteValue(std::ref(bufferedWrites))));
+  httpSession_->setSessionStats(&nextStats);
 
   // but no expectEgressResumed
   handler->expectError();
   handler->expectDetachTransaction();
+  EXPECT_CALL(nextStats,
+              _recordPendingBufferedWriteBytes(Eq(std::ref(bufferedWrites))));
   failWrites_ = true;
   resumeWrites();
 
-  this->eventBase_.loop();
+  eventBase_.loop();
   EXPECT_EQ(this->sessionDestroyed_, true);
 }
 

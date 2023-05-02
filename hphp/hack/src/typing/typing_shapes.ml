@@ -302,40 +302,50 @@ let to_collection env pos shape_ty res return_type =
       inherit! Type_mapper.tvar_expanding_type_mapper
 
       method! on_tshape env r shape_kind fdm =
-        if Typing_utils.is_nothing env shape_kind then
-          let keys = TShapeMap.keys fdm in
-          let (env, keys) =
-            List.map_env env keys ~f:(fun env key ->
-                match key with
-                | Typing_defs.TSFlit_int (p, _) ->
-                  (env, MakeType.int (Reason.Rwitness_from_decl p))
-                | Typing_defs.TSFlit_str (p, _) ->
-                  (env, MakeType.string (Reason.Rwitness_from_decl p))
-                | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
-                  match Env.get_class env cid with
-                  | Some class_ -> begin
-                    match Env.get_const env class_ mid with
-                    | Some const ->
-                      let ((env, ty_err_opt), lty) =
-                        Typing_phase.localize_no_subst
-                          env
-                          ~ignore_errors:true
-                          const.cc_type
-                      in
-                      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-                      (env, lty)
+        (* The key type is the union of the types of the known fields,
+         * or arraykey if there may be unknown fields (open shape)
+         *)
+        let (env, key) =
+          if not (Typing_utils.is_nothing env shape_kind) then
+            (env, MakeType.arraykey r)
+          else
+            let keys = TShapeMap.keys fdm in
+            let (env, keys) =
+              List.map_env env keys ~f:(fun env key ->
+                  match key with
+                  | Typing_defs.TSFlit_int (p, _) ->
+                    (env, MakeType.int (Reason.Rwitness_from_decl p))
+                  | Typing_defs.TSFlit_str (p, _) ->
+                    (env, MakeType.string (Reason.Rwitness_from_decl p))
+                  | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
+                    match Env.get_class env cid with
+                    | Some class_ -> begin
+                      match Env.get_const env class_ mid with
+                      | Some const ->
+                        let ((env, ty_err_opt), lty) =
+                          Typing_phase.localize_no_subst
+                            env
+                            ~ignore_errors:true
+                            const.cc_type
+                        in
+                        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+                        (env, lty)
+                      | None -> Env.fresh_type_error env pos
+                    end
                     | None -> Env.fresh_type_error env pos
-                  end
-                  | None -> Env.fresh_type_error env pos
-                end)
-          in
-          let (env, key) = Typing_union.union_list env r keys in
-          let values = TShapeMap.values fdm in
-          let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
-          let (env, value) = Typing_union.union_list env r values in
-          return_type env (get_reason res) key value
-        else
-          (env, res)
+                  end)
+            in
+            Typing_union.union_list env r keys
+        in
+        let values = TShapeMap.values fdm in
+        let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
+        (* The value type is the union of the types of the known fields together
+         * with the type of the unknown fields (open shape, typically mixed or supportdyn<mixed>)
+         *)
+        let (env, value) =
+          Typing_union.union_list env r (shape_kind :: values)
+        in
+        return_type env (get_reason res) key value
 
       method! on_tunion env r tyl =
         let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
@@ -357,6 +367,9 @@ let to_collection env pos shape_ty res return_type =
         | Tunion _
         | Tintersection _ ->
           super#on_type env ty
+          (* Look through bound on newtype, including supportdyn. We assume that
+           * supportdyn has already been pushed into the type of unknown fields *)
+        | Tnewtype (_, _, ty) -> super#on_type env ty
         | _ -> (env, res)
     end
   in
@@ -371,6 +384,9 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:Errors.add_typing_error e1;
+  let shape_ty =
+    Typing_utils.get_base_type ~expand_supportdyn:true env shape_ty
+  in
   to_collection env pos shape_ty res (fun env r key value ->
       (env, MakeType.dict r key value))
 

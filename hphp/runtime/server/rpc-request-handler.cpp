@@ -65,10 +65,8 @@ RPCRequestHandler::~RPCRequestHandler() {
 
 void RPCRequestHandler::initState() {
   hphp_session_init(Treadmill::SessionKind::RpcRequest);
-  bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
   m_context = g_context.getNoCheck();
-  if (isServer) {
+  if (!is_any_cli_mode()) {
     m_context->obStart(uninit_null(),
                        0,
                        OBFlags::Default | OBFlags::OutputDisabled);

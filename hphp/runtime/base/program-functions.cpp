@@ -742,8 +742,7 @@ init_command_line_globals(
     serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
-    if (RuntimeOption::ServerExecutionMode() &&
-        !is_cli_server_mode() &&
+    if (!is_any_cli_mode() &&
         !gethostname(hostname, sizeof(hostname))) {
       // gethostname may not null-terminate
       hostname[sizeof(hostname) - 1] = '\0';
@@ -2816,8 +2815,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool allowDynCallNoPointer /* = false */) {
   tracing::Block _{"invoke", [&] { return tracing::Props{}.add("cmd", cmd); }};
 
-  bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
+  bool isServer = !is_any_cli_mode();
   error = false;
 
   // Make sure we have the right current working directory within the repo

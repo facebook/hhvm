@@ -844,7 +844,7 @@ void HHVM_FUNCTION(HSL_os_ftruncate, const Object& obj, int64_t length) {
 }
 
 Object HHVM_FUNCTION(HSL_os_request_stdio_fd, int64_t client_fd) {
-  if (RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()) {
+  if (!is_any_cli_mode()) {
     throw_errno_exception(
       EBADF,
       "Request STDIO file descriptors are only available in CLI mode"

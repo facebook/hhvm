@@ -396,9 +396,6 @@ class ast_parser : public parser_actions {
     }
   }
 
-  // Checks the type of the parsed const information against its declared type.
-  void validate_const_type(t_const* c);
-
   // Checks that the constant name does not refer to an ambiguous enum.
   // An ambiguous enum is one that is redefined but not referred to by
   // ENUM_NAME.ENUM_VALUE.

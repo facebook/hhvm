@@ -626,6 +626,15 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
         }
       }
     }
+
+    if (poolJson.json.isObject()) {
+      if (auto* jErrorOnEmpty = poolJson.json.get_ptr("error_on_empty")) {
+        jhashWithWeights["error_on_empty"] =
+            parseBool(*jErrorOnEmpty, "error_on_empty");
+      }
+    }
+    jhashWithWeights["name"] = poolJson.name;
+
     auto route = createHashRoute<RouterInfo>(
         jhashWithWeights, std::move(destinations), factory.getThreadId());
 

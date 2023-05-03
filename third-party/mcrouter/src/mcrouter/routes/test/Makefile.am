@@ -11,6 +11,7 @@ mcrouter_routes_test_SOURCES = \
   ConstShardHashFuncTest.cpp \
   FailoverWithExptimeRouteTest.cpp \
   Main.cpp \
+  PoolRouteTest.cpp \
   RateLimitRouteTest.cpp \
   RouteHandleTestUtil.h \
   ShadowRouteTest.cpp \

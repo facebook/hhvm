@@ -112,7 +112,19 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
 
   auto n = rh.size();
   if (n == 0) {
-    return createNullRoute<typename RouterInfo::RouteHandleIf>();
+    auto errorOnEmpty = true;
+    folly::StringPiece name{nullptr, nullptr};
+    if (json.isObject()) {
+      if (auto* jErrorOnEmpty = json.get_ptr("error_on_empty")) {
+        errorOnEmpty = parseBool(*jErrorOnEmpty, "error_on_empty");
+      }
+      if (auto* jName = json.get_ptr("name")) {
+        name = jName->stringPiece();
+      }
+    }
+    return errorOnEmpty ? createErrorRoute<RouterInfo>(folly::sformat(
+                              "HashRoute with empty children, name: {}", name))
+                        : createNullRoute<typename RouterInfo::RouteHandleIf>();
   }
   if (n == 1) {
     return std::move(rh[0]);

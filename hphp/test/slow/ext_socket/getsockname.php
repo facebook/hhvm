@@ -6,7 +6,8 @@ function main_getsockname() {
 $s = socket_create(AF_UNIX, SOCK_STREAM, 0);
 var_dump($s);
 
-$f = sys_get_temp_dir().'/socktest'.rand();
+$sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+$f = $sockdir.'/socktest'.rand();
 $ret = socket_bind($s, $f);
 var_dump($ret);
 

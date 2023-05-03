@@ -1,5 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sock_path = sprintf("%s/%s.sock", sys_get_temp_dir(), uniqid());
+$sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+$sock_path = sprintf("%s/%s.sock", $sockdir, uniqid());
 
 if (file_exists($sock_path))
     die('Temporary socket already exists.');

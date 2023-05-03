@@ -217,7 +217,8 @@ function test_stream_socket_recvfrom_udp6() {
 
 
 function test_stream_socket_recvfrom_unix() {
-  $tmpsock = tempnam(sys_get_temp_dir(), 'vmstreamtest');
+  $sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+  $tmpsock = tempnam($sockdir, 'vmstreamtest');
   unlink($tmpsock);
 
   $address = "unix://$tmpsock";

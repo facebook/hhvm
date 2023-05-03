@@ -553,7 +553,6 @@ class t_hack_generator : public t_concat_generator {
     IS_SHAPE = 1,
     IS_ANY_SHAPE = 2,
     IMMUTABLE_COLLECTIONS = 3,
-    IGNORE_TYPEDEF = 5,
     IGNORE_WRAPPER = 6,
     RECURSIVE_IGNORE_WRAPPER = 7,
   };
@@ -609,9 +608,11 @@ class t_hack_generator : public t_concat_generator {
           {TypeToTypehintVariations::IS_SHAPE, false},
           {TypeToTypehintVariations::IMMUTABLE_COLLECTIONS, false},
           {TypeToTypehintVariations::IS_ANY_SHAPE, false},
-          {TypeToTypehintVariations::IGNORE_TYPEDEF, false},
           {TypeToTypehintVariations::IGNORE_WRAPPER, false},
           {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, false}});
+  std::string typedef_to_typehint(
+      const t_typedef* ttypedef,
+      std::map<TypeToTypehintVariations, bool> variations);
   std::string type_to_param_typehint(
       const t_type* ttype, bool nullable = false);
 
@@ -1616,10 +1617,12 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     // structs is prefixed with "\"
     has_nested_ns = true;
   }
-  auto typehint = type_to_typehint(
-      ttypedef,
-      {{TypeToTypehintVariations::IGNORE_TYPEDEF, true},
-       {TypeToTypehintVariations::IGNORE_WRAPPER, true}});
+  std::string typehint;
+  if (auto adapter = find_hack_adapter(ttypedef)) {
+    typehint = *adapter + "::THackType";
+  } else {
+    typehint = type_to_typehint(ttypedef->get_type());
+  }
   if (wrapper) {
     f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
              << " = " << *wrapper << "<" << hack_wrapped_type_name(name, ns)
@@ -6616,67 +6619,64 @@ std::string t_hack_generator::get_container_keyword(
   return hack_collection;
 }
 
+std::string t_hack_generator::typedef_to_typehint(
+    const t_typedef* ttypedef,
+    std::map<TypeToTypehintVariations, bool> variations) {
+  auto [wrapper, name, ns] = find_hack_wrapper(ttypedef, false);
+  std::string typehint;
+
+  if (auto adapter = find_hack_adapter(ttypedef)) {
+    typehint = *adapter + "::THackType";
+  } else {
+    typehint = type_to_typehint(ttypedef->get_type(), variations);
+
+    if (ttypedef->get_true_type()->is_struct() &&
+        variations[TypeToTypehintVariations::IS_SHAPE]) {
+      return typehint;
+    }
+  }
+
+  if (wrapper) {
+    bool ignore_wrapper =
+        variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
+        variations[TypeToTypehintVariations::IGNORE_WRAPPER];
+    if (ignore_wrapper) {
+      return typedef_ ? hack_wrapped_type_name(name, ns) : typehint;
+    } else {
+      return typedef_ ? hack_name(ttypedef) : (*wrapper + "<" + typehint + ">");
+    }
+  } else {
+    return typedef_ ? hack_name(ttypedef) : typehint;
+  }
+}
+
 /**
  * Generate an appropriate string for a php typehint
  */
 std::string t_hack_generator::type_to_typehint(
     const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations) {
-  bool is_typedef = ttype->is_typedef();
   if (const auto* ttypedef =
           dynamic_cast<const t_placeholder_typedef*>(ttype)) {
-    is_typedef = ttypedef->get_true_type()->is_typedef();
     ttype = ttypedef->get_type();
   }
-  bool use_defined_type_const = is_typedef &&
-      !variations[TypeToTypehintVariations::IGNORE_TYPEDEF] && typedef_;
-  bool ignore_wrapper =
-      variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
-      variations[TypeToTypehintVariations::IGNORE_WRAPPER];
+  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {
+    return typedef_to_typehint(ttypedef, variations);
+  }
 
-  variations[TypeToTypehintVariations::IGNORE_WRAPPER] =
-      variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER];
-  variations[TypeToTypehintVariations::IGNORE_TYPEDEF] = false;
-  auto adapter = find_hack_adapter(ttype);
-  // Resolve wrapper on typedef
-  auto [wrapper, name, ns] = find_hack_wrapper(ttype, false);
-  if (wrapper) {
-    if (use_defined_type_const || ttype->is_struct()) {
-      // If its a struct or defined typedef, then we can use the name
-      // directly as it refers to the wrapped version
-      auto struct_name = hack_name(ttype);
-      if (ignore_wrapper) {
+  if (ttype->is_struct() || ttype->is_xception()) {
+    std::string struct_name = hack_name(ttype);
+
+    auto [wrapper, name, ns] = find_hack_wrapper(ttype, false);
+
+    if (wrapper) {
+      if (variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
+          variations[TypeToTypehintVariations::IGNORE_WRAPPER]) {
         // If wrapper is ignored, then use the underlying_type
         struct_name = hack_wrapped_type_name(name, ns);
       }
-      return struct_name +
-          (variations[TypeToTypehintVariations::IS_SHAPE] && ttype->is_struct()
-               ? "::TShape"
-               : "");
-    } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {
-      ttype = ttypedef->get_type();
-      // typedef_ option is not enabled or typedef is ignored.
-      // Cannot use the type constant here and
-      // need to use the actual type here
-      auto typehint = type_to_typehint(ttype, variations);
-
-      if (ignore_wrapper) {
-        return typehint;
-      }
-      return *wrapper + "<" + typehint + ">";
     }
-  } else if (use_defined_type_const) {
-    // This is a typedef without wrapper, we can use the type constant
-    // directly
-    return hack_name(ttype);
-  }
-
-  if (adapter) {
-    // Check the adapter before resolving typedefs.
-    return *adapter + "::THackType";
-  }
-
-  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {
-    return type_to_typehint(ttypedef->get_type(), variations);
+    return struct_name +
+        (variations[TypeToTypehintVariations::IS_SHAPE] ? "::TShape" : "");
   }
 
   ttype = ttype->get_true_type();
@@ -6706,9 +6706,6 @@ std::string t_hack_generator::type_to_typehint(
     } else {
       return hack_name(ttype);
     }
-  } else if (ttype->is_struct() || ttype->is_xception()) {
-    return hack_name(ttype) +
-        (variations[TypeToTypehintVariations::IS_SHAPE] ? "::TShape" : "");
   } else if (const auto* tlist = dynamic_cast<const t_list*>(ttype)) {
     std::string prefix = get_container_keyword(ttype, variations);
     return prefix + "<" + type_to_typehint(tlist->get_elem_type(), variations) +

@@ -3222,7 +3222,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?\thrift\test\A,
+    ?'a' => ?\thrift\test\AdaptedA,
   );
 
   const type TShape = shape(
@@ -3233,9 +3233,9 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
    * Original thrift field:-
    * 1: module.AdaptedA a
    */
-  public ?\thrift\test\A $a;
+  public ?\thrift\test\AdaptedA $a;
 
-  public function __construct(?\thrift\test\A $a = null)[] {
+  public function __construct(?\thrift\test\AdaptedA $a = null)[] {
     $this->a = $a;
   }
 
@@ -3350,7 +3350,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     }
 
     if (idx($parsed, 'a') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\A>($parsed['a']));
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedA>($parsed['a']));
       $_tmp1 = \thrift\test\A::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->a = $_tmp1;
@@ -6261,9 +6261,9 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
 
   const type TShape = shape(
     ?'adaptedStruct' => ?\thrift\test\AdaptedStruct::TShape,
-    ?'adaptedTypedef' => ?\thrift\test\AdaptedTypedef,
+    ?'adaptedTypedef' => ?\thrift\test\AdaptedStruct::TShape,
     ?'directlyAdapted' => ?\thrift\test\DirectlyAdaptedStruct::TShape,
-    ?'typedefOfAdapted' => ?\thrift\test\TypedefOfDirect,
+    ?'typedefOfAdapted' => ?\thrift\test\DirectlyAdaptedStruct::TShape,
   );
   const int STRUCTURAL_ID = 3653783318222631819;
   /**
@@ -6646,7 +6646,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?\thrift\test\CircularAdaptee,
+    ?'field' => ?\thrift\test\AdaptedCircularAdaptee,
   );
 
   const type TShape = shape(
@@ -6657,9 +6657,9 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
    * Original thrift field:-
    * 1: module.AdaptedCircularAdaptee field
    */
-  public ?\thrift\test\CircularAdaptee $field;
+  public ?\thrift\test\AdaptedCircularAdaptee $field;
 
-  public function __construct(?\thrift\test\CircularAdaptee $field = null)[] {
+  public function __construct(?\thrift\test\AdaptedCircularAdaptee $field = null)[] {
     $this->field = $field;
   }
 
@@ -6773,7 +6773,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CircularAdaptee>($parsed['field']));
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedCircularAdaptee>($parsed['field']));
       $_tmp1 = \thrift\test\CircularAdaptee::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;

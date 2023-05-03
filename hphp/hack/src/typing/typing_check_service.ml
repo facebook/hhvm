@@ -895,7 +895,7 @@ let rec event_loop
     ~(handle : Hh_distc_ffi.handle)
     ~(check_info : check_info)
     ~(hhdg_path : string) :
-    [> `Success of typing_result * 'env
+    [> `Success of Errors.t * Typing_deps.dep_edges * 'env
     | `Error of log_message
     | `Cancel of 'env * MultiThreadedCall.cancel_reason
     ] =
@@ -913,11 +913,8 @@ let rec event_loop
         (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
         Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
         `Success
-          ( {
-              errors;
-              dep_edges = Typing_deps.dep_edges_make ();
-              telemetry = Telemetry.create ();
-            },
+          ( errors,
+            Typing_deps.dep_edges_make (),
             interrupt.MultiThreadedCall.env )
       | Error error -> `Error error)
     | Some _ ->
@@ -998,7 +995,7 @@ let process_with_hh_distc
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(check_info : check_info) :
-    [> `Success of typing_result * 'env
+    [> `Success of Errors.t * Typing_deps.dep_edges * 'env
     | `Error of log_message
     | `Cancel of 'env * MultiThreadedCall.cancel_reason
     ] =
@@ -1343,17 +1340,24 @@ let go_with_interrupt
       |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     let results_via_distc =
       if will_use_distc then (
+        (* distc doesn't yet give any profiling_info about how its workers fared *)
+        let profiling_info = Telemetry.create () in
         match process_with_hh_distc ~root ~interrupt ~check_info with
-        | `Success (typing_result, env) ->
+        | `Success (errors, dep_edges, env) ->
           Some
-            (typing_result, delegate_state, telemetry, env, None, (None, None))
+            ( { errors; dep_edges; telemetry = profiling_info },
+              delegate_state,
+              telemetry,
+              env,
+              None,
+              (None, None) )
         | `Cancel (env, reason) ->
           (* Typecheck is cancelled due to interrupt *)
           Some
             ( {
                 errors = Errors.empty;
                 dep_edges = Typing_deps.dep_edges_make ();
-                telemetry = Telemetry.create ();
+                telemetry = profiling_info;
               },
               delegate_state,
               telemetry,
@@ -1389,11 +1393,11 @@ let go_with_interrupt
         ~check_info
         ~typecheck_info
   in
-  let { errors; dep_edges; telemetry = typing_telemetry } = typing_result in
+  let { errors; dep_edges; telemetry = profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
   let telemetry =
-    telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
+    telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in
   ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
     cancelled_fnl_and_reason )

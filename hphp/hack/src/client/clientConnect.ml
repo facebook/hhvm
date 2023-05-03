@@ -63,7 +63,7 @@ let read_and_show_progress (progress_callback : string option -> unit) : unit =
   progress_callback (Some message);
   ()
 
-let check_for_deadline deadline_opt =
+let check_for_deadline progress_callback deadline_opt =
   let now = Unix.time () in
   match deadline_opt with
   | Some deadline when Float.(now > deadline) ->
@@ -71,6 +71,8 @@ let check_for_deadline deadline_opt =
       "check_for_deadline expired: %s > %s"
       (Utils.timestring now)
       (Utils.timestring deadline);
+    (* must hide the spinner prior to printing output or exiting *)
+    progress_callback None;
     Printf.eprintf "\nError: hh_client hit timeout, giving up!\n%!";
     raise Exit_status.(Exit_with Out_of_time)
   | _ -> ()
@@ -85,7 +87,7 @@ let rec wait_for_server_message
     ~(server_specific_files : ServerCommandTypes.server_specific_files)
     ~(progress_callback : string option -> unit)
     ~(root : Path.t) : _ ServerCommandTypes.message_type Lwt.t =
-  check_for_deadline deadline;
+  check_for_deadline progress_callback deadline;
   let%lwt (readable, _, _) =
     Lwt_utils.select
       [Timeout.descr_of_in_channel ic]
@@ -157,6 +159,8 @@ let rec wait_for_server_message
       let client_stack =
         e |> Exception.get_backtrace_string |> Exception.clean_stack
       in
+      (* must hide the spinner prior to printing output or exiting *)
+      progress_callback None;
       (* stderr *)
       let msg =
         match (exn, finale_data) with
@@ -170,8 +174,6 @@ let rec wait_for_server_message
             (Option.value ~default:"" finale_data.Exit_status.msg)
       in
       Printf.eprintf "%s\n" msg;
-      (* spinner *)
-      progress_callback None;
       (* exception, caught by hh_client.ml and logged.
          In most cases we report that find_hh.sh should simply retry the failed command.
          There are only two cases where we say it shouldn't. *)
@@ -220,7 +222,8 @@ let wait_for_server_hello
 
 let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     conn Lwt.t =
-  check_for_deadline env.deadline;
+  env.progress_callback (Some "connecting");
+  check_for_deadline env.progress_callback env.deadline;
   let handoff_options =
     {
       MonitorRpc.force_dormant_start = env.force_dormant_start;
@@ -307,6 +310,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         For longer startup times, a sufficient (if not exactly clean) workaround
         is simply to have the client re-establish a connection.
       *)
+      (* must hide the spinner prior to printing output or exiting *)
+      env.progress_callback None;
       Printf.eprintf
         "Server connection took over %.1f seconds. Refreshing...\n"
         threshold;
@@ -317,7 +322,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
 
       (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
       connect ~allow_macos_hack:false env start_time
-    ) else
+    ) else (
+      env.progress_callback (Some "connected");
       Lwt.return
         {
           connection_log_id = Connection_tracker.log_id tracker;
@@ -332,7 +338,10 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           conn_deadline = env.deadline;
           from = env.from;
         }
+    )
   | Error e ->
+    (* must hide the spinner prior to printing output or exiting *)
+    env.progress_callback None;
     (match e with
     | MonitorUtils.Server_died
     | MonitorUtils.(Connect_to_monitor_failure { server_exists = true; _ }) ->

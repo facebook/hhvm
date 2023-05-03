@@ -142,6 +142,8 @@ let () =
   with
   | exn ->
     let e = Exception.wrap exn in
+    (* hide the spinner *)
+    ClientSpinner.report ~to_stderr:false ~angery_reaccs_only:false None;
     (* We trust that if someone raised Exit_with then they had the decency to print
        out a user-facing message; we will only print out a user-facing message here
        for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)

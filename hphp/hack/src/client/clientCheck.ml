@@ -1088,6 +1088,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
   | exn ->
     let e = Exception.wrap exn in
     let spinner = ClientSpinner.get_latest_report () in
+    (* hide the spinner *)
+    ClientSpinner.report ~to_stderr:false ~angery_reaccs_only:false None;
     let exit_status =
       match exn with
       | Exit_status.Exit_with exit_status ->

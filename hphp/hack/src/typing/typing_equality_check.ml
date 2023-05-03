@@ -27,7 +27,7 @@ let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
   let result = trivial_result_str bop
   and tys1 = lazy (Typing_print.error env ty1)
   and tys2 = lazy (Typing_print.error env ty2) in
-  Errors.add_typing_error
+  Typing_error_utils.add_typing_error
     Typing_error.(
       primary
       @@ Primary.Trivial_strict_eq
@@ -47,7 +47,7 @@ let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
 let eq_incompatible_types env p ty1 ty2 =
   let tys1 = lazy (Typing_print.error env ty1)
   and tys2 = lazy (Typing_print.error env ty2) in
-  Errors.add_typing_error
+  Typing_error_utils.add_typing_error
     Typing_error.(
       primary
       @@ Primary.Eq_incompatible_types
@@ -110,7 +110,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       ()
     | ((r, Tprim N.Tnoreturn), _)
     | (_, (r, Tprim N.Tnoreturn)) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           wellformedness
           @@ Primary.Wellformedness.Noreturn_usage
@@ -122,7 +122,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           wellformedness
           @@ Primary.Wellformedness.Void_usage

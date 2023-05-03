@@ -134,7 +134,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     match ty_interface with
     | Some interface ->
       (if not (is_valid_base interface) then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
         @@ Typing_error.(
              enum
              @@ Primary.Enum.Enum_type_bad
@@ -167,7 +167,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
         ty_arraykey
         callback
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   env
 
 (* Check an enum declaration of the form
@@ -210,7 +210,7 @@ let enum_class_check env tc consts const_types =
       let ((env, ty_err1), ty_exp) =
         Phase.localize_no_subst env ~ignore_errors:false ty_exp
       in
-      Option.iter ~f:Errors.add_typing_error ty_err1;
+      Option.iter ~f:Typing_error_utils.add_typing_error ty_err1;
       let ((env, ty_err2), ty_interface) =
         match ty_interface with
         | Some dty ->
@@ -220,7 +220,7 @@ let enum_class_check env tc consts const_types =
           (env, Some lty)
         | None -> ((env, None), None)
       in
-      Option.iter ~f:Errors.add_typing_error ty_err2;
+      Option.iter ~f:Typing_error_utils.add_typing_error ty_err2;
       (* Check that ty_exp <: arraykey *)
       let env =
         enum_check_type
@@ -239,7 +239,7 @@ let enum_class_check env tc consts const_types =
           let ((env, ty_err1), ty) =
             Phase.localize_no_subst env ~ignore_errors:false ty
           in
-          Option.iter ~f:Errors.add_typing_error ty_err1;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err1;
           let env =
             enum_check_type
               env
@@ -270,5 +270,5 @@ let enum_class_check env tc consts const_types =
       (env, Typing_error.multiple_opt ty_errs)
     | None -> (env, None)
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   env

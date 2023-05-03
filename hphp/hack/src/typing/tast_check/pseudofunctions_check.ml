@@ -18,7 +18,8 @@ let disallow_isset_inout_args_check p = function
                 | (Ast_defs.Pinout _, _) -> true
                 | (Ast_defs.Pnormal, _) -> false)
               el ->
-    Errors.add_typing_error Typing_error.(primary @@ Primary.Isset_inout_arg p)
+    Typing_error_utils.add_typing_error
+      Typing_error.(primary @@ Primary.Isset_inout_arg p)
   | _ -> ()
 
 let well_formed_isset_argument_check p = function
@@ -36,7 +37,8 @@ let well_formed_isset_argument_check p = function
         [(_, (_, _, Class_get (_, CGexpr (_, _, Id _), _)))],
         _ )
     when String.equal pseudo_func SN.PseudoFunctions.isset ->
-    Errors.add_typing_error Typing_error.(primary @@ Primary.Isset_in_strict p)
+    Typing_error_utils.add_typing_error
+      Typing_error.(primary @@ Primary.Isset_in_strict p)
   | _ -> ()
 
 let handler =

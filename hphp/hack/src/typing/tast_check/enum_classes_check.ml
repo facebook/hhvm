@@ -20,6 +20,6 @@ let handler =
       let is_enum_class = Aast.is_enum_class c in
       let pos = fst c.Aast.c_name in
       if (not enabled) && is_enum_class then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(enum @@ Primary.Enum.Enum_classes_reserved_syntax pos)
   end

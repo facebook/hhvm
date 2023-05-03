@@ -34,7 +34,7 @@ let strip_awaitable fun_kind env et =
 
 let enforce_return_not_disposable ret_pos fun_kind env et =
   let stripped_et = strip_awaitable fun_kind env et in
-  Option.iter ~f:Errors.add_typing_error
+  Option.iter ~f:Typing_error_utils.add_typing_error
   @@ Option.map
        (Typing_disposable.is_disposable_type env stripped_et.et_type)
        ~f:(fun class_name ->
@@ -124,7 +124,7 @@ let force_return_kind ~is_toplevel env p ety =
           ty
           Typing_error.Callback.unify_error
       in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
       (env, wrapped_ty)
   in
   (env, { ety with et_type = ty })
@@ -176,7 +176,7 @@ let make_return_type
           | _ -> dty
         in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
         (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
         let (env, ty) =
           if supportdyn then
@@ -242,7 +242,7 @@ let make_return_type
         let ((env, ty_err_opt), et_type) =
           Typing_phase.localize ~ety_env env dty
         in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
         (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
         let (env, et_type) =
           if supportdyn then
@@ -310,7 +310,8 @@ let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =
     Typing_ops.sub_type pos reason env actual expected
     @@ Typing_error.Callback.of_primary_error error
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   env
 
 let check_inout_return ret_pos env =
@@ -356,7 +357,8 @@ let check_inout_return ret_pos env =
           (env, ty_errs)
         | None -> (env, ty_errs))
   in
-  Option.iter ~f:Errors.add_typing_error @@ Typing_error.multiple_opt ty_errs;
+  Option.iter ~f:Typing_error_utils.add_typing_error
+  @@ Typing_error.multiple_opt ty_errs;
   env
 
 let rec remove_like_for_return env ty =

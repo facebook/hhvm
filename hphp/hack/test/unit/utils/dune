@@ -63,5 +63,6 @@
   relative_path
   sys_utils
   test_injector_config
+  typing_error_utils
   unit_test
   utils_core))

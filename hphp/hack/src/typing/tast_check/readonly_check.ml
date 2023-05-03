@@ -209,7 +209,7 @@ let check_readonly_return_call pos caller_ty is_readonly =
     let open Typing_defs in
     match get_fty caller_ty with
     | Some fty when get_ft_returns_readonly fty ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Explicit_readonly_cast
@@ -228,7 +228,7 @@ let check_readonly_property env obj get obj_ro =
   let readonly_prop = List.find ~f:get_ce_readonly_prop prop_elts in
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -246,7 +246,7 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
   let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -283,7 +283,7 @@ let rec assign env lval rval =
     in
     match mutable_prop with
     | Some elt when not (Typing_defs.get_ce_readonly_prop elt) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -309,7 +309,7 @@ let rec assign env lval rval =
         assign env array rval
       | _ -> ())
     | (Mut, Readonly) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -320,7 +320,7 @@ let rec assign env lval rval =
                  pos_super = Tast.get_position array |> Pos_or_decl.of_raw_pos;
                })
     | (Readonly, _) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_modified
@@ -338,7 +338,7 @@ let rec assign env lval rval =
     begin
       match ty_expr env obj with
       | Readonly ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             readonly
             @@ Primary.Readonly.Readonly_modified
@@ -362,7 +362,7 @@ let method_call caller =
   | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, Is_method))) ->
     (match get_fty ty with
     | Some fty when not (get_ft_readonly_this fty) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_method_call
@@ -376,7 +376,7 @@ let check_special_function env caller args =
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(readonly @@ Primary.Readonly.Readonly_invalid_as_mut pos)
     else
       ()
@@ -417,7 +417,7 @@ let call
         (* Otherwise, it's likely from a Rwitness, but we suggest declaring it as readonly *)
         | _ -> "declaring this as a `readonly` function"
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_closure_call
@@ -429,7 +429,7 @@ let call
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch

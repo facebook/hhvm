@@ -44,7 +44,7 @@ let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
     | _ -> Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
   in
   Option.iter err_opt ~f:(fun err ->
-      Errors.add_typing_error @@ Typing_error.primary err)
+      Typing_error_utils.add_typing_error @@ Typing_error.primary err)
 
 let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let upper_bounds =
@@ -61,7 +61,7 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
   if Int.( <> ) 1 (List.length valid_classes) then
     let constraints = List.map ~f:Cls.name valid_classes in
     let (pos, tp_name) = tparam.tp_name in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         primary
         @@ Primary.Invalid_newable_typaram_constraints
@@ -92,7 +92,7 @@ let verify_targ_valid env reification tparam targ =
     | Nast.SoftReified ->
       let (decl_pos, param_name) = tparam.tp_name in
       let emit_error pos arg_info =
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_reified_arg
@@ -111,7 +111,7 @@ let verify_targ_valid env reification tparam targ =
       (snd targ)
       (fun pos ty_info ->
         let (tp_pos, tp_name) = tparam.tp_name in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_enforceable_type
@@ -126,7 +126,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     let targs_length = List.length targs in
     if Int.( <> ) tparams_length targs_length then
       if Int.( = ) targs_length 0 then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
       else
@@ -135,7 +135,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
         ());
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
   else
@@ -160,13 +160,13 @@ let handler =
       match x with
       | (_, call_pos, Class_get ((_, _, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(primary @@ Primary.Class_get_reified call_pos)
       | (fun_ty, pos, Method_caller _) ->
         (match get_ft_tparams fun_ty with
         | Some (ft_tparams, _) ->
           if tparams_has_reified ft_tparams then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(primary @@ Primary.Reified_function_reference pos)
         | None -> ())
       | ( _,
@@ -178,7 +178,7 @@ let handler =
           match get_node ty with
           (* If we get Tgeneric here, the underlying type was reified *)
           | Tgeneric (ci, _) when String.equal ci class_id ->
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 expr_tree
                 @@ Primary.Expr_tree.Reified_static_method_in_expr_tree pos)
@@ -204,7 +204,7 @@ let handler =
              parameter must have been newable and reified, neither of which his allowed for
              higher-kinded type-parameters *)
           if not (Env.get_newable env ci) then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 primary @@ Primary.New_without_newable { pos; name = ci })
         (* No need to report a separate error here if targs is non-empty:
@@ -239,7 +239,7 @@ let handler =
                   | CIparent -> ("parent", Env.get_parent_id env)
                   | _ -> failwith "Unexpected match"
                 in
-                Errors.add_typing_error
+                Typing_error_utils.add_typing_error
                   Typing_error.(
                     primary
                     @@ Primary.New_class_reified
@@ -293,7 +293,7 @@ let handler =
               ~f:(fun t -> not (equal_reify_kind t.tp_reified Erased))
               (Cls.tparams cls)
           then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(primary @@ Primary.Consistent_construct_reified pos)
         | _ -> ()
       end

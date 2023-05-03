@@ -646,7 +646,7 @@ let attribute_conflicting_memoize pos second_pos =
 
 let wrong_expression_kind_builtin_attribute pos attr expr_kind =
   User_error.make
-    Typing_error.Error_code.(to_enum WrongExpressionKindAttribute)
+    Error_codes.Typing.(to_enum WrongExpressionKindAttribute)
     ( pos,
       Printf.sprintf
         "The %s attribute cannot be used on %s."
@@ -656,7 +656,7 @@ let wrong_expression_kind_builtin_attribute pos attr expr_kind =
 
 let attribute_too_many_arguments pos name expected =
   User_error.make
-    Typing_error.Error_code.(to_enum AttributeTooManyArguments)
+    Error_codes.Typing.(to_enum AttributeTooManyArguments)
     ( pos,
       "The attribute "
       ^ Markdown_lite.md_codify name
@@ -666,7 +666,7 @@ let attribute_too_many_arguments pos name expected =
 
 let attribute_too_few_arguments pos name expected =
   User_error.make
-    Typing_error.Error_code.(to_enum AttributeTooFewArguments)
+    Error_codes.Typing.(to_enum AttributeTooFewArguments)
     ( pos,
       "The attribute "
       ^ Markdown_lite.md_codify name
@@ -677,9 +677,9 @@ let attribute_too_few_arguments pos name expected =
 let attribute_not_exact_number_of_args pos name expected actual =
   let code =
     if actual > expected then
-      Typing_error.Error_code.AttributeTooManyArguments
+      Error_codes.Typing.AttributeTooManyArguments
     else
-      Typing_error.Error_code.AttributeTooFewArguments
+      Error_codes.Typing.AttributeTooFewArguments
   and claim =
     ( pos,
       "The attribute "
@@ -691,17 +691,17 @@ let attribute_not_exact_number_of_args pos name expected actual =
       | 1 -> "exactly 1 argument"
       | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
   in
-  User_error.make Typing_error.Error_code.(to_enum code) claim []
+  User_error.make Error_codes.Typing.(to_enum code) claim []
 
 let attribute_param_type pos x =
   User_error.make
-    Typing_error.Error_code.(to_enum AttributeParamType)
+    Error_codes.Typing.(to_enum AttributeParamType)
     (pos, "This attribute parameter should be " ^ x)
     []
 
 let enum_supertyping_reserved_syntax pos =
   User_error.make
-    Typing_error.Error_code.(to_enum EnumSupertypingReservedSyntax)
+    Error_codes.Typing.(to_enum EnumSupertypingReservedSyntax)
     ( pos,
       "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
       ^ "Enable it with the enable_enum_supertyping option in .hhconfig" )

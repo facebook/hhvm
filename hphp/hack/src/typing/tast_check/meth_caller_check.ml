@@ -30,7 +30,7 @@ let check_parameters =
           | FPinout -> "`inout`"
           | FPnormal -> "normal"
         in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_meth_caller_calling_convention
@@ -51,7 +51,7 @@ let check_readonly_return env pos ft =
       let (_, expanded_ty) = Tast_env.expand_type env ft in
       let r = get_reason expanded_ty in
       let rpos = Typing_reason.to_pos r in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Invalid_meth_caller_readonly_return

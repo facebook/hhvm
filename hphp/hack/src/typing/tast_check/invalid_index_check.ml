@@ -92,7 +92,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
                  ("It is incompatible with " ^ ty_have_str)
                  (get_reason ty_have)))
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Index_type_mismatch

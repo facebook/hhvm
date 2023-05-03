@@ -95,7 +95,7 @@ let decl_error_to_typing_error decl_error =
   Typing_error.primary primary
 
 let add_decl_error decl_error =
-  Errors.add_typing_error (decl_error_to_typing_error decl_error)
+  Typing_error_utils.add_typing_error (decl_error_to_typing_error decl_error)
 
 let add_decl_errors = List.iter ~f:add_decl_error
 
@@ -123,7 +123,7 @@ let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
             Typing_log.log_key "WARN: environment is too big.";
             Typing_log.hh_show_env p env); *)
         let (pos, fn_name) = fun_name in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Typechecker_timeout { pos; fn_name; seconds = timeout });

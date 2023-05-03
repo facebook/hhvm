@@ -22,18 +22,58 @@
   (pps ppx_deriving.std)))
 
 (library
+  (name typing_defs_core)
+  (wrapped false)
+  (modules
+    tanySentinel
+    typing_defs_core
+    typing_defs_flags
+    typing_reason
+    xhp_attribute)
+  (libraries
+    ast
+    heap_ident
+    nast
+    pos
+    pos_or_decl)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+  (name typing_error)
+  (wrapped false)
+  (modules typing_error)
+  (libraries
+    ast
+    pos
+    pos_or_decl
+    typing_defs_core
+    error_codes
+    user_error)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+  (name typing_error_utils)
+  (wrapped false)
+  (modules typing_error_utils)
+  (libraries
+    core_kernel
+    errors
+    error_codes
+    pos
+    pos_or_decl
+    typing_error
+    user_error))
+
+(library
  (name typing_defs)
  (wrapped false)
  (modules
   coverage_level_defs
   type_visitor
   class_refinement
-  typing_defs
-  typing_defs_core
-  typing_defs_flags
-  tanySentinel
-  typing_reason
-  xhp_attribute)
+  typing_defs)
  (libraries
   ast
   core_kernel
@@ -44,6 +84,8 @@
   pos
   pos_or_decl
   relative_path
+  typing_defs_core
+  typing_error
   utils_core)
  (preprocess
   (pps ppx_deriving.std)))
@@ -162,6 +204,7 @@
   (wrapped false)
   (modules typing_modules)
   (libraries typing_env typing_env_types decl_provider))
+
 
 (library
  (name typing)
@@ -328,7 +371,7 @@
  (name typing_utils)
  (wrapped false)
  (modules typing_utils)
- (libraries typing_env typing_logic)
+ (libraries typing_env typing_logic typing_error errors)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -403,6 +446,7 @@
   common
   core_kernel
   errors
+  typing_error
   naming_attributes
   nast
   type_mapper_forget
@@ -428,6 +472,7 @@
   core_kernel
   deferred_decl
   errors
+  typing_error
   file_info
   nast
   substitution_mutation
@@ -453,6 +498,7 @@
   deferred_decl
   diagnostic_pusher
   errors
+  typing_error
   file_info
   nast
   gc_utils

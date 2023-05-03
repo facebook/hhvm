@@ -26,7 +26,7 @@ let expect_ty_equal
   if not @@ ty_equal ~normalize_lists:true ty expected_ty then
     let actual_ty = lazy (Typing_print.debug env ty) in
     let expected_ty = lazy (Typing_print.debug env expected_ty) in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         primary @@ Primary.Unexpected_ty_in_tast { pos; actual_ty; expected_ty })
 

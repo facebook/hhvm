@@ -92,7 +92,7 @@ let check_attrs pos env sid attrs =
                 ("The attribute `" ^ attr_name ^ "` is declared here.")
                 (Reason.Rwitness_from_decl pos))
         in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             xhp
             @@ Primary.Xhp.Missing_xhp_required_attr

@@ -208,13 +208,13 @@ module StateConstraintGraph = struct
     let env =
       catch_exc on_err env (fun on_err ->
           let (env, ty_err_opt) = Sub.sub_type env ty ty' on_err in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env)
     in
     let env =
       catch_exc on_err env (fun on_err ->
           let (env, ty_err_opt) = Sub.sub_type env ty' ty on_err in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env)
     in
     let (env, vars_in_lower_bounds, vars_in_upper_bounds) =
@@ -245,7 +245,7 @@ module StateConstraintGraph = struct
           let (env, ty_err_opt) =
             Typing_solver.try_bind_to_equal_bound env var'
           in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env)
     in
     let env =
@@ -253,7 +253,7 @@ module StateConstraintGraph = struct
           let (env, ty_err_opt) =
             Typing_solver.try_bind_to_equal_bound env var
           in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env)
     in
     let env =
@@ -337,7 +337,7 @@ module StateSolvedGraph = struct
           if StateErrors.has_error errors var then (
             let (env, ty) = Env.fresh_type_invariant env Pos.none in
             let (env, ty_err_opt) = Typing_solver.bind env var ty in
-            Option.iter ~f:Errors.add_typing_error ty_err_opt;
+            Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
             env
           ) else
             env)
@@ -352,7 +352,7 @@ module StateSolvedGraph = struct
         let (env, ty_err_opt) =
           Typing_solver.solve_all_unsolved_tyvars_gi env
         in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
         env
     in
     (env, errors, type_map)

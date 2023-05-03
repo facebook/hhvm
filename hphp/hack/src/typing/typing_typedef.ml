@@ -71,8 +71,8 @@ let typedef_def ctx typedef =
       typedef.t_tparams
       []
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt1;
-  List.iter ~f:Errors.add_typing_error
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt1;
+  List.iter ~f:Typing_error_utils.add_typing_error
   @@ Typing_type_wellformedness.typedef env typedef;
   Typing_env.make_depend_on_current_module env;
   Typing_variance.typedef env typedef;
@@ -116,15 +116,15 @@ let typedef_def ctx typedef =
           let err = create_err_from_cycles cycles t_pos t_name in
           (ty, err)
         in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+        Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt2;
         let ety_env = Typing_defs.empty_expand_env in
         let ((env, ty_err_opt3), ty) = Phase.localize ~ety_env env ty in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt3;
+        Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt3;
 
         let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
         let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
         Option.iter
-          ~f:Errors.add_typing_error
+          ~f:Typing_error_utils.add_typing_error
           (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
         env
       | None ->
@@ -138,12 +138,12 @@ let typedef_def ctx typedef =
           ~report_cycle:(t_pos, t_name)
           hint
       in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt2;
 
       let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
       let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
       Option.iter
-        ~f:Errors.add_typing_error
+        ~f:Typing_error_utils.add_typing_error
         (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
       env
   in

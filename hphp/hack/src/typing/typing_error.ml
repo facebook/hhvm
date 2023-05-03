@@ -171,6 +171,25 @@ type error =
 module Common = struct
   let map2 ~f x y = Lazy.(x >>= fun x -> map ~f:(fun y -> f x y) y)
 
+  (* The contents of the following error message can trigger `hh rage` in
+   * sandcastle. If you change it, please make sure the existing trigger in
+   * `flib/intern/sandcastle/hack/SandcastleCheckHackOnDiffsStep.php` still
+   * catches this error message. *)
+  let please_file_a_bug_message =
+    let hacklang_feedback_support_link =
+      "https://fb.workplace.com/groups/hackforhiphop/"
+    in
+    let hh_rage = Markdown_lite.md_codify "hh rage" in
+    Printf.sprintf
+      "Please run %s and post in %s."
+      hh_rage
+      hacklang_feedback_support_link
+
+  let remediation_message =
+    Printf.sprintf
+      "Addressing other errors, restarting the typechecker with %s, or rebasing might resolve this error."
+      (Markdown_lite.md_codify "hh restart")
+
   let reasons_of_trail trail =
     List.map trail ~f:(fun pos -> (pos, "Typedef definition comes from here"))
 
@@ -264,12 +283,12 @@ module Common = struct
   let badpos_message =
     Printf.sprintf
       "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
-      Error_message_sentinel.please_file_a_bug_message
+      please_file_a_bug_message
 
   let badpos_message_2 =
     Printf.sprintf
       "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
-      Error_message_sentinel.please_file_a_bug_message
+      please_file_a_bug_message
 
   let wrap_error_in_different_file ~current_file ~current_span reasons =
     let claim =
@@ -5600,8 +5619,8 @@ module Primary = struct
   let internal_compiler_error_msg =
     Printf.sprintf
       "Encountered an internal compiler error while typechecking this. %s %s"
-      Error_message_sentinel.remediation_message
-      Error_message_sentinel.please_file_a_bug_message
+      Common.remediation_message
+      Common.please_file_a_bug_message
 
   let invariant_violation pos =
     ( Error_code.InvariantViolated,

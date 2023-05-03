@@ -31,7 +31,7 @@ let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
     let (env, ty_err_opt) =
       Typing_subtype.sub_type_or_fail env available required err_opt
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     env
   ) else
     env
@@ -72,7 +72,7 @@ module Capabilities = struct
       Typing_make_type.apply r (Reason.to_pos r, special_name) []
       |> Typing_phase.localize_no_subst ~ignore_errors:true env
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     (env, res)
 end
 

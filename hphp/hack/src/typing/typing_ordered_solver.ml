@@ -730,7 +730,7 @@ and disj_prop_to_env_cc acc fail props =
   match props with
   | [] ->
     (* Add error as a side effect *)
-    Option.iter ~f:Errors.add_typing_error fail;
+    Option.iter ~f:Typing_error_utils.add_typing_error fail;
     acc
   | prop :: _props ->
     (* Stupidly take the first proposition for now. *)

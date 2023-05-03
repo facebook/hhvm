@@ -27,7 +27,7 @@ let catch_ifc_internal_errors pos f =
         Hh_logger.log
           "Timed out running IFC analysis on %s"
           (Relative_path.suffix (Pos.filename pos));
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             ifc
             @@ Primary.Ifc.Ifc_internal_error
@@ -35,20 +35,20 @@ let catch_ifc_internal_errors pos f =
   with
   (* Solver exceptions*)
   | IFCError error ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         ifc
         @@ Primary.Ifc.Ifc_internal_error
              { pos; msg = Ifc_pretty.ifc_error_to_string error })
   (* Failwith exceptions *)
   | Failure s ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         ifc
         @@ Primary.Ifc.Ifc_internal_error
              { pos; msg = "IFC internal assertion failure: " ^ s })
   | e ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         ifc
         @@ Primary.Ifc.Ifc_internal_error

@@ -58,7 +58,7 @@ let set_self env c =
       let ((env, ty_err_opt), res) =
         Typing_phase.localize_no_subst env ~ignore_errors:true self
       in
-      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
       (env, res)
   in
   let env = Env.set_self env self_id self_ty in

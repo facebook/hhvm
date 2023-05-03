@@ -39,7 +39,7 @@ let check_param_has_hint param =
       None
   in
   Option.iter prim_err_opt ~f:(fun err ->
-      Errors.add_typing_error @@ Typing_error.primary err)
+      Typing_error_utils.add_typing_error @@ Typing_error.primary err)
 
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
@@ -135,7 +135,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
       in
       Phase.localize_no_subst env ~ignore_errors:false ty
     in
-    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
     let ty =
       match get_node ty with
       | t when param.param_is_variadic ->
@@ -149,7 +149,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     let prim_err_opt = enforce_param_not_disposable env param ty in
     Option.iter prim_err_opt ~f:(fun err ->
-        Errors.add_typing_error @@ Typing_error.primary err);
+        Typing_error_utils.add_typing_error @@ Typing_error.primary err);
     (env, Some ty)
 
 let make_param_local_tys ~dynamic_mode env decl_tys params =

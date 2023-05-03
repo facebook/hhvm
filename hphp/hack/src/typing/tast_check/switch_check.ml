@@ -30,7 +30,7 @@ let get_constant tc kind (seen, has_default) case =
   let check_case pos cls const =
     (* wish:T109260699 *)
     if String.( <> ) cls (Cls.name tc) then (
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           enum
           @@ Primary.Enum.Enum_switch_wrong_class
@@ -45,7 +45,7 @@ let get_constant tc kind (seen, has_default) case =
       match SMap.find_opt const seen with
       | None -> (SMap.add const pos seen, has_default)
       | Some old_pos ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             enum
             @@ Primary.Enum.Enum_switch_redundant
@@ -60,7 +60,7 @@ let get_constant tc kind (seen, has_default) case =
   | Case ((_, pos, EnumClassLabel (Some (_, cls), const)), _) ->
     check_case pos cls const
   | Case ((_, pos, _), _) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(enum @@ Primary.Enum.Enum_switch_not_const pos);
     (seen, has_default)
 
@@ -123,7 +123,7 @@ let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
     | _ -> None
   in
   Option.iter enum_err_opt ~f:(fun err ->
-      Errors.add_typing_error @@ Typing_error.enum err)
+      Typing_error_utils.add_typing_error @@ Typing_error.enum err)
 
 (* Small reminder:
  * - enums are localized to `Tnewtype (name, _, _)` where name is the name of

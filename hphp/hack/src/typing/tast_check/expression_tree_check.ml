@@ -39,6 +39,6 @@ let handler =
                   expr_tree
                   @@ Primary.Expr_tree.Experimental_expression_trees pos)
           in
-          Option.iter err_opt ~f:Errors.add_typing_error
+          Option.iter err_opt ~f:Typing_error_utils.add_typing_error
       | _ -> ()
   end

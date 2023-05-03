@@ -200,7 +200,7 @@
 (library
  (name decl_fun_utils)
  (modules decl_fun_utils)
- (libraries decl_defs decl_env decl_hint typing_defs)
+ (libraries decl_defs decl_env decl_hint typing_defs typing_error_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -296,7 +296,10 @@
   naming_attributes
   naming_attributes_params
   shallow_decl_defs
-  typing_defs)
+  typing_defs
+  typing_error
+  typing_error_utils
+  )
  (preprocess
   (pps ppx_deriving.std)))
 

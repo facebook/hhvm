@@ -21,7 +21,7 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
     let req_pos = Typing_defs.get_pos req_ty in
     (match get_impl req_name with
     | None ->
-      (Errors.add_typing_error
+      (Typing_error_utils.add_typing_error
       @@ Typing_error.(
            primary
            @@ Primary.Unsatisfied_req
@@ -37,7 +37,7 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
                 ~req_pos
                 req_name)
       in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
       env)
 
 let check_require_class env class_pos tc (trait_pos, req_ty) =
@@ -56,7 +56,7 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
         env
       else
         let req_pos = Typing_defs.get_pos req_ty in
-        (Errors.add_typing_error
+        (Typing_error_utils.add_typing_error
         @@ Typing_error.(
              primary
              @@ Primary.Req_class_not_final
@@ -64,7 +64,7 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
         env
     ) else
       let req_pos = Typing_defs.get_pos req_ty in
-      (Errors.add_typing_error
+      (Typing_error_utils.add_typing_error
       @@ Typing_error.(
            primary
            @@ Primary.Unsatisfied_req_class
@@ -100,7 +100,7 @@ let check_require_class_require_extends_conflict
       with
       | None -> ()
       | Some (_, pe) ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
         @@ Typing_error.(
              primary
              @@ Primary.Incompatible_reqs
@@ -128,7 +128,7 @@ let check_require_class_use env trait_pos required_classes tc =
           (not (Cls.has_ancestor trc (Cls.name tc)))
           && Ast_defs.is_c_class (Cls.kind trc)
         then
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
           @@ Typing_error.(
                primary
                @@ Primary.Trait_not_used

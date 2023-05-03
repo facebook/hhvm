@@ -18,7 +18,7 @@ let static_method_check reified_params m =
         match h with
         | Aast.Habstr (t, args) ->
           if SSet.mem t reified_params then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 primary
                 @@ Primary.Static_meth_with_class_reified_generic

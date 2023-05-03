@@ -18,12 +18,12 @@ let handler =
     method! at_expr env =
       function
       | (_, _, Obj_get (_, (_, p, This), _, _)) ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$this" })
       | (_, _, Obj_get (_, (_, p, Lplaceholder _), _, _)) ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$_" })

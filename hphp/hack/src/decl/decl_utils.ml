@@ -16,14 +16,14 @@ let unwrap_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->
     (pos, class_name, type_parameters)
   | (p, Habstr _) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         primary
         @@ Primary.Expected_class
              { suffix = Some (lazy " or interface but got a generic"); pos = p });
     (Pos.none, "", [])
   | (p, _) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         primary
         @@ Primary.Expected_class

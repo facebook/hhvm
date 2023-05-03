@@ -205,7 +205,8 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
       Typing_error.Secondary.Visibility_override_internal
         { pos; module_name = None; parent_pos; parent_module }
     in
-    Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
+    Typing_error_utils.add_typing_error
+    @@ Typing_error.(apply_reasons ~on_error err)
   | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
       match
@@ -252,7 +253,8 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
       | `OutsideViaTrait _ -> None
     in
     Option.iter err_opt ~f:(fun err ->
-        Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err))
+        Typing_error_utils.add_typing_error
+        @@ Typing_error.(apply_reasons ~on_error err))
   | _ ->
     let parent_vis = Typing_defs.string_of_visibility parent_vis in
     let vis = Typing_defs.string_of_visibility c_vis in
@@ -260,7 +262,8 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
       Typing_error.Secondary.Visibility_extends
         { pos; vis; parent_pos; parent_vis }
     in
-    Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
+    Typing_error_utils.add_typing_error
+    @@ Typing_error.(apply_reasons ~on_error err)
 
 let check_class_elt_visibility env parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
@@ -347,7 +350,7 @@ let members_missing_error
                  quickfixes;
                })
       in
-      Errors.add_typing_error err);
+      Typing_error_utils.add_typing_error err);
 
   List.iteri class_methods ~f:(fun i { member_name; parent_class_elt; _ } ->
       let quickfixes =
@@ -369,7 +372,7 @@ let members_missing_error
              ~classish:(Cls.name class_)
              ~ancestor:parent_class_elt.ce_origin)
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Implement_abstract
@@ -391,7 +394,7 @@ let members_missing_error
              ~classish:(Cls.name class_)
              ~ancestor:parent_class_elt.ce_origin)
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Implement_abstract
@@ -446,7 +449,12 @@ let check_ambiguous_inheritance f parent child pos class_ origin on_error =
       String.( <> ) (Cls.name class_) origin
       && Errors.has_no_errors (f child parent))
     ~then_:(fun error ->
-      Errors.ambiguous_inheritance pos (Cls.name class_) origin error on_error)
+      Typing_error_utils.ambiguous_inheritance
+        pos
+        (Cls.name class_)
+        origin
+        error
+        on_error)
 
 (** Checks that we're not overriding a final method. *)
 let check_override_final_method parent_class_elt class_elt on_error =
@@ -458,7 +466,7 @@ let check_override_final_method parent_class_elt class_elt on_error =
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error @@ Secondary.Override_final { pos; parent_pos })
 
@@ -481,7 +489,8 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
     let on_error =
       Typing_error.Reasons_callback.prepend_on_apply on_error snd_err1
     in
-    Errors.add_typing_error @@ Typing_error.apply_reasons ~on_error snd_err2
+    Typing_error_utils.add_typing_error
+    @@ Typing_error.apply_reasons ~on_error snd_err2
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -492,7 +501,7 @@ let check_lsb_overrides
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
     @@ Typing_error.(
          apply_reasons ~on_error
          @@ Secondary.Override_lsb { pos; parent_pos; member_name })
@@ -505,7 +514,7 @@ let check_lateinit parent_class_elt class_elt on_error =
   if lateinit_diff then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy child_pos) = class_elt.ce_pos in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
     @@ Typing_error.(
          apply_reasons ~on_error
          @@ Secondary.Bad_lateinit_override
@@ -518,7 +527,7 @@ let check_lateinit parent_class_elt class_elt on_error =
 let check_async ft_parent ft_child parent_pos pos on_error =
   match (get_ft_async ft_parent, get_ft_async ft_child) with
   | (true, false) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error @@ Secondary.Override_async { pos; parent_pos })
   | _ -> ()
@@ -550,7 +559,7 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
         | Some Xhp_attribute.Required -> required
         | Some Xhp_attribute.LateInit -> lateinit
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
       @@ Typing_error.(
            apply_reasons ~on_error
            @@ Secondary.Bad_xhp_attr_required_override
@@ -642,7 +651,7 @@ let check_compatible_sound_dynamic_attributes
   then
     let (lazy pos) = class_elt.ce_pos in
     let (lazy parent_pos) = parent_class_elt.ce_pos in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
     @@ Typing_error.(
          apply_reasons ~on_error
          @@ Secondary.Override_method_support_dynamic_type
@@ -655,7 +664,7 @@ let check_compatible_sound_dynamic_attributes
 
 let check_prop_const_mismatch parent_class_elt class_elt on_error =
   if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error
         @@ Secondary.Overriding_prop_const_mismatch
@@ -672,7 +681,7 @@ let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See override_abstract_concrete.php test case for example. *)
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
         @@ Secondary.Abstract_concrete_override
@@ -716,7 +725,7 @@ let check_multiple_concrete_definitions
          (parent_class_elt, parent_class)
   then
     (* Multiple concrete trait definitions, error *)
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error
         @@ Secondary.Multiple_concrete_defs
@@ -961,14 +970,14 @@ let check_override
   match (deref fty_parent, deref fty_child) with
   | ((_, Tany _), (_, Tany _)) -> env
   | ((_, Tany _), _) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error
         @@ Secondary.Decl_override_missing_hint parent_pos);
 
     env
   | (_, (_, Tany _)) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         apply_reasons ~on_error @@ Secondary.Decl_override_missing_hint pos);
     env
@@ -1018,7 +1027,7 @@ let check_override
           fty_parent
           fty_child
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     env
 
 (* Constants and type constants with declared values in declared interfaces can never be
@@ -1104,7 +1113,7 @@ let check_abstract_const_in_concrete_class
              ~classish:(Cls.name class_)
              ~ancestor:class_const.cc_origin)
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Implement_abstract
@@ -1241,13 +1250,13 @@ let check_const_override
       else
         None
     in
-    Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
+    Option.iter ty_err_opt1 ~f:Typing_error_utils.add_typing_error;
     let (env, ty_err_opt2) =
       Phase.sub_type_decl env class_const_type parent_class_const_type
       @@ Some
            (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
     in
-    Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
+    Option.iter ty_err_opt2 ~f:Typing_error_utils.add_typing_error;
     env
 
 let check_inherited_member_is_dynamically_callable
@@ -1396,7 +1405,8 @@ let check_class_against_parent_class_elt
         parent_class
         (member_kind, member_name, parent_class_elt);
       errors_if_not_overriden
-      |> List.iter ~f:(fun err -> err |> Lazy.force |> Errors.add_typing_error);
+      |> List.iter ~f:(fun err ->
+             err |> Lazy.force |> Typing_error_utils.add_typing_error);
 
       let is_final = Cls.final class_ in
       let missing_members =
@@ -1494,7 +1504,7 @@ let check_static_member_intersection
     MemberNameMap.fold (check_single_member child_member_kind) map []
   in
   let on_error ~member_name ~static_elem ~instance_elem ~kind =
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
     @@ Typing_error.(
          primary
          @@ Primary.Static_instance_intersection
@@ -1624,7 +1634,7 @@ let check_constructors env parent_class class_ psubst on_error =
       | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
       | (Some parent_cstr, None) ->
         let (lazy pos) = parent_cstr.ce_pos in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             apply_reasons ~on_error @@ Secondary.Missing_constructor pos);
         env
@@ -1680,7 +1690,7 @@ let tconst_subsumption
   match (parent_typeconst.ttc_kind, child_typeconst.ttc_kind) with
   | ( TCAbstract { atc_default = Some _; _ },
       TCAbstract { atc_default = None; _ } ) ->
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
         @@ Secondary.Override_no_default_typeconst { pos; parent_pos });
@@ -1689,7 +1699,7 @@ let tconst_subsumption
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See typecheck/tconst/subsume_tconst5.php test case for example. *)
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
       Typing_error.(
         assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
         @@ Secondary.Abstract_concrete_override
@@ -1756,7 +1766,7 @@ let tconst_subsumption
             check_cstrs Reason.URsubsume_tconst_cstr env p_super_opt c_super_opt
           in
           let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env
         | TCConcrete { tc_type = c_t } ->
           let (env, e1) =
@@ -1766,7 +1776,7 @@ let tconst_subsumption
             check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
           in
           let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
           env
       end
       | TCConcrete _ ->
@@ -1778,7 +1788,7 @@ let tconst_subsumption
                 (Env.get_tcopt env)
               && not inherited
             then
-              Errors.add_typing_error
+              Typing_error_utils.add_typing_error
                 Typing_error.(
                   assert_in_current_decl
                     ~ctx:(Env.get_current_decl_and_file env)
@@ -1798,7 +1808,7 @@ let tconst_subsumption
       | (TCAbstract { atc_default = Some ty; _ }, (tp_pos, true))
       | (TCConcrete { tc_type = ty }, (tp_pos, true)) ->
         let emit_error pos ty_info =
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary
               @@ Primary.Invalid_enforceable_type
@@ -1858,7 +1868,7 @@ let tconst_subsumption
            (opt_type__LEGACY child_typeconst)
            ~f:(check env)
     in
-    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
     env
 
 let check_abstract_typeconst_in_concrete_class env (class_pos, class_) tconst =
@@ -1874,7 +1884,7 @@ let check_abstract_typeconst_in_concrete_class env (class_pos, class_) tconst =
              ~classish:(Cls.name class_)
              ~ancestor:tconst.ttc_origin)
       in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Implement_abstract
@@ -1978,7 +1988,8 @@ let check_typeconst_override
               parent_origin = parent_tconst.ttc_origin;
             }
         in
-        Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
+        Typing_error_utils.add_typing_error
+        @@ Typing_error.(apply_reasons ~on_error err)
     | _ -> ());
     env
 
@@ -2217,7 +2228,7 @@ let check_no_conflicting_inherited_concrete_constants name constants class_pos =
               definitions;
         }
     in
-    Errors.add_typing_error (Typing_error.primary err)
+    Typing_error_utils.add_typing_error (Typing_error.primary err)
 
 (* When a class inherits a concrete type constant from two different points in its hierarchy
  * (e.g. a parent class and an interface) HHVM will fail to load the class, and the flag
@@ -2260,7 +2271,7 @@ let check_no_conflicting_inherited_concrete_typeconsts
               definitions;
         }
     in
-    Errors.add_typing_error (Typing_error.primary err)
+    Typing_error_utils.add_typing_error (Typing_error.primary err)
 
 let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
   let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
@@ -2372,7 +2383,7 @@ let check_class_extends_parents_constants
                        quickfixes = [];
                      })
             in
-            Errors.add_typing_error err;
+            Typing_error_utils.add_typing_error err;
             env)
         inherited
         env)
@@ -2474,7 +2485,7 @@ let check_class_extends_parents_typeconsts
                        quickfixes = [];
                      })
             in
-            Errors.add_typing_error err;
+            Typing_error_utils.add_typing_error err;
             env)
         inherited
         env)
@@ -2552,7 +2563,8 @@ let merge_member_maps
       SMap.keys errors_per_origin
       |> minimum_classes env
       |> List.iter ~f:(fun origin ->
-             SMap.find origin errors_per_origin |> Errors.add_typing_error))
+             SMap.find origin errors_per_origin
+             |> Typing_error_utils.add_typing_error))
     !errors_per_diamond;
   members
 
@@ -2589,7 +2601,7 @@ let check_consts_are_not_abstract
   List.iter consts ~f:(fun const ->
       match const.Aast.cc_kind with
       | Aast.CCAbstract _ ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Abstract_member_in_concrete_class
@@ -2606,7 +2618,7 @@ let check_typeconsts_are_not_abstract ~is_final ~class_name_pos typeconsts =
   List.iter typeconsts ~f:(fun tc ->
       match tc.Aast.c_tconst_kind with
       | Aast.TCAbstract _ ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Abstract_member_in_concrete_class
@@ -2623,7 +2635,7 @@ let check_properties_are_not_abstract
     ~is_final ~class_name_pos (properties : Nast.class_var list) =
   List.iter properties ~f:(fun property ->
       if property.Aast.cv_abstract then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Abstract_member_in_concrete_class
@@ -2639,7 +2651,7 @@ let check_methods_are_not_abstract
     ~is_final ~class_name_pos (methods : Nast.method_ list) =
   List.iter methods ~f:(fun (method_ : (unit, unit) Aast.method_) ->
       if method_.Aast.m_abstract then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Abstract_member_in_concrete_class

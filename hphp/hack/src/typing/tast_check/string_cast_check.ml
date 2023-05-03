@@ -70,7 +70,7 @@ let handler =
       | Cast ((_, Hprim Tstring), te) ->
         let (ty, _, _) = te in
         if not (is_stringish env ty) then
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary
               @@ Primary.String_cast

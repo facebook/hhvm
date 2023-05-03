@@ -195,7 +195,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     let ((env, ty_err_opt), locl_ty) =
       TUtils.localize_no_subst env ~ignore_errors:true decl_ty
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->
       (match Env.get_class env (snd cls_name) with
@@ -211,12 +211,12 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
                   let ((env, ty_err1), cstr_ty) =
                     TUtils.localize ~ety_env env cstr_ty
                   in
-                  Option.iter ~f:Errors.add_typing_error ty_err1;
+                  Option.iter ~f:Typing_error_utils.add_typing_error ty_err1;
                   let (_env, ty_err2) =
                     TGenConstraint.check_constraint env ck ty ~cstr_ty
                     @@ report_constraint ty cls_name x
                   in
-                  Option.iter ty_err2 ~f:Errors.add_typing_error)
+                  Option.iter ty_err2 ~f:Typing_error_utils.add_typing_error)
           end
           tc_tparams
           tyl
@@ -254,7 +254,7 @@ let check_class_usable_as_hk_type pos class_info =
 let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
   let actual_kind = Simple.description_of_kind actual in
   let expected_kind = Simple.description_of_kind expected in
-  Errors.add_typing_error
+  Typing_error_utils.add_typing_error
   @@ Typing_error.(
        primary
        @@ Primary.Kind_mismatch
@@ -302,7 +302,7 @@ module Simple = struct
     let act_len = List.length tyargs in
     let arity_mistmatch_okay = Int.equal act_len 0 && allow_missing_targs in
     if Int.( <> ) exp_len act_len && not arity_mistmatch_okay then
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Type_arity_mismatch
@@ -410,7 +410,7 @@ module Simple = struct
       match Env.get_class_or_typedef env cid with
       | Some (Env.ClassResult class_info) ->
         Option.iter
-          ~f:Errors.add_typing_error
+          ~f:Typing_error_utils.add_typing_error
           (Typing_visibility.check_top_level_access
              ~in_signature
              ~use_pos
@@ -422,7 +422,7 @@ module Simple = struct
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Some (Env.TypedefResult typedef) ->
         Option.iter
-          ~f:Errors.add_typing_error
+          ~f:Typing_error_utils.add_typing_error
           (Typing_visibility.check_top_level_access
              ~in_signature
              ~use_pos
@@ -441,7 +441,7 @@ module Simple = struct
       (match Env.get_typedef env name with
       | Some typedef ->
         Option.iter
-          ~f:Errors.add_typing_error
+          ~f:Typing_error_utils.add_typing_error
           (Typing_visibility.check_top_level_access
              ~in_signature
              ~use_pos

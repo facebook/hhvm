@@ -91,7 +91,7 @@ let duplicated_used_traits c =
     ~f:(fun ~key ~data ->
       if List.length data > 1 then
         let (pos, class_name) = c.c_name in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Trait_reuse_inside_class

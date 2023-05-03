@@ -38,6 +38,8 @@ type per_file_errors
 (** The type of collections of errors *)
 type t [@@deriving eq, show]
 
+val iter : t -> f:(error -> unit) -> unit
+
 module ErrorSet : Caml.Set.S with type elt := error
 
 module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
@@ -69,18 +71,6 @@ val add_parsing_error : Parsing_error.t -> unit
 
 val add_nast_check_error : Nast_check_error.t -> unit
 
-val apply_error_from_reasons_callback :
-  ?code:Typing.t ->
-  ?claim:Pos.t Message.t Lazy.t ->
-  ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-  ?quickfixes:Pos.t Quickfix.t list ->
-  Typing_error.Reasons_callback.t ->
-  unit
-
-val add_typing_error : Typing_error.t -> unit
-
-val apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit
-
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
@@ -95,6 +85,10 @@ val is_hh_fixme : (Pos.t -> int -> bool) ref
 val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 
 val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
+
+val get_current_span : unit -> Pos.t
+
+val fixme_present : Pos.t -> int -> bool
 
 val code_agnostic_fixme : bool ref
 
@@ -240,14 +234,6 @@ val internal_error : Pos.t -> string -> unit
 val unimplemented_feature : Pos.t -> string -> unit
 
 val experimental_feature : Pos.t -> string -> unit
-
-val ambiguous_inheritance :
-  Pos_or_decl.t ->
-  string ->
-  string ->
-  (Pos.t, Pos_or_decl.t) User_error.t ->
-  Typing_error.Reasons_callback.t ->
-  unit
 
 val method_is_not_dynamically_callable :
   Pos.t ->

@@ -213,7 +213,7 @@ let check_params paraml =
             to check. We've already given a parse error if the variadic
             parameter is not last. *)
       else if seen_default && Option.is_none param.param_expr then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(primary @@ Primary.Previous_default param.param_pos)
       (* We've seen at least one required parameter, and there's an
           optional parameter after it.  Given an error, and then stop looking

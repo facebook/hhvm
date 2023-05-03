@@ -139,7 +139,7 @@ let test_get_sorted_error_list () =
   let key_pos2 = Pos.make_from (create_path "K2") |> Pos_or_decl.of_raw_pos in
   let (errors, ()) =
     Errors.do_with_context file_with_errors Errors.Typing (fun () ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_arraykey
@@ -151,7 +151,7 @@ let test_get_sorted_error_list () =
                    key_pos = key_pos2;
                    key_ty_name = lazy "K2_Type";
                  });
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_arraykey
@@ -164,7 +164,7 @@ let test_get_sorted_error_list () =
                    key_ty_name = lazy "K1_Type";
                  });
         error_in "FileWithErrors.php";
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_arraykey
@@ -176,7 +176,7 @@ let test_get_sorted_error_list () =
                    key_pos = key_pos2;
                    key_ty_name = lazy "K2_Type";
                  });
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Invalid_arraykey
@@ -293,7 +293,7 @@ let test_phases () =
             @@ Parsing_error.Parsing_error
                  { pos = Pos.make_from a_path; msg = ""; quickfixes = [] });
         Errors.run_in_context a_path Errors.Typing (fun () ->
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 primary
                 @@ Primary.Generic_unify

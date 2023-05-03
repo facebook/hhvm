@@ -77,7 +77,7 @@ let check_property_sound_for_dynamic_write
       | Some ty -> ((env, None), ty)
       | None -> Typing_phase.localize_no_subst ~ignore_errors:true env decl_ty
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     if
       not
         (Typing_utils.is_sub_type_for_union

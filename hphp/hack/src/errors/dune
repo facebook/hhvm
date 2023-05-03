@@ -48,7 +48,6 @@
    phase_error
    quickfix_ffp
    raw_error_formatter
-   typing_error
    error_message_sentinel)
  (libraries
   core_kernel

@@ -93,7 +93,7 @@ let subtype_method_decl
       ft_super.ft_tparams
       ft_super.ft_where_constraints
   in
-  Option.iter ~f:Errors.add_typing_error ty_err1;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err1;
   (* Reified type parameters should match those in the overridden method (TODO).
    * For non-reified parameters, we allow a generic method to override
    * a method whose signature is an instance of the generic type. For example,
@@ -141,7 +141,7 @@ let subtype_method_decl
       non_reified_tparams
       []
   in
-  Option.iter ~f:Errors.add_typing_error ty_err2;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err2;
   let tvarl = List.map ~f:fst explicit_targs in
   let substs = Decl_subst.make_locl non_reified_tparams tvarl in
   let (env, ty_err3) =
@@ -151,7 +151,7 @@ let subtype_method_decl
       env
       ft_sub.ft_tparams
   in
-  Option.iter ~f:Errors.add_typing_error ty_err3;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err3;
 
   (* Localize the function type for the method in the subtype.
    * Non-reified generic method parameters will be replaced by the type
@@ -159,14 +159,14 @@ let subtype_method_decl
   let ((env, ty_err4), locl_ft_sub) =
     Phase.localize_ft ~ety_env:{ ety_env with substs } ~def_pos:p_sub env ft_sub
   in
-  Option.iter ~f:Errors.add_typing_error ty_err4;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err4;
   (* Localize the function type for the method in the supertype.
    * Generic method parameters will be left alone.
    *)
   let ((env, ty_err5), locl_ft_super) =
     Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
   in
-  Option.iter ~f:Errors.add_typing_error ty_err5;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err5;
   let add_where_constraints env (cstrl : locl_where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
         Typing_subtype.add_constraint env ck ty1 ty2 (Some on_error))
@@ -208,7 +208,7 @@ let subtype_method_decl
       ft_sub.ft_where_constraints
   in
 
-  Option.iter ~f:Errors.add_typing_error ty_err6;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err6;
   (* Finally apply ordinary contra/co subtyping on the function types *)
   let (env, ty_err7) =
     subtype_funs
@@ -221,8 +221,8 @@ let subtype_method_decl
       locl_ft_super
       env
   in
-  Option.iter ~f:Errors.add_typing_error ty_err7;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err7;
   let (env, ty_err8) = Typing_solver.close_tyvars_and_solve env in
-  Option.iter ~f:Errors.add_typing_error ty_err8;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err8;
   (* Restore the type parameter environment *)
   Env.env_with_tpenv (Env.env_with_global_tpenv env old_global_tpenv) old_tpenv

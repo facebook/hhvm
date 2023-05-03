@@ -58,7 +58,7 @@ let handler =
       let (pos, c_name) = c.c_name in
       match find_cycle env c_name with
       | Some stack ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(primary @@ Primary.Cyclic_class_def { pos; stack })
       | None -> ()
   end

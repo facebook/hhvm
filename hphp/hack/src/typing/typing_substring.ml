@@ -53,7 +53,7 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
 
   let ty_mismatch = Option.map e2 ~f:(Fn.const (ty, stringlike)) in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   (env, ty_mismatch)
 
 let sub_string (p : Pos.t) (env : env) (ty : locl_ty) : env =

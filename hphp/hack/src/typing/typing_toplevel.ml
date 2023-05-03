@@ -109,7 +109,7 @@ let fun_def ctx fd :
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Env.get_support_dynamic_type env
   in
-  List.iter ~f:Errors.add_typing_error
+  List.iter ~f:Typing_error_utils.add_typing_error
   @@ Typing_type_wellformedness.fun_def env fd;
   Typing_env.make_depend_on_current_module env;
   let (env, ty_err_opt) =
@@ -119,7 +119,7 @@ let fun_def ctx fd :
       fd.fd_tparams
       fd.fd_where_constraints
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   let env = Env.set_fn_kind env f.f_fun_kind in
   let (return_decl_ty, params_decl_ty) =
     merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret decl_header env
@@ -201,7 +201,7 @@ let fun_def ctx fd :
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
     | Some _ -> ()
   end;
@@ -285,7 +285,7 @@ let fun_def ctx fd :
   in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   (fundefs, (pos, global_inference_env))
 
 let class_def = Typing_class.class_def
@@ -296,7 +296,7 @@ let gconst_def ctx cst =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
-  List.iter ~f:Errors.add_typing_error
+  List.iter ~f:Typing_error_utils.add_typing_error
   @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, (env, ty_err_opt)) =
     let ((_, _, init) as value) = cst.cst_value in
@@ -344,7 +344,7 @@ let gconst_def ctx cst =
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, (env, None))
   in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
   {
     Aast.cst_annotation = Env.save (Env.get_tpenv env) env;
     Aast.cst_mode = cst.cst_mode;

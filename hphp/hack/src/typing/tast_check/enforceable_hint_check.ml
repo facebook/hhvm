@@ -25,7 +25,7 @@ let handler =
           (Tast_env.tast_env_as_typing_env env)
           hint
           (fun pos reasons ->
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 primary
                 @@ Primary.Invalid_is_as_expression_hint { op; pos; reasons }))

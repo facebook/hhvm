@@ -39,7 +39,7 @@ let handler =
                     (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
                     ty
                     (fun pos ty_info ->
-                      Errors.add_typing_error
+                      Typing_error_utils.add_typing_error
                         Typing_error.(
                           primary
                           @@ Primary.Invalid_enforceable_type

@@ -80,7 +80,7 @@ let type_does_not_require_init env ty_opt =
     let ((env, ty_err_opt), ty) =
       Typing_phase.localize_no_subst env ~ignore_errors:true ty
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     let null = Typing_make_type.null Typing_reason.Rnone in
     Typing_subtype.is_sub_type env null ty
     ||
@@ -281,7 +281,7 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
                  class_name
                  member_origin
                  prop_name);
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary
               @@ Primary.Internal_error
@@ -478,7 +478,7 @@ and expr_ env acc p e =
   | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, Is_prop) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       let (pos, member_name) = v in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(primary @@ Primary.Read_before_write { pos; member_name });
       acc
     ) else if
@@ -491,7 +491,7 @@ and expr_ env acc p e =
          constructor, but we haven't called the parent constructor
          yet. *)
       let (pos, member_name) = v in
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(primary @@ Primary.Read_before_write { pos; member_name });
       acc
     ) else
@@ -652,7 +652,7 @@ let class_ tenv c =
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary @@ Primary.Lateinit_with_default (fst cv.cv_id))
         | None when cv.cv_is_static ->
@@ -668,7 +668,7 @@ let class_ tenv c =
           then
             ()
           else
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 wellformedness
                 @@ Primary.Wellformedness.Missing_assign (fst cv.cv_id))

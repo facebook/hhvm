@@ -15,7 +15,7 @@ module Cls = Decl_provider.Class
 
 let error_inherited_base member_type base_name parent_name base_elt parent_elt :
     unit =
-  Errors.add_typing_error
+  Typing_error_utils.add_typing_error
     Typing_error.(
       primary
       @@ Primary.Inherited_class_member_with_different_case
@@ -49,7 +49,7 @@ let check_inheritance_case
       error_inherited_base member_type prev_name name prev_elt elt
     (* Otherwise, this class inherited two methods that differ only by case *)
     | (class1, class2) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Multiple_inherited_class_member_with_different_case

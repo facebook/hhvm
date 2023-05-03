@@ -631,7 +631,7 @@ let shape_field_name_with_ty_err env (_, p, field) =
 let shape_field_name env field =
   let (res, error) = shape_field_name_with_ty_err env field in
   (match error with
-  | Some error -> Errors.add_typing_error error
+  | Some error -> Typing_error_utils.add_typing_error error
   | None -> ());
   res
 

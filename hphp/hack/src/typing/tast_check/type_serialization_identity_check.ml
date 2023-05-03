@@ -116,7 +116,7 @@ let handler =
           let ty = strip_ty ty in
           let deserialized_ty = strip_ty deserialized_ty in
           if not (ty_equal ty deserialized_ty) then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
               Typing_error.(
                 primary
                 @@ Primary.Unserializable_type
@@ -133,7 +133,7 @@ let handler =
                      })
         | Error (Not_supported _) -> ()
         | Error (Wrong_phase message) ->
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -147,7 +147,7 @@ let handler =
                          (Tast_env.ty_to_json env ty |> Hh_json.json_to_string);
                    })
         | Error (Deserialization_error message) ->
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -162,7 +162,7 @@ let handler =
                    })
       with
       | e ->
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(
             primary
             @@ Primary.Unserializable_type

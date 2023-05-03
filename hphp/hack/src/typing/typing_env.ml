@@ -1313,7 +1313,7 @@ let set_local_expr_id env x new_eid =
     | Some (type_, pos, eid)
       when not (Typing_local_types.equal_expression_id eid new_eid) ->
       if Ident.is_immutable eid then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
           Typing_error.(primary @@ Primary.Immutable_local pos);
       let local = (type_, pos, new_eid) in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in

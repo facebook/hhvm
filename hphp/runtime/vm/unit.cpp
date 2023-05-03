@@ -429,7 +429,7 @@ void Unit::logTearing(int64_t nsecs) {
   assertx(RO::EvalSampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
-  auto repoRoot = std::filesystem::path(repoOptions->path()).parent_path();
+  auto repoRoot = repoOptions->dir();
 
   assertx(!isSystemLib());
   StructuredLogEntry ent;

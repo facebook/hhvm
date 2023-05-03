@@ -374,11 +374,8 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
 
-  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
-    return boost::starts_with(
-      std::filesystem::path{p2},
-      std::filesystem::path{p1}.parent_path()
-    );
+  auto const isParentOf = [] (const std::filesystem::path& p1, const std::string& p2) {
+    return boost::starts_with(std::filesystem::path{p2}, p1.parent_path());
   };
 
   // Fast path: we have an active request and it has cached a RepoOptions
@@ -556,7 +553,7 @@ AUTOLOADFLAGS();
              "2b024904a67752dc492e64ad21ae88b707464bd1");
 
   filterNamespaces();
-  if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
+  if (!m_path.empty()) m_repo = std::filesystem::canonical(m_path.parent_path());
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
   calcCacheKey();
 }

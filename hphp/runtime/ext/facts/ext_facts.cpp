@@ -98,7 +98,7 @@ struct RepoOptionsParseExc : public std::runtime_error {
  * be the root of the repository we're autoloading.
  */
 fs::path getRepoRoot(const RepoOptions& options) {
-  return fs::canonical(fs::path{options.path()}.parent_path());
+  return options.dir();
 }
 
 std::string getCacheBreakerSchemaHash(
@@ -743,7 +743,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
     if (!requestOptions || requestOptions->path().empty()) {
       return std::nullopt;
     }
-    return fs::path{requestOptions->path()}.parent_path() / maybeRoot;
+    return requestOptions->dir() / maybeRoot;
   }();
   if (!root) {
     XLOG(ERR) << "Error resolving " << rootStr.slice();

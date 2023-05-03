@@ -1187,11 +1187,11 @@ void ExecutionContext::onLoadWithOptions(
   if (m_requestOptions != opts) {
     // The data buffer has to stay alive for the call to raise_error.
     auto const path_str = opts.path();
-    auto const path = path_str.empty() ? "{default options}" : path_str.data();
+    auto const path = path_str.empty() ? "{default options}" : path_str.c_str();
     raise_error(
       "Attempting to load file %s with incompatible parser settings from %s, "
       "this request is using parser settings from %s",
-      f, path, m_requestOptions->path().data()
+      f, path, m_requestOptions->path().c_str()
     );
   }
 }

@@ -1773,7 +1773,7 @@ static int execute_program_impl(int argc, char** argv) {
         return HPHP_EXIT_FAILURE;
       }
       auto const& opts = RepoOptions::forFile(scriptFilePath);
-      cout << opts.path() << ": "
+      cout << opts.path().string() << ": "
            << opts.flags().cacheKeySha1().toString() << "\n";
       return 0;
     }

@@ -79,8 +79,7 @@ FactsStore* getFactsForRequest() {
     map->ensureUpdated();
     return map;
   } catch (const std::exception& e) {
-    auto repoRoot =
-      std::filesystem::canonical(repoOptions->path()).parent_path();
+    auto repoRoot = repoOptions->dir();
     Logger::FInfo(
         "Failed to update native autoloader, not natively autoloading {}. {}\n",
         repoRoot.native(),

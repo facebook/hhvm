@@ -221,7 +221,7 @@ struct RepoOptions {
 
   const RepoOptionsFlags& flags() const { return m_flags; }
   const PackageInfo& packageInfo() const { return flags().packageInfo(); }
-  const std::string& path() const { return m_path; }
+  const std::filesystem::path& path() const { return m_path; }
   const RepoOptionStats& stat() const { return m_stat; }
 
   const std::filesystem::path& dir() const { return m_repo; }
@@ -248,7 +248,7 @@ private:
 
   RepoOptionsFlags m_flags;
 
-  std::string m_path;
+  std::filesystem::path m_path;
   RepoOptionStats m_stat;
 
   std::filesystem::path m_repo;

@@ -518,8 +518,9 @@ let event_to_string (event : event) : string =
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
   | Errors_file None -> "Errors_file(anomalous end-of-stream)"
-  | Errors_file (Some (Ok (errors_by_file, _timestamp))) -> begin
-    match Relative_path.Map.choose_opt errors_by_file with
+  | Errors_file (Some (Ok (ServerProgress.Errors { errors; timestamp = _ }))) ->
+  begin
+    match Relative_path.Map.choose_opt errors with
     | None -> "Errors_file(anomalous empty report)"
     | Some (file, errors_in_file) ->
       Printf.sprintf
@@ -4383,7 +4384,7 @@ let handle_errors_file_item
         ()
     end;
     Lwt.return_none
-  | Some (Ok (errors, timestamp)) ->
+  | Some (Ok (ServerProgress.Errors { errors; timestamp })) ->
     let lenv =
       validate_error_item_TEMPORARY lenv ide_service errors ~start_time
     in

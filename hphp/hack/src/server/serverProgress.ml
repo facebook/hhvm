@@ -195,6 +195,17 @@ type errors_file_error =
   | Build_id_mismatch
 [@@deriving show { with_path = false }]
 
+type errors_file_item =
+  | Errors of {
+      errors: Errors.finalized_error list Relative_path.Map.t;
+          (** we convert to finalized_error (i.e. turn paths absolute) before writing in the file,
+            because consumers don't know hhi paths. As for the [Relative_path.Map.t], it
+            is guaranteed to only have root-relative paths. (we don't have a type to indicate
+            "I am the suffix of a root-relative path" so this is the best we can do.) *)
+      timestamp: float;
+          (** the errors were detected by reading the files not later than this time. *)
+    }
+
 let is_complete (e : errors_file_error) : bool =
   match e with
   | Complete _ -> true
@@ -218,7 +229,7 @@ module ErrorsFile = struct
 
   The first two messages are [VersionHeader] followed by [Header], and these
   always exist (they are placed atomically at error-file creation by
-  [ErrorsWrite.new_empty_file]). Then there are zero or more [Report], each
+  [ErrorsWrite.new_empty_file]). Then there are zero or more [Item], each
   one appended by a call to [ErrorsWrite.report]. Finally, there may be an [End],
   appended by a call to [ErrorsWrite.complete] or [unlink_after_stopped] or [new_empty_file].
 
@@ -243,15 +254,7 @@ module ErrorsFile = struct
         clock: Watchman.clock option;
             (** the watchclock at which the typecheck began, i.e. reflecting all file-changes up to here *)
       }
-    | Report of {
-        errors: Errors.finalized_error list Relative_path.Map.t;
-            (** we convert to finalized_error (i.e. turn paths absolute) before writing in the file,
-            because consumers don't know hhi paths. As for the [Relative_path.Map.t], it
-            is guaranteed to only have root-relative paths. (we don't have a type to indicate
-            "I am the suffix of a root-relative path" so this is the best we can do.) *)
-        timestamp: float;
-            (** the errors were detected by reading the files not later than this time. *)
-      }
+    | Item of errors_file_item
     | End of {
         error: errors_file_error;
         timestamp: float;
@@ -482,7 +485,7 @@ module ErrorsWrite = struct
         in
         ErrorsFile.write_message
           fd
-          (ErrorsFile.Report { timestamp = Unix.gettimeofday (); errors });
+          (ErrorsFile.Item (Errors { timestamp = Unix.gettimeofday (); errors }));
         write_state := Reporting (fd, n)
     end
 
@@ -548,10 +551,7 @@ module ErrorsRead = struct
     clock: Watchman.clock option;
   }
 
-  type read_result =
-    ( Errors.finalized_error list Relative_path.Map.t * float,
-      errors_file_error * log_message )
-    result
+  type read_result = (errors_file_item, errors_file_error * log_message) result
 
   let openfile (fd : Unix.file_descr) :
       (open_success, errors_file_error * log_message) result =
@@ -588,6 +588,6 @@ module ErrorsRead = struct
     | ErrorsFile.Header _ ->
       failwith
         "do ServerProgress.ErrorsRead.openfile before read_next_error or ServerProgressLwt.watch_errors_file"
-    | ErrorsFile.Report { errors; timestamp } -> Ok (errors, timestamp)
+    | ErrorsFile.Item item -> Ok item
     | ErrorsFile.End { error; log_message; _ } -> Error (error, log_message)
 end

@@ -178,6 +178,13 @@ type errors_file_error =
       (** The hh_server that produced these errors is incompatible with the current binary. *)
 [@@deriving show]
 
+(** Each item that a consumer reads from the errors-file is one of these. *)
+type errors_file_item =
+  | Errors of {
+      errors: Errors.finalized_error list Relative_path.Map.t;
+      timestamp: float;
+    }
+
 val is_complete : errors_file_error -> bool
 
 val enable_error_production : bool -> unit
@@ -236,10 +243,7 @@ module ErrorsRead : sig
   (** This is the return type for [read_next_errors]. In case of success, it includes
   a timestamp when they were reported. The paths in the [Relative_path.Map.t] are guaranteed
   to all be root-relative. (it doesn't even make sense to report errors on other files...) *)
-  type read_result =
-    ( Errors.finalized_error list Relative_path.Map.t * float,
-      errors_file_error * log_message )
-    result
+  type read_result = (errors_file_item, errors_file_error * log_message) result
 
   (** Attempt to get the next batch of errors. It returns based on a queue
   of what the server was written to the errors file...

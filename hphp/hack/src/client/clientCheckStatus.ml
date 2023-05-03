@@ -143,7 +143,7 @@ let go_streaming_on_fd
       failwith "Expected end_sentinel before end of stream"
     | Some (Error (end_sentinel, log_message)) ->
       Lwt.return (displayed_count, end_sentinel, log_message)
-    | Some (Ok (errors, _timestamp)) ->
+    | Some (Ok (ServerProgress.Errors { errors; timestamp = _ })) ->
       first_error_time :=
         Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
       (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)

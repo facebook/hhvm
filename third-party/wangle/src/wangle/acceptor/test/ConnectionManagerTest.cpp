@@ -420,36 +420,6 @@ TEST_F(ConnectionManagerTest, testDropIdle) {
   cm_->dropIdleConnections(conns_.size());
 }
 
-TEST_F(ConnectionManagerTest, testDropActive) {
-  for (const auto& conn : conns_) {
-    // Set everyone to be idle for 100ms
-    EXPECT_CALL(*conn, getLastActivityElapsedTime())
-        .WillRepeatedly(Return(std::chrono::milliseconds(100)));
-  }
-
-  // Mark the first half of the connections idle
-  for (size_t i = 0; i < conns_.size(); i++) {
-    if (i < conns_.size() / 2) {
-      cm_->onDeactivated(*conns_[i]);
-    } else {
-      cm_->onActivated(*conns_[i]);
-    }
-  }
-  // remove the first idle conn
-  cm_->removeConnection(conns_[1].get());
-
-  InSequence enforceOrder;
-
-  // Expect all active connections to be dropped
-  for (size_t i = conns_.size() / 2; i < conns_.size(); i++) {
-    EXPECT_CALL(*conns_[i], dropConnection(_))
-        .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_[i].get());
-        }));
-  }
-  cm_->dropActiveConnections(conns_.size(), std::chrono::milliseconds(50));
-}
-
 TEST_F(ConnectionManagerTest, testAddDuringShutdown) {
   auto extraConn = MockConnection::makeUnique(this);
   InSequence enforceOrder;

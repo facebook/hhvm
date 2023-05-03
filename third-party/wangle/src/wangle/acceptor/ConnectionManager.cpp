@@ -405,31 +405,4 @@ size_t ConnectionManager::dropIdleConnections(size_t num) {
   return count;
 }
 
-/**
- * Note that the active ones are organized in the increasing reported activity
- * time order
- */
-size_t ConnectionManager::dropActiveConnections(
-    size_t num,
-    std::chrono::milliseconds inActivityThresholdTimeMs) {
-  VLOG(4) << "attempt to drop " << num << " active connections";
-  size_t count = 0;
-  while (count < num && conns_.begin() != idleIterator_) {
-    auto it = --idleIterator_;
-    if (!it->getLastActivityElapsedTime() ||
-        *it->getLastActivityElapsedTime() <= inActivityThresholdTimeMs) {
-      VLOG(4) << "conn's idletime: "
-              << it->getLastActivityElapsedTime()->count()
-              << ", in-activity threshold: "
-              << inActivityThresholdTimeMs.count() << ", dropped " << count
-              << "/" << num;
-      return count;
-    }
-    ManagedConnection& conn = *it;
-    conn.dropConnection();
-    count++;
-  }
-  return count;
-}
-
 } // namespace wangle

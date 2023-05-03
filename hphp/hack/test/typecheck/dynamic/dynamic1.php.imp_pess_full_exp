@@ -1,0 +1,122 @@
+File "dynamic1.php", line 13, characters 3-13:
+  dynamic
+File "dynamic1.php", line 15, characters 3-13:
+  dynamic
+File "dynamic1.php", line 17, characters 3-13:
+  dynamic
+File "dynamic1.php", line 19, characters 3-13:
+  dynamic
+File "dynamic1.php", line 21, characters 3-13:
+  dynamic
+File "dynamic1.php", line 23, characters 3-13:
+  dynamic
+File "dynamic1.php", line 25, characters 3-14:
+  classname<dynamic>
+File "dynamic1.php", line 27, characters 3-13:
+  dynamic
+File "dynamic1.php", line 29, characters 3-13:
+  dynamic
+File "dynamic1.php", line 31, characters 3-13:
+  dynamic
+File "dynamic1.php", line 33, characters 3-13:
+  dynamic
+File "dynamic1.php", line 35, characters 3-13:
+  dynamic
+File "dynamic1.php", line 37, characters 3-13:
+  ~int
+File "dynamic1.php", line 39, characters 3-13:
+  ~float
+File "dynamic1.php", line 41, characters 3-13:
+  dynamic
+File "dynamic1.php", line 43, characters 3-13:
+  dynamic
+File "dynamic1.php", line 45, characters 3-13:
+  dynamic
+File "dynamic1.php", line 47, characters 3-13:
+  dynamic
+File "dynamic1.php", line 49, characters 3-13:
+  (dynamic & string)
+File "dynamic1.php", line 51, characters 3-13:
+  dynamic
+File "dynamic1.php", line 54, characters 3-13:
+  dynamic
+File "dynamic1.php", line 56, characters 3-13:
+  dynamic
+File "dynamic1.php", line 58, characters 3-13:
+  dynamic
+File "dynamic1.php", line 60, characters 3-13:
+  dynamic
+File "dynamic1.php", line 61, characters 3-13:
+  dynamic
+File "dynamic1.php", line 63, characters 3-13:
+  dynamic
+File "dynamic1.php", line 65, characters 3-13:
+  dynamic
+File "dynamic1.php", line 66, characters 3-13:
+  dynamic
+File "dynamic1.php", line 67, characters 3-13:
+  dynamic
+File "dynamic1.php", line 71, characters 3-13:
+  dynamic
+File "dynamic1.php", line 13, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 15, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 17, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 19, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 21, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 23, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 25, characters 3-14:[2]
+  dynamic
+File "dynamic1.php", line 27, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 29, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 31, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 33, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 35, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 37, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 39, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 41, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 43, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 45, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 47, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 49, characters 3-13:[2]
+  string
+File "dynamic1.php", line 51, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 54, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 56, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 58, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 60, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 61, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 63, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 65, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 66, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 67, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 71, characters 3-13:[2]
+  dynamic
+File "dynamic1.php", line 11, characters 68-69:
+Was expecting a type hint (Typing[4032])

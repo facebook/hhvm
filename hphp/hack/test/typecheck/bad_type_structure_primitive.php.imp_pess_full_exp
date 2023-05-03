@@ -1,0 +1,140 @@
+File "bad_type_structure_primitive.php", line 4, characters 3-22:
+  TypeStructureKind
+File "bad_type_structure_primitive.php", line 5, characters 3-23:
+  ?string
+File "bad_type_structure_primitive.php", line 6, characters 3-22:
+  ?string
+File "bad_type_structure_primitive.php", line 9, characters 3-27:
+  _
+File "bad_type_structure_primitive.php", line 10, characters 3-26:
+  _
+File "bad_type_structure_primitive.php", line 11, characters 3-28:
+  _
+File "bad_type_structure_primitive.php", line 12, characters 3-24:
+  _
+File "bad_type_structure_primitive.php", line 13, characters 3-29:
+  _
+File "bad_type_structure_primitive.php", line 14, characters 3-29:
+  _
+File "bad_type_structure_primitive.php", line 15, characters 3-31:
+  _
+File "bad_type_structure_primitive.php", line 18, characters 3-22:
+  TypeStructureKind
+File "bad_type_structure_primitive.php", line 4, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 5, characters 3-23:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 6, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 9, characters 3-27:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 10, characters 3-26:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 11, characters 3-28:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 12, characters 3-24:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 13, characters 3-29:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 14, characters 3-29:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 15, characters 3-31:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 18, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 22, characters 3-22:
+  TypeStructureKind
+File "bad_type_structure_primitive.php", line 23, characters 3-23:
+  ?string
+File "bad_type_structure_primitive.php", line 24, characters 3-22:
+  ?string
+File "bad_type_structure_primitive.php", line 27, characters 3-27:
+  _
+File "bad_type_structure_primitive.php", line 28, characters 3-26:
+  _
+File "bad_type_structure_primitive.php", line 29, characters 3-28:
+  _
+File "bad_type_structure_primitive.php", line 30, characters 3-24:
+  _
+File "bad_type_structure_primitive.php", line 31, characters 3-29:
+  _
+File "bad_type_structure_primitive.php", line 32, characters 3-29:
+  _
+File "bad_type_structure_primitive.php", line 33, characters 3-31:
+  ?vec<mixed>
+File "bad_type_structure_primitive.php", line 36, characters 3-22:
+  TypeStructureKind
+File "bad_type_structure_primitive.php", line 22, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 23, characters 3-23:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 24, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 27, characters 3-27:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 28, characters 3-26:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 29, characters 3-28:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 30, characters 3-24:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 31, characters 3-29:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 32, characters 3-29:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 33, characters 3-31:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 36, characters 3-22:[2]
+  dynamic
+File "bad_type_structure_primitive.php", line 9, characters 15-25:
+This shape doesn't have a field `classname` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 10, characters 15-24:
+This shape doesn't have a field `nullable` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 11, characters 15-26:
+This shape doesn't have a field `elem_types` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 12, characters 15-22:
+This shape doesn't have a field `fields` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 13, characters 15-27:
+This shape doesn't have a field `param_types` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 14, characters 15-27:
+This shape doesn't have a field `return_type` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 15, characters 15-29:
+This shape doesn't have a field `generic_types` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 27, characters 15-25:
+This shape doesn't have a field `classname` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 28, characters 15-24:
+This shape doesn't have a field `nullable` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 29, characters 15-26:
+This shape doesn't have a field `elem_types` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 30, characters 15-22:
+This shape doesn't have a field `fields` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 31, characters 15-27:
+This shape doesn't have a field `param_types` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here
+File "bad_type_structure_primitive.php", line 32, characters 15-27:
+This shape doesn't have a field `return_type` (Typing[4108])
+  File "typestructure.hhi", line 55, characters 31-621:
+  The shape is defined here

@@ -1,0 +1,12 @@
+File "cross_file.php--file2.php", line 4, characters 5-14:
+Invalid argument (Typing[4110])
+  File "cross_file.php--file1.php", line 3, characters 18-20:
+  Expected `int`
+  File "cross_file.php--file2.php", line 3, characters 18-23:
+  But got `string`
+File "cross_file.php--file2.php", line 4, characters 11-14:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "cross_file.php--file2.php", line 3, characters 18-23:
+  Expected `string`
+  File "cross_file.php--file1.php", line 3, characters 18-20:
+  But got `int`

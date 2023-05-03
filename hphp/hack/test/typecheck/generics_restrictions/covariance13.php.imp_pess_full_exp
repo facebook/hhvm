@@ -1,0 +1,21 @@
+File "covariance13.php", line 4, characters 24-24:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "covariance13.php", line 3, characters 14-14:
+  This is where the parameter was declared as covariant `+`
+  File "covariance13.php", line 4, characters 24-24:
+  Function parameters are contravariant
+File "covariance13.php", line 5, characters 39-39:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "covariance13.php", line 3, characters 14-14:
+  This is where the parameter was declared as covariant `+`
+  File "covariance13.php", line 5, characters 39-39:
+  This position is contravariant (-) because it is the composition of (+)(+)(-)
+The rest of the error messages decomposes the inference of the variance.
+Check out this link if you don't understand what this is about:
+http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
+  File "covariance13.php", line 5, characters 39-39:
+  (+) Function return types are covariant
+  File "covariance13.php", line 5, characters 27-40:
+  (+) This type parameter was declared as covariant (+) (cf 'HH\supportdyn')
+  File "covariance13.php", line 5, characters 27-40:
+  (-) Function parameters are contravariant

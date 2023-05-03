@@ -1,0 +1,12 @@
+File "assign_array_unresolved_bad2.php", line 15, characters 3-16:
+Invalid assignment (Typing[4110])
+  File "assign_array_unresolved_bad2.php", line 6, characters 15-17:
+  Expected `int`
+  File "assign_array_unresolved_bad2.php", line 8, characters 3-5:
+  But got `float`
+File "assign_array_unresolved_bad2.php", line 15, characters 3-16:
+Invalid assignment (Typing[4110])
+  File "assign_array_unresolved_bad2.php", line 7, characters 15-19:
+  Expected `float`
+  File "assign_array_unresolved_bad2.php", line 8, characters 3-5:
+  But got `int`

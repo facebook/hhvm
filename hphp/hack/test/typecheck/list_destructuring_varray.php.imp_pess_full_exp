@@ -1,0 +1,17 @@
+File "list_destructuring_varray.php", line 6, characters 3-13:
+  int
+File "list_destructuring_varray.php", line 7, characters 3-13:
+  int
+File "list_destructuring_varray.php", line 9, characters 3-13:
+  string
+File "list_destructuring_varray.php", line 10, characters 3-13:
+  string
+File "list_destructuring_varray.php", line 6, characters 3-13:[2]
+  dynamic
+File "list_destructuring_varray.php", line 7, characters 3-13:[2]
+  dynamic
+File "list_destructuring_varray.php", line 9, characters 3-13:[2]
+  dynamic
+File "list_destructuring_varray.php", line 10, characters 3-13:[2]
+  dynamic
+No errors

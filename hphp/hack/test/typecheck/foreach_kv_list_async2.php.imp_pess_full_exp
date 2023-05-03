@@ -1,0 +1,6 @@
+File "foreach_kv_list_async2.php", line 20, characters 9-10:
+Invalid argument (Typing[4110])
+  File "foreach_kv_list_async2.php", line 12, characters 14-19:
+  Expected `string`
+  File "foreach_kv_list_async2.php", line 14, characters 23-57:
+  But got `dynamic`

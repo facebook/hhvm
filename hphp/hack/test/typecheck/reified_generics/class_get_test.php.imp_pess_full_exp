@@ -1,0 +1,8 @@
+File "class_get_test.php", line 8, characters 3-21:
+  string
+File "class_get_test.php", line 8, characters 3-21:[2]
+  dynamic
+File "class_get_test.php", line 12, characters 3-20:
+  string
+File "class_get_test.php", line 12, characters 11-19:
+Cannot access static properties on reified generics (Typing[4346])

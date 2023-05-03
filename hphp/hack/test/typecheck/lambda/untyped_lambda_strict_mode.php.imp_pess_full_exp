@@ -1,0 +1,4 @@
+File "untyped_lambda_strict_mode.php", line 5, characters 27-29:
+You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "untyped_lambda_strict_mode.php", line 5, characters 16-31:
+  Definition is here

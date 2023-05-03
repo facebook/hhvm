@@ -1,0 +1,14 @@
+File "constructor_parameters.php", line 10, characters 3-17:
+  T as A
+File "constructor_parameters.php", line 12, characters 3-17:
+  T as A
+File "constructor_parameters.php", line 10, characters 3-17:[2]
+  dynamic
+File "constructor_parameters.php", line 12, characters 3-17:[2]
+  T as A
+File "constructor_parameters.php", line 11, characters 18-24:
+Invalid argument (Typing[4110])
+  File "constructor_parameters.php", line 6, characters 38-40:
+  Expected `int`
+  File "constructor_parameters.php", line 11, characters 18-24:
+  But got `string`

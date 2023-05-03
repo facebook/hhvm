@@ -1,0 +1,6 @@
+File "recursive_non_null_3.php", line 20, characters 10-13:
+Invalid return type (Typing[4110])
+  File "recursive_non_null_3.php", line 11, characters 50-50:
+  Expected `A`
+  File "recursive_non_null_3.php", line 11, characters 49-50:
+  But got `nonnull`

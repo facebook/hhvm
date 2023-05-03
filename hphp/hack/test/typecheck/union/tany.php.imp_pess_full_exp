@@ -1,0 +1,6 @@
+File "tany.php", line 4, characters 3-13:
+  mixed
+File "tany.php", line 4, characters 3-13:[2]
+  mixed
+File "tany.php", line 3, characters 34-35:
+Was expecting a type hint (Typing[4032])

@@ -1,0 +1,6 @@
+File "bad_inout_use_assign7.php", line 16, characters 3-9:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "bad_inout_use_assign7.php", line 10, characters 18-18:
+  Expected `D`
+  File "bad_inout_use_assign7.php", line 14, characters 14-14:
+  But got `C`

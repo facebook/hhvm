@@ -1,0 +1,12 @@
+File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
+  Expected `D`
+  File "explicit_type_collection_subtyping_sad.php", line 7, characters 12-12:
+  But got `B`
+File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
+  Expected `D`
+  File "explicit_type_collection_subtyping_sad.php", line 7, characters 18-18:
+  But got `C`

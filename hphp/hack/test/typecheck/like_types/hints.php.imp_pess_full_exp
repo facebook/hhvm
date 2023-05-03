@@ -1,0 +1,29 @@
+File "hints.php", line 12, characters 3-13:
+  int
+File "hints.php", line 13, characters 3-13:
+  ?int
+File "hints.php", line 14, characters 3-13:
+  ~?int
+File "hints.php", line 15, characters 3-13:
+  vec<~int>
+File "hints.php", line 16, characters 3-13:
+  int
+File "hints.php", line 17, characters 3-13:
+  int
+File "hints.php", line 18, characters 3-13:
+  ~int
+File "hints.php", line 12, characters 3-13:[2]
+  ~int
+File "hints.php", line 13, characters 3-13:[2]
+  ~?int
+File "hints.php", line 14, characters 3-13:[2]
+  ~?int
+File "hints.php", line 15, characters 3-13:[2]
+  dynamic
+File "hints.php", line 16, characters 3-13:[2]
+  int
+File "hints.php", line 17, characters 3-13:[2]
+  ~int
+File "hints.php", line 18, characters 3-13:[2]
+  ~int
+No errors

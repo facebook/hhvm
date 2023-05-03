@@ -1,0 +1,24 @@
+File "bad_function_hint2.php", line 12, characters 30-30:
+A right parenthesis `)` is expected here. (Parsing[1002])
+File "bad_function_hint2.php", line 12, characters 30-30:
+Unbound name: `,` (a global constant) (Naming[2049])
+File "bad_function_hint2.php", line 12, characters 32-34:
+Unbound name: `int` (a global constant) (Naming[2049])
+File "bad_function_hint2.php", line 12, characters 35-35:
+Unbound name: `)` (a global constant) (Naming[2049])
+File "bad_function_hint2.php", line 13, characters 3-8:
+Unbound name: `return` (a global constant) (Naming[2049])
+File "bad_function_hint2.php", line 12, characters 30-30:
+Unbound global constant (Typing) (Typing[4106])
+File "bad_function_hint2.php", line 12, characters 32-34:
+Unbound global constant (Typing) (Typing[4106])
+File "bad_function_hint2.php", line 12, characters 35-35:
+Unbound global constant (Typing) (Typing[4106])
+File "bad_function_hint2.php", line 13, characters 3-8:
+Unbound global constant (Typing) (Typing[4106])
+File "bad_function_hint2.php", line 12, characters 10-10:
+Invalid return type (Typing[4336])
+  File "bad_function_hint2.php", line 12, characters 15-29:
+  Expected `(function(): ~int)`
+  File "bad_function_hint2.php", line 12, characters 10-10:
+  But got `void` because this function does not always return a value

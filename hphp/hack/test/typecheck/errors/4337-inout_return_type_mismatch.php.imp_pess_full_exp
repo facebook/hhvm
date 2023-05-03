@@ -1,0 +1,6 @@
+File "4337-inout_return_type_mismatch.php", line 6, characters 5-15:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "4337-inout_return_type_mismatch.php", line 5, characters 29-31:
+  Expected `int`
+  File "4337-inout_return_type_mismatch.php", line 6, characters 10-15:
+  But got `string`

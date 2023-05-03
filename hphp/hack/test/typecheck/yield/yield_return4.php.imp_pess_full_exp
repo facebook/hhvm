@@ -1,0 +1,8 @@
+File "yield_return4.php", line 6, characters 5-16:
+You cannot return a value in a generator (a generator is a function that uses `yield`) (NastCheck[3019])
+File "yield_return4.php", line 6, characters 12-15:
+Invalid return type (Typing[4110])
+  File "yield_return4.php", line 3, characters 21-51:
+  Expected `AsyncGenerator<_, _, _>` (result of `async function` containing a `yield`)
+  File "yield_return4.php", line 6, characters 12-15:
+  But got `string`

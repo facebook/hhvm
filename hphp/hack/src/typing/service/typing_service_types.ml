@@ -192,4 +192,6 @@ type delegate_env = {
   saved_state_data_loader:
     (unit -> (string option * Relative_path.t list, string) result Future.t)
     option;
+  load_hack_64_distc_saved_state: bool;
+      (* Send a hack/64_distc Manifold path to remote workers *)
 }

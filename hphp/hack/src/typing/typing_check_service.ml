@@ -863,16 +863,17 @@ let on_cancelled
   add_next []
 
 let rec drain_events (done_count, total_count, handle, check_info) =
-  match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
-  | Some (Hh_distc_types.Errors errors) ->
+  match Hh_distc_ffi.recv handle with
+  | Ok (Some (Hh_distc_types.Errors errors)) ->
     if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
     drain_events (done_count, total_count, handle, check_info)
-  | Some (Hh_distc_types.TypingStart total_count) ->
+  | Ok (Some (Hh_distc_types.TypingStart total_count)) ->
     drain_events (done_count, total_count, handle, check_info)
-  | Some (Hh_distc_types.TypingProgress n) ->
+  | Ok (Some (Hh_distc_types.TypingProgress n)) ->
     let done_count = done_count + n in
     drain_events (done_count, total_count, handle, check_info)
-  | None -> (done_count, total_count)
+  | Ok None -> Ok (done_count, total_count)
+  | Error error -> Error error
 
 (**
   This is the event loop that powers hh_distc. It keeps looping and calling
@@ -904,7 +905,7 @@ let rec event_loop
   let (ready_fds, _, _) =
     Sys_utils.select_non_intr (handler_fds @ [fd_distc]) [] [] (-1.)
   in
-  if List.mem ~equal:Poly.( = ) ready_fds fd_distc then (
+  if List.mem ~equal:Poly.( = ) ready_fds fd_distc then
     match Sys_utils.read_non_intr fd_distc 1 with
     | None ->
       ServerProgress.write "hh_distc done";
@@ -918,25 +919,25 @@ let rec event_loop
             interrupt.MultiThreadedCall.env )
       | Error error -> `Error error)
     | Some _ ->
-      let (done_count, total_count) =
-        drain_events (done_count, total_count, handle, check_info)
-      in
-      ServerProgress.write_percentage
-        ~operation:"hh_distc checking"
-        ~done_count
-        ~total_count
-        ~unit:"files"
-        ~extra:None;
-      event_loop
-        ~done_count
-        ~total_count
-        ~interrupt
-        ~handlers
-        ~fd_distc
-        ~handle
-        ~check_info
-        ~hhdg_path
-  ) else
+      (match drain_events (done_count, total_count, handle, check_info) with
+      | Ok (done_count, total_count) ->
+        ServerProgress.write_percentage
+          ~operation:"hh_distc checking"
+          ~done_count
+          ~total_count
+          ~unit:"files"
+          ~extra:None;
+        event_loop
+          ~done_count
+          ~total_count
+          ~interrupt
+          ~handlers
+          ~fd_distc
+          ~handle
+          ~check_info
+          ~hhdg_path
+      | Error error -> `Error error)
+  else
     let (env, decision, handlers) =
       List.fold
         handlers

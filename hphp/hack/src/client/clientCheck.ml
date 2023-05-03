@@ -1084,10 +1084,15 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
     let spinner = ClientSpinner.get_latest_report () in
     let exit_status =
       match exn with
-      | Exit_status.Exit_with exit_status -> exit_status
+      | Exit_status.Exit_with exit_status ->
+        (* we assume that whoever raised [Exit_with] had the decency to print an explanation *)
+        exit_status
       | _ ->
-        Printf.eprintf "Uncaught exception: %s\n" (Exception.get_ctor_string e);
-        Exit_status.Uncaught_exception e
+        (* if it was uncaught, then presumably no one else has printed it, so it's up to us.
+           Let's include lots of details, including stack trace. *)
+        let exit_status = Exit_status.Uncaught_exception e in
+        Printf.eprintf "%s\n%!" (Exit_status.show_expanded exit_status);
+        exit_status
     in
     begin
       match (exit_status, !partial_telemetry_ref) with

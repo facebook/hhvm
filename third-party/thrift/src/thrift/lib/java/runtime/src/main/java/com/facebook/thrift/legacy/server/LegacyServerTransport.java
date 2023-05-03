@@ -133,7 +133,6 @@ public class LegacyServerTransport implements ServerTransport {
   @Override
   public void dispose() {
     channel.close();
-    RpcResources.shutdown();
   }
 
   @Override

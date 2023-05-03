@@ -181,11 +181,11 @@ let client_restart ~data:_ = ()
 
 let client_check_start () = ()
 
-let client_check _ _ = ()
+let client_check _ _ ~retry_start:_ ~retry_count:_ = ()
 
-let client_check_partial _ _ _ = ()
+let client_check_partial _ _ _ ~retry_start:_ ~retry_count:_ = ()
 
-let client_check_bad_exit _ _ _ = ()
+let client_check_bad_exit _ _ _ ~retry_start:_ ~retry_count:_ = ()
 
 let client_check_errors_file_restarted _ = ()
 

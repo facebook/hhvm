@@ -116,6 +116,8 @@ let connect ?(use_priority_pipe = false) args =
     no_load;
     watchman_debug_logging;
     log_inference_constraints;
+    log_retry_count = _;
+    log_retry_start = _;
     remote;
     show_spinner;
     ignore_hh_version;
@@ -1075,7 +1077,11 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
        the lwt code that's running in [main_internal]. Thus, here is the only place
        that we can deal with it. This also motivates the use of a reference
        [partial_telemetry_ref], since there's no way for a return value to survive SIGINT. *)
-    HackEventLogger.client_check exit_status telemetry;
+    HackEventLogger.client_check
+      exit_status
+      telemetry
+      ~retry_start:args.log_retry_start
+      ~retry_count:args.log_retry_count;
     Hh_logger.log "CLIENT_CHECK %s" (Exit_status.show exit_status);
     Exit.exit exit_status
   with
@@ -1100,13 +1106,23 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
         (* [Interrupted] is raised by a SIGINT exit-handler installed in hh_client.
            [Client_broken_pipe] is raised in [clientCheckStatus.go_streaming] when
            it can't write errors to the pipe. *)
-        HackEventLogger.client_check_partial exit_status spinner telemetry;
+        HackEventLogger.client_check_partial
+          exit_status
+          spinner
+          telemetry
+          ~retry_start:args.log_retry_start
+          ~retry_count:args.log_retry_count;
         Hh_logger.log
           "CLIENT_CHECK_PARTIAL [%s] %s"
           (Option.value spinner ~default:"")
           (Exit_status.show exit_status)
       | _ ->
-        HackEventLogger.client_check_bad_exit exit_status spinner e;
+        HackEventLogger.client_check_bad_exit
+          exit_status
+          spinner
+          e
+          ~retry_start:args.log_retry_start
+          ~retry_count:args.log_retry_count;
         Hh_logger.log
           "CLIENT_CHECK_EXIT [%s] %s"
           (Option.value spinner ~default:"")

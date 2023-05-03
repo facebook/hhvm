@@ -21,6 +21,8 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     error_format = _;
     force_dormant_start = _;
     from = _;
+    log_retry_count = _;
+    log_retry_start = _;
     show_spinner = _;
     gen_saved_ignore_type_errors = _;
     paths = _;

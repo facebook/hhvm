@@ -102,6 +102,8 @@ type client_check_env = {
   saved_state_ignore_hhconfig: bool;
   paths: string list;
   log_inference_constraints: bool;
+  log_retry_count: int;
+  log_retry_start: float;
   max_errors: int option;
   mode: client_mode;
   no_load: bool;

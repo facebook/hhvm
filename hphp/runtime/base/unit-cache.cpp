@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -393,6 +394,10 @@ Optional<String> loadFileContents(const char* path,
       return f->read();
     }
     return {};
+  }
+
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    return Replayer::get().file(path);
   }
 
   auto const fd = open(path, O_RDONLY);

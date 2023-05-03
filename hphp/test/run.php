@@ -349,6 +349,8 @@ final class Options {
     public ?string $jitsample;
     public ?string $hh_single_type_check;
     public bool $bespoke = false;
+    public bool $record = false;
+    public bool $replay = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -410,6 +412,8 @@ function get_options(
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
+    '*record' => '',
+    '*replay' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -912,6 +916,35 @@ function hhvm_cmd_impl(
     if ($options->bespoke) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
       $args[] = '-vServer.APC.MemModelTreadmill=true';
+    }
+
+    if ($options->record || $options->replay) {
+      // Extract the test to be run
+      $test_run_index = -1;
+      foreach ($extra_args as $i => $replay_extra_arg) {
+        if ($replay_extra_arg === '--file') {
+          $test_run_index = $i + 1;
+          break;
+        }
+      }
+      $test_run = substr($extra_args[$test_run_index], 1, -1);
+
+      // Create a temporary directory for the recording
+      $record_dir = Status::getTestWorkingDir($test_run) . 'record';
+      @mkdir($record_dir, 0777, true);
+
+      // Create the record command
+      $args[] = '-vEval.RecordReplay=true';
+      $args[] = '-vEval.RecordSampleRate=1';
+      $args[] = "-vEval.RecordDir=$record_dir";
+
+      // If replaying, create a second replay command
+      if ($options->replay) {
+        $cmds[] = implode(' ', array_merge($args, $extra_args));
+        $args = HH\Lib\Vec\take($args, C\count($args) - 2);
+        $args[] = '-vEval.Replay=true';
+        $extra_args[$test_run_index] = "$record_dir/*";
+      }
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));
@@ -2580,6 +2613,15 @@ function should_skip_test_simple(
 
   if ($options->only_non_remote_executable && !file_exists("$test.no_remote")) {
     return 'skip-only_running_NON_remote_executable_tests';
+  }
+
+  if ($options->record || $options->replay) {
+    if (file_exists($test . ".verify")) {
+      return 'skip-verify';
+    }
+    if (find_debug_config($test, 'hphpd.ini')) {
+      return 'skip-debugger';
+    }
   }
 
   return null;

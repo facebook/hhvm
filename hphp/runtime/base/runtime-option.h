@@ -1484,6 +1484,7 @@ struct RuntimeOption {
   F(bool, RecordReplay, false)                                          \
   F(uint64_t, RecordSampleRate, 0)                                      \
   F(string, RecordDir, std::string(""))                                 \
+  F(bool, Replay, false)                                                \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
   F(bool, IncludeReopOptionsInFactsCacheBreaker, true)                  \
   F(bool, ModuleLevelTraits, false)                                     \

@@ -1001,7 +1001,7 @@ void VariableUnserializer::unserializeVariant(
         // it. Otherwise, we risk creating a CPP object without having it
         // initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable() &&
-            !cls->isCollectionClass()) {
+            !cls->isCollectionClass() && m_type != Type::DebuggerSerialize) {
           assertx(obj.isNull());
           throw_null_pointer_exception();
         } else {
@@ -1213,6 +1213,20 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_tv<KindOfObject>(obj.detach()), self);
     }
     return; // object has '}' terminating
+  case 'c': // Class
+    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+      tvMove(make_tv<KindOfClass>(Class::load(unserializeString().get())), self);
+      break;
+    } else {
+      throwUnknownType(type);
+    }
+  case 'f': // Func
+    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+      tvMove(make_tv<KindOfFunc>(Func::load(unserializeString().get())), self);
+      break;
+    } else {
+      throwUnknownType(type);
+    }
   default:
     throwUnknownType(type);
   }

@@ -1393,6 +1393,10 @@ void ExecutionContext::requestInit() {
   vmStack().requestInit();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate > 0)) {
+    m_recorder.emplace();
+    m_recorder->requestInit();
+  }
 
   *rl_num_coeffect_violations = 0;
 
@@ -1453,6 +1457,10 @@ void ExecutionContext::requestExit() {
   autoTypecheckRequestExit();
   HHProf::Request::FinishProfiling();
 
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate > 0)) {
+    m_recorder->requestExit();
+    m_recorder.reset();
+  }
   manageAPCHandle();
   syncGdbState();
   vmStack().requestExit();

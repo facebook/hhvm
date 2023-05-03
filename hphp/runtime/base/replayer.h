@@ -16,90 +16,67 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-#include <exception>
-#include <type_traits>
+#include <deque>
+#include <string>
+#include <tuple>
+#include <unordered_map>
 #include <utility>
 
-#include <folly/Likely.h>
-
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/record-replay.h"
-#include "hphp/runtime/base/req-vector.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
-struct Recorder {
-  void requestExit();
-  void requestInit();
-  static void setEntryPoint(const String& entryPoint);
+struct Replayer {
+  ~Replayer();
+  String file(const String& path) const;
+  static Replayer& get();
+  String init(const String& path);
 
   template<auto f>
   static auto wrapNativeFunc(const char* name) {
     using Wrapper = WrapNativeFunc<MethodToFunc<f>::value>;
-    addNativeFuncName(Wrapper::id, name);
+    get().m_nativeFuncNames[name] = Wrapper::id;
     return Wrapper::wrapper;
   }
 
  private:
-  friend struct Replayer;
-  struct LoggerHook;
-  struct StdoutHook;
   template<auto f> struct WrapNativeFunc;
 
   template<typename R, typename... A, R(*f)(A...)>
   struct WrapNativeFunc<f> {
     inline static const auto id{reinterpret_cast<std::uintptr_t>(f)};
     static R wrapper(A... args) {
-      if (UNLIKELY(get().m_enabled)) {
-        return get().recordNativeCall(f, id, std::forward<A>(args)...);
-      } else {
-        return f(std::forward<A>(args)...);
-      }
+      return get().replayNativeFunc<R>(id, std::forward<A>(args)...);
     }
   };
 
-  static void addNativeFuncName(std::uintptr_t id, const char* name);
-  static Recorder& get();
-  static StdoutHook* getStdoutHook();
-  void onNativeCallArg(const String& arg);
-  void onNativeCallEntry(std::uintptr_t id);
-  void onNativeCallReturn(const String& ret);
-  void onNativeCallThrow(std::exception_ptr exc);
-  template<typename T> static String serialize(T value);
-  Array toArray() const;
+  template<typename T> static void nativeArg(const String& recordedArg, T arg);
+  std::tuple<Array, String, String> popNativeCall(std::uintptr_t id);
+  template<typename T> static T unserialize(const String& recordedValue);
 
   template<typename R, typename... A>
-  R recordNativeCall(R(*f)(A...), std::uintptr_t id, A&&... args) {
-    onNativeCallEntry(id);
-    std::conditional_t<std::is_void_v<R>, std::nullptr_t, R> ret;
-    std::exception_ptr exc;
-    try {
-      if constexpr (std::is_void_v<R>) {
-        f(std::forward<A>(args)...);
-      } else {
-        ret = f(std::forward<A>(args)...);
-      }
-    } catch (...) {
-      exc = std::current_exception();
-    }
-    (onNativeCallArg(serialize(std::forward<A>(args))), ...);
-    if (exc) {
-      onNativeCallThrow(exc);
-      std::rethrow_exception(exc);
+  R replayNativeFunc(std::uintptr_t id, A&&... args) {
+    const auto [recordedArgs, recordedRet, recordedExc]{popNativeCall(id)};
+    std::int64_t i{-1};
+    (nativeArg<A>(recordedArgs[++i].asCStrRef(), std::forward<A>(args)), ...);
+    if (recordedRet.empty()) {
+      // NOLINTNEXTLINE(facebook-hte-ThrowNonStdExceptionIssue)
+      throw unserialize<Object>(recordedExc);
     } else {
-      onNativeCallReturn(serialize(ret));
-      if constexpr (!std::is_void_v<R>) {
-        return ret;
-      }
+      return unserialize<R>(recordedRet);
     }
   }
 
-  bool m_enabled{false};
-  req::vector<NativeCall> m_nativeCalls;
+  std::unordered_map<std::string, std::string> m_files;
+  std::deque<NativeCall> m_nativeCalls;
+  std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
 };
 
 } // namespace HPHP

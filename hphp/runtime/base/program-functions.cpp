@@ -39,6 +39,8 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -2182,6 +2184,15 @@ static int execute_program_impl(int argc, char** argv) {
       }
 
     } else {
+
+      if (UNLIKELY(RO::EvalRecordReplay)) {
+        if (RO::EvalRecordSampleRate > 0) {
+          Recorder::setEntryPoint(file);
+        } else if (RO::EvalReplay) {
+          file = Replayer::get().init(file).toCppString();
+        }
+      }
+
       tracing::Request _{
         "cli-request",
         file,

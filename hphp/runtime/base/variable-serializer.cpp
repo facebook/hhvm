@@ -1570,13 +1570,19 @@ void VariableSerializer::serializeFunc(const Func* func) {
       }
     case Type::Serialize:
     case Type::Internal:
-    case Type::DebuggerSerialize:
       if (func->isMethCaller()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerSerde.get()}
         );
       }
       invalidFuncConversion("string");
+      break;
+    case Type::DebuggerSerialize:
+      m_buf->append("f:");
+      m_buf->append(name->size());
+      m_buf->append(":\"");
+      m_buf->append(name->data(), name->size());
+      m_buf->append("\";");
       break;
   }
 }
@@ -1621,8 +1627,14 @@ void VariableSerializer::serializeClass(const Class* cls) {
     case Type::Serialize:
     case Type::Internal:
     case Type::APCSerialize:
-    case Type::DebuggerSerialize:
       write(StrNR(classToStringHelper(cls)));
+      break;
+    case Type::DebuggerSerialize:
+      m_buf->append("c:");
+      m_buf->append(cls->name()->size());
+      m_buf->append(":\"");
+      m_buf->append(cls->name()->data(), cls->name()->size());
+      m_buf->append("\";");
       break;
   }
 }

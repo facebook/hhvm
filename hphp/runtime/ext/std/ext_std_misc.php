@@ -82,6 +82,7 @@ namespace {
 
 const float INF = 1e308 + 1e308;
 const float NAN = (1e308 + 1e308) - (1e308 + 1e308);
+const bool ZEND_THREAD_SAFE = true;
 
 /** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.

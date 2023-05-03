@@ -8449,8 +8449,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(PNG_ALL_FILTERS, 0x08 | 0x10 | 0x20 | 0x40 | 0x80);
 #endif
 
-    HHVM_RC_BOOL(GD_BUNDLED, true);
-
     loadSystemlib();
   }
 } s_gd_extension;

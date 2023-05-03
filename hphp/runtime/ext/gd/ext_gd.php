@@ -1,5 +1,7 @@
 <?hh // partial
 
+const bool GD_BUNDLED = true;
+
 /* Gets information about the version and capabilities of the installed GD
  * library.
  */

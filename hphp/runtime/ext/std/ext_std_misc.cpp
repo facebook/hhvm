@@ -515,8 +515,6 @@ void StandardExtension::initMisc() {
     Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
     Native::registerConstant<KindOfNull>(makeStaticString("null"));
 
-    HHVM_RC_BOOL(ZEND_THREAD_SAFE, true);
-
     HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
 #ifndef NDEBUG
     HHVM_RC_BOOL(PHP_DEBUG, true);

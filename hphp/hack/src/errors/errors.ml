@@ -853,8 +853,6 @@ let count ?(drop_fixmed = true) err =
 let is_empty ?(drop_fixmed = true) err =
   Relative_path.Map.is_empty (drop_fixmes_if err drop_fixmed)
 
-let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
-
 let get_current_span () = !current_span
 
 and empty = Relative_path.Map.empty

@@ -145,6 +145,16 @@
   (pps ppx_sexp_conv visitors.ppx ppx_deriving.std)))
 
 (library
+ (name parsing_error)
+ (wrapped false)
+ (modules
+   parsing_error)
+ (libraries
+   error_codes
+   user_error
+   pos_or_decl))
+
+(library
  (name parser)
  (wrapped false)
  (modules
@@ -173,6 +183,7 @@
   nast
   aast_parser_ffi
   rust_parser_ffi
+  parsing_error
   typing_ast
   utils_lint
   utils_php_escape))

@@ -29,6 +29,7 @@
   ast
   collections
   errors
+  parsing_error
   package_ocaml_ffi)
  (preprocess
   (pps ppx_deriving.std)))

@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+module Error_code = Error_codes.Parsing
 
 type t =
   | Fixme_format of Pos.t
@@ -24,5 +25,4 @@ type t =
       reasons: Pos_or_decl.t Message.t list;
     }
 
-include
-  Phase_error.S with type t := t and module Error_code = Error_codes.Parsing
+val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

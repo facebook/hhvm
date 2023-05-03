@@ -114,7 +114,9 @@ let emit
         "Malformed hint: expected Haccess (Happly ...) from ast_to_nast")
     malformed_accesses;
   List.iter ~f:emit_experimental_feature experimental_features;
-  List.iter ~f:Errors.add_parsing_error parsing
+  List.iter
+    ~f:(fun err -> Errors.add_error @@ Parsing_error.to_user_error err)
+    parsing
 
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs

@@ -27,6 +27,8 @@ let emoji_chars =
 
 type state = {
   message: string option;  (** "hh_server is busy: [<message>] <spinner>" *)
+  non_null_message: string option;
+      (** the most recent non-null message to have been reported *)
   to_stderr: bool;  (** should this be displayed on stderr? *)
   angery_reaccs_only: bool; (* do we use emoji_chars or ascii_chars? *)
   index: int;  (** which of the four chars is used as spinner *)
@@ -36,16 +38,26 @@ type state = {
 is reflected in stderr -- either some message, or nothing. *)
 let state : state ref =
   ref
-    { message = None; to_stderr = false; angery_reaccs_only = false; index = 0 }
+    {
+      message = None;
+      non_null_message = None;
+      to_stderr = false;
+      angery_reaccs_only = false;
+      index = 0;
+    }
 
-let get_latest_report () : string option = !state.message
+let get_latest_report () : string option =
+  match (!state.message, !state.non_null_message) with
+  | (Some message, _) -> Some message
+  | (None, Some message) -> Some ("[hidden] " ^ message)
+  | (None, None) -> None
 
 let start_time : float = Unix.gettimeofday ()
 
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
     let%lwt _ = Lwt_unix.sleep 1.0 in
-    HackEventLogger.spinner_heartbeat n !state.message;
+    HackEventLogger.spinner_heartbeat n (get_latest_report ());
     loop (n + 1)
   in
   let _future = loop 1 in
@@ -93,7 +105,10 @@ let report ~(to_stderr : bool) ~(angery_reaccs_only : bool) :
       "spinner %0.1fs: [%s]"
       (Unix.gettimeofday () -. start_time)
       (Option.value_exn message);
-  let new_state = { !state with message; to_stderr; angery_reaccs_only } in
+  let non_null_message = Option.first_some message !state.non_null_message in
+  let new_state =
+    { !state with message; non_null_message; to_stderr; angery_reaccs_only }
+  in
   update_stderr !state ~new_state;
   state := new_state;
   ()

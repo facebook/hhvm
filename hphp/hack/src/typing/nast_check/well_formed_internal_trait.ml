@@ -21,9 +21,11 @@ let handler =
           let trait_pos = fst c.c_name in
           let check visibility pos member =
             if Aast.equal_visibility Aast.Internal (visibility member) then
-              Errors.add_nast_check_error
-              @@ Nast_check_error.Internal_member_inside_public_trait
-                   { member_pos = pos member; trait_pos }
+              Errors.add_error
+                Nast_check_error.(
+                  to_user_error
+                  @@ Internal_member_inside_public_trait
+                       { member_pos = pos member; trait_pos })
           in
           List.iter
             c.c_methods

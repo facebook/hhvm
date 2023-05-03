@@ -17,8 +17,8 @@ let check_param _env params p user_attributes name =
       | Ast_defs.Pinout _ ->
         let pos = param.param_pos in
         if SSet.mem name SN.Members.as_set then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Inout_params_special pos
+          Errors.add_error
+            Nast_check_error.(to_user_error @@ Inout_params_special pos)
       | Ast_defs.Pnormal -> ());
   let inout =
     List.find params ~f:(fun x ->
@@ -34,9 +34,10 @@ let check_param _env params p user_attributes name =
         SN.UserAttributes.uaMemoizeLSB
         user_attributes
     then
-      Errors.add_nast_check_error
-      @@ Nast_check_error.Inout_params_memoize
-           { pos = p; param_pos = param.param_pos }
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Inout_params_memoize { pos = p; param_pos = param.param_pos })
   | _ -> ()
 
 let handler =

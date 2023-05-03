@@ -25,6 +25,7 @@ let handler =
       in
       let pos = fst c.Aast.c_name in
       if (not enabled) && uses_enum_supertyping then
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Enum_supertyping_reserved_syntax { pos }
+        Errors.add_error
+          Nast_check_error.(
+            to_user_error @@ Enum_supertyping_reserved_syntax { pos })
   end

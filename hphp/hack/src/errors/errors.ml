@@ -855,8 +855,6 @@ let is_empty ?(drop_fixmed = true) err =
 
 let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
 
-let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
-
 let get_current_span () = !current_span
 
 and empty = Relative_path.Map.empty

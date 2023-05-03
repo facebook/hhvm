@@ -28,8 +28,9 @@ let visitor =
       | Hrefinement _ ->
         (match ancestor with
         | Some kind ->
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Refinement_in_typestruct { pos; kind }
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error @@ Refinement_in_typestruct { pos; kind })
         | None -> ())
       | _ -> super#on_hint (env, ancestor) h
   end

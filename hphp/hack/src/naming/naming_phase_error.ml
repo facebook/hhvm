@@ -100,7 +100,9 @@ let emit
   List.iter
     ~f:(fun err -> Errors.add_error @@ Naming_error.to_user_error err)
     naming;
-  List.iter ~f:Errors.add_nast_check_error nast_check;
+  List.iter
+    ~f:(fun err -> Errors.add_error @@ Nast_check_error.to_user_error err)
+    nast_check;
   List.iter
     ~f:(fun pos ->
       Errors.internal_error pos "Unexpected hint not present on legacy AST")

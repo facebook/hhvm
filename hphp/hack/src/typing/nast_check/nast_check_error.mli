@@ -6,6 +6,8 @@
  *
  *)
 
+module Error_code = Error_codes.NastCheck
+
 type verb =
   | Vreq_implement
   | Vimplement
@@ -159,5 +161,4 @@ type t =
     }
   | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
-include
-  Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck
+val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

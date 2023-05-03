@@ -43,7 +43,6 @@
    error_category
    errors
    highlighted_error_formatter
-   nast_check_error
    parsing_error
    phase_error
    quickfix_ffp

@@ -33,15 +33,16 @@ let check_expr env (_, pos, e) =
 let check_method_body m =
   let named_body = m.m_body in
   if m.m_abstract && not (List.is_empty named_body.fb_ast) then
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Abstract_with_body (fst m.m_name)
+    Errors.add_error
+      Nast_check_error.(to_user_error @@ Abstract_with_body (fst m.m_name))
 
 let check_class _ c =
   if Ast_defs.is_c_abstract c.c_kind && c.c_final then (
     let err m =
-      Errors.add_nast_check_error
-      @@ Nast_check_error.Nonstatic_method_in_abstract_final_class
-           (fst m.m_name)
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Nonstatic_method_in_abstract_final_class (fst m.m_name))
     in
     let (c_constructor, _, c_methods) = split_methods c.c_methods in
     List.iter c_methods ~f:err;
@@ -51,9 +52,10 @@ let check_class _ c =
     c_instance_vars
     |> List.filter ~f:(fun var -> Option.is_none var.cv_xhp_attr)
     |> List.iter ~f:(fun var ->
-           Errors.add_nast_check_error
-           @@ Nast_check_error.Instance_property_in_abstract_final_class
-                (fst var.cv_id))
+           Errors.add_error
+             Nast_check_error.(
+               to_user_error
+               @@ Instance_property_in_abstract_final_class (fst var.cv_id)))
   )
 
 let handler =

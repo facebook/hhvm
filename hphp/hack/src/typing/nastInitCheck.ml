@@ -191,8 +191,10 @@ module Env = struct
       if not @@ SMap.is_empty uninit then
         let prop_names = SMap.bindings uninit |> List.map ~f:fst
         and (pos, class_name) = c.c_name in
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Constructor_required { pos; class_name; prop_names });
+        Errors.add_error
+          Nast_check_error.(
+            to_user_error
+            @@ Constructor_required { pos; class_name; prop_names }));
 
     let ( add_init_not_required_props,
           add_trait_props,
@@ -444,8 +446,9 @@ and check_all_init pos env acc =
     begin
       fun prop_name _ ->
         if not (S.mem prop_name acc) then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Call_before_init { pos; prop_name }
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error @@ Call_before_init { pos; prop_name })
     end
     env.props
 
@@ -697,7 +700,8 @@ let class_ tenv c =
       in
       if not (SMap.is_empty uninit_props) then
         if SMap.mem DICheck.parent_init_prop uninit_props then
-          Errors.add_nast_check_error @@ Nast_check_error.No_construct_parent p
+          Errors.add_error
+            Nast_check_error.(to_user_error @@ No_construct_parent p)
         else
           let class_uninit_props =
             SMap.filter
@@ -705,22 +709,24 @@ let class_ tenv c =
               uninit_props
           in
           if (not (SMap.is_empty class_uninit_props)) && not is_hhi then
-            Errors.add_nast_check_error
-            @@ Nast_check_error.Not_initialized
-                 {
-                   pos = p;
-                   class_name = snd c.c_name;
-                   props =
-                     SMap.bindings class_uninit_props
-                     |> List.map ~f:(fun (name, _) ->
-                            let pos =
-                              class_prop_pos
-                                (snd c.c_name)
-                                name
-                                (Typing_env.get_ctx tenv)
-                            in
-                            (pos, name));
-                 }
+            Errors.add_error
+              Nast_check_error.(
+                to_user_error
+                @@ Not_initialized
+                     {
+                       pos = p;
+                       class_name = snd c.c_name;
+                       props =
+                         SMap.bindings class_uninit_props
+                         |> List.map ~f:(fun (name, _) ->
+                                let pos =
+                                  class_prop_pos
+                                    (snd c.c_name)
+                                    name
+                                    (Typing_env.get_ctx tenv)
+                                in
+                                (pos, name));
+                     })
     in
     let check_throws_or_init_all inits =
       match inits with

@@ -17,6 +17,7 @@ let handler =
     method! at_expr env (_, _, e) =
       match e with
       | Array_get ((_, p, _), None) when not env.array_append_allowed ->
-        Errors.add_nast_check_error @@ Nast_check_error.Reading_from_append p
+        Errors.add_error
+          Nast_check_error.(to_user_error @@ Reading_from_append p)
       | _ -> ()
   end

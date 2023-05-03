@@ -27,7 +27,7 @@ let visitor =
           super#on_expr env e
         else
           (* Ban list() in rvalue positions, e.g. foo(list($bar)) *)
-          Errors.add_nast_check_error @@ Nast_check_error.List_rvalue p
+          Errors.add_error Nast_check_error.(to_user_error @@ List_rvalue p)
       | _ -> super#on_expr { in_lvalue = false } e
 
     method! on_stmt env s =

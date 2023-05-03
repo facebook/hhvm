@@ -24,9 +24,11 @@ let visitor =
             state.class_tparams
             ~f:(fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
               if String.equal c_tp_name tp_name then
-                Errors.add_nast_check_error
-                @@ Nast_check_error.Typeconst_depends_on_external_tparam
-                     { pos; ext_pos = c_tp_pos; ext_name = c_tp_name });
+                Errors.add_error
+                  Nast_check_error.(
+                    to_user_error
+                    @@ Typeconst_depends_on_external_tparam
+                         { pos; ext_pos = c_tp_pos; ext_name = c_tp_name }));
           List.iter args ~f:(this#on_hint (env, state))
         | _ -> ()
       end;

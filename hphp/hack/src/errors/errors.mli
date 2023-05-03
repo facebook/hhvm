@@ -69,8 +69,6 @@ val add_error : error -> unit
 
 val add_parsing_error : Parsing_error.t -> unit
 
-val add_nast_check_error : Nast_check_error.t -> unit
-
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 

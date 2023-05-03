@@ -206,6 +206,7 @@
   naming_captures
   naming_elaborate_namespaces_endo
   naming_error
+  nast_check_error
   naming_table
   naming_global
   naming_provider

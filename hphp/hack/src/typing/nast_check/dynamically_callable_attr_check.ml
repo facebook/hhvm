@@ -37,8 +37,8 @@ let handler =
       let attr = m.m_user_attributes in
       let check_reified_callable p =
         if has_reified_generics m.m_tparams then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Dynamically_callable_reified p
+          Errors.add_error
+            Nast_check_error.(to_user_error @@ Dynamically_callable_reified p)
       in
       match
         ( Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr,
@@ -70,8 +70,8 @@ let handler =
       with
       | Some p ->
         if has_reified_generics fd.fd_tparams then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Dynamically_callable_reified p;
+          Errors.add_error
+            Nast_check_error.(to_user_error @@ Dynamically_callable_reified p);
         ()
       | _ -> ()
   end

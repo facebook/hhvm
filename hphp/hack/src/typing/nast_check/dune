@@ -1,6 +1,47 @@
 (library
+ (name nast_check_error)
+ (wrapped false)
+ (modules
+   nast_check_error
+ )
+ (libraries
+   ast
+   error_codes
+   user_error))
+
+(library
  (name nast_check)
  (wrapped false)
+ (modules
+   attribute_nast_checks
+   class_tparams_check
+   class_typeconst_check
+   const_prohibited_check
+   control_context_check
+   duplicate_class_member_check
+   duplicate_xhp_attribute_check
+   dynamically_callable_attr_check
+   enum_supertyping_check
+   function_pointer_check
+   global_const_check
+   illegal_name_check
+   inout_check
+   interface_check
+   list_rvalue_check
+   naming_coroutine_check
+   nast_check
+   nast_class_method_check
+   nast_generics_check
+   pessimisation_node_recording
+   php_lambda_check
+   private_final_check
+   prop_modifier_prohibited_check
+   read_from_append_check
+   shape_name_check
+   type_structure_leak_check
+   unbound_name_check
+   well_formed_internal_trait
+ )
  (libraries
   ast
   core_kernel

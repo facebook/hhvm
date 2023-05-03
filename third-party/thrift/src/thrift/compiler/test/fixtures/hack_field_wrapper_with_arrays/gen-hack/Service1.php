@@ -33,7 +33,7 @@ interface Service1AsyncIf extends \IThriftAsyncIf {
    *   func2(1: StructWithWrapper arg1,
    *         2: i64WithWrapper arg2);
    */
-  public function func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): Awaitable<i64WithWrapper>;
+  public function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): Awaitable<i64WithWrapper>;
 }
 
 /**
@@ -63,7 +63,7 @@ interface Service1If extends \IThriftSyncIf {
    *   func2(1: StructWithWrapper arg1,
    *         2: i64WithWrapper arg2);
    */
-  public function func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): i64WithWrapper;
+  public function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): i64WithWrapper;
 }
 
 /**
@@ -100,7 +100,7 @@ interface Service1ClientIf extends \IThriftSyncIf {
    *   func2(1: StructWithWrapper arg1,
    *         2: i64WithWrapper arg2);
    */
-  public function func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): Awaitable<i64WithWrapper>;
+  public function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): Awaitable<i64WithWrapper>;
 }
 
 /**
@@ -163,7 +163,7 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
    *   func2(1: StructWithWrapper arg1,
    *         2: i64WithWrapper arg2);
    */
-  public async function func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): Awaitable<i64WithWrapper> {
+  public async function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): Awaitable<i64WithWrapper> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -234,7 +234,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
    *   func2(1: StructWithWrapper arg1,
    *         2: i64WithWrapper arg2);
    */
-  public async function func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): Awaitable<i64WithWrapper> {
+  public async function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): Awaitable<i64WithWrapper> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -273,7 +273,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
   public function recv_func1(?int $expectedsequenceid = null): MyStruct {
     return $this->recvImplHelper(Service1_func1_result::class, "func1", false, $expectedsequenceid);
   }
-  public function send_func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): int {
+  public function send_func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): int {
     $args = Service1_func2_args::withDefaultValues();
     if ($arg1 !== null) {
       $args->arg1 = $arg1;

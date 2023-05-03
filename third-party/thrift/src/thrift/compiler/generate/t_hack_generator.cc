@@ -550,11 +550,9 @@ class t_hack_generator : public t_concat_generator {
   };
 
   enum class TypeToTypehintVariations {
-    NULLABLE = 0,
     IS_SHAPE = 1,
     IS_ANY_SHAPE = 2,
     IMMUTABLE_COLLECTIONS = 3,
-    IGNORE_ADAPTER = 4,
     IGNORE_TYPEDEF = 5,
     IGNORE_WRAPPER = 6,
     RECURSIVE_IGNORE_WRAPPER = 7,
@@ -608,10 +606,8 @@ class t_hack_generator : public t_concat_generator {
   std::string type_to_typehint(
       const t_type* ttype,
       std::map<TypeToTypehintVariations, bool> variations = {
-          {TypeToTypehintVariations::NULLABLE, false},
           {TypeToTypehintVariations::IS_SHAPE, false},
           {TypeToTypehintVariations::IMMUTABLE_COLLECTIONS, false},
-          {TypeToTypehintVariations::IGNORE_ADAPTER, false},
           {TypeToTypehintVariations::IS_ANY_SHAPE, false},
           {TypeToTypehintVariations::IGNORE_TYPEDEF, false},
           {TypeToTypehintVariations::IGNORE_WRAPPER, false},
@@ -5125,10 +5121,7 @@ void t_hack_generator::generate_adapter_type_checks(
   std::set<std::pair<std::string, std::string>> adapter_types_;
   for (const auto* t : collect_types(tstruct)) {
     if (boost::optional<std::string> adapter = find_hack_adapter(t)) {
-      adapter_types_.emplace(
-          *adapter,
-          type_to_typehint(
-              t, {{TypeToTypehintVariations::IGNORE_ADAPTER, true}}));
+      adapter_types_.emplace(*adapter, type_to_typehint(t->get_true_type()));
     }
   }
 
@@ -5137,11 +5130,7 @@ void t_hack_generator::generate_adapter_type_checks(
       continue;
     }
     if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
-      adapter_types_.emplace(
-          *adapter,
-          type_to_typehint(
-              field.get_type(),
-              {{TypeToTypehintVariations::IGNORE_ADAPTER, true}}));
+      adapter_types_.emplace(*adapter, type_to_typehint(field.get_type()));
     }
   }
 
@@ -6643,7 +6632,6 @@ std::string t_hack_generator::type_to_typehint(
   bool ignore_wrapper =
       variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
       variations[TypeToTypehintVariations::IGNORE_WRAPPER];
-  bool nullable = variations[TypeToTypehintVariations::NULLABLE];
 
   variations[TypeToTypehintVariations::IGNORE_WRAPPER] =
       variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER];
@@ -6660,7 +6648,7 @@ std::string t_hack_generator::type_to_typehint(
         // If wrapper is ignored, then use the underlying_type
         struct_name = hack_wrapped_type_name(name, ns);
       }
-      return (nullable ? "?" : "") + struct_name +
+      return struct_name +
           (variations[TypeToTypehintVariations::IS_SHAPE] && ttype->is_struct()
                ? "::TShape"
                : "");
@@ -6674,18 +6662,15 @@ std::string t_hack_generator::type_to_typehint(
       if (ignore_wrapper) {
         return typehint;
       }
-      return (nullable ? "?" : "") + *wrapper + "<" + typehint + ">";
+      return *wrapper + "<" + typehint + ">";
     }
   } else if (use_defined_type_const) {
     // This is a typedef without wrapper, we can use the type constant
     // directly
-    if (adapter && variations[TypeToTypehintVariations::IGNORE_ADAPTER]) {
-      return type_to_typehint(ttype->get_true_type());
-    }
     return hack_name(ttype);
   }
 
-  if (adapter && !variations[TypeToTypehintVariations::IGNORE_ADAPTER]) {
+  if (adapter) {
     // Check the adapter before resolving typedefs.
     return *adapter + "::THackType";
   }
@@ -6693,9 +6678,6 @@ std::string t_hack_generator::type_to_typehint(
   if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {
     return type_to_typehint(ttypedef->get_type(), variations);
   }
-
-  variations[TypeToTypehintVariations::NULLABLE] = false;
-  variations[TypeToTypehintVariations::IGNORE_ADAPTER] = false;
 
   ttype = ttype->get_true_type();
   if (ttype->is_base_type()) {
@@ -6722,10 +6704,10 @@ std::string t_hack_generator::type_to_typehint(
     if (is_bitmask_enum(tenum)) {
       return "int";
     } else {
-      return (nullable ? "?" : "") + hack_name(ttype);
+      return hack_name(ttype);
     }
   } else if (ttype->is_struct() || ttype->is_xception()) {
-    return (nullable ? "?" : "") + hack_name(ttype) +
+    return hack_name(ttype) +
         (variations[TypeToTypehintVariations::IS_SHAPE] ? "::TShape" : "");
   } else if (const auto* tlist = dynamic_cast<const t_list*>(ttype)) {
     std::string prefix = get_container_keyword(ttype, variations);
@@ -6834,28 +6816,26 @@ std::string t_hack_generator::get_sink_function_return_typehint(
  */
 std::string t_hack_generator::type_to_param_typehint(
     const t_type* ttype, bool nullable) {
+  std::string prefix = (nullable ? "?" : "");
   if (const auto* tlist = dynamic_cast<const t_list*>(ttype)) {
     if (strict_types_) {
-      return type_to_typehint(
-          ttype, {{TypeToTypehintVariations::NULLABLE, nullable}});
+      return prefix + type_to_typehint(ttype);
     } else {
-      return "KeyedContainer<int, " +
+      return prefix + "KeyedContainer<int, " +
           type_to_param_typehint(tlist->get_elem_type()) + ">";
     }
   } else if (const auto* tmap = dynamic_cast<const t_map*>(ttype)) {
     if (strict_types_) {
-      return type_to_typehint(
-          ttype, {{TypeToTypehintVariations::NULLABLE, nullable}});
+      return prefix + type_to_typehint(ttype);
     } else {
       const auto* key_type = tmap->get_key_type();
-      return "KeyedContainer<" +
+      return prefix + "KeyedContainer<" +
           (!is_type_arraykey(key_type) ? "arraykey"
                                        : type_to_param_typehint(key_type)) +
           ", " + type_to_param_typehint(tmap->get_val_type()) + ">";
     }
   } else {
-    return type_to_typehint(
-        ttype, {{TypeToTypehintVariations::NULLABLE, nullable}});
+    return prefix + type_to_typehint(ttype);
   }
 }
 
@@ -7607,16 +7587,16 @@ std::string t_hack_generator::argument_list(
     result += delim;
     delim = ", ";
     if (typehints) {
-      // If a field is not sent to a thrift server, the value is null :(
-      const t_type* ftype = field.type()->get_true_type();
-      bool nullable = !no_nullables_ ||
-          (ftype->is_enum() &&
-           (field.default_value() == nullptr ||
-            field.get_req() != t_field::e_req::required));
-      if (force_nullable && !field_is_nullable(tstruct, &field)) {
-        result += "?";
-      }
-      result += type_to_param_typehint(field.get_type(), nullable) + " ";
+      auto true_type = field.get_type()->get_true_type();
+      /*
+       * force_nullable sets everything to null
+       * Structs are nullable unless no_nullables_ is set.
+       * Enums are always nullable
+       */
+      auto is_param_nullable = force_nullable || true_type->is_enum() ||
+          (!no_nullables_ && true_type->is_struct());
+      result +=
+          type_to_param_typehint(field.get_type(), is_param_nullable) + " ";
     }
     result += "$" + find_hack_name(&field);
   }

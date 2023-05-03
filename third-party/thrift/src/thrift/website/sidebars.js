@@ -368,7 +368,7 @@ module.exports = {
           items: [
             'fb/server/overload-protection/cpuconcurrencycontroller',
             'fb/server/overload-protection/adaptive-concurrency',
-            'fb/server/overload-protection/queue-timeouts'
+            'fb/server/overload-protection/queue-timeout'
           ]
         },
         {

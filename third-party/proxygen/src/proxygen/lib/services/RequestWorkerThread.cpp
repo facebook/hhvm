@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/services/RequestWorkerThread.h>
 
+#include <csignal>
 #include <folly/io/async/EventBaseManager.h>
 #include <proxygen/lib/services/ServiceWorker.h>
 
@@ -16,19 +17,15 @@ namespace proxygen {
 static const uint32_t requestIdBits = 56;
 static const uint64_t requestIdMask = ((1ULL << requestIdBits) - 1);
 
+thread_local RequestWorkerThread* RequestWorkerThread::currentRequestWorker_ =
+    nullptr;
+
 RequestWorkerThread::RequestWorkerThread(FinishCallback& callback,
                                          uint8_t threadId,
-                                         const std::string& evbName)
-    : WorkerThread(folly::EventBaseManager::get(), evbName),
-      nextRequestId_(static_cast<uint64_t>(threadId) << requestIdBits),
-      callback_(callback) {
-}
-
-RequestWorkerThread::~RequestWorkerThread() {
-  // It is important to reset the underlying event base in advance of this
-  // class' destruction as it may be that there are functions awaiting
-  // execution that possess a reference to this class.
-  resetEventBase();
+                                         folly::EventBase* evb)
+    : nextRequestId_(static_cast<uint64_t>(threadId) << requestIdBits),
+      callback_(callback),
+      evb_(evb) {
 }
 
 uint8_t RequestWorkerThread::getWorkerId() const {
@@ -50,12 +47,41 @@ void RequestWorkerThread::flushStats() {
 }
 
 void RequestWorkerThread::setup() {
-  WorkerThread::setup();
-  callback_.workerStarted(this);
+  CHECK(evb_);
+  evb_->runImmediatelyOrRunInEventBaseThreadAndWait([&]() {
+    sigset_t ss;
+
+    // Ignore some signals
+    sigemptyset(&ss);
+    sigaddset(&ss, SIGHUP);
+    sigaddset(&ss, SIGINT);
+    sigaddset(&ss, SIGQUIT);
+    sigaddset(&ss, SIGUSR1);
+    sigaddset(&ss, SIGUSR2);
+    sigaddset(&ss, SIGPIPE);
+    sigaddset(&ss, SIGALRM);
+    sigaddset(&ss, SIGTERM);
+    sigaddset(&ss, SIGCHLD);
+    sigaddset(&ss, SIGIO);
+    PCHECK(pthread_sigmask(SIG_BLOCK, &ss, nullptr) == 0);
+
+    currentRequestWorker_ = this;
+    callback_.workerStarted(this);
+  });
+}
+
+void RequestWorkerThread::forceStop() {
+  forceStopped_.store(true);
+  evb_->terminateLoopSoon();
 }
 
 void RequestWorkerThread::cleanup() {
-  WorkerThread::cleanup();
+  LOG(INFO) << "Worker " << getWorkerId() << " in cleanup";
+  if (!forceStopped_.load()) {
+    LOG(INFO) << "Looping to finish pending work";
+    evb_->loop();
+  }
+  currentRequestWorker_ = nullptr;
   callback_.workerFinished(this);
 }
 

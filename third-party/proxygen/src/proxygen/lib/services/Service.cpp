@@ -9,6 +9,7 @@
 #include <proxygen/lib/services/Service.h>
 
 #include <proxygen/lib/services/RequestWorkerThread.h>
+#include <proxygen/lib/services/RequestWorkerThreadNoExecutor.h>
 #include <proxygen/lib/services/ServiceWorker.h>
 
 namespace proxygen {
@@ -21,6 +22,12 @@ Service::~Service() {
 
 void Service::addServiceWorker(std::unique_ptr<ServiceWorker> worker,
                                RequestWorkerThread* reqWorker) {
+  reqWorker->addServiceWorker(this, worker.get());
+  workers_.emplace_back(std::move(worker));
+}
+
+void Service::addServiceWorker(std::unique_ptr<ServiceWorker> worker,
+                               RequestWorkerThreadNoExecutor* reqWorker) {
   reqWorker->addServiceWorker(this, worker.get());
   workers_.emplace_back(std::move(worker));
 }

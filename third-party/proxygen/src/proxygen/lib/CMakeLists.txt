@@ -184,6 +184,7 @@ add_library(
     pools/generators/ServerListGenerator.cpp
     sampling/Sampling.cpp
     services/RequestWorkerThread.cpp
+    services/RequestWorkerThreadNoExecutor.cpp
     services/Service.cpp
     services/WorkerThread.cpp
     stats/ResourceStats.cpp

@@ -9,8 +9,8 @@
 #pragma once
 
 #include <cstdint>
-#include <folly/io/async/EventBase.h>
 #include <map>
+#include <proxygen/lib/services/WorkerThread.h>
 #include <wangle/acceptor/LoadShedConfiguration.h>
 
 namespace proxygen {
@@ -19,29 +19,33 @@ class Service;
 class ServiceWorker;
 
 /**
- * RequestWorkerThread intended to be used with a folly::Executor, and also
- * contains a list of ServiceWorkers running in this thread.
+ * RequestWorkerThreadNoExecutor extends WorkerThread, and also contains a list
+ * of ServiceWorkers running in this thread.
  */
-class RequestWorkerThread {
+class RequestWorkerThreadNoExecutor : public WorkerThread {
  public:
   class FinishCallback {
    public:
-    virtual ~FinishCallback() noexcept {
-    }
-    virtual void workerStarted(RequestWorkerThread*) = 0;
-    virtual void workerFinished(RequestWorkerThread*) = 0;
+    virtual ~FinishCallback() noexcept = default;
+    virtual void workerStarted(RequestWorkerThreadNoExecutor*) = 0;
+    virtual void workerFinished(RequestWorkerThreadNoExecutor*) = 0;
   };
 
   /**
-   * Create a new RequestWorkerThread.
+   * Create a new RequestWorkerThreadNoExecutor.
    *
    * @param proxygen  The object to notify when this worker finishes.
    * @param threadId  A unique ID for this worker.
    * @param evbName   The event base will ne named to this name (thread name)
    */
-  RequestWorkerThread(FinishCallback& callback,
-                      uint8_t threadId,
-                      folly::EventBase* evb);
+  RequestWorkerThreadNoExecutor(FinishCallback& callback,
+                                uint8_t threadId,
+                                const std::string& evbName = std::string());
+
+  /**
+   * Reset the underlying event base prior to WorkerThread destruction.
+   */
+  ~RequestWorkerThreadNoExecutor() override;
 
   /**
    * Return a unique 64bit identifier.
@@ -51,10 +55,13 @@ class RequestWorkerThread {
   /**
    * Return unique 8bit worker ID.
    */
-  uint8_t getWorkerId() const;
+  [[nodiscard]] uint8_t getWorkerId() const;
 
-  static RequestWorkerThread* getRequestWorkerThread() {
-    return currentRequestWorker_;
+  static RequestWorkerThreadNoExecutor* getRequestWorkerThreadNoExecutor() {
+    auto* self = dynamic_cast<RequestWorkerThreadNoExecutor*>(
+        WorkerThread::getCurrentWorkerThread());
+    CHECK_NOTNULL(self);
+    return self;
   }
 
   /**
@@ -67,7 +74,7 @@ class RequestWorkerThread {
 
   /**
    * For a given service, returns the ServiceWorker associated with this
-   * RequestWorkerThread
+   * RequestWorkerThreadNoExecutor
    */
   ServiceWorker* getServiceWorker(Service* service) const {
     auto it = serviceWorkers_.find(service);
@@ -81,8 +88,8 @@ class RequestWorkerThread {
    * the use of swapping such that threads will automatically see updated
    * fields on update.
    */
-  std::shared_ptr<const wangle::LoadShedConfiguration> getLoadShedConfig()
-      const {
+  [[nodiscard]] std::shared_ptr<const wangle::LoadShedConfiguration>
+  getLoadShedConfig() const {
     return loadShedConfig_;
   }
   void setLoadShedConfig(
@@ -97,22 +104,16 @@ class RequestWorkerThread {
    */
   void flushStats();
 
-  void forceStop();
-
-  folly::EventBase* getEventBase() {
-    return evb_;
-  }
-
-  void setup();
-  void cleanup();
-
  private:
+  void setup() override;
+  void cleanup() override;
+
   // The next request id within this thread. The id has its highest byte set to
   // the thread id, so is unique across the process.
   uint64_t nextRequestId_;
 
   // The ServiceWorkers executing in this worker
-  std::map<Service*, ServiceWorker*> serviceWorkers_;
+  folly::F14ValueMap<Service*, ServiceWorker*> serviceWorkers_;
 
   // Every worker instance has their own version of load shed config.
   // This enables every request worker thread, and derivative there of,
@@ -120,11 +121,6 @@ class RequestWorkerThread {
   std::shared_ptr<const wangle::LoadShedConfiguration> loadShedConfig_{nullptr};
 
   FinishCallback& callback_;
-  folly::EventBase* evb_{nullptr};
-
-  static thread_local RequestWorkerThread* currentRequestWorker_;
-
-  std::atomic_bool forceStopped_{false};
 };
 
 } // namespace proxygen

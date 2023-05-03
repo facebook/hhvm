@@ -16,6 +16,7 @@ namespace proxygen {
 
 class ServiceWorker;
 class RequestWorkerThread;
+class RequestWorkerThreadNoExecutor;
 
 /*
  * A Service object represents a network service running in proxygen.
@@ -159,6 +160,8 @@ class Service {
    */
   void addServiceWorker(std::unique_ptr<ServiceWorker> worker,
                         RequestWorkerThread* reqWorker);
+  void addServiceWorker(std::unique_ptr<ServiceWorker> worker,
+                        RequestWorkerThreadNoExecutor* reqWorker);
 
   /**
    * List of workers

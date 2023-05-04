@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include <folly/Range.h>
 #include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
@@ -419,11 +420,11 @@ struct Encode<type::string_t> {
 template <>
 struct Encode<type::binary_t> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const std::string& s) const {
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.writeBinary(s);
   }
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
+  uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.writeBinary(s);
   }
 };

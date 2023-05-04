@@ -70,7 +70,7 @@ apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_g
   ::test::fixtures::basic::DbMixedStackArguments_getDataByKey0_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("getDataByKey0", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -140,7 +140,7 @@ apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_g
   ::test::fixtures::basic::DbMixedStackArguments_getDataByKey1_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("getDataByKey1", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

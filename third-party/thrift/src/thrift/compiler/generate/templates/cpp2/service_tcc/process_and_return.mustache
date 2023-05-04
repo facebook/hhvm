@@ -74,16 +74,16 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
   <%/function:stack_arguments?%>
 <%/type:resolves_to_complex_return?%>
 <%/field:type%><%/function:args%>
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "<%service:parent_service_name%>.<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "<%service:parent_service_name%>.<% > common/function_name%>", serverRequest.requestContext()));
 <%#service:interaction?%>
   auto& iface = static_cast<apache::thrift::ServiceHandler<<%service:parent_service_cpp_name%>>::<%service:name%>If&>(*tile);
 <%/service:interaction?%>
   try {
-    deserializeRequest<ProtocolIn_>(args, "<%function:name%>", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    deserializeRequest<ProtocolIn_>(args, "<% > common/function_name%>", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
 <%#function:oneway?%>
-    LOG(ERROR) << "exception in function <%function:name%>: " << folly::exceptionStr(std::current_exception());
+    LOG(ERROR) << "exception in function <% > common/function_name%>: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -107,7 +107,7 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
         , serverRequest.requestContext()
         , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>");
+        , "<% > common/function_name%>");
     return;
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
@@ -176,7 +176,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   };
       <%/function:stream_exceptions?%>
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(std::move(returnStream), std::move(executor));
-  return {serializeResponse(&prot, ctx, result), std::move(encodedStream)};
+  return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(encodedStream)};
 <%/function:returns_stream?%>
 <%#function:returns_sink?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
@@ -220,7 +220,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   <%/type:sink_has_first_response?%>
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(sinkConsumerImpl)};
 <%/function:returns_sink?%>
 <%^function:returns_stream?%><%^function:returns_sink?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult result;
@@ -228,7 +228,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   result.get<0>().value = const_cast<<%type:cpp_type%>*>(&_return);
   result.setIsSet(0, true);
 <%/type:void?%>
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("<% > common/function_name%>", &prot, ctx, result);
 <%/function:returns_sink?%><%/function:returns_stream?%>
 }
 
@@ -282,29 +282,29 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
 <%/function:exceptions%>
   {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>");
+        ew, std::move(req), reqCtx, ctx, "<% > common/function_name%>");
     return;
   }
 <%#function:exceptions?%>
   ProtocolOut_ prot;
   <%^function:returns_stream?%><%^function:returns_sink?%>
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   return req->sendReply(std::move(payload));
   <%/function:returns_sink?%><%/function:returns_stream?%>
   <%#function:returns_stream?%>
-  auto response = serializeResponse(&prot, ctx, result.fields);
+  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
   <%/function:returns_stream?%>
   <%#function:returns_sink?%>
-  auto response = serializeResponse(&prot, ctx, result.fields);
+  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
   <%/function:returns_sink?%>

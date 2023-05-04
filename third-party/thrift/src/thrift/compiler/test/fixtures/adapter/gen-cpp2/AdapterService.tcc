@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_count(ap
   ::facebook::thrift::test::AdapterService_count_presult result;
   result.get<0>().value = const_cast<::facebook::thrift::test::CountingStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("count", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -138,7 +138,7 @@ apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_adaptedT
   ::facebook::thrift::test::AdapterService_adaptedTypes_presult result;
   result.get<0>().value = const_cast<::facebook::thrift::test::HeapAllocated*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("adaptedTypes", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

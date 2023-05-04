@@ -74,7 +74,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse service3AsyncProcessor::return_methodA(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test_cpp2::cpp_reflection::service3_methodA_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodA", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -146,7 +146,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse service3AsyncProcessor::return_methodB(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test_cpp2::cpp_reflection::service3_methodB_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodB", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -214,7 +214,7 @@ apache::thrift::SerializedResponse service3AsyncProcessor::return_methodC(apache
   ::test_cpp2::cpp_reflection::service3_methodC_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodC", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -288,7 +288,7 @@ apache::thrift::SerializedResponse service3AsyncProcessor::return_methodD(apache
   ::test_cpp2::cpp_reflection::service3_methodD_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodD", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -356,7 +356,7 @@ apache::thrift::SerializedResponse service3AsyncProcessor::return_methodE(apache
   ::test_cpp2::cpp_reflection::service3_methodE_presult result;
   result.get<0>().value = const_cast<::test_cpp2::cpp_reflection::struct2*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodE", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -430,7 +430,7 @@ apache::thrift::SerializedResponse service3AsyncProcessor::return_methodF(apache
   ::test_cpp2::cpp_reflection::service3_methodF_presult result;
   result.get<0>().value = const_cast<::test_cpp2::cpp_reflection::struct3*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("methodF", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

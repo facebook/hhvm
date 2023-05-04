@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_first(apache:
   ::test::fixtures::basic-structured-annotations::MyService_first_presult result;
   result.get<0>().value = const_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("first", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -138,7 +138,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_second(apache
   ::test::fixtures::basic-structured-annotations::MyService_second_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("second", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -66,7 +66,7 @@ apache::thrift::SerializedResponse AAsyncProcessor::return_foo(apache::thrift::C
   ::cpp2::A_foo_presult result;
   result.get<0>().value = const_cast<::cpp2::Foo*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("foo", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -104,7 +104,7 @@ void AAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "A.I.interact", serverRequest.requestContext()));
   auto& iface = static_cast<apache::thrift::ServiceHandler<A>::IIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    deserializeRequest<ProtocolIn_>(args, "I.interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -137,7 +137,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse AAsyncProcessor::return_I_interact(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::A_I_interact_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("I.interact", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -221,7 +221,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse BAsyncProcessor::return_bar(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::B_bar_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bar", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -292,7 +292,7 @@ apache::thrift::ResponseAndServerStreamFactory BAsyncProcessor::return_stream_st
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(std::move(returnStream), std::move(executor));
-  return {serializeResponse(&prot, ctx, result), std::move(encodedStream)};
+  return {serializeResponse("stream_stuff", &prot, ctx, result), std::move(encodedStream)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -372,7 +372,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("sink_stuff", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -414,7 +414,7 @@ void CAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "C.I.interact", serverRequest.requestContext()));
   auto& iface = static_cast<apache::thrift::ServiceHandler<C>::IIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    deserializeRequest<ProtocolIn_>(args, "I.interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -447,7 +447,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse CAsyncProcessor::return_I_interact(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::C_I_interact_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("I.interact", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

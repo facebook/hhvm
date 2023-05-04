@@ -66,7 +66,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_foo(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_foo_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("foo", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -132,7 +132,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_bar(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_bar_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bar", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

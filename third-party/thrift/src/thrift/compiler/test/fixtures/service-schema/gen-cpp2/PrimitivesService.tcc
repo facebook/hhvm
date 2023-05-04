@@ -74,7 +74,7 @@ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_init(
   ::cpp2::PrimitivesService_init_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("init", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -142,7 +142,7 @@ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_metho
   ::cpp2::PrimitivesService_method_that_throws_presult result;
   result.get<0>().value = const_cast<::cpp2::Result*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("method_that_throws", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -167,7 +167,7 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(apache::t
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("method_that_throws", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "method_that_throws");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -227,7 +227,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::PrimitivesService_return_void_method_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("return_void_method", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse FB303ServiceAsyncProcessor::return_simple_rpc
   ::test::fixtures::basic::FB303Service_simple_rpc_presult result;
   result.get<0>().value = const_cast<::test::fixtures::basic::ReservedKeyword*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("simple_rpc", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

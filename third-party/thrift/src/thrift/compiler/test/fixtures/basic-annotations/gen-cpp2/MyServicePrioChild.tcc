@@ -64,7 +64,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServicePrioChildAsyncProcessor::return_pang(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServicePrioChild_pang_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("pang", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

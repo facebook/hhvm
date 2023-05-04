@@ -70,7 +70,7 @@ apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_bounce_map(
   ::apache::thrift::fixtures::types::SomeService_bounce_map_presult result;
   result.get<0>().value = const_cast<::apache::thrift::fixtures::types::SomeMap*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bounce_map", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -140,7 +140,7 @@ apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_binary_keye
   ::apache::thrift::fixtures::types::SomeService_binary_keyed_map_presult result;
   result.get<0>().value = const_cast<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("binary_keyed_map", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

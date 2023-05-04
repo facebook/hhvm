@@ -66,7 +66,7 @@ apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_bar(apache:
   ::cpp2::GoodService_bar_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bar", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -104,7 +104,7 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "BadService.BadInteraction.foo", serverRequest.requestContext()));
   auto& iface = static_cast<apache::thrift::ServiceHandler<GoodService>::BadInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    deserializeRequest<ProtocolIn_>(args, "BadInteraction.foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -137,7 +137,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_BadInteraction_foo(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::GoodService_BadInteraction_foo_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("BadInteraction.foo", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

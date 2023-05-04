@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse TestServiceAsyncProcessor::return_init(apache
   ::test::namespace_from_package_without_module_name::TestService_init_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("init", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -77,7 +77,7 @@ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_simple_fun
   ::extra::svc::ExtraService_simple_function_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("simple_function", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -146,7 +146,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::extra::svc::ExtraService_throws_function_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("throws_function", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -181,7 +181,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function(apache::thrift::R
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("throws_function", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "throws_function");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -243,7 +243,7 @@ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_fun
   ::extra::svc::ExtraService_throws_function2_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("throws_function2", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -278,7 +278,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function2(apache::thrift::
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("throws_function2", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "throws_function2");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -342,7 +342,7 @@ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_fun
   ::extra::svc::ExtraService_throws_function3_presult result;
   result.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::string>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("throws_function3", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -377,7 +377,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function3(apache::thrift::
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("throws_function3", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "throws_function3");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());

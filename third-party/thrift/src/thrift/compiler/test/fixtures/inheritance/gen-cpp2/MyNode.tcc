@@ -64,7 +64,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyNodeAsyncProcessor::return_do_mid(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyNode_do_mid_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("do_mid", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

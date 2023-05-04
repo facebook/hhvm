@@ -74,7 +74,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapList(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_mapList_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("mapList", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -142,7 +142,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapSet(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_mapSet_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("mapSet", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -210,7 +210,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listMap(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_listMap_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("listMap", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -278,7 +278,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listSet(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_listSet_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("listSet", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -346,7 +346,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_turtles(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_turtles_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("turtles", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

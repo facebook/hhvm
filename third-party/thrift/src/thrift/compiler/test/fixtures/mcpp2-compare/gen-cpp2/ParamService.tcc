@@ -125,7 +125,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_i16_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_i16_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_i16_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -195,7 +195,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_byte_i16_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_byte_i16_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_byte_i16_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -263,7 +263,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_map_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_map_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_map_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -333,7 +333,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_map_setlist_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_map_setlist_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_map_setlist_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -401,7 +401,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_map_typedef_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_map_typedef_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_map_typedef_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -469,7 +469,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_enum_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_enum_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_enum_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -537,7 +537,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_struct_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_struct_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_struct_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -605,7 +605,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_void_ret_listunion_param(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ParamService_void_ret_listunion_param_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("void_ret_listunion_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -677,7 +677,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_bool_ret_i
   ::some::valid::ns::ParamService_bool_ret_i32_i64_param_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bool_ret_i32_i64_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -747,7 +747,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_bool_ret_m
   ::some::valid::ns::ParamService_bool_ret_map_param_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bool_ret_map_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -817,7 +817,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_bool_ret_u
   ::some::valid::ns::ParamService_bool_ret_union_param_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("bool_ret_union_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -889,7 +889,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_i64_ret_fl
   ::some::valid::ns::ParamService_i64_ret_float_double_param_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i64_ret_float_double_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -961,7 +961,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_i64_ret_st
   ::some::valid::ns::ParamService_i64_ret_string_typedef_param_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i64_ret_string_typedef_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1042,7 +1042,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_i64_ret_i3
   ::some::valid::ns::ParamService_i64_ret_i32_i32_i32_i32_i32_param_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i64_ret_i32_i32_i32_i32_i32_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1112,7 +1112,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_double_ret
   ::some::valid::ns::ParamService_double_ret_setstruct_param_presult result;
   result.get<0>().value = const_cast<double*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("double_ret_setstruct_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1182,7 +1182,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_string_ret
   ::some::valid::ns::ParamService_string_ret_string_param_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("string_ret_string_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1252,7 +1252,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_binary_ret
   ::some::valid::ns::ParamService_binary_ret_binary_param_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("binary_ret_binary_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1322,7 +1322,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_map_ret_bo
   ::some::valid::ns::ParamService_map_ret_bool_param_presult result;
   result.get<0>().value = const_cast<::std::map<::std::string, ::std::int64_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("map_ret_bool_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1394,7 +1394,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_list_ret_m
   ::some::valid::ns::ParamService_list_ret_map_setlist_param_presult result;
   result.get<0>().value = const_cast<::std::vector<bool>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_ret_map_setlist_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1464,7 +1464,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_mapsetlist
   ::some::valid::ns::ParamService_mapsetlistmapliststring_ret_listlistlist_param_presult result;
   result.get<0>().value = const_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("mapsetlistmapliststring_ret_listlistlist_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1534,7 +1534,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_typedef_re
   ::some::valid::ns::ParamService_typedef_ret_i32_param_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::simpleTypeDef*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("typedef_ret_i32_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1607,7 +1607,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_listtypede
   ::some::valid::ns::ParamService_listtypedef_ret_typedef_param_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::simpleTypeDef>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("listtypedef_ret_typedef_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1677,7 +1677,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_enum_ret_d
   ::some::valid::ns::ParamService_enum_ret_double_param_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::MyEnumA*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("enum_ret_double_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1749,7 +1749,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_enum_ret_d
   ::some::valid::ns::ParamService_enum_ret_double_enum_param_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::MyEnumA*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("enum_ret_double_enum_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1819,7 +1819,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_listenum_r
   ::some::valid::ns::ParamService_listenum_ret_map_param_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::MyEnumA>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("listenum_ret_map_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1892,7 +1892,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_struct_ret
   ::some::valid::ns::ParamService_struct_ret_i16_param_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::MyStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("struct_ret_i16_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1962,7 +1962,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_setstruct_
   ::some::valid::ns::ParamService_setstruct_ret_set_param_presult result;
   result.get<0>().value = const_cast<::std::set<::some::valid::ns::MyStruct>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("setstruct_ret_set_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2034,7 +2034,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_union_ret_
   ::some::valid::ns::ParamService_union_ret_i32_i32_param_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::ComplexUnion*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("union_ret_i32_i32_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2104,7 +2104,7 @@ apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_listunion_
   ::some::valid::ns::ParamService_listunion_string_param_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::ComplexUnion>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("listunion_string_param", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -66,7 +66,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_ping(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServicePrioParent_ping_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("ping", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -132,7 +132,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_pong(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServicePrioParent_pong_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("pong", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

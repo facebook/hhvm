@@ -85,7 +85,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
       getServiceName(),
-      "<%service:parent_service_name%>.<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>",
+      "<%service:parent_service_name%>.<% > common/function_name%>",
       *header);
 
   return {std::move(ctx), std::move(header)};

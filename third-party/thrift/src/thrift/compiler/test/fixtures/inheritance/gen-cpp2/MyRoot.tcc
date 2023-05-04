@@ -64,7 +64,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyRootAsyncProcessor::return_do_root(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyRoot_do_root_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("do_root", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

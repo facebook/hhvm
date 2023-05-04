@@ -148,7 +148,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_five(
   ::py3::simple::SimpleService_get_five_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_five", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -218,7 +218,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_add_five(
   ::py3::simple::SimpleService_add_five_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("add_five", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -284,7 +284,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_do_nothing(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::py3::simple::SimpleService_do_nothing_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("do_nothing", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -356,7 +356,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat(ap
   ::py3::simple::SimpleService_concat_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("concat", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -426,7 +426,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_value
   ::py3::simple::SimpleService_get_value_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_value", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -496,7 +496,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_negate(ap
   ::py3::simple::SimpleService_negate_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("negate", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -566,7 +566,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_tiny(apac
   ::py3::simple::SimpleService_tiny_presult result;
   result.get<0>().value = const_cast<::std::int8_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("tiny", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -636,7 +636,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_small(apa
   ::py3::simple::SimpleService_small_presult result;
   result.get<0>().value = const_cast<::std::int16_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("small", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -706,7 +706,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_big(apach
   ::py3::simple::SimpleService_big_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("big", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -776,7 +776,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_two(apach
   ::py3::simple::SimpleService_two_presult result;
   result.get<0>().value = const_cast<double*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("two", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -842,7 +842,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_expected_exception(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::py3::simple::SimpleService_expected_exception_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("expected_exception", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -867,7 +867,7 @@ void SimpleServiceAsyncProcessor::throw_wrapped_expected_exception(apache::thrif
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("expected_exception", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "expected_exception");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -927,7 +927,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unexpecte
   ::py3::simple::SimpleService_unexpected_exception_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("unexpected_exception", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -997,7 +997,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i16_l
   ::py3::simple::SimpleService_sum_i16_list_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sum_i16_list", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1067,7 +1067,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i32_l
   ::py3::simple::SimpleService_sum_i32_list_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sum_i32_list", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1137,7 +1137,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i64_l
   ::py3::simple::SimpleService_sum_i64_list_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sum_i64_list", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1207,7 +1207,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat_ma
   ::py3::simple::SimpleService_concat_many_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("concat_many", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1277,7 +1277,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_count_str
   ::py3::simple::SimpleService_count_structs_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("count_structs", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1347,7 +1347,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_set(a
   ::py3::simple::SimpleService_sum_set_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sum_set", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1419,7 +1419,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contains_
   ::py3::simple::SimpleService_contains_word_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("contains_word", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1491,7 +1491,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_map_v
   ::py3::simple::SimpleService_get_map_value_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_map_value", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1561,7 +1561,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_map_lengt
   ::py3::simple::SimpleService_map_length_presult result;
   result.get<0>().value = const_cast<::std::int16_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("map_length", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1631,7 +1631,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_map_v
   ::py3::simple::SimpleService_sum_map_values_presult result;
   result.get<0>().value = const_cast<::std::int16_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sum_map_values", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1701,7 +1701,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_complex_s
   ::py3::simple::SimpleService_complex_sum_i32_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("complex_sum_i32", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1771,7 +1771,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_repeat_na
   ::py3::simple::SimpleService_repeat_name_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("repeat_name", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1839,7 +1839,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struc
   ::py3::simple::SimpleService_get_struct_presult result;
   result.get<0>().value = const_cast<::py3::simple::SimpleStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_struct", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1909,7 +1909,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_fib(apach
   ::py3::simple::SimpleService_fib_presult result;
   result.get<0>().value = const_cast<::std::vector<::std::int32_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("fib", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1979,7 +1979,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unique_wo
   ::py3::simple::SimpleService_unique_words_presult result;
   result.get<0>().value = const_cast<::std::set<::std::string>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("unique_words", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2049,7 +2049,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_words_cou
   ::py3::simple::SimpleService_words_count_presult result;
   result.get<0>().value = const_cast<::std::map<::std::string, ::std::int16_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("words_count", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2119,7 +2119,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_set_enum(
   ::py3::simple::SimpleService_set_enum_presult result;
   result.get<0>().value = const_cast<::py3::simple::AnEnum*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("set_enum", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2191,7 +2191,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_l
   ::py3::simple::SimpleService_list_of_lists_presult result;
   result.get<0>().value = const_cast<::std::vector<::std::vector<::std::int32_t>>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_of_lists", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2261,7 +2261,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_word_char
   ::py3::simple::SimpleService_word_character_frequency_presult result;
   result.get<0>().value = const_cast<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("word_character_frequency", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2331,7 +2331,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_s
   ::py3::simple::SimpleService_list_of_sets_presult result;
   result.get<0>().value = const_cast<::std::vector<::std::set<::std::string>>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_of_sets", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2401,7 +2401,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_nested_ma
   ::py3::simple::SimpleService_nested_map_argument_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("nested_map_argument", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2471,7 +2471,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_make_sent
   ::py3::simple::SimpleService_make_sentence_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("make_sentence", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2541,7 +2541,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_union
   ::py3::simple::SimpleService_get_union_presult result;
   result.get<0>().value = const_cast<::std::set<::std::int32_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_union", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2611,7 +2611,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_keys(
   ::py3::simple::SimpleService_get_keys_presult result;
   result.get<0>().value = const_cast<::std::set<::std::string>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_keys", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2681,7 +2681,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_lookup_do
   ::py3::simple::SimpleService_lookup_double_presult result;
   result.get<0>().value = const_cast<double*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("lookup_double", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2751,7 +2751,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_retrieve_
   ::py3::simple::SimpleService_retrieve_binary_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("retrieve_binary", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2821,7 +2821,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_b
   ::py3::simple::SimpleService_contain_binary_presult result;
   result.get<0>().value = const_cast<::std::set<::std::string>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("contain_binary", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2891,7 +2891,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_e
   ::py3::simple::SimpleService_contain_enum_presult result;
   result.get<0>().value = const_cast<::std::vector<::py3::simple::AnEnum>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("contain_enum", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -2961,7 +2961,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_binar
   ::py3::simple::SimpleService_get_binary_union_struct_presult result;
   result.get<0>().value = const_cast<::py3::simple::BinaryUnionStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_binary_union_struct", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -3029,7 +3029,7 @@ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struc
   ::py3::simple::SimpleService_get_struct_hidden_presult result;
   result.get<0>().value = const_cast<::py3::simple::SimpleStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_struct_hidden", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

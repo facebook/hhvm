@@ -66,7 +66,7 @@ apache::thrift::SerializedResponse DerivedServiceAsyncProcessor::return_get_six(
   ::py3::simple::DerivedService_get_six_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get_six", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

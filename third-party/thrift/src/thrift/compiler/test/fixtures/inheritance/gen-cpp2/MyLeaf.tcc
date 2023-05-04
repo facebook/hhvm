@@ -64,7 +64,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyLeafAsyncProcessor::return_do_leaf(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyLeaf_do_leaf_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("do_leaf", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -51,7 +51,7 @@ apache::thrift::ServiceRequestInfoMap <%service:cpp_name%>ServiceInfoHolder::sta
   {"<%function:name%>",
     {<%#function:eb%>true<%/function:eb%><%^function:eb%>false<%/function:eb%>,
      <% > types/function_kind%>,
-     "<%service:parent_service_name%>.<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>",
+     "<%service:parent_service_name%>.<% > common/function_name%>",
      std::nullopt,
      apache::thrift::concurrency::<%function:priority%>}},
 <%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
@@ -59,7 +59,7 @@ apache::thrift::ServiceRequestInfoMap <%service:cpp_name%>ServiceInfoHolder::sta
   {"<%service:name%>.<%function:name%>",
     {<%#function:eb%>true<%/function:eb%><%^function:eb%>false<%/function:eb%>,
      <% > types/function_kind%>,
-     "<%service:parent_service_name%>.<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>",
+     "<%service:parent_service_name%>.<% > common/function_name%>",
      "<%service:name%>",
      apache::thrift::concurrency::<%function:priority%>}},
 <%/function:return_type%><%/service:functions%><%/service:interactions%>

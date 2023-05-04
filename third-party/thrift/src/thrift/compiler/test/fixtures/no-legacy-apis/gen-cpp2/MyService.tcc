@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_query(apache:
   ::test::fixtures::basic::MyService_query_presult result;
   result.get<0>().value = const_cast<::test::fixtures::basic::MyStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("query", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -70,7 +70,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_query(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_query_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("query", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -140,7 +140,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_has_arg_docs(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_has_arg_docs_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("has_arg_docs", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

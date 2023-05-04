@@ -72,7 +72,7 @@ apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(apache::th
   ::facebook::thrift::test::Service_func_presult result;
   result.get<0>().value = const_cast<::facebook::thrift::test::MyI32*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("func", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

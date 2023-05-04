@@ -107,7 +107,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_noReturn(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ReturnService_noReturn_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("noReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -175,7 +175,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_boolRetur
   ::some::valid::ns::ReturnService_boolReturn_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("boolReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -243,7 +243,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i16Return
   ::some::valid::ns::ReturnService_i16Return_presult result;
   result.get<0>().value = const_cast<::std::int16_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i16Return", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -311,7 +311,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i32Return
   ::some::valid::ns::ReturnService_i32Return_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i32Return", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -379,7 +379,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i64Return
   ::some::valid::ns::ReturnService_i64Return_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("i64Return", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -447,7 +447,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_floatRetu
   ::some::valid::ns::ReturnService_floatReturn_presult result;
   result.get<0>().value = const_cast<float*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("floatReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -515,7 +515,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_doubleRet
   ::some::valid::ns::ReturnService_doubleReturn_presult result;
   result.get<0>().value = const_cast<double*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("doubleReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -586,7 +586,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_stringRet
   ::some::valid::ns::ReturnService_stringReturn_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("stringReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -654,7 +654,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_binaryRet
   ::some::valid::ns::ReturnService_binaryReturn_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("binaryReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -722,7 +722,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_mapReturn
   ::some::valid::ns::ReturnService_mapReturn_presult result;
   result.get<0>().value = const_cast<::std::map<::std::string, ::std::int64_t>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("mapReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -790,7 +790,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_simpleTyp
   ::some::valid::ns::ReturnService_simpleTypedefReturn_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::simpleTypeDef*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("simpleTypedefReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -858,7 +858,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_complexTy
   ::some::valid::ns::ReturnService_complexTypedefReturn_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::complexStructTypeDef*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("complexTypedefReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -926,7 +926,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_most
   ::some::valid::ns::ReturnService_list_mostComplexTypedefReturn_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::mostComplexTypeDef>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_mostComplexTypedefReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -997,7 +997,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_enumRetur
   ::some::valid::ns::ReturnService_enumReturn_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::MyEnumA*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("enumReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1068,7 +1068,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_Enum
   ::some::valid::ns::ReturnService_list_EnumReturn_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::MyEnumA>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_EnumReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1136,7 +1136,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_structRet
   ::some::valid::ns::ReturnService_structReturn_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::MyStruct*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("structReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1204,7 +1204,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_set_Struc
   ::some::valid::ns::ReturnService_set_StructReturn_presult result;
   result.get<0>().value = const_cast<::std::set<::some::valid::ns::MyStruct>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("set_StructReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1275,7 +1275,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_unionRetu
   ::some::valid::ns::ReturnService_unionReturn_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::ComplexUnion*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("unionReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1343,7 +1343,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_Unio
   ::some::valid::ns::ReturnService_list_UnionReturn_presult result;
   result.get<0>().value = const_cast<::std::vector<::some::valid::ns::ComplexUnion>*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("list_UnionReturn", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1416,7 +1416,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readDataE
   ::some::valid::ns::ReturnService_readDataEb_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::IOBuf*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("readDataEb", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1486,7 +1486,7 @@ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readData(
   ::some::valid::ns::ReturnService_readData_presult result;
   result.get<0>().value = const_cast<::some::valid::ns::IOBufPtr*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("readData", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

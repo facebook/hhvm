@@ -632,7 +632,10 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   template <typename ProtocolOut, typename Result>
   static SerializedResponse serializeResponse(
-      ProtocolOut* prot, ContextStack* ctx, const Result& result);
+      const char* method,
+      ProtocolOut* prot,
+      ContextStack* ctx,
+      const Result& result);
 
   // Returns true if setup succeeded and sends an error response otherwise.
   // Always runs in eb thread.
@@ -1503,8 +1506,12 @@ LegacySerializedResponse GeneratedAsyncProcessorBase::serializeLegacyResponse(
 
 template <typename ProtocolOut, typename Result>
 SerializedResponse GeneratedAsyncProcessorBase::serializeResponse(
-    ProtocolOut* prot, ContextStack* ctx, const Result& result) {
-  return serializeResponseImpl<SerializedResponse>("", prot, 0, ctx, result);
+    const char* method,
+    ProtocolOut* prot,
+    ContextStack* ctx,
+    const Result& result) {
+  return serializeResponseImpl<SerializedResponse>(
+      method, prot, 0, ctx, result);
 }
 
 template <typename ChildType>

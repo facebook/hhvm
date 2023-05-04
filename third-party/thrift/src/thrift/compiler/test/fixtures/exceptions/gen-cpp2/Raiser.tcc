@@ -70,7 +70,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doBland(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Raiser_doBland_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("doBland", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -136,7 +136,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doRaise(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Raiser_doRaise_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("doRaise", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -181,7 +181,7 @@ void RaiserAsyncProcessor::throw_wrapped_doRaise(apache::thrift::ResponseChannel
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("doRaise", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "doRaise");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -241,7 +241,7 @@ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get200(apache::t
   ::cpp2::Raiser_get200_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get200", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -309,7 +309,7 @@ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get500(apache::t
   ::cpp2::Raiser_get500_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get500", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -354,7 +354,7 @@ void RaiserAsyncProcessor::throw_wrapped_get500(apache::thrift::ResponseChannelR
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result);
+  auto response = serializeResponse("get500", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "get500");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());

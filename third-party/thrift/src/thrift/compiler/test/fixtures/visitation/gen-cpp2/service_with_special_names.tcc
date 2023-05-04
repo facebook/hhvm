@@ -120,7 +120,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_get_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("get", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -188,7 +188,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_getter_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("getter", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -256,7 +256,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_lists_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("lists", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -324,7 +324,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_maps_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("maps", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -392,7 +392,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_name_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("name", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -460,7 +460,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_name_to_value_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("name_to_value", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -528,7 +528,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_names_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("names", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -596,7 +596,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_prefix_tree_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("prefix_tree", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -664,7 +664,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_sets_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sets", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -732,7 +732,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_setter_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("setter", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -800,7 +800,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_str_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("str", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -868,7 +868,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_strings_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("strings", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -936,7 +936,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_type_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("type", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1004,7 +1004,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_value_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("value", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1072,7 +1072,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_value_to_name_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("value_to_name", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1140,7 +1140,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_values_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("values", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1208,7 +1208,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_id_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("id", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1276,7 +1276,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_ids_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("ids", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1344,7 +1344,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_descriptor_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("descriptor", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1412,7 +1412,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_descriptors_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("descriptors", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1480,7 +1480,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_key_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("key", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1548,7 +1548,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_keys_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("keys", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1616,7 +1616,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_annotation_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("annotation", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1684,7 +1684,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_annotations_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("annotations", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1752,7 +1752,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_member_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("member", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1820,7 +1820,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_members_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("members", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1888,7 +1888,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_field_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("field", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -1956,7 +1956,7 @@ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::ret
   ::test_cpp2::cpp_reflection::service_with_special_names_fields_presult result;
   result.get<0>().value = const_cast<::std::int32_t*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("fields", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -118,7 +118,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("method", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -200,7 +200,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return.sinkConsumer),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodAndReponse", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -280,7 +280,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -305,7 +305,7 @@ void SinkServiceAsyncProcessor::throw_wrapped_methodThrow(apache::thrift::Respon
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse(&prot, ctx, result.fields);
+  auto response = serializeResponse("methodThrow", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "methodThrow");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
@@ -377,7 +377,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodSinkThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -467,7 +467,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodFinalThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -557,7 +557,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodBothThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -640,7 +640,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(_return),
       std::move(executor));
 
-  return {serializeResponse(&prot, ctx, result), std::move(sinkConsumerImpl)};
+  return {serializeResponse("methodFast", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

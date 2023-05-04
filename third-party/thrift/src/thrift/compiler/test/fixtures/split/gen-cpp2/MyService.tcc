@@ -77,7 +77,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_ping(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_ping_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("ping", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -145,7 +145,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData
   ::cpp2::MyService_getRandomData_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("getRandomData", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -213,7 +213,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_sink(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_sink_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("sink", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -283,7 +283,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_putDataById(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_putDataById_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("putDataById", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -353,7 +353,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(a
   ::cpp2::MyService_hasDataById_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("hasDataById", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -423,7 +423,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(a
   ::cpp2::MyService_getDataById_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("getDataById", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -491,7 +491,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_deleteDataById(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_deleteDataById_presult result;
-  return serializeResponse(&prot, ctx, result);
+  return serializeResponse("deleteDataById", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

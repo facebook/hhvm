@@ -12,7 +12,8 @@
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
-namespace fizz::server {
+namespace fizz {
+namespace server {
 
 /**
  * Interface for encrypting and decrypting various tokens, e.g., PSKs.
@@ -35,4 +36,5 @@ class TokenCipher {
       std::unique_ptr<folly::IOBuf>,
       folly::IOBuf* associatedData = nullptr) const = 0;
 };
-} // namespace fizz::server
+} // namespace server
+} // namespace fizz

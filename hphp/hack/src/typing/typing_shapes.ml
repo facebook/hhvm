@@ -339,13 +339,29 @@ let to_collection env pos shape_ty res return_type =
             in
             Typing_union.union_list env r keys
         in
-        let values = TShapeMap.values fdm in
-        let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
         (* The value type is the union of the types of the known fields together
          * with the type of the unknown fields (open shape, typically mixed or supportdyn<mixed>)
          *)
         let (env, value) =
-          Typing_union.union_list env r (shape_kind :: values)
+          (* If the unknown fields have type mixed then that's the type of values: no need for union *)
+          if TUtils.is_mixed env shape_kind then
+            (env, shape_kind)
+          else
+            (* Otherwise first filter out subtypes (common case,
+             * as unknown fields are likely supportdyn<mixed>)
+             * and then construct the union.
+             *)
+            let values = TShapeMap.values fdm in
+            let values =
+              List.filter_map
+                ~f:(fun { sft_ty; _ } ->
+                  if TUtils.is_sub_type env sft_ty shape_kind then
+                    None
+                  else
+                    Some sft_ty)
+                values
+            in
+            Typing_union.union_list env r (shape_kind :: values)
         in
         return_type env (get_reason res) key value
 

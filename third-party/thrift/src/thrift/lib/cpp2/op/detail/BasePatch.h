@@ -23,6 +23,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/op/Clear.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
@@ -103,6 +104,12 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
     } else {
       std::forward<U>(next).customVisit(derived());
     }
+  }
+
+  // Convert Static Patch to Dynamic Patch.
+  protocol::Object toObject() const {
+    return protocol::asValueStruct<type::struct_c>(Base::toThrift())
+        .as_object();
   }
 
  protected:

@@ -106,17 +106,6 @@ pub(crate) enum Replacement {
 }
 
 impl Replacement {
-    fn pattern(&self) -> &TokenStream {
-        match self {
-            Replacement::Simple { pat, .. }
-            | Replacement::AsExpr { pat, .. }
-            | Replacement::Id { pat, .. }
-            | Replacement::Lvar { pat, .. }
-            | Replacement::Repeat { pat, .. }
-            | Replacement::Str { pat, .. } => pat,
-        }
-    }
-
     fn into_expr(self) -> Result<TokenStream> {
         Ok(match self {
             Replacement::Simple { pat, span } => {
@@ -808,10 +797,15 @@ impl ser::SerializeSeq for SerializeSeq {
                 let mut cur = Vec::new();
                 for item in self.seq {
                     match item {
-                        AstValue::Replace(ReplaceState::Expr(repl) | ReplaceState::Stmt(repl))
-                        | AstValue::Replace(ReplaceState::Tuple2(box (_, repl))) => {
+                        AstValue::Replace(
+                            ReplaceState::Expr(Replacement::Repeat { pat, .. })
+                            | ReplaceState::Stmt(Replacement::Repeat { pat, .. }),
+                        )
+                        | AstValue::Replace(ReplaceState::Tuple2(box (
+                            _,
+                            Replacement::Repeat { pat, .. },
+                        ))) => {
                             flush(&mut outer, &mut cur);
-                            let pat = repl.pattern();
                             outer.extend(quote!(.chain(#pat.into_iter())));
                         }
                         _ => cur.push(item.into_tokens()?),

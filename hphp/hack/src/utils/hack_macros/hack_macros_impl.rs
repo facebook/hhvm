@@ -1588,4 +1588,45 @@ mod tests {
             }),
         );
     }
+
+    #[test]
+    fn test_exprs_expand() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(EX r#"return vec[#a, #{b*}, #c];"#)),
+            quote!({
+                use EX::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::Return(Box::new(Some(Expr(
+                        (),
+                        __hygienic_pos.clone(),
+                        Expr_::ValCollection(Box::new((
+                            (__hygienic_pos.clone(), VcKind::Vec),
+                            None,
+                            std::iter::empty()
+                                .chain(
+                                    [{
+                                        let tmp: Expr = a;
+                                        tmp
+                                    }]
+                                    .into_iter(),
+                                )
+                                .chain(b.into_iter())
+                                .chain(
+                                    [{
+                                        let tmp: Expr = c;
+                                        tmp
+                                    }]
+                                    .into_iter(),
+                                )
+                                .collect::<Vec<_>>(),
+                        ))),
+                    )))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
 }

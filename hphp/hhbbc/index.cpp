@@ -416,12 +416,12 @@ PropState make_unknown_propstate(const Index& index,
 //////////////////////////////////////////////////////////////////////
 
 template <typename Resolve, typename Self>
-Index::ConstraintType<>
+Index::ConstraintType
 type_from_constraint(const TypeConstraint& tc,
                      const Type& candidate,
                      const Resolve& resolve,
                      const Self& self) {
-  using C = Index::ConstraintType<>;
+  using C = Index::ConstraintType;
 
   assertx(IMPLIES(
     !tc.isCheckable(),
@@ -3709,7 +3709,7 @@ struct Index::IndexData {
   };
   folly_concurrent_hash_map_simd<
     std::pair<const php::Class*, SString>,
-    ClsConstInfo<>,
+    ClsConstInfo,
     ClsConstTypesHasher,
     ClsConstTypesEquals
   > clsConstTypes;
@@ -3717,7 +3717,7 @@ struct Index::IndexData {
   // Cache for lookup_class_constant
   folly_concurrent_hash_map_simd<
     std::pair<const php::Class*, SString>,
-    ClsConstLookupResult<>,
+    ClsConstLookupResult,
     ClsConstTypesHasher,
     ClsConstTypesEquals
   > clsConstLookupCache;
@@ -5049,14 +5049,14 @@ bool class_init_might_raise(IndexData& data,
  * which will succeed (if any), and if the type-constraint check might
  * throw.
  */
-PropMergeResult<> prop_tc_effects(const Index& index,
-                                  const ClassInfo* ci,
-                                  const php::Prop& prop,
-                                  const Type& val,
-                                  bool checkUB) {
+PropMergeResult prop_tc_effects(const Index& index,
+                                const ClassInfo* ci,
+                                const php::Prop& prop,
+                                const Type& val,
+                                bool checkUB) {
   assertx(prop.typeConstraint.validForProp());
 
-  using R = PropMergeResult<>;
+  using R = PropMergeResult;
 
   // If we're not actually checking property type-hints, everything
   // goes
@@ -5113,13 +5113,13 @@ PropMergeResult<> prop_tc_effects(const Index& index,
  * to avoid redundant class hierarchy walks). `clsCtx' is the current
  * context, converted to a ClassInfo* (or nullptr if not in a class).
 */
-PropLookupResult<> lookup_static_impl(IndexData& data,
-                                      Context ctx,
-                                      const ClassInfo* clsCtx,
-                                      const PropertiesInfo& privateProps,
-                                      const ClassInfo* start,
-                                      SString propName,
-                                      bool startOnly) {
+PropLookupResult lookup_static_impl(IndexData& data,
+                                    Context ctx,
+                                    const ClassInfo* clsCtx,
+                                    const PropertiesInfo& privateProps,
+                                    const ClassInfo* start,
+                                    SString propName,
+                                    bool startOnly) {
   ITRACE(
     6, "lookup_static_impl: {} {} {}\n",
     clsCtx ? clsCtx->cls->name->toCppString() : std::string{"-"},
@@ -5154,7 +5154,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
                              const ClassInfo* ci) {
     // The property was definitely found. Compute its attributes
     // from the prop metadata.
-    return PropLookupResult<>{
+    return PropLookupResult{
       type(prop, ci),
       propName,
       TriBool::Yes,
@@ -5168,7 +5168,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
 
   auto const notFound = [&] {
     // The property definitely wasn't found.
-    return PropLookupResult<>{
+    return PropLookupResult{
       TBottom,
       propName,
       TriBool::No,
@@ -5214,7 +5214,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
   assertx(!startOnly);
   auto const result = visit_parent_cinfo(
     start,
-    [&] (const ClassInfo* ci) -> Optional<PropLookupResult<>> {
+    [&] (const ClassInfo* ci) -> Optional<PropLookupResult> {
       for (auto const& prop : ci->cls->properties) {
         if (prop.name != propName) continue;
         // We have a matching prop. If its not static or not
@@ -5262,18 +5262,18 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
  * dependencies).
  */
 template <typename F>
-PropMergeResult<> merge_static_type_impl(IndexData& data,
-                                         Context ctx,
-                                         F mergePublic,
-                                         PropertiesInfo& privateProps,
-                                         const ClassInfo* clsCtx,
-                                         const ClassInfo* start,
-                                         SString propName,
-                                         const Type& val,
-                                         bool checkUB,
-                                         bool ignoreConst,
-                                         bool mustBeReadOnly,
-                                         bool startOnly) {
+PropMergeResult merge_static_type_impl(IndexData& data,
+                                       Context ctx,
+                                       F mergePublic,
+                                       PropertiesInfo& privateProps,
+                                       const ClassInfo* clsCtx,
+                                       const ClassInfo* start,
+                                       SString propName,
+                                       const Type& val,
+                                       bool checkUB,
+                                       bool ignoreConst,
+                                       bool mustBeReadOnly,
+                                       bool startOnly) {
   ITRACE(
     6, "merge_static_type_impl: {} {} {} {}\n",
     clsCtx ? clsCtx->cls->name->toCppString() : std::string{"-"},
@@ -5312,7 +5312,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
          // If the property is internal, accessing it may throw
          // TODO(T131951529): we can do better by checking modules here
         if ((prop.attrs & AttrInternal) && effects.throws == TriBool::No) {
-          return PropMergeResult<>{
+          return PropMergeResult{
             effects.adjusted,
             TriBool::Maybe
           };
@@ -5333,7 +5333,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
   // If we don't find a property, then the mutation will definitely
   // fail.
   auto const notFound = [&] {
-    return PropMergeResult<>{
+    return PropMergeResult{
       TBottom,
       TriBool::Yes
     };
@@ -5378,7 +5378,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
   assertx(!startOnly);
   auto result = visit_parent_cinfo(
     start,
-    [&] (const ClassInfo* ci) -> Optional<PropMergeResult<>> {
+    [&] (const ClassInfo* ci) -> Optional<PropMergeResult> {
       for (auto const& prop : ci->cls->properties) {
         if (prop.name != propName) continue;
         // We found a property with the right name, but its
@@ -5422,7 +5422,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
   // initialization can throw. If we might already throw (or
   // definitely will throw), this doesn't matter.
   if (result->throws == TriBool::No) {
-    return PropMergeResult<>{
+    return PropMergeResult{
       std::move(result->adjusted),
       maybeOrNo(class_init_might_raise(data, ctx, start))
     };
@@ -14362,7 +14362,7 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   return resolve_func_helper((it != end(m_data->funcs)) ? it->second : nullptr, name);
 }
 
-Index::ConstraintType<>
+Index::ConstraintType
 Index::lookup_constraint(const Context& ctx,
                          const TypeConstraint& tc,
                          const Type& candidate) const {
@@ -14576,14 +14576,14 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
   return !unresolved;
 }
 
-ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
-                                                    const Type& cls,
-                                                    const Type& name) const {
+ClsConstLookupResult Index::lookup_class_constant(Context ctx,
+                                                  const Type& cls,
+                                                  const Type& name) const {
   ITRACE(4, "lookup_class_constant: ({}) {}::{}\n",
          show(ctx), show(cls), show(name));
   Trace::Indent _;
 
-  using R = ClsConstLookupResult<>;
+  using R = ClsConstLookupResult;
 
   auto const conservative = [] {
     ITRACE(4, "conservative\n");
@@ -14702,22 +14702,22 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   return *result;
 }
 
-std::vector<std::pair<SString, ClsConstInfo<>>>
+std::vector<std::pair<SString, ClsConstInfo>>
 Index::lookup_class_constants(const php::Class& cls) const {
-  std::vector<std::pair<SString, ClsConstInfo<>>> out;
+  std::vector<std::pair<SString, ClsConstInfo>> out;
   out.reserve(cls.constants.size());
   for (auto const& cns : cls.constants) {
     if (cns.kind != ConstModifiers::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) {
-      out.emplace_back(cns.name, ClsConstInfo<>{ from_cell(*cns.val), 0 });
+      out.emplace_back(cns.name, ClsConstInfo{ from_cell(*cns.val), 0 });
     } else {
       out.emplace_back(
         cns.name,
         folly::get_default(
           m_data->clsConstTypes,
           std::make_pair(&cls, cns.name),
-          ClsConstInfo<>{ TInitCell, 0 }
+          ClsConstInfo{ TInitCell, 0 }
         )
       );
     }
@@ -14725,7 +14725,7 @@ Index::lookup_class_constants(const php::Class& cls) const {
   return out;
 }
 
-ClsTypeConstLookupResult<>
+ClsTypeConstLookupResult
 Index::lookup_class_type_constant(
     const Type& cls,
     const Type& name,
@@ -14733,7 +14733,7 @@ Index::lookup_class_type_constant(
   ITRACE(4, "lookup_class_type_constant: {}::{}\n", show(cls), show(name));
   Trace::Indent _;
 
-  using R = ClsTypeConstLookupResult<>;
+  using R = ClsTypeConstLookupResult;
 
   auto const conservative = [] {
     ITRACE(4, "conservative\n");
@@ -15369,7 +15369,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
     }();
     state.emplace(
       prop.name,
-      PropStateElem<>{
+      PropStateElem{
         std::move(ty),
         &prop.typeConstraint,
         prop.attrs,
@@ -15385,14 +15385,14 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
  * metadata about a `cls'::`name' static property access in the given
  * context.
  */
-PropLookupResult<> Index::lookup_static(Context ctx,
-                                        const PropertiesInfo& privateProps,
-                                        const Type& cls,
-                                        const Type& name) const {
+PropLookupResult Index::lookup_static(Context ctx,
+                                      const PropertiesInfo& privateProps,
+                                      const Type& cls,
+                                      const Type& name) const {
   ITRACE(4, "lookup_static: {} {}::${}\n", show(ctx), show(cls), show(name));
   Trace::Indent _;
 
-  using R = PropLookupResult<>;
+  using R = PropLookupResult;
 
   // First try to obtain the property name as a static string
   auto const sname = [&] () -> SString {
@@ -15518,7 +15518,7 @@ Index::lookup_iface_vtable_slot(const php::Class* cls) const {
  * found. Mutations to AttrConst properties are ignored, unless
  * `ignoreConst' is true.
  */
-PropMergeResult<> Index::merge_static_type(
+PropMergeResult Index::merge_static_type(
     Context ctx,
     PublicSPropMutations& publicMutations,
     PropertiesInfo& privateProps,
@@ -15536,7 +15536,7 @@ PropMergeResult<> Index::merge_static_type(
 
   assertx(val.subtypeOf(BInitCell));
 
-  using R = PropMergeResult<>;
+  using R = PropMergeResult;
 
   // In some cases we might try to merge Bottom if we're in
   // unreachable code. This won't affect anything, so just skip out
@@ -15580,7 +15580,7 @@ PropMergeResult<> Index::merge_static_type(
 
     // To be conservative, say we might throw and be conservative about
     // conversions.
-    return PropMergeResult<>{
+    return PropMergeResult{
       loosen_likeness(val),
       TriBool::Maybe
     };
@@ -15705,7 +15705,7 @@ void Index::init_public_static_prop_types() {
 
 void Index::refine_class_constants(
   const Context& ctx,
-  const CompactVector<std::pair<size_t, ClsConstInfo<>>>& resolved,
+  const CompactVector<std::pair<size_t, ClsConstInfo>>& resolved,
   DependencyContextSet& deps
 ) {
   if (resolved.empty()) return;
@@ -15733,7 +15733,7 @@ void Index::refine_class_constants(
       auto const old = [&] {
         auto const it = types.find(key);
         return (it == types.end())
-          ? ClsConstInfo<>{ TInitCell, 0 }
+          ? ClsConstInfo{ TInitCell, 0 }
           : it->second;
       }();
 

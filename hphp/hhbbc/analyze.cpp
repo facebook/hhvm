@@ -660,13 +660,13 @@ ClsConstantWork::ClsConstantWork(const Index& index,
   for (auto& [name, info] : initial) constants.emplace(name, std::move(info));
 }
 
-ClsConstLookupResult<> ClsConstantWork::lookup(SString name) {
+ClsConstLookupResult ClsConstantWork::lookup(SString name) {
   auto const it = constants.find(name);
   if (it == end(constants)) {
-    return ClsConstLookupResult<>{ TBottom, TriBool::No, true };
+    return ClsConstLookupResult{ TBottom, TriBool::No, true };
   }
   if (current) deps[name].emplace(current);
-  return ClsConstLookupResult<>{
+  return ClsConstLookupResult{
     it->second.type,
     TriBool::Yes,
     !is_scalar(it->second.type) || bool(cls.attrs & AttrInternal)

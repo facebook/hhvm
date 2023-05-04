@@ -17,6 +17,7 @@
 
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/type-system.h"
 
 namespace HPHP::HHBBC {
 
@@ -25,10 +26,11 @@ namespace HPHP::HHBBC {
 struct CollectedInfo;
 struct Index;
 struct ISS;
-struct Type;
 
 namespace php {
   struct Class;
+  struct Const;
+  struct TypeAlias;
 }
 
 //////////////////////////////////////////////////////////////////////

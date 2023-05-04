@@ -771,7 +771,7 @@ std::string show(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const PropLookupResult<Type>& r) {
+std::string show(const PropLookupResult& r) {
   return folly::sformat(
     "{{{},ty:{},found:{},const:{},late:{},init:{}}}",
     r.name,
@@ -783,7 +783,7 @@ std::string show(const PropLookupResult<Type>& r) {
   );
 }
 
-std::string show(const PropMergeResult<Type>& r) {
+std::string show(const PropMergeResult& r) {
   return folly::sformat(
     "{{adjusted:{},throws:{}}}",
     show(r.adjusted),
@@ -791,7 +791,7 @@ std::string show(const PropMergeResult<Type>& r) {
   );
 }
 
-std::string show(const ClsConstLookupResult<Type>& r) {
+std::string show(const ClsConstLookupResult& r) {
   return folly::sformat(
     "{{ty:{},found:{},throw:{}}}",
     show(r.ty),
@@ -800,7 +800,7 @@ std::string show(const ClsConstLookupResult<Type>& r) {
   );
 }
 
-std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>& r) {
+std::string show(const ClsTypeConstLookupResult& r) {
   return folly::sformat(
     "{{ty:{},fail:{},found:{},abstract:{}}}",
     show(r.resolution.type),

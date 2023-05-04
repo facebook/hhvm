@@ -481,8 +481,8 @@ struct StateMutationUndo {
 struct PropertiesInfo {
   PropertiesInfo(const Index&, Context, ClassAnalysis*);
 
-  const PropStateElem<>* readPrivateProp(SString name) const;
-  const PropStateElem<>* readPrivateStatic(SString name) const;
+  const PropStateElem* readPrivateProp(SString name) const;
+  const PropStateElem* readPrivateStatic(SString name) const;
 
   void mergeInPrivateProp(const Index& index,
                           SString name,

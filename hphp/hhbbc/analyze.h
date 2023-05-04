@@ -117,7 +117,7 @@ struct FuncAnalysisResult {
    * For an 86cinit, any constants that we inferred a type for.
    * The size_t is the index into ctx.cls->constants
    */
-  CompactVector<std::pair<size_t,ClsConstInfo<>>> resolvedConstants;
+  CompactVector<std::pair<size_t,ClsConstInfo>> resolvedConstants;
 
   /*
    * Public static property mutations in this function.
@@ -236,7 +236,7 @@ struct ClassAnalysis {
 struct ClsConstantWork {
   ClsConstantWork(const Index&, const php::Class&);
 
-  ClsConstLookupResult<> lookup(SString);
+  ClsConstLookupResult lookup(SString);
 
   void update(SString, Type);
   void add(SString);
@@ -254,7 +254,7 @@ struct ClsConstantWork {
   void schedule(SString);
 
   const php::Class& cls;
-  hphp_fast_map<SString, ClsConstInfo<>> constants;
+  hphp_fast_map<SString, ClsConstInfo> constants;
 
   SString current{nullptr};
   hphp_fast_map<SString, hphp_fast_set<SString>> deps;

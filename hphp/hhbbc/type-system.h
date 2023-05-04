@@ -23,11 +23,13 @@
 #include "hphp/util/low-ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/string-data.h"
+
+#include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/type-system-bits.h"
 
 #include "hphp/hhbbc/array-like-map.h"
-#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -174,7 +176,12 @@ namespace HPHP {
 
 namespace HHBBC {
 
+struct Context;
+struct Index;
 struct Type;
+
+namespace res { struct Class; };
+namespace php { struct Class; };
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \
@@ -238,41 +245,20 @@ struct DCls {
 
   DCls() : DCls{PtrTag::Exact, nullptr} {}
 
-  static DCls MakeExact(res::Class cls, bool nonReg) {
-    return DCls{
-      nonReg ? PtrTag::ExactNonReg : PtrTag::Exact,
-      (void*)cls.toOpaque()
-    };
-  }
-  static DCls MakeSub(res::Class cls, bool nonReg) {
-    return DCls{
-      nonReg ? PtrTag::SubNonReg : PtrTag::Sub,
-      (void*)cls.toOpaque()
-    };
-  }
-  static DCls MakeIsect(IsectSet isect, bool nonReg) {
-    auto w = new IsectWrapper{std::move(isect)};
-    return DCls{nonReg ? PtrTag::IsectNonReg : PtrTag::Isect, (void*)w};
-  }
+  static DCls MakeExact(res::Class cls, bool nonReg);
+  static DCls MakeSub(res::Class cls, bool nonReg);
+  static DCls MakeIsect(IsectSet isect, bool nonReg);
 
   // Need to implement these manually so we do proper ref-counting on
   // the IsectWrapper (if available).
-  DCls(const DCls& o) : val{o.val}
-  { if (isIsect()) rawIsect()->acquire(); }
+  DCls(const DCls&);
   DCls(DCls&& o) noexcept : val{std::move(o.val)}
   { o.val.set(PtrTag::Exact, nullptr); }
 
-  DCls& operator=(const DCls& o) {
-    if (this == &o) return *this;
-    auto const i = isIsect() ? rawIsect() : nullptr;
-    if (o.isIsect()) o.rawIsect()->acquire();
-    val = o.val;
-    if (i) i->release();
-    return *this;
-  }
+  DCls& operator=(const DCls&);
   DCls& operator=(DCls&& o) { val.swap(o.val); return *this; }
 
-  ~DCls() { if (isIsect()) rawIsect()->release(); }
+  ~DCls();
 
   bool isExact() const {
     return
@@ -315,11 +301,7 @@ struct DCls {
   // Obtain the res::Class this DCls represents. Only valid if
   // !isSect(), as that cannot be completely represented by any single
   // res::Class.
-  res::Class cls() const {
-    assertx(!isIsect());
-    assertx(val.ptr());
-    return res::Class::fromOpaque((uintptr_t)val.ptr());
-  }
+  res::Class cls() const;
 
   // Obtain a res::Class which is a super-type of what this DCls
   // represents. That is, it may be larger than the "actual"
@@ -328,11 +310,9 @@ struct DCls {
   // of them is valid, as we're a subclass of all of them). We use the
   // first class in the list, which in canonical order is the
   // smallest.
-  res::Class smallestCls() const {
-    return isIsect() ? isect().front() : cls();
-  }
+  res::Class smallestCls() const;
 
-  const IsectSet& isect() const { return rawIsect()->isects; }
+  const IsectSet& isect() const;
 
   bool isCtx() const {
     switch (val.tag()) {
@@ -358,46 +338,12 @@ struct DCls {
     val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
   }
 
-  void setCls(res::Class cls) {
-    assertx(!isIsect());
-    val.set(val.tag(), (void*)cls.toOpaque());
-  }
+  void setCls(res::Class cls);
 
-  bool same(const DCls& o, bool checkCtx = true) const {
-    if (checkCtx) {
-      if (val.tag() != o.val.tag()) return false;
-    } else {
-      if (removeCtx(val.tag()) != removeCtx(o.val.tag())) return false;
-    }
+  bool same(const DCls& o, bool checkCtx = true) const;
 
-    if (!isIsect()) return cls().same(o.cls());
-    auto const& isect1 = isect();
-    auto const& isect2 = o.isect();
-    if (&isect1 == &isect2) return true;
-    if (isect1.size() != isect2.size()) return false;
-
-    return std::equal(
-      begin(isect1), end(isect1),
-      begin(isect2), end(isect2),
-      [] (res::Class c1, res::Class c2) { return c1.same(c2); }
-    );
-  }
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    if constexpr (SerDe::deserializing) {
-      auto const tag = sd.template make<decltype(val.tag())>();
-      if (tagIsIsect(tag)) {
-        auto i = sd.template make<IsectSet>();
-        val.set(tag, new IsectWrapper{std::move(i)});
-      } else {
-        auto c = sd.template make<res::Class>();
-        val.set(tag, (void*)c.toOpaque());
-      }
-    } else {
-      sd(val.tag());
-      isIsect() ? sd(isect()) : sd(cls());
-    }
-  }
+  void serde(BlobEncoder&) const;
+  void serde(BlobDecoder&);
 
 private:
   // To keep size down, we encode everything into a single
@@ -468,65 +414,13 @@ private:
     not_reached();
   }
 
-  // We ref-count the IsectSet, so multiple copies of a DCls can share
-  // it. This is basically copy_ptr, but we can't use that easily with
-  // our CompactTaggedPtr representation.
-  struct IsectWrapper {
-    IsectSet isects;
-    std::atomic<uint32_t> refcount{1};
-    void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
-    void release() {
-      if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
-        delete this;
-      }
-    }
-  };
-
-  IsectWrapper* rawIsect() const {
-    assertx(isIsect());
-    assertx(val.ptr());
-    return (IsectWrapper*)val.ptr();
-  }
+  struct IsectWrapper;
+  IsectWrapper* rawIsect() const;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Information about a wait handle (sub-class of HH\\Awaitable) carry a
- * type that awaiting the wait handle will produce.
- */
-template <typename T = Type>
-struct DWaitHandleT {
-  DWaitHandleT() = default;
-  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
-  // it around lets us demote to a DCls without having the Index
-  // available.
-  DWaitHandleT(DCls cls, T inner)
-    : cls{std::move(cls)}
-    , inner{std::move(inner)} {}
-  DCls cls;
-  T inner;
-
-  // We do not explicitly serialize cls, since it's always the wait
-  // handle class.
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(inner);
-    if constexpr (SerDe::deserializing) {
-      cls = DCls::MakeSub(res::Class::unresolvedWaitHandle(), false);
-    } else {
-      assertx(!cls.containsNonRegular());
-      assertx(cls.isSub());
-      assertx(!cls.isCtx());
-      assertx(
-        cls.cls().name()->isame(
-          res::Class::unresolvedWaitHandle().name()
-        )
-      );
-    }
-  }
-};
-using DWaitHandle = DWaitHandleT<>;
-
+struct DWaitHandle;
 struct DArrLikePacked;
 struct DArrLikePackedN;
 struct DArrLikeMap;
@@ -965,6 +859,25 @@ struct MapElem {
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Information about a wait handle (sub-class of HH\\Awaitable) carry a
+ * type that awaiting the wait handle will produce.
+ */
+struct DWaitHandle {
+  DWaitHandle() = default;
+  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
+  // it around lets us demote to a DCls without having the Index
+  // available.
+  DWaitHandle(DCls cls, Type inner)
+    : cls{std::move(cls)}
+    , inner{std::move(inner)} {}
+  DCls cls;
+  Type inner;
+
+  void serde(BlobEncoder&) const;
+  void serde(BlobDecoder&);
+};
 
 struct DArrLikePacked {
   DArrLikePacked() = default;

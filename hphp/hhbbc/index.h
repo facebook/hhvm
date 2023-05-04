@@ -39,12 +39,13 @@
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/type-structure.h"
+#include "hphp/hhbbc/type-system.h"
 
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Type;
 struct Index;
 struct PublicSPropMutations;
 struct FuncAnalysisResult;
@@ -53,12 +54,6 @@ struct ContextHash;
 struct CallContext;
 struct PropertiesInfo;
 struct MethodsInfo;
-
-struct TypeStructureResolution;
-
-struct DCls;
-
-extern const Type TCell;
 
 namespace php {
 struct Class;
@@ -152,15 +147,13 @@ std::string show(Context);
  * State of properties on a class.  Map from property name to its
  * Type.
  */
-template <typename T = Type> // NB: The template param here is to
-                             // break a cyclic dependency on Type.
 struct PropStateElem {
-  T ty;
+  Type ty;
   const TypeConstraint* tc = nullptr;
   Attr attrs;
   bool everModified;
 
-  bool operator==(const PropStateElem<T>& o) const {
+  bool operator==(const PropStateElem& o) const {
     return
       ty == o.ty &&
       tc == o.tc &&
@@ -168,15 +161,13 @@ struct PropStateElem {
       everModified == o.everModified;
   }
 };
-using PropState = std::map<LSString,PropStateElem<>>;
+using PropState = std::map<LSString,PropStateElem>;
 
 /*
  * The result of Index::lookup_static
  */
-template <typename T = Type> // NB: The template parameter is here to
-                             // break a cyclic dependency on Type.
 struct PropLookupResult {
-  T ty; // The best known type of the property (TBottom if not found)
+  Type ty; // The best known type of the property (TBottom if not found)
   SString name; // The statically known name of the string, if any
   TriBool found; // If the property was found
   TriBool isConst; // If the property is AttrConst
@@ -188,9 +179,8 @@ struct PropLookupResult {
                             // others, this is only no or maybe).
 };
 
-template <typename T>
-inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
-                                       const PropLookupResult<T>& b) {
+inline PropLookupResult& operator|=(PropLookupResult& a,
+                                    const PropLookupResult& b) {
   assertx(a.name == b.name);
   a.ty |= b.ty;
   a.found |= b.found;
@@ -202,69 +192,62 @@ inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
   return a;
 }
 
-std::string show(const PropLookupResult<Type>&);
+std::string show(const PropLookupResult&);
 
 /*
  * The result of Index::merge_static_type
  */
-template <typename T = Type> // NB: The template parameter is here to
-                             // break a cyclic dependency on Type
 struct PropMergeResult {
-  T adjusted; // The merged type, potentially adjusted according to
-              // the prop's type-constraint (it's the subtype of the
-              // merged type that would succeed).
+  Type adjusted; // The merged type, potentially adjusted according to
+                 // the prop's type-constraint (it's the subtype of
+                 // the merged type that would succeed).
   TriBool throws; // Whether the mutation this merge represents
                   // can throw.
 };
 
-template <typename T>
-inline PropMergeResult<T>& operator|=(PropMergeResult<T>& a,
-                                      const PropMergeResult<T>& b) {
+inline PropMergeResult& operator|=(PropMergeResult& a,
+                                   const PropMergeResult& b) {
   a.adjusted |= b.adjusted;
   a.throws |= b.throws;
   return a;
 }
 
-std::string show(const PropMergeResult<Type>&);
+std::string show(const PropMergeResult&);
 
 /*
  * The result of Index::lookup_class_constant
  */
-template <typename T = Type> // NB: The template parameter is here to
-                             // break a cyclic dependency on Type
 struct ClsConstLookupResult {
-  T ty;            // The best known type of the constant (might not be a
-                   // scalar).
-  TriBool found;   // If the constant was found
-  bool mightThrow; // If accessing the constant can throw
+  Type ty;            // The best known type of the constant (might not be a
+                      // scalar).
+  TriBool found;      // If the constant was found
+  bool mightThrow;    // If accessing the constant can throw
 };
 
-template <typename T>
-inline ClsConstLookupResult<T>& operator|=(ClsConstLookupResult<T>& a,
-                                           const ClsConstLookupResult<T>& b) {
+inline ClsConstLookupResult& operator|=(ClsConstLookupResult& a,
+                                        const ClsConstLookupResult& b) {
   a.ty |= b.ty;
   a.found |= b.found;
   a.mightThrow |= b.mightThrow;
   return a;
 }
 
-std::string show(const ClsConstLookupResult<Type>&);
+std::string show(const ClsConstLookupResult&);
 
 /*
  * The result of Index::lookup_class_type_constant
  */
-template <typename T = TypeStructureResolution>
 struct ClsTypeConstLookupResult {
-  T resolution;     // The result from resolving the type-structure
+  TypeStructureResolution resolution; // The result from resolving
+                                      // the type-structure
   TriBool found;    // If the constant was found
   TriBool abstract; // If the constant was abstract (this only applies
                     // to the subset which wasn't found).
 };
 
-template <typename T>
-inline ClsTypeConstLookupResult<T>& operator|=(
-    ClsTypeConstLookupResult<T>& a,
-    const ClsTypeConstLookupResult<T>& b) {
+inline ClsTypeConstLookupResult& operator|=(
+    ClsTypeConstLookupResult& a,
+    const ClsTypeConstLookupResult& b) {
   a.resolution |= b.resolution;
   if (a.found == TriBool::Yes) {
     a.abstract = b.abstract;
@@ -275,14 +258,13 @@ inline ClsTypeConstLookupResult<T>& operator|=(
   return a;
 }
 
-std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
+std::string show(const ClsTypeConstLookupResult&);
 
 //////////////////////////////////////////////////////////////////////
 
 // Inferred class constant type from a 86cinit.
-template <typename T = Type>
 struct ClsConstInfo {
-  T type;
+  Type type;
   size_t refinements = 0;
 };
 
@@ -337,7 +319,7 @@ struct Class {
    */
   bool exactSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
   bool exactSubtypeOfExact(
-      const Class& o, bool nonRegularL, bool nonRegularR
+    const Class& o, bool nonRegularL, bool nonRegularR
   ) const;
   bool subSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
@@ -1018,14 +1000,13 @@ struct Index {
    * is useful for the magic interfaces, whose lower-bound cannot be
    * precisely represented by a single type.
    */
-  template <typename T = Type>
   struct ConstraintType {
     // Lower bound of constraint. Any type which is a subtype of this
     // is guaranteed to pass a type-check without any side-effects.
-    T lower;
+    Type lower;
     // Upper bound of constraint. Any type which does not intersect
     // with this is guaranteed to always fail a type-check.
-    T upper;
+    Type upper;
     // If this type-constraint might promote a "classish" type to a
     // static string as a side-effect.
     TriBool coerceClassToString{TriBool::No};
@@ -1035,7 +1016,7 @@ struct Index {
     bool maybeMixed{false};
   };
 
-  ConstraintType<>
+  ConstraintType
   lookup_constraint(const Context&, const TypeConstraint&,
                     const Type& candidate = TCell) const;
 
@@ -1067,7 +1048,7 @@ struct Index {
    *
    * This function only looks up non-type, non-context constants.
    */
-  ClsConstLookupResult<>
+  ClsConstLookupResult
   lookup_class_constant(Context ctx, const Type& cls, const Type& name) const;
 
   /*
@@ -1075,7 +1056,7 @@ struct Index {
    * constants defined on the given class. This does not register any
    * dependency.
    */
-  std::vector<std::pair<SString, ClsConstInfo<>>>
+  std::vector<std::pair<SString, ClsConstInfo>>
   lookup_class_constants(const php::Class&) const;
 
   /*
@@ -1094,7 +1075,7 @@ struct Index {
   using ClsTypeConstLookupResolver =
     std::function<TypeStructureResolution(const php::Const&,const php::Class&)>;
 
-  ClsTypeConstLookupResult<>
+  ClsTypeConstLookupResult
   lookup_class_type_constant(
     const Type& cls,
     const Type& name,
@@ -1242,10 +1223,10 @@ struct Index {
    * accessibility rules. This is intended to be the source of truth
    * about static properties during analysis.
    */
-  PropLookupResult<> lookup_static(Context ctx,
-                                   const PropertiesInfo& privateProps,
-                                   const Type& cls,
-                                   const Type& name) const;
+  PropLookupResult lookup_static(Context ctx,
+                                 const PropertiesInfo& privateProps,
+                                 const Type& cls,
+                                 const Type& name) const;
 
   /*
    * Lookup if initializing (which is a side-effect of several bytecodes) the
@@ -1297,15 +1278,15 @@ struct Index {
    * successfully set (according to the type constraints), and if the
    * mutation would throw or not.
    */
-  PropMergeResult<> merge_static_type(Context ctx,
-                                      PublicSPropMutations& publicMutations,
-                                      PropertiesInfo& privateProps,
-                                      const Type& cls,
-                                      const Type& name,
-                                      const Type& val,
-                                      bool checkUB = false,
-                                      bool ignoreConst = false,
-                                      bool mustBeReadOnly = false) const;
+  PropMergeResult merge_static_type(Context ctx,
+                                    PublicSPropMutations& publicMutations,
+                                    PropertiesInfo& privateProps,
+                                    const Type& cls,
+                                    const Type& name,
+                                    const Type& val,
+                                    bool checkUB = false,
+                                    bool ignoreConst = false,
+                                    bool mustBeReadOnly = false) const;
 
   /*
    * Initialize the initial types for public static properties. This should be
@@ -1338,7 +1319,7 @@ struct Index {
    */
   void refine_class_constants(
     const Context& ctx,
-    const CompactVector<std::pair<size_t, ClsConstInfo<>>>& resolved,
+    const CompactVector<std::pair<size_t, ClsConstInfo>>& resolved,
     DependencyContextSet& deps);
 
   /*

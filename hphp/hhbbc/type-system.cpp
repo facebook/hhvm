@@ -2012,6 +2012,138 @@ bool double_equals(double a, double b) {
 
 //////////////////////////////////////////////////////////////////////
 
+// We ref-count the IsectSet, so multiple copies of a DCls can share
+// it. This is basically copy_ptr, but we can't use that easily with
+// our CompactTaggedPtr representation.
+struct DCls::IsectWrapper {
+  IsectSet isects;
+  std::atomic<uint32_t> refcount{1};
+  void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
+  void release() {
+    if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
+      delete this;
+    }
+  }
+};
+
+DCls::DCls(const DCls& o) : val{o.val} {
+  if (isIsect()) rawIsect()->acquire();
+}
+
+DCls::~DCls() {
+  if (isIsect()) rawIsect()->release();
+}
+
+DCls& DCls::operator=(const DCls& o) {
+  if (this == &o) return *this;
+  auto const i = isIsect() ? rawIsect() : nullptr;
+  if (o.isIsect()) o.rawIsect()->acquire();
+  val = o.val;
+  if (i) i->release();
+  return *this;
+}
+
+DCls DCls::MakeExact(res::Class cls, bool nonReg) {
+  return DCls{
+    nonReg ? PtrTag::ExactNonReg : PtrTag::Exact,
+    (void*)cls.toOpaque()
+  };
+}
+
+DCls DCls::MakeSub(res::Class cls, bool nonReg) {
+  return DCls{
+    nonReg ? PtrTag::SubNonReg : PtrTag::Sub,
+    (void*)cls.toOpaque()
+  };
+}
+
+DCls DCls::MakeIsect(IsectSet isect, bool nonReg) {
+  auto w = new IsectWrapper{std::move(isect)};
+  return DCls{nonReg ? PtrTag::IsectNonReg : PtrTag::Isect, (void*)w};
+}
+
+res::Class DCls::cls() const {
+  assertx(!isIsect());
+  assertx(val.ptr());
+  return res::Class::fromOpaque((uintptr_t)val.ptr());
+}
+
+res::Class DCls::smallestCls() const {
+  return isIsect() ? isect().front() : cls();
+}
+
+const DCls::IsectSet& DCls::isect() const {
+  return rawIsect()->isects;
+}
+
+void DCls::setCls(res::Class cls) {
+  assertx(!isIsect());
+  val.set(val.tag(), (void*)cls.toOpaque());
+}
+
+bool DCls::same(const DCls& o, bool checkCtx) const {
+  if (checkCtx) {
+    if (val.tag() != o.val.tag()) return false;
+  } else {
+    if (removeCtx(val.tag()) != removeCtx(o.val.tag())) return false;
+  }
+
+  if (!isIsect()) return cls().same(o.cls());
+  auto const& isect1 = isect();
+  auto const& isect2 = o.isect();
+  if (&isect1 == &isect2) return true;
+  if (isect1.size() != isect2.size()) return false;
+
+  return std::equal(
+    begin(isect1), end(isect1),
+    begin(isect2), end(isect2),
+    [] (res::Class c1, res::Class c2) { return c1.same(c2); }
+  );
+}
+
+DCls::IsectWrapper* DCls::rawIsect() const {
+  assertx(isIsect());
+  assertx(val.ptr());
+  return (IsectWrapper*)val.ptr();
+}
+
+void DCls::serde(BlobEncoder& sd) const {
+  sd(val.tag());
+  isIsect() ? sd(isect()) : sd(cls());
+}
+void DCls::serde(BlobDecoder& sd) {
+  auto const tag = sd.template make<decltype(val.tag())>();
+  if (tagIsIsect(tag)) {
+    auto i = sd.make<IsectSet>();
+    val.set(tag, new IsectWrapper{std::move(i)});
+  } else {
+    auto c = sd.make<res::Class>();
+    val.set(tag, (void*)c.toOpaque());
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// We do not explicitly serialize cls, since it's always the wait
+// handle class.
+void DWaitHandle::serde(BlobEncoder& sd) const {
+  sd(inner);
+  assertx(!cls.containsNonRegular());
+  assertx(cls.isSub());
+  assertx(!cls.isCtx());
+  assertx(
+    cls.cls().name()->isame(
+      res::Class::unresolvedWaitHandle().name()
+    )
+  );
+}
+void DWaitHandle::serde(BlobDecoder& sd) {
+  sd(inner);
+  cls = DCls::MakeSub(res::Class::unresolvedWaitHandle(), false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 MapElem MapElem::KeyFromType(const Type& key, Type val) {
   assertx(is_scalar_counted(key));
   assertx(is_specialized_int(key) || is_specialized_string(key));

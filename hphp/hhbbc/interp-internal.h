@@ -402,11 +402,11 @@ inline Type selfExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // class constants
 
-inline ClsConstLookupResult<> lookupClsConstant(const Index& index,
-                                                const Context& ctx,
-                                                const CollectedInfo* collect,
-                                                const Type& cls,
-                                                const Type& name) {
+inline ClsConstLookupResult lookupClsConstant(const Index& index,
+                                              const Context& ctx,
+                                              const CollectedInfo* collect,
+                                              const Type& cls,
+                                              const Type& name) {
   // Check if the constant's class is definitely the current context.
   auto const isClsCtx = [&] {
     if (!collect || !collect->clsCns) return false;
@@ -425,9 +425,9 @@ inline ClsConstLookupResult<> lookupClsConstant(const Index& index,
   return index.lookup_class_constant(ctx, cls, name);
 }
 
-inline ClsConstLookupResult<> lookupClsConstant(ISS& env,
-                                                const Type& cls,
-                                                const Type& name) {
+inline ClsConstLookupResult lookupClsConstant(ISS& env,
+                                              const Type& cls,
+                                              const Type& name) {
   return lookupClsConstant(env.index, env.ctx, &env.collect, cls, name);
 }
 

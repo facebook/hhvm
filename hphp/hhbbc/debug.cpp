@@ -29,6 +29,7 @@
 
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
@@ -67,7 +68,7 @@ void with_file(fs::path dir, const php::Unit& u, Operation op) {
   }
 }
 
-using NameTy = std::pair<SString,PropStateElem<>>;
+using NameTy = std::pair<SString,PropStateElem>;
 std::vector<NameTy> sorted_prop_state(const PropState& ps) {
   std::vector<NameTy> ret(begin(ps), end(ps));
   std::sort(

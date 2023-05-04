@@ -229,7 +229,7 @@ const PropState& PropertiesInfo::privateStaticsRaw() const {
   return m_privateStatics;
 }
 
-const PropStateElem<>*
+const PropStateElem*
 PropertiesInfo::readPrivateProp(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateProperties.find(name);
@@ -241,7 +241,7 @@ PropertiesInfo::readPrivateProp(SString name) const {
   return it == m_privateProperties.end() ? nullptr : &it->second;
 }
 
-const PropStateElem<>*
+const PropStateElem*
 PropertiesInfo::readPrivateStatic(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateStatics.find(name);

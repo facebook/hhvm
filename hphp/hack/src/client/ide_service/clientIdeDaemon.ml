@@ -1124,10 +1124,10 @@ let handle_request
     in
     Lwt.return (Initialized istate, Ok result)
     (* textDocument/rename - localvar only *)
-  | (Initialized istate, Rename (document, { line; column }, new_name)) ->
-    (* Update the state of the world with the document as it exists in the IDE *)
-    let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let result =
+  | ( Initialized istate,
+      Rename (document, { line; column }, new_name, document_list) ) ->
+    let (istate, ctx, entry, _errors) = update_file_ctx istate document in
+    let (istate, result) =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match
             ServerFindRefs.go_from_file_ctx_with_symbol_definition
@@ -1136,26 +1136,55 @@ let handle_request
               ~line
               ~column
           with
-          | None ->
-            ClientIdeMessage.Invalid_rename_symbol
-            (* Clicking a line+col that isn't a symbol *)
+          | None -> (istate, ClientIdeMessage.Invalid_rename_symbol)
           | Some (_definition, action) when ServerFindRefs.is_local action ->
-          begin
-            match ServerRename.go_for_localvar ctx action new_name with
-            | Ok patch_list ->
-              ClientIdeMessage.Local_var_rename_result patch_list
-            | Error action ->
-              let str =
-                Printf.sprintf
-                  "ClientIDEDaemon failed to rename for localvar %s"
-                  (ServerCommandTypes.Find_refs.show_action action)
-              in
-              log "%s" str;
-              failwith "ClientIDEDaemon failed to rename for a localvar"
-          end
+            let res =
+              match ServerRename.go_for_localvar ctx action new_name with
+              | Ok patch_list ->
+                ClientIdeMessage.Local_var_rename_result patch_list
+              | Error action ->
+                let str =
+                  Printf.sprintf
+                    "ClientIDEDaemon failed to rename for localvar %s"
+                    (ServerCommandTypes.Find_refs.show_action action)
+                in
+                log "%s" str;
+                failwith "ClientIDEDaemon failed to rename for a localvar"
+            in
+            (istate, res)
           | Some (symbol_definition, action) ->
-            ClientIdeMessage.Shell_out_rename_and_augment
-              (symbol_definition, action)
+            let (istate, single_file_patches) =
+              List.fold
+                ~f:(fun (istate, accum) document ->
+                  let (istate, ctx, _entry, _errors) =
+                    update_file_ctx istate document
+                  in
+                  let filename =
+                    Path.to_string document.ClientIdeMessage.file_path
+                    |> Relative_path.create_detect_prefix
+                  in
+                  let single_file_patches =
+                    ServerRename.go_for_single_file
+                      ctx
+                      ~find_refs_action:action
+                      ~filename
+                      ~symbol_definition
+                      ~new_name
+                      ~naming_table:istate.naming_table
+                  in
+                  let patches =
+                    match single_file_patches with
+                    | Ok patches -> patches
+                    | Error _ -> []
+                  in
+                  let patch_list = List.rev_append patches accum in
+                  (istate, patch_list))
+                ~init:(istate, [])
+                document_list
+            in
+            ( istate,
+              ClientIdeMessage.Shell_out_rename_and_augment
+                (symbol_definition, action, single_file_patches) )
           (* not a localvar, must defer to hh_server *))
     in
     Lwt.return (Initialized istate, Ok result)
@@ -1214,13 +1243,11 @@ let handle_request
                   let filename =
                     Relative_path.create_detect_prefix stringified_path
                   in
-                  let include_defs = false in
                   let single_file_ref =
                     ServerFindRefs.go_for_single_file
                       ~ctx
                       ~action
                       ~filename
-                      ~include_defs
                       ~name
                       ~naming_table:istate.naming_table
                     |> ServerFindRefs.to_absolute

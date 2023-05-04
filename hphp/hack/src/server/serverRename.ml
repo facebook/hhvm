@@ -652,6 +652,69 @@ let go_for_localvar ctx action new_name =
     changes
   | _ -> Error action
 
+let go_for_single_file
+    ctx ~find_refs_action ~new_name ~filename ~symbol_definition ~naming_table =
+  let action =
+    match find_refs_action with
+    | ServerCommandTypes.Find_refs.Class str ->
+      (* Note that [ServerRename.go] remaps ClassRename to Find_refs.ExplicitClass,
+         so we manually handle that here for parity.
+      *)
+      ServerCommandTypes.Find_refs.ExplicitClass str
+    | action -> action
+  in
+  ( ServerFindRefs.go_for_single_file
+      ~ctx
+      ~action
+      ~filename
+      ~name:symbol_definition.SymbolDefinition.full_name
+      ~naming_table
+  |> fun refs ->
+    let changes =
+      List.fold_left
+        refs
+        ~f:
+          begin
+            fun acc x ->
+              let replacement =
+                { pos = Pos.to_absolute (snd x); text = new_name }
+              in
+              let patch = Replace replacement in
+              patch :: acc
+          end
+        ~init:[]
+    in
+    let deprecated_wrapper_patch =
+      let open ServerCommandTypes.Find_refs in
+      let filename = Relative_path.suffix filename in
+      match find_refs_action with
+      | Function _ ->
+        get_deprecated_wrapper_patch
+          ~filename:(Some filename)
+          ~definition:(Some symbol_definition)
+          ~ctx
+          new_name
+      | Member (class_name, Method old_name) ->
+        if method_might_support_dynamic ctx ~class_name ~method_name:old_name
+        then
+          get_deprecated_wrapper_patch
+            ~filename:(Some filename)
+            ~definition:(Some symbol_definition)
+            ~ctx
+            new_name
+        else
+          None
+      | Class _
+      | Member _
+      | ExplicitClass _
+      | LocalVar _
+      | GConst _ ->
+        None
+    in
+    Option.value_map deprecated_wrapper_patch ~default:changes ~f:(fun patch ->
+        patch :: changes) )
+  |> fun rename_patches -> Ok rename_patches
+
 (**
   Like go_ide, but rather than looking up a symbolDefinition manually from a file and
   converting a ServerRenameTypes.action to a Find_refs.action, we supply a Find_refs.action

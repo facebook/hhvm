@@ -44,7 +44,6 @@ val go_for_single_file :
   ctx:Provider_context.t ->
   action:ServerCommandTypes.Find_refs.action ->
   filename:Relative_path.t ->
-  include_defs:bool ->
   name:string ->
   naming_table:Naming_table.t ->
   server_result

@@ -271,13 +271,18 @@ let find_refs
     (ctx : Provider_context.t)
     (target : action_internal)
     (acc : (string * Pos.t) list)
-    (files : Relative_path.t list) : (string * Pos.t) list =
+    (files : Relative_path.t list)
+    ~(omit_declaration : bool) : (string * Pos.t) list =
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
   let results_from_tast (_file, tast) : string Pos.Map.t =
     IdentifySymbolService.all_symbols ctx tast
-    |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
+    |> List.filter ~f:(fun symbol ->
+           if omit_declaration then
+             not symbol.SymbolOccurrence.is_declaration
+           else
+             true)
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
   (* [files] can legitimately refer to non-existent files, e.g.
@@ -333,10 +338,10 @@ let find_refs_ctx
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
 
-let parallel_find_refs workers files target ctx =
+let parallel_find_refs workers files target ctx ~(omit_declaration : bool) =
   MultiWorker.call
     workers
-    ~job:(find_refs ctx target)
+    ~job:(find_refs ctx target ~omit_declaration)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers files)
@@ -404,9 +409,9 @@ let find_references ctx workers target include_defs files =
   Hh_logger.debug "find_references: %d files" len;
   let results =
     if len < 10 then
-      find_refs ctx target [] files
+      find_refs ctx target [] files ~omit_declaration:true
     else
-      parallel_find_refs workers files target ctx
+      parallel_find_refs workers files target ctx ~omit_declaration:true
   in
   let () =
     Hh_logger.debug "find_references: %d results" (List.length results)
@@ -418,24 +423,14 @@ let find_references ctx workers target include_defs files =
   else
     results
 
-let find_references_single_worker ctx target include_defs files =
-  Hh_logger.debug "find_references_single_worker: %d files" (List.length files);
-  let results = find_refs ctx target [] files in
+let find_references_single_file ctx target file =
+  let results = find_refs ctx target [] [file] ~omit_declaration:false in
   let () =
     Hh_logger.debug
-      "find_references_single_worker: %d results"
+      "find_references_single_file: %d results"
       (List.length results)
   in
-  if include_defs then
-    let defs = get_definitions ctx target in
-    let () =
-      Hh_logger.debug
-        "find_references_single_worker: +%d defs"
-        (List.length defs)
-    in
-    List.rev_append defs results
-  else
-    results
+  results
 
 let get_dependent_files_function ctx _workers f_name =
   (* This is performant enough to not need to go parallel for now *)

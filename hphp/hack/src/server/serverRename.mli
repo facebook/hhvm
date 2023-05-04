@@ -43,6 +43,15 @@ val go_ide :
     string )
   result
 
+val go_for_single_file :
+  Provider_context.t ->
+  find_refs_action:ServerCommandTypes.Find_refs.action ->
+  new_name:string ->
+  filename:Relative_path.t ->
+  symbol_definition:string SymbolDefinition.t ->
+  naming_table:Naming_table.t ->
+  (ServerRenameTypes.patch list, 'a) result
+
 val go_ide_with_find_refs_action :
   Provider_context.t ->
   find_refs_action:ServerCommandTypes.Find_refs.action ->

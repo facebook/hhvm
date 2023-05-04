@@ -237,6 +237,7 @@ module Lost_env = struct
         find_refs_action: ServerCommandTypes.Find_refs.action;
         new_name: string;
         filename: string;
+        ide_calculated_patches: ServerRenameTypes.patch list;
       }
 end
 
@@ -1418,6 +1419,17 @@ let get_document_contents
            message = "action on a file not open in LSP server";
            data = None;
          })
+
+let get_all_open_files editor_open_files =
+  UriMap.fold
+    (fun fn _val accum ->
+      {
+        ClientIdeMessage.file_path = Path.make @@ Lsp_helpers.lsp_uri_to_path fn;
+        file_contents = get_document_contents editor_open_files fn;
+      }
+      :: accum)
+    editor_open_files
+    []
 
 (** Turns this Lsp uri+line+col into a format suitable for clientIdeDaemon.
 Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
@@ -3418,18 +3430,7 @@ let do_findReferences_local
   let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
-  let all_open_documents =
-    UriMap.fold
-      (fun fn _val accum ->
-        {
-          ClientIdeMessage.file_path =
-            Path.make @@ Lsp_helpers.lsp_uri_to_path fn;
-          file_contents = get_document_contents editor_open_files fn;
-        }
-        :: accum)
-      editor_open_files
-      []
-  in
+  let all_open_documents = get_all_open_files editor_open_files in
   let%lwt response =
     ide_rpc
       ide_service
@@ -3895,13 +3896,14 @@ let do_documentRename_local
     get_document_location editor_open_files document_position
   in
   let new_name = params.Rename.newName in
+  let all_open_documents = get_all_open_files editor_open_files in
   let%lwt response =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Rename (document, location, new_name))
+      (ClientIdeMessage.Rename (document, location, new_name, all_open_documents))
   in
   let state =
     match response with
@@ -3915,14 +3917,21 @@ let do_documentRename_local
       respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
       Lwt.return state
     | ClientIdeMessage.Shell_out_rename_and_augment
-        (symbol_definition, find_refs_action) ->
+        (symbol_definition, find_refs_action, ide_calculated_patches) ->
       (* clientIdeDaemon returns errors if we try to rename a non-localvar *)
       let (filename, _line, _col) =
         lsp_file_position_to_hack document_position
       in
       let shellable_type =
         Lost_env.Rename
-          { lsp_id; symbol_definition; find_refs_action; new_name; filename }
+          {
+            lsp_id;
+            symbol_definition;
+            find_refs_action;
+            new_name;
+            filename;
+            ide_calculated_patches;
+          }
       in
       let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
       Lwt.return state
@@ -4722,16 +4731,33 @@ let respond_jsonrpc_for_shell
       in
       Lwt.return @@ Some (0, error_telemetry)
   end
-  | Lost_env.Rename _ -> begin
+  | Lost_env.Rename { ide_calculated_patches; _ } -> begin
     match parse_patch_list stdout with
     | Ok result ->
+      (* The list of patches we receive from shelling out reflect the state
+         of files on disk, which is incorrect for edited files. To fix,
+
+         1) Filter out all changes for files that are open
+         2) add the list of ide_calculated changes
+      *)
+      let server_supplied_changes = result.WorkspaceEdit.changes in
+      let ide_supplied_changes =
+        patches_to_workspace_edit ide_calculated_patches
+      in
+      let combined_changes =
+        SMap.fold
+          (fun file ide combined -> SMap.add file ide combined)
+          ide_supplied_changes.WorkspaceEdit.changes
+          server_supplied_changes
+      in
+      let result = { WorkspaceEdit.changes = combined_changes } in
       let () =
         respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
       in
       let result_count =
         SMap.fold
           (fun _file changes tot -> tot + List.length changes)
-          result.WorkspaceEdit.changes
+          combined_changes
           0
       in
       let result_extra_telemetry =

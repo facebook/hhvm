@@ -12,6 +12,8 @@ type t = {
   dummy_one: bool;
   dummy_two: bool;
   dummy_three: bool;
+  no_ancestor_edges: bool;
+      (** Whether the depgraph contains the transitive closure of extends edges. *)
 }
 [@@deriving eq, show]
 
@@ -28,6 +30,7 @@ type flag =
   | Dummy_one
   | Dummy_two
   | Dummy_three
+  | No_ancestor_edges
 [@@deriving show { with_path = false }]
 
 type flag_name = string
@@ -138,6 +141,7 @@ let rollout_order =
   | Dummy_one -> 0
   | Dummy_two -> 1
   | Dummy_three -> 2
+  | No_ancestor_edges -> 3
 
 let make
     ~current_rolled_out_flag_idx
@@ -164,6 +168,7 @@ let make
     dummy_one = get_flag_value Dummy_one;
     dummy_two = get_flag_value Dummy_two;
     dummy_three = get_flag_value Dummy_three;
+    no_ancestor_edges = get_flag_value No_ancestor_edges;
   }
 
 let default : t =
@@ -177,15 +182,17 @@ let output t =
   let print_flag flag value =
     Printf.eprintf "%s = %b\n" (flag_name flag) value
   in
-  let { dummy_one; dummy_two; dummy_three } = t in
+  let { dummy_one; dummy_two; dummy_three; no_ancestor_edges } = t in
   print_flag Dummy_one dummy_one;
   print_flag Dummy_two dummy_two;
-  print_flag Dummy_three dummy_three
+  print_flag Dummy_three dummy_three;
+  print_flag No_ancestor_edges no_ancestor_edges;
+  ()
 
 let to_bit_array_string t : string =
   let s : bool -> string = function
     | true -> "1"
     | false -> "0"
   in
-  let { dummy_one; dummy_two; dummy_three } = t in
-  s dummy_one ^ s dummy_two ^ s dummy_three
+  let { dummy_one; dummy_two; dummy_three; no_ancestor_edges } = t in
+  s dummy_one ^ s dummy_two ^ s dummy_three ^ s no_ancestor_edges

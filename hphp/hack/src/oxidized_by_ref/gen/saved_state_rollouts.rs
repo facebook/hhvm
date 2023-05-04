@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9707b3a8836da524e3829d0ca9a30ec4>>
+// @generated SignedSource<<3b5e5d7c7962e66bdae7d01579254161>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -36,12 +36,13 @@ use crate::*;
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
-#[rust_to_ocaml(prefix = "dummy_")]
 #[repr(C)]
 pub struct SavedStateRollouts {
-    pub one: bool,
-    pub two: bool,
-    pub three: bool,
+    pub dummy_one: bool,
+    pub dummy_two: bool,
+    pub dummy_three: bool,
+    /// Whether the depgraph contains the transitive closure of extends edges.
+    pub no_ancestor_edges: bool,
 }
 impl TrivialDrop for SavedStateRollouts {}
 arena_deserializer::impl_deserialize_in_arena!(SavedStateRollouts);
@@ -72,6 +73,8 @@ pub enum Flag {
     DummyTwo,
     #[rust_to_ocaml(name = "Dummy_three")]
     DummyThree,
+    #[rust_to_ocaml(name = "No_ancestor_edges")]
+    NoAncestorEdges,
 }
 impl TrivialDrop for Flag {}
 arena_deserializer::impl_deserialize_in_arena!(Flag);

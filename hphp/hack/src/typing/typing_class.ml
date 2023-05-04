@@ -1816,7 +1816,13 @@ let class_def ctx (c : _ class_) =
     None
   | Some tc ->
     Typing_helpers.add_decl_errors (Cls.decl_errors tc);
-    Typing_env.make_depend_on_ancestors env tc;
+    if
+      not
+        (TypecheckerOptions.saved_state_rollouts
+           (Provider_context.get_tcopt ctx))
+          .Saved_state_rollouts.no_ancestor_edges
+    then
+      Typing_env.make_depend_on_ancestors env tc;
 
     (* If there are duplicate definitions of the class then we will end up
      * checking one AST with respect to the decl corresponding to the other definition.

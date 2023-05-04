@@ -41,6 +41,7 @@ impl Flag {
             Self::DummyOne => 0,
             Self::DummyTwo => 1,
             Self::DummyThree => 2,
+            Self::NoAncestorEdges => 3,
         }
     }
 
@@ -49,6 +50,7 @@ impl Flag {
             Self::DummyOne => "dummy_one",
             Self::DummyTwo => "dummy_two",
             Self::DummyThree => "dummy_three",
+            Self::NoAncestorEdges => "no_ancestor_edges",
         }
     }
 }
@@ -87,9 +89,10 @@ impl SavedStateRollouts {
             }
         };
         Ok(Self {
-            one: get_flag_value(Flag::DummyOne)?,
-            two: get_flag_value(Flag::DummyTwo)?,
-            three: get_flag_value(Flag::DummyThree)?,
+            dummy_one: get_flag_value(Flag::DummyOne)?,
+            dummy_two: get_flag_value(Flag::DummyTwo)?,
+            dummy_three: get_flag_value(Flag::DummyThree)?,
+            no_ancestor_edges: get_flag_value(Flag::NoAncestorEdges)?,
         })
     }
 }

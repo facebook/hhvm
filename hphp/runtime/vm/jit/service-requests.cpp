@@ -66,6 +66,7 @@ uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
 }
 
 folly_concurrent_hash_map_simd<uint64_t, TCA> s_stubMap;
+folly_concurrent_hash_map_simd<TCA, bool>     s_stubSet;
 
 TCA typeToHandler(StubType type) {
   switch (type) {
@@ -189,7 +190,12 @@ TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
 
   auto const pair = s_stubMap.insert({key, stub});
   if (!pair.second) return pair.first->second;
+  s_stubSet.insert({stub, true});
   return stub;
+}
+
+bool isStub(TCA addr) {
+  return s_stubSet.find(addr) != s_stubSet.end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

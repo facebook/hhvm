@@ -532,7 +532,7 @@ fn compute_vars(
     params: &[FunParam],
     body: &impl aast_visitor::Node<AstParams<(), String>>,
 ) -> Result<IndexSet<String>> {
-    hhbc::decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
+    hhbc::decl_vars::vars_from_ast(params, &body, false).map_err(Error::unrecoverable)
 }
 
 fn get_parameter_names(params: &[FunParam]) -> IndexSet<String> {

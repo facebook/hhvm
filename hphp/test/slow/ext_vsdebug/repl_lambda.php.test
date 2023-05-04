@@ -1,0 +1,6 @@
+<?hh
+
+<<__EntryPoint>>
+function repl_lambda_main(): void {
+  hphp_debug_break();
+}

@@ -1,0 +1,12 @@
+=$a = 1;
+$l = function() use ($a) { return $a; }
+= $l();
+= (function() use ($a) { return $a; })();
+$l2 = () ==> $a;
+= $l2();
+= (() ==> $a)();
+= function() use ($b) { return $b; }
+= (function() use ($b) { return $b; })();
+$l4 = () ==> $b;
+= $l4();
+= (() ==> $b)();

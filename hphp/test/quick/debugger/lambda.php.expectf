@@ -1,0 +1,31 @@
+Program %s/lambda.php loaded. Type '[r]un' or '[c]ontinue' to go.
+=$a = 1;
+1
+$l = function() use ($a) { return $a; }
+= $l();
+1
+= (function() use ($a) { return $a; })();
+1
+$l2 = () ==> $a;
+= $l2();
+1
+= (() ==> $a)();
+1
+= function() use ($b) { return $b; }
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
+Stack trace:
+%A
+= (function() use ($b) { return $b; })();
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
+Stack trace:
+%A
+$l4 = () ==> $b;
+= $l4();
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
+Stack trace:
+%A
+= (() ==> $b)();
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
+Stack trace:
+%A
+quit

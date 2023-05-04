@@ -63,6 +63,8 @@ checkObjEqualRecursively($msg, darray[
   "success" => false,
   "request_seq" => $seq]);
 
+resumeTarget();
+vsDebugCleanup($testProcess);
 
 echo "----- OK! -----\n";
 }

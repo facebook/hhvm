@@ -665,6 +665,11 @@ and default_subtype
          * We want this even if t is a type variable e.g. consider
          *   int | v <: v
          *)
+        let (tyl, has_dyn) =
+          match Typing_utils.try_strip_dynamic_from_union env tyl with
+          | None -> (tyl, false)
+          | Some non_dyn -> (non_dyn, true)
+        in
         List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
             res
             &&& simplify_subtype_i
@@ -673,6 +678,16 @@ and default_subtype
                   ~super_like
                   (LoclType ty_sub)
                   ty_super)
+        &&&
+        if has_dyn then
+          simplify_subtype_i
+            ~subtype_env
+            ~sub_supportdyn
+            ~super_like
+            (LoclType (Typing_make_type.dynamic (get_reason lty_sub)))
+            ty_super
+        else
+          valid
       (*| (_, Terr) ->
         if subtype_env.no_top_bottom then
           default env
@@ -1564,15 +1579,15 @@ and simplify_subtype_i
             else
               finish
         in
-
         let stripped_dynamic =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-            TUtils.try_strip_dynamic_from_union env r tyl_super
+            TUtils.try_strip_dynamic_from_union env tyl_super
           else
             None
         in
         match stripped_dynamic with
-        | Some ty ->
+        | Some tyl ->
+          let ty = Typing_make_type.union r tyl in
           let delay_push =
             is_sub_type_for_union_i
               env

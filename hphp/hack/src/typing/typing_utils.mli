@@ -465,9 +465,8 @@ val try_strip_dynamic :
 
 val try_strip_dynamic_from_union :
   Typing_env_types.env ->
-  Typing_reason.t ->
   Typing_defs.locl_ty list ->
-  Typing_defs.locl_ty option
+  Typing_defs.locl_ty list option
 
 (* If input is dynamic | t or t | dynamic then return t,
  * otherwise return type unchanged. *)

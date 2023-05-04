@@ -80,10 +80,11 @@ let check_property_sound_for_dynamic_write
     Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     if
       not
-        (Typing_utils.is_sub_type_for_union
-           env
-           (Typing_make_type.dynamic Reason.Rnone)
-           ty)
+        (Typing_utils.is_any env ty
+        || Typing_utils.is_sub_type_for_union
+             env
+             (Typing_make_type.dynamic Reason.Rnone)
+             ty)
     then (
       let pos = get_pos decl_ty in
       Typing_log.log_pessimise_prop

@@ -1,4 +1,0 @@
-File "tany_ambiguous.php", line 10, characters 54-58:
-Class `Base` cannot support dynamic because property `data` does not have an enforceable type (Typing[4402])
-  File "tany_ambiguous.php", line 10, characters 42-52:
-  Property `data` has type `this::TData`

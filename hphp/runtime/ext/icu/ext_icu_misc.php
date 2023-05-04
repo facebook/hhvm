@@ -1,5 +1,17 @@
 <?hh // partial
 
+/* Constants not found in ICU library */
+const int IDNA_CONTAINS_ACE_PREFIX = 8;
+const int IDNA_CONTAINS_MINUS = 4;
+const int IDNA_CONTAINS_NON_LDH = 3;
+const int IDNA_ICONV_ERROR = 9;
+const int IDNA_INVALID_LENGTH = 5;
+const int IDNA_MALLOC_ERROR = 201;
+const int IDNA_NO_ACE_PREFIX = 6;
+const int IDNA_PUNYCODE_ERROR = 2;
+const int IDNA_ROUNDTRIP_VERIFY_ERROR = 7;
+const int IDNA_STRINGPREP_ERROR = 1;
+
 /**
  * Useful to handle errors occurred in static methods when there's no object
  * to get error code from.

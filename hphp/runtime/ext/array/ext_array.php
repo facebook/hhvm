@@ -3,6 +3,9 @@
 
 namespace {
 
+const int ARRAY_FILTER_USE_BOTH = 1;
+const int ARRAY_FILTER_USE_KEY = 2;
+
 /**
  * Returns an array with all keys from input lowercased or uppercased.
  *   Numbered indices are left as is.

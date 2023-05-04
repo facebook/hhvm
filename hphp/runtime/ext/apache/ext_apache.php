@@ -1,6 +1,9 @@
 <?hh // partial
 
 namespace {
+
+const int APACHE_MAP = 200;
+
 /**
  * Get and set apache request notes
  *

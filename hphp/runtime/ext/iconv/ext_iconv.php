@@ -1,5 +1,8 @@
 <?hh // partial
 
+const int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
+const int ICONV_MIME_DECODE_STRICT = 1;
+
 /**
  * Retrieve internal configuration variables of iconv extension
  *

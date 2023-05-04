@@ -2,6 +2,9 @@
 
 namespace HH {
 
+const string BUILTIN_ENUM = "HH\\BuiltinEnum";
+const string BUILTIN_ENUM_CLASS = "HH\\BuiltinEnumClass";
+
 /**
  * BuiltinEnum contains the utility methods provided by enums.
  * Under the hood, an enum Foo will extend BuiltinEnum<Foo>.

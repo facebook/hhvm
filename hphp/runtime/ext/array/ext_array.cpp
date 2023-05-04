@@ -3061,9 +3061,6 @@ struct ArrayExtension final : Extension {
     HHVM_RC_INT_SAME(UCOL_HIRAGANA_QUATERNARY_MODE);
     HHVM_RC_INT_SAME(UCOL_NUMERIC_COLLATION);
 
-    HHVM_RC_INT(ARRAY_FILTER_USE_BOTH, 1);
-    HHVM_RC_INT(ARRAY_FILTER_USE_KEY, 2);
-
     HHVM_RC_INT(CASE_LOWER, static_cast<int64_t>(CaseMode::LOWER));
     HHVM_RC_INT(CASE_UPPER, static_cast<int64_t>(CaseMode::UPPER));
 

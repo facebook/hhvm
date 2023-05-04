@@ -1,5 +1,44 @@
 <?hh // partial
 
+const string MCRYPT_3DES = "tripledes";
+const string MCRYPT_ARCFOUR = "arcfour";
+const string MCRYPT_ARCFOUR_IV = "arcfour-iv";
+const string MCRYPT_BLOWFISH = "blowfish";
+const string MCRYPT_BLOWFISH_COMPAT = "blowfish-compat";
+const string MCRYPT_CAST_128 = "cast-128";
+const string MCRYPT_CAST_256 = "cast-256";
+const string MCRYPT_CRYPT = "crypt";
+const int MCRYPT_DECRYPT = 1;
+const string MCRYPT_DES = "des";
+const int MCRYPT_ENCRYPT = 0;
+const string MCRYPT_ENIGNA = "crypt";
+const string MCRYPT_GOST = "gost";
+const string MCRYPT_IDEA = "idea";
+const string MCRYPT_LOKI97 = "loki97";
+const string MCRYPT_MARS = "mars";
+const string MCRYPT_MODE_CBC = "cbc";
+const string MCRYPT_MODE_CFB = "cfb";
+const string MCRYPT_MODE_ECB = "ecb";
+const string MCRYPT_MODE_NOFB = "nofb";
+const string MCRYPT_MODE_OFB = "ofb";
+const string MCRYPT_MODE_STREAM = "stream";
+const string MCRYPT_PANAMA = "panama";
+const string MCRYPT_RC2 = "rc2";
+const string MCRYPT_RC6 = "rc6";
+const string MCRYPT_RIJNDAEL_128 = "rijndael-128";
+const string MCRYPT_RIJNDAEL_192 = "rijndael-192";
+const string MCRYPT_RIJNDAEL_256 = "rijndael-256";
+const string MCRYPT_SAFER128 = "safer-sk128";
+const string MCRYPT_SAFER64 = "safer-sk64";
+const string MCRYPT_SAFERPLUS = "saferplus";
+const string MCRYPT_SERPENT = "serpent";
+const string MCRYPT_SKIPJACK = "skipjack";
+const string MCRYPT_THREEWAY = "threeway";
+const string MCRYPT_TRIPLEDES = "tripledes";
+const string MCRYPT_TWOFISH = "twofish";
+const string MCRYPT_WAKE = "wake";
+const string MCRYPT_XTEA = "xtea";
+
 /**
  * Encrypts/decrypts data in CBC mode
  *

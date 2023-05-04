@@ -1,5 +1,25 @@
 <?hh // partial
 
+const int APC_ITER_TYPE = 0x1;
+const int APC_ITER_KEY = 0x2;
+const int APC_ITER_FILENAME = 0x4;
+const int APC_ITER_DEVICE = 0x8;
+const int APC_ITER_INODE = 0x10;
+const int APC_ITER_VALUE = 0x20;
+const int APC_ITER_MD5 = 0x40;
+const int APC_ITER_NUM_HITS = 0x80;
+const int APC_ITER_MTIME = 0x100;
+const int APC_ITER_CTIME = 0x200;
+const int APC_ITER_DTIME = 0x400;
+const int APC_ITER_ATIME = 0x800;
+const int APC_ITER_REFCOUNT = 0x1000;
+const int APC_ITER_MEM_SIZE = 0x2000;
+const int APC_ITER_TTL = 0x4000;
+const int APC_ITER_NONE = 0x0;
+const int APC_ITER_ALL = 0xFFFFFFFFFF;
+const int APC_LIST_ACTIVE = 1;
+const int APC_LIST_DELETED = 2;
+
 /**
  * Caches a variable in the data store, only if it's not already stored.
  *   Unlike many other mechanisms in PHP, variables stored using apc_add() will

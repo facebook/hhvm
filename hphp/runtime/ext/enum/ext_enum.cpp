@@ -173,8 +173,6 @@ struct enumExtension final : Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnumClass, getValues, BuiltinEnum, getValues);
-    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
-    HHVM_RC_STR(HH\\BUILTIN_ENUM_CLASS, "HH\\BuiltinEnumClass");
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(create_opaque_value_internal);
     X(unwrap_opaque_value);

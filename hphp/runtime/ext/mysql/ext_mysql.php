@@ -1,5 +1,10 @@
 <?hh // partial
 
+const int MYSQL_CLIENT_COMPRESS = 32;
+const int MYSQL_CLIENT_IGNORE_SPACE = 256;
+const int MYSQL_CLIENT_INTERACTIVE = 1024;
+const int MYSQL_CLIENT_SSL = 2048;
+
 /**
  * Get number of affected rows in previous MySQL operation
  *

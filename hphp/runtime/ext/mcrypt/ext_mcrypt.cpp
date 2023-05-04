@@ -730,47 +730,9 @@ bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
 struct McryptExtension final : Extension {
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {
-    HHVM_RC_STR(MCRYPT_3DES, "tripledes");
-    HHVM_RC_STR(MCRYPT_ARCFOUR, "arcfour");
-    HHVM_RC_STR(MCRYPT_ARCFOUR_IV, "arcfour-iv");
-    HHVM_RC_STR(MCRYPT_BLOWFISH, "blowfish");
-    HHVM_RC_STR(MCRYPT_BLOWFISH_COMPAT, "blowfish-compat");
-    HHVM_RC_STR(MCRYPT_CAST_128, "cast-128");
-    HHVM_RC_STR(MCRYPT_CAST_256, "cast-256");
-    HHVM_RC_STR(MCRYPT_CRYPT, "crypt");
-    HHVM_RC_INT(MCRYPT_DECRYPT, 1);
-    HHVM_RC_STR(MCRYPT_DES, "des");
     HHVM_RC_INT(MCRYPT_DEV_RANDOM, RANDOM);
     HHVM_RC_INT(MCRYPT_DEV_URANDOM, URANDOM);
-    HHVM_RC_INT(MCRYPT_ENCRYPT, 0);
-    HHVM_RC_STR(MCRYPT_ENIGNA, "crypt");
-    HHVM_RC_STR(MCRYPT_GOST, "gost");
-    HHVM_RC_STR(MCRYPT_IDEA, "idea");
-    HHVM_RC_STR(MCRYPT_LOKI97, "loki97");
-    HHVM_RC_STR(MCRYPT_MARS, "mars");
-    HHVM_RC_STR(MCRYPT_MODE_CBC, "cbc");
-    HHVM_RC_STR(MCRYPT_MODE_CFB, "cfb");
-    HHVM_RC_STR(MCRYPT_MODE_ECB, "ecb");
-    HHVM_RC_STR(MCRYPT_MODE_NOFB, "nofb");
-    HHVM_RC_STR(MCRYPT_MODE_OFB, "ofb");
-    HHVM_RC_STR(MCRYPT_MODE_STREAM, "stream");
-    HHVM_RC_STR(MCRYPT_PANAMA, "panama");
     HHVM_RC_INT(MCRYPT_RAND, RAND);
-    HHVM_RC_STR(MCRYPT_RC2, "rc2");
-    HHVM_RC_STR(MCRYPT_RC6, "rc6");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_128, "rijndael-128");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_192, "rijndael-192");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_256, "rijndael-256");
-    HHVM_RC_STR(MCRYPT_SAFER128, "safer-sk128");
-    HHVM_RC_STR(MCRYPT_SAFER64, "safer-sk64");
-    HHVM_RC_STR(MCRYPT_SAFERPLUS, "saferplus");
-    HHVM_RC_STR(MCRYPT_SERPENT, "serpent");
-    HHVM_RC_STR(MCRYPT_SKIPJACK, "skipjack");
-    HHVM_RC_STR(MCRYPT_THREEWAY, "threeway");
-    HHVM_RC_STR(MCRYPT_TRIPLEDES, "tripledes");
-    HHVM_RC_STR(MCRYPT_TWOFISH, "twofish");
-    HHVM_RC_STR(MCRYPT_WAKE, "wake");
-    HHVM_RC_STR(MCRYPT_XTEA, "xtea");
 
     HHVM_FE(mcrypt_module_open);
     HHVM_FE(mcrypt_module_close);

@@ -155,8 +155,6 @@ void ApacheExtension::moduleInit() {
   HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
   HHVM_FALIAS(HH\\get_proxygen_headers, get_proxygen_headers);
 
-  HHVM_RC_INT(APACHE_MAP, 200);
-
   loadSystemlib();
 }
 

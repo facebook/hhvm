@@ -242,12 +242,14 @@ CodeCache::CodeCache() {
 void CodeCache::cutTCSizeTo(size_t targetSize) {
   assertx(targetSize < (2ull << 30));
   // Make sure the result if size_t to avoid 32-bit overflow
-  auto const total = ASize + AColdSize + AFrozenSize + GlobalDataSize;
+  auto const total =
+    ASize + AColdSize + AFrozenSize + ABytecodeSize + GlobalDataSize;
   if (total <= targetSize) return;
 
   ASize = rd(ASize * targetSize / total);
   AColdSize = rd(AColdSize * targetSize / total);
   AFrozenSize = rd(AFrozenSize * targetSize / total);
+  ABytecodeSize = rd(ABytecodeSize * targetSize / total);
   GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
   AMaxUsage = maxUsage(ASize);

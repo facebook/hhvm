@@ -88,6 +88,7 @@ struct CodeCache {
     body("bytecode");
   }
 
+  // maxUsage should be slightly less than the max capacity to avoid overflow.
   static uint32_t maxUsage(uint32_t total) {
     return total - total / 128;
   }

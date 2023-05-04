@@ -57,7 +57,8 @@ template <class TT>
     protocol::Object obj = toObject(data);
 
     data.field_2_ref() = value.value;
-    obj.members()->merge(*toObject(data).members());
+    auto map = *toObject(data).members();
+    obj.members()->insert(map.begin(), map.end());
     CHECK_EQ(obj.members()->size(), 2);
 
     auto testCase = genCompatibilityRoundTripTestCase(

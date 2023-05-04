@@ -47,6 +47,8 @@ struct Object {
 
   // The members of the object.
   // TODO(ytj): use schema.FieldId as key
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "::folly::F14FastMap"}
   2: map<i16, Value> members;
 } (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object", rust.ord)
 

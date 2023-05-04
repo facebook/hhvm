@@ -283,7 +283,7 @@ using target_type = typename target_type_impl<Tag, T>::type;
 
 protocol::Object setObjectMemeber(
     protocol::Object&& object, int16_t id, protocol::Value value) {
-  object.members().ensure()[id] = value;
+  object[FieldId{id}] = value;
   return std::move(object);
 }
 
@@ -355,7 +355,7 @@ PatchOpTestCase makeClearTC(
   tascase.request() = req;
   auto expectedValue = asValueStruct<Tag>(expected);
   if (auto obj = expectedValue.if_object()) {
-    obj->members().ensure().clear();
+    obj->members()->clear();
   }
   tascase.result() = registry.store(expectedValue, protocol);
   return tascase;

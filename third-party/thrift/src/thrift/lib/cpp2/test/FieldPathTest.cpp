@@ -35,14 +35,14 @@ Path makePath(const std::vector<std::int64_t>& path) {
 
 TEST(FieldPathTest, Byte) {
   Object object;
-  object.members()[10] = asValueStruct<type::byte_t>(100);
-  object.members()[20] = asValueStruct<type::i16_t>(200);
-  object.members()[30] = asValueStruct<type::i32_t>(300);
-  object.members()[40] = asValueStruct<type::i64_t>(400);
-  object.members()[50] = asValueStruct<type::string_t>("500");
+  object[FieldId{10}] = asValueStruct<type::byte_t>(100);
+  object[FieldId{20}] = asValueStruct<type::i16_t>(200);
+  object[FieldId{30}] = asValueStruct<type::i32_t>(300);
+  object[FieldId{40}] = asValueStruct<type::i64_t>(400);
+  object[FieldId{50}] = asValueStruct<type::string_t>("500");
 
   auto protocol = ::apache::thrift::conformance::Protocol("hi").asStruct();
-  object.members()[60] = asValueStruct<type::union_c>(protocol);
+  object[FieldId{60}] = asValueStruct<type::union_c>(protocol);
 
   auto test_object = [&protocol](auto&& obj) {
     EXPECT_EQ(*get(obj, makePath({10})), asValueStruct<type::byte_t>(100));
@@ -69,7 +69,7 @@ TEST(FieldPathTest, Byte) {
   test_object(std::as_const(object));
 
   *get(object, makePath({10})) = asValueStruct<type::string_t>("42");
-  EXPECT_EQ(object.members()[10].stringValue_ref(), "42");
+  EXPECT_EQ(object[FieldId{10}].stringValue_ref(), "42");
 }
 
 } // namespace

@@ -55,12 +55,10 @@ class ObjectWrapper : public Base {
   // TODO(ytj): Provide boost.json.value like APIs
   // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__object.html
 
-  Value& operator[](FieldId i) {
-    return members().value()[folly::to_underlying(i)];
-  }
+  Value& operator[](FieldId i) { return (*members())[folly::to_underlying(i)]; }
 
   const Value& operator[](FieldId i) const {
-    return members().value()[folly::to_underlying(i)];
+    return (*members())[folly::to_underlying(i)];
   }
 
   Value& at(FieldId i) { return members()->at(folly::to_underlying(i)); }

@@ -457,12 +457,11 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 
   if (auto* clear = findOp(patch, PatchOp::Clear)) {
     if (argAs<type::bool_t>(*clear)) {
-      value.members().ensure().clear();
+      value.members()->clear();
     }
   }
 
   auto applyFieldPatch = [&](auto patchFields) {
-    value.members().ensure();
     const auto* obj = patchFields->if_object();
     if (!obj) {
       throw std::runtime_error(
@@ -508,7 +507,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
         value = *ensureUnion;
       } else if (value.size() != 1) {
         // Clear other values, without copying the current value
-        value.members() = {{itr->first, std::move(itr->second)}};
+        *value.members() = {{itr->first, std::move(itr->second)}};
       }
     }
   }

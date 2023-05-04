@@ -160,9 +160,14 @@ template <class TT>
 
     protocol::Object obj = toObject(def);
     protocol::Object dataObj = toObject(data);
+
+    int16_t idx = 1;
     for (auto&& i : *dataObj.members()) {
       // Add new field with non-existing field id
-      obj.members()[obj.members()->rbegin()->first + 1] = i.second;
+      while (obj.contains(FieldId{idx})) {
+        idx++;
+      }
+      obj[FieldId{idx}] = i.second;
     }
 
     ret.push_back(genCompatibilityRoundTripTestCase(

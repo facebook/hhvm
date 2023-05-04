@@ -136,8 +136,8 @@ class PatchTest : public testing::Test {
   }
 
   static Object patchAddOperation(Object&& patch, auto operation, auto value) {
-    auto opId = static_cast<int16_t>(operation);
-    patch.members()[opId] = value;
+    auto opId = static_cast<FieldId>(operation);
+    patch[opId] = value;
     return std::move(patch);
   }
 
@@ -1085,15 +1085,13 @@ TEST_F(PatchTest, Struct) {
     fieldPatchValue.objectValue_ref() =
         makePatch(op, asValueStruct<type::list<type::i32_t>>({3, 2, 1}));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure().members().ensure()[1] =
-        fieldPatchValue;
+    fieldPatch.objectValue_ref().ensure()[FieldId{1}] = fieldPatchValue;
     Object patchObj = makePatch(op::PatchOp::PatchPrior, fieldPatch);
     EXPECT_EQ(
         expected,
         applyContainerPatch(patchObj, value)
             .objectValue_ref()
-            ->members()
-            .ensure()[1]);
+            .ensure()[FieldId{1}]);
 
     Mask mask;
     mask.includes_ref().emplace()[1] = allMask();
@@ -1102,7 +1100,7 @@ TEST_F(PatchTest, Struct) {
   };
 
   applyFieldPatchTest(
-      op::PatchOp::Assign, patchValue.objectValue_ref()->members().ensure()[1]);
+      op::PatchOp::Assign, patchValue.objectValue_ref().ensure()[FieldId{1}]);
 
   applyFieldPatchTest(
       op::PatchOp::Put,
@@ -1115,16 +1113,14 @@ TEST_F(PatchTest, Struct) {
 
     Value ensureValuePatch;
     Object ensureObject;
-    ensureObject.members().ensure()[1] =
-        asValueStruct<type::list<type::i32_t>>({});
+    ensureObject[FieldId{1}] = asValueStruct<type::list<type::i32_t>>({});
     ensureValuePatch.objectValue_ref() = ensureObject;
 
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() = makePatch(
         op::PatchOp::Put, asValueStruct<type::list<type::i32_t>>({42}));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure().members().ensure()[1] =
-        fieldPatchValue;
+    fieldPatch.objectValue_ref().ensure()[FieldId{1}] = fieldPatchValue;
 
     Object patchObj = patchAddOperation(
         makePatch(op::PatchOp::PatchAfter, fieldPatch),
@@ -1135,8 +1131,7 @@ TEST_F(PatchTest, Struct) {
         asValueStruct<type::list<type::i32_t>>({42}),
         applyContainerPatch(patchObj, sourceValue)
             .objectValue_ref()
-            ->members()
-            .ensure()[1]);
+            .ensure()[FieldId{1}]);
 
     Mask mask;
     mask.includes_ref().emplace()[1] = allMask();
@@ -1335,15 +1330,14 @@ TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
 
     Value ensureValuePatch;
     Object ensureObject;
-    ensureObject.members().ensure()[2] = asValueStruct<type::i32_t>(43);
+    ensureObject[FieldId{2}] = asValueStruct<type::i32_t>(43);
     ensureValuePatch.objectValue_ref() = ensureObject;
 
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() =
         makePatch(op::PatchOp::Add, asValueStruct<type::i32_t>(1));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure().members().ensure()[2] =
-        fieldPatchValue;
+    fieldPatch.objectValue_ref().ensure()[FieldId{2}] = fieldPatchValue;
 
     Object patchObj = patchAddOperation(
         makePatch(op::PatchOp::PatchAfter, fieldPatch),
@@ -1364,7 +1358,7 @@ TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
 
     Value ensureValuePatch;
     Object ensureObject;
-    ensureObject.members().ensure()[1] = asValueStruct<type::i32_t>(43);
+    ensureObject[FieldId{1}] = asValueStruct<type::i32_t>(43);
     ensureValuePatch.objectValue_ref() = ensureObject;
 
     Object patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
@@ -1391,8 +1385,8 @@ TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
     // Setting union to two variants at the same time
     Value ensureValuePatch;
     Object ensureObject;
-    ensureObject.members().ensure()[1] = asValueStruct<type::i32_t>(43);
-    ensureObject.members().ensure()[2] = asValueStruct<type::i32_t>(43);
+    ensureObject[FieldId{1}] = asValueStruct<type::i32_t>(43);
+    ensureObject[FieldId{2}] = asValueStruct<type::i32_t>(43);
     ensureValuePatch.objectValue_ref() = ensureObject;
     patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
 
@@ -1413,8 +1407,7 @@ TEST_F(PatchTest, extractMaskViewFromPatchNested) {
       fieldPatchValue;
   Value fieldPatchValue2, bytePatchValue;
   bytePatchValue.objectValue_ref() = (op::BytePatch{} - 1).toObject();
-  fieldPatchValue2.objectValue_ref().ensure().members().ensure()[1] =
-      bytePatchValue;
+  fieldPatchValue2.objectValue_ref().ensure()[FieldId{1}] = bytePatchValue;
   Value objectPatchValue;
   objectPatchValue.objectValue_ref() =
       makePatch(op::PatchOp::PatchPrior, fieldPatchValue2);

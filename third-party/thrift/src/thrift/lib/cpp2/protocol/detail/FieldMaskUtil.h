@@ -102,7 +102,8 @@ bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
     return std::all_of(m->begin(), m->end(), [](const auto& pair) {
       return is_compatible_with<Value>(pair.second);
     });
-  } else if (const auto* m = getStringMapMask(mask)) {
+  }
+  if (const auto* m = getStringMapMask(mask)) {
     return std::all_of(m->begin(), m->end(), [](const auto& pair) {
       return is_compatible_with<Value>(pair.second);
     });

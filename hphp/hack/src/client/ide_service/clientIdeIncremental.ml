@@ -131,7 +131,7 @@ module Batch = struct
     bool ->
     Path.t ->
     Relative_path.t list ->
-    (Relative_path.t * FileInfo.t option) list
+    (Relative_path.t * (FileInfo.t * SearchUtils.si_addendum list) option) list
     = "batch_index_hackrs_ffi_root_relative_paths_only"
 
   type changed_file_info = {
@@ -146,10 +146,11 @@ module Batch = struct
     changes: changed_file_info list;
   }
 
-  (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, skips that file. *)
+  (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, return [None]. *)
   let compute_file_info_batch_root_relative_paths_only
       (popt : ParserOptions.t) (paths : Relative_path.t list) :
-      (Relative_path.t * FileInfo.t option) list =
+      (Relative_path.t * (FileInfo.t * SearchUtils.si_addendum list) option)
+      list =
     batch_index_root_relative_paths_only
       (DeclParserOptions.from_parser_options popt)
       (ParserOptions.deregister_php_stdlib popt)
@@ -168,11 +169,11 @@ module Batch = struct
              "Ignored change to file %s"
              (Relative_path.to_absolute ignored_path));
     (* NOTE: our batch index/file info computation expects only files relative to root. *)
-    let changes_to_update =
-      Relative_path.Set.filter changes ~f:should_update_changed_file
-    in
     let batch_index_benchmark_start = Unix.gettimeofday () in
-    let new_file_infos =
+    let index_result =
+      let changes_to_update =
+        Relative_path.Set.filter changes ~f:should_update_changed_file
+      in
       compute_file_info_batch_root_relative_paths_only
         (Provider_context.get_popt ctx)
         (Relative_path.Set.elements changes_to_update)
@@ -181,9 +182,13 @@ module Batch = struct
       "Batch index completed in %f seconds"
       (Unix.gettimeofday () -. batch_index_benchmark_start);
     let changed_file_infos =
-      List.map new_file_infos ~f:(fun (path, new_file_info) ->
+      List.map index_result ~f:(fun (path, new_file_info_with_addendum) ->
           let old_file_info = Naming_table.get_file_info naming_table path in
-          { path; new_file_info; old_file_info })
+          {
+            path;
+            new_file_info = Option.map new_file_info_with_addendum ~f:fst;
+            old_file_info;
+          })
     in
     (* update the reverse-naming-table, which is mutable storage owned by backend *)
     let update_reverse_naming_table_benchmark_start = Unix.gettimeofday () in
@@ -211,12 +216,12 @@ module Batch = struct
           | Some _ -> Naming_table.remove naming_table path)
     in
     (* update new *)
-    let paths_with_new_file_info =
-      List.filter_map changed_file_infos ~f:(fun { path; new_file_info; _ } ->
-          Option.map new_file_info ~f:(fun new_file_info ->
-              (path, new_file_info)))
-    in
     let naming_table =
+      let paths_with_new_file_info =
+        List.filter_map changed_file_infos ~f:(fun { path; new_file_info; _ } ->
+            Option.map new_file_info ~f:(fun new_file_info ->
+                (path, new_file_info)))
+      in
       Naming_table.update_many
         naming_table
         (paths_with_new_file_info |> Relative_path.Map.of_list)
@@ -225,16 +230,16 @@ module Batch = struct
       "Updated forward naming table in %f seconds"
       (Unix.gettimeofday () -. update_forward_naming_table_benchmark_start);
     (* update search index *)
-    let paths_missing_new_file_info =
-      List.filter changed_file_infos ~f:(fun { new_file_info; _ } ->
-          Option.is_none new_file_info)
-      |> List.map ~f:(fun { path; _ } -> path)
-      |> Relative_path.Set.of_list
-    in
     (* remove paths without new file info *)
     let removing_search_index_files_benchmark_start = Unix.gettimeofday () in
     let sienv =
-      SymbolIndexCore.remove_files ~sienv ~paths:paths_missing_new_file_info
+      let paths_without_new_file_info =
+        List.filter changed_file_infos ~f:(fun { new_file_info; _ } ->
+            Option.is_none new_file_info)
+        |> List.map ~f:(fun { path; _ } -> path)
+        |> Relative_path.Set.of_list
+      in
+      SymbolIndexCore.remove_files ~sienv ~paths:paths_without_new_file_info
     in
     log
       "Removed files from search index in %f seconds"
@@ -244,12 +249,16 @@ module Batch = struct
       Unix.gettimeofday ()
     in
     let sienv =
-      SymbolIndexCore.update_files
-        ~ctx
-        ~sienv
-        ~paths:
-          (List.map paths_with_new_file_info ~f:(fun (path, new_file_info) ->
-               (path, new_file_info, SearchUtils.TypeChecker)))
+      let get_addenda_opt (path, new_file_info_with_addenda_opt) =
+        Option.map
+          new_file_info_with_addenda_opt
+          ~f:(fun (_new_file_info, addenda) ->
+            (path, addenda, SearchUtils.TypeChecker))
+      in
+      let paths_with_addenda =
+        List.filter_map index_result ~f:get_addenda_opt
+      in
+      SymbolIndexCore.update_from_addenda ~sienv ~paths:paths_with_addenda
     in
     log
       "Update search index with new files in %f seconds"

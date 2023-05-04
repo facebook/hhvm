@@ -120,6 +120,29 @@ let update_file
     lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
   }
 
+let update_file_from_addenda
+    ~(sienv : si_env)
+    ~(path : Relative_path.t)
+    ~(addenda : SearchUtils.si_addendum list) : si_env =
+  let tombstone = get_tombstone path in
+  let filepath = Relative_path.suffix path in
+  let contents : SearchUtils.si_capture =
+    List.map addenda ~f:(fun addendum ->
+        {
+          sif_name = addendum.sia_name;
+          sif_kind = addendum.sia_kind;
+          sif_filepath = filepath;
+          sif_is_abstract = addendum.sia_is_abstract;
+          sif_is_final = addendum.sia_is_final;
+        })
+  in
+  {
+    sienv with
+    lss_fullitems =
+      Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
+    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+  }
+
 let update_file_facts
     ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env
     =

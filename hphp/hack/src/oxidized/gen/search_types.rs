@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00fefe546ba8d5081ba13eba71ef8eca>>
+// @generated SignedSource<<95cc519ba21d63979a4c56e80c11f935>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -79,3 +79,28 @@ pub enum SiKind {
 }
 impl TrivialDrop for SiKind {}
 arena_deserializer::impl_deserialize_in_arena!(SiKind);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "sia_")]
+#[repr(C)]
+pub struct SiAddendum {
+    pub name: String,
+    pub kind: SiKind,
+    pub is_abstract: bool,
+    pub is_final: bool,
+}

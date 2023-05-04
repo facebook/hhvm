@@ -192,6 +192,7 @@ let string_to_kind (type_ : string) : si_kind option =
 
 (* More complete representation of a symbol index item *)
 type si_fullitem = {
+  (* NOTE: this is expected to have its leading backslash stripped. See [Utils.strip_ns] *)
   sif_name: string;
   sif_kind: si_kind;
   sif_filepath: string;

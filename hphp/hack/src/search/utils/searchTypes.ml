@@ -29,3 +29,14 @@ type si_kind =
   | SI_Keyword
   | SI_Constructor
 [@@deriving eq, show]
+
+(* An [si_fullitem] without the filepath, used mainly for FFI. *)
+type si_addendum = {
+  (* This is expected not to contain the leading namespace backslash! See
+     [Utils.strip_ns]. *)
+  sia_name: string;
+  sia_kind: si_kind;
+  sia_is_abstract: bool;
+  sia_is_final: bool;
+}
+[@@deriving show]

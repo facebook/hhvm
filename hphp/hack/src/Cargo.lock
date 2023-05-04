@@ -4506,6 +4506,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bumpalo",
+ "core_utils_rust",
  "direct_decl_parser",
  "hackrs_provider_backend",
  "ocamlrep_ocamlpool",

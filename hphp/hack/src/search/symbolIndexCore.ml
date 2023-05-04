@@ -78,6 +78,22 @@ let update_files
           LocalSearchService.update_file ~ctx ~sienv ~path ~info
         | _ -> sienv)
 
+let update_from_addenda
+    ~(sienv : si_env)
+    ~(paths :
+       (Relative_path.t * SearchUtils.si_addendum list * file_source) list) :
+    si_env =
+  match sienv.sie_provider with
+  | NoIndex -> sienv
+  | CustomIndex
+  | LocalIndex
+  | SqliteIndex ->
+    List.fold paths ~init:sienv ~f:(fun sienv (path, addenda, detector) ->
+        match detector with
+        | SearchUtils.TypeChecker ->
+          LocalSearchService.update_file_from_addenda ~sienv ~path ~addenda
+        | _ -> sienv)
+
 (* Update from fast facts parser directly *)
 let update_from_facts
     ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env

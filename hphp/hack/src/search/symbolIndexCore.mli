@@ -27,6 +27,14 @@ val update_files :
   paths:(Relative_path.t * FileInfo.t * SearchUtils.file_source) list ->
   SearchUtils.si_env
 
+(* FASTER: update from addenda directly *)
+val update_from_addenda :
+  sienv:SearchUtils.si_env ->
+  paths:
+    (Relative_path.t * SearchUtils.si_addendum list * SearchUtils.file_source)
+    list ->
+  SearchUtils.si_env
+
 (* FASTER: Update from facts directly *)
 val update_from_facts :
   sienv:SearchUtils.si_env ->

@@ -14,6 +14,7 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 anyhow = "1.0.65"
 bumpalo = { version = "3.11.1", features = ["collections"] }
+core_utils_rust = { version = "0.0.0", path = "../../../../utils/core" }
 direct_decl_parser = { version = "0.0.0", path = "../../../../parser/api/cargo/direct_decl_parser" }
 hackrs_provider_backend = { version = "0.0.0", path = "../../../../providers/hackrs_provider_backend" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

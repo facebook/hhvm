@@ -12,6 +12,7 @@ use bumpalo::Bump;
 use hackrs_provider_backend::FileInfo;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::search_types::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
 use relative_path::RelativePath;
@@ -23,7 +24,7 @@ ocaml_ffi! {
         deregister_php_stdlib_if_hhi: bool,
         root: PathBuf,
         filenames: Vec<RelativePath>,
-    ) -> Vec<(RelativePath, Option<FileInfo>)> {
+    ) -> Vec<(RelativePath, Option<(FileInfo, Vec<SiAddendum>)>)> {
         let filenames_and_contents = par_read_file_root_only(&root, filenames).unwrap_ocaml();
         filenames_and_contents
             .into_par_iter()
@@ -49,7 +50,9 @@ ocaml_ffi! {
                     &arena,
                 );
 
-                (relpath, Some(with_hashes.into()))
+                let addenda = get_symbol_addenda(&with_hashes);
+
+                (relpath, Some((with_hashes.into(), addenda)))
             })
             .collect()
     }
@@ -74,6 +77,45 @@ fn par_read_file_root_only(
                 Err(e) if e.kind() == io::ErrorKind::NotFound => Ok((relpath, None)),
                 Err(e) => Err(e.into()),
             }
+        })
+        .collect()
+}
+
+fn get_symbol_addenda<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Vec<SiAddendum> {
+    parsed_file
+        .iter()
+        .filter_map(|(name, decl, _hash)| {
+            use oxidized::search_types::SiKind::*;
+            use oxidized_by_ref::shallow_decl_defs::Decl;
+            let kind = match decl {
+                Decl::Class(class) => {
+                    use oxidized::ast_defs::ClassishKind::*;
+                    match class.kind {
+                        Cclass(_) => SIClass,
+                        Cinterface => SIInterface,
+                        Ctrait => SITrait,
+                        Cenum | CenumClass(_) => SIEnum,
+                    }
+                }
+                Decl::Fun(_) => SIFunction,
+                Decl::Typedef(_) => SITypedef,
+                Decl::Const(_) => SIGlobalConstant,
+                Decl::Module(_) => {
+                    // TODO: SymbolIndex doesn't currently represent modules
+                    return None;
+                }
+            };
+            let (is_abstract, is_final) = match decl {
+                Decl::Class(class) => (class.abstract_, class.final_),
+                _ => (false, false),
+            };
+
+            Some(SiAddendum {
+                name: core_utils_rust::strip_ns(name).to_owned(),
+                kind,
+                is_abstract,
+                is_final,
+            })
         })
         .collect()
 }

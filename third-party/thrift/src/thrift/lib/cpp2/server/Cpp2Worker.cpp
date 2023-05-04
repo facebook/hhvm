@@ -26,9 +26,11 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseLocal.h>
+#include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/portability/Sockets.h>
 #include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/concurrency/Util.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
@@ -39,6 +41,10 @@
 #include <wangle/acceptor/EvbHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/UnencryptedAcceptorHandshakeHelper.h>
+
+// DANGER: If you disable this overly broadly, this can completely break
+// workloads that rely on passing FDs over Unix sockets + Thrift.
+THRIFT_FLAG_DEFINE_bool(enable_server_async_fd_socket, /* default = */ true);
 
 namespace apache {
 namespace thrift {
@@ -190,6 +196,18 @@ void Cpp2Worker::plaintextConnectionReady(
       server_,
       std::move(sock),
       server_->getObserverShared());
+}
+
+folly::AsyncSocket::UniquePtr Cpp2Worker::makeNewAsyncSocket(
+    folly::EventBase* base, int fd, const folly::SocketAddress* peerAddress) {
+  if (THRIFT_FLAG(enable_server_async_fd_socket) &&
+      peerAddress->getFamily() == AF_UNIX) {
+    VLOG(4) << "Enabling AsyncFdSocket"; // peerAddress is always anonymous
+    // Enable passing FDs over Unix sockets, see `man cmsg`.
+    return folly::AsyncSocket::UniquePtr(new folly::AsyncFdSocket(
+        base, folly::NetworkSocket::fromFd(fd), peerAddress));
+  }
+  return Acceptor::makeNewAsyncSocket(base, fd, peerAddress);
 }
 
 void Cpp2Worker::useExistingChannel(

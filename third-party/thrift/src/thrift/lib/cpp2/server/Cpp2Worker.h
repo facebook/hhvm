@@ -390,6 +390,11 @@ class Cpp2Worker : public IOWorkerContext,
   mutable folly::F14NodeMap<AsyncProcessorFactory*, PerServiceMetadata>
       perServiceMetadata_;
 
+  folly::AsyncSocket::UniquePtr makeNewAsyncSocket(
+      folly::EventBase* base,
+      int fd,
+      const folly::SocketAddress* peerAddress) override;
+
   folly::AsyncSSLSocket::UniquePtr makeNewAsyncSSLSocket(
       const std::shared_ptr<folly::SSLContext>& ctx,
       folly::EventBase* base,

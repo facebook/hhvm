@@ -50,14 +50,15 @@ struct comment {
   source_location loc;
 };
 
-struct attributes {
-  boost::optional<comment> doc;
-  node_list<t_const> annotations;
-};
-
 struct deprecated_annotations {
   std::map<std::string, annotation_value> strings;
   source_location loc;
+};
+
+struct attributes {
+  boost::optional<comment> doc;
+  node_list<t_const> annotations;
+  std::unique_ptr<struct deprecated_annotations> deprecated_annotations;
 };
 
 struct type_throws_spec {
@@ -88,12 +89,6 @@ class parser_actions {
   virtual void on_namespace(
       const identifier& language, fmt::string_view ns) = 0;
 
-  virtual void on_definition(
-      source_range range,
-      std::unique_ptr<t_named> defn,
-      std::unique_ptr<attributes> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
-
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
   virtual comment on_inline_doc(source_location loc, fmt::string_view text) = 0;
@@ -103,14 +98,16 @@ class parser_actions {
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) = 0;
 
-  virtual std::unique_ptr<t_service> on_service(
+  virtual void on_service(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       const identifier& base,
       std::unique_ptr<t_function_list> functions) = 0;
 
-  virtual std::unique_ptr<t_interaction> on_interaction(
+  virtual void on_interaction(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       std::unique_ptr<t_function_list> functions) = 0;
 
@@ -121,8 +118,7 @@ class parser_actions {
       std::vector<t_type_ref> return_type,
       const identifier& name,
       t_field_list params,
-      std::unique_ptr<t_throws> throws,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+      std::unique_ptr<t_throws> throws) = 0;
 
   virtual t_type_ref on_stream_return_type(
       source_range range, type_throws_spec spec) = 0;
@@ -150,17 +146,27 @@ class parser_actions {
 
   virtual std::unique_ptr<t_throws> on_throws(t_field_list exceptions) = 0;
 
-  virtual std::unique_ptr<t_typedef> on_typedef(
-      source_range range, t_type_ref type, const identifier& name) = 0;
-
-  virtual std::unique_ptr<t_struct> on_struct(
-      source_range range, const identifier& name, t_field_list fields) = 0;
-
-  virtual std::unique_ptr<t_union> on_union(
-      source_range range, const identifier& name, t_field_list fields) = 0;
-
-  virtual std::unique_ptr<t_exception> on_exception(
+  virtual void on_typedef(
       source_range range,
+      std::unique_ptr<attributes> attrs,
+      t_type_ref type,
+      const identifier& name) = 0;
+
+  virtual void on_struct(
+      source_range range,
+      std::unique_ptr<attributes> attrs,
+      const identifier& name,
+      t_field_list fields) = 0;
+
+  virtual void on_union(
+      source_range range,
+      std::unique_ptr<attributes> attrs,
+      const identifier& name,
+      t_field_list fields) = 0;
+
+  virtual void on_exception(
+      source_range range,
+      std::unique_ptr<attributes> attrs,
       t_error_safety safety,
       t_error_kind kind,
       t_error_blame blame,
@@ -175,7 +181,6 @@ class parser_actions {
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) = 0;
 
   virtual t_type_ref on_type(
@@ -187,19 +192,22 @@ class parser_actions {
       fmt::string_view name,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
-  virtual std::unique_ptr<t_enum> on_enum(
-      source_range range, const identifier& name, t_enum_value_list values) = 0;
+  virtual void on_enum(
+      source_range range,
+      std::unique_ptr<attributes> attrs,
+      const identifier& name,
+      t_enum_value_list values) = 0;
 
   virtual std::unique_ptr<t_enum_value> on_enum_value(
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
-      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) = 0;
 
-  virtual std::unique_ptr<t_const> on_const(
+  virtual void on_const(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value) = 0;

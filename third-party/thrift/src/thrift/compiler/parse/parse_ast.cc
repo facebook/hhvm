@@ -471,21 +471,23 @@ class ast_parser : public parser_actions {
   void set_attributes(
       t_named& node,
       std::unique_ptr<attributes> attrs,
-      std::unique_ptr<deprecated_annotations> annots,
       const source_range& range) const {
     if (mode_ != parsing_mode::PROGRAM) {
       return;
     }
     node.set_src_range(range);
-    if (attrs) {
-      if (attrs->doc) {
-        node.set_doc(std::move(attrs->doc->text));
-      }
-      for (auto& annotation : attrs->annotations) {
-        node.add_structured_annotation(std::move(annotation));
-      }
+    if (!attrs) {
+      return;
     }
-    set_annotations(&node, std::move(annots));
+    if (attrs->doc) {
+      node.set_doc(std::move(attrs->doc->text));
+    }
+    for (auto& annotation : attrs->annotations) {
+      node.add_structured_annotation(std::move(annotation));
+    }
+    if (attrs->deprecated_annotations) {
+      set_annotations(&node, std::move(attrs->deprecated_annotations));
+    }
   }
 
   // DEPRECATED! Adds an unnamed typedef to the program.
@@ -760,7 +762,7 @@ class ast_parser : public parser_actions {
     if (mode_ != parsing_mode::PROGRAM) {
       return;
     }
-    set_attributes(*program_, std::move(attrs), {}, range);
+    set_attributes(*program_, std::move(attrs), range);
     if (!program_->package().empty()) {
       diags_.error(range.begin, "Package already specified.");
     }
@@ -793,22 +795,20 @@ class ast_parser : public parser_actions {
     }
   }
 
-  void on_definition(
+  void add_definition(
       source_range range,
       std::unique_ptr<t_named> defn,
-      std::unique_ptr<attributes> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) override {
+      std::unique_ptr<attributes> attrs) {
     if (mode_ == parsing_mode::PROGRAM) {
       programs_that_parsed_definition_.insert(program_->path());
     }
-    set_attributes(*defn, std::move(attrs), std::move(annotations), range);
+    set_attributes(*defn, std::move(attrs), range);
 
     if (mode_ != parsing_mode::PROGRAM) {
       return;
     }
 
     // Add to scope.
-    // TODO: Consider moving program-level scope management to t_program.
     if (auto* tnode = dynamic_cast<t_interaction*>(defn.get())) {
       scope_cache_->add_interaction(program_->scope_name(*defn), tnode);
     } else if (auto* tnode = dynamic_cast<t_service*>(defn.get())) {
@@ -865,8 +865,9 @@ class ast_parser : public parser_actions {
     return new_struct_annotation(std::move(value), range);
   }
 
-  std::unique_ptr<t_service> on_service(
+  void on_service(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       const identifier& base,
       std::unique_ptr<t_function_list> functions) override {
@@ -889,18 +890,19 @@ class ast_parser : public parser_actions {
         program_, fmt::to_string(name.str), find_base_service());
     service->set_src_range(range);
     set_functions(*service, std::move(functions));
-    return service;
+    add_definition(range, std::move(service), std::move(attrs));
   }
 
-  std::unique_ptr<t_interaction> on_interaction(
+  void on_interaction(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       std::unique_ptr<t_function_list> functions) override {
     auto interaction =
         std::make_unique<t_interaction>(program_, fmt::to_string(name.str));
     interaction->set_src_range(range);
     set_functions(*interaction, std::move(functions));
-    return interaction;
+    add_definition(range, std::move(interaction), std::move(attrs));
   }
 
   std::unique_ptr<t_function> on_function(
@@ -910,8 +912,7 @@ class ast_parser : public parser_actions {
       std::vector<t_type_ref> return_type,
       const identifier& name,
       t_field_list params,
-      std::unique_ptr<t_throws> throws,
-      std::unique_ptr<deprecated_annotations> annotations) override {
+      std::unique_ptr<t_throws> throws) override {
     auto function = std::make_unique<t_function>(
         program_, std::move(return_type), fmt::to_string(name.str));
     function->set_qualifier(qual);
@@ -920,7 +921,7 @@ class ast_parser : public parser_actions {
     function->set_src_range(range);
     // TODO: Leave the param list unnamed.
     function->params().set_name(function->name() + "_args");
-    set_attributes(*function, std::move(attrs), std::move(annotations), range);
+    set_attributes(*function, std::move(attrs), range);
     return function;
   }
 
@@ -991,38 +992,44 @@ class ast_parser : public parser_actions {
     return result;
   }
 
-  std::unique_ptr<t_typedef> on_typedef(
-      source_range range, t_type_ref type, const identifier& name) override {
+  void on_typedef(
+      source_range range,
+      std::unique_ptr<attributes> attrs,
+      t_type_ref type,
+      const identifier& name) override {
     auto typedef_node = std::make_unique<t_typedef>(
         program_, fmt::to_string(name.str), std::move(type));
     typedef_node->set_src_range(range);
-    return typedef_node;
+    add_definition(range, std::move(typedef_node), std::move(attrs));
   }
 
-  std::unique_ptr<t_struct> on_struct(
+  void on_struct(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       t_field_list fields) override {
     auto struct_node =
         std::make_unique<t_struct>(program_, fmt::to_string(name.str));
     struct_node->set_src_range(range);
     set_fields(*struct_node, std::move(fields));
-    return struct_node;
+    add_definition(range, std::move(struct_node), std::move(attrs));
   }
 
-  std::unique_ptr<t_union> on_union(
+  void on_union(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       t_field_list fields) override {
     auto union_node =
         std::make_unique<t_union>(program_, fmt::to_string(name.str));
     union_node->set_src_range(range);
     set_fields(*union_node, std::move(fields));
-    return union_node;
+    add_definition(range, std::move(union_node), std::move(attrs));
   }
 
-  std::unique_ptr<t_exception> on_exception(
+  void on_exception(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       t_error_safety safety,
       t_error_kind kind,
       t_error_blame blame,
@@ -1035,7 +1042,7 @@ class ast_parser : public parser_actions {
     exception->set_kind(kind);
     exception->set_blame(blame);
     set_fields(*exception, std::move(fields));
-    return exception;
+    add_definition(range, std::move(exception), std::move(attrs));
   }
 
   std::unique_ptr<t_field> on_field(
@@ -1046,7 +1053,6 @@ class ast_parser : public parser_actions {
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) override {
     auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
                        : boost::optional<t_field_id>();
@@ -1057,7 +1063,7 @@ class ast_parser : public parser_actions {
       field->set_default_value(std::move(value));
     }
     field->set_src_range(range);
-    set_attributes(*field, std::move(attrs), std::move(annotations), range);
+    set_attributes(*field, std::move(attrs), range);
     if (doc) {
       set_doctext(*field, doc);
     }
@@ -1077,15 +1083,16 @@ class ast_parser : public parser_actions {
     return new_type_ref(fmt::to_string(name), std::move(annotations), range);
   }
 
-  std::unique_ptr<t_enum> on_enum(
+  void on_enum(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       t_enum_value_list values) override {
     auto enum_node =
         std::make_unique<t_enum>(program_, fmt::to_string(name.str));
     enum_node->set_src_range(range);
     enum_node->set_values(std::move(values));
-    return enum_node;
+    add_definition(range, std::move(enum_node), std::move(attrs));
   }
 
   std::unique_ptr<t_enum_value> on_enum_value(
@@ -1093,12 +1100,10 @@ class ast_parser : public parser_actions {
       std::unique_ptr<attributes> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
-      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) override {
     auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
     enum_value->set_src_range(range);
-    set_attributes(
-        *enum_value, std::move(attrs), std::move(annotations), range);
+    set_attributes(*enum_value, std::move(attrs), range);
     if (value) {
       enum_value->set_value(
           narrow_int<int32_t>(range.begin, *value, "enum values"));
@@ -1109,15 +1114,16 @@ class ast_parser : public parser_actions {
     return enum_value;
   }
 
-  std::unique_ptr<t_const> on_const(
+  void on_const(
       source_range range,
+      std::unique_ptr<attributes> attrs,
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value) override {
     auto constant = std::make_unique<t_const>(
         program_, std::move(type), fmt::to_string(name.str), std::move(value));
     constant->set_src_range(range);
-    return constant;
+    add_definition(range, std::move(constant), std::move(attrs));
   }
 
   std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override {

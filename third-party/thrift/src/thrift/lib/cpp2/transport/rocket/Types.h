@@ -23,6 +23,7 @@
 
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/fdsock/SocketFds.h>
 
 namespace apache {
 namespace thrift {
@@ -140,6 +141,8 @@ class Payload {
   void append(Payload&& other);
 
   bool hasData() const { return buffer_ != nullptr; }
+
+  folly::SocketFds fds;
 
  private:
   std::unique_ptr<folly::IOBuf> buffer_;

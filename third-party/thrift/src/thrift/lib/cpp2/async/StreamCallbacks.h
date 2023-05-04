@@ -26,6 +26,7 @@
 #include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/fdsock/SocketFds.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -41,6 +42,7 @@ struct FirstResponsePayload {
 
   std::unique_ptr<folly::IOBuf> payload;
   ResponseRpcMetadata metadata;
+  folly::SocketFds fds;
 };
 
 struct StreamPayload {
@@ -72,6 +74,7 @@ struct StreamPayload {
   StreamPayloadMetadata metadata;
   // OrderedHeader is sent as a PAYLOAD frame with an empty payload
   bool isOrderedHeader;
+  folly::SocketFds fds;
 };
 
 struct HeadersPayload {

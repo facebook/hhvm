@@ -470,7 +470,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
   }
 
   context_.sendPayload(
-      pack(metadata, std::move(data)),
+      packWithFds(&metadata, std::move(data), folly::SocketFds{}),
       Flags().next(true).complete(true),
       std::move(cb));
 }

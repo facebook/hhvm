@@ -187,6 +187,7 @@ struct RequestRpcMetadata {
   // Thrift is typically used within a larger framework.
   // This field is for storing framework-specific metadata.
   20: optional IOBufPtr frameworkMetadata;
+  21: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
 }
 
 struct ErrorClassification {
@@ -284,6 +285,7 @@ struct ResponseRpcMetadata {
   9: optional i32 streamId;
   // Set on a sampled basis for tracking queueing times.
   10: optional QueueMetadata queueMetadata;
+  11: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
 }
 
 enum ResponseRpcErrorCategory {
@@ -384,6 +386,7 @@ struct StreamPayloadMetadata {
   // Metadata describing the type of stream payload. MUST be set for protocol
   // version 8+.
   3: optional PayloadMetadata payloadMetadata;
+  4: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
 }
 
 // Setup metadata sent from the client to the server at the time

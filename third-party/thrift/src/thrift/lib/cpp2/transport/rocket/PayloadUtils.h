@@ -157,21 +157,48 @@ inline std::unique_ptr<folly::IOBuf> packCompact(
   return std::move(data);
 }
 
+// NB: Populates `metadata.numFds` if `fds` is nonempty.
 template <typename Payload, typename Metadata>
-rocket::Payload pack(const Metadata& metadata, Payload&& payload) {
+rocket::Payload packWithFds(
+    Metadata* metadata, Payload&& payload, folly::SocketFds fds) {
   auto serializedPayload = packCompact(std::forward<Payload>(payload));
-  if (auto compress = metadata.compression_ref()) {
+  if (auto compress = metadata->compression_ref()) {
     apache::thrift::rocket::detail::compressPayload(
         serializedPayload, *compress);
   }
-  return apache::thrift::rocket::detail::makePayload(
-      metadata, std::move(serializedPayload));
+  auto numFds = fds.size();
+  if (numFds) {
+    // When received, the request will know to retrieve this many FDs.
+    //
+    // NB: The receiver could more confidently assert that the right FDs are
+    // associated with the right request if we could:
+    //  - Additionally store the "socket sequence number" of these FDs into
+    //    the metadata here.
+    //  - Have `AsyncFdSocket::writeIOBufsWithFds` check, via a token
+    //    object, that the sequence number chosen at parse-time matches the
+    //    actual write order).
+    // Unfortunately, implementing this check would require adding
+    // considerable plumbing to Rocket, so we skip it in favor of asserting
+    // we got the right # of FDs, and documenting the correct FD+data
+    // ordering invariant in the client & server code that interacts with
+    // the socket.
+    metadata->numFds() = numFds;
+  }
+  auto ret = apache::thrift::rocket::detail::makePayload(
+      *metadata, std::move(serializedPayload));
+  if (numFds) {
+    ret.fds = std::move(fds.dcheckToSend());
+  }
+  return ret;
 }
 
 template <class T>
 rocket::Payload pack(T&& payload) {
-  return pack(
-      std::forward<T>(payload).metadata, std::forward<T>(payload).payload);
+  auto metadata = std::forward<T>(payload).metadata;
+  return packWithFds(
+      &metadata,
+      std::forward<T>(payload).payload,
+      std::forward<T>(payload).fds);
 }
 } // namespace rocket
 } // namespace thrift

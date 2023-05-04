@@ -270,6 +270,7 @@ add_library(
   transport/core/ThriftClient.cpp
   transport/core/ThriftClientCallback.cpp
   transport/core/ThriftRequest.cpp
+  transport/rocket/FdSocketMetadata.cpp
   transport/rocket/PayloadUtils.cpp
   transport/rocket/Types.cpp
   transport/rocket/client/RequestContext.cpp

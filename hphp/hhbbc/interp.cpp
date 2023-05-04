@@ -920,7 +920,7 @@ void clsCnsImpl(ISS& env, const Type& cls, const Type& name) {
     return;
   }
 
-  auto lookup = env.index.lookup_class_constant(env.ctx, cls, name);
+  auto lookup = lookupClsConstant(env, cls, name);
   if (lookup.found == TriBool::No || lookup.ty.is(BBottom)) {
     push(env, TBottom);
     unreachable(env);

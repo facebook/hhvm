@@ -385,7 +385,7 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
       if (!state.initialized) continue;
 
       CollectedInfo collect {
-        index, ctx, nullptr, CollectionOpts {}, &fa
+        index, ctx, nullptr, CollectionOpts {}, nullptr, &fa
       };
       Interp interp { index, ctx, collect, bid, blk, state };
       for (auto& bc : blk->hhbcs) {

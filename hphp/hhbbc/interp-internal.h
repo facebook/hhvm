@@ -20,10 +20,12 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/array-provenance.h"
 
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/options.h"
@@ -395,6 +397,38 @@ inline Type selfExact(ISS& env) {
     return ty ? *ty : TCls;
   }
   return ty ? toobj(*ty) : TObj;
+}
+
+//////////////////////////////////////////////////////////////////////
+// class constants
+
+inline ClsConstLookupResult<> lookupClsConstant(const Index& index,
+                                                const Context& ctx,
+                                                const CollectedInfo* collect,
+                                                const Type& cls,
+                                                const Type& name) {
+  // Check if the constant's class is definitely the current context.
+  auto const isClsCtx = [&] {
+    if (!collect || !collect->clsCns) return false;
+    auto const rcls = index.selfCls(ctx);
+    if (!rcls) return false;
+    if (!is_specialized_cls(cls)) return false;
+    auto const& dcls = dcls_of(cls);
+    if (!dcls.isExact()) return false;
+    return dcls.cls().same(*rcls);
+  }();
+
+  if (isClsCtx && is_specialized_string(name)) {
+    auto lookup = collect->clsCns->lookup(sval_of(name));
+    if (lookup.found == TriBool::Yes) return lookup;
+  }
+  return index.lookup_class_constant(ctx, cls, name);
+}
+
+inline ClsConstLookupResult<> lookupClsConstant(ISS& env,
+                                                const Type& cls,
+                                                const Type& name) {
+  return lookupClsConstant(env.index, env.ctx, &env.collect, cls, name);
 }
 
 //////////////////////////////////////////////////////////////////////

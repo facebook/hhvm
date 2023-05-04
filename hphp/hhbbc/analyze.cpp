@@ -492,22 +492,70 @@ FuncAnalysis do_analyze_collect(const Index& index,
 FuncAnalysis do_analyze(const Index& index,
                         const AnalysisContext& inputCtx,
                         ClassAnalysis* clsAnalysis,
+                        ClsConstantWork* clsCnsWork = nullptr,
                         const KnownArgs* knownArgs = nullptr,
                         CollectionOpts opts = CollectionOpts{}) {
   auto const ctx = adjust_closure_context(index, inputCtx);
-  auto collect = CollectedInfo { index, ctx, clsAnalysis, opts };
 
-  auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
-  if (ctx.func->name == s_86cinit.get() && !knownArgs) {
-    // We need to try to resolve any dynamic constants
-    size_t idx = 0;
-    for (auto const& c : ctx.cls->constants) {
-      if (c.val && c.val->m_type == KindOfUninit) {
-        auto const fa = analyze_func_inline(index, ctx, TCls, { sval(c.name) });
-        ret.resolvedConstants.emplace_back(idx, unctx(fa.inferredReturn));
-      }
-      ++idx;
-    }
+  // If this isn't an 86cinit, or if we're inline interping, just do a
+  // normal analyze.
+  if (ctx.func->name != s_86cinit.get() || knownArgs) {
+    auto collect = CollectedInfo { index, ctx, clsAnalysis, opts, clsCnsWork };
+    return do_analyze_collect(index, ctx, collect, knownArgs);
+  }
+
+  // Otherwise this is an 86cinit. We want to inline interp it for
+  // each constant to resolve them. Since a constant can be defined in
+  // terms of another, we want to repeat this until we reach a fixed
+  // point.
+
+  // Use a scratch ClsConstantWork if one hasn't been provided (this
+  // is the case when we're the analyzing constants phase).
+  Optional<ClsConstantWork> temp;
+  if (!clsCnsWork) {
+    temp.emplace(index, *ctx.cls);
+    clsCnsWork = temp.get_pointer();
+  }
+  assertx(!clsCnsWork->next());
+
+  // Schedule initial work
+  for (auto const& cns : ctx.cls->constants) {
+    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) continue;
+    clsCnsWork->add(cns.name);
+  }
+
+  // Inline interp for this constant, and reschedule interp for any
+  // constants which rely on this constant. Continue until there's no
+  // more work.
+  while (auto const cns = clsCnsWork->next()) {
+    clsCnsWork->setCurrent(cns);
+    SCOPE_EXIT { clsCnsWork->clearCurrent(cns); };
+    auto fa = analyze_func_inline(
+      index,
+      ctx,
+      TCls,
+      { sval(cns) },
+      clsCnsWork
+    );
+    clsCnsWork->update(cns, unctx(std::move(fa.inferredReturn)));
+  }
+
+  // Analyze the 86cinit as a normal functions. We do this last so it
+  // can take advantage of any resolved constants in clsCnsWork.
+  auto collect = CollectedInfo { index, ctx, clsAnalysis, opts, clsCnsWork };
+  auto ret = do_analyze_collect(index, ctx, collect, nullptr);
+
+  // Propagate out the resolved constants so they can be reflected
+  // into the Index.
+  for (size_t i = 0, size = ctx.cls->constants.size(); i < size; ++i) {
+    auto const& cns = ctx.cls->constants[i];
+    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) continue;
+    auto& info = clsCnsWork->constants.at(cns.name);
+    ret.resolvedConstants.emplace_back(i, std::move(info));
   }
   return ret;
 }
@@ -606,6 +654,77 @@ void ClassAnalysisWorklist::scheduleForReturnType(const php::Func& callee) {
 
 //////////////////////////////////////////////////////////////////////
 
+ClsConstantWork::ClsConstantWork(const Index& index,
+                                 const php::Class& cls): cls{cls} {
+  auto initial = index.lookup_class_constants(cls);
+  for (auto& [name, info] : initial) constants.emplace(name, std::move(info));
+}
+
+ClsConstLookupResult<> ClsConstantWork::lookup(SString name) {
+  auto const it = constants.find(name);
+  if (it == end(constants)) {
+    return ClsConstLookupResult<>{ TBottom, TriBool::No, true };
+  }
+  if (current) deps[name].emplace(current);
+  return ClsConstLookupResult<>{
+    it->second.type,
+    TriBool::Yes,
+    !is_scalar(it->second.type) || bool(cls.attrs & AttrInternal)
+  };
+}
+
+void ClsConstantWork::update(SString name, Type t) {
+  auto& old = constants.at(name);
+  if (t.strictlyMoreRefined(old.type)) {
+    if (old.refinements < options.returnTypeRefineLimit) {
+      old.type = std::move(t);
+      ++old.refinements;
+      schedule(name);
+    } else {
+      FTRACE(
+        1, "maxed out refinements for class constant {}::{}\n",
+        cls.name, name
+      );
+    }
+  } else {
+    always_assert_flog(
+      t.moreRefined(old.type),
+      "Class constant type invariant violated for {}::{}.\n"
+      "   {} is not at least as refined as {}\n",
+      cls.name,
+      name,
+      show(t),
+      show(old.type)
+    );
+  }
+}
+
+void ClsConstantWork::add(SString name) {
+  auto const emplaced = inWorklist.emplace(name);
+  if (!emplaced.second) return;
+  worklist.emplace_back(name);
+}
+
+void ClsConstantWork::schedule(SString name) {
+  auto const it = deps.find(name);
+  if (it == end(deps)) return;
+  for (auto const d : it->second) {
+    FTRACE(2, "Scheduling {}::{} because of {}::{}\n",
+           cls.name, d, cls.name, name);
+    add(d);
+  }
+}
+
+SString ClsConstantWork::next() {
+  if (worklist.empty()) return nullptr;
+  auto n = worklist.front();
+  inWorklist.erase(n);
+  worklist.pop_front();
+  return n;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 FuncAnalysisResult::FuncAnalysisResult(AnalysisContext ctx)
   : ctx(ctx)
   , inferredReturn(TBottom)
@@ -624,20 +743,21 @@ FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
 
 FuncAnalysis analyze_func(const Index& index, const AnalysisContext& ctx,
                           CollectionOpts opts) {
-  return do_analyze(index, ctx, nullptr, nullptr, opts);
+  return do_analyze(index, ctx, nullptr, nullptr, nullptr, opts);
 }
 
 FuncAnalysis analyze_func_inline(const Index& index,
                                  const AnalysisContext& ctx,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
+                                 ClsConstantWork* clsCnsWork,
                                  CollectionOpts opts) {
   auto const knownArgs = KnownArgs {
     ctx.func->isClosureBody ? TBottom : thisType,
     args
   };
 
-  return do_analyze(index, ctx, nullptr, &knownArgs,
+  return do_analyze(index, ctx, nullptr, clsCnsWork, &knownArgs,
                     opts | CollectionOpts::Inlining);
 }
 
@@ -744,6 +864,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    */
   if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
 
+  ClsConstantWork clsCnsWork{index, *ctx.cls};
+
   /*
    * For classes with non-scalar initializers, the 86pinit, 86sinit,
    * 86linit, 86cinit, and 86reifiedinit methods are guaranteed to run
@@ -753,11 +875,13 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * be run again as part of the fixedpoint computation.
    */
   CompactVector<FuncAnalysis> initResults;
-  auto analyze_86init = [&](const StaticString &name) {
+  auto const analyze_86init = [&] (const StaticString& name) {
     if (auto func = find_method(ctx.cls, name.get())) {
       auto const wf = php::WideFunc::cns(func);
       auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
-      initResults.push_back(do_analyze(index, context, &clsAnalysis));
+      initResults.emplace_back(
+        do_analyze(index, context, &clsAnalysis, &clsCnsWork)
+      );
     }
   };
   analyze_86init(s_86pinit);
@@ -865,7 +989,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
       auto const wf = php::WideFunc::cns(f);
       auto const context = AnalysisContext { meta.unit, wf, meta.cls };
-      auto results = do_analyze(index, context, &clsAnalysis);
+      auto results = do_analyze(index, context, &clsAnalysis, &clsCnsWork);
 
       if (meta.output) {
         if (meta.outputIdx < 0) {
@@ -947,7 +1071,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto const context = AnalysisContext { meta.unit, wf, meta.cls };
 
       work.propsRefined = false;
-      auto results = do_analyze(index, context, &clsAnalysis);
+      auto results = do_analyze(index, context, &clsAnalysis, &clsCnsWork);
       assertx(!work.propsRefined);
 
       if (!meta.output) continue;

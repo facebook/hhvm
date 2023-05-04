@@ -157,9 +157,11 @@ CollectedInfo::CollectedInfo(const Index& index,
                              Context ctx,
                              ClassAnalysis* cls,
                              CollectionOpts opts,
+                             ClsConstantWork* clsCns,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
     , methods{ctx, cls}
+    , clsCns{clsCns}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
 {
   if (fa) {

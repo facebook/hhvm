@@ -602,7 +602,7 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
 
     auto collect = CollectedInfo {
       index, ainfo.ctx, nullptr,
-      CollectionOpts{}, &ainfo
+      CollectionOpts{}, nullptr, &ainfo
     };
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
     ainfo.bdata.push_back({

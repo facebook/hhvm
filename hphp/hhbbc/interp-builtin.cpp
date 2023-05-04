@@ -370,7 +370,7 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     }
 
     // Found a type-alias, resolve it's type-structure.
-    auto const r = resolve_type_structure(env.index, *typeAlias);
+    auto const r = resolve_type_structure(env.index, &env.collect, *typeAlias);
     if (r.type.is(BBottom)) {
       // Resolution will always fail
       unreachable(env);

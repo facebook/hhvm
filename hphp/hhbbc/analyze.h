@@ -117,7 +117,7 @@ struct FuncAnalysisResult {
    * For an 86cinit, any constants that we inferred a type for.
    * The size_t is the index into ctx.cls->constants
    */
-  CompactVector<std::pair<size_t,Type>> resolvedConstants;
+  CompactVector<std::pair<size_t,ClsConstInfo<>>> resolvedConstants;
 
   /*
    * Public static property mutations in this function.
@@ -231,6 +231,39 @@ struct ClassAnalysis {
 
 //////////////////////////////////////////////////////////////////////
 
+// Local state for resolving class constants and reaching a fixed
+// point.
+struct ClsConstantWork {
+  ClsConstantWork(const Index&, const php::Class&);
+
+  ClsConstLookupResult<> lookup(SString);
+
+  void update(SString, Type);
+  void add(SString);
+  SString next();
+
+  void setCurrent(SString n) {
+    assertx(!current);
+    current = n;
+  }
+  void clearCurrent(SString n) {
+    assertx(current == n);
+    current = nullptr;
+  }
+
+  void schedule(SString);
+
+  const php::Class& cls;
+  hphp_fast_map<SString, ClsConstInfo<>> constants;
+
+  SString current{nullptr};
+  hphp_fast_map<SString, hphp_fast_set<SString>> deps;
+  hphp_fast_set<SString> inWorklist;
+  std::deque<SString> worklist;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Perform a flow-sensitive type analysis on a function, using the
  * given Index and Context when we need information about things
@@ -255,6 +288,7 @@ FuncAnalysis analyze_func_inline(const Index&,
                                  const AnalysisContext&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
+                                 ClsConstantWork* clsCnsWork = nullptr,
                                  CollectionOpts opts = {});
 
 /*

@@ -671,7 +671,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
   bool again;
   Optional<CollectedInfo> collect;
   Optional<VisitContext> visit;
-  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo);
   visit.emplace(index, ainfo, *collect, func);
 
   update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
@@ -701,7 +701,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
     ainfo = analyze_func(index, ctx, CollectionOpts{});
     update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
-    collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+    collect.emplace(
+      index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo
+    );
     visit.emplace(index, ainfo, *collect, func);
 
     // If we merged blocks, there could be new optimization opportunities

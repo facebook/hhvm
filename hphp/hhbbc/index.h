@@ -279,6 +279,15 @@ std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
 
 //////////////////////////////////////////////////////////////////////
 
+// Inferred class constant type from a 86cinit.
+template <typename T = Type>
+struct ClsConstInfo {
+  T type;
+  size_t refinements = 0;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 // private types
 struct ClassInfo;
 struct UnresolvedClassMaker;
@@ -1062,6 +1071,14 @@ struct Index {
   lookup_class_constant(Context ctx, const Type& cls, const Type& name) const;
 
   /*
+   * Retrieve the information the Index knows about all of the class
+   * constants defined on the given class. This does not register any
+   * dependency.
+   */
+  std::vector<std::pair<SString, ClsConstInfo<>>>
+  lookup_class_constants(const php::Class&) const;
+
+  /*
    * Lookup metadata about the constant access `cls'::`name', where
    * that constant is meant to be a type-constant. The returned
    * metadata includes the best known type of the resolved
@@ -1321,7 +1338,7 @@ struct Index {
    */
   void refine_class_constants(
     const Context& ctx,
-    const CompactVector<std::pair<size_t, Type>>& resolved,
+    const CompactVector<std::pair<size_t, ClsConstInfo<>>>& resolved,
     DependencyContextSet& deps);
 
   /*

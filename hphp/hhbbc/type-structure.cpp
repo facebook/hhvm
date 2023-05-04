@@ -261,6 +261,7 @@ struct ResolveCtx {
   Context ctx;
   const Index* index;
   Cache* cache;
+  const CollectedInfo* collect = nullptr;
   const php::Class* selfCls = nullptr;
   const php::Class* thisCls = nullptr;
   const GenericsMap* generics = nullptr;
@@ -507,8 +508,10 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
       auto const cls = name_to_cls_type(ctx, clsName);
       if (cls.is(BBottom)) return fails();
 
-      auto lookup = ctx.index->lookup_class_constant(
+      auto lookup = lookupClsConstant(
+        *ctx.index,
         ctx.ctx,
+        ctx.collect,
         cls,
         sval(cnsName)
       );
@@ -879,6 +882,7 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
   Cache cache;
   ResolveCtx ctx{env.ctx, &env.index, &cache};
   ctx.selfCls = env.ctx.cls;
+  ctx.collect = &env.collect;
   return resolveBespoke(ctx, ts);
 }
 
@@ -903,6 +907,7 @@ Resolution resolve_type_structure(const Index& index,
 }
 
 Resolution resolve_type_structure(const Index& index,
+                                  const CollectedInfo* collect,
                                   const php::TypeAlias& typeAlias) {
   auto const& preresolved = typeAlias.resolvedTypeStructure;
   if (!preresolved.isNull()) {
@@ -913,6 +918,7 @@ Resolution resolve_type_structure(const Index& index,
 
   Cache cache;
   ResolveCtx ctx{Context{}, &index, &cache};
+  ctx.collect = collect;
   return Builder::attach(resolve(ctx, typeAlias.typeStructure.get()))
     .set(s_alias, make_tv<KindOfPersistentString>(typeAlias.name))
     .finishTS();

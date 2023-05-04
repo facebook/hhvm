@@ -3538,12 +3538,6 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Inferred class constant type from a 86cinit.
-struct ClsConstInfo {
-  Type type;
-  size_t refinements = 0;
-};
-
 struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
@@ -3715,7 +3709,7 @@ struct Index::IndexData {
   };
   folly_concurrent_hash_map_simd<
     std::pair<const php::Class*, SString>,
-    ClsConstInfo,
+    ClsConstInfo<>,
     ClsConstTypesHasher,
     ClsConstTypesEquals
   > clsConstTypes;
@@ -13592,7 +13586,7 @@ void Index::preresolve_type_structures() {
       for (auto const& typeAlias : unit->typeAliases) {
         assertx(typeAlias->resolvedTypeStructure.isNull());
         if (auto const ts =
-            resolve_type_structure(*this, *typeAlias).sarray()) {
+            resolve_type_structure(*this, nullptr, *typeAlias).sarray()) {
           updates.emplace_back(TAUpdate{ typeAlias.get(), ts });
         }
       }
@@ -14708,6 +14702,29 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   return *result;
 }
 
+std::vector<std::pair<SString, ClsConstInfo<>>>
+Index::lookup_class_constants(const php::Class& cls) const {
+  std::vector<std::pair<SString, ClsConstInfo<>>> out;
+  out.reserve(cls.constants.size());
+  for (auto const& cns : cls.constants) {
+    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) {
+      out.emplace_back(cns.name, ClsConstInfo<>{ from_cell(*cns.val), 0 });
+    } else {
+      out.emplace_back(
+        cns.name,
+        folly::get_default(
+          m_data->clsConstTypes,
+          std::make_pair(&cls, cns.name),
+          ClsConstInfo<>{ TInitCell, 0 }
+        )
+      );
+    }
+  }
+  return out;
+}
+
 ClsTypeConstLookupResult<>
 Index::lookup_class_type_constant(
     const Type& cls,
@@ -14911,6 +14928,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
       AnalysisContext { m_data->units.at(func->unit), wf, func->cls },
       ctxType,
       calleeCtx.args,
+      nullptr,
       CollectionOpts::EffectFreeOnly
     );
     return fa.effectFree ? fa.inferredReturn : TInitCell;
@@ -15686,10 +15704,11 @@ void Index::init_public_static_prop_types() {
 }
 
 void Index::refine_class_constants(
-    const Context& ctx,
-    const CompactVector<std::pair<size_t, Type>>& resolved,
-    DependencyContextSet& deps) {
-  if (!resolved.size()) return;
+  const Context& ctx,
+  const CompactVector<std::pair<size_t, ClsConstInfo<>>>& resolved,
+  DependencyContextSet& deps
+) {
+  if (resolved.empty()) return;
 
   auto changed = false;
   auto& constants = ctx.func->cls->constants;
@@ -15704,7 +15723,7 @@ void Index::refine_class_constants(
     auto& types = m_data->clsConstTypes;
 
     always_assert(cnst.val && type(*cnst.val) == KindOfUninit);
-    if (auto const val = tv(c.second)) {
+    if (auto const val = tv(c.second.type)) {
       assertx(val->m_type != KindOfUninit);
       cnst.val = *val;
       // Deleting from the types map is too expensive, so just leave
@@ -15713,30 +15732,23 @@ void Index::refine_class_constants(
     } else {
       auto const old = [&] {
         auto const it = types.find(key);
-        return (it == types.end()) ? ClsConstInfo{ TInitCell, 0 } : it->second;
+        return (it == types.end())
+          ? ClsConstInfo<>{ TInitCell, 0 }
+          : it->second;
       }();
 
-      if (c.second.strictlyMoreRefined(old.type)) {
-        if (old.refinements < options.returnTypeRefineLimit) {
-          types.insert_or_assign(
-            key,
-            ClsConstInfo{ c.second, old.refinements+1 }
-          );
-          changed = true;
-        } else {
-          FTRACE(
-            1, "maxed out refinements for class constant {}::{}\n",
-            ctx.func->cls->name, cnst.name
-          );
-        }
+      if (c.second.type.strictlyMoreRefined(old.type)) {
+        always_assert(c.second.refinements > old.refinements);
+        types.insert_or_assign(key, std::move(c.second));
+        changed = true;
       } else {
         always_assert_flog(
-          c.second.moreRefined(old.type),
+          c.second.type.moreRefined(old.type),
           "Class constant type invariant violated for {}::{}\n"
           "    {} is not at least as refined as {}\n",
           ctx.func->cls->name,
           cnst.name,
-          show(c.second),
+          show(c.second.type),
           show(old.type)
         );
       }

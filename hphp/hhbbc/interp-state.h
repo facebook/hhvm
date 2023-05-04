@@ -34,6 +34,8 @@ namespace HPHP::HHBBC {
 struct ClassAnalysis;
 struct FuncAnalysis;
 
+struct ClsConstantWork;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -583,15 +585,17 @@ inline bool any(CollectionOpts o) { return static_cast<int>(o); }
  * a series of step operations (possibly cross block).
  */
 struct CollectedInfo {
-  explicit CollectedInfo(const Index& index,
-                         Context ctx,
-                         ClassAnalysis* cls,
-                         CollectionOpts opts,
-                         const FuncAnalysis* fa = nullptr);
+  CollectedInfo(const Index& index,
+                Context ctx,
+                ClassAnalysis* cls,
+                CollectionOpts opts,
+                ClsConstantWork* clsCns = nullptr,
+                const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
   MethodsInfo methods;
+  ClsConstantWork* clsCns;
   hphp_fast_set<CallContext, CallContextHasher> unfoldableFuncs;
   bool effectFree{true};
   bool hasInvariantIterBase{false};
@@ -610,7 +614,7 @@ struct CollectedInfo {
      */
     Base base{};
 
-    /* 
+    /*
      * Used to track whether a member op sequence is effect free. We use
      * this information to replace member op sequences with constants.
      */

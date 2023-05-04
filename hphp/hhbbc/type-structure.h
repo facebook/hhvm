@@ -22,6 +22,7 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+struct CollectedInfo;
 struct Index;
 struct ISS;
 struct Type;
@@ -68,6 +69,7 @@ TypeStructureResolution resolve_type_structure(const Index&,
                                                const php::Const& cns,
                                                const php::Class& thiz);
 TypeStructureResolution resolve_type_structure(const Index&,
+                                               const CollectedInfo*,
                                                const php::TypeAlias&);
 
 //////////////////////////////////////////////////////////////////////

@@ -364,7 +364,6 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.disable_lval_as_an_expression = DisableLvalAsAnExpression;
   flags.disable_xhp_element_mangling = DisableXHPElementMangling;
   flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
-  flags.enable_enum_classes = EnableEnumClasses;
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;
 }
 

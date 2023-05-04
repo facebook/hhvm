@@ -208,7 +208,6 @@ module Primary : sig
           classish_name: string;
           src_classish_name: string;
         }
-      | Enum_classes_reserved_syntax of Pos.t
     [@@deriving show]
   end
 

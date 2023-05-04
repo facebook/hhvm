@@ -80,7 +80,6 @@ let visitor ctx =
           Some Meth_caller_check.handler;
           Some Expression_tree_check.handler;
           hierarchy_check Class_const_origin_check.handler;
-          Some Enum_classes_check.handler;
           (if TypecheckerOptions.global_access_check_enabled tcopt then
             Some Global_access_check.handler
           else

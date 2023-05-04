@@ -635,7 +635,6 @@ module Primary = struct
           classish_name: string;
           src_classish_name: string;
         }
-      | Enum_classes_reserved_syntax of Pos.t
     [@@deriving show]
 
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
@@ -831,15 +830,6 @@ module Primary = struct
       in
       (Error_code.IncompatibleEnumInclusion, claim, lazy [], [])
 
-    let enum_classes_reserved_syntax pos =
-      ( Error_code.EnumClassesReservedSyntax,
-        lazy
-          ( pos,
-            "This syntax is reserved for the Enum Classes feature.\n"
-            ^ "Enable it with the enable_enum_classes option in .hhconfig" ),
-        lazy [],
-        [] )
-
     let to_error = function
       | Enum_type_bad { pos; is_enum_class; ty_name; trail } ->
         enum_type_bad pos is_enum_class ty_name trail
@@ -878,7 +868,6 @@ module Primary = struct
           src_classish_name
       | Enum_inclusion_not_enum { pos; classish_name; src_classish_name } ->
         enum_inclusion_not_enum pos classish_name src_classish_name
-      | Enum_classes_reserved_syntax pos -> enum_classes_reserved_syntax pos
   end
 
   module Expr_tree = struct

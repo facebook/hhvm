@@ -4617,7 +4617,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             ObjectCreationExpression(_) => {
                 // We allow "enum class" constants to be initialized via new.
-                if !(self.env.parser_options.po_enable_enum_classes && self.is_in_enum_class()) {
+                if !self.is_in_enum_class() {
                     default(self);
                 }
             }

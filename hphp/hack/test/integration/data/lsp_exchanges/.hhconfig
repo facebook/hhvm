@@ -3,4 +3,3 @@ assume_php = false
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 disable_xhp_element_mangling=false
-enable_enum_classes=true

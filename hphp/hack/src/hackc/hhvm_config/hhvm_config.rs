@@ -130,12 +130,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.DisallowFuncPtrsInConstants",
     )?;
 
-    // Only hdf option in use
-    init(
-        &mut flags.po_enable_enum_classes,
-        "Hack.Lang.EnableEnumClasses",
-    )?;
-
     // Both options in use
     init(
         &mut flags.po_enable_xhp_class_modifier,

@@ -115,11 +115,6 @@ let enable_xhp_class_modifier po = po.GlobalOptions.po_enable_xhp_class_modifier
 let with_enable_xhp_class_modifier po b =
   { po with GlobalOptions.po_enable_xhp_class_modifier = b }
 
-let enable_enum_classes po = po.GlobalOptions.po_enable_enum_classes
-
-let with_enable_enum_classes po b =
-  { po with GlobalOptions.po_enable_enum_classes = b }
-
 let disable_hh_ignore_error po = po.GlobalOptions.po_disable_hh_ignore_error
 
 let interpret_soft_types_as_like_types po =
@@ -154,7 +149,6 @@ let make
     ~disable_xhp_element_mangling
     ~allow_unstable_features
     ~disable_xhp_children_declarations
-    ~enable_enum_classes
     ~disable_hh_ignore_error
     ~interpret_soft_types_as_like_types
     ~is_systemlib =
@@ -178,7 +172,6 @@ let make
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;
       po_allow_unstable_features = allow_unstable_features;
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
-      po_enable_enum_classes = enable_enum_classes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       tco_is_systemlib = is_systemlib;
@@ -187,7 +180,6 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool
@@ -220,7 +212,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     enable_xhp_class_modifier po,
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
-    enable_enum_classes po,
     const_default_lambda_args po,
     allow_unstable_features po,
     interpret_soft_types_as_like_types po,

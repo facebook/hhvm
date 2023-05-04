@@ -106,7 +106,6 @@ struct RepoOptionsFlags {
   H(bool,           AllowUnstableFeatures,            false)          \
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
-  H(bool,           EnableEnumClasses,                true)           \
   H(bool,           StressShallowDeclDeps,            false)          \
   H(bool,           StressFoldedDeclDeps,             false)          \
   /* Allow omission of some `readonly` annotations based on           \

@@ -6,8 +6,8 @@
 
 **Implementation status:** Done. Depends on a couple of lags
 
-* Enum classes flag, now enabled by default. (HHVM: `-v Hack.Lang.EnableEnumClasses=1`)
-* Unstable Features `enum_class_label` (HHVM: `-v Hack.Lang.AllowUnstableFeatures=1`)
+* ~~Enum classes flag, now enabled by default. (HHVM: `-v Hack.Lang.EnableEnumClasses=1`)~~ This is now removed
+* ~~Unstable Features `enum_class_label` (HHVM: `-v Hack.Lang.AllowUnstableFeatures=1`)~~ No longer an unstable feature
 * ~~common `disallow-hash-comments` flag~~ this flag has been removed from the parser.
 
 ## Motivation

@@ -281,7 +281,6 @@ let parse_options () =
   let enable_sound_dynamic = ref false in
   let always_pessimise_return = ref false in
   let consider_type_const_enforceable = ref false in
-  let disable_enum_classes = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
@@ -724,9 +723,6 @@ let parse_options () =
       ( "--consider-type-const-enforceable",
         Arg.Set consider_type_const_enforceable,
         " Consider type constants to potentially be enforceable." );
-      ( "--disable-enum-classes",
-        Arg.Set disable_enum_classes,
-        " Disable the enum classes extension." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
@@ -991,7 +987,6 @@ let parse_options () =
         else
           [])
       ~tco_global_access_check_enabled:!enable_global_access_check
-      ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp

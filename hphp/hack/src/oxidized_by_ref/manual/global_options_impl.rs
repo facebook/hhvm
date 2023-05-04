@@ -106,7 +106,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     symbol_write_sym_hash_in: None,
     symbol_write_exclude_out: None,
     symbol_write_sym_hash_out: false,
-    po_enable_enum_classes: true,
     po_disable_hh_ignore_error: 0,
     tco_is_systemlib: false,
     tco_higher_kinded_types: false,

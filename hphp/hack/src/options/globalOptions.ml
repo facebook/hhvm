@@ -150,7 +150,6 @@ type t = {
   po_enable_xhp_class_modifier: bool;
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
-  po_enable_enum_classes: bool;
   po_disable_hh_ignore_error: int;
   tco_is_systemlib: bool;
   tco_higher_kinded_types: bool;
@@ -287,7 +286,6 @@ let default =
     po_enable_xhp_class_modifier = true;
     po_disable_xhp_element_mangling = true;
     po_disable_xhp_children_declarations = true;
-    po_enable_enum_classes = true;
     po_disable_hh_ignore_error = 0;
     tco_is_systemlib = false;
     tco_higher_kinded_types = false;
@@ -421,7 +419,6 @@ let set
     ?po_enable_xhp_class_modifier
     ?po_disable_xhp_element_mangling
     ?po_disable_xhp_children_declarations
-    ?po_enable_enum_classes
     ?po_disable_hh_ignore_error
     ?po_allow_unstable_features
     ?tco_is_systemlib
@@ -693,8 +690,6 @@ let set
       setting
         po_disable_xhp_children_declarations
         options.po_disable_xhp_children_declarations;
-    po_enable_enum_classes =
-      setting po_enable_enum_classes options.po_enable_enum_classes;
     po_disable_hh_ignore_error =
       setting po_disable_hh_ignore_error options.po_disable_hh_ignore_error;
     tco_is_systemlib = setting tco_is_systemlib options.tco_is_systemlib;

@@ -90,7 +90,6 @@ pub mod compile_ffi {
         disallow_inst_meth: bool,
         disable_xhp_element_mangling: bool,
         disallow_func_ptrs_in_constants: bool,
-        enable_enum_classes: bool,
         enable_xhp_class_modifier: bool,
         enable_class_level_where_clauses: bool,
         disallow_static_constants_in_default_func_args: bool,
@@ -259,7 +258,6 @@ impl compile_ffi::NativeEnv {
                     po_disallow_func_ptrs_in_constants: self
                         .parser_flags
                         .disallow_func_ptrs_in_constants,
-                    po_enable_enum_classes: self.parser_flags.enable_enum_classes,
                     po_enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
                     po_enable_class_level_where_clauses: self
                         .parser_flags

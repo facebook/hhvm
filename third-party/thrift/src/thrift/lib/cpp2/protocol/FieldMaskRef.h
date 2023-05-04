@@ -78,14 +78,15 @@ class MaskRef {
 
   // Removes masked fields in a map value in schemaless Thrift Object.
   // Throws a runtime exception if the mask and object are incompatible.
-  void clear(std::map<Value, Value>& map) const;
+  void clear(folly::F14FastMap<Value, Value>& map) const;
 
   // Copies masked fields from one object to another (schemaless).
   // If the masked field doesn't exist in src, the field in dst will be removed.
   // Throws a runtime exception if the mask and objects are incompatible.
   void copy(const protocol::Object& src, protocol::Object& dst) const;
   void copy(
-      const std::map<Value, Value>& src, std::map<Value, Value>& dst) const;
+      const folly::F14FastMap<Value, Value>& src,
+      folly::F14FastMap<Value, Value>& dst) const;
 
  private:
   // Gets all fields/ keys that need to be copied from src to dst.
@@ -93,8 +94,8 @@ class MaskRef {
       const protocol::Object& src, const protocol::Object& dst) const;
 
   std::set<std::reference_wrapper<const Value>, std::less<Value>> getKeysToCopy(
-      const std::map<Value, Value>& src,
-      const std::map<Value, Value>& dst) const;
+      const folly::F14FastMap<Value, Value>& src,
+      const folly::F14FastMap<Value, Value>& dst) const;
 
   void throwIfNotFieldMask() const;
   void throwIfNotMapMask() const;

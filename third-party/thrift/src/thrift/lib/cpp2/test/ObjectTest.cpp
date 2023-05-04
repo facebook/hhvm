@@ -260,11 +260,11 @@ TEST(ObjectTest, Map) {
   std::map<std::string, int> data = {{"one", 1}, {"four", 4}, {"two", 2}};
   Value value = asValueStruct<type::map<type::string_t, type::byte_t>>(data);
   ASSERT_EQ(value.getType(), Value::Type::mapValue);
-  ASSERT_EQ(value.get_mapValue().size(), data.size());
+  ASSERT_EQ(value.mapValue_ref()->size(), data.size());
   for (const auto& entry : data) {
     auto itr =
-        value.get_mapValue().find(asValueStruct<type::string_t>(entry.first));
-    ASSERT_NE(itr, value.get_mapValue().end());
+        value.mapValue_ref()->find(asValueStruct<type::string_t>(entry.first));
+    ASSERT_NE(itr, value.mapValue_ref()->end());
     EXPECT_EQ(itr->second, asValueStruct<type::byte_t>(entry.second));
   }
 
@@ -272,11 +272,11 @@ TEST(ObjectTest, Map) {
   std::vector<std::pair<std::string, int>> otherData(data.begin(), data.end());
   value = asValueStruct<type::map<type::string_t, type::byte_t>>(otherData);
   ASSERT_EQ(value.getType(), Value::Type::mapValue);
-  ASSERT_EQ(value.get_mapValue().size(), data.size());
+  ASSERT_EQ(value.mapValue_ref()->size(), data.size());
   for (const auto& entry : data) {
     auto itr =
-        value.get_mapValue().find(asValueStruct<type::string_t>(entry.first));
-    ASSERT_NE(itr, value.get_mapValue().end());
+        value.mapValue_ref()->find(asValueStruct<type::string_t>(entry.first));
+    ASSERT_NE(itr, value.mapValue_ref()->end());
     EXPECT_EQ(itr->second, asValueStruct<type::byte_t>(entry.second));
   }
 }
@@ -667,7 +667,7 @@ TEST(Value, Wrapper) {
   const std::set<Value> s = {
       asValueStruct<type::i32_t>(30), asValueStruct<type::i32_t>(40)};
 
-  const std::map<Value, Value> m = {
+  const folly::F14FastMap<Value, Value> m = {
       {asValueStruct<type::i32_t>(50), asValueStruct<type::i32_t>(60)},
       {asValueStruct<type::i32_t>(70), asValueStruct<type::i32_t>(80)}};
 

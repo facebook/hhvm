@@ -741,7 +741,7 @@ TEST_F(PatchTest, Map) {
       {{"key", "test"}});
   auto patchValue = asValueStruct<type::map<type::binary_t, type::binary_t>>(
       {{"new key", "new value"}});
-  auto emptyMap = std::map<Value, Value>{};
+  auto emptyMap = folly::F14FastMap<Value, Value>{};
   auto emptySet = asValueStruct<type::set<type::binary_t>>({});
   auto emptyValue =
       asValueStruct<type::map<type::binary_t, type::binary_t>>({});

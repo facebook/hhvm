@@ -21,6 +21,7 @@ include "thrift/lib/thrift/standard.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
 cpp_include "thrift/lib/thrift/detail/protocol.h"
+cpp_include "folly/container/F14Map.h"
 
 @thrift.v1alpha
 package "facebook.com/thrift/protocol/detail"
@@ -86,6 +87,10 @@ union Value {
     reason = "Set can only have integer/string/binary/enum values",
   }
   15: set<Value> setValue;
+
+  // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "::folly::F14FastMap"}
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   16: map<Value, Value> mapValue;
 } (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value", rust.ord)

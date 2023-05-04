@@ -643,11 +643,10 @@ TEST(FieldMaskTest, SchemalessClearMap) {
   protocol::clear(mask, barObject);
 
   ASSERT_TRUE(barObject.contains(FieldId{1}));
-  std::map<Value, Value>& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
+  auto& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
   ASSERT_NE(m1.find(asValueStruct<type::i64_t>(1)), m1.end());
   EXPECT_EQ(m1.find(asValueStruct<type::i64_t>(2)), m1.end());
-  std::map<Value, Value>& m2 =
-      m1[asValueStruct<type::i64_t>(1)].mapValue_ref().value();
+  auto& m2 = m1[asValueStruct<type::i64_t>(1)].mapValue_ref().value();
   EXPECT_EQ(m2[asValueStruct<type::i16_t>(1)].stringValue_ref().value(), "1");
   EXPECT_EQ(m2.find(asValueStruct<type::i16_t>(2)), m2.end());
   EXPECT_FALSE(barObject.contains(FieldId{2}));
@@ -682,11 +681,10 @@ TEST(FieldMaskTest, SchemalessClearStringMap) {
   protocol::clear(mask, barObject);
 
   ASSERT_TRUE(barObject.contains(FieldId{1}));
-  std::map<Value, Value>& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
+  auto& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
   ASSERT_NE(m1.find(asValueStruct<type::string_t>("1")), m1.end());
   EXPECT_EQ(m1.find(asValueStruct<type::string_t>("2")), m1.end());
-  std::map<Value, Value>& m2 =
-      m1[asValueStruct<type::string_t>("1")].mapValue_ref().value();
+  auto& m2 = m1[asValueStruct<type::string_t>("1")].mapValue_ref().value();
   EXPECT_EQ(
       m2[asValueStruct<type::string_t>("1")].stringValue_ref().value(), "1");
   EXPECT_EQ(m2.find(asValueStruct<type::string_t>("2")), m2.end());

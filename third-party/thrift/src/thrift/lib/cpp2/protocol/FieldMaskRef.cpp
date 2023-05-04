@@ -47,7 +47,7 @@ void clear(MaskRef ref, Value& value) {
     return;
   }
   if (value.mapValue_ref()) {
-    ref.clear(value.mapValue_ref().value());
+    ref.clear(*value.mapValue_ref());
     return;
   }
   folly::throw_exception<std::runtime_error>(
@@ -124,7 +124,7 @@ void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
     return;
   }
   if (src.at(id).mapValue_ref()) {
-    std::map<Value, Value> newMap;
+    folly::F14FastMap<Value, Value> newMap;
     ref.copy(src.at(id).mapValue_ref().value(), newMap);
     if (!newMap.empty()) {
       dst[id].emplace_map() = std::move(newMap);
@@ -256,7 +256,7 @@ void MaskRef::clear(protocol::Object& obj) const {
   }
 }
 
-void MaskRef::clear(std::map<Value, Value>& map) const {
+void MaskRef::clear(folly::F14FastMap<Value, Value>& map) const {
   throwIfNotMapMask();
   for (auto& [key, value] : map) {
     MaskRef ref =
@@ -277,7 +277,8 @@ void MaskRef::copy(const protocol::Object& src, protocol::Object& dst) const {
 }
 
 void MaskRef::copy(
-    const std::map<Value, Value>& src, std::map<Value, Value>& dst) const {
+    const folly::F14FastMap<Value, Value>& src,
+    folly::F14FastMap<Value, Value>& dst) const {
   throwIfNotMapMask();
   // Get all map keys that are possibly masked.
   auto keys = getKeysToCopy(src, dst);
@@ -329,8 +330,8 @@ std::unordered_set<FieldId> MaskRef::getFieldsToCopy(
 
 std::set<std::reference_wrapper<const Value>, std::less<Value>>
 MaskRef::getKeysToCopy(
-    const std::map<Value, Value>& src,
-    const std::map<Value, Value>& dst) const {
+    const folly::F14FastMap<Value, Value>& src,
+    const folly::F14FastMap<Value, Value>& dst) const {
   // cannot use unordered_set as Value doesn't have hash function.
   // TODO: check if all keys have the same type
   std::set<std::reference_wrapper<const Value>, std::less<Value>> keys;

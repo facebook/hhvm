@@ -181,7 +181,8 @@ class ObjectWriter : public BaseObjectAdapter {
     // insert elements from buffer into mapValue
     std::vector<Value> mapKeyAndValues = getBufferFromStack();
     assert(mapKeyAndValues.size() % 2 == 0);
-    std::map<Value, Value>& mapVal = cur().mapValue_ref().ensure();
+    auto& mapVal = cur().mapValue_ref().ensure();
+    mapVal.reserve(mapKeyAndValues.size() / 2);
     for (size_t i = 0; i < mapKeyAndValues.size(); i += 2) {
       mapVal.emplace(
           std::move(mapKeyAndValues[i]), std::move(mapKeyAndValues[i + 1]));
@@ -415,6 +416,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
       uint32_t size;
       auto& mapValue = result.mapValue_ref().ensure();
       prot.readMapBegin(keyType, valType, size);
+      mapValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
         auto key = parseValue(prot, keyType, string_to_binary);
         mapValue[std::move(key)] = parseValue(prot, valType, string_to_binary);

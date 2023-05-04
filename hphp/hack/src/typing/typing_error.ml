@@ -62,32 +62,24 @@ end = struct
     | _ -> Empty
 
   let map t ~f =
-    let rec aux ~k = function
-      | Empty -> k Empty
-      | Single x -> k @@ single @@ f x
-      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
-      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
-      | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
-    and auxs ~k = function
-      | [] -> k []
-      | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
+    let rec aux = function
+      | Empty -> Empty
+      | Single x -> Single (f x)
+      | Multiple xs -> Multiple (List.map ~f:aux xs)
+      | Union xs -> Union (List.map ~f:aux xs)
+      | Intersect xs -> Intersect (List.map ~f:aux xs)
     in
-    aux ~k:Fn.id t
+    aux t
 
   let bind t ~f =
-    let rec aux ~k = function
-      | Empty -> k Empty
-      | Single x -> k @@ f x
-      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
-      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
-      | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
-    and auxs ~k = function
-      | [] -> k []
-      | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
+    let rec aux = function
+      | Empty -> Empty
+      | Single x -> f x
+      | Multiple xs -> Multiple (List.map ~f:aux xs)
+      | Union xs -> Union (List.map ~f:aux xs)
+      | Intersect xs -> Intersect (List.map ~f:aux xs)
     in
-    aux ~k:Fn.id t
+    aux t
 
   let iter t ~f =
     let rec aux = function

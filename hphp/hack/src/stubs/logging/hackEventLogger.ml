@@ -65,6 +65,7 @@ type rollout_flags = {
   use_hh_distc_instead_of_hulk: bool;
   consume_streaming_errors: bool;
   hh_distc_fanout_threshold: int;
+  rust_elab: bool;
 }
 
 let flush () = ()

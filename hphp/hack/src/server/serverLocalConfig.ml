@@ -1537,4 +1537,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
+      rust_elab = options.rust_elab;
     }

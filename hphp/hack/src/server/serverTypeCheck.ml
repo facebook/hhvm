@@ -1204,9 +1204,6 @@ functor
           ~parse_t
       in
       Hh_logger.log "Begin typechecking %d files." to_recheck_count;
-      ServerProgress.ErrorsWrite.telemetry
-        (Telemetry.create ()
-        |> Telemetry.int_ ~key:"to_recheck_count" ~value:to_recheck_count);
 
       ServerCheckpoint.process_updates files_to_check;
 

@@ -1336,9 +1336,6 @@ let go_with_interrupt
       use_hh_distc_instead_of_hulk
       && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
     in
-    ServerProgress.ErrorsWrite.telemetry
-      (Telemetry.create ()
-      |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     let results_via_distc =
       if will_use_distc then (
         (* distc doesn't yet give any profiling_info about how its workers fared *)
@@ -1378,9 +1375,6 @@ let go_with_interrupt
     match results_via_distc with
     | Some results -> results
     | None ->
-      ServerProgress.ErrorsWrite.telemetry
-        (Telemetry.create ()
-        |> Telemetry.bool_ ~key:"process_in_parallel" ~value:true);
       process_in_parallel
         ?diagnostic_pusher
         ctx

@@ -205,7 +205,6 @@ type errors_file_item =
       timestamp: float;
           (** the errors were detected by reading the files not later than this time. *)
     }
-  | Telemetry of Telemetry.t
 
 let is_complete (e : errors_file_error) : bool =
   match e with
@@ -488,18 +487,6 @@ module ErrorsWrite = struct
           fd
           (ErrorsFile.Item (Errors { timestamp = Unix.gettimeofday (); errors }));
         write_state := Reporting (fd, n)
-    end
-
-  let telemetry (telemetry : Telemetry.t) : unit =
-    match errors_file_path () with
-    | None -> ()
-    | Some _ -> begin
-      match !write_state with
-      | Absent
-      | Closed ->
-        failwith ("Cannot report in state " ^ show_write_state !write_state)
-      | Reporting (fd, _n) ->
-        ErrorsFile.write_message fd (ErrorsFile.Item (Telemetry telemetry))
     end
 
   let complete (telemetry : Telemetry.t) : unit =

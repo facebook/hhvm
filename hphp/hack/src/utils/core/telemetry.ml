@@ -245,8 +245,6 @@ let diff ~(all : bool) ?(suffix_keys = true) (telemetry : t) ~(prev : t) : t =
 
   diff telemetry ~prev
 
-let merge (telemetry1 : t) (telemetry2 : t) : t = telemetry2 @ telemetry1
-
 let rec add (telemetry1 : t) (telemetry2 : t) : t =
   let telemetry1 = List.sort telemetry1 ~compare in
   let telemetry2 = List.sort telemetry2 ~compare in

@@ -22,17 +22,7 @@ It works with nested telemetry objects. In places where the structure differs,
 only `current` is kept. *)
 val diff : all:bool -> ?suffix_keys:bool -> t -> prev:t -> t
 
-(** [add t1 t2] does a key-by-key numeric add, for instance [add {a->1,b->1} {a->3}] will produce [{a->4,b->1}].
-It retains only numerics (int, float) and hierarchical objects that contain numerics.
-It doesn't retain int lists. *)
 val add : t -> t -> t
-
-(** [merge t1 t2] appends two telemetries, for instance [merge {a->1,b->true} {c->2}]
-will produce [{a->1,b->true,c->2}]. No matching is done: if an item with the same [key]
-appears in both [t1] and [t2] then it will be listed twice in the output, similar
-to if you'd done [t |> int_ ~key ~value |> int_ ~key ~value] twice using the same
-key. (so don't do it!) *)
-val merge : t -> t -> t
 
 val string_ : ?truncate:int -> key:string -> value:string -> t -> t
 

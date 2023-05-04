@@ -26,7 +26,6 @@ let show_errors (errors : Errors.finalized_error list Relative_path.Map.t) :
 let show_read (read : ServerProgress.ErrorsRead.read_result) : string =
   match read with
   | Ok (ServerProgress.Errors { errors; timestamp = _ }) -> show_errors errors
-  | Ok (ServerProgress.Telemetry _) -> "Telemetry"
   | Error (e, log_message) ->
     Printf.sprintf
       "%s [%s]"

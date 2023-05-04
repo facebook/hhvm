@@ -1594,6 +1594,17 @@ and simplify_subtype_i
               (LoclType ty)
               (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r))
           in
+          (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
+          let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
+            if TL.is_valid p1 then
+              (env, p1)
+            else
+              let (env, p2) = f env in
+              if TL.is_unsat p2 then
+                (env, p1)
+              else
+                (env, TL.disj ~fail p1 p2)
+          in
           (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
              * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
              *   t <: ~C<t1,...,tn> iff
@@ -1648,17 +1659,7 @@ and simplify_subtype_i
                 in
                 env |> simplify_pushed_like ||| dyn_finish ty
           in
-          (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
-          let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
-            if TL.is_valid p1 then
-              (env, p1)
-            else
-              let (env, p2) = f env in
-              if TL.is_unsat p2 then
-                (env, p1)
-              else
-                (env, TL.disj ~fail p1 p2)
-          in
+
           simplify_subtype_i
             ~subtype_env
             ~sub_supportdyn

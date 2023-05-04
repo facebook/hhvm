@@ -7,7 +7,7 @@
  */
 
 #pragma once
-#include <fizz/util/KeyLogWriter.h>
+#include <fizz/util/KeyLogTypes.h>
 
 namespace fizz {
 
@@ -15,7 +15,7 @@ extern "C" {
 void fizz_probe_secret_available(
     long unsigned int secretSize,
     unsigned char* secretData,
-    fizz::KeyLogWriter::Label nssLabel,
+    fizz::NSSLabel nssLabel,
     unsigned char* clientRandom);
 }
 

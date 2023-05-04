@@ -131,7 +131,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
   }
   void writeKeyLog(
       const fizz::Random& clientRandom,
-      KeyLogWriter::Label label,
+      NSSLabel label,
       const folly::ByteRange& secret) {
     if (keyLogger_) {
       keyLogger_->write(clientRandom, label, secret);
@@ -255,37 +255,37 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
     if (clientEarlyTrafficSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::CLIENT_EARLY_TRAFFIC_SECRET,
+          NSSLabel::CLIENT_EARLY_TRAFFIC_SECRET,
           folly::range(*clientEarlyTrafficSecret_));
     }
     if (clientHandshakeTrafficSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET,
+          NSSLabel::CLIENT_HANDSHAKE_TRAFFIC_SECRET,
           folly::range(*clientHandshakeTrafficSecret_));
     }
     if (serverHandshakeTrafficSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::SERVER_HANDSHAKE_TRAFFIC_SECRET,
+          NSSLabel::SERVER_HANDSHAKE_TRAFFIC_SECRET,
           folly::range(*serverHandshakeTrafficSecret_));
     }
     if (exporterMasterSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::EXPORTER_SECRET,
+          NSSLabel::EXPORTER_SECRET,
           folly::range(*exporterMasterSecret_));
     }
     if (clientAppTrafficSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::CLIENT_TRAFFIC_SECRET_0,
+          NSSLabel::CLIENT_TRAFFIC_SECRET_0,
           folly::range(*clientAppTrafficSecret_));
     }
     if (serverAppTrafficSecret_) {
       acceptor_->writeKeyLog(
           *state.clientRandom(),
-          KeyLogWriter::Label::SERVER_TRAFFIC_SECRET_0,
+          NSSLabel::SERVER_TRAFFIC_SECRET_0,
           folly::range(*serverAppTrafficSecret_));
     }
 

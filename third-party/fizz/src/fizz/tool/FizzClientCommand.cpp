@@ -366,37 +366,37 @@ class Connection : public AsyncSocket::ConnectCallback,
       if (clientEarlyTrafficSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::CLIENT_EARLY_TRAFFIC_SECRET,
+            NSSLabel::CLIENT_EARLY_TRAFFIC_SECRET,
             folly::range(*clientEarlyTrafficSecret_));
       }
       if (clientHandshakeTrafficSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET,
+            NSSLabel::CLIENT_HANDSHAKE_TRAFFIC_SECRET,
             folly::range(*clientHandshakeTrafficSecret_));
       }
       if (serverHandshakeTrafficSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::SERVER_HANDSHAKE_TRAFFIC_SECRET,
+            NSSLabel::SERVER_HANDSHAKE_TRAFFIC_SECRET,
             folly::range(*serverHandshakeTrafficSecret_));
       }
       if (exporterMasterSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::EXPORTER_SECRET,
+            NSSLabel::EXPORTER_SECRET,
             folly::range(*exporterMasterSecret_));
       }
       if (clientAppTrafficSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::CLIENT_TRAFFIC_SECRET_0,
+            NSSLabel::CLIENT_TRAFFIC_SECRET_0,
             folly::range(*clientAppTrafficSecret_));
       }
       if (serverAppTrafficSecret_) {
         keyLogger_->write(
             *transport_->getClientRandom(),
-            KeyLogWriter::Label::SERVER_TRAFFIC_SECRET_0,
+            NSSLabel::SERVER_TRAFFIC_SECRET_0,
             folly::range(*serverAppTrafficSecret_));
       }
     }

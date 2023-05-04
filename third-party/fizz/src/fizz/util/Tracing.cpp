@@ -14,7 +14,7 @@ extern "C" {
 void fizz_probe_secret_available(
     long unsigned int secretSize,
     unsigned char* secretData,
-    fizz::KeyLogWriter::Label nssLabel,
+    fizz::NSSLabel nssLabel,
     unsigned char* clientRandom) {
   FOLLY_SDT(
       fizz,

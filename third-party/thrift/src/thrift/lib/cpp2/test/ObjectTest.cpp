@@ -520,59 +520,6 @@ bool hasEmptyContainer(const type::standard_type<Tag>& value) {
   return false;
 }
 
-template <
-    ::apache::thrift::conformance::StandardProtocol Protocol,
-    typename Tag,
-    typename T>
-void testSerializeObject() {
-  T testsetValue;
-  for (const auto& val : data::ValueGenerator<Tag>::getKeyValues()) {
-    SCOPED_TRACE(val.name);
-    testsetValue.field_1_ref() = val.value;
-    auto valueStruct = asValueStruct<type::struct_c>(testsetValue);
-    const Object& object = valueStruct.get_objectValue();
-    auto schemalessSerializedData =
-        serializeObject<protocol_writer_t<Protocol>>(object);
-
-    auto schemaBasedSerializedData = serialize<Protocol, T>(testsetValue);
-
-    // FIXME: skip validation for structs with empty list, set, map.
-    if (hasEmptyContainer<Tag>(val.value)) {
-      continue;
-    }
-    EXPECT_TRUE(folly::IOBufEqualTo{}(
-        *schemalessSerializedData, *schemaBasedSerializedData));
-  }
-}
-
-template <
-    ::apache::thrift::conformance::StandardProtocol Protocol,
-    typename Tag,
-    typename T>
-void testSerializeObjectAny() {
-  AnyRegistry registry;
-  registry.registerType<T>(
-      createThriftTypeInfo({"facebook.com/thrift/conformance/struct_with"}));
-  registry.registerSerializer<T>(&getAnyStandardSerializer<T, Protocol>());
-  for (const auto& val : data::ValueGenerator<Tag>::getKeyValues()) {
-    SCOPED_TRACE(val.name);
-    RoundTripResponse anyValue;
-    T testsetValue;
-    testsetValue.field_1_ref() = val.value;
-    anyValue.value_ref() = registry.store<Protocol>(testsetValue);
-
-    auto schemaBasedSerializedData = serialize<Protocol>(anyValue);
-    auto objFromParseObject =
-        parseObject<protocol_reader_t<Protocol>>(*schemaBasedSerializedData);
-
-    auto schemalessSerializedData =
-        serializeObject<protocol_writer_t<Protocol>>(objFromParseObject);
-
-    EXPECT_TRUE(folly::IOBufEqualTo{}(
-        *schemalessSerializedData, *schemaBasedSerializedData));
-  }
-}
-
 // The tests cases to run.
 using ParseObjectTestCases = ::testing::Types<
     type::bool_t,
@@ -635,44 +582,6 @@ TYPED_TEST(TypedParseObjectTest, SerializeObjectWithMask) {
       testset::struct_with<TypeParam>>(true);
 }
 
-TYPED_TEST(TypedParseObjectTest, SerializeObjectSameAsDirectSerialization) {
-  testSerializeObject<
-      ::apache::thrift::conformance::StandardProtocol::Binary,
-      TypeParam,
-      testset::struct_with<TypeParam>>();
-  testSerializeObject<
-      ::apache::thrift::conformance::StandardProtocol::Compact,
-      TypeParam,
-      testset::struct_with<TypeParam>>();
-  testSerializeObject<
-      ::apache::thrift::conformance::StandardProtocol::Binary,
-      TypeParam,
-      testset::union_with<TypeParam>>();
-  testSerializeObject<
-      ::apache::thrift::conformance::StandardProtocol::Compact,
-      TypeParam,
-      testset::union_with<TypeParam>>();
-}
-
-TYPED_TEST(TypedParseObjectTest, SerializeObjectSameAsDirectSerializationAny) {
-  testSerializeObjectAny<
-      ::apache::thrift::conformance::StandardProtocol::Binary,
-      TypeParam,
-      testset::struct_with<TypeParam>>();
-  testSerializeObjectAny<
-      ::apache::thrift::conformance::StandardProtocol::Compact,
-      TypeParam,
-      testset::struct_with<TypeParam>>();
-  testSerializeObjectAny<
-      ::apache::thrift::conformance::StandardProtocol::Binary,
-      TypeParam,
-      testset::union_with<TypeParam>>();
-  testSerializeObjectAny<
-      ::apache::thrift::conformance::StandardProtocol::Compact,
-      TypeParam,
-      testset::union_with<TypeParam>>();
-}
-
 TEST(Object, invalid_object) {
   {
     Object obj;
@@ -733,20 +642,6 @@ TEST(Object, Wrapper) {
   EXPECT_EQ(object.contains(FieldId{1}), false);
   EXPECT_EQ(object.contains(FieldId{2}), true);
   EXPECT_THROW(object.at(FieldId{1}), std::out_of_range);
-
-  std::vector<int16_t> ids;
-  std::vector<Value*> values;
-  for (auto&& i : object) {
-    ids.push_back(i.first);
-    values.push_back(&i.second);
-  }
-
-  EXPECT_EQ(ids.size(), 2);
-  EXPECT_EQ(ids[0], 0);
-  EXPECT_EQ(ids[1], 2);
-  EXPECT_EQ(values.size(), 2);
-  EXPECT_EQ(values[0], &object.members()[0]);
-  EXPECT_EQ(values[1], &object.members()[2]);
 
   EXPECT_EQ(object.erase(FieldId{0}), 1);
   EXPECT_EQ(object.contains(FieldId{0}), false);

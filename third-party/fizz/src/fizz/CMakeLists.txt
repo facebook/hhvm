@@ -223,7 +223,6 @@ set(FIZZ_SOURCES
   tool/FizzCommandCommon.cpp
   util/FizzUtil.cpp
   util/Tracing.cpp
-  util/KeyLogTypes.cpp
 )
 
 add_library(fizz

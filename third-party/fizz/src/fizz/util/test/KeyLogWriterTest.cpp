@@ -7,7 +7,6 @@
  */
 
 #include <fizz/crypto/RandomGenerator.h>
-#include <fizz/util/KeyLogTypes.h>
 #include <fizz/util/KeyLogWriter.h>
 #include <folly/portability/GTest.h>
 
@@ -18,7 +17,7 @@ TEST(KeyLogWriterTest, WriteLog) {
   auto random = RandomGenerator<32>().generateRandom();
   auto secret = RandomGenerator<32>().generateRandom();
   std::string logLine = KeyLogWriter::generateLogLine(
-      random, NSSLabel::CLIENT_HANDSHAKE_TRAFFIC_SECRET, secret);
+      random, KeyLogWriter::Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET, secret);
 
   std::vector<std::string> fields;
   folly::split(" ", logLine, fields);

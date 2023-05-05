@@ -346,6 +346,12 @@ class StringPatch : public BaseStringPatch<Patch, StringPatch<Patch>> {
   using Base::data_;
 };
 
+inline const folly::IOBuf& emptyIOBuf() {
+  static const auto empty =
+      folly::IOBuf::wrapBufferAsValue(folly::StringPiece(""));
+  return empty;
+}
+
 /// Patch for a Thrift Binary.
 ///
 /// The `Patch` template parameter must be a Thrift struct with the following
@@ -389,7 +395,7 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
       T& v;
       std::deque<const T*> bufs = {&v};
       void assign(const T& t) { bufs = {&t}; }
-      void clear() { v = v.wrapBufferAsValue(folly::StringPiece("")); }
+      void clear() { bufs = {&emptyIOBuf()}; }
       void prepend(const T& t) { bufs.push_front(&t); }
       void append(const T& t) { bufs.push_back(&t); }
       ~Visitor() {

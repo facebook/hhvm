@@ -128,6 +128,10 @@ TEST(PatchTest, BinaryPatch) {
   test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf("__bye__"));
   patch = makeIOBuf("");
   test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf(""));
+
+  BinaryPatch clearPatch;
+  clearPatch.clear();
+  test::expectPatch(clearPatch, {makeIOBuf("hi")}, makeIOBuf(""));
 }
 
 } // namespace op

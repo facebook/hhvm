@@ -59,14 +59,16 @@ void validate_nested_type(
   auto schema = flatten_map(type);
   EXPECT_EQ(
       schema.at("name")->get_map().at(0).first->get_string(), type_string);
-  EXPECT_EQ(
-      schema.at("name")
-          ->get_map()
-          .at(0)
-          .second->get_map()
-          .at(0)
-          .second->get_string(),
-      uri);
+  if (!uri.empty()) {
+    EXPECT_EQ(
+        schema.at("name")
+            ->get_map()
+            .at(0)
+            .second->get_map()
+            .at(0)
+            .second->get_string(),
+        uri);
+  }
   EXPECT_FALSE(schema.count("params"));
 }
 

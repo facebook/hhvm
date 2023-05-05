@@ -4,7 +4,7 @@ state: draft
 
 # Rocket Protocol
 
-This document describes the Rocket transport protocol and how it is used by Thrift to achieve the [Interface Types](../../definition/index.md) by using [RSocket](https://rsocket.io/about/protocol).
+This document describes the Rocket transport protocol and how it is used by Thrift to achieve the [Interface Types](/idl/interfaces.md) by using [RSocket](https://rsocket.io/about/protocol).
 
 ## Thrift Protocol Negotiation
 

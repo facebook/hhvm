@@ -81,6 +81,7 @@ module.exports = {
         "idl/annotations",
         "idl/structured-annotations",
         "idl/standard-thrift-annotation-library",
+        "idl/interfaces",
         "idl/mixins"
       ]
     },
@@ -92,17 +93,6 @@ module.exports = {
         id: 'spec/index'
       },
       items: [
-        {
-          type: 'category',
-          label: 'Definitions',
-          link: {
-            type: 'doc',
-            id: 'spec/definition/index',
-          },
-          items: [
-            "spec/definition/interface",
-          ]
-        },
         {
           type: 'category',
           label: 'Protocols',

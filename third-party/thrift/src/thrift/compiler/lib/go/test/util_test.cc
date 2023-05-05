@@ -37,6 +37,7 @@ TEST_F(GoUtilTest, test_munge_ident) {
   EXPECT_EQ(go::munge_ident("FooBar", true), "FooBar");
   EXPECT_EQ(go::munge_ident("fooBar", true), "FooBar");
   EXPECT_EQ(go::munge_ident("FOOBar", true), "FOOBar");
+  EXPECT_EQ(go::munge_ident("FooBar_", true), "FooBar_");
 
   // Initialisms
   EXPECT_EQ(go::munge_ident("url", true, false), "URL");

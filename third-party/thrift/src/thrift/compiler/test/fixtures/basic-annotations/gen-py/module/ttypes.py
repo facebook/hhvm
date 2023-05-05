@@ -824,6 +824,7 @@ MyStruct.thrift_field_annotations = {
   },
   2: {
     "cpp.name": "majorVer",
+    "go.name": "MajorVer",
   },
   3: {
     "go.tag": "tag:\"somevalue\"",

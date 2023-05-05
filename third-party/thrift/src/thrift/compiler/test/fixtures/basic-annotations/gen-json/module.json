@@ -281,6 +281,20 @@
                 }
               }
             }
+,
+            "go.name" : {
+              "value" : "MajorVer",
+              "source_range" : {
+                "begin" : {
+                  "line" : 44,
+                  "column" : 40
+                },
+                "end" : {
+                  "line" : 44,
+                  "column" : 60
+                }
+              }
+            }
           },
           "source_range" : {
             "begin" : {
@@ -289,7 +303,7 @@
             },
             "end" : {
               "line" : 44,
-              "column" : 40
+              "column" : 62
             }
           }
         },

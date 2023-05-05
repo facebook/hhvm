@@ -53,7 +53,7 @@ struct WeirdNames {
   // golang generator does not support this combination of ambiguous names
   // 3: bool SetMe;
   4: bool SetMe_;
-  5: bool _setMe;
+  5: bool _setMe (go.name = "XSetMe");
   6: bool p;
   7: bool b;
 }
@@ -159,7 +159,7 @@ service ThriftTest {
   oneway void doTestOneway(1: i32 secondsToSleep);
 
   /* Test poor naming */
-  void _doTestPoorName();
+  void _doTestPoorName() (go.name = "XDoTestPoorName");
 }
 
 struct VersioningTestV1 {

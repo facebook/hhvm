@@ -413,7 +413,7 @@ func (x *MyException) Read(p thrift.Protocol) error {
 
 
 type MyStruct struct {
-    Major int64 `thrift:"major,2" json:"major" db:"major"`
+    MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
     Package string `thrift:"package,1" json:"package" db:"package"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
     Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
@@ -435,12 +435,12 @@ func NewMyStruct() *MyStruct {
 // Deprecated: Use NewMyStruct().MyUnion instead.
 var MyStruct_MyUnion_DEFAULT = NewMyStruct().MyUnion
 
-func (x *MyStruct) GetMajorNonCompat() int64 {
-    return x.Major
+func (x *MyStruct) GetMajorVerNonCompat() int64 {
+    return x.MajorVer
 }
 
-func (x *MyStruct) GetMajor() int64 {
-    return x.Major
+func (x *MyStruct) GetMajorVer() int64 {
+    return x.MajorVer
 }
 
 func (x *MyStruct) GetPackageNonCompat() string {
@@ -523,8 +523,8 @@ func (x *MyStruct) GetMyID() MyId {
     return x.MyID
 }
 
-func (x *MyStruct) SetMajor(value int64) *MyStruct {
-    x.Major = value
+func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
+    x.MajorVer = value
     return x
 }
 
@@ -589,12 +589,12 @@ func (x *MyStruct) IsSetMyUnion() bool {
 }
 
 
-func (x *MyStruct) writeField2(p thrift.Protocol) error {  // Major
+func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
     if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMajorNonCompat()
+    item := x.GetMajorVerNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -769,13 +769,13 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField2(p thrift.Protocol) error {  // Major
+func (x *MyStruct) readField2(p thrift.Protocol) error {  // MajorVer
     result, err := p.ReadI64()
 if err != nil {
     return err
 }
 
-    x.SetMajor(result)
+    x.SetMajorVer(result)
     return nil
 }
 
@@ -905,8 +905,8 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) Major(value int64) *MyStructBuilder {
-    x.obj.Major = value
+func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
+    x.obj.MajorVer = value
     return x
 }
 

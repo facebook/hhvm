@@ -313,6 +313,10 @@ std::string get_go_func_name(const t_function* func) {
 }
 
 std::string get_field_name(const t_field* field) {
+  if (field->has_annotation("go.name")) {
+    return field->get_annotation("go.name");
+  }
+
   auto name = munge_ident(field->name());
   if (reserved_field_names.count(name) > 0) {
     name += "_";

@@ -626,12 +626,7 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:placeholder?", &mstch_go_typedef::is_placeholder},
         });
   }
-  mstch::node go_name() {
-    if (typedef_->has_annotation("go.name")) {
-      return typedef_->get_annotation("go.name");
-    }
-    return go::munge_ident(typedef_->name());
-  }
+  mstch::node go_name() { return go_name_(); }
   mstch::node go_newtype() { return typedef_->has_annotation("go.newtype"); }
   mstch::node go_qualified_name() {
     auto prefix = go_package_alias_prefix(typedef_->program(), data_);

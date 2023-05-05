@@ -95,7 +95,7 @@ StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 void StructMetadata<::cpp2::detail::YourStruct>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-  thriftStruct.fields()[0].unstructured_annotations() = std::map<std::string, std::string>{{R"THRIFT_CODEGEN(cpp.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(majorVer)THRIFT_CODEGEN"},};
+  thriftStruct.fields()[0].unstructured_annotations() = std::map<std::string, std::string>{{R"THRIFT_CODEGEN(cpp.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(majorVer)THRIFT_CODEGEN"},{R"THRIFT_CODEGEN(go.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(MajorVer)THRIFT_CODEGEN"},};
   thriftStruct.fields()[1].unstructured_annotations() = std::map<std::string, std::string>{{R"THRIFT_CODEGEN(java.swift.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(_package)THRIFT_CODEGEN"},};
   thriftStruct.fields()[2].unstructured_annotations() = std::map<std::string, std::string>{{R"THRIFT_CODEGEN(go.tag)THRIFT_CODEGEN", R"THRIFT_CODEGEN(tag:"somevalue")THRIFT_CODEGEN"},};
   thriftStruct.fields()[3].unstructured_annotations() = std::map<std::string, std::string>{{R"THRIFT_CODEGEN(java.swift.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(class_)THRIFT_CODEGEN"},};

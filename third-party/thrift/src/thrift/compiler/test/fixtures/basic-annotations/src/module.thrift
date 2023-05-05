@@ -41,7 +41,7 @@ safe exception MyException {} (cpp.name = "YourException")
 @cpp.Adapter{name = '::StaticCast'}
 struct MyStruct {
   # glibc has macros with this name, Thrift should be able to prevent collisions
-  2: i64 major (cpp.name = 'majorVer');
+  2: i64 major (cpp.name = 'majorVer', go.name = 'MajorVer');
   # package is a reserved keyword in Java, Thrift should be able to handle this
   1: string package (java.swift.name = '_package');
   # should generate valid code even with double quotes in an annotation

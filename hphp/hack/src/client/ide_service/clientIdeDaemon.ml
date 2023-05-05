@@ -50,8 +50,8 @@ type common_state = {
       (** Local_memory backend; includes decl caches *)
   fall_back_to_full_index: bool;
       (** fall back to a full index naming table build if loading the saved state fails. *)
-  process_changes_sync: bool;
-      (** See [ServerConfig.ide_process_changes_sync] for details. *)
+  batch_process_changes: bool;
+      (** See [ServerConfig.ide_batch_process_changes] for details. *)
 }
 [@@deriving show]
 
@@ -656,7 +656,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let fall_back_to_full_index =
     ServerConfig.ide_fall_back_to_full_index config
   in
-  let process_changes_sync = ServerConfig.ide_process_changes_sync config in
+  let batch_process_changes = ServerConfig.ide_batch_process_changes config in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
@@ -687,7 +687,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
         tcopt;
         local_memory;
         fall_back_to_full_index;
-        process_changes_sync;
+        batch_process_changes;
       };
     dfiles =
       {
@@ -718,7 +718,7 @@ let initialize2
       Relative_path.Set.cardinal changed_files_to_process
     in
     let istate =
-      if dstate.dcommon.process_changes_sync then
+      if dstate.dcommon.batch_process_changes then
         let benchmark_start = Unix.gettimeofday () in
         let () =
           log

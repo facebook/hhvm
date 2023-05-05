@@ -33,7 +33,8 @@ class ProxyConfigBuilder {
   ProxyConfigBuilder(
       const McrouterOptions& opts,
       ConfigApi& configApi,
-      folly::StringPiece jsonC);
+      folly::StringPiece jsonC,
+      const std::string& name);
 
   template <class RouterInfo>
   std::shared_ptr<ProxyConfig<RouterInfo>> buildConfig(

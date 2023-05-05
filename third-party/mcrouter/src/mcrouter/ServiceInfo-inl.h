@@ -444,7 +444,10 @@ ServiceInfo<RouterInfo>::ServiceInfoImpl::ServiceInfoImpl(
           throw std::runtime_error("Can not load config from " + path);
         }
         ProxyConfigBuilder builder(
-            proxy_.router().opts(), proxy_.router().configApi(), confFile);
+            proxy_.router().opts(),
+            proxy_.router().configApi(),
+            confFile,
+            RouterInfo::name);
         return toPrettySortedJson(builder.preprocessedConfig());
       });
 

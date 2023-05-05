@@ -27,7 +27,8 @@ namespace mcrouter {
 ProxyConfigBuilder::ProxyConfigBuilder(
     const McrouterOptions& opts,
     ConfigApi& configApi,
-    folly::StringPiece jsonC)
+    folly::StringPiece jsonC,
+    const std::string& routerInfoName)
     : json_(nullptr) {
   McImportResolver importResolver(configApi);
   int sr_linked = 0;
@@ -41,7 +42,8 @@ ProxyConfigBuilder::ProxyConfigBuilder(
       {"hostid", globals::hostid()},
       {"router-name", opts.router_name},
       {"service-name", opts.service_name},
-      {"service-router-capable", sr_linked}};
+      {"service-router-capable", sr_linked},
+      {"router-info-name", routerInfoName}};
 
   auto additionalParams = additionalConfigParams();
   folly::json::metadata_map configMetadataMap;

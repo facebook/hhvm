@@ -656,7 +656,7 @@ CarbonRouterInstance<RouterInfo>::createConfigBuilder() {
     try {
       // assume default_route, default_region and default_cluster are same for
       // each proxy
-      return ProxyConfigBuilder(opts_, configApi(), config);
+      return ProxyConfigBuilder(opts_, configApi(), config, RouterInfo::name);
     } catch (const std::exception& e) {
       MC_LOG_FAILURE(
           opts(),

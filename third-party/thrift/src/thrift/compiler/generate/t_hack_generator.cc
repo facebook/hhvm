@@ -6717,8 +6717,6 @@ std::string t_hack_generator::type_to_typehint(
     if (variations[TypeToTypehintVariations::IS_SHAPE] && shape_arraykeys_ &&
         key_type == "string") {
       key_type = "arraykey";
-    } else if (!is_type_arraykey(tmap->get_key_type())) {
-      key_type = "arraykey";
     }
     return prefix + "<" + key_type + ", " +
         type_to_typehint(tmap->get_val_type(), variations) + ">";
@@ -6743,10 +6741,8 @@ std::string t_hack_generator::type_to_typehint(
           ? "\\ConstSet"
           : "Set";
     }
-    std::string key_type = !is_type_arraykey(tset->get_elem_type())
-        ? "arraykey"
-        : type_to_typehint(tset->get_elem_type(), variations);
-    return prefix + "<" + key_type + suffix;
+    return prefix + "<" + type_to_typehint(tset->get_elem_type(), variations) +
+        suffix;
   } else {
     return "mixed";
   }

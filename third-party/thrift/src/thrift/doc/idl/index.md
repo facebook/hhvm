@@ -228,7 +228,8 @@ service PeopleSearch {
 ### Include Directives
 
 ```grammar
-include_directive ::=  ("include" | "cpp_include" | "hs_include") string_literal
+include_directive ::=
+  ("include" | "cpp_include" | "hs_include") string_literal [";"]
 ```
 
 Include directives allow the use of constants, types, and services from other Thrift files by prefixing the name (without extension) of the included Thrift file followed by a period. `cpp_include` instructs the compiler to emit an include in generated C++ code and `hs_include` does the same for Haskell.
@@ -255,7 +256,7 @@ If there is a circular dependency between files, a compile-time error is reporte
 A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](../features/universal-name.md) prefix.
 
 ```grammar
-package_declaration ::=  [annotations] "package" package_name
+package_declaration ::=  [annotations] "package" package_name [";"]
 ```
 
 A package name is a string containing a domain name and a path separated with `/`, for example:
@@ -343,11 +344,13 @@ struct PeopleSearchRequest { /* ... */ }
 ### Namespace Directives
 
 ```grammar
-namespace_directive ::=  "namespace" maybe_qualified_id namespace_name
+namespace_directive ::=  "namespace" maybe_qualified_id namespace_name [";"]
 namespace_name      ::=  maybe_qualified_id | string_literal
 ```
 
-Namespace directives instruct the compiler on top level structure of the generated code. The details are language-specific. Namespace directives do not affect the Thrift file semantics.
+Namespace directives override the default namespaces set by a [package declaration](#package-declaration).
+
+Namespaces control the top-level structure of the generated code in a language-specific way. They do not affect the Thrift file semantics.
 
 ```thrift
 // Directs the compiler to generate C++ code inside the namespace

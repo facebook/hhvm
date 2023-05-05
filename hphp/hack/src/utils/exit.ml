@@ -18,12 +18,33 @@ let exit
     ?(telemetry : Telemetry.t option)
     ?(stack : string option)
     (exit_status : Exit_status.t) : 'a =
+  (* is there additional inforamtion in exit_status to pick up? *)
+  let (emsg, estack) =
+    match exit_status with
+    | Exit_status.Uncaught_exception e ->
+      ( Some (Exception.get_ctor_string e),
+        Some (Exception.get_backtrace_string e |> Exception.clean_stack) )
+    | Exit_status.(
+        ( Server_hung_up_should_abort (Some finale_data)
+        | Server_hung_up_should_retry (Some finale_data) )) ->
+      let { Exit_status.exit_status; stack = Utils.Callstack stack; _ } =
+        finale_data
+      in
+      (Some (Exit_status.show exit_status), Some stack)
+    | _ -> (None, None)
+  in
   let stack =
     Option.value
       ~default:
         (Exception.get_current_callstack_string 99 |> Exception.clean_stack)
       stack
   in
+  let stack =
+    match estack with
+    | None -> stack
+    | Some estack -> stack ^ "\n\n" ^ estack
+  in
+  let msg = Option.first_some msg emsg in
   let server_finale_data =
     { Exit_status.exit_status; msg; stack = Utils.Callstack stack; telemetry }
   in

@@ -58,6 +58,8 @@ class AstGeneratorTest(unittest.TestCase):
                 struct Foo {
                     1: i64 int;
                 }
+
+                const i16 answer = 42;
                 """
             ),
         )
@@ -71,3 +73,6 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(srcRange.beginColumn, 1)
         self.assertEqual(srcRange.endLine, 4)
         self.assertEqual(srcRange.endColumn, 2)
+
+        self.assertEqual(ast.definitions[1].constDef.attrs.name, "answer")
+        self.assertEqual(ast.values[ast.definitions[1].constDef.value - 1].i16Value, 42)

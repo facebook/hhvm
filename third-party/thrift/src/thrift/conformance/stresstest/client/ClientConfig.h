@@ -54,6 +54,7 @@ struct ClientConnectionConfig {
   std::string keyPath;
   std::string trustedCertsPath;
   bool ioUring{false};
+  bool useQuic{false};
 };
 
 struct ClientConfig {

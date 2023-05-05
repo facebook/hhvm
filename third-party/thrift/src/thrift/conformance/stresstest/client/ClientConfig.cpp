@@ -47,6 +47,7 @@ DEFINE_int64(
     10,
     "How often to poll in secs stats when running continuously");
 DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
+DEFINE_bool(quic, false, "Flag to enable quic on the client");
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 DEFINE_int64(warmup_s, 2, "Warmup time of test in seconds");
 DEFINE_uint32(target_qps, 1000, "Target QPS for generated load");
@@ -82,6 +83,7 @@ namespace apache::thrift::stress {
   connCfg.keyPath = FLAGS_client_key_path;
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
   connCfg.ioUring = FLAGS_io_uring;
+  connCfg.useQuic = FLAGS_quic;
 
   ClientConfig config{};
 

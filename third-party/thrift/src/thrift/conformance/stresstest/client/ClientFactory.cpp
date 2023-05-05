@@ -22,6 +22,8 @@
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <quic/client/QuicClientAsyncTransport.h>
+#include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
 namespace apache {
@@ -133,10 +135,46 @@ folly::AsyncTransport::UniquePtr createSocketWithIOUring(
   }
 }
 
+folly::AsyncTransport::UniquePtr createQuicSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  static quic::TransportSettings ts{
+      .advertisedInitialConnectionWindowSize = 60 * 1024 * 1024,
+      .advertisedInitialBidiLocalStreamWindowSize = 60 * 1024 * 1024,
+      .numGROBuffers_ = quic::kMaxNumGROBuffers,
+      .connectUDP = true,
+      .writeConnectionDataPacketsLimit = 50,
+      .batchingMode = quic::QuicBatchingMode::BATCHING_MODE_GSO,
+      .maxBatchSize = 50,
+      .initCwndInMss = 100,
+      .maxCwndInMss = quic::kLargeMaxCwndInMss,
+      .maxRecvBatchSize = 64,
+      .shouldRecvBatch = true,
+      .shouldUseRecvmmsgForBatchRecv = true,
+  };
+
+  auto sock = std::make_unique<folly::AsyncUDPSocket>(evb);
+  auto quicClient = std::make_shared<quic::QuicClientTransport>(
+      evb,
+      std::move(sock),
+      quic::FizzClientQuicHandshakeContext::Builder()
+          .setFizzClientContext(getFizzContext(cfg))
+          .setCertificateVerifier(getFizzVerifier(cfg))
+          .build());
+  quicClient->setTransportSettings(ts);
+  quicClient->addNewPeerAddress(cfg.serverHost);
+  auto quicAsyncTransport = new quic::QuicClientAsyncTransport(quicClient);
+  return folly::AsyncTransport::UniquePtr(quicAsyncTransport);
+}
+
 folly::AsyncTransport::UniquePtr createSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  return !cfg.ioUring ? createSocketWithEPoll(evb, cfg)
-                      : createSocketWithIOUring(evb, cfg);
+  if (cfg.useQuic) {
+    return createQuicSocket(evb, cfg);
+  } else if (cfg.ioUring) {
+    return createSocketWithIOUring(evb, cfg);
+  } else {
+    return createSocketWithEPoll(evb, cfg);
+  }
 }
 
 folly::AsyncTransport::UniquePtr createEPollSocket(

@@ -21,7 +21,6 @@
    duplicate_class_member_check
    duplicate_xhp_attribute_check
    dynamically_callable_attr_check
-   enum_supertyping_check
    function_pointer_check
    global_const_check
    illegal_name_check

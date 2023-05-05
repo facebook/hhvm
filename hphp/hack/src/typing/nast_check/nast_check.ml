@@ -25,7 +25,6 @@ let visitor ctx =
       Php_lambda_check.handler;
       Duplicate_xhp_attribute_check.handler;
       Attribute_nast_checks.handler;
-      Enum_supertyping_check.handler;
       List_rvalue_check.handler;
       Private_final_check.handler;
       Well_formed_internal_trait.handler;

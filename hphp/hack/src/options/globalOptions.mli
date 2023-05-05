@@ -267,8 +267,6 @@ type t = {
   tco_ifc_enabled: string list;
   (* Enable global access checker to check global writes and reads *)
   tco_global_access_check_enabled: bool;
-  (* Enables the enum supertyping extension *)
-  po_enable_enum_supertyping: bool;
   (* <<__Soft>> T -> ~T *)
   po_interpret_soft_types_as_like_types: bool;
   (* Restricts string concatenation and interpolation to arraykeys *)
@@ -447,7 +445,6 @@ val set :
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_enabled:bool ->
-  ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->

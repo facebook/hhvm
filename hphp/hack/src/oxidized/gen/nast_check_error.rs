@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<94d76810cd6381bf8087e8a8ac0a2078>>
+// @generated SignedSource<<559d9953e9dd4b2fe2f6e5cf8443ee6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -266,9 +266,5 @@ pub enum NastCheckError {
     AttributeParamType {
         pos: pos::Pos,
         x: String,
-    },
-    #[rust_to_ocaml(name = "Enum_supertyping_reserved_syntax")]
-    EnumSupertypingReservedSyntax {
-        pos: pos::Pos,
     },
 }

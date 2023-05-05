@@ -345,7 +345,6 @@ let load_config config options =
     ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
     ?tco_enable_modules:(bool_opt "enable_modules" config)
-    ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
     ?po_interpret_soft_types_as_like_types:
       (bool_opt "interpret_soft_types_as_like_types" config)
     ?tco_enable_strict_string_concat_interp:

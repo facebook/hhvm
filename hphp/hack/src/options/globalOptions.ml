@@ -160,7 +160,6 @@ type t = {
   tco_skip_check_under_dynamic: bool;
   tco_ifc_enabled: string list;
   tco_global_access_check_enabled: bool;
-  po_enable_enum_supertyping: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
   tco_ignore_unsafe_cast: bool;
@@ -296,7 +295,6 @@ let default =
     tco_skip_check_under_dynamic = false;
     tco_ifc_enabled = [];
     tco_global_access_check_enabled = false;
-    po_enable_enum_supertyping = true;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
     tco_ignore_unsafe_cast = false;
@@ -430,7 +428,6 @@ let set
     ?tco_skip_check_under_dynamic
     ?tco_ifc_enabled
     ?tco_global_access_check_enabled
-    ?po_enable_enum_supertyping
     ?po_interpret_soft_types_as_like_types
     ?tco_enable_strict_string_concat_interp
     ?tco_ignore_unsafe_cast
@@ -710,8 +707,6 @@ let set
       setting
         tco_global_access_check_enabled
         options.tco_global_access_check_enabled;
-    po_enable_enum_supertyping =
-      setting po_enable_enum_supertyping options.po_enable_enum_supertyping;
     po_interpret_soft_types_as_like_types =
       setting
         po_interpret_soft_types_as_like_types

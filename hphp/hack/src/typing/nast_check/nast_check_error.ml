@@ -159,7 +159,6 @@ type t =
       pos: Pos.t;
       x: string;
     }
-  | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -699,14 +698,6 @@ let attribute_param_type pos x =
     (pos, "This attribute parameter should be " ^ x)
     []
 
-let enum_supertyping_reserved_syntax pos =
-  User_error.make
-    Error_codes.Typing.(to_enum EnumSupertypingReservedSyntax)
-    ( pos,
-      "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
-      ^ "Enable it with the enable_enum_supertyping option in .hhconfig" )
-    []
-
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -786,5 +777,3 @@ let to_user_error = function
   | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
     attribute_not_exact_number_of_args pos name expected actual
   | Attribute_param_type { pos; x } -> attribute_param_type pos x
-  | Enum_supertyping_reserved_syntax { pos } ->
-    enum_supertyping_reserved_syntax pos

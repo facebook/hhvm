@@ -159,6 +159,5 @@ type t =
       pos: Pos.t;
       x: string;
     }
-  | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

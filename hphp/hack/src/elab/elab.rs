@@ -407,8 +407,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         passes::validate_expr_function_pointer::ValidateExprFunctionPointerPass::default(),
 
-        passes::validate_enum_supertyping::ValidateEnumSupertypingPass::default(),
-
         passes::validate_expr_array_get::ValidateExprArrayGetPass::default(),
 
         passes::validate_expr_list::ValidateExprListPass::default(),

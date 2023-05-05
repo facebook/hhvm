@@ -240,8 +240,6 @@ let strict_value_equality t = t.GlobalOptions.tco_strict_value_equality
 
 let enforce_sealed_subclasses t = t.GlobalOptions.tco_enforce_sealed_subclasses
 
-let enable_enum_supertyping t = t.GlobalOptions.po_enable_enum_supertyping
-
 let everything_sdt t = t.GlobalOptions.tco_everything_sdt
 
 let pessimise_builtins t = t.GlobalOptions.tco_enable_sound_dynamic

@@ -1435,13 +1435,8 @@ let check_sealed env c =
   let hard_error =
     TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
   in
-  if is_enum_or_enum_class c.c_kind then
-    if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
-      sealed_subtype (Env.get_ctx env) c ~is_enum:true ~hard_error
-    else
-      ()
-  else
-    sealed_subtype (Env.get_ctx env) c ~is_enum:false ~hard_error
+  let is_enum = is_enum_or_enum_class c.c_kind in
+  sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error
 
 let check_class_where_require_class_constraints env c tc =
   let (pc, _) = c.c_name in

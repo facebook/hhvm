@@ -486,6 +486,9 @@ let load ~silent options : t * ServerLocalConfig.t =
             Some local_config.remote_type_check.num_workers)
         ?so_remote_version_specifier:local_config.remote_version_specifier
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
+        ?tco_ide_should_use_hack_64_distc:
+          (Some local_config.ide_should_use_hack_64_distc)
+          (* clientIdeDaemon should load a naming table from hack/64_distc *)
         ?tco_log_large_fanouts_threshold:
           local_config.log_large_fanouts_threshold
         ~tco_remote_old_decls_no_limit:

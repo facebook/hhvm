@@ -355,9 +355,9 @@ type reqGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetEntity{}
 
-
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
-    return (&reqGetEntityGetEntity{})
+    return (&reqGetEntityGetEntity{}).
+        SetR(NewGetEntityRequest())
 }
 
 // Deprecated: Use newReqGetEntityGetEntity().R instead.
@@ -505,9 +505,9 @@ type respGetEntityGetEntity struct {
 var _ thrift.Struct = &respGetEntityGetEntity{}
 var _ thrift.WritableResult = &respGetEntityGetEntity{}
 
-
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
-    return (&respGetEntityGetEntity{})
+    return (&respGetEntityGetEntity{}).
+        SetValue(NewGetEntityResponse())
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().Value instead.
@@ -657,7 +657,6 @@ type reqGetEntityGetBool struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBool{}
 
-
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
 }
@@ -739,9 +738,9 @@ type respGetEntityGetBool struct {
 var _ thrift.Struct = &respGetEntityGetBool{}
 var _ thrift.WritableResult = &respGetEntityGetBool{}
 
-
 func newRespGetEntityGetBool() *respGetEntityGetBool {
-    return (&respGetEntityGetBool{})
+    return (&respGetEntityGetBool{}).
+        SetValue(false)
 }
 
 func (x *respGetEntityGetBool) GetValueNonCompat() bool {
@@ -875,7 +874,6 @@ type reqGetEntityGetByte struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetByte{}
 
-
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
 }
@@ -957,9 +955,9 @@ type respGetEntityGetByte struct {
 var _ thrift.Struct = &respGetEntityGetByte{}
 var _ thrift.WritableResult = &respGetEntityGetByte{}
 
-
 func newRespGetEntityGetByte() *respGetEntityGetByte {
-    return (&respGetEntityGetByte{})
+    return (&respGetEntityGetByte{}).
+        SetValue(0)
 }
 
 func (x *respGetEntityGetByte) GetValueNonCompat() byte {
@@ -1093,7 +1091,6 @@ type reqGetEntityGetI16 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI16{}
 
-
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
 }
@@ -1175,9 +1172,9 @@ type respGetEntityGetI16 struct {
 var _ thrift.Struct = &respGetEntityGetI16{}
 var _ thrift.WritableResult = &respGetEntityGetI16{}
 
-
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
-    return (&respGetEntityGetI16{})
+    return (&respGetEntityGetI16{}).
+        SetValue(0)
 }
 
 func (x *respGetEntityGetI16) GetValueNonCompat() int16 {
@@ -1311,7 +1308,6 @@ type reqGetEntityGetI32 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI32{}
 
-
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
 }
@@ -1393,9 +1389,9 @@ type respGetEntityGetI32 struct {
 var _ thrift.Struct = &respGetEntityGetI32{}
 var _ thrift.WritableResult = &respGetEntityGetI32{}
 
-
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
-    return (&respGetEntityGetI32{})
+    return (&respGetEntityGetI32{}).
+        SetValue(0)
 }
 
 func (x *respGetEntityGetI32) GetValueNonCompat() int32 {
@@ -1529,7 +1525,6 @@ type reqGetEntityGetI64 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI64{}
 
-
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
 }
@@ -1611,9 +1606,9 @@ type respGetEntityGetI64 struct {
 var _ thrift.Struct = &respGetEntityGetI64{}
 var _ thrift.WritableResult = &respGetEntityGetI64{}
 
-
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
-    return (&respGetEntityGetI64{})
+    return (&respGetEntityGetI64{}).
+        SetValue(0)
 }
 
 func (x *respGetEntityGetI64) GetValueNonCompat() int64 {
@@ -1747,7 +1742,6 @@ type reqGetEntityGetDouble struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetDouble{}
 
-
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
 }
@@ -1829,9 +1823,9 @@ type respGetEntityGetDouble struct {
 var _ thrift.Struct = &respGetEntityGetDouble{}
 var _ thrift.WritableResult = &respGetEntityGetDouble{}
 
-
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
-    return (&respGetEntityGetDouble{})
+    return (&respGetEntityGetDouble{}).
+        SetValue(0.0)
 }
 
 func (x *respGetEntityGetDouble) GetValueNonCompat() float64 {
@@ -1965,7 +1959,6 @@ type reqGetEntityGetString struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetString{}
 
-
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
 }
@@ -2047,9 +2040,9 @@ type respGetEntityGetString struct {
 var _ thrift.Struct = &respGetEntityGetString{}
 var _ thrift.WritableResult = &respGetEntityGetString{}
 
-
 func newRespGetEntityGetString() *respGetEntityGetString {
-    return (&respGetEntityGetString{})
+    return (&respGetEntityGetString{}).
+        SetValue("")
 }
 
 func (x *respGetEntityGetString) GetValueNonCompat() string {
@@ -2183,7 +2176,6 @@ type reqGetEntityGetBinary struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBinary{}
 
-
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
 }
@@ -2265,9 +2257,9 @@ type respGetEntityGetBinary struct {
 var _ thrift.Struct = &respGetEntityGetBinary{}
 var _ thrift.WritableResult = &respGetEntityGetBinary{}
 
-
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
-    return (&respGetEntityGetBinary{})
+    return (&respGetEntityGetBinary{}).
+        SetValue([]byte(""))
 }
 
 func (x *respGetEntityGetBinary) GetValueNonCompat() []byte {
@@ -2413,7 +2405,6 @@ type reqGetEntityGetMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetMap{}
 
-
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
 }
@@ -2495,9 +2486,9 @@ type respGetEntityGetMap struct {
 var _ thrift.Struct = &respGetEntityGetMap{}
 var _ thrift.WritableResult = &respGetEntityGetMap{}
 
-
 func newRespGetEntityGetMap() *respGetEntityGetMap {
-    return (&respGetEntityGetMap{})
+    return (&respGetEntityGetMap{}).
+        SetValue(make(map[string]string))
 }
 
 func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
@@ -2506,7 +2497,7 @@ func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
 
 func (x *respGetEntityGetMap) GetValue() map[string]string {
     if !x.IsSetValue() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Value
@@ -2689,7 +2680,6 @@ type reqGetEntityGetSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetSet{}
 
-
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
 }
@@ -2771,9 +2761,9 @@ type respGetEntityGetSet struct {
 var _ thrift.Struct = &respGetEntityGetSet{}
 var _ thrift.WritableResult = &respGetEntityGetSet{}
 
-
 func newRespGetEntityGetSet() *respGetEntityGetSet {
-    return (&respGetEntityGetSet{})
+    return (&respGetEntityGetSet{}).
+        SetValue(make([]string))
 }
 
 func (x *respGetEntityGetSet) GetValueNonCompat() []string {
@@ -2782,7 +2772,7 @@ func (x *respGetEntityGetSet) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetSet) GetValue() []string {
     if !x.IsSetValue() {
-        return nil
+        return make([]string)
     }
 
     return x.Value
@@ -2948,7 +2938,6 @@ type reqGetEntityGetList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetList{}
 
-
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
 }
@@ -3030,9 +3019,9 @@ type respGetEntityGetList struct {
 var _ thrift.Struct = &respGetEntityGetList{}
 var _ thrift.WritableResult = &respGetEntityGetList{}
 
-
 func newRespGetEntityGetList() *respGetEntityGetList {
-    return (&respGetEntityGetList{})
+    return (&respGetEntityGetList{}).
+        SetValue(make([]string))
 }
 
 func (x *respGetEntityGetList) GetValueNonCompat() []string {
@@ -3041,7 +3030,7 @@ func (x *respGetEntityGetList) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetList) GetValue() []string {
     if !x.IsSetValue() {
-        return nil
+        return make([]string)
     }
 
     return x.Value
@@ -3210,9 +3199,11 @@ type reqGetEntityGetLegacyStuff struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
 
-
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
-    return (&reqGetEntityGetLegacyStuff{})
+    return (&reqGetEntityGetLegacyStuff{}).
+        SetNumPos(0).
+        SetNumNeg1(0).
+        SetNumNeg2(0)
 }
 
 func (x *reqGetEntityGetLegacyStuff) GetNumPosNonCompat() int64 {
@@ -3448,9 +3439,9 @@ type respGetEntityGetLegacyStuff struct {
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
 var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
 
-
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
-    return (&respGetEntityGetLegacyStuff{})
+    return (&respGetEntityGetLegacyStuff{}).
+        SetValue(0)
 }
 
 func (x *respGetEntityGetLegacyStuff) GetValueNonCompat() int32 {

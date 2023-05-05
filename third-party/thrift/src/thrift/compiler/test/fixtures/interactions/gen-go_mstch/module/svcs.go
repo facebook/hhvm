@@ -134,7 +134,6 @@ type reqMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceFoo{}
 
-
 func newReqMyServiceFoo() *reqMyServiceFoo {
     return (&reqMyServiceFoo{})
 }
@@ -214,7 +213,6 @@ type respMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceFoo{}
 var _ thrift.WritableResult = &respMyServiceFoo{}
-
 
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{})

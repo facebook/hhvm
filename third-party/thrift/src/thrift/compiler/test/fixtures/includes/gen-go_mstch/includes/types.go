@@ -77,13 +77,12 @@ type Included struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Included{}
 
-
 func NewIncluded() *Included {
     return (&Included{}).
         SetMyIntField(0).
         SetMyTransitiveField(
-            *transitive.NewFoo(),
-        )
+              *transitive.NewFoo(),
+          )
 }
 
 // Deprecated: Use NewIncluded().MyTransitiveField instead.

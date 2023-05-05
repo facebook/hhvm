@@ -21,9 +21,9 @@ type GetEntityRequest struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GetEntityRequest{}
 
-
 func NewGetEntityRequest() *GetEntityRequest {
-    return (&GetEntityRequest{})
+    return (&GetEntityRequest{}).
+        SetId("")
 }
 
 func (x *GetEntityRequest) GetIdNonCompat() string {
@@ -155,9 +155,9 @@ type GetEntityResponse struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GetEntityResponse{}
 
-
 func NewGetEntityResponse() *GetEntityResponse {
-    return (&GetEntityResponse{})
+    return (&GetEntityResponse{}).
+        SetEntity("")
 }
 
 func (x *GetEntityResponse) GetEntityNonCompat() string {

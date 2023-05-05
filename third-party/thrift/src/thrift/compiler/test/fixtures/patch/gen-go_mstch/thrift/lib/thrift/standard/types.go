@@ -224,9 +224,10 @@ type TypeUri struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeUri{}
 
-
 func NewTypeUri() *TypeUri {
-    return (&TypeUri{})
+    return (&TypeUri{}).
+        SetUri(NewUri()).
+        SetTypeHashPrefixSha2_256(NewByteString())
 }
 
 // Deprecated: Use NewTypeUri().Uri instead.
@@ -469,9 +470,25 @@ type TypeName struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeName{}
 
-
 func NewTypeName() *TypeName {
-    return (&TypeName{})
+    return (&TypeName{}).
+        SetBoolType(0).
+        SetByteType(0).
+        SetI16Type(0).
+        SetI32Type(0).
+        SetI64Type(0).
+        SetFloatType(0).
+        SetDoubleType(0).
+        SetStringType(0).
+        SetBinaryType(0).
+        SetEnumType(NewTypeUri()).
+        SetTypedefType(NewTypeUri()).
+        SetStructType(NewTypeUri()).
+        SetUnionType(NewTypeUri()).
+        SetExceptionType(NewTypeUri()).
+        SetListType(0).
+        SetSetType(0).
+        SetMapType(0)
 }
 
 // Deprecated: Use NewTypeName().BoolType instead.

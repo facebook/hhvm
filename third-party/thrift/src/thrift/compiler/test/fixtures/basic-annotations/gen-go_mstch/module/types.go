@@ -109,9 +109,9 @@ type MyStructNestedAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructNestedAnnotation{}
 
-
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
-    return (&MyStructNestedAnnotation{})
+    return (&MyStructNestedAnnotation{}).
+        SetName("")
 }
 
 func (x *MyStructNestedAnnotation) GetNameNonCompat() string {
@@ -242,7 +242,6 @@ type MyUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
 
-
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
@@ -330,7 +329,6 @@ type MyException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyException{}
-
 
 func NewMyException() *MyException {
     return (&MyException{})
@@ -426,9 +424,18 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).
+        SetMajorVer(0).
+        SetPackage("").
+        SetAnnotationWithQuote("").
+        SetClass_("").
+        SetAnnotationWithTrailingComma("").
+        SetEmptyAnnotations("").
+        SetMyEnum(0).
+        SetCppTypeAnnotation(make([]string)).
+        SetMyUnion(NewMyUnion()).
+        SetMyID(NewMyId())
 }
 
 // Deprecated: Use NewMyStruct().MyUnion instead.
@@ -496,7 +503,7 @@ func (x *MyStruct) GetCppTypeAnnotationNonCompat() []string {
 
 func (x *MyStruct) GetCppTypeAnnotation() []string {
     if !x.IsSetCppTypeAnnotation() {
-        return nil
+        return make([]string)
     }
 
     return x.CppTypeAnnotation
@@ -1088,9 +1095,10 @@ type SecretStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SecretStruct{}
 
-
 func NewSecretStruct() *SecretStruct {
-    return (&SecretStruct{})
+    return (&SecretStruct{}).
+        SetId(0).
+        SetPassword("")
 }
 
 func (x *SecretStruct) GetIdNonCompat() int64 {

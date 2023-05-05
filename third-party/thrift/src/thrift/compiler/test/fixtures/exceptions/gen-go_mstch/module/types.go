@@ -23,9 +23,9 @@ type Fiery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Fiery{}
 
-
 func NewFiery() *Fiery {
-    return (&Fiery{})
+    return (&Fiery{}).
+        SetMessage("")
 }
 
 func (x *Fiery) GetMessageNonCompat() string {
@@ -160,7 +160,6 @@ type Serious struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Serious{}
-
 
 func NewSerious() *Serious {
     return (&Serious{})
@@ -315,9 +314,10 @@ type ComplexFieldNames struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexFieldNames{}
 
-
 func NewComplexFieldNames() *ComplexFieldNames {
-    return (&ComplexFieldNames{})
+    return (&ComplexFieldNames{}).
+        SetErrorMessage("").
+        SetInternalErrorMessage("")
 }
 
 func (x *ComplexFieldNames) GetErrorMessageNonCompat() string {
@@ -506,9 +506,10 @@ type CustomFieldNames struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CustomFieldNames{}
 
-
 func NewCustomFieldNames() *CustomFieldNames {
-    return (&CustomFieldNames{})
+    return (&CustomFieldNames{}).
+        SetErrorMessage("").
+        SetInternalErrorMessage("")
 }
 
 func (x *CustomFieldNames) GetErrorMessageNonCompat() string {
@@ -697,9 +698,10 @@ type ExceptionWithPrimitiveField struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionWithPrimitiveField{}
 
-
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
-    return (&ExceptionWithPrimitiveField{})
+    return (&ExceptionWithPrimitiveField{}).
+        SetMessage("").
+        SetErrorCode(0)
 }
 
 func (x *ExceptionWithPrimitiveField) GetMessageNonCompat() string {
@@ -888,9 +890,10 @@ type ExceptionWithStructuredAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionWithStructuredAnnotation{}
 
-
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
-    return (&ExceptionWithStructuredAnnotation{})
+    return (&ExceptionWithStructuredAnnotation{}).
+        SetMessageField("").
+        SetErrorCode(0)
 }
 
 func (x *ExceptionWithStructuredAnnotation) GetMessageFieldNonCompat() string {
@@ -1076,7 +1079,6 @@ type Banal struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Banal{}
-
 
 func NewBanal() *Banal {
     return (&Banal{})

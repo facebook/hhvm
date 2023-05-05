@@ -21,9 +21,9 @@ type CustomException struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CustomException{}
 
-
 func NewCustomException() *CustomException {
-    return (&CustomException{})
+    return (&CustomException{}).
+        SetMessage("")
 }
 
 func (x *CustomException) GetMessageNonCompat() string {

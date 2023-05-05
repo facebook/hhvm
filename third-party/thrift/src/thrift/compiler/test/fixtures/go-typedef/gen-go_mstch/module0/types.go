@@ -22,9 +22,10 @@ type Accessory struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Accessory{}
 
-
 func NewAccessory() *Accessory {
-    return (&Accessory{})
+    return (&Accessory{}).
+        SetInventoryId(0).
+        SetName("")
 }
 
 func (x *Accessory) GetInventoryIdNonCompat() int32 {
@@ -209,9 +210,10 @@ type PartName struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &PartName{}
 
-
 func NewPartName() *PartName {
-    return (&PartName{})
+    return (&PartName{}).
+        SetInventoryId(0).
+        SetName("")
 }
 
 func (x *PartName) GetInventoryIdNonCompat() int32 {

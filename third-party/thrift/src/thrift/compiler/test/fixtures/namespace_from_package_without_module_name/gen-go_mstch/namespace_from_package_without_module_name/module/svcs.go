@@ -136,9 +136,9 @@ type reqTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqTestServiceInit{}
 
-
 func newReqTestServiceInit() *reqTestServiceInit {
-    return (&reqTestServiceInit{})
+    return (&reqTestServiceInit{}).
+        SetInt1(0)
 }
 
 func (x *reqTestServiceInit) GetInt1NonCompat() int64 {
@@ -270,9 +270,9 @@ type respTestServiceInit struct {
 var _ thrift.Struct = &respTestServiceInit{}
 var _ thrift.WritableResult = &respTestServiceInit{}
 
-
 func newRespTestServiceInit() *respTestServiceInit {
-    return (&respTestServiceInit{})
+    return (&respTestServiceInit{}).
+        SetValue(0)
 }
 
 func (x *respTestServiceInit) GetValueNonCompat() int64 {

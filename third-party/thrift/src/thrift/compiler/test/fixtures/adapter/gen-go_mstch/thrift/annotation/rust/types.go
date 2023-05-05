@@ -23,9 +23,9 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
-
 func NewAdapter() *Adapter {
-    return (&Adapter{})
+    return (&Adapter{}).
+        SetName("")
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -157,9 +157,9 @@ type Derive struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Derive{}
 
-
 func NewDerive() *Derive {
-    return (&Derive{})
+    return (&Derive{}).
+        SetDerives(make([]string))
 }
 
 func (x *Derive) GetDerivesNonCompat() []string {
@@ -168,7 +168,7 @@ func (x *Derive) GetDerivesNonCompat() []string {
 
 func (x *Derive) GetDerives() []string {
     if !x.IsSetDerives() {
-        return nil
+        return make([]string)
     }
 
     return x.Derives

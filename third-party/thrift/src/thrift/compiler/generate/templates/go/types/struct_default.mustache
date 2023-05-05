@@ -19,20 +19,33 @@
   Creates Default function for structs.
 
 }}
-
 func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
     return (&{{struct:go_name}}{}){{!
-      }}{{#struct:fields}}{{#field:value}}.
+      }}{{#struct:fields}}{{!
+
+        // Fields with given default values.
+        }}{{#field:value}}.
         {{field:go_setter_name}}({{!
-        }}{{#field:type}}{{!
-        }}{{^type:base?}}
-            {{> const/value}},
-        {{/type:base?}}{{!
-        }}{{#type:base?}}{{!
-            }}{{> const/value}}{{!
-        }}{{/type:base?}}{{!
-        }}{{/field:type}}{{!
+          }}{{#field:type}}{{!
+          }}{{^type:base?}}
+              {{> const/value}},
+          {{/type:base?}}{{!
+          }}{{#type:base?}}{{!
+              }}{{> const/value}}{{!
+          }}{{/type:base?}}{{!
+          }}{{/field:type}}{{!
         }}){{/field:value}}{{!
+
+        // Non-optional fields without given default values.
+        }}{{^field:value}}{{!
+        }}{{^field:optional?}}.
+        {{field:go_setter_name}}({{!
+          }}{{#field:type}}{{!
+            }}{{> common/zero_value}}{{!
+          }}{{/field:type}}{{!
+        }}){{/field:optional?}}{{!
+        }}{{/field:value}}{{!
+
       }}{{/struct:fields}}
 }
 {{#struct:fields}}

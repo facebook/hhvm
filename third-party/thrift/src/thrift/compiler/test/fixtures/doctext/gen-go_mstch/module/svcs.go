@@ -157,7 +157,6 @@ type reqCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCF{}
 
-
 func newReqCF() *reqCF {
     return (&reqCF{})
 }
@@ -237,7 +236,6 @@ type respCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respCF{}
 var _ thrift.WritableResult = &respCF{}
-
 
 func newRespCF() *respCF {
     return (&respCF{})
@@ -325,9 +323,11 @@ type reqCThing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCThing{}
 
-
 func newReqCThing() *reqCThing {
-    return (&reqCThing{})
+    return (&reqCThing{}).
+        SetA(0).
+        SetB("").
+        SetC(make([]int32))
 }
 
 func (x *reqCThing) GetANonCompat() int32 {
@@ -352,7 +352,7 @@ func (x *reqCThing) GetCNonCompat() []int32 {
 
 func (x *reqCThing) GetC() []int32 {
     if !x.IsSetC() {
-        return nil
+        return make([]int32)
     }
 
     return x.C
@@ -605,9 +605,9 @@ type respCThing struct {
 var _ thrift.Struct = &respCThing{}
 var _ thrift.WritableResult = &respCThing{}
 
-
 func newRespCThing() *respCThing {
-    return (&respCThing{})
+    return (&respCThing{}).
+        SetValue("")
 }
 
 // Deprecated: Use newRespCThing().Bang instead.

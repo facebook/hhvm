@@ -152,9 +152,11 @@ type reqServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqServiceFunc{}
 
-
 func newReqServiceFunc() *reqServiceFunc {
-    return (&reqServiceFunc{})
+    return (&reqServiceFunc{}).
+        SetArg1(NewStringWithAdapter()).
+        SetArg2("").
+        SetArg3(NewFoo())
 }
 
 // Deprecated: Use newReqServiceFunc().Arg3 instead.
@@ -407,9 +409,9 @@ type respServiceFunc struct {
 var _ thrift.Struct = &respServiceFunc{}
 var _ thrift.WritableResult = &respServiceFunc{}
 
-
 func newRespServiceFunc() *respServiceFunc {
-    return (&respServiceFunc{})
+    return (&respServiceFunc{}).
+        SetValue(NewMyI32())
 }
 
 func (x *respServiceFunc) GetValueNonCompat() MyI32 {
@@ -772,7 +774,6 @@ type reqAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceCount{}
 
-
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
@@ -854,9 +855,9 @@ type respAdapterServiceCount struct {
 var _ thrift.Struct = &respAdapterServiceCount{}
 var _ thrift.WritableResult = &respAdapterServiceCount{}
 
-
 func newRespAdapterServiceCount() *respAdapterServiceCount {
-    return (&respAdapterServiceCount{})
+    return (&respAdapterServiceCount{}).
+        SetValue(NewCountingStruct())
 }
 
 // Deprecated: Use newRespAdapterServiceCount().Value instead.
@@ -1007,9 +1008,9 @@ type reqAdapterServiceAdaptedTypes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 
-
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
-    return (&reqAdapterServiceAdaptedTypes{})
+    return (&reqAdapterServiceAdaptedTypes{}).
+        SetArg_(NewHeapAllocated())
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().Arg_ instead.
@@ -1157,9 +1158,9 @@ type respAdapterServiceAdaptedTypes struct {
 var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
 var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
 
-
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
-    return (&respAdapterServiceAdaptedTypes{})
+    return (&respAdapterServiceAdaptedTypes{}).
+        SetValue(NewHeapAllocated())
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().Value instead.

@@ -97,7 +97,7 @@ if err != nil {
 type MyMapIdentifier = map[string]string
 
 func NewMyMapIdentifier() MyMapIdentifier {
-  return nil
+  return make(map[string]string)
 }
 
 func WriteMyMapIdentifier(item MyMapIdentifier, p thrift.Protocol) error {
@@ -351,9 +351,10 @@ type Internship struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Internship{}
 
-
 func NewInternship() *Internship {
-    return (&Internship{})
+    return (&Internship{}).
+        SetWeeks(0).
+        SetTitle("")
 }
 
 // Deprecated: Use NewInternship().Employer instead.
@@ -740,9 +741,10 @@ type Range struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Range{}
 
-
 func NewRange() *Range {
-    return (&Range{})
+    return (&Range{}).
+        SetMin(0).
+        SetMax(0)
 }
 
 func (x *Range) GetMinNonCompat() int32 {
@@ -926,7 +928,6 @@ type Struct1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct1{}
-
 
 func NewStruct1() *Struct1 {
     return (&Struct1{}).
@@ -1118,9 +1119,12 @@ type Struct2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct2{}
 
-
 func NewStruct2() *Struct2 {
-    return (&Struct2{})
+    return (&Struct2{}).
+        SetA(0).
+        SetB("").
+        SetC(NewStruct1()).
+        SetD(make([]int32))
 }
 
 // Deprecated: Use NewStruct2().C instead.
@@ -1160,7 +1164,7 @@ func (x *Struct2) GetDNonCompat() []int32 {
 
 func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
-        return nil
+        return make([]int32)
     }
 
     return x.D
@@ -1467,9 +1471,11 @@ type Struct3 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct3{}
 
-
 func NewStruct3() *Struct3 {
-    return (&Struct3{})
+    return (&Struct3{}).
+        SetA("").
+        SetB(0).
+        SetC(NewStruct2())
 }
 
 // Deprecated: Use NewStruct3().C instead.
@@ -1723,9 +1729,9 @@ type Struct4 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct4{}
 
-
 func NewStruct4() *Struct4 {
-    return (&Struct4{})
+    return (&Struct4{}).
+        SetA(0)
 }
 
 // Deprecated: Use NewStruct4().B instead.
@@ -1992,9 +1998,10 @@ type Union1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Union1{}
 
-
 func NewUnion1() *Union1 {
-    return (&Union1{})
+    return (&Union1{}).
+        SetI(0).
+        SetD(0.0)
 }
 
 // Deprecated: Use NewUnion1().I instead.
@@ -2225,9 +2232,12 @@ type Union2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Union2{}
 
-
 func NewUnion2() *Union2 {
-    return (&Union2{})
+    return (&Union2{}).
+        SetI(0).
+        SetD(0.0).
+        SetS(NewStruct1()).
+        SetU(NewUnion1())
 }
 
 // Deprecated: Use NewUnion2().I instead.

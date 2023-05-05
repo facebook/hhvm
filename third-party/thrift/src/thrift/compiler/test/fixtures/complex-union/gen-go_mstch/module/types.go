@@ -18,7 +18,7 @@ var _ = thrift.ZERO
 type ContainerTypedef = map[int16]string
 
 func NewContainerTypedef() ContainerTypedef {
-  return nil
+  return make(map[int16]string)
 }
 
 func WriteContainerTypedef(item ContainerTypedef, p thrift.Protocol) error {
@@ -98,9 +98,14 @@ type ComplexUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexUnion{}
 
-
 func NewComplexUnion() *ComplexUnion {
-    return (&ComplexUnion{})
+    return (&ComplexUnion{}).
+        SetIntValue(0).
+        SetStringValue("").
+        SetIntListValue(make([]int64)).
+        SetStringListValue(make([]string)).
+        SetTypedefValue(NewContainerTypedef()).
+        SetStringRef("")
 }
 
 // Deprecated: Use NewComplexUnion().IntValue instead.
@@ -142,7 +147,7 @@ func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return nil
+        return make([]int64)
     }
 
     return x.IntListValue
@@ -154,7 +159,7 @@ func (x *ComplexUnion) GetStringListValueNonCompat() []string {
 
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return nil
+        return make([]string)
     }
 
     return x.StringListValue
@@ -659,9 +664,10 @@ type ListUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ListUnion{}
 
-
 func NewListUnion() *ListUnion {
-    return (&ListUnion{})
+    return (&ListUnion{}).
+        SetIntListValue(make([]int64)).
+        SetStringListValue(make([]string))
 }
 
 func (x *ListUnion) GetIntListValueNonCompat() []int64 {
@@ -670,7 +676,7 @@ func (x *ListUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return nil
+        return make([]int64)
     }
 
     return x.IntListValue
@@ -682,7 +688,7 @@ func (x *ListUnion) GetStringListValueNonCompat() []string {
 
 func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return nil
+        return make([]string)
     }
 
     return x.StringListValue
@@ -942,9 +948,10 @@ type DataUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DataUnion{}
 
-
 func NewDataUnion() *DataUnion {
-    return (&DataUnion{})
+    return (&DataUnion{}).
+        SetBinaryData([]byte("")).
+        SetStringData("")
 }
 
 // Deprecated: Use NewDataUnion().StringData instead.
@@ -1171,9 +1178,11 @@ type Val struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Val{}
 
-
 func NewVal() *Val {
-    return (&Val{})
+    return (&Val{}).
+        SetStrVal("").
+        SetIntVal(0).
+        SetTypedefValue(NewContainerTypedef())
 }
 
 func (x *Val) GetStrValNonCompat() string {
@@ -1423,9 +1432,10 @@ type ValUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ValUnion{}
 
-
 func NewValUnion() *ValUnion {
-    return (&ValUnion{})
+    return (&ValUnion{}).
+        SetV1(NewVal()).
+        SetV2(NewVal())
 }
 
 // Deprecated: Use NewValUnion().V1 instead.
@@ -1656,9 +1666,10 @@ type VirtualComplexUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &VirtualComplexUnion{}
 
-
 func NewVirtualComplexUnion() *VirtualComplexUnion {
-    return (&VirtualComplexUnion{})
+    return (&VirtualComplexUnion{}).
+        SetThingOne("").
+        SetThingTwo("")
 }
 
 // Deprecated: Use NewVirtualComplexUnion().ThingOne instead.
@@ -1886,9 +1897,9 @@ type NonCopyableStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NonCopyableStruct{}
 
-
 func NewNonCopyableStruct() *NonCopyableStruct {
-    return (&NonCopyableStruct{})
+    return (&NonCopyableStruct{}).
+        SetNum(0)
 }
 
 func (x *NonCopyableStruct) GetNumNonCompat() int64 {
@@ -2020,9 +2031,9 @@ type NonCopyableUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NonCopyableUnion{}
 
-
 func NewNonCopyableUnion() *NonCopyableUnion {
-    return (&NonCopyableUnion{})
+    return (&NonCopyableUnion{}).
+        SetS(NewNonCopyableStruct())
 }
 
 // Deprecated: Use NewNonCopyableUnion().S instead.

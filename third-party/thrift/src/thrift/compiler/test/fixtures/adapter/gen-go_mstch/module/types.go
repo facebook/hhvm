@@ -30,7 +30,7 @@ var _ = thrift.ZERO
 type SetWithAdapter = []string
 
 func NewSetWithAdapter() SetWithAdapter {
-  return nil
+  return make([]string)
 }
 
 func WriteSetWithAdapter(item SetWithAdapter, p thrift.Protocol) error {
@@ -111,7 +111,7 @@ if err != nil {
 type ListWithElemAdapter = []StringWithAdapter
 
 func NewListWithElemAdapter() ListWithElemAdapter {
-  return nil
+  return make([]StringWithAdapter)
 }
 
 func WriteListWithElemAdapter(item ListWithElemAdapter, p thrift.Protocol) error {
@@ -926,12 +926,12 @@ type MyAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyAnnotation{}
 
-
 func NewMyAnnotation() *MyAnnotation {
     return (&MyAnnotation{}).
+        SetSignature("").
         SetColor(
-            Color_RED,
-        )
+              Color_RED,
+          )
 }
 
 func (x *MyAnnotation) GetSignatureNonCompat() string {
@@ -1126,10 +1126,16 @@ type Foo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
 
-
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetIntFieldWithDefault(13)
+        SetIntField(0).
+        SetIntFieldWithDefault(13).
+        SetSetField(NewSetWithAdapter()).
+        SetMapField(make(map[string]ListWithElemAdapterWithAdapter)).
+        SetBinaryField([]byte("")).
+        SetLongField(NewMyI64()).
+        SetAdaptedLongField(NewMyI64()).
+        SetDoubleAdaptedField(NewDoubleTypedefI64())
 }
 
 // Deprecated: Use NewFoo().OptionalIntField instead.
@@ -1193,7 +1199,7 @@ func (x *Foo) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter {
 
 func (x *Foo) GetMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetMapField() {
-        return nil
+        return make(map[string]ListWithElemAdapterWithAdapter)
     }
 
     return x.MapField
@@ -1205,7 +1211,7 @@ func (x *Foo) GetOptionalMapFieldNonCompat() map[string]ListWithElemAdapterWithA
 
 func (x *Foo) GetOptionalMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetOptionalMapField() {
-        return nil
+        return make(map[string]ListWithElemAdapterWithAdapter)
     }
 
     return x.OptionalMapField
@@ -1959,9 +1965,13 @@ type Baz struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Baz{}
 
-
 func NewBaz() *Baz {
-    return (&Baz{})
+    return (&Baz{}).
+        SetIntField(0).
+        SetSetField(NewSetWithAdapter()).
+        SetMapField(make(map[string]ListWithElemAdapterWithAdapter)).
+        SetBinaryField([]byte("")).
+        SetLongField(NewMyI64())
 }
 
 // Deprecated: Use NewBaz().IntField instead.
@@ -2000,7 +2010,7 @@ func (x *Baz) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter {
 
 func (x *Baz) GetMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetMapField() {
-        return nil
+        return make(map[string]ListWithElemAdapterWithAdapter)
     }
 
     return x.MapField
@@ -2445,9 +2455,12 @@ type Bar struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Bar{}
 
-
 func NewBar() *Bar {
-    return (&Bar{})
+    return (&Bar{}).
+        SetStructField(NewFoo()).
+        SetStructListField(make([]*FooWithAdapter)).
+        SetUnionField(NewBaz()).
+        SetAdaptedStructField(NewDirectlyAdapted())
 }
 
 // Deprecated: Use NewBar().StructField instead.
@@ -2495,7 +2508,7 @@ func (x *Bar) GetStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetStructListField() []*FooWithAdapter {
     if !x.IsSetStructListField() {
-        return nil
+        return make([]*FooWithAdapter)
     }
 
     return x.StructListField
@@ -2507,7 +2520,7 @@ func (x *Bar) GetOptionalStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetOptionalStructListField() []*FooWithAdapter {
     if !x.IsSetOptionalStructListField() {
-        return nil
+        return make([]*FooWithAdapter)
     }
 
     return x.OptionalStructListField
@@ -3055,9 +3068,9 @@ type DirectlyAdapted struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DirectlyAdapted{}
 
-
 func NewDirectlyAdapted() *DirectlyAdapted {
-    return (&DirectlyAdapted{})
+    return (&DirectlyAdapted{}).
+        SetField(0)
 }
 
 func (x *DirectlyAdapted) GetFieldNonCompat() int32 {
@@ -3189,9 +3202,9 @@ type IndependentDirectlyAdapted struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IndependentDirectlyAdapted{}
 
-
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
-    return (&IndependentDirectlyAdapted{})
+    return (&IndependentDirectlyAdapted{}).
+        SetField(0)
 }
 
 func (x *IndependentDirectlyAdapted) GetFieldNonCompat() int32 {
@@ -3326,9 +3339,10 @@ type StructWithFieldAdapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructWithFieldAdapter{}
 
-
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
-    return (&StructWithFieldAdapter{})
+    return (&StructWithFieldAdapter{}).
+        SetField(0).
+        SetSharedField(0)
 }
 
 // Deprecated: Use NewStructWithFieldAdapter().OptSharedField instead.
@@ -3648,9 +3662,11 @@ type TerseAdaptedFields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TerseAdaptedFields{}
 
-
 func NewTerseAdaptedFields() *TerseAdaptedFields {
-    return (&TerseAdaptedFields{})
+    return (&TerseAdaptedFields{}).
+        SetIntField(0).
+        SetStringField("").
+        SetSetField(make([]int32))
 }
 
 func (x *TerseAdaptedFields) GetIntFieldNonCompat() int32 {
@@ -3675,7 +3691,7 @@ func (x *TerseAdaptedFields) GetSetFieldNonCompat() []int32 {
 
 func (x *TerseAdaptedFields) GetSetField() []int32 {
     if !x.IsSetSetField() {
-        return nil
+        return make([]int32)
     }
 
     return x.SetField
@@ -3927,9 +3943,9 @@ type B struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &B{}
 
-
 func NewB() *B {
-    return (&B{})
+    return (&B{}).
+        SetA(NewAdaptedA())
 }
 
 // Deprecated: Use NewB().A instead.
@@ -4076,7 +4092,6 @@ type A struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &A{}
 
-
 func NewA() *A {
     return (&A{})
 }
@@ -4158,9 +4173,9 @@ type Config struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Config{}
 
-
 func NewConfig() *Config {
-    return (&Config{})
+    return (&Config{}).
+        SetPath("")
 }
 
 func (x *Config) GetPathNonCompat() string {
@@ -4293,9 +4308,10 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).
+        SetField(0).
+        SetSetString(NewSetWithAdapter())
 }
 
 func (x *MyStruct) GetFieldNonCompat() int32 {
@@ -4501,9 +4517,18 @@ type AdaptTestStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTestStruct{}
 
-
 func NewAdaptTestStruct() *AdaptTestStruct {
-    return (&AdaptTestStruct{})
+    return (&AdaptTestStruct{}).
+        SetDelay(NewDurationMs()).
+        SetCustom(NewCustomProtocolType()).
+        SetTimeout(0).
+        SetData(0).
+        SetMeta("").
+        SetIndirectionString(NewIndirectionString()).
+        SetStringData("").
+        SetDoubleWrappedBool(NewAdaptedBool()).
+        SetDoubleWrappedInteger(NewAdaptedInteger()).
+        SetBinaryData([]byte(""))
 }
 
 func (x *AdaptTestStruct) GetDelayNonCompat() DurationMs {
@@ -5153,9 +5178,18 @@ type AdaptTemplatedTestStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTemplatedTestStruct{}
 
-
 func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
     return (&AdaptTemplatedTestStruct{}).
+        SetAdaptedBool(NewAdaptedBool()).
+        SetAdaptedByte(NewAdaptedByte()).
+        SetAdaptedShort(NewAdaptedShort()).
+        SetAdaptedInteger(NewAdaptedInteger()).
+        SetAdaptedLong(NewAdaptedLong()).
+        SetAdaptedDouble(NewAdaptedDouble()).
+        SetAdaptedString(NewAdaptedString()).
+        SetAdaptedList(make([]int64)).
+        SetAdaptedSet(make([]int64)).
+        SetAdaptedMap(make(map[int64]int64)).
         SetAdaptedBoolDefault(true).
         SetAdaptedByteDefault(1).
         SetAdaptedShortDefault(2).
@@ -5164,23 +5198,24 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
         SetAdaptedDoubleDefault(5.0).
         SetAdaptedStringDefault("6").
         SetAdaptedEnum(
-            ThriftAdaptedEnum_One,
-        ).
+              ThriftAdaptedEnum_One,
+          ).
         SetAdaptedListDefault(
-            []int64{
+              []int64{
     1,
 },
-        ).
+          ).
         SetAdaptedSetDefault(
-            []int64{
+              []int64{
     1,
 },
-        ).
+          ).
         SetAdaptedMapDefault(
-            map[int64]int64{
+              map[int64]int64{
     1: 1,
 },
-        )
+          ).
+        SetDoubleTypedefBool(NewDoubleTypedefBool())
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedBoolNonCompat() AdaptedBool {
@@ -5245,7 +5280,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
     if !x.IsSetAdaptedList() {
-        return nil
+        return make([]int64)
     }
 
     return x.AdaptedList
@@ -5257,7 +5292,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSet() []int64 {
     if !x.IsSetAdaptedSet() {
-        return nil
+        return make([]int64)
     }
 
     return x.AdaptedSet
@@ -5269,7 +5304,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapNonCompat() map[int64]int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMap() map[int64]int64 {
     if !x.IsSetAdaptedMap() {
-        return nil
+        return make(map[int64]int64)
     }
 
     return x.AdaptedMap
@@ -5345,7 +5380,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
-        return nil
+        return make([]int64)
     }
 
     return x.AdaptedListDefault
@@ -5357,7 +5392,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
-        return nil
+        return make([]int64)
     }
 
     return x.AdaptedSetDefault
@@ -5369,7 +5404,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefaultNonCompat() map[int64]int
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
-        return nil
+        return make(map[int64]int64)
     }
 
     return x.AdaptedMapDefault
@@ -6700,9 +6735,9 @@ type AdaptTemplatedNestedTestStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
 
-
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
-    return (&AdaptTemplatedNestedTestStruct{})
+    return (&AdaptTemplatedNestedTestStruct{}).
+        SetAdaptedStruct(NewAdaptTemplatedTestStruct())
 }
 
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().AdaptedStruct instead.
@@ -6851,9 +6886,10 @@ type AdaptTestUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTestUnion{}
 
-
 func NewAdaptTestUnion() *AdaptTestUnion {
-    return (&AdaptTestUnion{})
+    return (&AdaptTestUnion{}).
+        SetDelay(NewDurationMs()).
+        SetCustom(NewCustomProtocolType())
 }
 
 // Deprecated: Use NewAdaptTestUnion().Delay instead.
@@ -7080,9 +7116,9 @@ type AdaptedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedStruct{}
 
-
 func NewAdaptedStruct() *AdaptedStruct {
-    return (&AdaptedStruct{})
+    return (&AdaptedStruct{}).
+        SetData(0)
 }
 
 func (x *AdaptedStruct) GetDataNonCompat() int64 {
@@ -7214,9 +7250,9 @@ type DirectlyAdaptedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DirectlyAdaptedStruct{}
 
-
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
-    return (&DirectlyAdaptedStruct{})
+    return (&DirectlyAdaptedStruct{}).
+        SetData(0)
 }
 
 func (x *DirectlyAdaptedStruct) GetDataNonCompat() int64 {
@@ -7351,9 +7387,12 @@ type StructFieldAdaptedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructFieldAdaptedStruct{}
 
-
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
-    return (&StructFieldAdaptedStruct{})
+    return (&StructFieldAdaptedStruct{}).
+        SetAdaptedStruct(NewAdaptedStruct()).
+        SetAdaptedTypedef(NewAdaptedTypedef()).
+        SetDirectlyAdapted(NewDirectlyAdaptedStruct()).
+        SetTypedefOfAdapted(NewTypedefOfDirect())
 }
 
 // Deprecated: Use NewStructFieldAdaptedStruct().AdaptedStruct instead.
@@ -7705,9 +7744,9 @@ type CircularAdaptee struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CircularAdaptee{}
 
-
 func NewCircularAdaptee() *CircularAdaptee {
-    return (&CircularAdaptee{})
+    return (&CircularAdaptee{}).
+        SetField(NewCircularStruct())
 }
 
 // Deprecated: Use NewCircularAdaptee().Field instead.
@@ -7854,7 +7893,6 @@ type CircularStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CircularStruct{}
-
 
 func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
@@ -8005,9 +8043,9 @@ type ReorderedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ReorderedStruct{}
 
-
 func NewReorderedStruct() *ReorderedStruct {
-    return (&ReorderedStruct{})
+    return (&ReorderedStruct{}).
+        SetReorderedDependentAdapted(NewDeclaredAfterStruct())
 }
 
 // Deprecated: Use NewReorderedStruct().ReorderedDependentAdapted instead.
@@ -8154,7 +8192,6 @@ type DeclaredAfterStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DeclaredAfterStruct{}
 
-
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
 }
@@ -8236,9 +8273,9 @@ type RenamedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RenamedStruct{}
 
-
 func NewRenamedStruct() *RenamedStruct {
-    return (&RenamedStruct{})
+    return (&RenamedStruct{}).
+        SetData(0)
 }
 
 func (x *RenamedStruct) GetDataNonCompat() int64 {
@@ -8370,9 +8407,9 @@ type SameNamespaceStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SameNamespaceStruct{}
 
-
 func NewSameNamespaceStruct() *SameNamespaceStruct {
-    return (&SameNamespaceStruct{})
+    return (&SameNamespaceStruct{}).
+        SetData(0)
 }
 
 func (x *SameNamespaceStruct) GetDataNonCompat() int64 {
@@ -8503,7 +8540,6 @@ type HeapAllocated struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &HeapAllocated{}
 
-
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
 }
@@ -8585,9 +8621,9 @@ type MoveOnly struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MoveOnly{}
 
-
 func NewMoveOnly() *MoveOnly {
-    return (&MoveOnly{})
+    return (&MoveOnly{}).
+        SetPtr(NewHeapAllocated())
 }
 
 // Deprecated: Use NewMoveOnly().Ptr instead.
@@ -8735,9 +8771,9 @@ type AlsoMoveOnly struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AlsoMoveOnly{}
 
-
 func NewAlsoMoveOnly() *AlsoMoveOnly {
-    return (&AlsoMoveOnly{})
+    return (&AlsoMoveOnly{}).
+        SetPtr(0)
 }
 
 func (x *AlsoMoveOnly) GetPtrNonCompat() int64 {
@@ -8868,7 +8904,6 @@ type ApplyAdapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ApplyAdapter{}
 
-
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
 }
@@ -8948,7 +8983,6 @@ type TransitiveAdapted struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TransitiveAdapted{}
-
 
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
@@ -9032,7 +9066,6 @@ type CountingStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CountingStruct{}
-
 
 func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
@@ -9317,9 +9350,9 @@ type Person struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Person{}
 
-
 func NewPerson() *Person {
-    return (&Person{})
+    return (&Person{}).
+        SetName("")
 }
 
 func (x *Person) GetNameNonCompat() string {
@@ -9451,9 +9484,9 @@ type Person2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Person2{}
 
-
 func NewPerson2() *Person2 {
-    return (&Person2{})
+    return (&Person2{}).
+        SetName("")
 }
 
 func (x *Person2) GetNameNonCompat() string {

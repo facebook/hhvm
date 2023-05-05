@@ -176,9 +176,9 @@ type reqFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderByPlate{}
 
-
 func newReqFinderByPlate() *reqFinderByPlate {
-    return (&reqFinderByPlate{})
+    return (&reqFinderByPlate{}).
+        SetPlate(NewPlate())
 }
 
 func (x *reqFinderByPlate) GetPlateNonCompat() Plate {
@@ -311,9 +311,9 @@ type respFinderByPlate struct {
 var _ thrift.Struct = &respFinderByPlate{}
 var _ thrift.WritableResult = &respFinderByPlate{}
 
-
 func newRespFinderByPlate() *respFinderByPlate {
-    return (&respFinderByPlate{})
+    return (&respFinderByPlate{}).
+        SetValue(NewAutomobile())
 }
 
 // Deprecated: Use newRespFinderByPlate().Value instead.
@@ -464,9 +464,9 @@ type reqFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderAliasByPlate{}
 
-
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
-    return (&reqFinderAliasByPlate{})
+    return (&reqFinderAliasByPlate{}).
+        SetPlate(NewPlate())
 }
 
 func (x *reqFinderAliasByPlate) GetPlateNonCompat() Plate {
@@ -599,9 +599,9 @@ type respFinderAliasByPlate struct {
 var _ thrift.Struct = &respFinderAliasByPlate{}
 var _ thrift.WritableResult = &respFinderAliasByPlate{}
 
-
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
-    return (&respFinderAliasByPlate{})
+    return (&respFinderAliasByPlate{}).
+        SetValue(NewCar())
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().Value instead.
@@ -752,9 +752,9 @@ type reqFinderPreviousPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderPreviousPlate{}
 
-
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
-    return (&reqFinderPreviousPlate{})
+    return (&reqFinderPreviousPlate{}).
+        SetPlate(NewPlate())
 }
 
 func (x *reqFinderPreviousPlate) GetPlateNonCompat() Plate {
@@ -887,9 +887,9 @@ type respFinderPreviousPlate struct {
 var _ thrift.Struct = &respFinderPreviousPlate{}
 var _ thrift.WritableResult = &respFinderPreviousPlate{}
 
-
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
-    return (&respFinderPreviousPlate{})
+    return (&respFinderPreviousPlate{}).
+        SetValue(NewPlate())
 }
 
 func (x *respFinderPreviousPlate) GetValueNonCompat() Plate {

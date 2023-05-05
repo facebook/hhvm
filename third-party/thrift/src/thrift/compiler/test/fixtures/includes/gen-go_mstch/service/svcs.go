@@ -162,9 +162,10 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
-
 func newReqMyServiceQuery() *reqMyServiceQuery {
-    return (&reqMyServiceQuery{})
+    return (&reqMyServiceQuery{}).
+        SetS(module.NewMyStruct()).
+        SetI(includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceQuery().S instead.
@@ -379,7 +380,6 @@ type respMyServiceQuery struct {
 var _ thrift.Struct = &respMyServiceQuery{}
 var _ thrift.WritableResult = &respMyServiceQuery{}
 
-
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
 }
@@ -465,9 +465,10 @@ type reqMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasArgDocs{}
 
-
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
-    return (&reqMyServiceHasArgDocs{})
+    return (&reqMyServiceHasArgDocs{}).
+        SetS(module.NewMyStruct()).
+        SetI(includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceHasArgDocs().S instead.
@@ -681,7 +682,6 @@ type respMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasArgDocs{}
 var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
-
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})

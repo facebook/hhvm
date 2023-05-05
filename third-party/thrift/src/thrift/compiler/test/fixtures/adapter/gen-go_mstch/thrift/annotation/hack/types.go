@@ -23,9 +23,9 @@ type FieldWrapper struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldWrapper{}
 
-
 func NewFieldWrapper() *FieldWrapper {
-    return (&FieldWrapper{})
+    return (&FieldWrapper{}).
+        SetName("")
 }
 
 func (x *FieldWrapper) GetNameNonCompat() string {
@@ -159,9 +159,10 @@ type Wrapper struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Wrapper{}
 
-
 func NewWrapper() *Wrapper {
     return (&Wrapper{}).
+        SetName("").
+        SetUnderlyingName("").
         SetExtraNamespace("thrift_adapted_types")
 }
 
@@ -398,9 +399,9 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
-
 func NewAdapter() *Adapter {
-    return (&Adapter{})
+    return (&Adapter{}).
+        SetName("")
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -532,9 +533,9 @@ type SkipCodegen struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SkipCodegen{}
 
-
 func NewSkipCodegen() *SkipCodegen {
-    return (&SkipCodegen{})
+    return (&SkipCodegen{}).
+        SetReason("")
 }
 
 func (x *SkipCodegen) GetReasonNonCompat() string {
@@ -667,9 +668,10 @@ type Name struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Name{}
 
-
 func NewName() *Name {
-    return (&Name{})
+    return (&Name{}).
+        SetName("").
+        SetReason("")
 }
 
 func (x *Name) GetNameNonCompat() string {
@@ -853,9 +855,9 @@ type UnionEnumAttributes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &UnionEnumAttributes{}
 
-
 func NewUnionEnumAttributes() *UnionEnumAttributes {
-    return (&UnionEnumAttributes{})
+    return (&UnionEnumAttributes{}).
+        SetAttributes(make([]string))
 }
 
 func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
@@ -864,7 +866,7 @@ func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
 
 func (x *UnionEnumAttributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-        return nil
+        return make([]string)
     }
 
     return x.Attributes
@@ -1028,9 +1030,9 @@ type StructTrait struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructTrait{}
 
-
 func NewStructTrait() *StructTrait {
-    return (&StructTrait{})
+    return (&StructTrait{}).
+        SetName("")
 }
 
 func (x *StructTrait) GetNameNonCompat() string {
@@ -1162,9 +1164,9 @@ type Attributes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Attributes{}
 
-
 func NewAttributes() *Attributes {
-    return (&Attributes{})
+    return (&Attributes{}).
+        SetAttributes(make([]string))
 }
 
 func (x *Attributes) GetAttributesNonCompat() []string {
@@ -1173,7 +1175,7 @@ func (x *Attributes) GetAttributesNonCompat() []string {
 
 func (x *Attributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-        return nil
+        return make([]string)
     }
 
     return x.Attributes
@@ -1336,7 +1338,6 @@ type StructAsTrait struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructAsTrait{}
 
-
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})
 }
@@ -1416,7 +1417,6 @@ type ModuleInternal struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ModuleInternal{}
-
 
 func NewModuleInternal() *ModuleInternal {
     return (&ModuleInternal{})

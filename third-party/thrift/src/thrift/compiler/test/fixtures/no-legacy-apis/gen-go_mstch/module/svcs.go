@@ -138,9 +138,9 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
-
 func newReqMyServiceQuery() *reqMyServiceQuery {
-    return (&reqMyServiceQuery{})
+    return (&reqMyServiceQuery{}).
+        SetU(NewMyUnion())
 }
 
 // Deprecated: Use newReqMyServiceQuery().U instead.
@@ -288,9 +288,9 @@ type respMyServiceQuery struct {
 var _ thrift.Struct = &respMyServiceQuery{}
 var _ thrift.WritableResult = &respMyServiceQuery{}
 
-
 func newRespMyServiceQuery() *respMyServiceQuery {
-    return (&respMyServiceQuery{})
+    return (&respMyServiceQuery{}).
+        SetValue(NewMyStruct())
 }
 
 // Deprecated: Use newRespMyServiceQuery().Value instead.

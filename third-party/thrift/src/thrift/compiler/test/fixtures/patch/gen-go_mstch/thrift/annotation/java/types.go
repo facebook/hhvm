@@ -22,7 +22,6 @@ type Mutable struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Mutable{}
 
-
 func NewMutable() *Mutable {
     return (&Mutable{})
 }
@@ -104,9 +103,9 @@ type Annotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Annotation{}
 
-
 func NewAnnotation() *Annotation {
-    return (&Annotation{})
+    return (&Annotation{}).
+        SetJavaAnnotation("")
 }
 
 func (x *Annotation) GetJavaAnnotationNonCompat() string {
@@ -237,7 +236,6 @@ type BinaryString struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BinaryString{}
 
-
 func NewBinaryString() *BinaryString {
     return (&BinaryString{})
 }
@@ -320,9 +318,10 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
-
 func NewAdapter() *Adapter {
-    return (&Adapter{})
+    return (&Adapter{}).
+        SetAdapterClassName("").
+        SetTypeClassName("")
 }
 
 func (x *Adapter) GetAdapterClassNameNonCompat() string {
@@ -507,9 +506,10 @@ type Wrapper struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Wrapper{}
 
-
 func NewWrapper() *Wrapper {
-    return (&Wrapper{})
+    return (&Wrapper{}).
+        SetWrapperClassName("").
+        SetTypeClassName("")
 }
 
 func (x *Wrapper) GetWrapperClassNameNonCompat() string {

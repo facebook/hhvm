@@ -161,9 +161,9 @@ type reqSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBounceMap{}
 
-
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
-    return (&reqSomeServiceBounceMap{})
+    return (&reqSomeServiceBounceMap{}).
+        SetM(included.NewSomeMap())
 }
 
 func (x *reqSomeServiceBounceMap) GetMNonCompat() included.SomeMap {
@@ -308,9 +308,9 @@ type respSomeServiceBounceMap struct {
 var _ thrift.Struct = &respSomeServiceBounceMap{}
 var _ thrift.WritableResult = &respSomeServiceBounceMap{}
 
-
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
-    return (&respSomeServiceBounceMap{})
+    return (&respSomeServiceBounceMap{}).
+        SetValue(included.NewSomeMap())
 }
 
 func (x *respSomeServiceBounceMap) GetValueNonCompat() included.SomeMap {
@@ -458,9 +458,9 @@ type reqSomeServiceBinaryKeyedMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
 
-
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
-    return (&reqSomeServiceBinaryKeyedMap{})
+    return (&reqSomeServiceBinaryKeyedMap{}).
+        SetR(make([]int64))
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
@@ -469,7 +469,7 @@ func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
-        return nil
+        return make([]int64)
     }
 
     return x.R
@@ -633,9 +633,9 @@ type respSomeServiceBinaryKeyedMap struct {
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
 var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
-
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
-    return (&respSomeServiceBinaryKeyedMap{})
+    return (&respSomeServiceBinaryKeyedMap{}).
+        SetValue(make(map[TBinary]int64))
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
@@ -644,7 +644,7 @@ func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
 
 func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
     if !x.IsSetValue() {
-        return nil
+        return make(map[TBinary]int64)
     }
 
     return x.Value

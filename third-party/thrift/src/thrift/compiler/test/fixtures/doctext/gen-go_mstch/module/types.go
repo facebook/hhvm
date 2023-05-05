@@ -123,9 +123,9 @@ type A struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &A{}
 
-
 func NewA() *A {
-    return (&A{})
+    return (&A{}).
+        SetUselessField(0)
 }
 
 func (x *A) GetUselessFieldNonCompat() int32 {
@@ -258,9 +258,10 @@ type U struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &U{}
 
-
 func NewU() *U {
-    return (&U{})
+    return (&U{}).
+        SetI(0).
+        SetS("")
 }
 
 // Deprecated: Use NewU().I instead.
@@ -488,9 +489,9 @@ type Bang struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Bang{}
 
-
 func NewBang() *Bang {
-    return (&Bang{})
+    return (&Bang{}).
+        SetMessage("")
 }
 
 func (x *Bang) GetMessageNonCompat() string {

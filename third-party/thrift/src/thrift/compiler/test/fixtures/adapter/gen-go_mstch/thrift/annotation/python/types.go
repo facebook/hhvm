@@ -24,9 +24,10 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
-
 func NewAdapter() *Adapter {
-    return (&Adapter{})
+    return (&Adapter{}).
+        SetName("").
+        SetTypeHint("")
 }
 
 func (x *Adapter) GetNameNonCompat() string {

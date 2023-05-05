@@ -79,9 +79,10 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).
+        SetMyIntField(0).
+        SetMyStringField("")
 }
 
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
@@ -266,9 +267,10 @@ type MyUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
 
-
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).
+        SetMyEnum(0).
+        SetMyDataItem(NewMyStruct())
 }
 
 // Deprecated: Use NewMyUnion().MyEnum instead.

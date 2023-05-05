@@ -21,9 +21,9 @@ type Foo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
 
-
 func NewFoo() *Foo {
-    return (&Foo{})
+    return (&Foo{}).
+        SetMyInt(0)
 }
 
 func (x *Foo) GetMyIntNonCompat() int64 {

@@ -506,22 +506,21 @@ type SomeStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SomeStruct{}
 
-
 func NewSomeStruct() *SomeStruct {
     return (&SomeStruct{}).
         SetReasonable(
-            Metasyntactic_FOO,
-        ).
+              Metasyntactic_FOO,
+          ).
         SetFine(
-            Metasyntactic_BAR,
-        ).
+              Metasyntactic_BAR,
+          ).
         SetQuestionable(
-            Metasyntactic(-1),
-        ).
+              Metasyntactic(-1),
+          ).
         SetTags(
-            []int32{
+              []int32{
 },
-        )
+          )
 }
 
 func (x *SomeStruct) GetReasonableNonCompat() Metasyntactic {
@@ -554,7 +553,7 @@ func (x *SomeStruct) GetTagsNonCompat() []int32 {
 
 func (x *SomeStruct) GetTags() []int32 {
     if !x.IsSetTags() {
-        return nil
+        return make([]int32)
     }
 
     return x.Tags
@@ -856,21 +855,20 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMe2_3(
-            MyEnum2(3),
-        ).
+              MyEnum2(3),
+          ).
         SetMe3N3(
-            MyEnum3(-3),
-        ).
+              MyEnum3(-3),
+          ).
         SetMe1T1(
-            MyEnum1_ME1_1,
-        ).
+              MyEnum1_ME1_1,
+          ).
         SetMe1T2(
-            MyEnum1_ME1_1,
-        )
+              MyEnum1_ME1_1,
+          )
 }
 
 func (x *MyStruct) GetMe2_3NonCompat() MyEnum2 {

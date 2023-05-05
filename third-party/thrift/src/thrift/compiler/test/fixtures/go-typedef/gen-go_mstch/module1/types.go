@@ -98,7 +98,7 @@ if err != nil {
 type Drivers = []string
 
 func NewDrivers() Drivers {
-  return nil
+  return make([]string)
 }
 
 func WriteDrivers(item Drivers, p thrift.Protocol) error {
@@ -243,10 +243,14 @@ type Automobile struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Automobile{}
 
-
 func NewAutomobile() *Automobile {
     return (&Automobile{}).
-        SetFirstPlate("0000")
+        SetPlate(NewPlate()).
+        SetFirstPlate("0000").
+        SetYear(NewYear()).
+        SetDrivers(NewDrivers()).
+        SetAccessories(make([]*Accessory)).
+        SetPartNames(make(map[int32]*CarPartName))
 }
 
 // Deprecated: Use NewAutomobile().PreviousPlate instead.
@@ -313,7 +317,7 @@ func (x *Automobile) GetAccessoriesNonCompat() []*Accessory {
 
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
-        return nil
+        return make([]*Accessory)
     }
 
     return x.Accessories
@@ -325,7 +329,7 @@ func (x *Automobile) GetPartNamesNonCompat() map[int32]*CarPartName {
 
 func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     if !x.IsSetPartNames() {
-        return nil
+        return make(map[int32]*CarPartName)
     }
 
     return x.PartNames
@@ -839,9 +843,10 @@ type MapKey struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MapKey{}
 
-
 func NewMapKey() *MapKey {
-    return (&MapKey{})
+    return (&MapKey{}).
+        SetNum(0).
+        SetStrval("")
 }
 
 func (x *MapKey) GetNumNonCompat() int64 {
@@ -1025,9 +1030,9 @@ type MapContainer struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MapContainer{}
 
-
 func NewMapContainer() *MapContainer {
-    return (&MapContainer{})
+    return (&MapContainer{}).
+        SetMapval(make(map[*MapKey]string))
 }
 
 func (x *MapContainer) GetMapvalNonCompat() map[*MapKey]string {
@@ -1036,7 +1041,7 @@ func (x *MapContainer) GetMapvalNonCompat() map[*MapKey]string {
 
 func (x *MapContainer) GetMapval() map[*MapKey]string {
     if !x.IsSetMapval() {
-        return nil
+        return make(map[*MapKey]string)
     }
 
     return x.Mapval
@@ -1219,9 +1224,10 @@ type Pair struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Pair{}
 
-
 func NewPair() *Pair {
-    return (&Pair{})
+    return (&Pair{}).
+        SetAutomobile(NewAutomobile()).
+        SetCar(NewCar())
 }
 
 // Deprecated: Use NewPair().Automobile instead.
@@ -1438,9 +1444,10 @@ type Collection struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Collection{}
 
-
 func NewCollection() *Collection {
-    return (&Collection{})
+    return (&Collection{}).
+        SetAutomobiles(make([]*Automobile)).
+        SetCars(make([]*Car))
 }
 
 func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
@@ -1449,7 +1456,7 @@ func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
 
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
-        return nil
+        return make([]*Automobile)
     }
 
     return x.Automobiles
@@ -1461,7 +1468,7 @@ func (x *Collection) GetCarsNonCompat() []*Car {
 
 func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
-        return nil
+        return make([]*Car)
     }
 
     return x.Cars

@@ -141,9 +141,17 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).
+        SetMyIntField(0).
+        SetMyStringField("").
+        SetMyDataField(NewMyDataItem()).
+        SetMyEnum(0).
+        SetOneway(false).
+        SetReadonly(false).
+        SetIdempotent(false).
+        SetFloatSet(make([]float32)).
+        SetNoHackCodegenField("")
 }
 
 // Deprecated: Use NewMyStruct().MyDataField instead.
@@ -215,7 +223,7 @@ func (x *MyStruct) GetFloatSetNonCompat() []float32 {
 
 func (x *MyStruct) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return nil
+        return make([]float32)
     }
 
     return x.FloatSet
@@ -748,7 +756,6 @@ type MyDataItem struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataItem{}
 
-
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
@@ -833,9 +840,12 @@ type MyUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
 
-
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).
+        SetMyEnum(0).
+        SetMyStruct(NewMyStruct()).
+        SetMyDataItem(NewMyDataItem()).
+        SetFloatSet(make([]float32))
 }
 
 // Deprecated: Use NewMyUnion().MyEnum instead.
@@ -889,7 +899,7 @@ func (x *MyUnion) GetFloatSetNonCompat() []float32 {
 
 func (x *MyUnion) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return nil
+        return make([]float32)
     }
 
     return x.FloatSet
@@ -1232,9 +1242,9 @@ type ReservedKeyword struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ReservedKeyword{}
 
-
 func NewReservedKeyword() *ReservedKeyword {
-    return (&ReservedKeyword{})
+    return (&ReservedKeyword{}).
+        SetReservedField(0)
 }
 
 func (x *ReservedKeyword) GetReservedFieldNonCompat() int32 {
@@ -1366,9 +1376,9 @@ type UnionToBeRenamed struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &UnionToBeRenamed{}
 
-
 func NewUnionToBeRenamed() *UnionToBeRenamed {
-    return (&UnionToBeRenamed{})
+    return (&UnionToBeRenamed{}).
+        SetReservedField(0)
 }
 
 // Deprecated: Use NewUnionToBeRenamed().ReservedField instead.

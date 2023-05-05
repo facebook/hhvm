@@ -202,7 +202,6 @@ type reqRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoBland{}
 
-
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
@@ -282,7 +281,6 @@ type respRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoBland{}
 var _ thrift.WritableResult = &respRaiserDoBland{}
-
 
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
@@ -367,7 +365,6 @@ type reqRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoRaise{}
 
-
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
 }
@@ -450,7 +447,6 @@ type respRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoRaise{}
 var _ thrift.WritableResult = &respRaiserDoRaise{}
-
 
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
@@ -748,7 +744,6 @@ type reqRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet200{}
 
-
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
 }
@@ -830,9 +825,9 @@ type respRaiserGet200 struct {
 var _ thrift.Struct = &respRaiserGet200{}
 var _ thrift.WritableResult = &respRaiserGet200{}
 
-
 func newRespRaiserGet200() *respRaiserGet200 {
-    return (&respRaiserGet200{})
+    return (&respRaiserGet200{}).
+        SetValue("")
 }
 
 func (x *respRaiserGet200) GetValueNonCompat() string {
@@ -966,7 +961,6 @@ type reqRaiserGet500 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet500{}
 
-
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
 }
@@ -1051,9 +1045,9 @@ type respRaiserGet500 struct {
 var _ thrift.Struct = &respRaiserGet500{}
 var _ thrift.WritableResult = &respRaiserGet500{}
 
-
 func newRespRaiserGet500() *respRaiserGet500 {
-    return (&respRaiserGet500{})
+    return (&respRaiserGet500{}).
+        SetValue("")
 }
 
 // Deprecated: Use newRespRaiserGet500().F instead.

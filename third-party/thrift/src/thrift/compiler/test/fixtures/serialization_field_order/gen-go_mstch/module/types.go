@@ -25,9 +25,11 @@ type Foo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
 
-
 func NewFoo() *Foo {
-    return (&Foo{})
+    return (&Foo{}).
+        SetField1(0).
+        SetField2(0).
+        SetField3(0)
 }
 
 func (x *Foo) GetField1NonCompat() int32 {
@@ -265,9 +267,11 @@ type Foo2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo2{}
 
-
 func NewFoo2() *Foo2 {
-    return (&Foo2{})
+    return (&Foo2{}).
+        SetField1(0).
+        SetField2(0).
+        SetField3(0)
 }
 
 func (x *Foo2) GetField1NonCompat() int32 {

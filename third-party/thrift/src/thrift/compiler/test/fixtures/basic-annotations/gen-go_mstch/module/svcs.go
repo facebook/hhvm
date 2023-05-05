@@ -247,7 +247,6 @@ type reqMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePing{}
 
-
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
@@ -328,7 +327,6 @@ type respMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePing{}
 var _ thrift.WritableResult = &respMyServicePing{}
-
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
@@ -484,7 +482,6 @@ type reqMyServiceGetRandomData struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetRandomData{}
 
-
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
@@ -566,9 +563,9 @@ type respMyServiceGetRandomData struct {
 var _ thrift.Struct = &respMyServiceGetRandomData{}
 var _ thrift.WritableResult = &respMyServiceGetRandomData{}
 
-
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
-    return (&respMyServiceGetRandomData{})
+    return (&respMyServiceGetRandomData{}).
+        SetValue("")
 }
 
 func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
@@ -703,9 +700,9 @@ type reqMyServiceHasDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasDataById{}
 
-
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
-    return (&reqMyServiceHasDataById{})
+    return (&reqMyServiceHasDataById{}).
+        SetId(0)
 }
 
 func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
@@ -837,9 +834,9 @@ type respMyServiceHasDataById struct {
 var _ thrift.Struct = &respMyServiceHasDataById{}
 var _ thrift.WritableResult = &respMyServiceHasDataById{}
 
-
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
-    return (&respMyServiceHasDataById{})
+    return (&respMyServiceHasDataById{}).
+        SetValue(false)
 }
 
 func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
@@ -974,9 +971,9 @@ type reqMyServiceGetDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetDataById{}
 
-
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
-    return (&reqMyServiceGetDataById{})
+    return (&reqMyServiceGetDataById{}).
+        SetId(0)
 }
 
 func (x *reqMyServiceGetDataById) GetIdNonCompat() int64 {
@@ -1108,9 +1105,9 @@ type respMyServiceGetDataById struct {
 var _ thrift.Struct = &respMyServiceGetDataById{}
 var _ thrift.WritableResult = &respMyServiceGetDataById{}
 
-
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
-    return (&respMyServiceGetDataById{})
+    return (&respMyServiceGetDataById{}).
+        SetValue("")
 }
 
 func (x *respMyServiceGetDataById) GetValueNonCompat() string {
@@ -1246,9 +1243,10 @@ type reqMyServicePutDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePutDataById{}
 
-
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
-    return (&reqMyServicePutDataById{})
+    return (&reqMyServicePutDataById{}).
+        SetId(0).
+        SetData("")
 }
 
 func (x *reqMyServicePutDataById) GetIdNonCompat() int64 {
@@ -1431,7 +1429,6 @@ type respMyServicePutDataById struct {
 var _ thrift.Struct = &respMyServicePutDataById{}
 var _ thrift.WritableResult = &respMyServicePutDataById{}
 
-
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
@@ -1517,9 +1514,10 @@ type reqMyServiceLobDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceLobDataById{}
 
-
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
-    return (&reqMyServiceLobDataById{})
+    return (&reqMyServiceLobDataById{}).
+        SetId(0).
+        SetData("")
 }
 
 func (x *reqMyServiceLobDataById) GetIdNonCompat() int64 {
@@ -1702,7 +1700,6 @@ type respMyServiceLobDataById struct {
 var _ thrift.Struct = &respMyServiceLobDataById{}
 var _ thrift.WritableResult = &respMyServiceLobDataById{}
 
-
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
@@ -1786,7 +1783,6 @@ type reqMyServiceGoDoNothing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGoDoNothing{}
 
-
 func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
     return (&reqMyServiceGoDoNothing{})
 }
@@ -1866,7 +1862,6 @@ type respMyServiceGoDoNothing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGoDoNothing{}
 var _ thrift.WritableResult = &respMyServiceGoDoNothing{}
-
 
 func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
     return (&respMyServiceGoDoNothing{})
@@ -2503,7 +2498,6 @@ type reqMyServicePrioParentPing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioParentPing{}
 
-
 func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
     return (&reqMyServicePrioParentPing{})
 }
@@ -2583,7 +2577,6 @@ type respMyServicePrioParentPing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePrioParentPing{}
 var _ thrift.WritableResult = &respMyServicePrioParentPing{}
-
 
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{})
@@ -2668,7 +2661,6 @@ type reqMyServicePrioParentPong struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioParentPong{}
 
-
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
     return (&reqMyServicePrioParentPong{})
 }
@@ -2748,7 +2740,6 @@ type respMyServicePrioParentPong struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePrioParentPong{}
 var _ thrift.WritableResult = &respMyServicePrioParentPong{}
-
 
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{})
@@ -3101,7 +3092,6 @@ type reqMyServicePrioChildPang struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioChildPang{}
 
-
 func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
     return (&reqMyServicePrioChildPang{})
 }
@@ -3181,7 +3171,6 @@ type respMyServicePrioChildPang struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePrioChildPang{}
 var _ thrift.WritableResult = &respMyServicePrioChildPang{}
-
 
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{})
@@ -3448,7 +3437,6 @@ type reqBadServiceBar struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqBadServiceBar{}
 
-
 func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{})
 }
@@ -3530,9 +3518,9 @@ type respBadServiceBar struct {
 var _ thrift.Struct = &respBadServiceBar{}
 var _ thrift.WritableResult = &respBadServiceBar{}
 
-
 func newRespBadServiceBar() *respBadServiceBar {
-    return (&respBadServiceBar{})
+    return (&respBadServiceBar{}).
+        SetValue(0)
 }
 
 func (x *respBadServiceBar) GetValueNonCompat() int32 {

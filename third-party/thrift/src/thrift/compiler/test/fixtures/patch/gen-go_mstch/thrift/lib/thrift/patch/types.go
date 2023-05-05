@@ -149,7 +149,6 @@ type GeneratePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GeneratePatch{}
 
-
 func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
 }
@@ -229,7 +228,6 @@ type AssignOnlyPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AssignOnlyPatch{}
-
 
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
@@ -314,9 +312,10 @@ type BoolPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BoolPatch{}
 
-
 func NewBoolPatch() *BoolPatch {
-    return (&BoolPatch{})
+    return (&BoolPatch{}).
+        SetClear(false).
+        SetInvert(false)
 }
 
 // Deprecated: Use NewBoolPatch().Assign instead.
@@ -569,9 +568,10 @@ type BytePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BytePatch{}
 
-
 func NewBytePatch() *BytePatch {
-    return (&BytePatch{})
+    return (&BytePatch{}).
+        SetClear(false).
+        SetAdd(0)
 }
 
 // Deprecated: Use NewBytePatch().Assign instead.
@@ -824,9 +824,10 @@ type I16Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &I16Patch{}
 
-
 func NewI16Patch() *I16Patch {
-    return (&I16Patch{})
+    return (&I16Patch{}).
+        SetClear(false).
+        SetAdd(0)
 }
 
 // Deprecated: Use NewI16Patch().Assign instead.
@@ -1079,9 +1080,10 @@ type I32Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &I32Patch{}
 
-
 func NewI32Patch() *I32Patch {
-    return (&I32Patch{})
+    return (&I32Patch{}).
+        SetClear(false).
+        SetAdd(0)
 }
 
 // Deprecated: Use NewI32Patch().Assign instead.
@@ -1334,9 +1336,10 @@ type I64Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &I64Patch{}
 
-
 func NewI64Patch() *I64Patch {
-    return (&I64Patch{})
+    return (&I64Patch{}).
+        SetClear(false).
+        SetAdd(0)
 }
 
 // Deprecated: Use NewI64Patch().Assign instead.
@@ -1589,9 +1592,10 @@ type FloatPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FloatPatch{}
 
-
 func NewFloatPatch() *FloatPatch {
-    return (&FloatPatch{})
+    return (&FloatPatch{}).
+        SetClear(false).
+        SetAdd(0.0)
 }
 
 // Deprecated: Use NewFloatPatch().Assign instead.
@@ -1844,9 +1848,10 @@ type DoublePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DoublePatch{}
 
-
 func NewDoublePatch() *DoublePatch {
-    return (&DoublePatch{})
+    return (&DoublePatch{}).
+        SetClear(false).
+        SetAdd(0.0)
 }
 
 // Deprecated: Use NewDoublePatch().Assign instead.
@@ -2100,9 +2105,11 @@ type StringPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StringPatch{}
 
-
 func NewStringPatch() *StringPatch {
-    return (&StringPatch{})
+    return (&StringPatch{}).
+        SetClear(false).
+        SetPrepend("").
+        SetAppend("")
 }
 
 // Deprecated: Use NewStringPatch().Assign instead.
@@ -2408,9 +2415,11 @@ type BinaryPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BinaryPatch{}
 
-
 func NewBinaryPatch() *BinaryPatch {
-    return (&BinaryPatch{})
+    return (&BinaryPatch{}).
+        SetClear(false).
+        SetPrepend(standard.NewByteBuffer()).
+        SetAppend(standard.NewByteBuffer())
 }
 
 func (x *BinaryPatch) GetAssignNonCompat() standard.ByteBuffer {

@@ -156,9 +156,10 @@ type Type struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Type{}
 
-
 func NewType() *Type {
-    return (&Type{})
+    return (&Type{}).
+        SetName("").
+        SetTemplate("")
 }
 
 func (x *Type) GetNameNonCompat() string {
@@ -342,9 +343,9 @@ type Ref struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Ref{}
 
-
 func NewRef() *Ref {
-    return (&Ref{})
+    return (&Ref{}).
+        SetType(0)
 }
 
 func (x *Ref) GetTypeNonCompat() RefType {
@@ -476,7 +477,6 @@ type Lazy struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Lazy{}
-
 
 func NewLazy() *Lazy {
     return (&Lazy{}).
@@ -611,7 +611,6 @@ type DisableLazyChecksum struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DisableLazyChecksum{}
 
-
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
 }
@@ -697,9 +696,13 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
-
 func NewAdapter() *Adapter {
-    return (&Adapter{})
+    return (&Adapter{}).
+        SetName("").
+        SetAdaptedType("").
+        SetUnderlyingName("").
+        SetExtraNamespace("").
+        SetMoveOnly(false)
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -1039,7 +1042,6 @@ type PackIsset struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &PackIsset{}
 
-
 func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
         SetAtomic(true)
@@ -1173,7 +1175,6 @@ type MinimizePadding struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MinimizePadding{}
 
-
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
 }
@@ -1253,7 +1254,6 @@ type TriviallyRelocatable struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TriviallyRelocatable{}
-
 
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
@@ -1335,7 +1335,6 @@ type ScopedEnumAsUnionType struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ScopedEnumAsUnionType{}
 
-
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
 }
@@ -1415,7 +1414,6 @@ type StrongType struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StrongType{}
-
 
 func NewStrongType() *StrongType {
     return (&StrongType{})
@@ -1499,9 +1497,10 @@ type FieldInterceptor struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldInterceptor{}
 
-
 func NewFieldInterceptor() *FieldInterceptor {
-    return (&FieldInterceptor{})
+    return (&FieldInterceptor{}).
+        SetName("").
+        SetNoinline(false)
 }
 
 func (x *FieldInterceptor) GetNameNonCompat() string {
@@ -1684,7 +1683,6 @@ type UseOpEncode struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &UseOpEncode{}
 
-
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
 }
@@ -1766,9 +1764,9 @@ type EnumType struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &EnumType{}
 
-
 func NewEnumType() *EnumType {
-    return (&EnumType{})
+    return (&EnumType{}).
+        SetType(0)
 }
 
 func (x *EnumType) GetTypeNonCompat() EnumUnderlyingType {
@@ -1900,7 +1898,6 @@ type Frozen2Exclude struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Frozen2Exclude{}
 
-
 func NewFrozen2Exclude() *Frozen2Exclude {
     return (&Frozen2Exclude{})
 }
@@ -1980,7 +1977,6 @@ type Frozen2RequiresCompleteContainerParams struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Frozen2RequiresCompleteContainerParams{}
-
 
 func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContainerParams {
     return (&Frozen2RequiresCompleteContainerParams{})

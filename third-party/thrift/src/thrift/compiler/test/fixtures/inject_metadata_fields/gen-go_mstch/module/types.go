@@ -25,9 +25,9 @@ type Fields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Fields{}
 
-
 func NewFields() *Fields {
-    return (&Fields{})
+    return (&Fields{}).
+        SetInjectedField("")
 }
 
 func (x *Fields) GetInjectedFieldNonCompat() string {
@@ -159,9 +159,9 @@ type FieldsInjectedToEmptyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedToEmptyStruct{}
 
-
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
-    return (&FieldsInjectedToEmptyStruct{})
+    return (&FieldsInjectedToEmptyStruct{}).
+        SetInjectedField("")
 }
 
 func (x *FieldsInjectedToEmptyStruct) GetInjectedFieldNonCompat() string {
@@ -294,9 +294,10 @@ type FieldsInjectedToStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedToStruct{}
 
-
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
-    return (&FieldsInjectedToStruct{})
+    return (&FieldsInjectedToStruct{}).
+        SetStringField("").
+        SetInjectedField("")
 }
 
 func (x *FieldsInjectedToStruct) GetStringFieldNonCompat() string {
@@ -483,9 +484,10 @@ type FieldsInjectedWithIncludedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedWithIncludedStruct{}
 
-
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
-    return (&FieldsInjectedWithIncludedStruct{})
+    return (&FieldsInjectedWithIncludedStruct{}).
+        SetStringField("").
+        SetInjectedField("")
 }
 
 // Deprecated: Use NewFieldsInjectedWithIncludedStruct().InjectedStructuredAnnotationField instead.

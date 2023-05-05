@@ -78,9 +78,10 @@ type MyData struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyData{}
 
-
 func NewMyData() *MyData {
-    return (&MyData{})
+    return (&MyData{}).
+        SetData1("").
+        SetData2(0)
 }
 
 func (x *MyData) GetData1NonCompat() string {
@@ -264,7 +265,6 @@ type MyDataWithCustomDefault struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefault{}
-
 
 func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
     return (&MyDataWithCustomDefault{}).
@@ -453,9 +453,9 @@ type InnerUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnion{}
 
-
 func NewInnerUnion() *InnerUnion {
-    return (&InnerUnion{})
+    return (&InnerUnion{}).
+        SetInnerOption([]byte(""))
 }
 
 func (x *InnerUnion) GetInnerOptionNonCompat() []byte {
@@ -612,9 +612,11 @@ type MyUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
 
-
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).
+        SetOption1("").
+        SetOption2(0).
+        SetOption3(NewInnerUnion())
 }
 
 // Deprecated: Use NewMyUnion().Option1 instead.
@@ -945,15 +947,30 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
+        SetBoolVal(false).
+        SetByteVal(0).
+        SetI16Val(0).
+        SetI32Val(0).
+        SetI64Val(0).
+        SetFloatVal(0.0).
+        SetDoubleVal(0.0).
+        SetStringVal("").
+        SetBinaryVal([]byte("")).
+        SetEnumVal(0).
+        SetStructVal(NewMyData()).
+        SetUnionVal(NewMyUnion()).
+        SetLateStructVal(NewLateDefStruct()).
+        SetListMap(make([]map[string]int32)).
+        SetMapMap(make(map[string]map[string]int32)).
         SetI32WithCustomDefault(1).
+        SetStructWithCustomDefault(NewMyDataWithCustomDefault()).
         SetStructWithFieldCustomDefault(
-            *NewMyData().
+              *NewMyData().
     SetData1("1").
     SetData2(2),
-        )
+          )
 }
 
 // Deprecated: Use NewMyStruct().StructVal instead.
@@ -1274,7 +1291,7 @@ func (x *MyStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return nil
+        return make([]int16)
     }
 
     return x.OptListVal
@@ -1286,7 +1303,7 @@ func (x *MyStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return nil
+        return make([]string)
     }
 
     return x.OptSetVal
@@ -1298,7 +1315,7 @@ func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
 
 func (x *MyStruct) GetOptMapVal() map[string]string {
     if !x.IsSetOptMapVal() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.OptMapVal
@@ -1310,7 +1327,7 @@ func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.ListMap
@@ -1322,7 +1339,7 @@ func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
 
 func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
     if !x.IsSetMapMap() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.MapMap
@@ -3352,7 +3369,6 @@ type LateDefStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStruct{}
 
-
 func NewLateDefStruct() *LateDefStruct {
     return (&LateDefStruct{})
 }
@@ -3434,9 +3450,9 @@ type Recursive struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Recursive{}
 
-
 func NewRecursive() *Recursive {
-    return (&Recursive{})
+    return (&Recursive{}).
+        SetNodes(make(map[string]*Recursive))
 }
 
 func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
@@ -3445,7 +3461,7 @@ func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
 
 func (x *Recursive) GetNodes() map[string]*Recursive {
     if !x.IsSetNodes() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Nodes
@@ -3627,9 +3643,9 @@ type Bar struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Bar{}
 
-
 func NewBar() *Bar {
-    return (&Bar{})
+    return (&Bar{}).
+        SetLoop(NewLoop())
 }
 
 // Deprecated: Use NewBar().Loop instead.
@@ -3777,9 +3793,9 @@ type Loop struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Loop{}
 
-
 func NewLoop() *Loop {
-    return (&Loop{})
+    return (&Loop{}).
+        SetBar(NewBar())
 }
 
 // Deprecated: Use NewLoop().Bar instead.
@@ -3931,9 +3947,12 @@ type MyDataPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataPatch{}
 
-
 func NewMyDataPatch() *MyDataPatch {
-    return (&MyDataPatch{})
+    return (&MyDataPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewMyDataFieldPatch()).
+        SetEnsure(NewMyDataEnsureStruct()).
+        SetPatch(NewMyDataFieldPatch())
 }
 
 // Deprecated: Use NewMyDataPatch().Assign instead.
@@ -4338,9 +4357,10 @@ type MyDataFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataFieldPatch{}
 
-
 func NewMyDataFieldPatch() *MyDataFieldPatch {
-    return (&MyDataFieldPatch{})
+    return (&MyDataFieldPatch{}).
+        SetData1(patch.NewStringPatch()).
+        SetData2(patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataFieldPatch().Data1 instead.
@@ -4556,7 +4576,6 @@ type MyDataEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataEnsureStruct{}
-
 
 func NewMyDataEnsureStruct() *MyDataEnsureStruct {
     return (&MyDataEnsureStruct{})
@@ -4777,9 +4796,12 @@ type MyDataWithCustomDefaultPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
 
-
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
-    return (&MyDataWithCustomDefaultPatch{})
+    return (&MyDataWithCustomDefaultPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewMyDataWithCustomDefaultFieldPatch()).
+        SetEnsure(NewMyDataWithCustomDefaultEnsureStruct()).
+        SetPatch(NewMyDataWithCustomDefaultFieldPatch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().Assign instead.
@@ -5184,9 +5206,10 @@ type MyDataWithCustomDefaultFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultFieldPatch{}
 
-
 func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
-    return (&MyDataWithCustomDefaultFieldPatch{})
+    return (&MyDataWithCustomDefaultFieldPatch{}).
+        SetData1(patch.NewStringPatch()).
+        SetData2(patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().Data1 instead.
@@ -5402,7 +5425,6 @@ type MyDataWithCustomDefaultEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultEnsureStruct{}
-
 
 func NewMyDataWithCustomDefaultEnsureStruct() *MyDataWithCustomDefaultEnsureStruct {
     return (&MyDataWithCustomDefaultEnsureStruct{})
@@ -5623,9 +5645,12 @@ type InnerUnionPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnionPatch{}
 
-
 func NewInnerUnionPatch() *InnerUnionPatch {
-    return (&InnerUnionPatch{})
+    return (&InnerUnionPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewInnerUnionFieldPatch()).
+        SetEnsure(NewInnerUnion()).
+        SetPatch(NewInnerUnionFieldPatch())
 }
 
 // Deprecated: Use NewInnerUnionPatch().Assign instead.
@@ -6029,9 +6054,9 @@ type InnerUnionFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnionFieldPatch{}
 
-
 func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
-    return (&InnerUnionFieldPatch{})
+    return (&InnerUnionFieldPatch{}).
+        SetInnerOption(patch.NewBinaryPatch())
 }
 
 // Deprecated: Use NewInnerUnionFieldPatch().InnerOption instead.
@@ -6183,9 +6208,12 @@ type MyUnionPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnionPatch{}
 
-
 func NewMyUnionPatch() *MyUnionPatch {
-    return (&MyUnionPatch{})
+    return (&MyUnionPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewMyUnionFieldPatch()).
+        SetEnsure(NewMyUnion()).
+        SetPatch(NewMyUnionFieldPatch())
 }
 
 // Deprecated: Use NewMyUnionPatch().Assign instead.
@@ -6591,9 +6619,11 @@ type MyUnionFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnionFieldPatch{}
 
-
 func NewMyUnionFieldPatch() *MyUnionFieldPatch {
-    return (&MyUnionFieldPatch{})
+    return (&MyUnionFieldPatch{}).
+        SetOption1(patch.NewStringPatch()).
+        SetOption2(patch.NewI32Patch()).
+        SetOption3(NewInnerUnionPatch())
 }
 
 // Deprecated: Use NewMyUnionFieldPatch().Option1 instead.
@@ -6881,9 +6911,12 @@ type MyStructPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructPatch{}
 
-
 func NewMyStructPatch() *MyStructPatch {
-    return (&MyStructPatch{})
+    return (&MyStructPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewMyStructFieldPatch()).
+        SetEnsure(NewMyStructEnsureStruct()).
+        SetPatch(NewMyStructFieldPatch())
 }
 
 // Deprecated: Use NewMyStructPatch().Assign instead.
@@ -7288,9 +7321,9 @@ type MyStructField10Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField10Patch{}
 
-
 func NewMyStructField10Patch() *MyStructField10Patch {
-    return (&MyStructField10Patch{})
+    return (&MyStructField10Patch{}).
+        SetClear(false)
 }
 
 // Deprecated: Use NewMyStructField10Patch().Assign instead.
@@ -7491,9 +7524,9 @@ type MyStructField23Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField23Patch{}
 
-
 func NewMyStructField23Patch() *MyStructField23Patch {
-    return (&MyStructField23Patch{})
+    return (&MyStructField23Patch{}).
+        SetClear(false)
 }
 
 // Deprecated: Use NewMyStructField23Patch().Assign instead.
@@ -7698,9 +7731,13 @@ type MyStructField26Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField26Patch{}
 
-
 func NewMyStructField26Patch() *MyStructField26Patch {
-    return (&MyStructField26Patch{})
+    return (&MyStructField26Patch{}).
+        SetClear(false).
+        SetPatch(make(map[patch.ListPatchIndex]*patch.I16Patch)).
+        SetRemove(make([]int16)).
+        SetPrepend(make([]int16)).
+        SetAppend(make([]int16))
 }
 
 func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
@@ -7709,7 +7746,7 @@ func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAssign() []int16 {
     if !x.IsSetAssign() {
-        return nil
+        return make([]int16)
     }
 
     return x.Assign
@@ -7729,7 +7766,7 @@ func (x *MyStructField26Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*pat
 
 func (x *MyStructField26Patch) GetPatch() map[patch.ListPatchIndex]*patch.I16Patch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[patch.ListPatchIndex]*patch.I16Patch)
     }
 
     return x.Patch
@@ -7741,7 +7778,7 @@ func (x *MyStructField26Patch) GetRemoveNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetRemove() []int16 {
     if !x.IsSetRemove() {
-        return nil
+        return make([]int16)
     }
 
     return x.Remove
@@ -7753,7 +7790,7 @@ func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetPrepend() []int16 {
     if !x.IsSetPrepend() {
-        return nil
+        return make([]int16)
     }
 
     return x.Prepend
@@ -7765,7 +7802,7 @@ func (x *MyStructField26Patch) GetAppendNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAppend() []int16 {
     if !x.IsSetAppend() {
-        return nil
+        return make([]int16)
     }
 
     return x.Append
@@ -8319,9 +8356,11 @@ type MyStructField27Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField27Patch{}
 
-
 func NewMyStructField27Patch() *MyStructField27Patch {
-    return (&MyStructField27Patch{})
+    return (&MyStructField27Patch{}).
+        SetClear(false).
+        SetRemove(make([]string)).
+        SetAdd(make([]string))
 }
 
 func (x *MyStructField27Patch) GetAssignNonCompat() []string {
@@ -8330,7 +8369,7 @@ func (x *MyStructField27Patch) GetAssignNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAssign() []string {
     if !x.IsSetAssign() {
-        return nil
+        return make([]string)
     }
 
     return x.Assign
@@ -8350,7 +8389,7 @@ func (x *MyStructField27Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField27Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string)
     }
 
     return x.Remove
@@ -8362,7 +8401,7 @@ func (x *MyStructField27Patch) GetAddNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAdd() []string {
     if !x.IsSetAdd() {
-        return nil
+        return make([]string)
     }
 
     return x.Add
@@ -8738,9 +8777,14 @@ type MyStructField28Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField28Patch{}
 
-
 func NewMyStructField28Patch() *MyStructField28Patch {
-    return (&MyStructField28Patch{})
+    return (&MyStructField28Patch{}).
+        SetClear(false).
+        SetPatchPrior(make(map[string]*patch.StringPatch)).
+        SetAdd(make(map[string]string)).
+        SetPatch(make(map[string]*patch.StringPatch)).
+        SetRemove(make([]string)).
+        SetPut(make(map[string]string))
 }
 
 func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
@@ -8749,7 +8793,7 @@ func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetAssign() map[string]string {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Assign
@@ -8769,7 +8813,7 @@ func (x *MyStructField28Patch) GetPatchPriorNonCompat() map[string]*patch.String
 
 func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*patch.StringPatch)
     }
 
     return x.PatchPrior
@@ -8781,7 +8825,7 @@ func (x *MyStructField28Patch) GetAddNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetAdd() map[string]string {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Add
@@ -8793,7 +8837,7 @@ func (x *MyStructField28Patch) GetPatchNonCompat() map[string]*patch.StringPatch
 
 func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*patch.StringPatch)
     }
 
     return x.Patch
@@ -8805,7 +8849,7 @@ func (x *MyStructField28Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField28Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string)
     }
 
     return x.Remove
@@ -8817,7 +8861,7 @@ func (x *MyStructField28Patch) GetPutNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetPut() map[string]string {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Put
@@ -9522,9 +9566,13 @@ type MyStructField29Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField29Patch{}
 
-
 func NewMyStructField29Patch() *MyStructField29Patch {
-    return (&MyStructField29Patch{})
+    return (&MyStructField29Patch{}).
+        SetClear(false).
+        SetPatch(make(map[patch.ListPatchIndex]*MyStructField29Patch1)).
+        SetRemove(make([]map[string]int32)).
+        SetPrepend(make([]map[string]int32)).
+        SetAppend(make([]map[string]int32))
 }
 
 func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
@@ -9533,7 +9581,7 @@ func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.Assign
@@ -9553,7 +9601,7 @@ func (x *MyStructField29Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*MyS
 
 func (x *MyStructField29Patch) GetPatch() map[patch.ListPatchIndex]*MyStructField29Patch1 {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[patch.ListPatchIndex]*MyStructField29Patch1)
     }
 
     return x.Patch
@@ -9565,7 +9613,7 @@ func (x *MyStructField29Patch) GetRemoveNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetRemove() []map[string]int32 {
     if !x.IsSetRemove() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.Remove
@@ -9577,7 +9625,7 @@ func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
     if !x.IsSetPrepend() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.Prepend
@@ -9589,7 +9637,7 @@ func (x *MyStructField29Patch) GetAppendNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
     if !x.IsSetAppend() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.Append
@@ -10330,9 +10378,14 @@ type MyStructField29Patch1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField29Patch1{}
 
-
 func NewMyStructField29Patch1() *MyStructField29Patch1 {
-    return (&MyStructField29Patch1{})
+    return (&MyStructField29Patch1{}).
+        SetClear(false).
+        SetPatchPrior(make(map[string]*patch.I32Patch)).
+        SetAdd(make(map[string]int32)).
+        SetPatch(make(map[string]*patch.I32Patch)).
+        SetRemove(make([]string)).
+        SetPut(make(map[string]int32))
 }
 
 func (x *MyStructField29Patch1) GetAssignNonCompat() map[string]int32 {
@@ -10341,7 +10394,7 @@ func (x *MyStructField29Patch1) GetAssignNonCompat() map[string]int32 {
 
 func (x *MyStructField29Patch1) GetAssign() map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Assign
@@ -10361,7 +10414,7 @@ func (x *MyStructField29Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Pa
 
 func (x *MyStructField29Patch1) GetPatchPrior() map[string]*patch.I32Patch {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.PatchPrior
@@ -10373,7 +10426,7 @@ func (x *MyStructField29Patch1) GetAddNonCompat() map[string]int32 {
 
 func (x *MyStructField29Patch1) GetAdd() map[string]int32 {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Add
@@ -10385,7 +10438,7 @@ func (x *MyStructField29Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
 
 func (x *MyStructField29Patch1) GetPatch() map[string]*patch.I32Patch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.Patch
@@ -10397,7 +10450,7 @@ func (x *MyStructField29Patch1) GetRemoveNonCompat() []string {
 
 func (x *MyStructField29Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string)
     }
 
     return x.Remove
@@ -10409,7 +10462,7 @@ func (x *MyStructField29Patch1) GetPutNonCompat() map[string]int32 {
 
 func (x *MyStructField29Patch1) GetPut() map[string]int32 {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Put
@@ -11115,9 +11168,14 @@ type MyStructField30Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField30Patch{}
 
-
 func NewMyStructField30Patch() *MyStructField30Patch {
-    return (&MyStructField30Patch{})
+    return (&MyStructField30Patch{}).
+        SetClear(false).
+        SetPatchPrior(make(map[string]*MyStructField30Patch1)).
+        SetAdd(make(map[string]map[string]int32)).
+        SetPatch(make(map[string]*MyStructField30Patch1)).
+        SetRemove(make([]string)).
+        SetPut(make(map[string]map[string]int32))
 }
 
 func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 {
@@ -11126,7 +11184,7 @@ func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 
 
 func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Assign
@@ -11146,7 +11204,7 @@ func (x *MyStructField30Patch) GetPatchPriorNonCompat() map[string]*MyStructFiel
 
 func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1 {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*MyStructField30Patch1)
     }
 
     return x.PatchPrior
@@ -11158,7 +11216,7 @@ func (x *MyStructField30Patch) GetAddNonCompat() map[string]map[string]int32 {
 
 func (x *MyStructField30Patch) GetAdd() map[string]map[string]int32 {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Add
@@ -11170,7 +11228,7 @@ func (x *MyStructField30Patch) GetPatchNonCompat() map[string]*MyStructField30Pa
 
 func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*MyStructField30Patch1)
     }
 
     return x.Patch
@@ -11182,7 +11240,7 @@ func (x *MyStructField30Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string)
     }
 
     return x.Remove
@@ -11194,7 +11252,7 @@ func (x *MyStructField30Patch) GetPutNonCompat() map[string]map[string]int32 {
 
 func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Put
@@ -12038,9 +12096,14 @@ type MyStructField30Patch1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField30Patch1{}
 
-
 func NewMyStructField30Patch1() *MyStructField30Patch1 {
-    return (&MyStructField30Patch1{})
+    return (&MyStructField30Patch1{}).
+        SetClear(false).
+        SetPatchPrior(make(map[string]*patch.I32Patch)).
+        SetAdd(make(map[string]int32)).
+        SetPatch(make(map[string]*patch.I32Patch)).
+        SetRemove(make([]string)).
+        SetPut(make(map[string]int32))
 }
 
 func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
@@ -12049,7 +12112,7 @@ func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Assign
@@ -12069,7 +12132,7 @@ func (x *MyStructField30Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Pa
 
 func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.PatchPrior
@@ -12081,7 +12144,7 @@ func (x *MyStructField30Patch1) GetAddNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetAdd() map[string]int32 {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Add
@@ -12093,7 +12156,7 @@ func (x *MyStructField30Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
 
 func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.Patch
@@ -12105,7 +12168,7 @@ func (x *MyStructField30Patch1) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string)
     }
 
     return x.Remove
@@ -12117,7 +12180,7 @@ func (x *MyStructField30Patch1) GetPutNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetPut() map[string]int32 {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Put
@@ -12849,9 +12912,41 @@ type MyStructFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructFieldPatch{}
 
-
 func NewMyStructFieldPatch() *MyStructFieldPatch {
-    return (&MyStructFieldPatch{})
+    return (&MyStructFieldPatch{}).
+        SetStructWithCustomDefault(NewMyDataWithCustomDefaultPatch()).
+        SetI32WithCustomDefault(patch.NewI32Patch()).
+        SetMapMap(NewMyStructField30Patch()).
+        SetListMap(NewMyStructField29Patch()).
+        SetOptMapVal(NewMyStructField28Patch()).
+        SetOptSetVal(NewMyStructField27Patch()).
+        SetOptListVal(NewMyStructField26Patch()).
+        SetOptLateStructVal(NewLateDefStructPatch()).
+        SetOptStructVal(NewMyDataPatch()).
+        SetOptEnumVal(NewMyStructField23Patch()).
+        SetOptBinaryVal(patch.NewBinaryPatch()).
+        SetOptStringVal(patch.NewStringPatch()).
+        SetOptDoubleVal(patch.NewDoublePatch()).
+        SetOptFloatVal(patch.NewFloatPatch()).
+        SetOptI64Val(patch.NewI64Patch()).
+        SetOptI32Val(patch.NewI32Patch()).
+        SetOptI16Val(patch.NewI16Patch()).
+        SetOptByteVal(patch.NewBytePatch()).
+        SetOptBoolVal(patch.NewBoolPatch()).
+        SetLateStructVal(NewLateDefStructPatch()).
+        SetUnionVal(NewMyUnionPatch()).
+        SetStructVal(NewMyDataPatch()).
+        SetEnumVal(NewMyStructField10Patch()).
+        SetBinaryVal(patch.NewBinaryPatch()).
+        SetStringVal(patch.NewStringPatch()).
+        SetDoubleVal(patch.NewDoublePatch()).
+        SetFloatVal(patch.NewFloatPatch()).
+        SetI64Val(patch.NewI64Patch()).
+        SetI32Val(patch.NewI32Patch()).
+        SetI16Val(patch.NewI16Patch()).
+        SetByteVal(patch.NewBytePatch()).
+        SetBoolVal(patch.NewBoolPatch()).
+        SetStructWithFieldCustomDefault(NewMyDataPatch())
 }
 
 // Deprecated: Use NewMyStructFieldPatch().StructWithCustomDefault instead.
@@ -15207,7 +15302,6 @@ type MyStructEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructEnsureStruct{}
 
-
 func NewMyStructEnsureStruct() *MyStructEnsureStruct {
     return (&MyStructEnsureStruct{})
 }
@@ -15320,7 +15414,7 @@ func (x *MyStructEnsureStruct) GetMapMapNonCompat() map[string]map[string]int32 
 
 func (x *MyStructEnsureStruct) GetMapMap() map[string]map[string]int32 {
     if !x.IsSetMapMap() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.MapMap
@@ -15332,7 +15426,7 @@ func (x *MyStructEnsureStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return nil
+        return make([]map[string]int32)
     }
 
     return x.ListMap
@@ -15344,7 +15438,7 @@ func (x *MyStructEnsureStruct) GetOptMapValNonCompat() map[string]string {
 
 func (x *MyStructEnsureStruct) GetOptMapVal() map[string]string {
     if !x.IsSetOptMapVal() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.OptMapVal
@@ -15356,7 +15450,7 @@ func (x *MyStructEnsureStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStructEnsureStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return nil
+        return make([]string)
     }
 
     return x.OptSetVal
@@ -15368,7 +15462,7 @@ func (x *MyStructEnsureStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return nil
+        return make([]int16)
     }
 
     return x.OptListVal
@@ -17763,9 +17857,12 @@ type LateDefStructPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructPatch{}
 
-
 func NewLateDefStructPatch() *LateDefStructPatch {
-    return (&LateDefStructPatch{})
+    return (&LateDefStructPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewLateDefStructFieldPatch()).
+        SetEnsure(NewLateDefStructEnsureStruct()).
+        SetPatch(NewLateDefStructFieldPatch())
 }
 
 // Deprecated: Use NewLateDefStructPatch().Assign instead.
@@ -18168,7 +18265,6 @@ type LateDefStructFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructFieldPatch{}
 
-
 func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
     return (&LateDefStructFieldPatch{})
 }
@@ -18248,7 +18344,6 @@ type LateDefStructEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructEnsureStruct{}
-
 
 func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
     return (&LateDefStructEnsureStruct{})
@@ -18335,9 +18430,12 @@ type RecursivePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursivePatch{}
 
-
 func NewRecursivePatch() *RecursivePatch {
-    return (&RecursivePatch{})
+    return (&RecursivePatch{}).
+        SetClear(false).
+        SetPatchPrior(NewRecursiveFieldPatch()).
+        SetEnsure(NewRecursiveEnsureStruct()).
+        SetPatch(NewRecursiveFieldPatch())
 }
 
 // Deprecated: Use NewRecursivePatch().Assign instead.
@@ -18742,9 +18840,9 @@ type RecursiveField1Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveField1Patch{}
 
-
 func NewRecursiveField1Patch() *RecursiveField1Patch {
-    return (&RecursiveField1Patch{})
+    return (&RecursiveField1Patch{}).
+        SetClear(false)
 }
 
 func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
@@ -18753,7 +18851,7 @@ func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
 
 func (x *RecursiveField1Patch) GetAssign() map[string]*Recursive {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Assign
@@ -18987,9 +19085,9 @@ type RecursiveFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveFieldPatch{}
 
-
 func NewRecursiveFieldPatch() *RecursiveFieldPatch {
-    return (&RecursiveFieldPatch{})
+    return (&RecursiveFieldPatch{}).
+        SetNodes(NewRecursiveField1Patch())
 }
 
 // Deprecated: Use NewRecursiveFieldPatch().Nodes instead.
@@ -19137,7 +19235,6 @@ type RecursiveEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveEnsureStruct{}
 
-
 func NewRecursiveEnsureStruct() *RecursiveEnsureStruct {
     return (&RecursiveEnsureStruct{})
 }
@@ -19148,7 +19245,7 @@ func (x *RecursiveEnsureStruct) GetNodesNonCompat() map[string]*Recursive {
 
 func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
     if !x.IsSetNodes() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Nodes
@@ -19334,9 +19431,12 @@ type BarPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BarPatch{}
 
-
 func NewBarPatch() *BarPatch {
-    return (&BarPatch{})
+    return (&BarPatch{}).
+        SetClear(false).
+        SetPatchPrior(NewBarFieldPatch()).
+        SetEnsure(NewBarEnsureStruct()).
+        SetPatch(NewBarFieldPatch())
 }
 
 // Deprecated: Use NewBarPatch().Assign instead.
@@ -19740,9 +19840,9 @@ type BarFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BarFieldPatch{}
 
-
 func NewBarFieldPatch() *BarFieldPatch {
-    return (&BarFieldPatch{})
+    return (&BarFieldPatch{}).
+        SetLoop(NewLoopPatch())
 }
 
 // Deprecated: Use NewBarFieldPatch().Loop instead.
@@ -19889,7 +19989,6 @@ type BarEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BarEnsureStruct{}
-
 
 func NewBarEnsureStruct() *BarEnsureStruct {
     return (&BarEnsureStruct{})
@@ -20041,9 +20140,9 @@ type LoopPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LoopPatch{}
 
-
 func NewLoopPatch() *LoopPatch {
-    return (&LoopPatch{})
+    return (&LoopPatch{}).
+        SetClear(false)
 }
 
 // Deprecated: Use NewLoopPatch().Assign instead.

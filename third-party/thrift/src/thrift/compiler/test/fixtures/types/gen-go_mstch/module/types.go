@@ -285,7 +285,6 @@ type EmptyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &EmptyStruct{}
 
-
 func NewEmptyStruct() *EmptyStruct {
     return (&EmptyStruct{})
 }
@@ -367,9 +366,9 @@ type DecoratedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DecoratedStruct{}
 
-
 func NewDecoratedStruct() *DecoratedStruct {
-    return (&DecoratedStruct{})
+    return (&DecoratedStruct{}).
+        SetField("")
 }
 
 func (x *DecoratedStruct) GetFieldNonCompat() string {
@@ -508,9 +507,16 @@ type ContainerStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ContainerStruct{}
 
-
 func NewContainerStruct() *ContainerStruct {
-    return (&ContainerStruct{})
+    return (&ContainerStruct{}).
+        SetFieldA(make([]int32)).
+        SetFieldB(make([]int32)).
+        SetFieldC(make([]int32)).
+        SetFieldD(make([]int32)).
+        SetFieldE(make([]int32)).
+        SetFieldF(make([]int32)).
+        SetFieldG(make(map[int32]string)).
+        SetFieldH(included.NewSomeMap())
 }
 
 func (x *ContainerStruct) GetFieldANonCompat() []int32 {
@@ -519,7 +525,7 @@ func (x *ContainerStruct) GetFieldANonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldA
@@ -531,7 +537,7 @@ func (x *ContainerStruct) GetFieldBNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldB() []int32 {
     if !x.IsSetFieldB() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldB
@@ -543,7 +549,7 @@ func (x *ContainerStruct) GetFieldCNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldC() []int32 {
     if !x.IsSetFieldC() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldC
@@ -555,7 +561,7 @@ func (x *ContainerStruct) GetFieldDNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldD() []int32 {
     if !x.IsSetFieldD() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldD
@@ -567,7 +573,7 @@ func (x *ContainerStruct) GetFieldENonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldE() []int32 {
     if !x.IsSetFieldE() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldE
@@ -579,7 +585,7 @@ func (x *ContainerStruct) GetFieldFNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldF() []int32 {
     if !x.IsSetFieldF() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldF
@@ -591,7 +597,7 @@ func (x *ContainerStruct) GetFieldGNonCompat() map[int32]string {
 
 func (x *ContainerStruct) GetFieldG() map[int32]string {
     if !x.IsSetFieldG() {
-        return nil
+        return make(map[int32]string)
     }
 
     return x.FieldG
@@ -1323,9 +1329,9 @@ type CppTypeStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CppTypeStruct{}
 
-
 func NewCppTypeStruct() *CppTypeStruct {
-    return (&CppTypeStruct{})
+    return (&CppTypeStruct{}).
+        SetFieldA(make([]int32))
 }
 
 func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
@@ -1334,7 +1340,7 @@ func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
 
 func (x *CppTypeStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return nil
+        return make([]int32)
     }
 
     return x.FieldA
@@ -1498,9 +1504,9 @@ type VirtualStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &VirtualStruct{}
 
-
 func NewVirtualStruct() *VirtualStruct {
-    return (&VirtualStruct{})
+    return (&VirtualStruct{}).
+        SetMyIntField(0)
 }
 
 func (x *VirtualStruct) GetMyIntFieldNonCompat() int64 {
@@ -1633,15 +1639,14 @@ type MyStructWithForwardRefEnum struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructWithForwardRefEnum{}
 
-
 func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
     return (&MyStructWithForwardRefEnum{}).
         SetA(
-            MyForwardRefEnum_NONZERO,
-        ).
+              MyForwardRefEnum_NONZERO,
+          ).
         SetB(
-            MyForwardRefEnum_NONZERO,
-        )
+              MyForwardRefEnum_NONZERO,
+          )
 }
 
 func (x *MyStructWithForwardRefEnum) GetANonCompat() MyForwardRefEnum {
@@ -1828,9 +1833,10 @@ type TrivialNumeric struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TrivialNumeric{}
 
-
 func NewTrivialNumeric() *TrivialNumeric {
-    return (&TrivialNumeric{})
+    return (&TrivialNumeric{}).
+        SetA(0).
+        SetB(false)
 }
 
 func (x *TrivialNumeric) GetANonCompat() int32 {
@@ -2015,15 +2021,14 @@ type TrivialNestedWithDefault struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TrivialNestedWithDefault{}
 
-
 func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     return (&TrivialNestedWithDefault{}).
         SetZ(4).
         SetN(
-            *NewTrivialNumeric().
+              *NewTrivialNumeric().
     SetA(3).
     SetB(true),
-        )
+          )
 }
 
 // Deprecated: Use NewTrivialNestedWithDefault().N instead.
@@ -2224,9 +2229,10 @@ type ComplexString struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexString{}
 
-
 func NewComplexString() *ComplexString {
-    return (&ComplexString{})
+    return (&ComplexString{}).
+        SetA("").
+        SetB(make(map[string]int32))
 }
 
 func (x *ComplexString) GetANonCompat() string {
@@ -2243,7 +2249,7 @@ func (x *ComplexString) GetBNonCompat() map[string]int32 {
 
 func (x *ComplexString) GetB() map[string]int32 {
     if !x.IsSetB() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.B
@@ -2469,19 +2475,18 @@ type ComplexNestedWithDefault struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexNestedWithDefault{}
 
-
 func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     return (&ComplexNestedWithDefault{}).
         SetZ("4").
         SetN(
-            *NewComplexString().
+              *NewComplexString().
     SetA("3").
     SetB(
         map[string]int32{
     "a": 3,
 },
     ),
-        )
+          )
 }
 
 // Deprecated: Use NewComplexNestedWithDefault().N instead.
@@ -2685,9 +2690,13 @@ type MinPadding struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPadding{}
 
-
 func NewMinPadding() *MinPadding {
-    return (&MinPadding{})
+    return (&MinPadding{}).
+        SetSmall(0).
+        SetBig(0).
+        SetMedium(0).
+        SetBiggish(0).
+        SetTiny(0)
 }
 
 func (x *MinPadding) GetSmallNonCompat() byte {
@@ -3031,9 +3040,13 @@ type MinPaddingWithCustomType struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPaddingWithCustomType{}
 
-
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
-    return (&MinPaddingWithCustomType{})
+    return (&MinPaddingWithCustomType{}).
+        SetSmall(0).
+        SetBig(0).
+        SetMedium(0).
+        SetBiggish(0).
+        SetTiny(0)
 }
 
 func (x *MinPaddingWithCustomType) GetSmallNonCompat() byte {
@@ -3376,9 +3389,12 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
-
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).
+        SetMyIntField(0).
+        SetMyStringField("").
+        SetMajorVer(0).
+        SetData(NewMyDataItem())
 }
 
 // Deprecated: Use NewMyStruct().Data instead.
@@ -3681,7 +3697,6 @@ type MyDataItem struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataItem{}
 
-
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
@@ -3763,9 +3778,9 @@ type Renaming struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Renaming{}
 
-
 func NewRenaming() *Renaming {
-    return (&Renaming{})
+    return (&Renaming{}).
+        SetFoo(0)
 }
 
 func (x *Renaming) GetFooNonCompat() int64 {
@@ -3898,9 +3913,10 @@ type AnnotatedTypes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AnnotatedTypes{}
 
-
 func NewAnnotatedTypes() *AnnotatedTypes {
-    return (&AnnotatedTypes{})
+    return (&AnnotatedTypes{}).
+        SetBinaryField(NewTBinary()).
+        SetListField(included.NewSomeListOfTypeMap())
 }
 
 func (x *AnnotatedTypes) GetBinaryFieldNonCompat() TBinary {
@@ -4110,7 +4126,6 @@ type ForwardUsageRoot struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageRoot{}
-
 
 func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
@@ -4329,7 +4344,6 @@ type ForwardUsageStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageStruct{}
 
-
 func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
@@ -4478,7 +4492,6 @@ type ForwardUsageByRef struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageByRef{}
-
 
 func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
@@ -4629,7 +4642,6 @@ type IncompleteMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteMap{}
 
-
 func NewIncompleteMap() *IncompleteMap {
     return (&IncompleteMap{})
 }
@@ -4640,7 +4652,7 @@ func (x *IncompleteMap) GetFieldNonCompat() map[int32]*IncompleteMapDep {
 
 func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     if !x.IsSetField() {
-        return nil
+        return make(map[int32]*IncompleteMapDep)
     }
 
     return x.Field
@@ -4821,7 +4833,6 @@ type IncompleteMapDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteMapDep{}
 
-
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{})
 }
@@ -4903,7 +4914,6 @@ type CompleteMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteMap{}
 
-
 func NewCompleteMap() *CompleteMap {
     return (&CompleteMap{})
 }
@@ -4914,7 +4924,7 @@ func (x *CompleteMap) GetFieldNonCompat() map[int32]*CompleteMapDep {
 
 func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     if !x.IsSetField() {
-        return nil
+        return make(map[int32]*CompleteMapDep)
     }
 
     return x.Field
@@ -5095,7 +5105,6 @@ type CompleteMapDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteMapDep{}
 
-
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{})
 }
@@ -5177,7 +5186,6 @@ type IncompleteList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteList{}
 
-
 func NewIncompleteList() *IncompleteList {
     return (&IncompleteList{})
 }
@@ -5188,7 +5196,7 @@ func (x *IncompleteList) GetFieldNonCompat() []*IncompleteListDep {
 
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     if !x.IsSetField() {
-        return nil
+        return make([]*IncompleteListDep)
     }
 
     return x.Field
@@ -5352,7 +5360,6 @@ type IncompleteListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteListDep{}
 
-
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{})
 }
@@ -5434,7 +5441,6 @@ type CompleteList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteList{}
 
-
 func NewCompleteList() *CompleteList {
     return (&CompleteList{})
 }
@@ -5445,7 +5451,7 @@ func (x *CompleteList) GetFieldNonCompat() []*CompleteListDep {
 
 func (x *CompleteList) GetField() []*CompleteListDep {
     if !x.IsSetField() {
-        return nil
+        return make([]*CompleteListDep)
     }
 
     return x.Field
@@ -5609,7 +5615,6 @@ type CompleteListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteListDep{}
 
-
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{})
 }
@@ -5691,7 +5696,6 @@ type AdaptedList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedList{}
 
-
 func NewAdaptedList() *AdaptedList {
     return (&AdaptedList{})
 }
@@ -5702,7 +5706,7 @@ func (x *AdaptedList) GetFieldNonCompat() []*AdaptedListDep {
 
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     if !x.IsSetField() {
-        return nil
+        return make([]*AdaptedListDep)
     }
 
     return x.Field
@@ -5867,9 +5871,9 @@ type AdaptedListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedListDep{}
 
-
 func NewAdaptedListDep() *AdaptedListDep {
-    return (&AdaptedListDep{})
+    return (&AdaptedListDep{}).
+        SetField(NewAdaptedList())
 }
 
 // Deprecated: Use NewAdaptedListDep().Field instead.
@@ -6017,7 +6021,6 @@ type DependentAdaptedList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DependentAdaptedList{}
 
-
 func NewDependentAdaptedList() *DependentAdaptedList {
     return (&DependentAdaptedList{})
 }
@@ -6028,7 +6031,7 @@ func (x *DependentAdaptedList) GetFieldNonCompat() []*DependentAdaptedListDep {
 
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     if !x.IsSetField() {
-        return nil
+        return make([]*DependentAdaptedListDep)
     }
 
     return x.Field
@@ -6193,7 +6196,6 @@ type DependentAdaptedListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DependentAdaptedListDep{}
 
-
 func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
@@ -6348,9 +6350,15 @@ type AllocatorAware struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware{}
 
-
 func NewAllocatorAware() *AllocatorAware {
-    return (&AllocatorAware{})
+    return (&AllocatorAware{}).
+        SetAaList(make([]int32)).
+        SetAaSet(make([]int32)).
+        SetAaMap(make(map[int32]int32)).
+        SetAaString("").
+        SetNotAContainer(0).
+        SetAaUnique(0).
+        SetAaShared(0)
 }
 
 func (x *AllocatorAware) GetAaListNonCompat() []int32 {
@@ -6359,7 +6367,7 @@ func (x *AllocatorAware) GetAaListNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaList() []int32 {
     if !x.IsSetAaList() {
-        return nil
+        return make([]int32)
     }
 
     return x.AaList
@@ -6371,7 +6379,7 @@ func (x *AllocatorAware) GetAaSetNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaSet() []int32 {
     if !x.IsSetAaSet() {
-        return nil
+        return make([]int32)
     }
 
     return x.AaSet
@@ -6383,7 +6391,7 @@ func (x *AllocatorAware) GetAaMapNonCompat() map[int32]int32 {
 
 func (x *AllocatorAware) GetAaMap() map[int32]int32 {
     if !x.IsSetAaMap() {
-        return nil
+        return make(map[int32]int32)
     }
 
     return x.AaMap
@@ -6935,9 +6943,9 @@ type AllocatorAware2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware2{}
 
-
 func NewAllocatorAware2() *AllocatorAware2 {
-    return (&AllocatorAware2{})
+    return (&AllocatorAware2{}).
+        SetNotAContainer(0)
 }
 
 // Deprecated: Use NewAllocatorAware2().BoxField instead.
@@ -7138,9 +7146,11 @@ type TypedefStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TypedefStruct{}
 
-
 func NewTypedefStruct() *TypedefStruct {
-    return (&TypedefStruct{})
+    return (&TypedefStruct{}).
+        SetI32Field(0).
+        SetIntTypedefField(NewIntTypedef()).
+        SetUintTypedefField(NewUintTypedef())
 }
 
 func (x *TypedefStruct) GetI32FieldNonCompat() int32 {
@@ -7378,9 +7388,9 @@ type StructWithDoubleUnderscores struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructWithDoubleUnderscores{}
 
-
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
-    return (&StructWithDoubleUnderscores{})
+    return (&StructWithDoubleUnderscores{}).
+        Set_Field(0)
 }
 
 func (x *StructWithDoubleUnderscores) Get_FieldNonCompat() int32 {

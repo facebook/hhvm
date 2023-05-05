@@ -110,9 +110,12 @@ type Color struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Color{}
 
-
 func NewColor() *Color {
-    return (&Color{})
+    return (&Color{}).
+        SetRed(0.0).
+        SetGreen(0.0).
+        SetBlue(0.0).
+        SetAlpha(0.0)
 }
 
 func (x *Color) GetRedNonCompat() float64 {
@@ -404,9 +407,9 @@ type Vehicle struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Vehicle{}
 
-
 func NewVehicle() *Vehicle {
     return (&Vehicle{}).
+        SetColor(NewColor()).
         SetHasAC(false)
 }
 
@@ -832,9 +835,10 @@ type Person struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Person{}
 
-
 func NewPerson() *Person {
-    return (&Person{})
+    return (&Person{}).
+        SetId(NewPersonID()).
+        SetName("")
 }
 
 // Deprecated: Use NewPerson().Age instead.
@@ -910,7 +914,7 @@ func (x *Person) GetFriendsNonCompat() []PersonID {
 
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
-        return nil
+        return make([]PersonID)
     }
 
     return x.Friends
@@ -934,7 +938,7 @@ func (x *Person) GetPetNamesNonCompat() map[Animal]string {
 
 func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
-        return nil
+        return make(map[Animal]string)
     }
 
     return x.PetNames
@@ -958,7 +962,7 @@ func (x *Person) GetVehiclesNonCompat() []*Vehicle {
 
 func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
-        return nil
+        return make([]*Vehicle)
     }
 
     return x.Vehicles

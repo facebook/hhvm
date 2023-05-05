@@ -1,0 +1,40 @@
+Program %s/async-1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+%s/async-1.php loaded
+Program %s/async-1.php exited normally.
+print function_exists('foo_async')
+true
+print function_exists('bar_async')
+true
+= HH\Asio\join(foo_async())
+1
+= HH\Asio\join(bar_async())
+2
+= await foo_async()
+1
+= await bar_async()
+2
+= await foo_async() + await bar_async()
+3
+concurrent { $x = await foo_async(); $y = await bar_async(); }
+= $x + $y
+3
+= exn1_async()
+HH\StaticWaitHandle Object
+(
+)
+
+= exn2_async()
+HH\AsyncFunctionWaitHandle Object
+(
+)
+
+= await exn1_async()
+Hit a php exception : exception 'Exception' with message 'exn' in %s/async-1.php:14
+Stack trace:
+%A
+= await exn2_async()
+Hit a php exception : exception 'Exception' with message 'exn' in %s/async-1.php:19
+Stack trace:
+%A
+quit

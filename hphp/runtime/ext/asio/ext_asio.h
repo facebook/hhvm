@@ -47,6 +47,7 @@ private:
 };
 
 Object HHVM_FUNCTION(asio_get_running);
+Variant HHVM_FUNCTION(join, const Object& obj);
 size_t asio_object_size(const ObjectData* obj);
 
 }

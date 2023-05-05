@@ -2,17 +2,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![feature(box_patterns)]
 
 use std::path::PathBuf;
 
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
+use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
 use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::ast::Def;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
 use oxidized::ast::FunDef;
 use oxidized::ast::FunKind;
 use oxidized::ast::Fun_;
@@ -103,27 +107,80 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     Ok(())
 }
 
+/// The function we emit for debugger takes all variables used in the block of
+/// code as parameters to the function created and returns the updated version
+/// of these variables as a vector, placing the result of executing this function
+/// as the 0th index of this vector.
 fn extract_debugger_main(
     empty_namespace: &RcOc<namespace_env::Env>,
     all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
-    let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
+    let (mut stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
     let mut vars = decl_vars::vars_from_ast(&[], &stmts, true)?
         .into_iter()
         .collect::<Vec<_>>();
+
+    // In order to find the return value of these sets of statements, we must
+    // search and obtain the "return statement".
+    // This basic pass looks at all the "return statements" and
+    // then replaces this stament with a variable set, so that we can later
+    // add this variable into our return result.
+    use oxidized::aast_visitor::NodeMut;
+    use oxidized::aast_visitor::VisitorMut;
+    struct Ctx {
+        return_val: local_id::LocalId,
+    }
+    struct Visitor {}
+    impl<'node> VisitorMut<'node> for Visitor {
+        type Params = oxidized::aast_visitor::AstParams<Ctx, Error>;
+        fn object(&mut self) -> &mut dyn VisitorMut<'node, Params = Self::Params> {
+            self
+        }
+
+        fn visit_stmt(&mut self, env: &mut Ctx, e: &'node mut ast::Stmt) -> Result<()> {
+            match e {
+                Stmt(p, Stmt_::Return(box value @ Some(_))) => {
+                    let value = value.take();
+                    let return_val = &env.return_val;
+                    let expr: Expr = value.unwrap();
+                    *e = hack_stmt!(pos = p.clone(), "#{lvar(clone(return_val))} = #expr;");
+                    Ok(())
+                }
+                _ => e.recurse(env, self),
+            }
+        }
+
+        fn visit_expr(&mut self, env: &mut Ctx, e: &'node mut ast::Expr) -> Result<()> {
+            match &e.2 {
+                // Do not recurse into closures
+                Expr_::Lfun(_) | Expr_::Efun(_) => Ok(()),
+                _ => e.recurse(env, self),
+            }
+        }
+    }
+
+    let mut ctx = Ctx {
+        return_val: local_id::make_unscoped("$__debugger$return_val"),
+    };
+    for stmt in &mut stmts {
+        oxidized::aast_visitor::visit_mut(&mut Visitor {}, &mut ctx, stmt).unwrap();
+    }
+    let return_val = ctx.return_val;
+
     let mut stmts = stmts
         .into_iter()
         .filter_map(|x| x.as_stmt_into())
         .collect::<Vec<_>>();
-    let stmts =
-        if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
-            let Stmt(p, s) = stmts.pop().unwrap();
-            let e = s.as_expr_into().unwrap();
-            let m = stmts.pop().unwrap();
-            vec![m, Stmt::new(p, Stmt_::mk_return(Some(e)))]
-        } else {
-            stmts
-        };
+
+    if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
+        let Stmt(p, s) = stmts.pop().unwrap();
+        let e = s.as_expr_into().unwrap();
+        stmts.push(hack_stmt!(
+            pos = p.clone(),
+            "#{lvar(clone(return_val))} = #e;"
+        ));
+    }
+
     let p = || Pos::NONE;
     let mut unsets: ast::Block = vars
         .iter()
@@ -147,11 +204,17 @@ fn extract_debugger_main(
         .collect();
     vars.push("$__debugger$this".into());
     vars.push("$__debugger_exn$output".into());
-    let params: Vec<_> = vars
+    let (params, return_val_sets): (Vec<_>, Vec<_>) = vars
         .iter()
-        .map(|var| closure_convert::make_fn_param(p(), &local_id::make_unscoped(var), false, true))
-        .collect();
+        .map(|var| {
+            let name = local_id::make_unscoped(var);
+            let param = closure_convert::make_fn_param(p(), &name, false, false);
+            let var = hack_expr!(pos = p(), r#"#{lvar(name)}"#);
+            (param, var)
+        })
+        .unzip();
     let exnvar = local_id::make_unscoped("$__debugger_exn$output");
+    unsets.push(hack_stmt!("#{lvar(clone(return_val))} = null;"));
     let catch = hack_stmt!(
         pos = p(),
         r#"
@@ -161,6 +224,7 @@ fn extract_debugger_main(
               /* no-op */
             } finally {
               #{sets*};
+              return vec[#{lvar(return_val)}, #{return_val_sets*}];
             }
         "#
     );
@@ -182,7 +246,7 @@ fn extract_debugger_main(
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
         body: FuncBody { fb_ast: body },
-        fun_kind: FunKind::FSync,
+        fun_kind: FunKind::FAsync,
         user_attributes: ast::UserAttributes(vec![UserAttribute {
             name: Id(Pos::NONE, "__DebuggerMain".into()),
             params: vec![],

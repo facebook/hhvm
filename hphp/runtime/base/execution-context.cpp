@@ -54,6 +54,7 @@
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_base.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
@@ -2049,7 +2050,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
               f->setAttrs(Attr(f->attrs() | AttrStatic));
             }
           }
-          assertx(f->numParams() >= 1 && f->numParams() == f->numInOutParams());
+          assertx(f->numParams() > 0);
           return f;
         }
       }
@@ -2066,7 +2067,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     };
     for (Id id = 0; id < f->numParams() - 1; id++) {
       assertx(id < f->numNamedLocals());
-      assertx(f->params()[id].isInOut());
+      assertx(!f->params()[id].isInOut());
+      assertx(!f->params()[id].isVariadic());
       if (f->localVarName(id)->equal(s_debuggerThis.get()) &&
           ctx && fp->hasThis()) {
         args.append(make_tv<KindOfObject>(fp->getThis()));
@@ -2091,11 +2093,14 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
-    auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls,
-                                   RuntimeCoeffects::defaults(), false);
-    assertx(isArrayLikeType(type(arr_tv)));
-    assertx(val(arr_tv).parr->size() == f->numParams() + 1);
-    Array arr = Array::attach(val(arr_tv).parr);
+    auto const wh = invokeFunc(f, args.toArray(), obj, cls,
+                               RuntimeCoeffects::defaults(), false);
+    assertx(f->isAsync());
+    assertx(tvIsObject(wh));
+    auto const arr_tv = HHVM_FN(join)(Object::attach(wh.m_data.pobj));
+    assertx(isArrayLikeType(arr_tv.getType()));
+    Array arr = arr_tv.toArray();
+    assertx(arr->size() == f->numParams() + 1);
     for (Id id = 0; id < f->numParams() - 1; id++) {
       auto const tv = arr.lookup(id + 1);
       if (isObjectType(type(tv)) &&

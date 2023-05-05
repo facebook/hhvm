@@ -1,4 +1,5 @@
 <?hh // partial
+
 /**
 * A Compatibility library with PHP 5.5's simplified password hashing API.
 *
@@ -9,6 +10,9 @@
 * Some changes by James Miller <james@pocketrent.com> for integration with the
 * HipHop VM
 */
+
+const int PASSWORD_BCRYPT = 1;
+const int PASSWORD_DEFAULT = 1; /* PASSWORD_BCRYPT */
 
 /**
 * Hash the password using the specified algorithm

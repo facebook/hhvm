@@ -12,33 +12,39 @@ open Hh_prelude
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
-type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, ord, show]
+type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, hash, ord, show]
 
 type arg_position =
   | Aonly
   | Afirst
   | Asecond
+[@@deriving eq, hash]
 
-and expr_dep_type_reason =
+type expr_dep_type_reason =
   | ERexpr of int
   | ERstatic
   | ERclass of string
   | ERparent of string
   | ERself of string
   | ERpu of string
+[@@deriving eq, hash]
 
-and blame_source =
+type blame_source =
   | BScall
   | BSlambda
   | BSassignment
   | BSout_of_scope
+[@@deriving eq, hash]
 
-and blame = Blame of Pos.t * blame_source [@@deriving eq]
+type blame = Blame of Pos.t * blame_source [@@deriving eq, hash]
 
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase [@@deriving eq, show]
+type decl_phase = private DeclPhase [@@deriving eq, hash, show]
 
-type locl_phase = private LoclPhase [@@deriving eq, show]
+type locl_phase = private LoclPhase [@@deriving eq, hash, show]
+
+(* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
+let _hash_fold_phase hsv _ = hsv
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
@@ -162,6 +168,7 @@ type _ t_ =
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_
+[@@deriving hash]
 
 type t = locl_phase t_
 

@@ -378,7 +378,7 @@ and 'ty fun_param = {
   fp_flags: int;
 }
 
-and 'ty fun_params = 'ty fun_param list
+and 'ty fun_params = 'ty fun_param list [@@deriving hash]
 
 val nonexact : exact
 

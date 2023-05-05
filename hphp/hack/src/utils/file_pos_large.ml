@@ -7,13 +7,15 @@
  *
  *)
 
+open Hh_prelude
+
 (* See documentation in mli file *)
 type t = {
   pos_lnum: int;
   pos_bol: int;
   pos_offset: int;
 }
-[@@deriving eq, ord]
+[@@deriving eq, hash, ord]
 
 let pp fmt pos =
   Format.pp_print_int fmt pos.pos_lnum;
@@ -29,7 +31,7 @@ let compare : t -> t -> int = compare
 
 let dummy = { pos_lnum = 0; pos_bol = 0; pos_offset = -1 }
 
-let is_dummy t = t = dummy
+let is_dummy = equal dummy
 
 let beg_of_file = { pos_lnum = 1; pos_bol = 0; pos_offset = 0 }
 

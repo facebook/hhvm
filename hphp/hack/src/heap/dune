@@ -21,7 +21,7 @@
  (modules ident)
  (libraries collections utils_core)
  (preprocess
-  (pps ppx_deriving.std visitors.ppx)))
+  (pps ppx_deriving.std ppx_hash visitors.ppx)))
 
 (library
  (name heap_shared_mem_hash)

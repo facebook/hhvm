@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1d6b8d315044e1fe90fcde484acbfc77>>
+// @generated SignedSource<<1a44ccaa1355ef6618dc0312ae7b40cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -62,14 +62,14 @@ pub enum CeVisibility {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
 #[repr(C, u8)]
 pub enum IfcFunDecl {
     FDPolicied(Option<String>),
     FDInferFlows,
 }
 
-#[rust_to_ocaml(attr = "deriving (eq, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
 pub type CrossPackageDecl = Option<String>;
 
 #[derive(
@@ -149,7 +149,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TypeOrigin {
     #[rust_to_ocaml(name = "Missing_origin")]
@@ -173,11 +173,11 @@ pub enum TypeOrigin {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct PosString(pub pos_or_decl::PosOrDecl, pub String);
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type TByteString = String;
 
 #[derive(
@@ -195,7 +195,7 @@ pub type TByteString = String;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 
@@ -214,7 +214,7 @@ pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName {
     #[rust_to_ocaml(name = "TSFlit_int")]
@@ -303,7 +303,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
@@ -324,7 +324,7 @@ pub enum DependentType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute {
@@ -347,7 +347,7 @@ pub struct UserAttribute {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam {
@@ -374,7 +374,7 @@ pub struct Tparam {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C)]
 pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
@@ -395,7 +395,7 @@ pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show, ord)")]
 #[repr(u8)]
 pub enum Enforcement {
     Unenforced,
@@ -873,6 +873,7 @@ pub struct FunParam {
 }
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
 pub type FunParams = Vec<FunParam>;
 
 #[derive(

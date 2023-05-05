@@ -19,7 +19,7 @@ type env = {
   ns_is_codegen: bool;
   ns_disable_xhp_element_mangling: bool;
 }
-[@@deriving eq, show, ord]
+[@@deriving eq, hash, show, ord]
 
 let hh_autoimport_map_of_list ids =
   List.map ids ~f:(fun id -> (id, "HH\\" ^ id)) |> SMap.of_list

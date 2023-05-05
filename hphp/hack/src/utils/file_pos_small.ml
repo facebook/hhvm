@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (**
  * Three values packed into one 64-bit integer:
  *
@@ -26,7 +28,7 @@
  *
  *)
 
-type t = int [@@deriving eq, ord]
+type t = int [@@deriving eq, hash, ord]
 
 let column_bits = 9
 

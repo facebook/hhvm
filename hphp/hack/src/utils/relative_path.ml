@@ -16,7 +16,7 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-[@@deriving eq, show, enum, ord, sexp_of]
+[@@deriving eq, hash, show, enum, ord, sexp_of]
 
 let is_hhi = function
   | Hhi -> true
@@ -73,7 +73,7 @@ let set_path_prefix prefix v =
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
   | _ -> path_ref_of_prefix prefix := Some (enforce_trailing_slash v)
 
-type t = prefix * string [@@deriving eq, show, ord, sexp_of]
+type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of]
 
 type relative_path = t
 

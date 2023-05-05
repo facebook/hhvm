@@ -16,7 +16,7 @@ type env = {
   ns_is_codegen: bool;
   ns_disable_xhp_element_mangling: bool;
 }
-[@@deriving eq, show, ord]
+[@@deriving eq, hash, show, ord]
 
 val empty_with_default : env
 

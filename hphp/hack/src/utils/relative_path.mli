@@ -14,7 +14,7 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-[@@deriving eq, show, enum]
+[@@deriving eq, hash, show, enum]
 
 val is_hhi : prefix -> bool
 
@@ -32,7 +32,7 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving eq, show, ord, sexp_of]
+type t = S.t [@@deriving eq, hash, show, ord, sexp_of]
 
 val default : t
 

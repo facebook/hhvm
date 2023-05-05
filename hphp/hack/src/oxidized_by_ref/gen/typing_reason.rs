@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d29bd84828ff57f2720f66c088b297c2>>
+// @generated SignedSource<<5ab7185c518c58b257550253a21125cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -19,7 +19,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type PosId<'a> = (&'a pos_or_decl::PosOrDecl<'a>, &'a ast_defs::Id_<'a>);
 
 pub use oxidized::typing_reason::ArgPosition;
@@ -40,7 +40,7 @@ pub use oxidized::typing_reason::ArgPosition;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
@@ -75,8 +75,7 @@ pub use oxidized::typing_reason::BlameSource;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving eq")]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C, u8)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -103,6 +102,7 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum T_<'a> {
     Rnone,

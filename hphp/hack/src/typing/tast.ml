@@ -20,7 +20,7 @@ open Hh_prelude
  * that omits type inference artefacts such as type variables and lambda
  * identifiers.
  *)
-type ty = Typing_defs.locl_ty
+type ty = Typing_defs.locl_ty [@@deriving hash]
 
 type possibly_enforced_ty = Typing_defs.locl_possibly_enforced_ty
 
@@ -81,7 +81,9 @@ type saved_env = {
 
 type program = (ty, saved_env) Aast.program [@@deriving show]
 
-type def = (ty, saved_env) Aast.def
+type def = (ty, (saved_env[@hash.ignore])) Aast.def [@@deriving hash]
+
+type def_list = def list [@@deriving hash]
 
 type expr = (ty, saved_env) Aast.expr
 

@@ -7,8 +7,10 @@
  *
  *)
 
+open Hh_prelude
+
 module S = struct
-  type t = int * string [@@deriving ord, eq]
+  type t = int * string [@@deriving ord, hash, eq]
 
   let compare = compare
 end
@@ -46,7 +48,7 @@ let tmp () =
   let res = next () in
   (res, "__tmp" ^ string_of_int res)
 
-module Set = Set.Make (S)
+module Set = Caml.Set.Make (S)
 
 module Map = struct
   include WrappedMap.Make (S)
@@ -54,4 +56,6 @@ module Map = struct
   let pp pp_data = make_pp (fun fmt id -> Format.fprintf fmt "%a" pp id) pp_data
 
   let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+
+  let hash_fold_t x = make_hash_fold_t S.hash_fold_t x
 end

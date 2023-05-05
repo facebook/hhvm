@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d1982e675c28fe417bcb070c333536d>>
+// @generated SignedSource<<0316d651463cf84b594886696e44dd35>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,7 +20,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type PosId = (pos_or_decl::PosOrDecl, ast_defs::Id_);
 
 #[derive(
@@ -40,6 +40,7 @@ pub type PosId = (pos_or_decl::PosOrDecl, ast_defs::Id_);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(u8)]
 pub enum ArgPosition {
     Aonly,
@@ -64,7 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
@@ -92,7 +93,7 @@ pub enum ExprDepTypeReason {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(u8)]
 pub enum BlameSource {
     BScall,
@@ -119,8 +120,7 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving eq")]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C, u8)]
 pub enum Blame {
     Blame(pos::Pos, BlameSource),
@@ -142,6 +142,7 @@ pub enum Blame {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum T_ {
     Rnone,

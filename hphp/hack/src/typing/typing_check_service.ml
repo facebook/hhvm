@@ -310,7 +310,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 let process_one_workitem
     ~ctx
-    ~check_info
+    ~(check_info : check_info)
     ~batch_info
     ~memory_cap
     ~longlived_workers

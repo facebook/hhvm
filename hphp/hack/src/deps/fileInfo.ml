@@ -27,7 +27,7 @@ open Prim_defs
 type mode =
   | Mhhi  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
-[@@deriving eq, show, enum, ord, sexp_of]
+[@@deriving eq, hash, show, enum, ord, sexp_of]
 
 let is_strict = function
   | Mstrict -> true

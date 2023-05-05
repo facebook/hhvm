@@ -7,7 +7,7 @@
  *
  *)
 
-type t = int [@@deriving eq]
+type t = int [@@deriving eq, hash]
 
 val compare : t -> t -> int
 

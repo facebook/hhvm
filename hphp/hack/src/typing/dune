@@ -37,7 +37,7 @@
     pos
     pos_or_decl)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_hash)))
 
 (library
   (name typing_error)
@@ -88,7 +88,7 @@
   typing_error
   utils_core)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_hash)))
 
 (library
  (name deferred_decl)
@@ -454,7 +454,7 @@
   typing_logic
   typechecker_options)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_hash)))
 
 (library
  (name coverage_level)

@@ -11,7 +11,7 @@ open Hh_prelude
 
 external hh_counter_next : unit -> int = "hh_counter_next"
 
-type t = int [@@deriving eq]
+type t = int [@@deriving eq, hash]
 
 let compare = Int.compare
 

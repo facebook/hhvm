@@ -1,4 +1,5 @@
 (library
  (name collections)
  (wrapped false)
- (libraries common core_kernel))
+ (libraries common core_kernel)
+ (preprocess (pps ppx_hash)))

@@ -7,8 +7,10 @@
  *
  *)
 
+open Core
+
 module type S = sig
-  include Map.S
+  include Caml.Map.S
 
   val add : ?combine:('a -> 'a -> 'a) -> key -> 'a -> 'a t -> 'a t
 
@@ -68,4 +70,11 @@ module type S = sig
     Format.formatter ->
     'a t ->
     unit
+
+  val make_hash_fold_t :
+    (Hash.state -> key -> Hash.state) ->
+    (Hash.state -> 'a -> Hash.state) ->
+    Hash.state ->
+    'a t ->
+    Hash.state
 end

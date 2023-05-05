@@ -26,7 +26,7 @@ open Prim_defs
 type mode =
   | Mhhi (* just declare signatures, don't check anything *)
   | Mstrict (* check everything! *)
-[@@deriving eq, show, enum, ord, sexp_of]
+[@@deriving eq, hash, show, enum, ord, sexp_of]
 
 val is_strict : mode -> bool
 

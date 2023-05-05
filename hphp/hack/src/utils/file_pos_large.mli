@@ -22,7 +22,7 @@ type t = {
   pos_offset: int;
       (** character offset from the beginning of the file. Starts at 0. *)
 }
-[@@deriving eq]
+[@@deriving eq, hash]
 
 val pp : Format.formatter -> t -> unit
 

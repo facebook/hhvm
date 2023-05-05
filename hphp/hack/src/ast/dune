@@ -4,4 +4,4 @@
  (modules ast_defs)
  (libraries file_info namespace_env naming_special_names visitors_runtime)
  (preprocess
-  (pps visitors.ppx ppx_transform ppx_deriving.std)))
+  (pps visitors.ppx ppx_hash ppx_transform ppx_deriving.std)))

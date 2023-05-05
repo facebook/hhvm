@@ -11,7 +11,11 @@
  * requiring a lot of padding for inline doc comments. *)
 [@@@ocamlformat "doc-comments-padding=80"]
 
-type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, ord, map, show]
+(* We could open Hh_prelude here, but then we get errors about using ==,
+   which some visitor below uses. *)
+open Base.Export
+
+type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, hash, ord, map, show]
 
 let pp_local_id_map _ fmt map =
   Format.fprintf fmt "@[<hov 2>{";
@@ -25,17 +29,19 @@ let pp_local_id_map _ fmt map =
        false);
   Format.fprintf fmt "}@]"
 
-type pos = Ast_defs.pos [@@deriving eq, show, ord] [@@transform.opaque]
+type pos = Ast_defs.pos [@@deriving eq, hash, show, ord] [@@transform.opaque]
+
+let hash_pos hsv _pos = hsv
 
 type byte_string = Ast_defs.byte_string
-[@@deriving eq, show, ord] [@@transform.opaque]
+[@@deriving eq, hash, show, ord] [@@transform.opaque]
 
 type visibility = Ast_defs.visibility =
   | Private
   | Public
   | Protected
   | Internal
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type tprim = Ast_defs.tprim =
   | Tnull
@@ -48,22 +54,23 @@ type tprim = Ast_defs.tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type typedef_visibility = Ast_defs.typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
   | CaseType
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type reify_kind = Ast_defs.reify_kind =
   | Erased
   | SoftReified
   | Reified
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
-type pstring = Ast_defs.pstring [@@deriving eq, ord, show] [@@transform.opaque]
+type pstring = Ast_defs.pstring
+[@@deriving eq, hash, ord, hash, show] [@@transform.opaque]
 
 type positioned_byte_string = Ast_defs.positioned_byte_string
 [@@deriving eq, ord, show]
@@ -71,12 +78,12 @@ type positioned_byte_string = Ast_defs.positioned_byte_string
 type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type prop_or_method = Ast_defs.prop_or_method =
   | Is_prop
   | Is_method
-[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
+[@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type local_id = (Local_id.t[@visitors.opaque]) [@@transform.opaque]
 
@@ -1276,6 +1283,7 @@ and where_constraint_hint =
 [@@deriving
   show { with_path = false },
     eq,
+    hash,
     ord,
     map,
     transform ~restart:(`Disallow `Encode_as_result),

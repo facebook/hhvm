@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<98bb90092191004a6b6ed1cf5d65aad8>>
+// @generated SignedSource<<2c26758f93399334dbeb0ab4ab6cea63>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,7 +68,7 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
 #[repr(C, u8)]
 pub enum IfcFunDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -78,7 +78,7 @@ pub enum IfcFunDecl<'a> {
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
-#[rust_to_ocaml(attr = "deriving (eq, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
 pub type CrossPackageDecl<'a> = Option<&'a str>;
 
 pub use oxidized::typing_defs_core::FunTparamsKind;
@@ -100,7 +100,7 @@ pub use oxidized::typing_defs_core::ValKind;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TypeOrigin<'a> {
     #[rust_to_ocaml(name = "Missing_origin")]
@@ -128,7 +128,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeOrigin<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct PosString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -138,7 +138,7 @@ pub struct PosString<'a>(
 impl<'a> TrivialDrop for PosString<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PosString<'arena>);
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type TByteString<'a> = str;
 
 #[derive(
@@ -157,7 +157,7 @@ pub type TByteString<'a> = str;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct PosByteString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -183,7 +183,7 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -223,7 +223,7 @@ pub use oxidized::typing_defs_core::ConsistentKind;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
@@ -246,7 +246,7 @@ arena_deserializer::impl_deserialize_in_arena!(DependentType);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute<'a> {
@@ -273,7 +273,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam<'a> {
@@ -306,7 +306,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C)]
 pub struct WhereConstraint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
@@ -881,4 +881,5 @@ impl<'a> TrivialDrop for FunParam<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
 pub type FunParams<'a> = [&'a FunParam<'a>];

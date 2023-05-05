@@ -10,20 +10,22 @@
 (* Note: While Pos.string prints out positions as closed intervals, pos_start
  * and pos_end actually form a half-open interval (i.e. pos_end points to the
  * character *after* the last character of the relevant lexeme.) *)
-type 'a pos [@@deriving eq, ord, show]
+type 'a pos [@@deriving eq, hash, ord, show]
 
 (** The underlying type used to construct Pos instances.
  *
  * See "val make: 'a -> b -> 'a pos" *)
 type b = Pos_source.t
 
-type t = Relative_path.t pos [@@deriving eq]
+type t = Relative_path.t pos [@@deriving eq, hash]
 
 val pp : Format.formatter -> t -> unit
 
 type absolute = string pos [@@deriving eq, ord, show]
 
 val none : t
+
+val hash : t -> int
 
 val filename : 'a pos -> 'a
 

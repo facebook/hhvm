@@ -19,7 +19,7 @@ open Hh_prelude
  * <-------------------><--------------><------------------><---->X
  *  byte offset of line   line number      column number     width
  *)
-type t = int [@@deriving eq, ord]
+type t = int [@@deriving eq, hash, ord]
 
 let start_beginning_of_line_bits = 21
 

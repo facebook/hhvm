@@ -38,7 +38,7 @@ pub use prim_defs::*;
     Serialize,
     ToOcamlRep,
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, enum, ord, sexp_of)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show, enum, ord, sexp_of)")]
 #[repr(u8)]
 pub enum Mode {
     /// just declare signatures, don't check anything

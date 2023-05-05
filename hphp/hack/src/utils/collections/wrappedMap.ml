@@ -7,10 +7,12 @@
  *
  *)
 
+open Core
+
 module type S = WrappedMap_sig.S
 
-module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
-  include Map.Make (Ord)
+module Make (Ord : Caml.Map.OrderedType) : S with type key = Ord.t = struct
+  include Caml.Map.Make (Ord)
 
   let union ?combine x y =
     let combine =
@@ -108,20 +110,10 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
   let filter_opt m = filter_map (fun _key x -> x) m
 
   let of_list elts =
-    List.fold_left
-      begin
-        (fun acc (key, value) -> add key value acc)
-      end
-      empty
-      elts
+    List.fold ~f:(fun acc (key, value) -> add key value acc) ~init:empty elts
 
   let of_function domain f =
-    List.fold_left
-      begin
-        (fun acc key -> add key (f key) acc)
-      end
-      empty
-      domain
+    List.fold ~f:(fun acc key -> add key (f key) acc) ~init:empty domain
 
   let add ?combine key new_value map =
     match combine with
@@ -137,7 +129,7 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
       fold
         (fun key item (map_, changed) ->
           let item_ = f item in
-          (add key item_ map_, changed || item_ != item))
+          (add key item_ map_, changed || not (phys_equal item_ item)))
         map
         (empty, false)
     in
@@ -151,7 +143,8 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
       fold
         (fun key item (map_, changed) ->
           let new_key = f key in
-          (add ?combine new_key item map_, changed || new_key != key))
+          ( add ?combine new_key item map_,
+            changed || not (phys_equal new_key key) ))
         map
         (empty, false)
     in
@@ -173,8 +166,8 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
     | [] -> ()
     | _ -> Format.fprintf fmt " ");
     ignore
-      (List.fold_left
-         (fun sep (key, data) ->
+      (List.fold
+         ~f:(fun sep (key, data) ->
            if sep then Format.fprintf fmt ";@ ";
            Format.fprintf fmt "@[";
            pp_key fmt key;
@@ -182,10 +175,22 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
            pp_data fmt data;
            Format.fprintf fmt "@]";
            true)
-         false
+         ~init:false
          bindings);
     (match bindings with
     | [] -> ()
     | _ -> Format.fprintf fmt " ");
     Format.fprintf fmt "}@]"
+
+  type ('a, 'b) tuple = 'a * 'b [@@deriving hash]
+
+  let make_hash_fold_t
+      (hash_fold_ord : Hash.state -> Ord.t -> Hash.state)
+      (hash_fold_a : Hash.state -> 'a -> Hash.state)
+      (hsv : Hash.state)
+      (map : 'a t) =
+    hash_fold_list
+      (hash_fold_tuple hash_fold_ord hash_fold_a)
+      hsv
+      (bindings map)
 end

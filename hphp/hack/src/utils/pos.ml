@@ -32,9 +32,9 @@ type 'a pos =
       pos_span: Pos_span_tiny.t;
     }
   | Pos_from_reason of 'a pos
-[@@deriving eq, show]
+[@@deriving eq, hash, show]
 
-type t = Relative_path.t pos [@@deriving eq, show]
+type t = Relative_path.t pos [@@deriving eq, hash, show]
 
 type absolute = string pos [@@deriving eq, show]
 

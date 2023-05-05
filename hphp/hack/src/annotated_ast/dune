@@ -4,7 +4,7 @@
  (wrapped false)
  (libraries ast namespace_env)
  (preprocess
-  (pps visitors.ppx ppx_transform ppx_deriving.std)))
+  (pps visitors.ppx ppx_transform ppx_deriving.std ppx_hash)))
 
 (library
  (name namespace_env)
@@ -12,7 +12,7 @@
  (modules namespace_env)
  (libraries collections core_kernel hh_autoimport parser_options)
  (preprocess
-  (pps visitors.ppx ppx_deriving.std)))
+  (pps ppx_hash visitors.ppx ppx_deriving.std)))
 
 (library
  (name annotated_ast_utils)

@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (** Used to represent local variables in the named AST. *)
 
 module S : sig
@@ -15,7 +17,7 @@ module S : sig
   val compare : t -> t -> int
 end
 
-type t = S.t [@@deriving eq]
+type t = S.t [@@deriving eq, hash]
 
 val pp : Format.formatter -> t -> unit
 
@@ -47,7 +49,7 @@ val make : int -> string -> t
 
 val tmp : unit -> t
 
-module Set : module type of Set.Make (S)
+module Set : module type of Caml.Set.Make (S)
 
 module Map : sig
   include module type of WrappedMap.Make (S)
@@ -55,4 +57,7 @@ module Map : sig
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 
   val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+
+  val hash_fold_t :
+    (Hash.state -> 'a -> Hash.state) -> Hash.state -> 'a t -> Hash.state
 end

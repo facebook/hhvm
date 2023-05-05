@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<54777ac59f46f72d01c0a15b4a9816eb>>
+// @generated SignedSource<<4a96c23e06f62f4c3fc1566eaacf9f2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2684,7 +2684,7 @@ pub struct Enum_ {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord, map,
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, hash, ord, map,
     (transform ~restart:(`Disallow `Encode_as_result)),
     (visitors
        {

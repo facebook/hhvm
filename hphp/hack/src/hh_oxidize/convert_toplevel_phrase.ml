@@ -44,6 +44,7 @@ let module_blacklist =
     "aast";
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
+    "base::export";
     "core_kernel";
     "common";
     "hh_core";

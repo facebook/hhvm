@@ -1602,6 +1602,8 @@ and simplify_subtype_i
               let (env, p2) = f env in
               if TL.is_unsat p2 then
                 (env, p1)
+              else if TL.is_unsat p1 then
+                (env, p2)
               else
                 (env, TL.disj ~fail p1 p2)
           in

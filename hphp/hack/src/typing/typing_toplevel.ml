@@ -188,15 +188,16 @@ let fun_def ctx fd :
       f.f_user_attributes
   in
   Typing_memoize.check_function env f;
-  let (env, tb) =
-    Typing.fun_
-      ~native:(Typing_native.is_native_fun ~env f)
-      ~disable
-      env
-      return
-      pos
-      f.f_body
-      f.f_fun_kind
+  let ((env, tb), had_errors) =
+    Errors.run_and_check_for_errors (fun () ->
+        Typing.fun_
+          ~native:(Typing_native.is_native_fun ~env f)
+          ~disable
+          env
+          return
+          pos
+          f.f_body
+          f.f_fun_kind)
   in
   begin
     match hint_of_type_hint f.f_ret with
@@ -257,6 +258,7 @@ let fun_def ctx fd :
     in
     if
       sdt_dynamic_check_required
+      && (not had_errors)
       && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
     then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in

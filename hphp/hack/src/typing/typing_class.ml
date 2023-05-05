@@ -276,16 +276,17 @@ let method_def ~is_disposable env cls m =
       SN.UserAttributes.uaDisableTypecheckerInternal
       m.m_user_attributes
   in
-  let (env, tb) =
-    Typing.fun_
-      ~abstract:m.m_abstract
-      ~native:(Typing_native.is_native_meth ~env m)
-      ~disable
-      env
-      return
-      pos
-      m.m_body
-      m.m_fun_kind
+  let ((env, tb), had_errors) =
+    Errors.run_and_check_for_errors (fun () ->
+        Typing.fun_
+          ~abstract:m.m_abstract
+          ~native:(Typing_native.is_native_meth ~env m)
+          ~disable
+          env
+          return
+          pos
+          m.m_body
+          m.m_fun_kind)
   in
   let type_hint' =
     match hint_of_type_hint m.m_ret with
@@ -329,6 +330,7 @@ let method_def ~is_disposable env cls m =
   in
   let sdt_dynamic_check_required =
     sdt_dynamic_check_required
+    && (not had_errors)
     && not
        @@
        (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)

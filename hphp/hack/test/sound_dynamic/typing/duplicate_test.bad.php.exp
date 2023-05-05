@@ -1,0 +1,8 @@
+File "duplicate_test.bad.php", line 6, characters 13-13:
+No class constant `A` in `C` (Typing[4090])
+  File "duplicate_test.bad.php", line 10, characters 7-7:
+  Declaration of `C` is here
+File "duplicate_test.bad.php", line 12, characters 15-15:
+No class constant `A` in `C` (Typing[4090])
+  File "duplicate_test.bad.php", line 10, characters 7-7:
+  Declaration of `C` is here

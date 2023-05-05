@@ -478,6 +478,15 @@ let get_current_list file_t_map =
   get_current_file_t file_t_map |> fun x ->
   PhaseMap.find_opt x current_phase |> Option.value ~default:[]
 
+let run_and_check_for_errors (f : unit -> 'res) : 'res * bool =
+  let old_error_list = get_current_list !error_map in
+
+  let old_count = List.length old_error_list in
+  let result = f () in
+  let new_error_list = get_current_list !error_map in
+  let new_count = List.length new_error_list in
+  (result, not (Int.equal old_count new_count))
+
 let set_current_list file_t_map new_list =
   let (current_file, current_phase) = !current_context in
   file_t_map :=

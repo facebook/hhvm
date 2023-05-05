@@ -46,7 +46,7 @@ func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
 
 func (x *MyStruct) GetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
-      return includes.NewIncluded()
+        return includes.NewIncluded()
     }
 
     return x.MyIncludedField
@@ -58,7 +58,7 @@ func (x *MyStruct) GetMyOtherIncludedFieldNonCompat() *includes.Included {
 
 func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
     if !x.IsSetMyOtherIncludedField() {
-      return includes.NewIncluded()
+        return includes.NewIncluded()
     }
 
     return x.MyOtherIncludedField
@@ -94,7 +94,6 @@ func (x *MyStruct) IsSetMyIncludedField() bool {
 func (x *MyStruct) IsSetMyOtherIncludedField() bool {
     return x.MyOtherIncludedField != nil
 }
-
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIncludedField
     if !x.IsSetMyIncludedField() {

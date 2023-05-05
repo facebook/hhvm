@@ -141,7 +141,6 @@ func (x *A) SetUselessField(value int32) *A {
     return x
 }
 
-
 func (x *A) writeField1(p thrift.Protocol) error {  // UselessField
     if err := p.WriteFieldBegin("useless_field", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -276,7 +275,7 @@ func (x *U) GetINonCompat() *int32 {
 
 func (x *U) GetI() int32 {
     if !x.IsSetI() {
-      return 0
+        return 0
     }
 
     return *x.I
@@ -288,7 +287,7 @@ func (x *U) GetSNonCompat() *string {
 
 func (x *U) GetS() string {
     if !x.IsSetS() {
-      return ""
+        return ""
     }
 
     return *x.S
@@ -506,7 +505,6 @@ func (x *Bang) SetMessage(value string) *Bang {
     x.Message = value
     return x
 }
-
 
 func (x *Bang) writeField1(p thrift.Protocol) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {

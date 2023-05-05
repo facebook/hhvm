@@ -369,7 +369,7 @@ func (x *reqGetEntityGetEntity) GetRNonCompat() *GetEntityRequest {
 
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     if !x.IsSetR() {
-      return NewGetEntityRequest()
+        return NewGetEntityRequest()
     }
 
     return x.R
@@ -519,7 +519,7 @@ func (x *respGetEntityGetEntity) GetValueNonCompat() *GetEntityResponse {
 
 func (x *respGetEntityGetEntity) GetValue() *GetEntityResponse {
     if !x.IsSetValue() {
-      return NewGetEntityResponse()
+        return NewGetEntityResponse()
     }
 
     return x.Value
@@ -757,7 +757,6 @@ func (x *respGetEntityGetBool) SetValue(value bool) *respGetEntityGetBool {
     return x
 }
 
-
 func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -975,7 +974,6 @@ func (x *respGetEntityGetByte) SetValue(value byte) *respGetEntityGetByte {
     x.Value = value
     return x
 }
-
 
 func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.BYTE, 0); err != nil {
@@ -1195,7 +1193,6 @@ func (x *respGetEntityGetI16) SetValue(value int16) *respGetEntityGetI16 {
     return x
 }
 
-
 func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I16, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1413,7 +1410,6 @@ func (x *respGetEntityGetI32) SetValue(value int32) *respGetEntityGetI32 {
     x.Value = value
     return x
 }
-
 
 func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
@@ -1633,7 +1629,6 @@ func (x *respGetEntityGetI64) SetValue(value int64) *respGetEntityGetI64 {
     return x
 }
 
-
 func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I64, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1851,7 +1846,6 @@ func (x *respGetEntityGetDouble) SetValue(value float64) *respGetEntityGetDouble
     x.Value = value
     return x
 }
-
 
 func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.DOUBLE, 0); err != nil {
@@ -2071,7 +2065,6 @@ func (x *respGetEntityGetString) SetValue(value string) *respGetEntityGetString 
     return x
 }
 
-
 func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2283,7 +2276,7 @@ func (x *respGetEntityGetBinary) GetValueNonCompat() []byte {
 
 func (x *respGetEntityGetBinary) GetValue() []byte {
     if !x.IsSetValue() {
-      return []byte("")
+        return []byte("")
     }
 
     return x.Value
@@ -2513,7 +2506,7 @@ func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
 
 func (x *respGetEntityGetMap) GetValue() map[string]string {
     if !x.IsSetValue() {
-      return nil
+        return nil
     }
 
     return x.Value
@@ -2789,7 +2782,7 @@ func (x *respGetEntityGetSet) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetSet) GetValue() []string {
     if !x.IsSetValue() {
-      return nil
+        return nil
     }
 
     return x.Value
@@ -3048,7 +3041,7 @@ func (x *respGetEntityGetList) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetList) GetValue() []string {
     if !x.IsSetValue() {
-      return nil
+        return nil
     }
 
     return x.Value
@@ -3261,9 +3254,6 @@ func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(value int64) *reqGetEntityGetLeg
     return x
 }
 
-
-
-
 func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Protocol) error {  // NumPos
     if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -3475,7 +3465,6 @@ func (x *respGetEntityGetLegacyStuff) SetValue(value int32) *respGetEntityGetLeg
     x.Value = value
     return x
 }
-
 
 func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {

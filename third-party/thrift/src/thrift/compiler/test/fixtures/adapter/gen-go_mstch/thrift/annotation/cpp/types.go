@@ -187,8 +187,6 @@ func (x *Type) SetTemplate(value string) *Type {
     return x
 }
 
-
-
 func (x *Type) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -362,7 +360,6 @@ func (x *Ref) SetType(value RefType) *Ref {
     return x
 }
 
-
 func (x *Ref) writeField1(p thrift.Protocol) error {  // Type
     if err := p.WriteFieldBegin("type", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -498,7 +495,6 @@ func (x *Lazy) SetRef(value bool) *Lazy {
     x.Ref = value
     return x
 }
-
 
 func (x *Lazy) writeField1(p thrift.Protocol) error {  // Ref
     if err := p.WriteFieldBegin("ref", thrift.BOOL, 1); err != nil {
@@ -770,11 +766,6 @@ func (x *Adapter) SetMoveOnly(value bool) *Adapter {
     x.MoveOnly = value
     return x
 }
-
-
-
-
-
 
 func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
@@ -1066,7 +1057,6 @@ func (x *PackIsset) SetAtomic(value bool) *PackIsset {
     x.Atomic = value
     return x
 }
-
 
 func (x *PackIsset) writeField1(p thrift.Protocol) error {  // Atomic
     if err := p.WriteFieldBegin("atomic", thrift.BOOL, 1); err != nil {
@@ -1540,8 +1530,6 @@ func (x *FieldInterceptor) SetNoinline(value bool) *FieldInterceptor {
     return x
 }
 
-
-
 func (x *FieldInterceptor) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1795,7 +1783,6 @@ func (x *EnumType) SetType(value EnumUnderlyingType) *EnumType {
     x.Type = value
     return x
 }
-
 
 func (x *EnumType) writeField1(p thrift.Protocol) error {  // Type
     if err := p.WriteFieldBegin("type", thrift.I32, 1); err != nil {

@@ -40,7 +40,6 @@ func (x *Foo) SetA(value int64) *Foo {
     return x
 }
 
-
 func (x *Foo) writeField1(p thrift.Protocol) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)

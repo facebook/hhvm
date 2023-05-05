@@ -179,7 +179,7 @@ func (x *reqMyServiceQuery) GetSNonCompat() *module.MyStruct {
 
 func (x *reqMyServiceQuery) GetS() *module.MyStruct {
     if !x.IsSetS() {
-      return module.NewMyStruct()
+        return module.NewMyStruct()
     }
 
     return x.S
@@ -191,7 +191,7 @@ func (x *reqMyServiceQuery) GetINonCompat() *includes.Included {
 
 func (x *reqMyServiceQuery) GetI() *includes.Included {
     if !x.IsSetI() {
-      return includes.NewIncluded()
+        return includes.NewIncluded()
     }
 
     return x.I
@@ -482,7 +482,7 @@ func (x *reqMyServiceHasArgDocs) GetSNonCompat() *module.MyStruct {
 
 func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
     if !x.IsSetS() {
-      return module.NewMyStruct()
+        return module.NewMyStruct()
     }
 
     return x.S
@@ -494,7 +494,7 @@ func (x *reqMyServiceHasArgDocs) GetINonCompat() *includes.Included {
 
 func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     if !x.IsSetI() {
-      return includes.NewIncluded()
+        return includes.NewIncluded()
     }
 
     return x.I

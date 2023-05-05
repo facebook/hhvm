@@ -167,10 +167,6 @@ func (x *Color) SetAlpha(value float64) *Color {
     return x
 }
 
-
-
-
-
 func (x *Color) writeField1(p thrift.Protocol) error {  // Red
     if err := p.WriteFieldBegin("red", thrift.DOUBLE, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -435,7 +431,7 @@ func (x *Vehicle) GetColorNonCompat() *Color {
 
 func (x *Vehicle) GetColor() *Color {
     if !x.IsSetColor() {
-      return NewColor()
+        return NewColor()
     }
 
     return x.Color
@@ -447,7 +443,7 @@ func (x *Vehicle) GetLicensePlateNonCompat() *string {
 
 func (x *Vehicle) GetLicensePlate() string {
     if !x.IsSetLicensePlate() {
-      return ""
+        return ""
     }
 
     return *x.LicensePlate
@@ -459,7 +455,7 @@ func (x *Vehicle) GetDescriptionNonCompat() *string {
 
 func (x *Vehicle) GetDescription() string {
     if !x.IsSetDescription() {
-      return ""
+        return ""
     }
 
     return *x.Description
@@ -471,7 +467,7 @@ func (x *Vehicle) GetNameNonCompat() *string {
 
 func (x *Vehicle) GetName() string {
     if !x.IsSetName() {
-      return ""
+        return ""
     }
 
     return *x.Name
@@ -483,7 +479,7 @@ func (x *Vehicle) GetHasACNonCompat() *bool {
 
 func (x *Vehicle) GetHasAC() bool {
     if !x.IsSetHasAC() {
-      return false
+        return false
     }
 
     return *x.HasAC
@@ -878,7 +874,7 @@ func (x *Person) GetAgeNonCompat() *int16 {
 
 func (x *Person) GetAge() int16 {
     if !x.IsSetAge() {
-      return 0
+        return 0
     }
 
     return *x.Age
@@ -890,7 +886,7 @@ func (x *Person) GetAddressNonCompat() *string {
 
 func (x *Person) GetAddress() string {
     if !x.IsSetAddress() {
-      return ""
+        return ""
     }
 
     return *x.Address
@@ -902,7 +898,7 @@ func (x *Person) GetFavoriteColorNonCompat() *Color {
 
 func (x *Person) GetFavoriteColor() *Color {
     if !x.IsSetFavoriteColor() {
-      return NewColor()
+        return NewColor()
     }
 
     return x.FavoriteColor
@@ -914,7 +910,7 @@ func (x *Person) GetFriendsNonCompat() []PersonID {
 
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
-      return nil
+        return nil
     }
 
     return x.Friends
@@ -926,7 +922,7 @@ func (x *Person) GetBestFriendNonCompat() *PersonID {
 
 func (x *Person) GetBestFriend() PersonID {
     if !x.IsSetBestFriend() {
-      return NewPersonID()
+        return NewPersonID()
     }
 
     return *x.BestFriend
@@ -938,7 +934,7 @@ func (x *Person) GetPetNamesNonCompat() map[Animal]string {
 
 func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
-      return nil
+        return nil
     }
 
     return x.PetNames
@@ -950,7 +946,7 @@ func (x *Person) GetAfraidOfAnimalNonCompat() *Animal {
 
 func (x *Person) GetAfraidOfAnimal() Animal {
     if !x.IsSetAfraidOfAnimal() {
-      return 0
+        return 0
     }
 
     return *x.AfraidOfAnimal
@@ -962,7 +958,7 @@ func (x *Person) GetVehiclesNonCompat() []*Vehicle {
 
 func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
-      return nil
+        return nil
     }
 
     return x.Vehicles
@@ -1017,8 +1013,6 @@ func (x *Person) SetVehicles(value []*Vehicle) *Person {
     x.Vehicles = value
     return x
 }
-
-
 
 func (x *Person) IsSetAge() bool {
     return x.Age != nil

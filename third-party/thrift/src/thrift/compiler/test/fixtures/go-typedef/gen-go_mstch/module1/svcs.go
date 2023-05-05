@@ -194,7 +194,6 @@ func (x *reqFinderByPlate) SetPlate(value Plate) *reqFinderByPlate {
     return x
 }
 
-
 func (x *reqFinderByPlate) writeField1(p thrift.Protocol) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -326,7 +325,7 @@ func (x *respFinderByPlate) GetValueNonCompat() *Automobile {
 
 func (x *respFinderByPlate) GetValue() *Automobile {
     if !x.IsSetValue() {
-      return NewAutomobile()
+        return NewAutomobile()
     }
 
     return x.Value
@@ -483,7 +482,6 @@ func (x *reqFinderAliasByPlate) SetPlate(value Plate) *reqFinderAliasByPlate {
     return x
 }
 
-
 func (x *reqFinderAliasByPlate) writeField1(p thrift.Protocol) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -615,7 +613,7 @@ func (x *respFinderAliasByPlate) GetValueNonCompat() *Car {
 
 func (x *respFinderAliasByPlate) GetValue() *Car {
     if !x.IsSetValue() {
-      return NewCar()
+        return NewCar()
     }
 
     return x.Value
@@ -772,7 +770,6 @@ func (x *reqFinderPreviousPlate) SetPlate(value Plate) *reqFinderPreviousPlate {
     return x
 }
 
-
 func (x *reqFinderPreviousPlate) writeField1(p thrift.Protocol) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -907,7 +904,6 @@ func (x *respFinderPreviousPlate) SetValue(value Plate) *respFinderPreviousPlate
     x.Value = value
     return x
 }
-
 
 func (x *respFinderPreviousPlate) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {

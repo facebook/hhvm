@@ -39,7 +39,6 @@ func (x *CustomException) SetMessage(value string) *CustomException {
     return x
 }
 
-
 func (x *CustomException) writeField1(p thrift.Protocol) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)

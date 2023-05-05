@@ -118,7 +118,7 @@ func (x *ComplexUnion) GetIntValueNonCompat() *int64 {
 
 func (x *ComplexUnion) GetIntValue() int64 {
     if !x.IsSetIntValue() {
-      return 0
+        return 0
     }
 
     return *x.IntValue
@@ -130,7 +130,7 @@ func (x *ComplexUnion) GetStringValueNonCompat() *string {
 
 func (x *ComplexUnion) GetStringValue() string {
     if !x.IsSetStringValue() {
-      return ""
+        return ""
     }
 
     return *x.StringValue
@@ -142,7 +142,7 @@ func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-      return nil
+        return nil
     }
 
     return x.IntListValue
@@ -154,7 +154,7 @@ func (x *ComplexUnion) GetStringListValueNonCompat() []string {
 
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-      return nil
+        return nil
     }
 
     return x.StringListValue
@@ -166,7 +166,7 @@ func (x *ComplexUnion) GetTypedefValueNonCompat() ContainerTypedef {
 
 func (x *ComplexUnion) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
-      return NewContainerTypedef()
+        return NewContainerTypedef()
     }
 
     return x.TypedefValue
@@ -178,7 +178,7 @@ func (x *ComplexUnion) GetStringRefNonCompat() *string {
 
 func (x *ComplexUnion) GetStringRef() string {
     if !x.IsSetStringRef() {
-      return ""
+        return ""
     }
 
     return *x.StringRef
@@ -670,7 +670,7 @@ func (x *ListUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-      return nil
+        return nil
     }
 
     return x.IntListValue
@@ -682,7 +682,7 @@ func (x *ListUnion) GetStringListValueNonCompat() []string {
 
 func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-      return nil
+        return nil
     }
 
     return x.StringListValue
@@ -956,7 +956,7 @@ func (x *DataUnion) GetBinaryDataNonCompat() []byte {
 
 func (x *DataUnion) GetBinaryData() []byte {
     if !x.IsSetBinaryData() {
-      return []byte("")
+        return []byte("")
     }
 
     return x.BinaryData
@@ -968,7 +968,7 @@ func (x *DataUnion) GetStringDataNonCompat() *string {
 
 func (x *DataUnion) GetStringData() string {
     if !x.IsSetStringData() {
-      return ""
+        return ""
     }
 
     return *x.StringData
@@ -1198,7 +1198,7 @@ func (x *Val) GetTypedefValueNonCompat() ContainerTypedef {
 
 func (x *Val) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
-      return NewContainerTypedef()
+        return NewContainerTypedef()
     }
 
     return x.TypedefValue
@@ -1218,8 +1218,6 @@ func (x *Val) SetTypedefValue(value ContainerTypedef) *Val {
     x.TypedefValue = value
     return x
 }
-
-
 
 func (x *Val) IsSetTypedefValue() bool {
     return x.TypedefValue != nil
@@ -1442,7 +1440,7 @@ func (x *ValUnion) GetV1NonCompat() *Val {
 
 func (x *ValUnion) GetV1() *Val {
     if !x.IsSetV1() {
-      return NewVal()
+        return NewVal()
     }
 
     return x.V1
@@ -1454,7 +1452,7 @@ func (x *ValUnion) GetV2NonCompat() *Val {
 
 func (x *ValUnion) GetV2() *Val {
     if !x.IsSetV2() {
-      return NewVal()
+        return NewVal()
     }
 
     return x.V2
@@ -1675,7 +1673,7 @@ func (x *VirtualComplexUnion) GetThingOneNonCompat() *string {
 
 func (x *VirtualComplexUnion) GetThingOne() string {
     if !x.IsSetThingOne() {
-      return ""
+        return ""
     }
 
     return *x.ThingOne
@@ -1687,7 +1685,7 @@ func (x *VirtualComplexUnion) GetThingTwoNonCompat() *string {
 
 func (x *VirtualComplexUnion) GetThingTwo() string {
     if !x.IsSetThingTwo() {
-      return ""
+        return ""
     }
 
     return *x.ThingTwo
@@ -1906,7 +1904,6 @@ func (x *NonCopyableStruct) SetNum(value int64) *NonCopyableStruct {
     return x
 }
 
-
 func (x *NonCopyableStruct) writeField1(p thrift.Protocol) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2037,7 +2034,7 @@ func (x *NonCopyableUnion) GetSNonCompat() *NonCopyableStruct {
 
 func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     if !x.IsSetS() {
-      return NewNonCopyableStruct()
+        return NewNonCopyableStruct()
     }
 
     return x.S

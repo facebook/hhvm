@@ -55,8 +55,6 @@ func (x *Adapter) SetTypeHint(value string) *Adapter {
     return x
 }
 
-
-
 func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)

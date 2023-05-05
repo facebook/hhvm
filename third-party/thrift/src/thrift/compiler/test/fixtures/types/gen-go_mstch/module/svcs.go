@@ -172,7 +172,7 @@ func (x *reqSomeServiceBounceMap) GetMNonCompat() included.SomeMap {
 
 func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     if !x.IsSetM() {
-      return included.NewSomeMap()
+        return included.NewSomeMap()
     }
 
     return x.M
@@ -319,7 +319,7 @@ func (x *respSomeServiceBounceMap) GetValueNonCompat() included.SomeMap {
 
 func (x *respSomeServiceBounceMap) GetValue() included.SomeMap {
     if !x.IsSetValue() {
-      return included.NewSomeMap()
+        return included.NewSomeMap()
     }
 
     return x.Value
@@ -469,7 +469,7 @@ func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
-      return nil
+        return nil
     }
 
     return x.R
@@ -644,7 +644,7 @@ func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
 
 func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
     if !x.IsSetValue() {
-      return nil
+        return nil
     }
 
     return x.Value

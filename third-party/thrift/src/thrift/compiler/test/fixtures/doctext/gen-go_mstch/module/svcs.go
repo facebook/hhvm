@@ -352,7 +352,7 @@ func (x *reqCThing) GetCNonCompat() []int32 {
 
 func (x *reqCThing) GetC() []int32 {
     if !x.IsSetC() {
-      return nil
+        return nil
     }
 
     return x.C
@@ -372,8 +372,6 @@ func (x *reqCThing) SetC(value []int32) *reqCThing {
     x.C = value
     return x
 }
-
-
 
 func (x *reqCThing) IsSetC() bool {
     return x.C != nil
@@ -629,7 +627,7 @@ func (x *respCThing) GetBangNonCompat() *Bang {
 
 func (x *respCThing) GetBang() *Bang {
     if !x.IsSetBang() {
-      return NewBang()
+        return NewBang()
     }
 
     return x.Bang
@@ -644,7 +642,6 @@ func (x *respCThing) SetBang(value Bang) *respCThing {
     x.Bang = &value
     return x
 }
-
 
 func (x *respCThing) IsSetBang() bool {
     return x.Bang != nil

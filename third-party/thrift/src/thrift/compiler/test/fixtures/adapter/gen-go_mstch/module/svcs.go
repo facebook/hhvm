@@ -182,7 +182,7 @@ func (x *reqServiceFunc) GetArg3NonCompat() *Foo {
 
 func (x *reqServiceFunc) GetArg3() *Foo {
     if !x.IsSetArg3() {
-      return NewFoo()
+        return NewFoo()
     }
 
     return x.Arg3
@@ -202,8 +202,6 @@ func (x *reqServiceFunc) SetArg3(value Foo) *reqServiceFunc {
     x.Arg3 = &value
     return x
 }
-
-
 
 func (x *reqServiceFunc) IsSetArg3() bool {
     return x.Arg3 != nil
@@ -426,7 +424,6 @@ func (x *respServiceFunc) SetValue(value MyI32) *respServiceFunc {
     x.Value = value
     return x
 }
-
 
 func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
@@ -871,7 +868,7 @@ func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
 
 func (x *respAdapterServiceCount) GetValue() *CountingStruct {
     if !x.IsSetValue() {
-      return NewCountingStruct()
+        return NewCountingStruct()
     }
 
     return x.Value
@@ -1024,7 +1021,7 @@ func (x *reqAdapterServiceAdaptedTypes) GetArg_NonCompat() *HeapAllocated {
 
 func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
     if !x.IsSetArg_() {
-      return NewHeapAllocated()
+        return NewHeapAllocated()
     }
 
     return x.Arg_
@@ -1174,7 +1171,7 @@ func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
 
 func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
     if !x.IsSetValue() {
-      return NewHeapAllocated()
+        return NewHeapAllocated()
     }
 
     return x.Value

@@ -471,7 +471,7 @@ func (x *respRaiserDoRaise) GetBNonCompat() *Banal {
 
 func (x *respRaiserDoRaise) GetB() *Banal {
     if !x.IsSetB() {
-      return NewBanal()
+        return NewBanal()
     }
 
     return x.B
@@ -483,7 +483,7 @@ func (x *respRaiserDoRaise) GetFNonCompat() *Fiery {
 
 func (x *respRaiserDoRaise) GetF() *Fiery {
     if !x.IsSetF() {
-      return NewFiery()
+        return NewFiery()
     }
 
     return x.F
@@ -495,7 +495,7 @@ func (x *respRaiserDoRaise) GetSNonCompat() *Serious {
 
 func (x *respRaiserDoRaise) GetS() *Serious {
     if !x.IsSetS() {
-      return NewSerious()
+        return NewSerious()
     }
 
     return x.S
@@ -848,7 +848,6 @@ func (x *respRaiserGet200) SetValue(value string) *respRaiserGet200 {
     return x
 }
 
-
 func (x *respRaiserGet200) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1080,7 +1079,7 @@ func (x *respRaiserGet500) GetFNonCompat() *Fiery {
 
 func (x *respRaiserGet500) GetF() *Fiery {
     if !x.IsSetF() {
-      return NewFiery()
+        return NewFiery()
     }
 
     return x.F
@@ -1092,7 +1091,7 @@ func (x *respRaiserGet500) GetBNonCompat() *Banal {
 
 func (x *respRaiserGet500) GetB() *Banal {
     if !x.IsSetB() {
-      return NewBanal()
+        return NewBanal()
     }
 
     return x.B
@@ -1104,7 +1103,7 @@ func (x *respRaiserGet500) GetSNonCompat() *Serious {
 
 func (x *respRaiserGet500) GetS() *Serious {
     if !x.IsSetS() {
-      return NewSerious()
+        return NewSerious()
     }
 
     return x.S
@@ -1129,7 +1128,6 @@ func (x *respRaiserGet500) SetS(value Serious) *respRaiserGet500 {
     x.S = &value
     return x
 }
-
 
 func (x *respRaiserGet500) IsSetF() bool {
     return x.F != nil

@@ -154,7 +154,6 @@ func (x *reqTestServiceInit) SetInt1(value int64) *reqTestServiceInit {
     return x
 }
 
-
 func (x *reqTestServiceInit) writeField1(p thrift.Protocol) error {  // Int1
     if err := p.WriteFieldBegin("int1", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -288,7 +287,6 @@ func (x *respTestServiceInit) SetValue(value int64) *respTestServiceInit {
     x.Value = value
     return x
 }
-
 
 func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I64, 0); err != nil {

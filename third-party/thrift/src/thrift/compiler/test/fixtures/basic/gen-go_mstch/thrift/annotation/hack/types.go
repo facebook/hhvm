@@ -41,7 +41,6 @@ func (x *FieldWrapper) SetName(value string) *FieldWrapper {
     return x
 }
 
-
 func (x *FieldWrapper) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -204,9 +203,6 @@ func (x *Wrapper) SetExtraNamespace(value string) *Wrapper {
     x.ExtraNamespace = value
     return x
 }
-
-
-
 
 func (x *Wrapper) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
@@ -420,7 +416,6 @@ func (x *Adapter) SetName(value string) *Adapter {
     return x
 }
 
-
 func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -554,7 +549,6 @@ func (x *SkipCodegen) SetReason(value string) *SkipCodegen {
     x.Reason = value
     return x
 }
-
 
 func (x *SkipCodegen) writeField1(p thrift.Protocol) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
@@ -703,8 +697,6 @@ func (x *Name) SetReason(value string) *Name {
     x.Reason = value
     return x
 }
-
-
 
 func (x *Name) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
@@ -872,7 +864,7 @@ func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
 
 func (x *UnionEnumAttributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-      return nil
+        return nil
     }
 
     return x.Attributes
@@ -1054,7 +1046,6 @@ func (x *StructTrait) SetName(value string) *StructTrait {
     return x
 }
 
-
 func (x *StructTrait) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1182,7 +1173,7 @@ func (x *Attributes) GetAttributesNonCompat() []string {
 
 func (x *Attributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-      return nil
+        return nil
     }
 
     return x.Attributes

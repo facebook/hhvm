@@ -41,7 +41,6 @@ func (x *Adapter) SetName(value string) *Adapter {
     return x
 }
 
-
 func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -169,7 +168,7 @@ func (x *Derive) GetDerivesNonCompat() []string {
 
 func (x *Derive) GetDerives() []string {
     if !x.IsSetDerives() {
-      return nil
+        return nil
     }
 
     return x.Derives

@@ -127,7 +127,6 @@ func (x *MyStructNestedAnnotation) SetName(value string) *MyStructNestedAnnotati
     return x
 }
 
-
 func (x *MyStructNestedAnnotation) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -497,7 +496,7 @@ func (x *MyStruct) GetCppTypeAnnotationNonCompat() []string {
 
 func (x *MyStruct) GetCppTypeAnnotation() []string {
     if !x.IsSetCppTypeAnnotation() {
-      return nil
+        return nil
     }
 
     return x.CppTypeAnnotation
@@ -509,7 +508,7 @@ func (x *MyStruct) GetMyUnionNonCompat() *MyUnion {
 
 func (x *MyStruct) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
-      return NewMyUnion()
+        return NewMyUnion()
     }
 
     return x.MyUnion
@@ -573,13 +572,6 @@ func (x *MyStruct) SetMyID(value MyId) *MyStruct {
     return x
 }
 
-
-
-
-
-
-
-
 func (x *MyStruct) IsSetCppTypeAnnotation() bool {
     return x.CppTypeAnnotation != nil
 }
@@ -587,7 +579,6 @@ func (x *MyStruct) IsSetCppTypeAnnotation() bool {
 func (x *MyStruct) IsSetMyUnion() bool {
     return x.MyUnion != nil
 }
-
 
 func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
     if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
@@ -1127,8 +1118,6 @@ func (x *SecretStruct) SetPassword(value string) *SecretStruct {
     x.Password = value
     return x
 }
-
-
 
 func (x *SecretStruct) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {

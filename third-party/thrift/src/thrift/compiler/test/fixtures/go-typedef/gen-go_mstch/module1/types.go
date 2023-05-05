@@ -269,7 +269,7 @@ func (x *Automobile) GetPreviousPlateNonCompat() *Plate {
 
 func (x *Automobile) GetPreviousPlate() Plate {
     if !x.IsSetPreviousPlate() {
-      return NewPlate()
+        return NewPlate()
     }
 
     return *x.PreviousPlate
@@ -281,7 +281,7 @@ func (x *Automobile) GetFirstPlateNonCompat() *Plate {
 
 func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
-      return NewPlate()
+        return NewPlate()
     }
 
     return *x.FirstPlate
@@ -301,7 +301,7 @@ func (x *Automobile) GetDriversNonCompat() Drivers {
 
 func (x *Automobile) GetDrivers() Drivers {
     if !x.IsSetDrivers() {
-      return NewDrivers()
+        return NewDrivers()
     }
 
     return x.Drivers
@@ -313,7 +313,7 @@ func (x *Automobile) GetAccessoriesNonCompat() []*Accessory {
 
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
-      return nil
+        return nil
     }
 
     return x.Accessories
@@ -325,7 +325,7 @@ func (x *Automobile) GetPartNamesNonCompat() map[int32]*CarPartName {
 
 func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     if !x.IsSetPartNames() {
-      return nil
+        return nil
     }
 
     return x.PartNames
@@ -366,7 +366,6 @@ func (x *Automobile) SetPartNames(value map[int32]*CarPartName) *Automobile {
     return x
 }
 
-
 func (x *Automobile) IsSetPreviousPlate() bool {
     return x.PreviousPlate != nil
 }
@@ -374,7 +373,6 @@ func (x *Automobile) IsSetPreviousPlate() bool {
 func (x *Automobile) IsSetFirstPlate() bool {
     return x.FirstPlate != nil
 }
-
 
 func (x *Automobile) IsSetDrivers() bool {
     return x.Drivers != nil
@@ -872,8 +870,6 @@ func (x *MapKey) SetStrval(value string) *MapKey {
     return x
 }
 
-
-
 func (x *MapKey) writeField1(p thrift.Protocol) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1040,7 +1036,7 @@ func (x *MapContainer) GetMapvalNonCompat() map[*MapKey]string {
 
 func (x *MapContainer) GetMapval() map[*MapKey]string {
     if !x.IsSetMapval() {
-      return nil
+        return nil
     }
 
     return x.Mapval
@@ -1240,7 +1236,7 @@ func (x *Pair) GetAutomobileNonCompat() *Automobile {
 
 func (x *Pair) GetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
-      return NewAutomobile()
+        return NewAutomobile()
     }
 
     return x.Automobile
@@ -1252,7 +1248,7 @@ func (x *Pair) GetCarNonCompat() *Car {
 
 func (x *Pair) GetCar() *Car {
     if !x.IsSetCar() {
-      return NewCar()
+        return NewCar()
     }
 
     return x.Car
@@ -1453,7 +1449,7 @@ func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
 
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
-      return nil
+        return nil
     }
 
     return x.Automobiles
@@ -1465,7 +1461,7 @@ func (x *Collection) GetCarsNonCompat() []*Car {
 
 func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
-      return nil
+        return nil
     }
 
     return x.Cars

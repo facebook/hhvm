@@ -39,7 +39,6 @@ func (x *GetEntityRequest) SetId(value string) *GetEntityRequest {
     return x
 }
 
-
 func (x *GetEntityRequest) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -173,7 +172,6 @@ func (x *GetEntityResponse) SetEntity(value string) *GetEntityResponse {
     x.Entity = value
     return x
 }
-
 
 func (x *GetEntityResponse) writeField1(p thrift.Protocol) error {  // Entity
     if err := p.WriteFieldBegin("entity", thrift.STRING, 1); err != nil {

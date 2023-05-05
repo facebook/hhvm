@@ -554,7 +554,7 @@ func (x *SomeStruct) GetTagsNonCompat() []int32 {
 
 func (x *SomeStruct) GetTags() []int32 {
     if !x.IsSetTags() {
-      return nil
+        return nil
     }
 
     return x.Tags
@@ -579,9 +579,6 @@ func (x *SomeStruct) SetTags(value []int32) *SomeStruct {
     x.Tags = value
     return x
 }
-
-
-
 
 func (x *SomeStruct) IsSetTags() bool {
     return x.Tags != nil
@@ -927,10 +924,6 @@ func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
     x.Me1T2 = value
     return x
 }
-
-
-
-
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Me2_3
     if err := p.WriteFieldBegin("me2_3", thrift.I32, 1); err != nil {

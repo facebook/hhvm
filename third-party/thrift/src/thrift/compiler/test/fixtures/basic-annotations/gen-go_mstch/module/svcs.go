@@ -343,7 +343,7 @@ func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
 
 func (x *respMyServicePing) GetMyExcept() *MyException {
     if !x.IsSetMyExcept() {
-      return NewMyException()
+        return NewMyException()
     }
 
     return x.MyExcept
@@ -584,7 +584,6 @@ func (x *respMyServiceGetRandomData) SetValue(value string) *respMyServiceGetRan
     return x
 }
 
-
 func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -722,7 +721,6 @@ func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
     return x
 }
 
-
 func (x *reqMyServiceHasDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -856,7 +854,6 @@ func (x *respMyServiceHasDataById) SetValue(value bool) *respMyServiceHasDataByI
     x.Value = value
     return x
 }
-
 
 func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
@@ -995,7 +992,6 @@ func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
     return x
 }
 
-
 func (x *reqMyServiceGetDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1129,7 +1125,6 @@ func (x *respMyServiceGetDataById) SetValue(value string) *respMyServiceGetDataB
     x.Value = value
     return x
 }
-
 
 func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
@@ -1281,8 +1276,6 @@ func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById
     x.Data = value
     return x
 }
-
-
 
 func (x *reqMyServicePutDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -1554,8 +1547,6 @@ func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById
     x.Data = value
     return x
 }
-
-
 
 func (x *reqMyServiceLobDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -3556,7 +3547,6 @@ func (x *respBadServiceBar) SetValue(value int32) *respBadServiceBar {
     x.Value = value
     return x
 }
-
 
 func (x *respBadServiceBar) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {

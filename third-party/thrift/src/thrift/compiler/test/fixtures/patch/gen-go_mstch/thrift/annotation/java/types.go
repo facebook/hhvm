@@ -122,7 +122,6 @@ func (x *Annotation) SetJavaAnnotation(value string) *Annotation {
     return x
 }
 
-
 func (x *Annotation) writeField1(p thrift.Protocol) error {  // JavaAnnotation
     if err := p.WriteFieldBegin("java_annotation", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -352,8 +351,6 @@ func (x *Adapter) SetTypeClassName(value string) *Adapter {
     return x
 }
 
-
-
 func (x *Adapter) writeField1(p thrift.Protocol) error {  // AdapterClassName
     if err := p.WriteFieldBegin("adapterClassName", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -540,8 +537,6 @@ func (x *Wrapper) SetTypeClassName(value string) *Wrapper {
     x.TypeClassName = value
     return x
 }
-
-
 
 func (x *Wrapper) writeField1(p thrift.Protocol) error {  // WrapperClassName
     if err := p.WriteFieldBegin("wrapperClassName", thrift.STRING, 1); err != nil {

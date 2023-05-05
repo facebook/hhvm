@@ -53,8 +53,6 @@ func (x *Accessory) SetName(value string) *Accessory {
     return x
 }
 
-
-
 func (x *Accessory) writeField1(p thrift.Protocol) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -241,8 +239,6 @@ func (x *PartName) SetName(value string) *PartName {
     x.Name = value
     return x
 }
-
-
 
 func (x *PartName) writeField1(p thrift.Protocol) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {

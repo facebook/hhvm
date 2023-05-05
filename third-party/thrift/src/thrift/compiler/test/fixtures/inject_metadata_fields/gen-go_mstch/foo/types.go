@@ -50,7 +50,7 @@ func (x *Fields) GetInjectedStructuredAnnotationFieldNonCompat() *string {
 
 func (x *Fields) GetInjectedStructuredAnnotationField() string {
     if !x.IsSetInjectedStructuredAnnotationField() {
-      return ""
+        return ""
     }
 
     return *x.InjectedStructuredAnnotationField
@@ -62,7 +62,7 @@ func (x *Fields) GetInjectedUnstructuredAnnotationFieldNonCompat() *string {
 
 func (x *Fields) GetInjectedUnstructuredAnnotationField() string {
     if !x.IsSetInjectedUnstructuredAnnotationField() {
-      return ""
+        return ""
     }
 
     return *x.InjectedUnstructuredAnnotationField
@@ -82,7 +82,6 @@ func (x *Fields) SetInjectedUnstructuredAnnotationField(value string) *Fields {
     x.InjectedUnstructuredAnnotationField = &value
     return x
 }
-
 
 func (x *Fields) IsSetInjectedStructuredAnnotationField() bool {
     return x.InjectedStructuredAnnotationField != nil

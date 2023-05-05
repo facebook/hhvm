@@ -43,7 +43,6 @@ func (x *InjectMetadataFields) SetType(value string) *InjectMetadataFields {
     return x
 }
 
-
 func (x *InjectMetadataFields) writeField1(p thrift.Protocol) error {  // Type
     if err := p.WriteFieldBegin("type", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)

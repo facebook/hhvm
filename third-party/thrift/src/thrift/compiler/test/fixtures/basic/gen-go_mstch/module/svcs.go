@@ -528,7 +528,6 @@ func (x *reqFB303ServiceSimpleRPC) SetIntParameter(value int32) *reqFB303Service
     return x
 }
 
-
 func (x *reqFB303ServiceSimpleRPC) writeField1(p thrift.Protocol) error {  // IntParameter
     if err := p.WriteFieldBegin("int_parameter", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -659,7 +658,7 @@ func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
 
 func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
     if !x.IsSetValue() {
-      return NewReservedKeyword()
+        return NewReservedKeyword()
     }
 
     return x.Value
@@ -1436,7 +1435,6 @@ func (x *respMyServiceGetRandomData) SetValue(value string) *respMyServiceGetRan
     return x
 }
 
-
 func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1573,7 +1571,6 @@ func (x *reqMyServiceSink) SetSink(value int64) *reqMyServiceSink {
     x.Sink = value
     return x
 }
-
 
 func (x *reqMyServiceSink) writeField1(p thrift.Protocol) error {  // Sink
     if err := p.WriteFieldBegin("sink", thrift.I64, 1); err != nil {
@@ -1806,8 +1803,6 @@ func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById
     x.Data = value
     return x
 }
-
-
 
 func (x *reqMyServicePutDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -2066,7 +2061,6 @@ func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
     return x
 }
 
-
 func (x *reqMyServiceHasDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2200,7 +2194,6 @@ func (x *respMyServiceHasDataById) SetValue(value bool) *respMyServiceHasDataByI
     x.Value = value
     return x
 }
-
 
 func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
@@ -2339,7 +2332,6 @@ func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
     return x
 }
 
-
 func (x *reqMyServiceGetDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2473,7 +2465,6 @@ func (x *respMyServiceGetDataById) SetValue(value string) *respMyServiceGetDataB
     x.Value = value
     return x
 }
-
 
 func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
@@ -2611,7 +2602,6 @@ func (x *reqMyServiceDeleteDataById) SetId(value int64) *reqMyServiceDeleteDataB
     x.Id = value
     return x
 }
-
 
 func (x *reqMyServiceDeleteDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -2844,8 +2834,6 @@ func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById
     x.Data = value
     return x
 }
-
-
 
 func (x *reqMyServiceLobDataById) writeField1(p thrift.Protocol) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -3178,7 +3166,7 @@ func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
 
 func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
     if !x.IsSetValue() {
-      return nil
+        return nil
     }
 
     return x.Value
@@ -4232,7 +4220,6 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixed
     return x
 }
 
-
 func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Protocol) error {  // Key
     if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -4360,7 +4347,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) GetValueNonCompat() []byte {
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) GetValue() []byte {
     if !x.IsSetValue() {
-      return []byte("")
+        return []byte("")
     }
 
     return x.Value
@@ -4516,7 +4503,6 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixed
     return x
 }
 
-
 func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Protocol) error {  // Key
     if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -4644,7 +4630,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) GetValueNonCompat() []byte {
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) GetValue() []byte {
     if !x.IsSetValue() {
-      return []byte("")
+        return []byte("")
     }
 
     return x.Value

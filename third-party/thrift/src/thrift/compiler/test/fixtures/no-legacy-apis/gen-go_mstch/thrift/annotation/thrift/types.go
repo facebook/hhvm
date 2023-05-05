@@ -284,7 +284,6 @@ func (x *Deprecated) SetMessage(value string) *Deprecated {
     return x
 }
 
-
 func (x *Deprecated) writeField1(p thrift.Protocol) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -413,7 +412,7 @@ func (x *ReserveIds) GetIdsNonCompat() []int32 {
 
 func (x *ReserveIds) GetIds() []int32 {
     if !x.IsSetIds() {
-      return nil
+        return nil
     }
 
     return x.Ids
@@ -425,7 +424,7 @@ func (x *ReserveIds) GetIdRangesNonCompat() map[int32]int32 {
 
 func (x *ReserveIds) GetIdRanges() map[int32]int32 {
     if !x.IsSetIdRanges() {
-      return nil
+        return nil
     }
 
     return x.IdRanges
@@ -705,7 +704,6 @@ func (x *Legacy) SetMessage(value string) *Legacy {
     return x
 }
 
-
 func (x *Legacy) writeField1(p thrift.Protocol) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -840,7 +838,6 @@ func (x *RequiresBackwardCompatibility) SetFieldName(value bool) *RequiresBackwa
     x.FieldName = value
     return x
 }
-
 
 func (x *RequiresBackwardCompatibility) writeField1(p thrift.Protocol) error {  // FieldName
     if err := p.WriteFieldBegin("field_name", thrift.BOOL, 1); err != nil {
@@ -1949,7 +1946,6 @@ func (x *GenDefaultEnumValue) SetName(value string) *GenDefaultEnumValue {
     return x
 }
 
-
 func (x *GenDefaultEnumValue) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2083,7 +2079,6 @@ func (x *GenEnumSet) SetName(value string) *GenEnumSet {
     x.Name = value
     return x
 }
-
 
 func (x *GenEnumSet) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
@@ -2543,7 +2538,6 @@ func (x *ExceptionMessage) SetField(value string) *ExceptionMessage {
     return x
 }
 
-
 func (x *ExceptionMessage) writeField1(p thrift.Protocol) error {  // Field
     if err := p.WriteFieldBegin("field", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -2677,7 +2671,6 @@ func (x *GenerateRuntimeSchema) SetName(value string) *GenerateRuntimeSchema {
     x.Name = value
     return x
 }
-
 
 func (x *GenerateRuntimeSchema) writeField1(p thrift.Protocol) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {

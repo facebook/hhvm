@@ -223,7 +223,7 @@ func (x *reqNestedContainersMapList) GetFooNonCompat() map[int32][]int32 {
 
 func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
     if !x.IsSetFoo() {
-      return nil
+        return nil
     }
 
     return x.Foo
@@ -528,7 +528,7 @@ func (x *reqNestedContainersMapSet) GetFooNonCompat() map[int32][]int32 {
 
 func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
     if !x.IsSetFoo() {
-      return nil
+        return nil
     }
 
     return x.Foo
@@ -833,7 +833,7 @@ func (x *reqNestedContainersListMap) GetFooNonCompat() []map[int32]int32 {
 
 func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     if !x.IsSetFoo() {
-      return nil
+        return nil
     }
 
     return x.Foo
@@ -1138,7 +1138,7 @@ func (x *reqNestedContainersListSet) GetFooNonCompat() [][]int32 {
 
 func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     if !x.IsSetFoo() {
-      return nil
+        return nil
     }
 
     return x.Foo
@@ -1426,7 +1426,7 @@ func (x *reqNestedContainersTurtles) GetFooNonCompat() [][]map[int32]map[int32][
 
 func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
     if !x.IsSetFoo() {
-      return nil
+        return nil
     }
 
     return x.Foo

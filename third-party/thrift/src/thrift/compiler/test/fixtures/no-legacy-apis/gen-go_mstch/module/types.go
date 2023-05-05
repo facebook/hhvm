@@ -110,8 +110,6 @@ func (x *MyStruct) SetMyStringField(value string) *MyStruct {
     return x
 }
 
-
-
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
     if err := p.WriteFieldBegin("myIntField", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -285,7 +283,7 @@ func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
 
 func (x *MyUnion) GetMyEnum() MyEnum {
     if !x.IsSetMyEnum() {
-      return 0
+        return 0
     }
 
     return *x.MyEnum
@@ -297,7 +295,7 @@ func (x *MyUnion) GetMyDataItemNonCompat() *MyStruct {
 
 func (x *MyUnion) GetMyDataItem() *MyStruct {
     if !x.IsSetMyDataItem() {
-      return NewMyStruct()
+        return NewMyStruct()
     }
 
     return x.MyDataItem

@@ -24,31 +24,14 @@
   Get method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}() {{> types/field_type}} {
-    return x.{{field:go_name}}
-}
-
-{{#program:compat_getters?}}
-func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/field:type}} {
-    {{#field:nilable?}}
-    if !x.IsSet{{field:go_name}}() {
-      return {{#field:type}}{{> common/zero_value}}{{/field:type}}
-    }
-
-    {{/field:nilable?}}
-    return {{#field:compat_getter_dereference?}}*{{/field:compat_getter_dereference?}}x.{{field:go_name}}
-}
-{{/program:compat_getters?}}
+{{> types/field_method_get}}
 
 {{/struct:fields}}{{!
 
   Set method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) {{field:go_setter_name}}(value {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
-    x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}value
-    return x
-}
+{{> types/field_method_set}}
 
 {{/struct:fields}}{{!
 
@@ -56,51 +39,22 @@ func (x *{{struct:go_name}}) {{field:go_setter_name}}(value {{#field:type}}{{> c
 
 }}{{#struct:fields}}
 {{#field:nilable?}}
-func (x *{{struct:go_name}}) IsSet{{field:go_name}}() bool {
-    return x.{{field:go_name}} != nil
-}
-{{/field:nilable?}}
+{{> types/field_method_is_set}}
 
+{{/field:nilable?}}
 {{/struct:fields}}{{!
 
   writeField method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) writeField{{field:key_str}}(p thrift.Protocol) error {  // {{field:go_name}}
-    {{#field:nilable?}}
-    if !x.IsSet{{field:go_name}}() {
-        return nil
-    }
-
-    {{/field:nilable?}}
-    if err := p.WriteFieldBegin("{{field:name}}", {{#field:type}}{{> common/ttype}}{{/field:type}}, {{field:key}}); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := {{#field:dereference?}}*{{/field:dereference?}}x.Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}()
-    {{#field:type}}
-    {{> codec/encode}}
-    {{/field:type}}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
+{{> types/field_method_write}}
 
 {{/struct:fields}}{{!
 
   readField method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) readField{{field:key_str}}(p thrift.Protocol) error {  // {{field:go_name}}
-    {{#field:type}}
-    {{> codec/decode}}
-    {{/field:type}}
-
-    x.{{field:go_setter_name}}(result)
-    return nil
-}
+{{> types/field_method_read}}
 
 {{/struct:fields}}{{!
 

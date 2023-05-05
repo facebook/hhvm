@@ -69,9 +69,6 @@ func (x *Foo) SetField3(value int32) *Foo {
     return x
 }
 
-
-
-
 func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -311,9 +308,6 @@ func (x *Foo2) SetField3(value int32) *Foo2 {
     x.Field3 = value
     return x
 }
-
-
-
 
 func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {

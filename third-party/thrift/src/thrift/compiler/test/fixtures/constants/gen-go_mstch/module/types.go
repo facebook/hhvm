@@ -387,7 +387,7 @@ func (x *Internship) GetEmployerNonCompat() *Company {
 
 func (x *Internship) GetEmployer() Company {
     if !x.IsSetEmployer() {
-      return 0
+        return 0
     }
 
     return *x.Employer
@@ -399,7 +399,7 @@ func (x *Internship) GetCompensationNonCompat() *float64 {
 
 func (x *Internship) GetCompensation() float64 {
     if !x.IsSetCompensation() {
-      return 0.0
+        return 0.0
     }
 
     return *x.Compensation
@@ -411,7 +411,7 @@ func (x *Internship) GetSchoolNonCompat() *string {
 
 func (x *Internship) GetSchool() string {
     if !x.IsSetSchool() {
-      return ""
+        return ""
     }
 
     return *x.School
@@ -441,8 +441,6 @@ func (x *Internship) SetSchool(value string) *Internship {
     x.School = &value
     return x
 }
-
-
 
 func (x *Internship) IsSetEmployer() bool {
     return x.Employer != nil
@@ -773,8 +771,6 @@ func (x *Range) SetMax(value int32) *Range {
     return x
 }
 
-
-
 func (x *Range) writeField1(p thrift.Protocol) error {  // Min
     if err := p.WriteFieldBegin("min", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -964,8 +960,6 @@ func (x *Struct1) SetB(value string) *Struct1 {
     return x
 }
 
-
-
 func (x *Struct1) writeField1(p thrift.Protocol) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -1154,7 +1148,7 @@ func (x *Struct2) GetCNonCompat() *Struct1 {
 
 func (x *Struct2) GetC() *Struct1 {
     if !x.IsSetC() {
-      return NewStruct1()
+        return NewStruct1()
     }
 
     return x.C
@@ -1166,7 +1160,7 @@ func (x *Struct2) GetDNonCompat() []int32 {
 
 func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
-      return nil
+        return nil
     }
 
     return x.D
@@ -1191,8 +1185,6 @@ func (x *Struct2) SetD(value []int32) *Struct2 {
     x.D = value
     return x
 }
-
-
 
 func (x *Struct2) IsSetC() bool {
     return x.C != nil
@@ -1505,7 +1497,7 @@ func (x *Struct3) GetCNonCompat() *Struct2 {
 
 func (x *Struct3) GetC() *Struct2 {
     if !x.IsSetC() {
-      return NewStruct2()
+        return NewStruct2()
     }
 
     return x.C
@@ -1525,8 +1517,6 @@ func (x *Struct3) SetC(value Struct2) *Struct3 {
     x.C = &value
     return x
 }
-
-
 
 func (x *Struct3) IsSetC() bool {
     return x.C != nil
@@ -1758,7 +1748,7 @@ func (x *Struct4) GetBNonCompat() *float64 {
 
 func (x *Struct4) GetB() float64 {
     if !x.IsSetB() {
-      return 0.0
+        return 0.0
     }
 
     return *x.B
@@ -1770,7 +1760,7 @@ func (x *Struct4) GetCNonCompat() *byte {
 
 func (x *Struct4) GetC() byte {
     if !x.IsSetC() {
-      return 0
+        return 0
     }
 
     return *x.C
@@ -1790,7 +1780,6 @@ func (x *Struct4) SetC(value byte) *Struct4 {
     x.C = &value
     return x
 }
-
 
 func (x *Struct4) IsSetB() bool {
     return x.B != nil
@@ -2020,7 +2009,7 @@ func (x *Union1) GetINonCompat() *int32 {
 
 func (x *Union1) GetI() int32 {
     if !x.IsSetI() {
-      return 0
+        return 0
     }
 
     return *x.I
@@ -2032,7 +2021,7 @@ func (x *Union1) GetDNonCompat() *float64 {
 
 func (x *Union1) GetD() float64 {
     if !x.IsSetD() {
-      return 0.0
+        return 0.0
     }
 
     return *x.D
@@ -2259,7 +2248,7 @@ func (x *Union2) GetINonCompat() *int32 {
 
 func (x *Union2) GetI() int32 {
     if !x.IsSetI() {
-      return 0
+        return 0
     }
 
     return *x.I
@@ -2271,7 +2260,7 @@ func (x *Union2) GetDNonCompat() *float64 {
 
 func (x *Union2) GetD() float64 {
     if !x.IsSetD() {
-      return 0.0
+        return 0.0
     }
 
     return *x.D
@@ -2283,7 +2272,7 @@ func (x *Union2) GetSNonCompat() *Struct1 {
 
 func (x *Union2) GetS() *Struct1 {
     if !x.IsSetS() {
-      return NewStruct1()
+        return NewStruct1()
     }
 
     return x.S
@@ -2295,7 +2284,7 @@ func (x *Union2) GetUNonCompat() *Union1 {
 
 func (x *Union2) GetU() *Union1 {
     if !x.IsSetU() {
-      return NewUnion1()
+        return NewUnion1()
     }
 
     return x.U

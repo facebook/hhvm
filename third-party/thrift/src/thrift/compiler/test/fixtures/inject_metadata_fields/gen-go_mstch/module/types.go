@@ -43,7 +43,6 @@ func (x *Fields) SetInjectedField(value string) *Fields {
     return x
 }
 
-
 func (x *Fields) writeField100(p thrift.Protocol) error {  // InjectedField
     if err := p.WriteFieldBegin("injected_field", thrift.STRING, 100); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
@@ -177,7 +176,6 @@ func (x *FieldsInjectedToEmptyStruct) SetInjectedField(value string) *FieldsInje
     x.InjectedField = value
     return x
 }
-
 
 func (x *FieldsInjectedToEmptyStruct) writeField_1100(p thrift.Protocol) error {  // InjectedField
     if err := p.WriteFieldBegin("injected_field", thrift.STRING, -1100); err != nil {
@@ -326,8 +324,6 @@ func (x *FieldsInjectedToStruct) SetInjectedField(value string) *FieldsInjectedT
     x.InjectedField = value
     return x
 }
-
-
 
 func (x *FieldsInjectedToStruct) writeField1(p thrift.Protocol) error {  // StringField
     if err := p.WriteFieldBegin("string_field", thrift.STRING, 1); err != nil {
@@ -520,7 +516,7 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationFieldN
 
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField() string {
     if !x.IsSetInjectedStructuredAnnotationField() {
-      return ""
+        return ""
     }
 
     return *x.InjectedStructuredAnnotationField
@@ -532,7 +528,7 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationFiel
 
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationField() string {
     if !x.IsSetInjectedUnstructuredAnnotationField() {
-      return ""
+        return ""
     }
 
     return *x.InjectedUnstructuredAnnotationField
@@ -557,8 +553,6 @@ func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationFiel
     x.InjectedUnstructuredAnnotationField = &value
     return x
 }
-
-
 
 func (x *FieldsInjectedWithIncludedStruct) IsSetInjectedStructuredAnnotationField() bool {
     return x.InjectedStructuredAnnotationField != nil

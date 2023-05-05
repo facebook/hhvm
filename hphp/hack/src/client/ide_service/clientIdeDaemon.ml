@@ -759,7 +759,7 @@ let initialize2
             };
         }
     in
-    (* TODO(toyang): Done_init always shows "Done_init(0/0)". We should remove the progress here. *)
+    (* TODO: Done_init always shows "Done_init(0/0)". We should remove the progress here. *)
     let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
     let%lwt () =
       write_message
@@ -827,8 +827,7 @@ let close_file (files : open_files_state) (path : Relative_path.t) :
 
 (** Updates an existing opened file, with new contents; if the
 contents haven't changed then the existing open file's AST and TAST
-will be left intact; if the file wasn't already open then we
-throw an exception. *)
+will be left intact. *)
 let update_file
     (files : open_files_state) (document : ClientIdeMessage.document) :
     open_files_state * Provider_context.entry * Errors.t option ref =
@@ -1458,6 +1457,48 @@ let should_process_file_change
   && (not (Lwt_unix.readable in_fd))
   && not (Relative_path.Set.is_empty istate.ifiles.changed_files_to_process)
 
+let batch_process_file_changes ~(out_fd : Lwt_unix.file_descr) (istate : istate)
+    : istate Lwt.t =
+  (* TODO: with batch processing, the "processed" field isn't meaningful (it'll always be 0 in this notification). *)
+  let%lwt () =
+    write_message
+      ~out_fd
+      ~message:
+        (ClientIdeMessage.Notification
+           (ClientIdeMessage.Processing_files
+              {
+                ClientIdeMessage.Processing_files.processed = 0;
+                total = istate.ifiles.changed_files_denominator;
+              }))
+  in
+  let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+    batch_update_naming_table_and_invalidate_caches
+      ~ctx:(make_empty_ctx istate.icommon)
+      ~naming_table:istate.naming_table
+      ~sienv:istate.icommon.sienv
+      ~local_memory:istate.icommon.local_memory
+      ~open_files:istate.ifiles.open_files
+      istate.ifiles.changed_files_to_process
+  in
+  let istate =
+    {
+      naming_table;
+      icommon = { istate.icommon with sienv };
+      ifiles =
+        {
+          istate.ifiles with
+          changed_files_to_process = Relative_path.Set.empty;
+          changed_files_denominator = 0;
+        };
+    }
+  in
+  let%lwt () =
+    write_message
+      ~out_fd
+      ~message:(ClientIdeMessage.Notification ClientIdeMessage.Done_processing)
+  in
+  Lwt.return istate
+
 let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     istate Lwt.t =
   let next_file =
@@ -1520,8 +1561,12 @@ let handle_one_message_exn
   match state with
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
-    (* TODO: update this to use the Rust multithreaded batch indexing instead of processing one change at a time *)
-    let%lwt istate = process_one_file_change out_fd istate in
+    let%lwt istate =
+      if istate.icommon.batch_process_changes then
+        batch_process_file_changes ~out_fd istate
+      else
+        process_one_file_change out_fd istate
+    in
     Lwt.return_some (Initialized istate)
   | _ ->
     let%lwt message = Lwt_message_queue.pop message_queue in

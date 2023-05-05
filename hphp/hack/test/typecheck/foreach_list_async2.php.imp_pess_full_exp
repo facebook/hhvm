@@ -2,5 +2,5 @@ File "foreach_list_async2.php", line 20, characters 9-10:
 Invalid argument (Typing[4110])
   File "foreach_list_async2.php", line 12, characters 14-19:
   Expected `string`
-  File "foreach_list_async2.php", line 14, characters 23-47:
-  But got `dynamic`
+  File "foreach_list_async2.php", line 14, characters 38-40:
+  But got `int`

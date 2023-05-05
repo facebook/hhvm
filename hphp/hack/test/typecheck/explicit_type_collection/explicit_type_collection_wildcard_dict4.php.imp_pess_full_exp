@@ -1,0 +1,8 @@
+File "explicit_type_collection_wildcard_dict4.php", line 6, characters 3-13:
+  dict<(string | (arraykey & dynamic)), bool>
+File "explicit_type_collection_wildcard_dict4.php", line 5, characters 13-18:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_wildcard_dict4.php", line 5, characters 13-18:
+  Expected `string`
+  File "explicit_type_collection_wildcard_dict4.php", line 5, characters 25-25:
+  But got `int`

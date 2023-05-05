@@ -1,0 +1,6 @@
+File "tparam_where_constraint.php", line 10, characters 5-22:
+Invalid argument (Typing[4110])
+  File "tparam_where_constraint.php", line 3, characters 66-68:
+  Expected `int`
+  File "tparam_where_constraint.php", line 10, characters 10-14:
+  But got `string`

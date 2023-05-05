@@ -1,0 +1,21 @@
+File "shape_blowup.php", line 54, characters 3-18:
+  shape(?'original_restriction_class' => string)
+File "shape_blowup.php", line 59, characters 3-18:
+  shape(?'aldrin_reason' => string, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 64, characters 3-18:
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 69, characters 3-18:
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'limited_fbid' => int, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 74, characters 3-18:
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'limited_fbid' => int, ?'original_restriction_class' => string, ?'policy' => string)
+File "shape_blowup.php", line 54, characters 3-18:[2]
+  shape(?'original_restriction_class' => string)
+File "shape_blowup.php", line 59, characters 3-18:[2]
+  shape(?'aldrin_reason' => string, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 64, characters 3-18:[2]
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 69, characters 3-18:[2]
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'limited_fbid' => int, ?'original_restriction_class' => string)
+File "shape_blowup.php", line 74, characters 3-18:[2]
+  shape(?'aldrin_reason' => string, ?'feature' => string, ?'limited_fbid' => int, ?'original_restriction_class' => string, ?'policy' => string)
+No errors

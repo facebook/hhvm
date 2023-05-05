@@ -1,0 +1,5 @@
+File "expr_dep_this_var.php", line 12, characters 5-18:
+  this as C
+File "expr_dep_this_var.php", line 13, characters 5-25:
+  ~this::T where this::T as C::T
+No errors

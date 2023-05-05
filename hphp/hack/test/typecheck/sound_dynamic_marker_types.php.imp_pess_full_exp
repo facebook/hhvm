@@ -1,0 +1,17 @@
+File "sound_dynamic_marker_types.php", line 9, characters 3-16:
+  int
+File "sound_dynamic_marker_types.php", line 10, characters 3-18:
+  ~string
+File "sound_dynamic_marker_types.php", line 11, characters 3-20:
+  vec<float>
+File "sound_dynamic_marker_types.php", line 12, characters 3-21:
+  vec<~float>
+File "sound_dynamic_marker_types.php", line 9, characters 3-16:[2]
+  dynamic
+File "sound_dynamic_marker_types.php", line 10, characters 3-18:[2]
+  dynamic
+File "sound_dynamic_marker_types.php", line 11, characters 3-20:[2]
+  dynamic
+File "sound_dynamic_marker_types.php", line 12, characters 3-21:[2]
+  dynamic
+No errors

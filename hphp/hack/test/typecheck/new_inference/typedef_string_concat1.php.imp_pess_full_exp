@@ -1,0 +1,4 @@
+File "typedef_string_concat1.php--use.php", line 6, characters 19-19:
+Was expecting a return type hint (Typing[4030])
+File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
+Expected an object convertible to string but got a dynamic value or a value of type TDef (Typing[4318])

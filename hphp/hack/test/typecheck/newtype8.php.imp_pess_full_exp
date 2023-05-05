@@ -1,0 +1,21 @@
+File "newtype8.php--test.php", line 10, characters 3-13:
+  bool
+File "newtype8.php--test.php", line 13, characters 3-13:
+  string
+File "newtype8.php--test.php", line 16, characters 3-13:
+  string
+File "newtype8.php--test.php", line 19, characters 3-13:
+  int
+File "newtype8.php--test.php", line 22, characters 3-13:
+  int
+File "newtype8.php--test.php", line 10, characters 3-13:[2]
+  bool
+File "newtype8.php--test.php", line 13, characters 3-13:[2]
+  string
+File "newtype8.php--test.php", line 16, characters 3-13:[2]
+  string
+File "newtype8.php--test.php", line 19, characters 3-13:[2]
+  int
+File "newtype8.php--test.php", line 22, characters 3-13:[2]
+  int
+No errors

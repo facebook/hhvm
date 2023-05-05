@@ -33,7 +33,6 @@ let exit_if_incorrect_tcopt ctx : unit =
     If running with hh, pass these flags or set the corresponding .hhconfig options:
         --config enable_sound_dynamic_type=true \
         --config tast_under_dynamic=true \
-        --config pessimise_builtins=true \
         --config everything_sdt=true \
 |};
     exit 2

@@ -20,7 +20,6 @@ class TestSafeRenameSoundDynamic(common_tests.CommonTestDriver):
 like_type_hints = true
 enable_sound_dynamic_type = true
 union_intersection_type_hints = true
-pessimise_builtins = true
 everything_sdt = true
 """
             )

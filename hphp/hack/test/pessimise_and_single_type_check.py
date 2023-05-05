@@ -97,7 +97,7 @@ if __name__ == "__main__":
         [hh_stc_path]
         + hh_stc_arguments
         + extra_builtins_opts
-        + ["--enable-sound-dynamic-type", "--like-type-hints", "--pessimise-builtins"]
+        + ["--enable-sound-dynamic-type", "--like-type-hints"]
         + ["--custom-hhi-path", pessimised_hhi_path]
         + pessimised_files
     )

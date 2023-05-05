@@ -1,5 +1,4 @@
 --enable-sound-dynamic-type
---pessimise-builtins
 --everything-sdt
 --tast-under-dynamic
 --extra-builtin ../hhi/sdt_analysis_test.hhi

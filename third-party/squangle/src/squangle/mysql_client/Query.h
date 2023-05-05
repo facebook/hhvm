@@ -584,7 +584,7 @@ template <>
 class fmt::formatter<facebook::common::mysql_client::Query> {
  public:
   template <typename ParseContext>
-  constexpr auto parse(const ParseContext& ctx) {
+  constexpr auto parse(const ParseContext& ctx) const {
     // No reading of the format needed
     return ctx.begin();
   }
@@ -592,7 +592,7 @@ class fmt::formatter<facebook::common::mysql_client::Query> {
   template <typename FormatContext>
   auto format(
       const facebook::common::mysql_client::Query& query,
-      FormatContext& ctx) {
+      FormatContext& ctx) const {
     return fmt::format_to(ctx.out(), "{}", query.renderInsecure());
   }
 };

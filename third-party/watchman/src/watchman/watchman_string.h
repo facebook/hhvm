@@ -547,7 +547,7 @@ namespace fmt {
 template <>
 struct formatter<w_string> {
   template <typename ParseContext>
-  constexpr auto parse(ParseContext& ctx) {
+  constexpr auto parse(ParseContext& ctx) const {
     return ctx.begin();
   }
 
@@ -560,7 +560,7 @@ struct formatter<w_string> {
 template <>
 struct formatter<w_string_piece> {
   template <typename ParseContext>
-  constexpr auto parse(ParseContext& ctx) {
+  constexpr auto parse(ParseContext& ctx) const {
     return ctx.begin();
   }
 

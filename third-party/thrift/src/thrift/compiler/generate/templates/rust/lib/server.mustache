@@ -215,11 +215,12 @@
 
             const_cstr! {
                 SERVICE_NAME = "{{service:parent_service_name}}";
-                METHOD_NAME = "{{service:name}}.{{function:name}}";
+                METHOD_NAME = "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
+                SERVICE_METHOD_NAME = "{{service:parent_service_name}}.{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_{{service:name}}_{{function:name}} = ::fbthrift::Deserialize::read(p)?;

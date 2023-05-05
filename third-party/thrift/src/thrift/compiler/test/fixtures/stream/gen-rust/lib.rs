@@ -3143,7 +3143,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.returnstream";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.returnstream";
             }
             let args = self::Args_PubSubStreamingService_returnstream {
                 i32_from: arg_i32_from,
@@ -3160,7 +3160,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstream"));
 
             async move {
@@ -3212,7 +3212,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.streamthrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.streamthrows";
             }
             let args = self::Args_PubSubStreamingService_streamthrows {
                 foo: arg_foo,
@@ -3228,7 +3228,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.streamthrows"));
 
             async move {
@@ -3280,7 +3280,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.servicethrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows";
             }
             let args = self::Args_PubSubStreamingService_servicethrows {
                 foo: arg_foo,
@@ -3296,7 +3296,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows"));
 
             async move {
@@ -3348,7 +3348,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.servicethrows2";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows2";
             }
             let args = self::Args_PubSubStreamingService_servicethrows2 {
                 foo: arg_foo,
@@ -3364,7 +3364,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows2"));
 
             async move {
@@ -3416,7 +3416,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.boththrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.boththrows";
             }
             let args = self::Args_PubSubStreamingService_boththrows {
                 foo: arg_foo,
@@ -3432,7 +3432,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.boththrows"));
 
             async move {
@@ -3484,7 +3484,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
             }
             let args = self::Args_PubSubStreamingService_responseandstreamstreamthrows {
                 foo: arg_foo,
@@ -3500,7 +3500,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamstreamthrows"));
 
             async move {
@@ -3552,7 +3552,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
             }
             let args = self::Args_PubSubStreamingService_responseandstreamservicethrows {
                 foo: arg_foo,
@@ -3568,7 +3568,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamservicethrows"));
 
             async move {
@@ -3620,7 +3620,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
             }
             let args = self::Args_PubSubStreamingService_responseandstreamboththrows {
                 foo: arg_foo,
@@ -3636,7 +3636,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamboththrows"));
 
             async move {
@@ -3689,7 +3689,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.returnstreamFast";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.returnstreamFast";
             }
             let args = self::Args_PubSubStreamingService_returnstreamFast {
                 i32_from: arg_i32_from,
@@ -3706,7 +3706,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstreamFast"));
 
             async move {
@@ -5060,11 +5060,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.returnstream";
+                METHOD_NAME = "returnstream";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.returnstream";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_returnstream = ::fbthrift::Deserialize::read(p)?;
@@ -5173,11 +5174,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.streamthrows";
+                METHOD_NAME = "streamthrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.streamthrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_streamthrows = ::fbthrift::Deserialize::read(p)?;
@@ -5291,11 +5293,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.servicethrows";
+                METHOD_NAME = "servicethrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_servicethrows = ::fbthrift::Deserialize::read(p)?;
@@ -5407,11 +5410,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.servicethrows2";
+                METHOD_NAME = "servicethrows2";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows2";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_servicethrows2 = ::fbthrift::Deserialize::read(p)?;
@@ -5527,11 +5531,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.boththrows";
+                METHOD_NAME = "boththrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.boththrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_boththrows = ::fbthrift::Deserialize::read(p)?;
@@ -5649,11 +5654,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
+                METHOD_NAME = "responseandstreamstreamthrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_responseandstreamstreamthrows = ::fbthrift::Deserialize::read(p)?;
@@ -5767,11 +5773,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
+                METHOD_NAME = "responseandstreamservicethrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_responseandstreamservicethrows = ::fbthrift::Deserialize::read(p)?;
@@ -5883,11 +5890,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
+                METHOD_NAME = "responseandstreamboththrows";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_responseandstreamboththrows = ::fbthrift::Deserialize::read(p)?;
@@ -6005,11 +6013,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "PubSubStreamingService.returnstreamFast";
+                METHOD_NAME = "returnstreamFast";
+                SERVICE_METHOD_NAME = "PubSubStreamingService.returnstreamFast";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_PubSubStreamingService_returnstreamFast = ::fbthrift::Deserialize::read(p)?;

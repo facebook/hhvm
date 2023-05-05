@@ -701,7 +701,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.mapList";
+                SERVICE_METHOD_NAME = "NestedContainers.mapList";
             }
             let args = self::Args_NestedContainers_mapList {
                 foo: arg_foo,
@@ -717,7 +717,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapList"));
 
             async move {
@@ -749,7 +749,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.mapSet";
+                SERVICE_METHOD_NAME = "NestedContainers.mapSet";
             }
             let args = self::Args_NestedContainers_mapSet {
                 foo: arg_foo,
@@ -765,7 +765,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapSet"));
 
             async move {
@@ -797,7 +797,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.listMap";
+                SERVICE_METHOD_NAME = "NestedContainers.listMap";
             }
             let args = self::Args_NestedContainers_listMap {
                 foo: arg_foo,
@@ -813,7 +813,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "NestedContainers.listMap"));
 
             async move {
@@ -845,7 +845,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.listSet";
+                SERVICE_METHOD_NAME = "NestedContainers.listSet";
             }
             let args = self::Args_NestedContainers_listSet {
                 foo: arg_foo,
@@ -861,7 +861,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "NestedContainers.listSet"));
 
             async move {
@@ -893,7 +893,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.turtles";
+                SERVICE_METHOD_NAME = "NestedContainers.turtles";
             }
             let args = self::Args_NestedContainers_turtles {
                 foo: arg_foo,
@@ -909,7 +909,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "NestedContainers.turtles"));
 
             async move {
@@ -1713,11 +1713,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.mapList";
+                METHOD_NAME = "mapList";
+                SERVICE_METHOD_NAME = "NestedContainers.mapList";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_NestedContainers_mapList = ::fbthrift::Deserialize::read(p)?;
@@ -1786,11 +1787,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.mapSet";
+                METHOD_NAME = "mapSet";
+                SERVICE_METHOD_NAME = "NestedContainers.mapSet";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_NestedContainers_mapSet = ::fbthrift::Deserialize::read(p)?;
@@ -1859,11 +1861,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.listMap";
+                METHOD_NAME = "listMap";
+                SERVICE_METHOD_NAME = "NestedContainers.listMap";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_NestedContainers_listMap = ::fbthrift::Deserialize::read(p)?;
@@ -1932,11 +1935,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.listSet";
+                METHOD_NAME = "listSet";
+                SERVICE_METHOD_NAME = "NestedContainers.listSet";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_NestedContainers_listSet = ::fbthrift::Deserialize::read(p)?;
@@ -2005,11 +2009,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "NestedContainers.turtles";
+                METHOD_NAME = "turtles";
+                SERVICE_METHOD_NAME = "NestedContainers.turtles";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_NestedContainers_turtles = ::fbthrift::Deserialize::read(p)?;

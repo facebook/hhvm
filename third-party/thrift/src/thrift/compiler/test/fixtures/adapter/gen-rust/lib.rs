@@ -542,7 +542,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Service";
-                METHOD_NAME = "Service.func";
+                SERVICE_METHOD_NAME = "Service.func";
             }
             let args = self::Args_Service_func {
                 arg1: arg_arg1,
@@ -560,7 +560,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Service.func"));
 
             async move {
@@ -869,7 +869,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "AdapterService.count";
+                SERVICE_METHOD_NAME = "AdapterService.count";
             }
             let args = self::Args_AdapterService_count {
                 _phantom: ::std::marker::PhantomData,
@@ -884,7 +884,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "AdapterService.count"));
 
             async move {
@@ -916,7 +916,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "AdapterService.adaptedTypes";
+                SERVICE_METHOD_NAME = "AdapterService.adaptedTypes";
             }
             let args = self::Args_AdapterService_adaptedTypes {
                 arg: arg_arg,
@@ -932,7 +932,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "AdapterService.adaptedTypes"));
 
             async move {
@@ -1352,11 +1352,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Service";
-                METHOD_NAME = "Service.func";
+                METHOD_NAME = "func";
+                SERVICE_METHOD_NAME = "Service.func";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Service_func = ::fbthrift::Deserialize::read(p)?;
@@ -1742,11 +1743,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "AdapterService.count";
+                METHOD_NAME = "count";
+                SERVICE_METHOD_NAME = "AdapterService.count";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_AdapterService_count = ::fbthrift::Deserialize::read(p)?;
@@ -1814,11 +1816,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "AdapterService.adaptedTypes";
+                METHOD_NAME = "adaptedTypes";
+                SERVICE_METHOD_NAME = "AdapterService.adaptedTypes";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_AdapterService_adaptedTypes = ::fbthrift::Deserialize::read(p)?;

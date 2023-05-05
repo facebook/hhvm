@@ -194,7 +194,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "TestService";
-                METHOD_NAME = "TestService.init";
+                SERVICE_METHOD_NAME = "TestService.init";
             }
             let args = self::Args_TestService_init {
                 int1: arg_int1,
@@ -210,7 +210,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "TestService.init"));
 
             async move {
@@ -562,11 +562,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "TestService";
-                METHOD_NAME = "TestService.init";
+                METHOD_NAME = "init";
+                SERVICE_METHOD_NAME = "TestService.init";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_TestService_init = ::fbthrift::Deserialize::read(p)?;

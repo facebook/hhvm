@@ -671,7 +671,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.f";
+                SERVICE_METHOD_NAME = "C.f";
             }
             let args = self::Args_C_f {
                 _phantom: ::std::marker::PhantomData,
@@ -686,7 +686,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "C.f"));
 
             async move {
@@ -719,7 +719,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.numbers";
+                SERVICE_METHOD_NAME = "C.numbers";
             }
             let args = self::Args_C_numbers {
                 _phantom: ::std::marker::PhantomData,
@@ -734,7 +734,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "C.numbers"));
 
             async move {
@@ -786,7 +786,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.thing";
+                SERVICE_METHOD_NAME = "C.thing";
             }
             let args = self::Args_C_thing {
                 a: arg_a,
@@ -804,7 +804,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "C.thing"));
 
             async move {
@@ -1395,11 +1395,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.f";
+                METHOD_NAME = "f";
+                SERVICE_METHOD_NAME = "C.f";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_C_f = ::fbthrift::Deserialize::read(p)?;
@@ -1467,11 +1468,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.numbers";
+                METHOD_NAME = "numbers";
+                SERVICE_METHOD_NAME = "C.numbers";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_C_numbers = ::fbthrift::Deserialize::read(p)?;
@@ -1578,11 +1580,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "C";
-                METHOD_NAME = "C.thing";
+                METHOD_NAME = "thing";
+                SERVICE_METHOD_NAME = "C.thing";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_C_thing = ::fbthrift::Deserialize::read(p)?;

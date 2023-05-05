@@ -2335,7 +2335,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteraction.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.frobnicate";
             }
             let args = self::Args_MyInteraction_frobnicate {
                 _phantom: ::std::marker::PhantomData,
@@ -2350,7 +2350,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
 
             async move {
@@ -2381,7 +2381,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteraction.ping";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.ping";
             }
             let args = self::Args_MyInteraction_ping {
                 _phantom: ::std::marker::PhantomData,
@@ -2396,7 +2396,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
 
             async move {
@@ -2429,7 +2429,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteraction.truthify";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.truthify";
             }
             let args = self::Args_MyInteraction_truthify {
                 _phantom: ::std::marker::PhantomData,
@@ -2444,7 +2444,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
 
             async move {
@@ -2493,7 +2493,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteraction.encode";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.encode";
             }
             let args = self::Args_MyInteraction_encode {
                 _phantom: ::std::marker::PhantomData,
@@ -2508,7 +2508,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteraction.encode"));
 
             async move {
@@ -2931,7 +2931,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteractionFast.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.frobnicate";
             }
             let args = self::Args_MyInteractionFast_frobnicate {
                 _phantom: ::std::marker::PhantomData,
@@ -2946,7 +2946,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
 
             async move {
@@ -2977,7 +2977,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteractionFast.ping";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.ping";
             }
             let args = self::Args_MyInteractionFast_ping {
                 _phantom: ::std::marker::PhantomData,
@@ -2992,7 +2992,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
 
             async move {
@@ -3025,7 +3025,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteractionFast.truthify";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.truthify";
             }
             let args = self::Args_MyInteractionFast_truthify {
                 _phantom: ::std::marker::PhantomData,
@@ -3040,7 +3040,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
 
             async move {
@@ -3089,7 +3089,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyInteractionFast.encode";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.encode";
             }
             let args = self::Args_MyInteractionFast_encode {
                 _phantom: ::std::marker::PhantomData,
@@ -3104,7 +3104,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.encode"));
 
             async move {
@@ -3528,7 +3528,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "SerialInteraction.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.SerialInteraction.frobnicate";
             }
             let args = self::Args_SerialInteraction_frobnicate {
                 _phantom: ::std::marker::PhantomData,
@@ -3543,7 +3543,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
 
             async move {
@@ -3811,7 +3811,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.foo";
+                SERVICE_METHOD_NAME = "MyService.foo";
             }
             let args = self::Args_MyService_foo {
                 _phantom: ::std::marker::PhantomData,
@@ -3826,7 +3826,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyService.foo"));
 
             async move {
@@ -3858,7 +3858,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.interact";
+                SERVICE_METHOD_NAME = "MyService.interact";
                 INTERACTION_NAME = "MyInteraction";
             }
             let args = self::Args_MyService_interact {
@@ -3880,7 +3880,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyService.interact"));
 
             async move {
@@ -3913,7 +3913,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.interactFast";
+                SERVICE_METHOD_NAME = "MyService.interactFast";
                 INTERACTION_NAME = "MyInteractionFast";
             }
             let args = self::Args_MyService_interactFast {
@@ -3934,7 +3934,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyService.interactFast"));
 
             async move {
@@ -3968,7 +3968,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.serialize";
+                SERVICE_METHOD_NAME = "MyService.serialize";
                 INTERACTION_NAME = "SerialInteraction";
             }
             let args = self::Args_MyService_serialize {
@@ -3989,7 +3989,7 @@ pub mod client {
             };
 
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "MyService.serialize"));
 
             async move {
@@ -4707,10 +4707,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
@@ -4779,10 +4780,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.ping";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
@@ -4851,10 +4853,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.truthify";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.truthify";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
@@ -4962,10 +4965,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.encode";
+                SERVICE_METHOD_NAME = "MyService.MyInteraction.encode";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::read(p)?;
@@ -5409,10 +5413,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
@@ -5481,10 +5486,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.ping";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
@@ -5553,10 +5559,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.truthify";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.truthify";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
@@ -5664,10 +5671,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.encode";
+                SERVICE_METHOD_NAME = "MyService.MyInteractionFast.encode";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::read(p)?;
@@ -5992,10 +6000,11 @@ pub mod server {
             const_cstr! {
                 SERVICE_NAME = "MyService";
                 METHOD_NAME = "SerialInteraction.frobnicate";
+                SERVICE_METHOD_NAME = "MyService.SerialInteraction.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
@@ -6484,11 +6493,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.foo";
+                METHOD_NAME = "foo";
+                SERVICE_METHOD_NAME = "MyService.foo";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyService_foo = ::fbthrift::Deserialize::read(p)?;
@@ -6556,11 +6566,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.interact";
+                METHOD_NAME = "interact";
+                SERVICE_METHOD_NAME = "MyService.interact";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyService_interact = ::fbthrift::Deserialize::read(p)?;
@@ -6632,11 +6643,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.interactFast";
+                METHOD_NAME = "interactFast";
+                SERVICE_METHOD_NAME = "MyService.interactFast";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyService_interactFast = ::fbthrift::Deserialize::read(p)?;
@@ -6707,11 +6719,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "MyService.serialize";
+                METHOD_NAME = "serialize";
+                SERVICE_METHOD_NAME = "MyService.serialize";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyService_serialize = ::fbthrift::Deserialize::read(p)?;

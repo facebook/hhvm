@@ -317,7 +317,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "Foo.return";
+                SERVICE_METHOD_NAME = "Foo.return";
             }
             let args = self::Args_Foo_return {
                 bar: arg_bar,
@@ -333,7 +333,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Foo.return"));
 
             async move {
@@ -365,7 +365,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "Foo.super";
+                SERVICE_METHOD_NAME = "Foo.super";
             }
             let args = self::Args_Foo_super {
                 bar: arg_bar,
@@ -381,7 +381,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Foo.super"));
 
             async move {
@@ -846,11 +846,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "Foo.return";
+                METHOD_NAME = "return";
+                SERVICE_METHOD_NAME = "Foo.return";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Foo_return = ::fbthrift::Deserialize::read(p)?;
@@ -919,11 +920,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "Foo.super";
+                METHOD_NAME = "super";
+                SERVICE_METHOD_NAME = "Foo.super";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Foo_super = ::fbthrift::Deserialize::read(p)?;

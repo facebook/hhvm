@@ -332,7 +332,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "SomeService.bounce_map";
+                SERVICE_METHOD_NAME = "SomeService.bounce_map";
             }
             let args = self::Args_SomeService_bounce_map {
                 m: arg_m,
@@ -348,7 +348,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "SomeService.bounce_map"));
 
             async move {
@@ -380,7 +380,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "SomeService.binary_keyed_map";
+                SERVICE_METHOD_NAME = "SomeService.binary_keyed_map";
             }
             let args = self::Args_SomeService_binary_keyed_map {
                 r: arg_r,
@@ -396,7 +396,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "SomeService.binary_keyed_map"));
 
             async move {
@@ -861,11 +861,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "SomeService.bounce_map";
+                METHOD_NAME = "bounce_map";
+                SERVICE_METHOD_NAME = "SomeService.bounce_map";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_SomeService_bounce_map = ::fbthrift::Deserialize::read(p)?;
@@ -934,11 +935,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "SomeService.binary_keyed_map";
+                METHOD_NAME = "binary_keyed_map";
+                SERVICE_METHOD_NAME = "SomeService.binary_keyed_map";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_SomeService_binary_keyed_map = ::fbthrift::Deserialize::read(p)?;

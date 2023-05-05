@@ -82,7 +82,7 @@
 
             const_cstr! {
                 SERVICE_NAME = "{{service:parent_service_name}}";
-                METHOD_NAME = "{{service:name}}.{{function:name}}";
+                SERVICE_METHOD_NAME = "{{service:parent_service_name}}.{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
                 {{#function:creates_interaction?}}
                 INTERACTION_NAME = "{{function:interaction_name}}";
                 {{/function:creates_interaction?}}
@@ -113,11 +113,11 @@
 
             {{#function:returns_streams?}}
             let call_stream = transport
-                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
             {{/function:returns_streams?}}{{^function:returns_streams?}}
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
             {{/function:returns_streams?}}
 

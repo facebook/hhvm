@@ -743,7 +743,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doBland";
+                SERVICE_METHOD_NAME = "Raiser.doBland";
             }
             let args = self::Args_Raiser_doBland {
                 _phantom: ::std::marker::PhantomData,
@@ -758,7 +758,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Raiser.doBland"));
 
             async move {
@@ -789,7 +789,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doRaise";
+                SERVICE_METHOD_NAME = "Raiser.doRaise";
             }
             let args = self::Args_Raiser_doRaise {
                 _phantom: ::std::marker::PhantomData,
@@ -804,7 +804,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Raiser.doRaise"));
 
             async move {
@@ -835,7 +835,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get200";
+                SERVICE_METHOD_NAME = "Raiser.get200";
             }
             let args = self::Args_Raiser_get200 {
                 _phantom: ::std::marker::PhantomData,
@@ -850,7 +850,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Raiser.get200"));
 
             async move {
@@ -881,7 +881,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get500";
+                SERVICE_METHOD_NAME = "Raiser.get500";
             }
             let args = self::Args_Raiser_get500 {
                 _phantom: ::std::marker::PhantomData,
@@ -896,7 +896,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "Raiser.get500"));
 
             async move {
@@ -1499,11 +1499,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doBland";
+                METHOD_NAME = "doBland";
+                SERVICE_METHOD_NAME = "Raiser.doBland";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Raiser_doBland = ::fbthrift::Deserialize::read(p)?;
@@ -1571,11 +1572,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doRaise";
+                METHOD_NAME = "doRaise";
+                SERVICE_METHOD_NAME = "Raiser.doRaise";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Raiser_doRaise = ::fbthrift::Deserialize::read(p)?;
@@ -1643,11 +1645,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get200";
+                METHOD_NAME = "get200";
+                SERVICE_METHOD_NAME = "Raiser.get200";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Raiser_get200 = ::fbthrift::Deserialize::read(p)?;
@@ -1715,11 +1718,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get500";
+                METHOD_NAME = "get500";
+                SERVICE_METHOD_NAME = "Raiser.get500";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_Raiser_get500 = ::fbthrift::Deserialize::read(p)?;

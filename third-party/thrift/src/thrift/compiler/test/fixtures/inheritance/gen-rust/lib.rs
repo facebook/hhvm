@@ -446,7 +446,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyRoot";
-                METHOD_NAME = "MyRoot.do_root";
+                SERVICE_METHOD_NAME = "MyRoot.do_root";
             }
             let args = self::Args_MyRoot_do_root {
                 _phantom: ::std::marker::PhantomData,
@@ -461,7 +461,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyRoot.do_root"));
 
             async move {
@@ -725,7 +725,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyNode";
-                METHOD_NAME = "MyNode.do_mid";
+                SERVICE_METHOD_NAME = "MyNode.do_mid";
             }
             let args = self::Args_MyNode_do_mid {
                 _phantom: ::std::marker::PhantomData,
@@ -740,7 +740,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyNode.do_mid"));
 
             async move {
@@ -1037,7 +1037,7 @@ pub mod client {
 
             const_cstr! {
                 SERVICE_NAME = "MyLeaf";
-                METHOD_NAME = "MyLeaf.do_leaf";
+                SERVICE_METHOD_NAME = "MyLeaf.do_leaf";
             }
             let args = self::Args_MyLeaf_do_leaf {
                 _phantom: ::std::marker::PhantomData,
@@ -1052,7 +1052,7 @@ pub mod client {
             };
 
             let call = transport
-                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", method = "MyLeaf.do_leaf"));
 
             async move {
@@ -1448,11 +1448,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyRoot";
-                METHOD_NAME = "MyRoot.do_root";
+                METHOD_NAME = "do_root";
+                SERVICE_METHOD_NAME = "MyRoot.do_root";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyRoot_do_root = ::fbthrift::Deserialize::read(p)?;
@@ -1790,11 +1791,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyNode";
-                METHOD_NAME = "MyNode.do_mid";
+                METHOD_NAME = "do_mid";
+                SERVICE_METHOD_NAME = "MyNode.do_mid";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyNode_do_mid = ::fbthrift::Deserialize::read(p)?;
@@ -2143,11 +2145,12 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyLeaf";
-                METHOD_NAME = "MyLeaf.do_leaf";
+                METHOD_NAME = "do_leaf";
+                SERVICE_METHOD_NAME = "MyLeaf.do_leaf";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
-                METHOD_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
             )?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
             let _args: self::Args_MyLeaf_do_leaf = ::fbthrift::Deserialize::read(p)?;

@@ -2825,6 +2825,7 @@ void t_hack_generator::generate_struct(const t_struct* tstruct) {
 }
 
 bool t_hack_generator::is_valid_hack_type(const t_type* type) {
+  type = type->get_true_type();
   if (!type->is_container()) {
     return true;
   }

@@ -64,7 +64,7 @@ let validator =
 
     method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then
-        this#on_type acc as_cstr
+        this#on_type acc (with_reason as_cstr r)
       else if acc.Type_validator.like_context then
         acc
       else

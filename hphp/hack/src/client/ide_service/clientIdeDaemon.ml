@@ -1136,12 +1136,15 @@ let handle_request
               ~line
               ~column
           with
-          | None -> (istate, ClientIdeMessage.Invalid_rename_symbol)
+          | None -> (istate, ClientIdeMessage.Not_renameable_position)
           | Some (_definition, action) when ServerFindRefs.is_local action ->
             let res =
               match ServerRename.go_for_localvar ctx action new_name with
-              | Ok patch_list ->
-                ClientIdeMessage.Local_var_rename_result patch_list
+              | Ok (Some patch_list) ->
+                ClientIdeMessage.Rename_success
+                  { shellout = None; local = patch_list }
+              | Ok None ->
+                ClientIdeMessage.Rename_success { shellout = None; local = [] }
               | Error action ->
                 let str =
                   Printf.sprintf
@@ -1183,8 +1186,11 @@ let handle_request
                 document_list
             in
             ( istate,
-              ClientIdeMessage.Shell_out_rename_and_augment
-                (symbol_definition, action, single_file_patches) )
+              ClientIdeMessage.Rename_success
+                {
+                  shellout = Some (symbol_definition, action);
+                  local = single_file_patches;
+                } )
           (* not a localvar, must defer to hh_server *))
     in
     Lwt.return (Initialized istate, Ok result)

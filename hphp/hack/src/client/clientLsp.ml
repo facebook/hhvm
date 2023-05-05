@@ -1404,13 +1404,13 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
-(** Retrieves the content of this file, or raises an LSP [InvalidRequest] exception
-if the file isn't currently open *)
-let get_document_contents
+(** Retrieves a TextDocumentItem for a given URI from editor_open_files,
+ or raises LSP [InvalidRequest] if not open *)
+let get_text_document_item
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
-    string =
+    TextDocumentItem.t =
   match UriMap.find_opt uri editor_open_files with
-  | Some document -> document.TextDocumentItem.text
+  | Some document -> document
   | None ->
     raise
       (Error.LspException
@@ -1420,16 +1420,29 @@ let get_document_contents
            data = None;
          })
 
-let get_all_open_files editor_open_files =
-  UriMap.fold
-    (fun fn _val accum ->
-      {
-        ClientIdeMessage.file_path = Path.make @@ Lsp_helpers.lsp_uri_to_path fn;
-        file_contents = get_document_contents editor_open_files fn;
-      }
-      :: accum)
-    editor_open_files
-    []
+(** Retrieves the content of this file, or raises an LSP [InvalidRequest] exception
+if the file isn't currently open *)
+let get_document_contents
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
+    string =
+  let document = get_text_document_item editor_open_files uri in
+  document.TextDocumentItem.text
+
+(** Converts a single TextDocumentItem (an element in editor_open_files, for example) into a document that ClientIdeDaemon uses*)
+let lsp_document_to_ide (text_document : TextDocumentItem.t) :
+    ClientIdeMessage.document =
+  let fn = text_document.TextDocumentItem.uri in
+  {
+    ClientIdeMessage.file_path = Path.make @@ Lsp_helpers.lsp_uri_to_path fn;
+    file_contents = text_document.TextDocumentItem.text;
+  }
+
+(** Turns the complete set of editor_open_files into a format
+suitable for clientIdeDaemon *)
+let get_documents_from_open_files
+    (editor_open_files : TextDocumentItem.t UriMap.t) :
+    ClientIdeMessage.document list =
+  editor_open_files |> UriMap.values |> List.map ~f:lsp_document_to_ide
 
 (** Turns this Lsp uri+line+col into a format suitable for clientIdeDaemon.
 Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
@@ -3373,13 +3386,10 @@ let do_documentSymbol_local
   let open DocumentSymbol in
   let open TextDocumentIdentifier in
   let filename = lsp_uri_to_path params.textDocument.uri in
-  let document =
-    {
-      ClientIdeMessage.file_path = Path.make filename;
-      file_contents =
-        get_document_contents editor_open_files params.textDocument.uri;
-    }
+  let text_document =
+    get_text_document_item editor_open_files params.textDocument.uri
   in
+  let document = lsp_document_to_ide text_document in
   let request = ClientIdeMessage.Document_symbol document in
   let%lwt outline =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
@@ -3430,7 +3440,7 @@ let do_findReferences_local
   let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
-  let all_open_documents = get_all_open_files editor_open_files in
+  let all_open_documents = get_documents_from_open_files editor_open_files in
   let%lwt response =
     ide_rpc
       ide_service
@@ -3609,20 +3619,13 @@ let do_typeCoverage_localFB
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
   let open TypeCoverageFB in
-  let file_contents =
-    get_document_contents
+  let text_document =
+    get_text_document_item
       editor_open_files
       params.textDocument.TextDocumentIdentifier.uri
   in
-  let file_path =
-    params.textDocument.TextDocumentIdentifier.uri
-    |> lsp_uri_to_path
-    |> Path.make
-  in
-  let request =
-    ClientIdeMessage.Type_coverage
-      { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
-  in
+  let document = lsp_document_to_ide text_document in
+  let request = ClientIdeMessage.Type_coverage document in
   let%lwt result =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
@@ -3754,16 +3757,13 @@ let do_codeAction_local
     * Path.t
     * Errors.finalized_error list option)
     Lwt.t =
-  let file_path =
-    Path.make
-      (lsp_uri_to_path
-         params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri)
-  in
-  let file_contents =
-    get_document_contents
+  let text_document =
+    get_text_document_item
       editor_open_files
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
+  let document = lsp_document_to_ide text_document in
+  let file_path = document.ClientIdeMessage.file_path in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
   let%lwt (actions, errors_opt) =
     ide_rpc
@@ -3771,8 +3771,7 @@ let do_codeAction_local
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Code_action
-         ({ ClientIdeMessage.file_path; ClientIdeMessage.file_contents }, range))
+      (ClientIdeMessage.Code_action (document, range))
   in
   Lwt.return (actions, file_path, errors_opt)
 
@@ -3896,7 +3895,7 @@ let do_documentRename_local
     get_document_location editor_open_files document_position
   in
   let new_name = params.Rename.newName in
-  let all_open_documents = get_all_open_files editor_open_files in
+  let all_open_documents = get_documents_from_open_files editor_open_files in
   let%lwt response =
     ide_rpc
       ide_service
@@ -3907,18 +3906,20 @@ let do_documentRename_local
   in
   let state =
     match response with
-    | ClientIdeMessage.Invalid_rename_symbol
-    | ClientIdeMessage.Local_var_rename_result None ->
-      let patches = patches_to_workspace_edit [] in
+    | ClientIdeMessage.Not_renameable_position ->
+      let message = "Tried to rename a non-renameable symbol" in
+      raise
+        (Error.LspException
+           { Error.code = Error.InvalidRequest; message; data = None })
+    | ClientIdeMessage.Rename_success { shellout = None; local } ->
+      let patches = patches_to_workspace_edit local in
       respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
       Lwt.return state
-    | ClientIdeMessage.Local_var_rename_result (Some patch_list) ->
-      let patches = patches_to_workspace_edit patch_list in
-      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
-      Lwt.return state
-    | ClientIdeMessage.Shell_out_rename_and_augment
-        (symbol_definition, find_refs_action, ide_calculated_patches) ->
-      (* clientIdeDaemon returns errors if we try to rename a non-localvar *)
+    | ClientIdeMessage.Rename_success
+        {
+          shellout = Some (symbol_definition, find_refs_action);
+          local = ide_calculated_patches;
+        } ->
       let (filename, _line, _col) =
         lsp_file_position_to_hack document_position
       in

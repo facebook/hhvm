@@ -43,12 +43,12 @@ type find_refs_result =
       * Pos.absolute list Lsp.UriMap.t)
 
 type rename_result =
-  | Invalid_rename_symbol
-  | Local_var_rename_result of ServerRenameTypes.patch list option
-  | Shell_out_rename_and_augment of
-      (string SymbolDefinition.t
-      * ServerCommandTypes.Find_refs.action
-      * ServerRenameTypes.patch list)
+  | Not_renameable_position
+  | Rename_success of {
+      shellout:
+        (string SymbolDefinition.t * ServerCommandTypes.Find_refs.action) option;
+      local: ServerRenameTypes.patch list;
+    }
 
 type completion_request = { is_manually_invoked: bool }
 
@@ -126,13 +126,11 @@ type _ t =
           *)
   | Rename : document * location * string * document list -> rename_result t
       (** The result of Rename is one of:
-       - Local_var_success of a [ServerRenameTypes.patch list option], which is an optional list
-       of Insert, Delete or Replace patches with positions and new_names.
-       - Shell_out_and_augment, where we return
-           - a symbol's definition from [SymbolDefinition.t],
-           - the find_refs action corresponding to this Rename attempt
-            e.g. Class of class_name, Member of member_name with a Method of method_name.
-           - [ServerRenameTypes.patch list], a list of rename patches for each open file supplied
+       - Not_renameable_position, indicating an attempt to rename something that isn't a valid symbol
+       - Rename_success, where we return a record containing two fields:
+           - [shellout], an optional tuple of (SymbolDefinition.full_name * Find_refs.action)
+             to indicate that ClientIdeDaemon could not satisfy all of the rename (the non-localvar case)
+           - [local], a [ServerRenameTypes.patch list], a list of rename patches for each open file supplied
             in the input document list
           *)
   | Type_definition :

@@ -367,12 +367,12 @@ class parser {
   // function_or_performs:
   //     function comma_or_semicolon?
   //   | "performs" type comma_or_semicolon
-  std::unique_ptr<t_function_list> parse_braced_function_list() {
+  t_function_list parse_braced_function_list() {
     expect_and_consume('{');
-    auto functions = std::make_unique<t_function_list>();
+    auto functions = t_function_list();
     while (token_.kind != '}') {
       if (token_.kind != tok::kw_performs) {
-        functions->emplace_back(parse_function());
+        functions.emplace_back(parse_function());
         try_parse_comma_or_semicolon();
         continue;
       }
@@ -383,7 +383,7 @@ class parser {
       if (!try_parse_comma_or_semicolon()) {
         report_expected("`,` or `;`");
       }
-      functions->emplace_back(actions_.on_performs(range, type));
+      functions.emplace_back(actions_.on_performs(range, type));
     }
     expect_and_consume('}');
     return functions;

@@ -75,7 +75,7 @@ struct parsing_params {
 };
 
 /**
- * Parses a program and returns the resulting AST.
+ * Parses a program, performs semantic analysis and returns the resulting AST.
  * Diagnostics such as warnings and errors are reported via `diags`.
  */
 std::unique_ptr<t_program_bundle> parse_ast(

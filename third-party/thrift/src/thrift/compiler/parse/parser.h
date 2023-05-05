@@ -34,11 +34,7 @@ class diagnostics_engine;
 class lexer;
 
 class t_base_type;
-class t_interaction;
-class t_service;
 class t_throws;
-class t_typedef;
-class t_union;
 
 struct identifier {
   fmt::string_view str;
@@ -103,13 +99,13 @@ class parser_actions {
       std::unique_ptr<attributes> attrs,
       const identifier& name,
       const identifier& base,
-      std::unique_ptr<t_function_list> functions) = 0;
+      t_function_list functions) = 0;
 
   virtual void on_interaction(
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
-      std::unique_ptr<t_function_list> functions) = 0;
+      t_function_list functions) = 0;
 
   virtual std::unique_ptr<t_function> on_function(
       source_range range,

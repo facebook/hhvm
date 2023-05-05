@@ -59,3 +59,15 @@ TEST(EnumUtilsTest, ShortEnumNameOrThrow) {
   EXPECT_THROW(enumNameOrThrow(MyEnum(42)), std::out_of_range);
   EXPECT_THROW(enumNameOrThrow(MyEnum(-1)), std::out_of_range);
 }
+
+struct MyStruct {
+  constexpr static size_t size = 0;
+};
+TEST(EnumUtilsTest, IsThriftEnum) {
+  EXPECT_TRUE(is_thrift_enum_v<MyEnum>);
+  enum class CppEnum {};
+  enum CEnum {};
+  EXPECT_FALSE(is_thrift_enum_v<CppEnum>);
+  EXPECT_FALSE(is_thrift_enum_v<CEnum>);
+  EXPECT_FALSE(is_thrift_enum_v<MyStruct>);
+}

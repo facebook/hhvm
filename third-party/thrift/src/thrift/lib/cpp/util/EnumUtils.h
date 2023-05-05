@@ -22,6 +22,7 @@
 #include <cstring>
 
 #include <folly/Conv.h>
+#include <folly/Portability.h>
 
 #include <thrift/lib/cpp/Thrift.h>
 
@@ -29,6 +30,15 @@ namespace apache {
 namespace thrift {
 
 namespace util {
+
+/// Return whether EnumType is a thrift defined enum type
+template <typename EnumType, typename = void>
+FOLLY_INLINE_VARIABLE constexpr bool is_thrift_enum_v = false;
+
+template <typename EnumType>
+FOLLY_INLINE_VARIABLE constexpr bool is_thrift_enum_v<
+    EnumType,
+    folly::void_t<decltype(TEnumTraits<EnumType>::size)>> = true;
 
 /**
  * Parses an enum name to the enum type

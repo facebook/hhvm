@@ -1074,17 +1074,19 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
   let partial_telemetry_ref = ref None in
 
   try
+    (* Note: SIGINT exception handler is typically raised from [run_main], not from
+       the lwt code that's running in [main_internal]. Thus, [Lwt_utils.run_main]'s caller is
+       the only place that we can deal with it. This also motivates the use of a reference
+       [partial_telemetry_ref], since there's no way for a return value to survive SIGINT. *)
     let (exit_status, telemetry) =
       Lwt_utils.run_main (fun () ->
           main_internal args local_config partial_telemetry_ref)
     in
-    (* Note: SIGINT exception handler is typically raised from [run_main], not from
-       the lwt code that's running in [main_internal]. Thus, here is the only place
-       that we can deal with it. This also motivates the use of a reference
-       [partial_telemetry_ref], since there's no way for a return value to survive SIGINT. *)
+    let spinner = ClientSpinner.get_latest_report () in
     HackEventLogger.client_check
       exit_status
       telemetry
+      ~spinner
       ~retry_start:args.log_retry_start
       ~retry_count:args.log_retry_count;
     Hh_logger.log "CLIENT_CHECK %s" (Exit_status.show exit_status);
@@ -1115,24 +1117,24 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
            it can't write errors to the pipe. *)
         HackEventLogger.client_check_partial
           exit_status
-          spinner
           telemetry
+          ~spinner
           ~retry_start:args.log_retry_start
           ~retry_count:args.log_retry_count;
         Hh_logger.log
           "CLIENT_CHECK_PARTIAL [%s] %s"
-          (Option.value spinner ~default:"")
+          (Option.value_map spinner ~f:fst ~default:"")
           (Exit_status.show exit_status)
       | _ ->
         HackEventLogger.client_check_bad_exit
           exit_status
-          spinner
           e
+          ~spinner
           ~retry_start:args.log_retry_start
           ~retry_count:args.log_retry_count;
         Hh_logger.log
           "CLIENT_CHECK_EXIT [%s] %s"
-          (Option.value spinner ~default:"")
+          (Option.value_map spinner ~f:fst ~default:"")
           (Exit_status.show_expanded exit_status)
     end;
     Exit.exit exit_status

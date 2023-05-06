@@ -182,11 +182,11 @@ let client_restart ~data:_ = ()
 
 let client_check_start () = ()
 
-let client_check _ _ ~retry_start:_ ~retry_count:_ = ()
+let client_check _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
 
-let client_check_partial _ _ _ ~retry_start:_ ~retry_count:_ = ()
+let client_check_partial _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
 
-let client_check_bad_exit _ _ _ ~retry_start:_ ~retry_count:_ = ()
+let client_check_bad_exit _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
 
 let client_check_errors_file_restarted _ = ()
 
@@ -266,7 +266,9 @@ let ranked_autocomplete_request_duration ~start_time:_ = ()
 
 let monitor_dead_but_typechecker_alive () = ()
 
-let spinner_heartbeat _ _ = ()
+let spinner_heartbeat _ ~spinner:_ = ()
+
+let spinner_change ~spinner:_ ~next:_ = ()
 
 let client_established_connection _ = ()
 

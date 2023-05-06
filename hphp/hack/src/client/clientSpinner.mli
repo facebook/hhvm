@@ -26,5 +26,6 @@ val start_heartbeat_telemetry : unit -> unit
   if someone erases the spinner, they do so only temporarily. *)
 val report : to_stderr:bool -> angery_reaccs_only:bool -> string option -> unit
 
-(** For telemetry purposes, this is the most recent non-None report. *)
-val get_latest_report : unit -> string option
+(** For telemetry purposes, this is the most recent non-None report,
+and how long since it was first reported. *)
+val get_latest_report : unit -> (string * float) option

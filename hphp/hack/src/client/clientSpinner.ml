@@ -36,6 +36,8 @@ type message =
           (** This is true when [report None] has been called more recently than [report Some].
           It means that the text won't be displayed on stderr.
           (However, the text is still used for heartbeat and logging). *)
+      start_time: float;
+          (** the time of the oldest [report (Some text)] with no other [report (Some other_text)] since then. *)
     }
 
 type state = {
@@ -51,10 +53,13 @@ let state : state ref =
   ref
     { message = Init; to_stderr = false; angery_reaccs_only = false; index = 0 }
 
-let get_latest_report () : string option =
+let get_latest_report () : (string * float) option =
+  let now = Unix.gettimeofday () in
   match !state.message with
-  | Message { text; is_hidden = false } -> Some text
-  | Message { text; is_hidden = true } -> Some ("[hidden] " ^ text)
+  | Message { text; is_hidden = false; start_time } ->
+    Some (text, now -. start_time)
+  | Message { text; is_hidden = true; start_time } ->
+    Some ("[hidden] " ^ text, now -. start_time)
   | Init -> None
 
 (** Used so that when we Hh_logger.log a spinner change, we can show wall-time. *)
@@ -63,7 +68,7 @@ let start_time : float = Unix.gettimeofday ()
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
     let%lwt _ = Lwt_unix.sleep 1.0 in
-    HackEventLogger.spinner_heartbeat n (get_latest_report ());
+    HackEventLogger.spinner_heartbeat n ~spinner:(get_latest_report ());
     loop (n + 1)
   in
   let _future = loop 1 in
@@ -80,7 +85,7 @@ let update_stderr (old_state : state) ~(new_state : state) : unit =
   in
   if was_present then Tty.print_clear_line stderr;
   match new_state.message with
-  | Message { is_hidden = false; text } when new_state.to_stderr ->
+  | Message { is_hidden = false; text; _ } when new_state.to_stderr ->
     let chars =
       if new_state.angery_reaccs_only then
         emoji_chars
@@ -109,19 +114,22 @@ let report ~(to_stderr : bool) ~(angery_reaccs_only : bool) :
   if Option.is_none !animator then animator := Some (animate ());
   let message =
     match (!state.message, next) with
-    | (Message { text = prev; _ }, Some next) when String.equal prev next ->
+    | (Message { text = prev; start_time; _ }, Some next)
+      when String.equal prev next ->
       (* text is unchanged. But if it was hidden before, now let it be shown *)
-      Message { text = next; is_hidden = false }
+      Message { text = next; is_hidden = false; start_time }
     | (_, Some next) ->
       (* text has changed *)
       Hh_logger.log
         "spinner %0.1fs: [%s]"
         (Unix.gettimeofday () -. start_time)
         next;
-      Message { text = next; is_hidden = false }
-    | (Message { text; _ }, None) ->
+      HackEventLogger.spinner_change ~spinner:(get_latest_report ()) ~next;
+      Message
+        { text = next; is_hidden = false; start_time = Unix.gettimeofday () }
+    | (Message { text; start_time; _ }, None) ->
       (* pre-existing text gets hidden *)
-      Message { text; is_hidden = true }
+      Message { text; start_time; is_hidden = true }
     | (Init, None) ->
       (* no-op, because we're hiding when no text has yet been reported *)
       Init

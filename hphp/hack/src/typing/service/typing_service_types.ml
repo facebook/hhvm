@@ -47,14 +47,17 @@ ACCUMULATE: we start with all fields empty, and then merge in the output of each
 type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;
-  telemetry: Telemetry.t;
+  profiling_info: Telemetry.t;
+      (** Instrumentation about how the workers behaved, e.g. how many decls were
+      computed or how much cpu-time it took. This info is merged by adding together the sub-fields,
+      so as to aggregate information from multiple workers. *)
 }
 
 let make_typing_result () =
   {
     errors = Errors.empty;
     dep_edges = Typing_deps.dep_edges_make ();
-    telemetry = Telemetry.create ();
+    profiling_info = Telemetry.create ();
   }
 
 let accumulate_job_output
@@ -66,8 +69,10 @@ let accumulate_job_output
       Typing_deps.merge_dep_edges
         produced_by_job.dep_edges
         accumulated_so_far.dep_edges;
-    telemetry =
-      Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
+    profiling_info =
+      Telemetry.add
+        produced_by_job.profiling_info
+        accumulated_so_far.profiling_info;
   }
 
 type delegate_job_sig = unit -> typing_result * typing_progress

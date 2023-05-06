@@ -442,7 +442,7 @@ let process_one_workitem
 
 let process_workitems
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; telemetry } : typing_result)
+    ({ errors; dep_edges; profiling_info } : typing_result)
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -516,18 +516,18 @@ let process_workitems
 
   (* Gather up our various forms of telemetry... *)
   let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
-  let this_batch_telemetry =
+  let this_batch_profiling_info =
     Telemetry.create ()
     |> Telemetry.object_ ~key:"operations" ~value:(Counters.get_counters ())
     |> Telemetry.int_ ~key:"end_heap_mb_sum" ~value:end_heap_mb
     |> Telemetry.int_ ~key:"batch_count" ~value:1
   in
-  let telemetry = Telemetry.add telemetry this_batch_telemetry in
+  let profiling_info = Telemetry.add profiling_info this_batch_profiling_info in
 
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; dep_edges; telemetry }, progress)
+  ({ errors; dep_edges; profiling_info }, progress)
 
 let load_and_process_workitems
     (ctx : Provider_context.t)
@@ -1343,7 +1343,7 @@ let go_with_interrupt
         match process_with_hh_distc ~root ~interrupt ~check_info with
         | `Success (errors, dep_edges, env) ->
           Some
-            ( { errors; dep_edges; telemetry = profiling_info },
+            ( { errors; dep_edges; profiling_info },
               delegate_state,
               telemetry,
               env,
@@ -1355,7 +1355,7 @@ let go_with_interrupt
             ( {
                 errors = Errors.empty;
                 dep_edges = Typing_deps.dep_edges_make ();
-                telemetry = profiling_info;
+                profiling_info;
               },
               delegate_state,
               telemetry,
@@ -1388,7 +1388,7 @@ let go_with_interrupt
         ~check_info
         ~typecheck_info
   in
-  let { errors; dep_edges; telemetry = profiling_info } = typing_result in
+  let { errors; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
   let telemetry =

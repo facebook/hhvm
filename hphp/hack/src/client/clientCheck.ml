@@ -1055,6 +1055,11 @@ let main_internal
     List.iter results ~f:(fun s -> ClientFindRefs.go s true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
 
+let rec flush_event_logger () : unit Lwt.t =
+  let%lwt () = Lwt_unix.sleep 1.0 in
+  let%lwt () = EventLoggerLwt.flush () in
+  flush_event_logger ()
+
 let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
   ref_local_config := Some local_config;
   (* That's a hack, just to avoid having to pass local_config into loads of callsites
@@ -1065,7 +1070,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
 
   HackEventLogger.client_check_start ();
   ClientSpinner.start_heartbeat_telemetry ();
-
+  Lwt.dont_wait flush_event_logger (fun _exn -> ());
   let partial_telemetry_ref = ref None in
 
   try

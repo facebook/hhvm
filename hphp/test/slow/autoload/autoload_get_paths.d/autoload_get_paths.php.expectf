@@ -1,4 +1,0 @@
-Paths:
-  %s/test/slow/autoload/autoload_get_paths.d/autoload-class.inc
-  %s/test/slow/autoload/autoload_get_paths.d/autoload-function-and-constant.inc
-  %s/test/slow/autoload/autoload_get_paths.d/autoload_get_paths.php

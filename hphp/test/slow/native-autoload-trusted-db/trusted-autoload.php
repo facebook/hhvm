@@ -18,7 +18,14 @@ function main_trusted_autoload(): void {
   print_enabled_stats();
 
   print "Paths:\n";
-  foreach (sorted(HH\autoload_get_paths()) as $path) {
+  $paths = vec[
+    __DIR__."/dir1/dir2/native-autoload-class.inc",
+    __DIR__."/dir1/dir2/native-autoload-type-alias.inc",
+    __DIR__."/dir1/native-autoload-const.inc",
+    __DIR__."/native-autoload-function.inc",
+    __DIR__."/trusted-autoload.php",
+  ];
+  foreach (sorted($paths) as $path) {
     print "  $path:\n";
     print "    Types:\n";
     foreach (sorted(HH\autoload_path_to_types($path)) as $type) {

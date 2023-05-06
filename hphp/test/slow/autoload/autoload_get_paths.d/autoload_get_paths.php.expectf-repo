@@ -1,4 +1,0 @@
-Paths:
-
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Repo Autoload Map does not support getAllFiles' in %s/autoload_get_paths.php:%d
-%A

@@ -144,14 +144,6 @@ Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) 
 
 } // end anonymous namespace
 
-Array HHVM_FUNCTION(autoload_get_paths) {
-  auto const* map = AutoloadHandler::s_instance->getAutoloadMap();
-  if (!map) {
-    SystemLib::throwInvalidArgumentExceptionObject("Autoloader not enabled");
-  }
-  return map->getAllFiles();
-}
-
 Variant HHVM_FUNCTION(autoload_type_to_path, const String& type) {
   return autoload_symbol_to_path(type, AutoloadMap::KindOf::Type);
 }
@@ -1549,7 +1541,6 @@ static struct HHExtension final : Extension {
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
     X(autoload_set_paths);
-    X(autoload_get_paths);
     X(autoload_type_to_path);
     X(autoload_function_to_path);
     X(autoload_constant_to_path);

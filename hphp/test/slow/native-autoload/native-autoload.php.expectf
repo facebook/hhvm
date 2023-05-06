@@ -1,8 +1,0 @@
-Test passed successfully
-Native Autoload: true
-Paths:
-  %s/test/slow/native-autoload/dir1/dir2/native-autoload-class.inc
-  %s/test/slow/native-autoload/dir1/dir2/native-autoload-type-alias.inc
-  %s/test/slow/native-autoload/dir1/native-autoload-const.inc
-  %s/test/slow/native-autoload/native-autoload-function.inc
-  %s/test/slow/native-autoload/native-autoload.php

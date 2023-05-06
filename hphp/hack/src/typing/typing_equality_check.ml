@@ -99,6 +99,9 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       eq_incompatible_types env p ety1 ety2
   | _ ->
     (match (deref ety1, deref ety2) with
+    | ((_, Tprim N.Tnum), (_, Tprim N.Tarraykey))
+    | ((_, Tprim N.Tarraykey), (_, Tprim N.Tnum)) ->
+      ()
     | ((_, Tprim N.Tnum), (_, Tprim (N.Tint | N.Tfloat)))
     | ((_, Tprim (N.Tint | N.Tfloat)), (_, Tprim N.Tnum)) ->
       ()

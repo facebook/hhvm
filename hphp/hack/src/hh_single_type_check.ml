@@ -1025,7 +1025,10 @@ let parse_options () =
         ~init:(Config_file_common.empty ())
         ~f:(fun config setting ->
           let c = Config_file_common.parse_contents setting in
-          Config_file_common.apply_overrides ~from:None ~config ~overrides:c)
+          Config_file_common.apply_overrides
+            ~config
+            ~overrides:c
+            ~log_reason:None)
     in
     ServerConfig.load_config config tcopt
   in

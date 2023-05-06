@@ -14,8 +14,10 @@ val empty : unit -> t
 
 val print_to_stderr : t -> unit
 
-(** Apply overrides using provided overrides. *)
-val apply_overrides : from:string option -> config:t -> overrides:t -> t
+(** Apply overrides using provided overrides.
+[log_reason] is solely used for logging, so we can write to stderr indicating where
+these overrides came from and what they were. *)
+val apply_overrides : config:t -> overrides:t -> log_reason:string option -> t
 
 val parse_contents : string -> t
 

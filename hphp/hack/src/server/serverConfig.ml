@@ -408,9 +408,9 @@ let load ~silent options : t * ServerLocalConfig.t =
   in
   let config =
     Config_file.apply_overrides
-      ~from:None
       ~config
       ~overrides:command_line_overrides
+      ~log_reason:None
   in
   process_untrusted_mode config;
   let version =

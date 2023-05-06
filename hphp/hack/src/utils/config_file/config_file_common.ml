@@ -21,12 +21,13 @@ let is_empty = Config_file_ffi_externs.is_empty
 let print_to_stderr (config : t) : unit =
   Config_file_ffi_externs.print_to_stderr config
 
-let apply_overrides ~(from : string option) ~(config : t) ~(overrides : t) : t =
+let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
+    : t =
   if is_empty overrides then
     config
   else
     let config = Config_file_ffi_externs.apply_overrides config overrides in
-    Option.iter from ~f:(fun from ->
+    Option.iter log_reason ~f:(fun from ->
         Printf.eprintf "*** Overrides from %s:\n%!" from;
         print_to_stderr overrides;
         Printf.eprintf "\n%!");

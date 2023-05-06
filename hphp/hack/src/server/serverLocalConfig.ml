@@ -625,7 +625,9 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
      to guide the manner in which JustKnobs picks up values, and "--config use_justknobs=false"
      will be able to disable it. Don't worry though -- we'll apply CLI overrides again at the end,
      so they overwrite any changes brought by JustKnobs and experiments_config. *)
-  let config = Config_file.apply_overrides ~from:None ~config ~overrides in
+  let config =
+    Config_file.apply_overrides ~config ~overrides ~log_reason:None
+  in
   (* Now is the time for JustKnobs *)
   let use_justknobs = bool_opt "use_justknobs" config in
   let config =
@@ -686,9 +688,9 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
         let experiment_overrides = Config_file.parse_local_config file in
         let config =
           Config_file.apply_overrides
-            ~from:(Option.some_if (not silent) "Experiment_overrides")
             ~config
             ~overrides:experiment_overrides
+            ~log_reason:(Option.some_if (not silent) "Experiment_overrides")
         in
         (meta, config)
       else
@@ -700,9 +702,9 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
      precedence over the experiments_config and JustKnobs. *)
   let config =
     Config_file.apply_overrides
-      ~from:(Option.some_if (not silent) "--config")
       ~config
       ~overrides
+      ~log_reason:(Option.some_if (not silent) "--config")
   in
   (experiments_meta, config)
 

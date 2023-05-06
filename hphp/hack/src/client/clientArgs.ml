@@ -1332,3 +1332,14 @@ let config = function
   | CDownloadSavedState _
   | CRage _ ->
     None
+
+let from = function
+  | CCheck { ClientEnv.from; _ }
+  | CStart { ClientStart.from; _ }
+  | CRestart { ClientStart.from; _ }
+  | CLsp { ClientLsp.from; _ }
+  | CSavedStateProjectMetadata { ClientEnv.from; _ }
+  | CStop { ClientStop.from; _ }
+  | CDownloadSavedState { ClientDownloadSavedState.from; _ }
+  | CRage { ClientRage.from; _ } ->
+    from

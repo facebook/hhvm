@@ -61,6 +61,7 @@ let () =
   (* The global variable Relative_path.root must be initialized for a wide variety of things *)
   let root = ClientArgs.root command in
   Option.iter root ~f:(Relative_path.set_path_prefix Relative_path.Root);
+  let from = ClientArgs.from command in
 
   (* We'll chose where Hh_logger.log gets sent *)
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
@@ -98,12 +99,13 @@ let () =
     | Some root ->
       ServerProgress.set_root root;
       (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
-         It requires a ServerArgs structure, solely to pick out --config options. We
-         dont have ServerArgs (we only have client args!) but we do parse --config
+         It requires a ServerArgs structure, solely to pick out --from and --config options. We
+         dont have ServerArgs (we only have client args!) but we do parse --from and --config
          options and will patch them onto a fake ServerArgs. *)
       let fake_server_args =
         ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
       in
+      let fake_server_args = ServerArgs.set_from fake_server_args from in
       let fake_server_args =
         match ClientArgs.config command with
         | None -> fake_server_args
@@ -123,10 +125,18 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        ClientCheck.main
-          check_env
-          (Option.value_exn local_config)
-          ~init_proc_stack:(Some init_proc_stack)
+        let local_config = Option.value_exn local_config in
+        let init_proc_stack =
+          if
+            String.is_empty from
+            || local_config
+                 .ServerLocalConfig.log_init_proc_stack_also_on_absent_from
+          then
+            Some init_proc_stack
+          else
+            None
+        in
+        ClientCheck.main check_env local_config ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)

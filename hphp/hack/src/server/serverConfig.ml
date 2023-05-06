@@ -431,6 +431,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ~current_version:version
       ~current_rolled_out_flag_idx
       ~deactivate_saved_state_rollout
+      ~from:(ServerArgs.from options)
       command_line_overrides
   in
   let local_config =

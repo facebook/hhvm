@@ -333,6 +333,10 @@ type t = {
   log_categories: string list;
   log_large_fanouts_threshold: int option;
       (** If a fanout is greater than this value, log stats about that fanout. *)
+  log_init_proc_stack_also_on_absent_from: bool;
+      (** A few select events like to log the init_proc_stack, but it's voluminous!
+      The default behavior is to log init_proc_stack only when "--from" is absent.
+      This flag lets us log it also when "--from" is present. *)
   experiments: string list;
       (** the list of experiments from the experiments config *)
   experiments_config_meta: string;  (** a free-form diagnostic string *)
@@ -513,6 +517,7 @@ let default =
     attempt_fix_credentials = false;
     log_categories = [];
     log_large_fanouts_threshold = None;
+    log_init_proc_stack_also_on_absent_from = false;
     experiments = [];
     experiments_config_meta = "";
     force_remote_type_check = false;
@@ -619,7 +624,7 @@ let system_config_path =
   in
   Filename.concat dir "hh.conf"
 
-let apply_overrides ~silent ~current_version ~config ~overrides =
+let apply_overrides ~silent ~current_version ~config ~from ~overrides =
   (* We'll apply CLI overrides now at the start so that JustKnobs and experiments_config
      can be informed about them, e.g. "--config rollout_group=foo" will be able
      to guide the manner in which JustKnobs picks up values, and "--config use_justknobs=false"
@@ -643,7 +648,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
     | (None, false)
     (* if use_justknobs isn't set, then HH_TEST_MODE unset or =0 will leave JK on *)
       ->
-      ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
+      ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config ~from
   in
   (* Now is the time for experiments_config overrides *)
   let experiments_enabled =
@@ -714,10 +719,11 @@ let load_
     ~current_version
     ~current_rolled_out_flag_idx
     ~deactivate_saved_state_rollout
+    ~from
     overrides : t =
   let config = Config_file.parse_local_config system_config_path in
   let (experiments_config_meta, config) =
-    apply_overrides ~silent ~current_version ~config ~overrides
+    apply_overrides ~silent ~current_version ~config ~from ~overrides
   in
   (if not silent then
     output_config_section "Combined config" @@ fun () ->
@@ -732,6 +738,9 @@ let load_
   in
   let log_large_fanouts_threshold =
     int_opt "log_large_fanouts_threshold" config
+  in
+  let log_init_proc_stack_also_on_absent_from =
+    bool_ "log_init_proc_stack_also_on_absent_from" ~default:false config
   in
   let min_log_level =
     match
@@ -1389,6 +1398,7 @@ let load_
     attempt_fix_credentials;
     log_categories;
     log_large_fanouts_threshold;
+    log_init_proc_stack_also_on_absent_from;
     experiments;
     experiments_config_meta;
     use_saved_state;
@@ -1503,6 +1513,7 @@ let load :
     current_version:Config_file_version.version ->
     current_rolled_out_flag_idx:int ->
     deactivate_saved_state_rollout:bool ->
+    from:string ->
     Config_file_common.t ->
     t =
   load_ system_config_path

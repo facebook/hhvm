@@ -127,7 +127,7 @@ let parse_without_command options usage command =
  * if you are making significant changes you need to update the manpage as
  * well. Experimental or otherwise volatile options need not be documented
  * there, but keep what's there up to date please. *)
-let parse_check_args cmd =
+let parse_check_args cmd ~from_default =
   (* arg parse output refs *)
   let autostart = ref true in
   let config = ref [] in
@@ -135,7 +135,7 @@ let parse_check_args cmd =
   let custom_hhi_path = ref None in
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
-  let from = ref "" in
+  let from = ref from_default in
   let log_retry_start = ref (Unix.gettimeofday ()) in
   let log_retry_count = ref 0 in
   let show_spinner = ref None in
@@ -902,10 +902,8 @@ let parse_check_args cmd =
     exit 0
   );
 
-  let () =
-    if String.equal !from "emacs" then
-      Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
-  in
+  if String.equal !from "emacs" then
+    Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
   {
     autostart = !autostart;
     config = !config;
@@ -914,7 +912,10 @@ let parse_check_args cmd =
     error_format = !error_format;
     force_dormant_start = !force_dormant_start;
     from = !from;
-    show_spinner = Option.value ~default:(String.equal !from "") !show_spinner;
+    show_spinner =
+      Option.value
+        ~default:(String.is_empty !from || String.equal !from "[sh]")
+        !show_spinner;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
@@ -946,7 +947,7 @@ let parse_check_args cmd =
     desc = !desc;
   }
 
-let parse_start_env command =
+let parse_start_env command ~from_default =
   let usage =
     Printf.sprintf
       "Usage: %s %s [OPTION]... [WWW-ROOT]\n%s a Hack server\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
@@ -961,7 +962,7 @@ let parse_start_env command =
   let saved_state_ignore_hhconfig = ref false in
   let prechecked = ref None in
   let mini_state = ref None in
-  let from = ref "" in
+  let from = ref from_default in
   let config = ref [] in
   let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
@@ -1022,20 +1023,23 @@ let parse_start_env command =
     allow_non_opt_build = !allow_non_opt_build;
   }
 
-let parse_saved_state_project_metadata_args () : command =
-  CSavedStateProjectMetadata (parse_check_args CKSavedStateProjectMetadata)
+let parse_saved_state_project_metadata_args ~from_default : command =
+  CSavedStateProjectMetadata
+    (parse_check_args CKSavedStateProjectMetadata ~from_default)
 
-let parse_start_args () = CStart (parse_start_env "start")
+let parse_start_args ~from_default =
+  CStart (parse_start_env "start" ~from_default)
 
-let parse_restart_args () = CRestart (parse_start_env "restart")
+let parse_restart_args ~from_default =
+  CRestart (parse_start_env "restart" ~from_default)
 
-let parse_stop_args () =
+let parse_stop_args ~from_default =
   let usage =
     Printf.sprintf
       "Usage: %s stop [OPTION]... [WWW-ROOT]\nStop a hack server\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0)
   in
-  let from = ref "" in
+  let from = ref from_default in
   let options =
     [
       Common_argspecs.from from;
@@ -1292,17 +1296,18 @@ invocations of `hh` faster.|}
       replay_token = !replay_token;
     }
 
-let parse_args () : command =
+let parse_args ~(from_default : string) : command =
   match parse_command () with
   | CKNone
   | CKCheck ->
-    CCheck (parse_check_args CKCheck)
-  | CKStart -> parse_start_args ()
-  | CKStop -> parse_stop_args ()
-  | CKRestart -> parse_restart_args ()
+    CCheck (parse_check_args CKCheck ~from_default)
+  | CKStart -> parse_start_args ~from_default
+  | CKStop -> parse_stop_args ~from_default
+  | CKRestart -> parse_restart_args ~from_default
   | CKLsp -> parse_lsp_args ()
   | CKRage -> parse_rage_args ()
-  | CKSavedStateProjectMetadata -> parse_saved_state_project_metadata_args ()
+  | CKSavedStateProjectMetadata ->
+    parse_saved_state_project_metadata_args ~from_default
   | CKDownloadSavedState -> parse_download_saved_state_args ()
 
 let root = function

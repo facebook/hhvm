@@ -38,7 +38,14 @@ let () =
     Sys.sigint
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
   let init_id = Random_id.short_string () in
-  let command = ClientArgs.parse_args () in
+  let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
+  let from_default =
+    if Proc.is_likely_from_interactive_shell init_proc_stack then
+      "[sh]"
+    else
+      ""
+  in
+  let command = ClientArgs.parse_args ~from_default in
   let command_name =
     match command with
     | ClientCommand.CCheck _ -> "Check"
@@ -116,7 +123,10 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        ClientCheck.main check_env (Option.value_exn local_config)
+        ClientCheck.main
+          check_env
+          (Option.value_exn local_config)
+          ~init_proc_stack:(Some init_proc_stack)
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)

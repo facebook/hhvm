@@ -1060,7 +1060,10 @@ let rec flush_event_logger () : unit Lwt.t =
   let%lwt () = EventLoggerLwt.flush () in
   flush_event_logger ()
 
-let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
+let main
+    (args : client_check_env)
+    (local_config : ServerLocalConfig.t)
+    ~(init_proc_stack : string list option) : 'a =
   ref_local_config := Some local_config;
   (* That's a hack, just to avoid having to pass local_config into loads of callsites
      in this module. *)
@@ -1086,6 +1089,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
     HackEventLogger.client_check
       exit_status
       telemetry
+      ~init_proc_stack
       ~spinner
       ~retry_start:args.log_retry_start
       ~retry_count:args.log_retry_count;
@@ -1118,6 +1122,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
         HackEventLogger.client_check_partial
           exit_status
           telemetry
+          ~init_proc_stack
           ~spinner
           ~retry_start:args.log_retry_start
           ~retry_count:args.log_retry_count;
@@ -1129,6 +1134,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) : 'a =
         HackEventLogger.client_check_bad_exit
           exit_status
           e
+          ~init_proc_stack
           ~spinner
           ~retry_start:args.log_retry_start
           ~retry_count:args.log_retry_count;

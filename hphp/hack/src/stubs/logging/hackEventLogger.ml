@@ -182,11 +182,17 @@ let client_restart ~data:_ = ()
 
 let client_check_start () = ()
 
-let client_check _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
+let client_check _ _ ~init_proc_stack:_ ~spinner:_ ~retry_start:_ ~retry_count:_
+    =
+  ()
 
-let client_check_partial _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
+let client_check_partial
+    _ _ ~init_proc_stack:_ ~spinner:_ ~retry_start:_ ~retry_count:_ =
+  ()
 
-let client_check_bad_exit _ _ ~spinner:_ ~retry_start:_ ~retry_count:_ = ()
+let client_check_bad_exit
+    _ _ ~init_proc_stack:_ ~spinner:_ ~retry_start:_ ~retry_count:_ =
+  ()
 
 let client_check_errors_file_restarted _ = ()
 

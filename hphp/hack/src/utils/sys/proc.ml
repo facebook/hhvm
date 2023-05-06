@@ -78,9 +78,15 @@ let get_proc_stat (pid : int) : (proc_stat, string) result =
       in
       Error error
 
+(** This returns the cmdlines of all callers in the PPID stack, with the ancestor caller at head
+e.g. "/usr/lib/systemd/systemd --system" and the cmdline of the [pid] parameter at the tail.
+There's the theoretical possibility of failng to read a /proc/{PID}/stat
+or /proc/{PID}/cmdline on linux, and the real eventuality that it doesn't work
+outside linux -- in these cases the returned string list contains strings that start with
+the word "ERROR". *)
 let get_proc_stack
     ?(max_depth : int = -1) ?(max_length : int = Int.max_value) (pid : int) :
-    (string list, string) result =
+    string list =
   let prepare_cmdline (cmdline : string) : string =
     let cmdline = Caml.String.trim cmdline in
     if max_length >= String.length cmdline then
@@ -90,23 +96,59 @@ let get_proc_stack
   in
   (* We could have max_depth as optional, but then everybody would have to pass in None *)
   (* let max_depth = match max_depth with | None -> -1 | Some max_depth -> max_depth in *)
-  let rec build_proc_stack
-      (curr_pid : int) (proc_stack : string list) (counter : int) :
-      (string list, string) result =
+  let rec build_proc_stack (curr_pid : int) (acc : string list) (counter : int)
+      : string list =
     if curr_pid = 0 then
-      Ok proc_stack
+      acc
     else if counter = max_depth then
-      Ok proc_stack
+      acc
     else
       match get_proc_stat curr_pid with
       | Ok stat ->
         build_proc_stack
           stat.ppid
-          (prepare_cmdline stat.cmdline :: proc_stack)
+          (prepare_cmdline stat.cmdline :: acc)
           (counter + 1)
-      | Error e -> Error e
+      | Error e -> ["ERROR " ^ e]
   in
   build_proc_stack pid [] 0
+
+(** This heuristic function judges whether [init_proc_stack] indicates an hh binary
+that was invoked from an interactive shell, rather than from some script/tool. *)
+let is_likely_from_interactive_shell (init_proc_stack : string list) : bool =
+  (* Things at the bottom of the stack like "/usr/local/bin/hh_client" indicate
+     the actual binary, or "/bin/bash /usr/local/bin/hh" a trivial wrapper around it.
+     We will ignore these. *)
+  let is_skippable_hh_cmdline (cmdline : string) : bool =
+    match String.split cmdline ~on:' ' with
+    | [] -> false
+    | "/bin/bash" :: cmd :: _
+    | cmd :: _ ->
+      List.mem
+        ["hh"; "hh_client"; "hh_server"]
+        (Filename.basename cmd)
+        ~equal:String.equal
+  in
+  (* After stripping binary/wrapper, if what's left has the form "-bash" or "/usr/bin/bash --init-file ..."
+     then that shows it's an interactive shell. However "bash -c cmd" is not. *)
+  let is_interactive_shell_cmdline (cmdline : string) : bool =
+    match String.split cmdline ~on:' ' with
+    | [] -> false
+    | cmd :: [] when String.is_suffix cmd ~suffix:"sh" -> true
+    | cmd :: arg :: _ when String.is_suffix cmd ~suffix:"sh" ->
+      String.is_prefix arg ~prefix:"-"
+      && not (String.is_prefix arg ~prefix:"-c")
+    | _ -> false
+  in
+
+  let rec loop stack =
+    match stack with
+    | [] -> false
+    | cmdline :: rest when is_skippable_hh_cmdline cmdline -> loop rest
+    | cmdline :: _ when is_interactive_shell_cmdline cmdline -> true
+    | _ -> false
+  in
+  loop (List.rev init_proc_stack)
 
 (** There's no reliable way to tell whether an arbitrary PID is still alive.
 That's because after the process has long since died, its PID might be recycled

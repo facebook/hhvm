@@ -169,11 +169,7 @@ let start () =
     CgroupProfiler.get_initial_reading () |> CgroupProfiler.use_initial_reading;
     (* Yet more initialization: *)
     Folly.ensure_folly_init ();
-    let proc_stack =
-      match Proc.get_proc_stack ~max_length:1000 (Unix.getpid ()) with
-      | Ok proc_stack -> proc_stack
-      | Error e -> [e]
-    in
+    let proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
     let options = ServerArgs.parse_options () in
     if ServerArgs.should_detach options then begin
       let (_ : (unit, unit) Daemon.handle) =

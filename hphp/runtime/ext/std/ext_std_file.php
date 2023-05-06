@@ -2,6 +2,9 @@
 
 namespace {
 
+const int FILE_TEXT = 0;
+const int FILE_BINARY = 0;
+
 /**
  * fopen() binds a named resource, specified by filename, to a stream.
  *

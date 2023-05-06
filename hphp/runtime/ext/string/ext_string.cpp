@@ -2763,15 +2763,6 @@ struct StringExtension final : Extension {
     HHVM_RC_INT_SAME(MON_12);
 #endif
 
-    // These are ostensibly bools,
-    // but for historical reasons are expressed as ints
-    HHVM_RC_INT(CRYPT_BLOWFISH, 1);
-    HHVM_RC_INT(CRYPT_EXT_DES, 0);
-    HHVM_RC_INT(CRYPT_MD5, 1);
-    HHVM_RC_INT(CRYPT_STD_DES, 1);
-
-    HHVM_RC_INT(CRYPT_SALT_LENGTH, 12);
-
     HHVM_FALIAS(HH\\str_number_coercible, HH_str_number_coercible);
     HHVM_FALIAS(HH\\str_to_numeric, HH_str_to_numeric);
     HHVM_FALIAS(HH\\str_bitwise_xor, HH_str_bitwise_xor);

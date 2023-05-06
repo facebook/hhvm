@@ -84,6 +84,59 @@ const float INF = 1e308 + 1e308;
 const float NAN = (1e308 + 1e308) - (1e308 + 1e308);
 const bool ZEND_THREAD_SAFE = true;
 
+const int UPLOAD_ERR_OK =         0;
+const int UPLOAD_ERR_INI_SIZE =   1;
+const int UPLOAD_ERR_FORM_SIZE =  2;
+const int UPLOAD_ERR_PARTIAL =    3;
+const int UPLOAD_ERR_NO_FILE =    4;
+const int UPLOAD_ERR_NO_TMP_DIR = 6;
+const int UPLOAD_ERR_CANT_WRITE = 7;
+const int UPLOAD_ERR_EXTENSION =  8;
+
+const int CREDITS_GROUP =    1 << 0;
+const int CREDITS_GENERAL =  1 << 1;
+const int CREDITS_SAPI =     1 << 2;
+const int CREDITS_MODULES =  1 << 3;
+const int CREDITS_DOCS =     1 << 4;
+const int CREDITS_FULLPAGE = 1 << 5;
+const int CREDITS_QA =       1 << 6;
+const int CREDITS_ALL = 0xFFFFFFFF;
+
+const int PHP_INT_SIZE = 8; // sizeof(int64_t)
+
+// FIXME: These values are hardcoded from their previous IDL values
+// Grab their correct values from the system as appropriate
+const string PHP_EOL = "\n";
+const string PHP_CONFIG_FILE_PATH = "";
+const string PHP_CONFIG_FILE_SCAN_DIR = "";
+const string PHP_DATADIR = "";
+const string PHP_EXTENSION_DIR = "";
+const string PHP_LIBDIR = "";
+const string PHP_LOCALSTATEDIR = "";
+const string PHP_PREFIX = "";
+const string PHP_SHLIB_SUFFIX = "so";
+const string PHP_SYSCONFDIR = "";
+const string PEAR_EXTENSION_DIR = "";
+const string PEAR_INSTALL_DIR = "";
+const string DEFAULT_INCLUDE_PATH = "";
+
+// I'm honestly not sure where these constants came from
+// I've brought them for ward from their IDL definitions
+// with their previous hard-coded values.
+const int CODESET =         14;
+const int RADIXCHAR =    65536;
+const int THOUSEP =      65537;
+const int ALT_DIGITS =  131119;
+const int AM_STR =      131110;
+const int PM_STR =      131111;
+const int D_T_FMT =     131112;
+const int D_FMT =       131113;
+const int ERA =         131116;
+const int ERA_D_FMT =   131118;
+const int ERA_D_T_FMT = 131120;
+const int ERA_T_FMT =   131121;
+const int CRNCYSTR =    262159;
+
 /** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.
  */

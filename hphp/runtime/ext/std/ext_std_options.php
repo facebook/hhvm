@@ -2,6 +2,15 @@
 
 namespace {
 
+const int INFO_GENERAL = 1 << 0;
+const int INFO_CREDITS = 1 << 1;
+const int INFO_CONFIGURATION = 1 << 2;
+const int INFO_MODULES = 1 << 3;
+const int INFO_ENVIRONMENT = 1 << 4;
+const int INFO_VARIABLES = 1 << 5;
+const int INFO_LICENSE = 1 << 6;
+const int INFO_ALL = -1;
+
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
  * or not. This works on both built-in extensions and dynamically loaded ones

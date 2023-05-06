@@ -5,6 +5,16 @@ newtype FormatString<T> = string;
 }
 
 namespace {
+
+// These are ostensibly bools,
+// but for historical reasons are expressed as ints
+const int CRYPT_BLOWFISH = 1;
+const int CRYPT_EXT_DES = 0;
+const int CRYPT_MD5 = 1;
+const int CRYPT_STD_DES = 1;
+
+const int CRYPT_SALT_LENGTH = 12;
+
 /**
  * Returns a string with backslashes before characters that are listed in
  *   charlist parameter.

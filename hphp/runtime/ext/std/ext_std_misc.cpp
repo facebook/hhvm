@@ -522,24 +522,6 @@ void StandardExtension::initMisc() {
     HHVM_RC_BOOL(PHP_DEBUG, false);
 #endif
 
-    HHVM_RC_INT(UPLOAD_ERR_OK,         0);
-    HHVM_RC_INT(UPLOAD_ERR_INI_SIZE,   1);
-    HHVM_RC_INT(UPLOAD_ERR_FORM_SIZE,  2);
-    HHVM_RC_INT(UPLOAD_ERR_PARTIAL,    3);
-    HHVM_RC_INT(UPLOAD_ERR_NO_FILE,    4);
-    HHVM_RC_INT(UPLOAD_ERR_NO_TMP_DIR, 6);
-    HHVM_RC_INT(UPLOAD_ERR_CANT_WRITE, 7);
-    HHVM_RC_INT(UPLOAD_ERR_EXTENSION,  8);
-
-    HHVM_RC_INT(CREDITS_GROUP,    1 << 0);
-    HHVM_RC_INT(CREDITS_GENERAL,  1 << 1);
-    HHVM_RC_INT(CREDITS_SAPI,     1 << 2);
-    HHVM_RC_INT(CREDITS_MODULES,  1 << 3);
-    HHVM_RC_INT(CREDITS_DOCS,     1 << 4);
-    HHVM_RC_INT(CREDITS_FULLPAGE, 1 << 5);
-    HHVM_RC_INT(CREDITS_QA,       1 << 6);
-    HHVM_RC_INT(CREDITS_ALL, 0xFFFFFFFF);
-
     HHVM_RC_INT(INI_SYSTEM, IniSetting::PHP_INI_SYSTEM);
     HHVM_RC_INT(INI_PERDIR, IniSetting::PHP_INI_PERDIR);
     HHVM_RC_INT(INI_USER,   IniSetting::PHP_INI_USER);
@@ -549,7 +531,6 @@ void StandardExtension::initMisc() {
 
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
 
-    HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
     HHVM_RC_INT(PHP_INT_MAX, k_PHP_INT_MAX);
 
@@ -571,39 +552,6 @@ void StandardExtension::initMisc() {
     HHVM_RC_INT(CONNECTION_NORMAL,  k_CONNECTION_NORMAL);
     HHVM_RC_INT(CONNECTION_ABORTED, k_CONNECTION_ABORTED);
     HHVM_RC_INT(CONNECTION_TIMEOUT, k_CONNECTION_TIMEOUT);
-
-    // FIXME: These values are hardcoded from their previous IDL values
-    // Grab their correct values from the system as appropriate
-    HHVM_RC_STR(PHP_EOL, "\n");
-    HHVM_RC_STR(PHP_CONFIG_FILE_PATH, "");
-    HHVM_RC_STR(PHP_CONFIG_FILE_SCAN_DIR, "");
-    HHVM_RC_STR(PHP_DATADIR, "");
-    HHVM_RC_STR(PHP_EXTENSION_DIR, "");
-    HHVM_RC_STR(PHP_LIBDIR, "");
-    HHVM_RC_STR(PHP_LOCALSTATEDIR, "");
-    HHVM_RC_STR(PHP_PREFIX, "");
-    HHVM_RC_STR(PHP_SHLIB_SUFFIX, "so");
-    HHVM_RC_STR(PHP_SYSCONFDIR, "");
-    HHVM_RC_STR(PEAR_EXTENSION_DIR, "");
-    HHVM_RC_STR(PEAR_INSTALL_DIR, "");
-    HHVM_RC_STR(DEFAULT_INCLUDE_PATH, "");
-
-    // I'm honestly not sure where these constants came from
-    // I've brought them for ward from their IDL definitions
-    // with their previous hard-coded values.
-    HHVM_RC_INT(CODESET,         14);
-    HHVM_RC_INT(RADIXCHAR,    65536);
-    HHVM_RC_INT(THOUSEP,      65537);
-    HHVM_RC_INT(ALT_DIGITS,  131119);
-    HHVM_RC_INT(AM_STR,      131110);
-    HHVM_RC_INT(PM_STR,      131111);
-    HHVM_RC_INT(D_T_FMT,     131112);
-    HHVM_RC_INT(D_FMT,       131113);
-    HHVM_RC_INT(ERA,         131116);
-    HHVM_RC_INT(ERA_D_FMT,   131118);
-    HHVM_RC_INT(ERA_D_T_FMT, 131120);
-    HHVM_RC_INT(ERA_T_FMT,   131121);
-    HHVM_RC_INT(CRNCYSTR,    262159);
 
     loadSystemlib("std_misc");
 }

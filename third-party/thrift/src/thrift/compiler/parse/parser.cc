@@ -251,8 +251,8 @@ class parser {
   std::unique_ptr<attributes> parse_attributes() {
     auto doc = actions_.on_doctext();
     auto annotations = node_list<t_const>();
-    while (auto annotation = parse_structured_annotation()) {
-      annotations.emplace_back(std::move(annotation));
+    while (token_.kind == '@') {
+      annotations.emplace_back(parse_structured_annotation());
     }
     return doc || !annotations.empty()
         ? std::make_unique<attributes>(
@@ -269,10 +269,9 @@ class parser {
 
   // structured_annotation: "@" (struct_literal | struct_literal_type)
   std::unique_ptr<t_const> parse_structured_annotation() {
+    assert(token_.kind == '@');
     auto range = track_range();
-    if (!try_consume_token('@')) {
-      return {};
-    }
+    consume_token();
     auto name = parse_identifier();
     if (token_.kind != '{') {
       return actions_.on_structured_annotation(range, name.str);

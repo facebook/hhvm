@@ -7,7 +7,7 @@ edition = "2021"
 
 [[bin]]
 name = "hackc"
-path = "hackc/hackc.rs"
+path = "cli/hackc.rs"
 
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../parser/cargo/aast_parser" }

@@ -381,8 +381,11 @@ void AsyncFizzBase::eventRecvmsgCallback(FizzMsgHdr* msgHdr, int res) {
   msgHdr_.reset(msgHdr);
 }
 
-void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
-  std::pair<void*, uint32_t> readSpace = transportReadBuf_.preallocate(
+void AsyncFizzBase::getReadBuffer(
+    folly::IOBufQueue& buf,
+    void** bufReturn,
+    size_t* lenReturn) {
+  std::pair<void*, uint32_t> readSpace = buf.preallocate(
       transportOptions_.readBufferMinReadSize,
       transportOptions_.readBufferAllocationSize);
   *bufReturn = readSpace.first;
@@ -408,6 +411,10 @@ void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
   } else {
     *lenReturn = readSpace.second;
   }
+}
+
+void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
+  getReadBuffer(transportReadBuf_, bufReturn, lenReturn);
 }
 
 void AsyncFizzBase::getReadBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) {
@@ -449,6 +456,34 @@ void AsyncFizzBase::readEOF() noexcept {
 
 void AsyncFizzBase::readErr(const folly::AsyncSocketException& ex) noexcept {
   transportError(ex);
+}
+
+folly::AsyncReader::ReadCallback::ZeroCopyMemStore*
+AsyncFizzBase::readZeroCopyEnabled() noexcept {
+  return transportOptions_.zeroCopyMemStore;
+}
+
+void AsyncFizzBase::getZeroCopyFallbackBuffer(
+    void** bufReturn,
+    size_t* lenReturn) noexcept {
+  getReadBuffer(zeroCopyFallbackReadBuf_, bufReturn, lenReturn);
+}
+
+void AsyncFizzBase::readZeroCopyDataAvailable(
+    std::unique_ptr<folly::IOBuf>&& zeroCopyData,
+    size_t additionalBytes) noexcept {
+  DelayedDestruction::DestructorGuard dg(this);
+
+  if (zeroCopyData) {
+    transportReadBuf_.append(std::move(zeroCopyData));
+  }
+
+  if (additionalBytes) {
+    zeroCopyFallbackReadBuf_.postallocate(additionalBytes);
+    transportReadBuf_.append(zeroCopyFallbackReadBuf_.move());
+  }
+
+  transportDataAvailable();
 }
 
 void AsyncFizzBase::writeSuccess() noexcept {}

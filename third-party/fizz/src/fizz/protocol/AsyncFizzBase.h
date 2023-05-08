@@ -153,6 +153,16 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
      * to satisfy this read.
      */
     size_t readBufferMinReadSize{1460};
+    /**
+     * When set, `zeroCopyMemStore` points to an instance of a
+     * `ZeroCopyMemStore` that outlives all `AsyncFizzBase` instances.
+     *
+     * When set, Fizz will attempt to perform TCP zero copy receives. This
+     * requires appropriate kernel and hardware support. With appropriate
+     * support, encrypted data received by the NIC will be handed directly to
+     * Fizz for decryption (normally, Fizz will copy data from the kernel).
+     */
+    ZeroCopyMemStore* zeroCopyMemStore{nullptr};
   };
 
   explicit AsyncFizzBase(
@@ -515,6 +525,14 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
       std::unique_ptr<folly::IOBuf> data) noexcept override;
   void readEOF() noexcept override;
   void readErr(const folly::AsyncSocketException& ex) noexcept override;
+  /* ZC RX related*/
+  ZeroCopyMemStore* readZeroCopyEnabled() noexcept override;
+  void getZeroCopyFallbackBuffer(
+      void** /*bufReturn*/,
+      size_t* /*lenReturn*/) noexcept override;
+  void readZeroCopyDataAvailable(
+      std::unique_ptr<folly::IOBuf>&& /*zeroCopyData*/,
+      size_t /*additionalBytes*/) noexcept override;
 
   /**
    * WriteCallback implementation, for use with handshake messages.
@@ -527,6 +545,9 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   void checkBufLen();
 
   void handshakeTimeoutExpired() noexcept;
+
+  void
+  getReadBuffer(folly::IOBufQueue& buf, void** bufReturn, size_t* lenReturn);
 
   ReadCallback* readCallback_{nullptr};
   std::unique_ptr<folly::IOBuf> appDataBuf_;
@@ -545,5 +566,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   TransportOptions transportOptions_;
   std::unique_ptr<FizzMsgHdr> msgHdr_;
+
+  folly::IOBufQueue zeroCopyFallbackReadBuf_{
+      folly::IOBufQueue::cacheChainLength()};
 };
 } // namespace fizz

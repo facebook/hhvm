@@ -270,7 +270,7 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
         SetMyEnum(0).
-        SetMyDataItem(NewMyStruct())
+        SetMyDataItem(*NewMyStruct())
 }
 
 // Deprecated: Use NewMyUnion().MyEnum instead.

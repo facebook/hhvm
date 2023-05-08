@@ -145,12 +145,12 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMyIntField(0).
         SetMyStringField("").
-        SetMyDataField(NewMyDataItem()).
+        SetMyDataField(*NewMyDataItem()).
         SetMyEnum(0).
         SetOneway(false).
         SetReadonly(false).
         SetIdempotent(false).
-        SetFloatSet(make([]float32)).
+        SetFloatSet(make([]float32, 0)).
         SetNoHackCodegenField("")
 }
 
@@ -223,7 +223,7 @@ func (x *MyStruct) GetFloatSetNonCompat() []float32 {
 
 func (x *MyStruct) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return make([]float32)
+        return make([]float32, 0)
     }
 
     return x.FloatSet
@@ -843,9 +843,9 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
         SetMyEnum(0).
-        SetMyStruct(NewMyStruct()).
-        SetMyDataItem(NewMyDataItem()).
-        SetFloatSet(make([]float32))
+        SetMyStruct(*NewMyStruct()).
+        SetMyDataItem(*NewMyDataItem()).
+        SetFloatSet(make([]float32, 0))
 }
 
 // Deprecated: Use NewMyUnion().MyEnum instead.
@@ -899,7 +899,7 @@ func (x *MyUnion) GetFloatSetNonCompat() []float32 {
 
 func (x *MyUnion) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return make([]float32)
+        return make([]float32, 0)
     }
 
     return x.FloatSet

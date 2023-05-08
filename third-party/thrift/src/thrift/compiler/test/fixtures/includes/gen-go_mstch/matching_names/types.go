@@ -25,7 +25,7 @@ var _ thrift.Struct = &IncludesAlso{}
 
 func NewIncludesAlso() *IncludesAlso {
     return (&IncludesAlso{}).
-        SetAlso(includesAlso.NewAlso())
+        SetAlso(*includesAlso.NewAlso())
 }
 
 // Deprecated: Use NewIncludesAlso().Also instead.

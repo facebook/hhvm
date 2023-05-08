@@ -98,7 +98,7 @@ if err != nil {
 type Drivers = []string
 
 func NewDrivers() Drivers {
-  return make([]string)
+  return make([]string, 0)
 }
 
 func WriteDrivers(item Drivers, p thrift.Protocol) error {
@@ -249,7 +249,7 @@ func NewAutomobile() *Automobile {
         SetFirstPlate("0000").
         SetYear(NewYear()).
         SetDrivers(NewDrivers()).
-        SetAccessories(make([]*Accessory)).
+        SetAccessories(make([]*Accessory, 0)).
         SetPartNames(make(map[int32]*CarPartName))
 }
 
@@ -317,7 +317,7 @@ func (x *Automobile) GetAccessoriesNonCompat() []*Accessory {
 
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
-        return make([]*Accessory)
+        return make([]*Accessory, 0)
     }
 
     return x.Accessories
@@ -1226,8 +1226,8 @@ var _ thrift.Struct = &Pair{}
 
 func NewPair() *Pair {
     return (&Pair{}).
-        SetAutomobile(NewAutomobile()).
-        SetCar(NewCar())
+        SetAutomobile(*NewAutomobile()).
+        SetCar(*NewCar())
 }
 
 // Deprecated: Use NewPair().Automobile instead.
@@ -1446,8 +1446,8 @@ var _ thrift.Struct = &Collection{}
 
 func NewCollection() *Collection {
     return (&Collection{}).
-        SetAutomobiles(make([]*Automobile)).
-        SetCars(make([]*Car))
+        SetAutomobiles(make([]*Automobile, 0)).
+        SetCars(make([]*Car, 0))
 }
 
 func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
@@ -1456,7 +1456,7 @@ func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
 
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
-        return make([]*Automobile)
+        return make([]*Automobile, 0)
     }
 
     return x.Automobiles
@@ -1468,7 +1468,7 @@ func (x *Collection) GetCarsNonCompat() []*Car {
 
 func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
-        return make([]*Car)
+        return make([]*Car, 0)
     }
 
     return x.Cars

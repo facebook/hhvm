@@ -156,7 +156,7 @@ func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{}).
         SetArg1(NewStringWithAdapter()).
         SetArg2("").
-        SetArg3(NewFoo())
+        SetArg3(*NewFoo())
 }
 
 // Deprecated: Use newReqServiceFunc().Arg3 instead.
@@ -857,7 +857,7 @@ var _ thrift.WritableResult = &respAdapterServiceCount{}
 
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{}).
-        SetValue(NewCountingStruct())
+        SetValue(*NewCountingStruct())
 }
 
 // Deprecated: Use newRespAdapterServiceCount().Value instead.
@@ -1010,7 +1010,7 @@ var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).
-        SetArg_(NewHeapAllocated())
+        SetArg_(*NewHeapAllocated())
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().Arg_ instead.
@@ -1160,7 +1160,7 @@ var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{}).
-        SetValue(NewHeapAllocated())
+        SetValue(*NewHeapAllocated())
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().Value instead.

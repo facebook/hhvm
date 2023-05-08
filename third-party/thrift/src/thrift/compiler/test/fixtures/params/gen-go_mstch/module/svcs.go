@@ -822,7 +822,7 @@ var _ thrift.Struct = &reqNestedContainersListMap{}
 
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
     return (&reqNestedContainersListMap{}).
-        SetFoo(make([]map[int32]int32))
+        SetFoo(make([]map[int32]int32, 0))
 }
 
 func (x *reqNestedContainersListMap) GetFooNonCompat() []map[int32]int32 {
@@ -831,7 +831,7 @@ func (x *reqNestedContainersListMap) GetFooNonCompat() []map[int32]int32 {
 
 func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     if !x.IsSetFoo() {
-        return make([]map[int32]int32)
+        return make([]map[int32]int32, 0)
     }
 
     return x.Foo
@@ -1126,7 +1126,7 @@ var _ thrift.Struct = &reqNestedContainersListSet{}
 
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
     return (&reqNestedContainersListSet{}).
-        SetFoo(make([][]int32))
+        SetFoo(make([][]int32, 0))
 }
 
 func (x *reqNestedContainersListSet) GetFooNonCompat() [][]int32 {
@@ -1135,7 +1135,7 @@ func (x *reqNestedContainersListSet) GetFooNonCompat() [][]int32 {
 
 func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     if !x.IsSetFoo() {
-        return make([][]int32)
+        return make([][]int32, 0)
     }
 
     return x.Foo
@@ -1413,7 +1413,7 @@ var _ thrift.Struct = &reqNestedContainersTurtles{}
 
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{}).
-        SetFoo(make([][]map[int32]map[int32][]int32))
+        SetFoo(make([][]map[int32]map[int32][]int32, 0))
 }
 
 func (x *reqNestedContainersTurtles) GetFooNonCompat() [][]map[int32]map[int32][]int32 {
@@ -1422,7 +1422,7 @@ func (x *reqNestedContainersTurtles) GetFooNonCompat() [][]map[int32]map[int32][
 
 func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
     if !x.IsSetFoo() {
-        return make([][]map[int32]map[int32][]int32)
+        return make([][]map[int32]map[int32][]int32, 0)
     }
 
     return x.Foo

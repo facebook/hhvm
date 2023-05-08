@@ -400,7 +400,7 @@ var _ thrift.Struct = &ReserveIds{}
 
 func NewReserveIds() *ReserveIds {
     return (&ReserveIds{}).
-        SetIds(make([]int32)).
+        SetIds(make([]int32, 0)).
         SetIdRanges(make(map[int32]int32))
 }
 
@@ -410,7 +410,7 @@ func (x *ReserveIds) GetIdsNonCompat() []int32 {
 
 func (x *ReserveIds) GetIds() []int32 {
     if !x.IsSetIds() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.Ids

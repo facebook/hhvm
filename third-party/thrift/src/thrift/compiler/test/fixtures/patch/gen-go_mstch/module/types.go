@@ -616,7 +616,7 @@ func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
         SetOption1("").
         SetOption2(0).
-        SetOption3(NewInnerUnion())
+        SetOption3(*NewInnerUnion())
 }
 
 // Deprecated: Use NewMyUnion().Option1 instead.
@@ -959,13 +959,13 @@ func NewMyStruct() *MyStruct {
         SetStringVal("").
         SetBinaryVal([]byte("")).
         SetEnumVal(0).
-        SetStructVal(NewMyData()).
-        SetUnionVal(NewMyUnion()).
-        SetLateStructVal(NewLateDefStruct()).
-        SetListMap(make([]map[string]int32)).
+        SetStructVal(*NewMyData()).
+        SetUnionVal(*NewMyUnion()).
+        SetLateStructVal(*NewLateDefStruct()).
+        SetListMap(make([]map[string]int32, 0)).
         SetMapMap(make(map[string]map[string]int32)).
         SetI32WithCustomDefault(1).
-        SetStructWithCustomDefault(NewMyDataWithCustomDefault()).
+        SetStructWithCustomDefault(*NewMyDataWithCustomDefault()).
         SetStructWithFieldCustomDefault(
               *NewMyData().
     SetData1("1").
@@ -1291,7 +1291,7 @@ func (x *MyStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.OptListVal
@@ -1303,7 +1303,7 @@ func (x *MyStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.OptSetVal
@@ -1327,7 +1327,7 @@ func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.ListMap
@@ -3645,7 +3645,7 @@ var _ thrift.Struct = &Bar{}
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetLoop(NewLoop())
+        SetLoop(*NewLoop())
 }
 
 // Deprecated: Use NewBar().Loop instead.
@@ -3795,7 +3795,7 @@ var _ thrift.Struct = &Loop{}
 
 func NewLoop() *Loop {
     return (&Loop{}).
-        SetBar(NewBar())
+        SetBar(*NewBar())
 }
 
 // Deprecated: Use NewLoop().Bar instead.
@@ -3950,9 +3950,9 @@ var _ thrift.Struct = &MyDataPatch{}
 func NewMyDataPatch() *MyDataPatch {
     return (&MyDataPatch{}).
         SetClear(false).
-        SetPatchPrior(NewMyDataFieldPatch()).
-        SetEnsure(NewMyDataEnsureStruct()).
-        SetPatch(NewMyDataFieldPatch())
+        SetPatchPrior(*NewMyDataFieldPatch()).
+        SetEnsure(*NewMyDataEnsureStruct()).
+        SetPatch(*NewMyDataFieldPatch())
 }
 
 // Deprecated: Use NewMyDataPatch().Assign instead.
@@ -4359,8 +4359,8 @@ var _ thrift.Struct = &MyDataFieldPatch{}
 
 func NewMyDataFieldPatch() *MyDataFieldPatch {
     return (&MyDataFieldPatch{}).
-        SetData1(patch.NewStringPatch()).
-        SetData2(patch.NewI32Patch())
+        SetData1(*patch.NewStringPatch()).
+        SetData2(*patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataFieldPatch().Data1 instead.
@@ -4799,9 +4799,9 @@ var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
     return (&MyDataWithCustomDefaultPatch{}).
         SetClear(false).
-        SetPatchPrior(NewMyDataWithCustomDefaultFieldPatch()).
-        SetEnsure(NewMyDataWithCustomDefaultEnsureStruct()).
-        SetPatch(NewMyDataWithCustomDefaultFieldPatch())
+        SetPatchPrior(*NewMyDataWithCustomDefaultFieldPatch()).
+        SetEnsure(*NewMyDataWithCustomDefaultEnsureStruct()).
+        SetPatch(*NewMyDataWithCustomDefaultFieldPatch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().Assign instead.
@@ -5208,8 +5208,8 @@ var _ thrift.Struct = &MyDataWithCustomDefaultFieldPatch{}
 
 func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
     return (&MyDataWithCustomDefaultFieldPatch{}).
-        SetData1(patch.NewStringPatch()).
-        SetData2(patch.NewI32Patch())
+        SetData1(*patch.NewStringPatch()).
+        SetData2(*patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().Data1 instead.
@@ -5648,9 +5648,9 @@ var _ thrift.Struct = &InnerUnionPatch{}
 func NewInnerUnionPatch() *InnerUnionPatch {
     return (&InnerUnionPatch{}).
         SetClear(false).
-        SetPatchPrior(NewInnerUnionFieldPatch()).
-        SetEnsure(NewInnerUnion()).
-        SetPatch(NewInnerUnionFieldPatch())
+        SetPatchPrior(*NewInnerUnionFieldPatch()).
+        SetEnsure(*NewInnerUnion()).
+        SetPatch(*NewInnerUnionFieldPatch())
 }
 
 // Deprecated: Use NewInnerUnionPatch().Assign instead.
@@ -6056,7 +6056,7 @@ var _ thrift.Struct = &InnerUnionFieldPatch{}
 
 func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
     return (&InnerUnionFieldPatch{}).
-        SetInnerOption(patch.NewBinaryPatch())
+        SetInnerOption(*patch.NewBinaryPatch())
 }
 
 // Deprecated: Use NewInnerUnionFieldPatch().InnerOption instead.
@@ -6211,9 +6211,9 @@ var _ thrift.Struct = &MyUnionPatch{}
 func NewMyUnionPatch() *MyUnionPatch {
     return (&MyUnionPatch{}).
         SetClear(false).
-        SetPatchPrior(NewMyUnionFieldPatch()).
-        SetEnsure(NewMyUnion()).
-        SetPatch(NewMyUnionFieldPatch())
+        SetPatchPrior(*NewMyUnionFieldPatch()).
+        SetEnsure(*NewMyUnion()).
+        SetPatch(*NewMyUnionFieldPatch())
 }
 
 // Deprecated: Use NewMyUnionPatch().Assign instead.
@@ -6621,9 +6621,9 @@ var _ thrift.Struct = &MyUnionFieldPatch{}
 
 func NewMyUnionFieldPatch() *MyUnionFieldPatch {
     return (&MyUnionFieldPatch{}).
-        SetOption1(patch.NewStringPatch()).
-        SetOption2(patch.NewI32Patch()).
-        SetOption3(NewInnerUnionPatch())
+        SetOption1(*patch.NewStringPatch()).
+        SetOption2(*patch.NewI32Patch()).
+        SetOption3(*NewInnerUnionPatch())
 }
 
 // Deprecated: Use NewMyUnionFieldPatch().Option1 instead.
@@ -6914,9 +6914,9 @@ var _ thrift.Struct = &MyStructPatch{}
 func NewMyStructPatch() *MyStructPatch {
     return (&MyStructPatch{}).
         SetClear(false).
-        SetPatchPrior(NewMyStructFieldPatch()).
-        SetEnsure(NewMyStructEnsureStruct()).
-        SetPatch(NewMyStructFieldPatch())
+        SetPatchPrior(*NewMyStructFieldPatch()).
+        SetEnsure(*NewMyStructEnsureStruct()).
+        SetPatch(*NewMyStructFieldPatch())
 }
 
 // Deprecated: Use NewMyStructPatch().Assign instead.
@@ -7735,9 +7735,9 @@ func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{}).
         SetClear(false).
         SetPatch(make(map[patch.ListPatchIndex]*patch.I16Patch)).
-        SetRemove(make([]int16)).
-        SetPrepend(make([]int16)).
-        SetAppend(make([]int16))
+        SetRemove(make([]int16, 0)).
+        SetPrepend(make([]int16, 0)).
+        SetAppend(make([]int16, 0))
 }
 
 func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
@@ -7746,7 +7746,7 @@ func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAssign() []int16 {
     if !x.IsSetAssign() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.Assign
@@ -7778,7 +7778,7 @@ func (x *MyStructField26Patch) GetRemoveNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetRemove() []int16 {
     if !x.IsSetRemove() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.Remove
@@ -7790,7 +7790,7 @@ func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetPrepend() []int16 {
     if !x.IsSetPrepend() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.Prepend
@@ -7802,7 +7802,7 @@ func (x *MyStructField26Patch) GetAppendNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAppend() []int16 {
     if !x.IsSetAppend() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.Append
@@ -8359,8 +8359,8 @@ var _ thrift.Struct = &MyStructField27Patch{}
 func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{}).
         SetClear(false).
-        SetRemove(make([]string)).
-        SetAdd(make([]string))
+        SetRemove(make([]string, 0)).
+        SetAdd(make([]string, 0))
 }
 
 func (x *MyStructField27Patch) GetAssignNonCompat() []string {
@@ -8369,7 +8369,7 @@ func (x *MyStructField27Patch) GetAssignNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAssign() []string {
     if !x.IsSetAssign() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Assign
@@ -8389,7 +8389,7 @@ func (x *MyStructField27Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField27Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -8401,7 +8401,7 @@ func (x *MyStructField27Patch) GetAddNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAdd() []string {
     if !x.IsSetAdd() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Add
@@ -8783,7 +8783,7 @@ func NewMyStructField28Patch() *MyStructField28Patch {
         SetPatchPrior(make(map[string]*patch.StringPatch)).
         SetAdd(make(map[string]string)).
         SetPatch(make(map[string]*patch.StringPatch)).
-        SetRemove(make([]string)).
+        SetRemove(make([]string, 0)).
         SetPut(make(map[string]string))
 }
 
@@ -8849,7 +8849,7 @@ func (x *MyStructField28Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField28Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -9570,9 +9570,9 @@ func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{}).
         SetClear(false).
         SetPatch(make(map[patch.ListPatchIndex]*MyStructField29Patch1)).
-        SetRemove(make([]map[string]int32)).
-        SetPrepend(make([]map[string]int32)).
-        SetAppend(make([]map[string]int32))
+        SetRemove(make([]map[string]int32, 0)).
+        SetPrepend(make([]map[string]int32, 0)).
+        SetAppend(make([]map[string]int32, 0))
 }
 
 func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
@@ -9581,7 +9581,7 @@ func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
     if !x.IsSetAssign() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.Assign
@@ -9613,7 +9613,7 @@ func (x *MyStructField29Patch) GetRemoveNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetRemove() []map[string]int32 {
     if !x.IsSetRemove() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.Remove
@@ -9625,7 +9625,7 @@ func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
     if !x.IsSetPrepend() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.Prepend
@@ -9637,7 +9637,7 @@ func (x *MyStructField29Patch) GetAppendNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
     if !x.IsSetAppend() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.Append
@@ -10384,7 +10384,7 @@ func NewMyStructField29Patch1() *MyStructField29Patch1 {
         SetPatchPrior(make(map[string]*patch.I32Patch)).
         SetAdd(make(map[string]int32)).
         SetPatch(make(map[string]*patch.I32Patch)).
-        SetRemove(make([]string)).
+        SetRemove(make([]string, 0)).
         SetPut(make(map[string]int32))
 }
 
@@ -10450,7 +10450,7 @@ func (x *MyStructField29Patch1) GetRemoveNonCompat() []string {
 
 func (x *MyStructField29Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -11174,7 +11174,7 @@ func NewMyStructField30Patch() *MyStructField30Patch {
         SetPatchPrior(make(map[string]*MyStructField30Patch1)).
         SetAdd(make(map[string]map[string]int32)).
         SetPatch(make(map[string]*MyStructField30Patch1)).
-        SetRemove(make([]string)).
+        SetRemove(make([]string, 0)).
         SetPut(make(map[string]map[string]int32))
 }
 
@@ -11240,7 +11240,7 @@ func (x *MyStructField30Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -12102,7 +12102,7 @@ func NewMyStructField30Patch1() *MyStructField30Patch1 {
         SetPatchPrior(make(map[string]*patch.I32Patch)).
         SetAdd(make(map[string]int32)).
         SetPatch(make(map[string]*patch.I32Patch)).
-        SetRemove(make([]string)).
+        SetRemove(make([]string, 0)).
         SetPut(make(map[string]int32))
 }
 
@@ -12168,7 +12168,7 @@ func (x *MyStructField30Patch1) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -12914,39 +12914,39 @@ var _ thrift.Struct = &MyStructFieldPatch{}
 
 func NewMyStructFieldPatch() *MyStructFieldPatch {
     return (&MyStructFieldPatch{}).
-        SetStructWithCustomDefault(NewMyDataWithCustomDefaultPatch()).
-        SetI32WithCustomDefault(patch.NewI32Patch()).
-        SetMapMap(NewMyStructField30Patch()).
-        SetListMap(NewMyStructField29Patch()).
-        SetOptMapVal(NewMyStructField28Patch()).
-        SetOptSetVal(NewMyStructField27Patch()).
-        SetOptListVal(NewMyStructField26Patch()).
-        SetOptLateStructVal(NewLateDefStructPatch()).
-        SetOptStructVal(NewMyDataPatch()).
-        SetOptEnumVal(NewMyStructField23Patch()).
-        SetOptBinaryVal(patch.NewBinaryPatch()).
-        SetOptStringVal(patch.NewStringPatch()).
-        SetOptDoubleVal(patch.NewDoublePatch()).
-        SetOptFloatVal(patch.NewFloatPatch()).
-        SetOptI64Val(patch.NewI64Patch()).
-        SetOptI32Val(patch.NewI32Patch()).
-        SetOptI16Val(patch.NewI16Patch()).
-        SetOptByteVal(patch.NewBytePatch()).
-        SetOptBoolVal(patch.NewBoolPatch()).
-        SetLateStructVal(NewLateDefStructPatch()).
-        SetUnionVal(NewMyUnionPatch()).
-        SetStructVal(NewMyDataPatch()).
-        SetEnumVal(NewMyStructField10Patch()).
-        SetBinaryVal(patch.NewBinaryPatch()).
-        SetStringVal(patch.NewStringPatch()).
-        SetDoubleVal(patch.NewDoublePatch()).
-        SetFloatVal(patch.NewFloatPatch()).
-        SetI64Val(patch.NewI64Patch()).
-        SetI32Val(patch.NewI32Patch()).
-        SetI16Val(patch.NewI16Patch()).
-        SetByteVal(patch.NewBytePatch()).
-        SetBoolVal(patch.NewBoolPatch()).
-        SetStructWithFieldCustomDefault(NewMyDataPatch())
+        SetStructWithCustomDefault(*NewMyDataWithCustomDefaultPatch()).
+        SetI32WithCustomDefault(*patch.NewI32Patch()).
+        SetMapMap(*NewMyStructField30Patch()).
+        SetListMap(*NewMyStructField29Patch()).
+        SetOptMapVal(*NewMyStructField28Patch()).
+        SetOptSetVal(*NewMyStructField27Patch()).
+        SetOptListVal(*NewMyStructField26Patch()).
+        SetOptLateStructVal(*NewLateDefStructPatch()).
+        SetOptStructVal(*NewMyDataPatch()).
+        SetOptEnumVal(*NewMyStructField23Patch()).
+        SetOptBinaryVal(*patch.NewBinaryPatch()).
+        SetOptStringVal(*patch.NewStringPatch()).
+        SetOptDoubleVal(*patch.NewDoublePatch()).
+        SetOptFloatVal(*patch.NewFloatPatch()).
+        SetOptI64Val(*patch.NewI64Patch()).
+        SetOptI32Val(*patch.NewI32Patch()).
+        SetOptI16Val(*patch.NewI16Patch()).
+        SetOptByteVal(*patch.NewBytePatch()).
+        SetOptBoolVal(*patch.NewBoolPatch()).
+        SetLateStructVal(*NewLateDefStructPatch()).
+        SetUnionVal(*NewMyUnionPatch()).
+        SetStructVal(*NewMyDataPatch()).
+        SetEnumVal(*NewMyStructField10Patch()).
+        SetBinaryVal(*patch.NewBinaryPatch()).
+        SetStringVal(*patch.NewStringPatch()).
+        SetDoubleVal(*patch.NewDoublePatch()).
+        SetFloatVal(*patch.NewFloatPatch()).
+        SetI64Val(*patch.NewI64Patch()).
+        SetI32Val(*patch.NewI32Patch()).
+        SetI16Val(*patch.NewI16Patch()).
+        SetByteVal(*patch.NewBytePatch()).
+        SetBoolVal(*patch.NewBoolPatch()).
+        SetStructWithFieldCustomDefault(*NewMyDataPatch())
 }
 
 // Deprecated: Use NewMyStructFieldPatch().StructWithCustomDefault instead.
@@ -15426,7 +15426,7 @@ func (x *MyStructEnsureStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return make([]map[string]int32)
+        return make([]map[string]int32, 0)
     }
 
     return x.ListMap
@@ -15450,7 +15450,7 @@ func (x *MyStructEnsureStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStructEnsureStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.OptSetVal
@@ -15462,7 +15462,7 @@ func (x *MyStructEnsureStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.OptListVal
@@ -17860,9 +17860,9 @@ var _ thrift.Struct = &LateDefStructPatch{}
 func NewLateDefStructPatch() *LateDefStructPatch {
     return (&LateDefStructPatch{}).
         SetClear(false).
-        SetPatchPrior(NewLateDefStructFieldPatch()).
-        SetEnsure(NewLateDefStructEnsureStruct()).
-        SetPatch(NewLateDefStructFieldPatch())
+        SetPatchPrior(*NewLateDefStructFieldPatch()).
+        SetEnsure(*NewLateDefStructEnsureStruct()).
+        SetPatch(*NewLateDefStructFieldPatch())
 }
 
 // Deprecated: Use NewLateDefStructPatch().Assign instead.
@@ -18433,9 +18433,9 @@ var _ thrift.Struct = &RecursivePatch{}
 func NewRecursivePatch() *RecursivePatch {
     return (&RecursivePatch{}).
         SetClear(false).
-        SetPatchPrior(NewRecursiveFieldPatch()).
-        SetEnsure(NewRecursiveEnsureStruct()).
-        SetPatch(NewRecursiveFieldPatch())
+        SetPatchPrior(*NewRecursiveFieldPatch()).
+        SetEnsure(*NewRecursiveEnsureStruct()).
+        SetPatch(*NewRecursiveFieldPatch())
 }
 
 // Deprecated: Use NewRecursivePatch().Assign instead.
@@ -19087,7 +19087,7 @@ var _ thrift.Struct = &RecursiveFieldPatch{}
 
 func NewRecursiveFieldPatch() *RecursiveFieldPatch {
     return (&RecursiveFieldPatch{}).
-        SetNodes(NewRecursiveField1Patch())
+        SetNodes(*NewRecursiveField1Patch())
 }
 
 // Deprecated: Use NewRecursiveFieldPatch().Nodes instead.
@@ -19434,9 +19434,9 @@ var _ thrift.Struct = &BarPatch{}
 func NewBarPatch() *BarPatch {
     return (&BarPatch{}).
         SetClear(false).
-        SetPatchPrior(NewBarFieldPatch()).
-        SetEnsure(NewBarEnsureStruct()).
-        SetPatch(NewBarFieldPatch())
+        SetPatchPrior(*NewBarFieldPatch()).
+        SetEnsure(*NewBarEnsureStruct()).
+        SetPatch(*NewBarFieldPatch())
 }
 
 // Deprecated: Use NewBarPatch().Assign instead.
@@ -19842,7 +19842,7 @@ var _ thrift.Struct = &BarFieldPatch{}
 
 func NewBarFieldPatch() *BarFieldPatch {
     return (&BarFieldPatch{}).
-        SetLoop(NewLoopPatch())
+        SetLoop(*NewLoopPatch())
 }
 
 // Deprecated: Use NewBarFieldPatch().Loop instead.

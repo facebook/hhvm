@@ -213,10 +213,10 @@ func NewMyUnion() *MyUnion {
         SetStringField("").
         SetBinaryField([]byte("")).
         SetEnumField(0).
-        SetListField(make([]int16)).
-        SetSetField(make([]int16)).
+        SetListField(make([]int16, 0)).
+        SetSetField(make([]int16, 0)).
         SetMapField(make(map[int16]int16)).
-        SetStructField(NewMyStruct())
+        SetStructField(*NewMyStruct())
 }
 
 // Deprecated: Use NewMyUnion().BoolField instead.
@@ -375,7 +375,7 @@ func (x *MyUnion) GetListFieldNonCompat() []int16 {
 
 func (x *MyUnion) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.ListField
@@ -387,7 +387,7 @@ func (x *MyUnion) GetSetFieldNonCompat() []int16 {
 
 func (x *MyUnion) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.SetField
@@ -1538,11 +1538,11 @@ func NewStructLevelTerseStruct() *StructLevelTerseStruct {
         SetStringField("").
         SetBinaryField([]byte("")).
         SetEnumField(0).
-        SetListField(make([]int16)).
-        SetSetField(make([]int16)).
+        SetListField(make([]int16, 0)).
+        SetSetField(make([]int16, 0)).
         SetMapField(make(map[int16]int16)).
-        SetStructField(NewMyStruct()).
-        SetUnionField(NewMyUnion())
+        SetStructField(*NewMyStruct()).
+        SetUnionField(*NewMyUnion())
 }
 
 // Deprecated: Use NewStructLevelTerseStruct().StructField instead.
@@ -1641,7 +1641,7 @@ func (x *StructLevelTerseStruct) GetListFieldNonCompat() []int16 {
 
 func (x *StructLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.ListField
@@ -1653,7 +1653,7 @@ func (x *StructLevelTerseStruct) GetSetFieldNonCompat() []int16 {
 
 func (x *StructLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.SetField
@@ -2628,11 +2628,11 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetTerseStringField("").
         SetTerseBinaryField([]byte("")).
         SetTerseEnumField(0).
-        SetTerseListField(make([]int16)).
-        SetTerseSetField(make([]int16)).
+        SetTerseListField(make([]int16, 0)).
+        SetTerseSetField(make([]int16, 0)).
         SetTerseMapField(make(map[int16]int16)).
-        SetTerseStructField(NewMyStruct()).
-        SetTerseUnionField(NewMyUnion()).
+        SetTerseStructField(*NewMyStruct()).
+        SetTerseUnionField(*NewMyUnion()).
         SetBoolField(false).
         SetByteField(0).
         SetShortField(0).
@@ -2643,11 +2643,11 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetStringField("").
         SetBinaryField([]byte("")).
         SetEnumField(0).
-        SetListField(make([]int16)).
-        SetSetField(make([]int16)).
+        SetListField(make([]int16, 0)).
+        SetSetField(make([]int16, 0)).
         SetMapField(make(map[int16]int16)).
-        SetStructField(NewMyStruct()).
-        SetUnionField(NewMyUnion())
+        SetStructField(*NewMyStruct()).
+        SetUnionField(*NewMyUnion())
 }
 
 // Deprecated: Use NewFieldLevelTerseStruct().TerseStructField instead.
@@ -2752,7 +2752,7 @@ func (x *FieldLevelTerseStruct) GetTerseListFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
     if !x.IsSetTerseListField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.TerseListField
@@ -2764,7 +2764,7 @@ func (x *FieldLevelTerseStruct) GetTerseSetFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
     if !x.IsSetTerseSetField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.TerseSetField
@@ -2896,7 +2896,7 @@ func (x *FieldLevelTerseStruct) GetListFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.ListField
@@ -2908,7 +2908,7 @@ func (x *FieldLevelTerseStruct) GetSetFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.SetField
@@ -4699,7 +4699,7 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
     1: 1,
 },
           ).
-        SetStructField(NewMyStructWithCustomDefault())
+        SetStructField(*NewMyStructWithCustomDefault())
 }
 
 // Deprecated: Use NewTerseStructWithCustomDefault().StructField instead.
@@ -4795,7 +4795,7 @@ func (x *TerseStructWithCustomDefault) GetListFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.ListField
@@ -4807,7 +4807,7 @@ func (x *TerseStructWithCustomDefault) GetSetFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16)
+        return make([]int16, 0)
     }
 
     return x.SetField

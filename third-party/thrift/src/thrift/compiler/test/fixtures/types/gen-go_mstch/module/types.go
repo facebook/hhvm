@@ -509,12 +509,12 @@ var _ thrift.Struct = &ContainerStruct{}
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{}).
-        SetFieldA(make([]int32)).
-        SetFieldB(make([]int32)).
-        SetFieldC(make([]int32)).
-        SetFieldD(make([]int32)).
-        SetFieldE(make([]int32)).
-        SetFieldF(make([]int32)).
+        SetFieldA(make([]int32, 0)).
+        SetFieldB(make([]int32, 0)).
+        SetFieldC(make([]int32, 0)).
+        SetFieldD(make([]int32, 0)).
+        SetFieldE(make([]int32, 0)).
+        SetFieldF(make([]int32, 0)).
         SetFieldG(make(map[int32]string)).
         SetFieldH(included.NewSomeMap())
 }
@@ -525,7 +525,7 @@ func (x *ContainerStruct) GetFieldANonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldA
@@ -537,7 +537,7 @@ func (x *ContainerStruct) GetFieldBNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldB() []int32 {
     if !x.IsSetFieldB() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldB
@@ -549,7 +549,7 @@ func (x *ContainerStruct) GetFieldCNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldC() []int32 {
     if !x.IsSetFieldC() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldC
@@ -561,7 +561,7 @@ func (x *ContainerStruct) GetFieldDNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldD() []int32 {
     if !x.IsSetFieldD() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldD
@@ -573,7 +573,7 @@ func (x *ContainerStruct) GetFieldENonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldE() []int32 {
     if !x.IsSetFieldE() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldE
@@ -585,7 +585,7 @@ func (x *ContainerStruct) GetFieldFNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldF() []int32 {
     if !x.IsSetFieldF() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldF
@@ -1331,7 +1331,7 @@ var _ thrift.Struct = &CppTypeStruct{}
 
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{}).
-        SetFieldA(make([]int32))
+        SetFieldA(make([]int32, 0))
 }
 
 func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
@@ -1340,7 +1340,7 @@ func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
 
 func (x *CppTypeStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.FieldA
@@ -3394,7 +3394,7 @@ func NewMyStruct() *MyStruct {
         SetMyIntField(0).
         SetMyStringField("").
         SetMajorVer(0).
-        SetData(NewMyDataItem())
+        SetData(*NewMyDataItem())
 }
 
 // Deprecated: Use NewMyStruct().Data instead.
@@ -5196,7 +5196,7 @@ func (x *IncompleteList) GetFieldNonCompat() []*IncompleteListDep {
 
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     if !x.IsSetField() {
-        return make([]*IncompleteListDep)
+        return make([]*IncompleteListDep, 0)
     }
 
     return x.Field
@@ -5451,7 +5451,7 @@ func (x *CompleteList) GetFieldNonCompat() []*CompleteListDep {
 
 func (x *CompleteList) GetField() []*CompleteListDep {
     if !x.IsSetField() {
-        return make([]*CompleteListDep)
+        return make([]*CompleteListDep, 0)
     }
 
     return x.Field
@@ -5706,7 +5706,7 @@ func (x *AdaptedList) GetFieldNonCompat() []*AdaptedListDep {
 
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     if !x.IsSetField() {
-        return make([]*AdaptedListDep)
+        return make([]*AdaptedListDep, 0)
     }
 
     return x.Field
@@ -5873,7 +5873,7 @@ var _ thrift.Struct = &AdaptedListDep{}
 
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{}).
-        SetField(NewAdaptedList())
+        SetField(*NewAdaptedList())
 }
 
 // Deprecated: Use NewAdaptedListDep().Field instead.
@@ -6031,7 +6031,7 @@ func (x *DependentAdaptedList) GetFieldNonCompat() []*DependentAdaptedListDep {
 
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     if !x.IsSetField() {
-        return make([]*DependentAdaptedListDep)
+        return make([]*DependentAdaptedListDep, 0)
     }
 
     return x.Field
@@ -6352,8 +6352,8 @@ var _ thrift.Struct = &AllocatorAware{}
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{}).
-        SetAaList(make([]int32)).
-        SetAaSet(make([]int32)).
+        SetAaList(make([]int32, 0)).
+        SetAaSet(make([]int32, 0)).
         SetAaMap(make(map[int32]int32)).
         SetAaString("").
         SetNotAContainer(0).
@@ -6367,7 +6367,7 @@ func (x *AllocatorAware) GetAaListNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaList() []int32 {
     if !x.IsSetAaList() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.AaList
@@ -6379,7 +6379,7 @@ func (x *AllocatorAware) GetAaSetNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaSet() []int32 {
     if !x.IsSetAaSet() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.AaSet

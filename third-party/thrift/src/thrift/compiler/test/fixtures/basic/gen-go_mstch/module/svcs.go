@@ -644,7 +644,7 @@ var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
 
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{}).
-        SetValue(NewReservedKeyword())
+        SetValue(*NewReservedKeyword())
 }
 
 // Deprecated: Use newRespFB303ServiceSimpleRPC().Value instead.
@@ -3149,7 +3149,7 @@ var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{}).
-        SetValue(make([]float32))
+        SetValue(make([]float32, 0))
 }
 
 func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
@@ -3158,7 +3158,7 @@ func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
 
 func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
     if !x.IsSetValue() {
-        return make([]float32)
+        return make([]float32, 0)
     }
 
     return x.Value

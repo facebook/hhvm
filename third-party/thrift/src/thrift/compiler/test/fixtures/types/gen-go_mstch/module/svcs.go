@@ -460,7 +460,7 @@ var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
-        SetR(make([]int64))
+        SetR(make([]int64, 0))
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
@@ -469,7 +469,7 @@ func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.R

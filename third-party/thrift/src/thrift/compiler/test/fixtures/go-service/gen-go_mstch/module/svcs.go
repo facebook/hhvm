@@ -357,7 +357,7 @@ var _ thrift.Struct = &reqGetEntityGetEntity{}
 
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{}).
-        SetR(NewGetEntityRequest())
+        SetR(*NewGetEntityRequest())
 }
 
 // Deprecated: Use newReqGetEntityGetEntity().R instead.
@@ -507,7 +507,7 @@ var _ thrift.WritableResult = &respGetEntityGetEntity{}
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{}).
-        SetValue(NewGetEntityResponse())
+        SetValue(*NewGetEntityResponse())
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().Value instead.
@@ -2763,7 +2763,7 @@ var _ thrift.WritableResult = &respGetEntityGetSet{}
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{}).
-        SetValue(make([]string))
+        SetValue(make([]string, 0))
 }
 
 func (x *respGetEntityGetSet) GetValueNonCompat() []string {
@@ -2772,7 +2772,7 @@ func (x *respGetEntityGetSet) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetSet) GetValue() []string {
     if !x.IsSetValue() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Value
@@ -3021,7 +3021,7 @@ var _ thrift.WritableResult = &respGetEntityGetList{}
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{}).
-        SetValue(make([]string))
+        SetValue(make([]string, 0))
 }
 
 func (x *respGetEntityGetList) GetValueNonCompat() []string {
@@ -3030,7 +3030,7 @@ func (x *respGetEntityGetList) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetList) GetValue() []string {
     if !x.IsSetValue() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.Value

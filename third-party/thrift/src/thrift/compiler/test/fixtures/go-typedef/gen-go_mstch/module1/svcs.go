@@ -313,7 +313,7 @@ var _ thrift.WritableResult = &respFinderByPlate{}
 
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{}).
-        SetValue(NewAutomobile())
+        SetValue(*NewAutomobile())
 }
 
 // Deprecated: Use newRespFinderByPlate().Value instead.
@@ -601,7 +601,7 @@ var _ thrift.WritableResult = &respFinderAliasByPlate{}
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{}).
-        SetValue(NewCar())
+        SetValue(*NewCar())
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().Value instead.

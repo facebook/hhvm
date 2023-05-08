@@ -409,7 +409,7 @@ var _ thrift.Struct = &Vehicle{}
 
 func NewVehicle() *Vehicle {
     return (&Vehicle{}).
-        SetColor(NewColor()).
+        SetColor(*NewColor()).
         SetHasAC(false)
 }
 
@@ -914,7 +914,7 @@ func (x *Person) GetFriendsNonCompat() []PersonID {
 
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
-        return make([]PersonID)
+        return make([]PersonID, 0)
     }
 
     return x.Friends
@@ -962,7 +962,7 @@ func (x *Person) GetVehiclesNonCompat() []*Vehicle {
 
 func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
-        return make([]*Vehicle)
+        return make([]*Vehicle, 0)
     }
 
     return x.Vehicles

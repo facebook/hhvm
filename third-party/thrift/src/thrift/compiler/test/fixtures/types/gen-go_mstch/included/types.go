@@ -90,7 +90,7 @@ result := mapResult
 type SomeListOfTypeMap = []SomeMap
 
 func NewSomeListOfTypeMap() SomeListOfTypeMap {
-  return make([]SomeMap)
+  return make([]SomeMap, 0)
 }
 
 func WriteSomeListOfTypeMap(item SomeListOfTypeMap, p thrift.Protocol) error {

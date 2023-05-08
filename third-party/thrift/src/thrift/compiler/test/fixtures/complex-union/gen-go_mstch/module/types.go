@@ -102,8 +102,8 @@ func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{}).
         SetIntValue(0).
         SetStringValue("").
-        SetIntListValue(make([]int64)).
-        SetStringListValue(make([]string)).
+        SetIntListValue(make([]int64, 0)).
+        SetStringListValue(make([]string, 0)).
         SetTypedefValue(NewContainerTypedef()).
         SetStringRef("")
 }
@@ -147,7 +147,7 @@ func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.IntListValue
@@ -159,7 +159,7 @@ func (x *ComplexUnion) GetStringListValueNonCompat() []string {
 
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.StringListValue
@@ -666,8 +666,8 @@ var _ thrift.Struct = &ListUnion{}
 
 func NewListUnion() *ListUnion {
     return (&ListUnion{}).
-        SetIntListValue(make([]int64)).
-        SetStringListValue(make([]string))
+        SetIntListValue(make([]int64, 0)).
+        SetStringListValue(make([]string, 0))
 }
 
 func (x *ListUnion) GetIntListValueNonCompat() []int64 {
@@ -676,7 +676,7 @@ func (x *ListUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.IntListValue
@@ -688,7 +688,7 @@ func (x *ListUnion) GetStringListValueNonCompat() []string {
 
 func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.StringListValue
@@ -1434,8 +1434,8 @@ var _ thrift.Struct = &ValUnion{}
 
 func NewValUnion() *ValUnion {
     return (&ValUnion{}).
-        SetV1(NewVal()).
-        SetV2(NewVal())
+        SetV1(*NewVal()).
+        SetV2(*NewVal())
 }
 
 // Deprecated: Use NewValUnion().V1 instead.
@@ -2033,7 +2033,7 @@ var _ thrift.Struct = &NonCopyableUnion{}
 
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{}).
-        SetS(NewNonCopyableStruct())
+        SetS(*NewNonCopyableStruct())
 }
 
 // Deprecated: Use NewNonCopyableUnion().S instead.

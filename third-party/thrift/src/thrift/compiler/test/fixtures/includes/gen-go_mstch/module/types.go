@@ -30,7 +30,7 @@ func NewMyStruct() *MyStruct {
         SetMyIncludedField(
               *includes.NewIncluded(),
           ).
-        SetMyOtherIncludedField(includes.NewIncluded()).
+        SetMyOtherIncludedField(*includes.NewIncluded()).
         SetMyIncludedInt(42)
 }
 

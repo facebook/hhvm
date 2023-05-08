@@ -140,7 +140,7 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
-        SetU(NewMyUnion())
+        SetU(*NewMyUnion())
 }
 
 // Deprecated: Use newReqMyServiceQuery().U instead.
@@ -290,7 +290,7 @@ var _ thrift.WritableResult = &respMyServiceQuery{}
 
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{}).
-        SetValue(NewMyStruct())
+        SetValue(*NewMyStruct())
 }
 
 // Deprecated: Use newRespMyServiceQuery().Value instead.

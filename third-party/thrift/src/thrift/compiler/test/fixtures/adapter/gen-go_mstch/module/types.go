@@ -30,7 +30,7 @@ var _ = thrift.ZERO
 type SetWithAdapter = []string
 
 func NewSetWithAdapter() SetWithAdapter {
-  return make([]string)
+  return make([]string, 0)
 }
 
 func WriteSetWithAdapter(item SetWithAdapter, p thrift.Protocol) error {
@@ -111,7 +111,7 @@ if err != nil {
 type ListWithElemAdapter = []StringWithAdapter
 
 func NewListWithElemAdapter() ListWithElemAdapter {
-  return make([]StringWithAdapter)
+  return make([]StringWithAdapter, 0)
 }
 
 func WriteListWithElemAdapter(item ListWithElemAdapter, p thrift.Protocol) error {
@@ -2457,10 +2457,10 @@ var _ thrift.Struct = &Bar{}
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetStructField(NewFoo()).
-        SetStructListField(make([]*FooWithAdapter)).
-        SetUnionField(NewBaz()).
-        SetAdaptedStructField(NewDirectlyAdapted())
+        SetStructField(*NewFoo()).
+        SetStructListField(make([]*FooWithAdapter, 0)).
+        SetUnionField(*NewBaz()).
+        SetAdaptedStructField(*NewDirectlyAdapted())
 }
 
 // Deprecated: Use NewBar().StructField instead.
@@ -2508,7 +2508,7 @@ func (x *Bar) GetStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetStructListField() []*FooWithAdapter {
     if !x.IsSetStructListField() {
-        return make([]*FooWithAdapter)
+        return make([]*FooWithAdapter, 0)
     }
 
     return x.StructListField
@@ -2520,7 +2520,7 @@ func (x *Bar) GetOptionalStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetOptionalStructListField() []*FooWithAdapter {
     if !x.IsSetOptionalStructListField() {
-        return make([]*FooWithAdapter)
+        return make([]*FooWithAdapter, 0)
     }
 
     return x.OptionalStructListField
@@ -3666,7 +3666,7 @@ func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{}).
         SetIntField(0).
         SetStringField("").
-        SetSetField(make([]int32))
+        SetSetField(make([]int32, 0))
 }
 
 func (x *TerseAdaptedFields) GetIntFieldNonCompat() int32 {
@@ -3691,7 +3691,7 @@ func (x *TerseAdaptedFields) GetSetFieldNonCompat() []int32 {
 
 func (x *TerseAdaptedFields) GetSetField() []int32 {
     if !x.IsSetSetField() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.SetField
@@ -3945,7 +3945,7 @@ var _ thrift.Struct = &B{}
 
 func NewB() *B {
     return (&B{}).
-        SetA(NewAdaptedA())
+        SetA(*NewAdaptedA())
 }
 
 // Deprecated: Use NewB().A instead.
@@ -5187,8 +5187,8 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
         SetAdaptedLong(NewAdaptedLong()).
         SetAdaptedDouble(NewAdaptedDouble()).
         SetAdaptedString(NewAdaptedString()).
-        SetAdaptedList(make([]int64)).
-        SetAdaptedSet(make([]int64)).
+        SetAdaptedList(make([]int64, 0)).
+        SetAdaptedSet(make([]int64, 0)).
         SetAdaptedMap(make(map[int64]int64)).
         SetAdaptedBoolDefault(true).
         SetAdaptedByteDefault(1).
@@ -5280,7 +5280,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
     if !x.IsSetAdaptedList() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.AdaptedList
@@ -5292,7 +5292,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSet() []int64 {
     if !x.IsSetAdaptedSet() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.AdaptedSet
@@ -5380,7 +5380,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.AdaptedListDefault
@@ -5392,7 +5392,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
-        return make([]int64)
+        return make([]int64, 0)
     }
 
     return x.AdaptedSetDefault
@@ -6737,7 +6737,7 @@ var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
 
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{}).
-        SetAdaptedStruct(NewAdaptTemplatedTestStruct())
+        SetAdaptedStruct(*NewAdaptTemplatedTestStruct())
 }
 
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().AdaptedStruct instead.
@@ -7389,10 +7389,10 @@ var _ thrift.Struct = &StructFieldAdaptedStruct{}
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{}).
-        SetAdaptedStruct(NewAdaptedStruct()).
-        SetAdaptedTypedef(NewAdaptedTypedef()).
-        SetDirectlyAdapted(NewDirectlyAdaptedStruct()).
-        SetTypedefOfAdapted(NewTypedefOfDirect())
+        SetAdaptedStruct(*NewAdaptedStruct()).
+        SetAdaptedTypedef(*NewAdaptedTypedef()).
+        SetDirectlyAdapted(*NewDirectlyAdaptedStruct()).
+        SetTypedefOfAdapted(*NewTypedefOfDirect())
 }
 
 // Deprecated: Use NewStructFieldAdaptedStruct().AdaptedStruct instead.
@@ -7746,7 +7746,7 @@ var _ thrift.Struct = &CircularAdaptee{}
 
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{}).
-        SetField(NewCircularStruct())
+        SetField(*NewCircularStruct())
 }
 
 // Deprecated: Use NewCircularAdaptee().Field instead.
@@ -8045,7 +8045,7 @@ var _ thrift.Struct = &ReorderedStruct{}
 
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{}).
-        SetReorderedDependentAdapted(NewDeclaredAfterStruct())
+        SetReorderedDependentAdapted(*NewDeclaredAfterStruct())
 }
 
 // Deprecated: Use NewReorderedStruct().ReorderedDependentAdapted instead.
@@ -8623,7 +8623,7 @@ var _ thrift.Struct = &MoveOnly{}
 
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{}).
-        SetPtr(NewHeapAllocated())
+        SetPtr(*NewHeapAllocated())
 }
 
 // Deprecated: Use NewMoveOnly().Ptr instead.

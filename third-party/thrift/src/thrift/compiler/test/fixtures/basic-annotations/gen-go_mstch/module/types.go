@@ -433,8 +433,8 @@ func NewMyStruct() *MyStruct {
         SetAnnotationWithTrailingComma("").
         SetEmptyAnnotations("").
         SetMyEnum(0).
-        SetCppTypeAnnotation(make([]string)).
-        SetMyUnion(NewMyUnion()).
+        SetCppTypeAnnotation(make([]string, 0)).
+        SetMyUnion(*NewMyUnion()).
         SetMyID(NewMyId())
 }
 
@@ -503,7 +503,7 @@ func (x *MyStruct) GetCppTypeAnnotationNonCompat() []string {
 
 func (x *MyStruct) GetCppTypeAnnotation() []string {
     if !x.IsSetCppTypeAnnotation() {
-        return make([]string)
+        return make([]string, 0)
     }
 
     return x.CppTypeAnnotation

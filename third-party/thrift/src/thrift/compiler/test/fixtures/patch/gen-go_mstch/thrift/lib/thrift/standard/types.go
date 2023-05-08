@@ -481,11 +481,11 @@ func NewTypeName() *TypeName {
         SetDoubleType(0).
         SetStringType(0).
         SetBinaryType(0).
-        SetEnumType(NewTypeUri()).
-        SetTypedefType(NewTypeUri()).
-        SetStructType(NewTypeUri()).
-        SetUnionType(NewTypeUri()).
-        SetExceptionType(NewTypeUri()).
+        SetEnumType(*NewTypeUri()).
+        SetTypedefType(*NewTypeUri()).
+        SetStructType(*NewTypeUri()).
+        SetUnionType(*NewTypeUri()).
+        SetExceptionType(*NewTypeUri()).
         SetListType(0).
         SetSetType(0).
         SetMapType(0)

@@ -41,8 +41,8 @@ This template define the default value for a given type.
   }}{{#type:double?}}0.0{{/type:double?}}{{!
   }}{{#type:float?}}0.0{{/type:float?}}{{!
   }}{{#type:enum?}}0{{/type:enum?}}{{!
-  }}{{#type:list?}}make({{> common/type}}){{/type:list?}}{{!
-  }}{{#type:set?}}make({{> common/type}}){{/type:set?}}{{!
+  }}{{#type:list?}}make({{> common/type}}, 0){{/type:list?}}{{!
+  }}{{#type:set?}}make({{> common/type}}, 0){{/type:set?}}{{!
   }}{{#type:map?}}make({{> common/type}}){{/type:map?}}{{!
   }}{{#type:struct?}}{{!
     }}{{#type:struct}}{{!

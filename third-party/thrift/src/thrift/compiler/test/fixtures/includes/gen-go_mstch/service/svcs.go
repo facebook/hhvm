@@ -164,8 +164,8 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
-        SetS(module.NewMyStruct()).
-        SetI(includes.NewIncluded())
+        SetS(*module.NewMyStruct()).
+        SetI(*includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceQuery().S instead.
@@ -467,8 +467,8 @@ var _ thrift.Struct = &reqMyServiceHasArgDocs{}
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{}).
-        SetS(module.NewMyStruct()).
-        SetI(includes.NewIncluded())
+        SetS(*module.NewMyStruct()).
+        SetI(*includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceHasArgDocs().S instead.

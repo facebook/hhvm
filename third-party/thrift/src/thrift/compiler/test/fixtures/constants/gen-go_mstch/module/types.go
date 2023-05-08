@@ -1123,8 +1123,8 @@ func NewStruct2() *Struct2 {
     return (&Struct2{}).
         SetA(0).
         SetB("").
-        SetC(NewStruct1()).
-        SetD(make([]int32))
+        SetC(*NewStruct1()).
+        SetD(make([]int32, 0))
 }
 
 // Deprecated: Use NewStruct2().C instead.
@@ -1164,7 +1164,7 @@ func (x *Struct2) GetDNonCompat() []int32 {
 
 func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
-        return make([]int32)
+        return make([]int32, 0)
     }
 
     return x.D
@@ -1475,7 +1475,7 @@ func NewStruct3() *Struct3 {
     return (&Struct3{}).
         SetA("").
         SetB(0).
-        SetC(NewStruct2())
+        SetC(*NewStruct2())
 }
 
 // Deprecated: Use NewStruct3().C instead.
@@ -2236,8 +2236,8 @@ func NewUnion2() *Union2 {
     return (&Union2{}).
         SetI(0).
         SetD(0.0).
-        SetS(NewStruct1()).
-        SetU(NewUnion1())
+        SetS(*NewStruct1()).
+        SetU(*NewUnion1())
 }
 
 // Deprecated: Use NewUnion2().I instead.

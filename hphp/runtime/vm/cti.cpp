@@ -223,7 +223,8 @@ Offset compile_cti(Func* func, PC unitpc) {
 TCA lookup_cti(const Func* func, Offset cti_entry, PC unitpc, PC pc) {
   assert(pc && unitpc);
   if (tl_cti_cache.empty()) {
-    tl_cti_cache.resize(jit::CodeCache::ABytecodeSize >> 10);
+    // tl_cti_size must be a power of two because probes use (hash & (size - 1))
+    tl_cti_cache.resize(folly::nextPowTwo(jit::CodeCache::ABytecodeSize >> 10));
     always_assert(tl_cti_cache.size() > 0 &&
                   (tl_cti_cache.size() & (tl_cti_cache.size()-1)) == 0);
   }

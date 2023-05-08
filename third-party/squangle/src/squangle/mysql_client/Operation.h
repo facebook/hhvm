@@ -64,6 +64,7 @@
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/Row.h"
 
+DECLARE_int64(async_mysql_max_connect_timeout_micros);
 namespace facebook {
 namespace common {
 namespace mysql_client {

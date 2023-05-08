@@ -36,6 +36,15 @@ DEFINE_int64(
     10 * 1000 * 1000,
     "default timeout, in micros, for mysql operations");
 
+DEFINE_int64(
+    async_mysql_max_connect_timeout_micros,
+#if defined(FOLLY_SANITIZE_ADDRESS) || (FOLLY_SANITIZE_THREAD)
+    30 * 1000 * 1000,
+#else
+    3 * 1000 * 1000,
+#endif
+    "The maximum connect timeout, to protect customers from themselves");
+
 namespace facebook {
 namespace common {
 namespace mysql_client {
@@ -217,6 +226,10 @@ Operation* Operation::run() {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     state_ = OperationState::Pending;
+  }
+  if (getOperationType() == db::OperationType::Connect) {
+    timeout_ = std::min(
+        Duration(FLAGS_async_mysql_max_connect_timeout_micros), timeout_);
   }
   return specializedRun();
 }

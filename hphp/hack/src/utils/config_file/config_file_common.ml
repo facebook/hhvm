@@ -14,6 +14,8 @@ type t = Config_file_ffi_externs.config
 
 let file_path_relative_to_repo_root = ".hhconfig"
 
+let pkgs_config_path_relative_to_repo_root = "PACKAGES.toml"
+
 let empty = Config_file_ffi_externs.empty
 
 let is_empty = Config_file_ffi_externs.is_empty
@@ -33,6 +35,13 @@ let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
         Printf.eprintf "\n%!");
     config
 
+(* Given an hhconfig_path, get the path to the PACKAGES.toml file in the same directory *)
+let get_packages_absolute_path ~(hhconfig_path : string) =
+  Path.make hhconfig_path
+  |> Path.dirname
+  |> (fun p -> Path.concat p pkgs_config_path_relative_to_repo_root)
+  |> Path.to_string
+
 (*
  * Config file format:
  * # Some comment. Indicate by a pound sign at the start of a new line
@@ -41,6 +50,7 @@ let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
 let parse_contents (contents : string) : t =
   Config_file_ffi_externs.parse_contents contents
 
+(* Non-lwt implementation of parse *)
 let parse (fn : string) : string * t =
   let contents = Sys_utils.cat fn in
   let parsed = parse_contents contents in

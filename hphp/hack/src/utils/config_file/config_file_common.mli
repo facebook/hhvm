@@ -10,6 +10,10 @@ type t
 
 val file_path_relative_to_repo_root : string
 
+val pkgs_config_path_relative_to_repo_root : string
+
+val get_packages_absolute_path : hhconfig_path:string -> string
+
 val empty : unit -> t
 
 val print_to_stderr : t -> unit
@@ -20,8 +24,6 @@ these overrides came from and what they were. *)
 val apply_overrides : config:t -> overrides:t -> log_reason:string option -> t
 
 val parse_contents : string -> t
-
-val parse : string -> string * t
 
 val parse_local_config : string -> t
 

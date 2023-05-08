@@ -2480,6 +2480,7 @@ dependencies = [
  "oxidized",
  "serde",
  "serde_json",
+ "sha1",
 ]
 
 [[package]]

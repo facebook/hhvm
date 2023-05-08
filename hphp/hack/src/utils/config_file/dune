@@ -5,6 +5,7 @@
  (libraries
   config_file_ffi_externs
   core_kernel
+  relative_path
   sys_utils
   utils_core
   utils_hash)

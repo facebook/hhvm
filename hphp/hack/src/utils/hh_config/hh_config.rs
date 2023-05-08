@@ -15,8 +15,11 @@ use config_file::ConfigFile;
 pub use local_config::LocalConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
+use sha1::Digest;
+use sha1::Sha1;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
+pub const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
@@ -54,14 +57,32 @@ impl HhConfig {
         Self::from_files(hhconfig_path, hh_conf_path, overrides)
     }
 
+    pub fn create_packages_path(hhconfig_path: &Path) -> PathBuf {
+        // Unwrap is safe because hhconfig_path is always at least one nonempty string
+        let mut packages_path = hhconfig_path.parent().unwrap().to_path_buf();
+        packages_path.push("PACKAGES.toml");
+        packages_path
+    }
+
     pub fn from_files(
         hhconfig_path: impl AsRef<Path>,
         hh_conf_path: impl AsRef<Path>,
         overrides: &ConfigFile,
     ) -> Result<Self> {
         let hhconfig_path = hhconfig_path.as_ref();
-        let (hash, mut hhconfig) = ConfigFile::from_file_with_sha1(hhconfig_path)
+        let package_config_pathbuf = Self::create_packages_path(hhconfig_path);
+        let package_config_path = package_config_pathbuf.as_path();
+        let (contents, mut hhconfig) = ConfigFile::from_file_with_contents(hhconfig_path)
             .with_context(|| hhconfig_path.display().to_string())?;
+        // Grab extra config and use it to process the hash
+        let extra_contents: String = if package_config_path.exists() {
+            let bytes = std::fs::read(package_config_path).unwrap_or(vec![]);
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::new()
+        };
+        let full_contents = contents + &extra_contents;
+        let hash = format!("{:x}", Sha1::digest(full_contents.as_bytes()));
         hhconfig.apply_overrides(overrides);
         let hh_conf_path = hh_conf_path.as_ref();
         let mut hh_conf = ConfigFile::from_file(hh_conf_path)

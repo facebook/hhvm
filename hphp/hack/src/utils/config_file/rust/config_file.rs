@@ -21,6 +21,14 @@ impl ConfigFile {
         Ok(Self::from_slice(&contents))
     }
 
+    pub fn from_file_with_contents(path: impl AsRef<Path>) -> std::io::Result<(String, Self)> {
+        let contents = std::fs::read(path.as_ref())?;
+        Ok((
+            String::from_utf8(contents.clone()).unwrap(),
+            Self::from_slice(&contents),
+        ))
+    }
+
     pub fn from_file_with_sha1(path: impl AsRef<Path>) -> std::io::Result<(String, Self)> {
         let path = path.as_ref();
         let contents = std::fs::read(path)?;

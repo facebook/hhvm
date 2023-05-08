@@ -48,6 +48,7 @@ pub struct HhConfig {
     pub sharedmem_global_size: usize,
     pub sharedmem_hash_table_pow: usize,
     pub sharedmem_heap_size: usize,
+    pub ide_fall_back_to_full_index: bool,
 }
 
 impl HhConfig {
@@ -130,6 +131,10 @@ impl HhConfig {
 
         for (key, mut value) in hhconfig {
             match key.as_str() {
+                "current_saved_state_rollout_flag_index" | "deactivate_saved_state_rollout" => {
+                    // These were already queried for LocalConfig above.
+                    // Ignore them so they aren't added to c.unknown.
+                }
                 "auto_namespace_map" => {
                     let map: BTreeMap<String, String> = parse_json(&value)?;
                     go.po_auto_namespace_map = map.into_iter().collect();
@@ -286,6 +291,9 @@ impl HhConfig {
                 "sharedmem_heap_size" => {
                     value.retain(|c| c != '_');
                     c.sharedmem_heap_size = parse_json(&value)?;
+                }
+                "ide_fall_back_to_full_index" => {
+                    c.ide_fall_back_to_full_index = parse_json(&value)?;
                 }
                 _ => c.unknown.push((key, value)),
             }

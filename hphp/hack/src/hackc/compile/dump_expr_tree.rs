@@ -111,6 +111,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
         false,
         ns,
         flags.is_systemlib,
+        false, // for_debugger_eval
         type_directed,
         &mut Profile::default(),
     ) {

@@ -162,6 +162,7 @@ let make_rust_env (env : env) : Rust_aast_parser_types.env =
       quick_mode = env.quick_mode;
       show_all_errors = env.show_all_errors;
       is_systemlib = env.is_systemlib;
+      for_debugger_eval = false;
       parser_options = env.parser_options;
       scour_comments = true;
     }

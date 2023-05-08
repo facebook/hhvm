@@ -178,6 +178,15 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
+    fn visit_stmt(&mut self, c: &mut Context, p: &aast::Stmt<(), ()>) -> Result<(), ()> {
+        if let aast::Stmt_::Awaitall(_) = p.1 {
+            if !c.in_methodish {
+                self.add_error(&p.0, syntax_error::toplevel_await_use);
+            }
+        }
+        p.recurse(c, self)
+    }
+
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
         use aast::ClassId;
         use aast::ClassId_::*;
@@ -235,10 +244,16 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
+pub fn check_program(
+    program: &aast::Program<(), ()>,
+    is_typechecker: bool,
+    for_debugger_eval: bool,
+) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
-        in_methodish: false,
+        // If we are checking for debugger repl, we should assume that we are
+        // inside a method
+        in_methodish: for_debugger_eval,
         in_classish: false,
         in_static_methodish: false,
         is_any_local_fun: false,

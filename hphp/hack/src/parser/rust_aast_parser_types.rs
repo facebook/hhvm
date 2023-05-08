@@ -27,6 +27,7 @@ pub struct Env {
     pub quick_mode: bool,
     pub show_all_errors: bool,
     pub is_systemlib: bool,
+    pub for_debugger_eval: bool,
     pub parser_options: ParserOptions,
     pub scour_comments: bool,
 }

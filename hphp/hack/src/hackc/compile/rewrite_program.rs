@@ -181,6 +181,20 @@ fn extract_debugger_main(
         ));
     }
 
+    match stmts.last_mut() {
+        Some(Stmt(_, Stmt_::Awaitall(box (_, block)))) => match block.last_mut() {
+            Some(s) => match s {
+                Stmt(_, Stmt_::Expr(box Expr(_, p, e))) => {
+                    let e_inner = Expr((), std::mem::take(p), std::mem::replace(e, Expr_::False));
+                    *s = hack_stmt!("#{lvar(clone(return_val))} = #e_inner;");
+                }
+                _ => {}
+            },
+            _ => {}
+        },
+        _ => {}
+    }
+
     let p = || Pos::NONE;
     let mut unsets: ast::Block = vars
         .iter()

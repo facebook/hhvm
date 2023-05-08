@@ -453,6 +453,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
         quick_mode: false,
         show_all_errors: true,
         is_systemlib: true,
+        for_debugger_eval: false,
         scour_comments: false,
     };
 

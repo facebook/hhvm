@@ -1,0 +1,15 @@
+<?hh
+
+async function foo_async(): Awaitable {
+  await RescheduleWaitHandle::create(0, 0);
+  return 5;
+}
+
+async function bar_async(): Awaitable {
+  await RescheduleWaitHandle::create(0, 0);
+  return 15;
+}
+
+<<__EntryPoint>> function main_test() {
+  hphp_debug_break();
+}

@@ -107,11 +107,13 @@ struct CommonLoggingData {
       OperationType op,
       Duration duration,
       std::optional<Duration> timeout,
-      Duration max_thread_block_time = Duration(0))
+      Duration max_thread_block_time = Duration(0),
+      Duration total_thread_block_time = Duration(0))
       : operation_type(op),
         operation_duration(duration),
         operation_timeout(timeout),
-        max_thread_block_time(max_thread_block_time) {}
+        max_thread_block_time(max_thread_block_time),
+        total_thread_block_time(total_thread_block_time) {}
   OperationType operation_type;
   // How long the single operation took
   Duration operation_duration;
@@ -120,6 +122,7 @@ struct CommonLoggingData {
   // The most time spent executing code in a single iteration
   // of socketActionable
   Duration max_thread_block_time;
+  Duration total_thread_block_time;
 };
 
 struct QueryLoggingData : CommonLoggingData {
@@ -138,8 +141,14 @@ struct QueryLoggingData : CommonLoggingData {
       std::unordered_map<std::string, std::string> responseAttributes =
           std::unordered_map<std::string, std::string>(),
       Duration maxThreadBlockTime = Duration(0),
+      Duration totalThreadBlockTime = Duration(0),
       bool wasSlow = false)
-      : CommonLoggingData(op, duration, timeout, maxThreadBlockTime),
+      : CommonLoggingData(
+            op,
+            duration,
+            timeout,
+            maxThreadBlockTime,
+            totalThreadBlockTime),
         queries_executed(queries),
         query(queryString),
         rows_received(rows),

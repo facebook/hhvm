@@ -45,6 +45,19 @@ const std::string kQueryChecksumKey = "checksum";
 
 using MysqlCertValidatorCallback =
     int (*)(X509* server_cert, const void* context, const char** errptr);
+
+class OperationGuard {
+ public:
+  using Func = std::function<void()>;
+
+  explicit OperationGuard(Func func) : func_(std::move(func)) {}
+  ~OperationGuard() {
+    func_();
+  }
+
+ private:
+  Func func_;
+};
 } // namespace
 
 namespace chrono = std::chrono;
@@ -694,14 +707,9 @@ ConnectOperation::~ConnectOperation() {
 void ConnectOperation::socketActionable() {
   DCHECK(isInEventBaseThread());
 
-  Timepoint started = chrono::steady_clock::now();
-  SCOPE_EXIT {
-    auto thread_time = std::chrono::duration_cast<Duration>(
-        chrono::steady_clock::now() - started);
-    if (getMaxThreadBlockTime() < thread_time) {
-      setMaxThreadBlockTime(thread_time);
-    }
-  };
+  folly::stop_watch<Duration> sw;
+  auto logThreadBlockTimeGuard =
+      std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
   auto& handler = conn()->client()->getMysqlHandler();
   MYSQL* mysql = conn()->mysql();
@@ -711,6 +719,7 @@ void ConnectOperation::socketActionable() {
 
   if (status == MysqlHandler::ERROR) {
     snapshotMysqlErrors();
+    logThreadBlockTimeGuard.reset();
     attemptFailed(OperationResult::Failed);
   } else {
     if ((isDoneWithTcpHandShake() || usingUnixSocket) &&
@@ -727,12 +736,14 @@ void ConnectOperation::socketActionable() {
       setAsyncClientError(
           "mysql_get_socket_descriptor returned an invalid "
           "descriptor");
+      logThreadBlockTimeGuard.reset();
       attemptFailed(OperationResult::Failed);
     } else if (status == MysqlHandler::DONE) {
       auto socket = folly::NetworkSocket::fromFd(fd);
       conn()->socketHandler()->changeHandlerFD(socket);
       conn()->mysqlConnection()->setConnectionContext(connection_context_);
       conn()->mysqlConnection()->connectionOpened();
+      logThreadBlockTimeGuard.reset();
       attemptSucceeded(OperationResult::Succeeded);
     } else {
       conn()->socketHandler()->changeHandlerFD(
@@ -815,7 +826,11 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     }
     client()->logConnectionSuccess(
         db::CommonLoggingData(
-            getOperationType(), elapsed, timeout_, getMaxThreadBlockTime()),
+            getOperationType(),
+            elapsed,
+            timeout_,
+            getMaxThreadBlockTime(),
+            getTotalThreadBlockTime()),
         *conn()->getKey(),
         context);
   } else {
@@ -827,7 +842,11 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     }
     client()->logConnectionFailure(
         db::CommonLoggingData(
-            getOperationType(), elapsed, timeout_, getMaxThreadBlockTime()),
+            getOperationType(),
+            elapsed,
+            timeout_,
+            getMaxThreadBlockTime(),
+            getTotalThreadBlockTime()),
         reason,
         *conn()->getKey(),
         mysql_errno(),
@@ -1152,15 +1171,9 @@ void FetchOperation::socketActionable() {
   DCHECK(isInEventBaseThread());
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
 
-  Timepoint started = chrono::steady_clock::now();
-
-  SCOPE_EXIT {
-    auto thread_time = std::chrono::duration_cast<Duration>(
-        chrono::steady_clock::now() - started);
-    if (getMaxThreadBlockTime() < thread_time) {
-      setMaxThreadBlockTime(thread_time);
-    }
-  };
+  folly::stop_watch<Duration> sw;
+  auto logThreadBlockTimeGuard =
+      std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
   auto& handler = conn()->client()->getMysqlHandler();
   MYSQL* mysql = conn()->mysql();
@@ -1322,6 +1335,7 @@ void FetchOperation::socketActionable() {
     // Once this action is set, the operation is going to be completed no matter
     // the reason it was called. It exists the loop.
     if (active_fetch_action_ == FetchAction::CompleteOperation) {
+      logThreadBlockTimeGuard.reset();
       if (cancel_) {
         state_ = OperationState::Cancelling;
         completeOperation(OperationResult::Cancelled);
@@ -1485,6 +1499,7 @@ void FetchOperation::specializedCompleteOperation() {
         attributes_,
         readResponseAttributes(),
         getMaxThreadBlockTime(),
+        getTotalThreadBlockTime(),
         was_slow_);
     client()->logQuerySuccess(logging_data, *conn().get());
   } else {
@@ -1508,6 +1523,7 @@ void FetchOperation::specializedCompleteOperation() {
             attributes_,
             readResponseAttributes(),
             getMaxThreadBlockTime(),
+            getTotalThreadBlockTime(),
             was_slow_),
         reason,
         mysql_errno(),

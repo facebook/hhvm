@@ -56,6 +56,7 @@
 #include <folly/io/async/Request.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
+#include <folly/stop_watch.h>
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/Compression.h"
 #include "squangle/mysql_client/DbResult.h"
@@ -442,9 +443,14 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return max_thread_block_time_;
   }
 
-  Operation* setMaxThreadBlockTime(Duration max_thread_block_time) {
-    max_thread_block_time_ = max_thread_block_time;
-    return this;
+  Duration getTotalThreadBlockTime() {
+    return total_thread_block_time_;
+  }
+
+  void logThreadBlockTime(const folly::stop_watch<Duration> sw) {
+    auto block_time = sw.elapsed();
+    max_thread_block_time_ = std::max(max_thread_block_time_, block_time);
+    total_thread_block_time_ += block_time;
   }
 
   // Did the operation succeed?
@@ -762,6 +768,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   // This will contain the max block time of the thread
   Duration max_thread_block_time_ = Duration(0);
+  Duration total_thread_block_time_ = Duration(0);
 
   // Our Connection object.  Created by ConnectOperation and moved
   // into QueryOperations.

@@ -16,10 +16,14 @@
 
 }}{{!
 
-}}{{#type:i16?}}thrift.Int16Ptr({{> const/value}}){{/type:i16?}}{{!
-}}{{#type:i32?}}thrift.Int32Ptr({{> const/value}}){{/type:i32?}}{{!
-}}{{#type:i64?}}thrift.Int64Ptr({{> const/value}}){{/type:i64?}}{{!
-}}{{#type:string?}}thrift.StringPtr({{> const/value}}){{/type:string?}}{{!
-}}{{#type:bool?}}thrift.BoolPtr({{> const/value}}){{/type:bool?}}{{!
-}}{{#type:double?}}thrift.Float64Ptr({{> const/value}}){{/type:double?}}{{!
-}}{{#type:struct?}}&{{> const/value}}{{/type:struct?}}
+  This file defines a pointerize function for a given primitive type.
+  These functions come from thrift/lib/go/thrift/pointerize.go module.
+
+}}{{#type:byte?}}thrift.BytePtr{{/type:byte?}}{{!
+}}{{#type:i16?}}thrift.Int16Ptr{{/type:i16?}}{{!
+}}{{#type:i32?}}thrift.Int32Ptr{{/type:i32?}}{{!
+}}{{#type:i64?}}thrift.Int64Ptr{{/type:i64?}}{{!
+}}{{#type:string?}}thrift.StringPtr{{/type:string?}}{{!
+}}{{#type:bool?}}thrift.BoolPtr{{/type:bool?}}{{!
+}}{{#type:float?}}thrift.Float32Ptr{{/type:float?}}{{!
+}}{{#type:double?}}thrift.Float64Ptr{{/type:double?}}{{!

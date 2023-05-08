@@ -61,6 +61,10 @@ let current_build_info =
 type connect_failure_reason =
   | Connect_timeout
   | Connect_exception of Exception.t
+      [@printer
+        fun fmt e ->
+          fprintf fmt "Connect_exception(%s)" (Exception.get_ctor_string e)]
+[@@deriving show { with_path = false }]
 
 type connect_failure_phase =
   | Connect_open_socket
@@ -68,7 +72,7 @@ type connect_failure_phase =
   | Connect_send_newline
   | Connect_receive_connection_ok
   | Connect_send_shutdown
-[@@deriving show]
+[@@deriving show { with_path = false }]
 
 type connect_to_monitor_failure = {
   server_exists: bool;
@@ -76,6 +80,7 @@ type connect_to_monitor_failure = {
   failure_phase: connect_failure_phase;
   failure_reason: connect_failure_reason;
 }
+[@@deriving show]
 
 type connection_error =
   | Connect_to_monitor_failure of connect_to_monitor_failure
@@ -97,38 +102,67 @@ type connection_error =
    *   correctly.
    *)
   | Build_id_mismatched of build_mismatch_info option
+[@@deriving show { with_path = false }]
 
-let connection_error_to_telemetry (e : connection_error) : Telemetry.t =
-  let telemetry = Telemetry.create () in
+(** The telemetry we get from this ends up appearing in our telemetry a HUGE number of times.
+I guess [HackEventLogger.client_connect_once_failure] is just called a lot.
+We therefore take pains to make this as minimal as we can. *)
+let connection_error_to_telemetry (e : connection_error) :
+    string * Telemetry.t option =
   match e with
-  | Server_died ->
-    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Server_died"
-  | Server_dormant ->
-    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Server_dormant"
-  | Server_dormant_out_of_retries ->
-    telemetry
-    |> Telemetry.string_ ~key:"kind" ~value:"Server_dormant_out_of_retries"
+  | Server_died
+  | Server_dormant
+  | Server_dormant_out_of_retries
   | Build_id_mismatched _ ->
-    telemetry |> Telemetry.string_ ~key:"kind" ~value:"Build_id_mismatched"
+    (* these errors come from MonitorConnection.connect_to_monitor [match cstate] *)
+    (show_connection_error e, None)
   | Connect_to_monitor_failure { server_exists; failure_phase; failure_reason }
     ->
-    let (reason, exn, stack) =
+    let (reason, stack) =
       match failure_reason with
-      | Connect_timeout -> ("timeout", None, None)
-      | Connect_exception e ->
-        ( "exception",
-          Some (Exception.get_ctor_string e),
-          Some (Exception.get_backtrace_string e |> Exception.clean_stack) )
+      | Connect_timeout ->
+        (* comes from MonitorConnection.connect_to_monitor [Timeout.open_connection] *)
+        ("Connect_timeout", None)
+      | Connect_exception e -> begin
+        (* comes from MonitorConnection.connect_to_monitor and [phase] says what part *)
+        match Exception.to_exn e with
+        | Unix.Unix_error (Unix.ECONNREFUSED, "connect", _) ->
+          (* Generally comes from [Timeout.open_connection] *)
+          ("ECONNREFUSED", None)
+        | Unix.Unix_error (Unix.ENOENT, "connect", _) ->
+          (* Generally comes from [Timeout.open_connection] *)
+          ("ENOENT", None)
+        | Unix.Unix_error (Unix.EMFILE, "pipe", _) ->
+          (* Usually comes from [Process.exec Exec_command.Pgrep] *)
+          ("EMFILE", None)
+        | Unix.Unix_error (Unix.ECONNRESET, "read", _) ->
+          (* Usually from [let cstate : ... = from_channel_without_buffering ic] *)
+          ("ECONNRESET", None)
+        | _ ->
+          ( Exception.get_ctor_string e,
+            Some (Exception.get_backtrace_string e |> Exception.clean_stack) )
+      end
     in
-    telemetry
-    |> Telemetry.string_ ~key:"kind" ~value:"Connection_to_monitor_Failure"
-    |> Telemetry.bool_ ~key:"server_exists" ~value:server_exists
-    |> Telemetry.string_
-         ~key:"phase"
-         ~value:(show_connect_failure_phase failure_phase)
-    |> Telemetry.string_ ~key:"reason" ~value:reason
-    |> Telemetry.string_opt ~key:"exn" ~value:exn
-    |> Telemetry.string_opt ~key:"exn_stack" ~value:stack
+    let exists =
+      if server_exists then
+        "exists"
+      else
+        "absent"
+    in
+    let reason =
+      Printf.sprintf
+        "%s:%s [%s]"
+        (show_connect_failure_phase failure_phase)
+        reason
+        exists
+    in
+    let telemetry =
+      Option.map
+        (fun value ->
+          Telemetry.create () |> Telemetry.string_ ~key:"stack" ~value)
+        stack
+    in
+    (reason, telemetry)
 
 type connection_state =
   | Connection_ok

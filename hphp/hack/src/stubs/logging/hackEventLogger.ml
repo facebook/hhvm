@@ -280,7 +280,7 @@ let client_established_connection _ = ()
 
 let client_connect_once ~t_start:_ = ()
 
-let client_connect_once_failure ~t_start:_ _ = ()
+let client_connect_once_failure ~t_start:_ _ _ = ()
 
 let client_connect_to_monitor_slow_log () = ()
 

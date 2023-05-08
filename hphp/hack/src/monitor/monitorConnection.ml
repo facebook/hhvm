@@ -356,16 +356,14 @@ let connect_once ~tracker ~timeout root handoff_options =
       ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
       ~on_timeout:(fun _ -> Error MonitorUtils.Server_dormant_out_of_retries)
   in
+  (* oops too heavy *)
   Result.iter result ~f:(fun _ ->
       log ~tracker "CLIENT_CONNECT_ONCE";
       HackEventLogger.client_connect_once ~t_start;
       ());
   Result.iter_error result ~f:(fun e ->
-      let telemetry = MonitorUtils.connection_error_to_telemetry e in
-      log
-        ~tracker
-        "CLIENT_CONNECT_ONCE FAILURE %s"
-        (telemetry |> Telemetry.to_string);
-      HackEventLogger.client_connect_once_failure ~t_start telemetry;
+      let (reason, telemetry) = MonitorUtils.connection_error_to_telemetry e in
+      log ~tracker "CLIENT_CONNECT_ONCE %s" reason;
+      HackEventLogger.client_connect_once_failure ~t_start reason telemetry;
       ());
   result

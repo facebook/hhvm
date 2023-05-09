@@ -14,7 +14,7 @@ class Foo extends Enum {
   const type TInner = int;
 }
 
-class :xhp {}
+class :xhp extends XHPTest {}
 
 class Enum {
   abstract const type TInner;

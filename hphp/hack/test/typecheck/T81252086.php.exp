@@ -1,0 +1,6 @@
+File "T81252086.php", line 18, characters 3-12:
+No instance method `getAttribute` in `:foo` (Typing[4053])
+  File "T81252086.php", line 17, characters 11-13:
+  This is why I think it is an object of type :foo
+  File "T81252086.php", line 4, characters 7-10:
+  Declaration of `:foo` is here

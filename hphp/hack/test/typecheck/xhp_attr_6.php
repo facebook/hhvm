@@ -1,5 +1,5 @@
 <?hh // strict
-class :foo {
+class :foo extends XHPTest {
   // Typechecker must consider this nullable
   attribute int x;
 }

@@ -17,7 +17,7 @@ class B implements I {
 
 function f(): void {}
 
-class C implements XHPChild {
+class C extends XHPTest implements XHPChild {
   attribute ?I x = null;
 
   public function test(): void {

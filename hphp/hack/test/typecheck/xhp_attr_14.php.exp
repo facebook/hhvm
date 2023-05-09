@@ -2,6 +2,8 @@ File "xhp_attr_14.php", line 7, characters 14-18:
 Typing error (Typing[4053])
   File "xhp_attr_14.php", line 7, characters 21-30:
   No property `:undefined` in `:foo`
+  File "XHPTest.hhi", line 7, characters 12-17:
+  Did you mean `_filename` instead?
   File "xhp_attr_14.php", line 3, characters 7-10:
   This is why I think it is an object of type :foo
   File "xhp_attr_14.php", line 3, characters 7-10:

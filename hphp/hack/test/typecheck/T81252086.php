@@ -8,7 +8,7 @@ class :foo {
     darray<arraykey,mixed> $_,
     varray<mixed> $_,
     string $_,
-        int $_
+    int $_
   ) {}
 }
 

@@ -8,6 +8,10 @@ class :xhp implements XHPChild {
     string $file,
     int $line
   ) {}
+
+  public function getAttribute(
+    string $_attribute
+  ): mixed { return null; }
 }
 
 class :foo extends :xhp {

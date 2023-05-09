@@ -1,0 +1,12 @@
+File "xhp_attribute_coeffect.php", line 8, characters 4-6:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "xhp_attribute_coeffect.php", line 7, characters 17-18:
+  From this declaration, the context of this function body provides the capability set {}
+  File "XHPTest.hhi", line 4, characters 19-29:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+File "xhp_attribute_coeffect.php", line 12, characters 3-13:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "xhp_attribute_coeffect.php", line 11, characters 26-27:
+  From this declaration, the context of this function body provides the capability set {}
+  File "XHPTest.hhi", line 11, characters 19-30:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

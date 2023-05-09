@@ -1,6 +1,10 @@
 <?hh
 
 class :xhp implements \XHPChild {
+  public function getAttribute(string $_attribute): mixed {
+    throw new \Exception();
+  }
+
   public function __construct(
     \HH\dict<string, mixed> $attr,
     \HH\vec<mixed> $children,

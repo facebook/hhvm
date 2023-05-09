@@ -2,16 +2,16 @@ File "repeated_xhp_attrib.php", line 6, characters 23-25:
 Cannot redeclare foo (Parsing[1007])
 File "repeated_xhp_attrib.php", line 6, characters 15-17:
 No property `:foo` in `:div` (Typing[4053])
-  File "XHPTest.hhi", line 5, characters 12-31:
-  Did you mean `_` instead?
+  File "XHPTest.hhi", line 7, characters 12-17:
+  Did you mean `_filename` instead?
   File "repeated_xhp_attrib.php", line 6, characters 11-13:
   This is why I think it is an object of type :div
   File "repeated_xhp_attrib.php", line 3, characters 7-10:
   Declaration of `:div` is here
 File "repeated_xhp_attrib.php", line 6, characters 23-25:
 No property `:foo` in `:div` (Typing[4053])
-  File "XHPTest.hhi", line 5, characters 12-31:
-  Did you mean `_` instead?
+  File "XHPTest.hhi", line 7, characters 12-17:
+  Did you mean `_filename` instead?
   File "repeated_xhp_attrib.php", line 6, characters 11-13:
   This is why I think it is an object of type :div
   File "repeated_xhp_attrib.php", line 3, characters 7-10:

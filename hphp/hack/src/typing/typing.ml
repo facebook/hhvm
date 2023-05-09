@@ -4589,11 +4589,13 @@ and expr_
     let (env, local) = Env.FakeMembers.make env e y p in
     let local = ((), p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
+    let env = xhp_check_get_attribute p env e y nf in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
     let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
     make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
   (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (_, pm, Id m), nullflavor, prop_or_method) ->
+    let env = xhp_check_get_attribute p env e1 (snd m) nullflavor in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let env = might_throw env in
     (* We typecheck Obj_get by checking whether it is a subtype of
@@ -5436,6 +5438,22 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
           ~ret_ty:declared_ft.ft_ret.et_type
           declared_ft
     )
+
+(** If `prop` is is an attribute, typecheck against the translated
+    `base_expr->getAttribute(prop)` as property accesses are translated to this
+    expression. *)
+and xhp_check_get_attribute pos env base_expr prop null_flavour =
+  (* All and only attributes start with `:` when represented as properties. *)
+  if String.is_prefix prop ~prefix:":" then
+    let base_lenv = env.lenv in
+    let call_get_attr =
+      Typing_xhp.rewrite_attribute_access_into_call pos base_expr null_flavour
+    in
+    let (env, _, _) = expr ~allow_awaitable:false env call_get_attr in
+    (* Snap the local env back to avoid manipualting refinements twice. *)
+    { env with lenv = base_lenv }
+  else
+    env
 
 (**
  * Process a spread operator by computing the intersection of XHP attributes

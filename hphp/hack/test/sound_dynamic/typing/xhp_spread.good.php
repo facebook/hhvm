@@ -7,6 +7,13 @@ abstract class XHPTest {
     public string $c, // Filename
     public int $d, // Line number
   ) { }
+
+  public function getAttribute(
+    string $_attribute,
+    mixed $_default = null
+  ): mixed {
+    return null;
+  }
 }
 
 <<__SupportDynamicType>>
@@ -21,7 +28,7 @@ class :bar {
   attribute :baz;
 }
 <<__SupportDynamicType>>
-class :foo {
+class :foo extends XHPTest {
   // Import all attributes from :bar
   attribute :bar;
 }

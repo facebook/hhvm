@@ -113,7 +113,7 @@ fn build_ir<'a, 'arena>(
 ) -> Result<ir::Unit<'arena>> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(RcOc::new(filepath.clone()), content);
-    let env = crate::compile::native_env(filepath, single_file_opts);
+    let env = crate::compile::native_env(filepath, single_file_opts)?;
     let mut profile = Profile::default();
     let decl_arena = bumpalo::Bump::new();
     let decl_provider = SelfProvider::wrap_existing_provider(

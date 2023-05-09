@@ -206,7 +206,7 @@ impl FileOpts {
 impl Opts {
     pub fn decl_opts(&self) -> DeclParserOptions {
         DeclParserOptions {
-            auto_namespace_map: auto_namespace_map().into_iter().collect(),
+            auto_namespace_map: compile::auto_namespace_map().collect(),
             disable_xhp_element_mangling: false,
             interpret_soft_types_as_like_types: true,
             allow_new_attribute_syntax: true,
@@ -221,7 +221,7 @@ impl Opts {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
         let parser_options = ParserOptions {
-            po_auto_namespace_map: auto_namespace_map().collect(),
+            po_auto_namespace_map: compile::auto_namespace_map().collect(),
             ..hhvm_config::parser_options(&hhvm_config)?
         };
         let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
@@ -235,29 +235,6 @@ impl Opts {
             hhbc_flags,
         })
     }
-}
-
-// TODO (T118266805): get these from nearest .hhconfig enclosing each file.
-fn auto_namespace_map() -> impl Iterator<Item = (String, String)> {
-    [
-        ("Async", "HH\\Lib\\Async"),
-        ("C", "FlibSL\\C"),
-        ("Dict", "FlibSL\\Dict"),
-        ("File", "HH\\Lib\\File"),
-        ("IO", "HH\\Lib\\IO"),
-        ("Keyset", "FlibSL\\Keyset"),
-        ("Locale", "FlibSL\\Locale"),
-        ("Math", "FlibSL\\Math"),
-        ("OS", "HH\\Lib\\OS"),
-        ("PHP", "FlibSL\\PHP"),
-        ("PseudoRandom", "FlibSL\\PseudoRandom"),
-        ("Regex", "FlibSL\\Regex"),
-        ("SecureRandom", "FlibSL\\SecureRandom"),
-        ("Str", "FlibSL\\Str"),
-        ("Vec", "FlibSL\\Vec"),
-    ]
-    .into_iter()
-    .map(|(k, v)| (k.into(), v.into()))
 }
 
 fn main() -> Result<()> {

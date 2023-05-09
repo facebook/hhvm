@@ -29,10 +29,12 @@ use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
+use hhvm_options::HhvmOptions;
 use multifile_rust as multifile;
 use naming_provider::SqliteNamingTable;
 use ocamlrep::rc::RcOc;
-use options::HhbcFlags;
+use options::Hhvm;
+use options::ParserOptions;
 use parking_lot::Mutex;
 use parser_core_types::source_text::SourceText;
 use pos::ConstName;
@@ -65,10 +67,13 @@ pub struct Opts {
     single_file_opts: SingleFileOpts,
 }
 
-#[derive(Parser, Clone, Debug)]
+#[derive(Parser, Debug)]
 pub(crate) struct SingleFileOpts {
     #[command(flatten)]
     pub(crate) env_flags: EnvFlags,
+
+    #[command(flatten)]
+    hhvm_options: HhvmOptions,
 
     /// The level of verbosity (can be set multiple times)
     #[clap(long = "verbose", action(clap::ArgAction::Count))]
@@ -133,19 +138,24 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     results.into_iter().collect()
 }
 
-pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv {
-    NativeEnv {
+pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Result<NativeEnv> {
+    let hhvm_options = &opts.hhvm_options;
+    let hhvm_config = hhvm_options.to_config()?;
+    let parser_options = ParserOptions {
+        po_auto_namespace_map: auto_namespace_map().collect(),
+        ..hhvm_config::parser_options(&hhvm_config)?
+    };
+    let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
+
+    Ok(NativeEnv {
         filepath,
-        hhbc_flags: HhbcFlags {
-            emit_cls_meth_pointers: true,
-            emit_meth_caller_func_pointers: true,
-            fold_lazy_class_keys: true,
-            log_extern_compiler_perf: true,
-            ..Default::default()
+        hhbc_flags,
+        hhvm: Hhvm {
+            include_roots: Default::default(),
+            parser_options,
         },
         flags: opts.env_flags.clone(),
-        ..Default::default()
-    }
+    })
 }
 
 pub(crate) fn process_single_file(
@@ -159,7 +169,7 @@ pub(crate) fn process_single_file(
     }
     let filepath = RelativePath::make(Prefix::Dummy, filepath);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
-    let env = native_env(filepath, opts);
+    let env = native_env(filepath, opts)?;
     let mut output = Vec::new();
     let decl_arena = bumpalo::Bump::new();
     let decl_provider = SelfProvider::wrap_existing_provider(
@@ -258,6 +268,29 @@ pub(crate) fn test_decl_compile_daemon(hackc_opts: &mut crate::Opts) -> Result<(
         hackc_opts.files.filenames = vec![path];
         test_decl_compile(hackc_opts, w)
     })
+}
+
+// TODO (T118266805): get these from nearest .hhconfig enclosing each file.
+pub(crate) fn auto_namespace_map() -> impl Iterator<Item = (String, String)> {
+    [
+        ("Async", "HH\\Lib\\Async"),
+        ("C", "FlibSL\\C"),
+        ("Dict", "FlibSL\\Dict"),
+        ("File", "HH\\Lib\\File"),
+        ("IO", "HH\\Lib\\IO"),
+        ("Keyset", "FlibSL\\Keyset"),
+        ("Locale", "FlibSL\\Locale"),
+        ("Math", "FlibSL\\Math"),
+        ("OS", "HH\\Lib\\OS"),
+        ("PHP", "FlibSL\\PHP"),
+        ("PseudoRandom", "FlibSL\\PseudoRandom"),
+        ("Regex", "FlibSL\\Regex"),
+        ("SecureRandom", "FlibSL\\SecureRandom"),
+        ("Str", "FlibSL\\Str"),
+        ("Vec", "FlibSL\\Vec"),
+    ]
+    .into_iter()
+    .map(|(k, v)| (k.into(), v.into()))
 }
 
 #[derive(Debug)]

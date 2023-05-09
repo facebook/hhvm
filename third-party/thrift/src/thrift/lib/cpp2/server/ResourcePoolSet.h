@@ -38,8 +38,6 @@ class ResourcePoolSet {
   using PoolSelectionFunction =
       folly::Function<SelectPoolResult(const ServerRequest&)>;
 
-  ~ResourcePoolSet() { stopAndJoin(); }
-
   // Set a specific resource pool by handle. This fails if the ResourcePool
   // already exists. This can only be called before lock() is called. This is
   // primarily used to set the defaultAsync or defaultSync resource pools.

@@ -851,7 +851,16 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             let this = state.load_static_class(clsid)?;
             state.fb.call_static(&target, this.into(), args)?
         }
-        CallDetail::FCallClsMethodM { .. } => state.write_todo("TODO_FCallClsMethodM")?,
+        CallDetail::FCallClsMethodM { method, log: _ } => {
+            // $c::foo()
+
+            // TODO: figure out better typing. If this is coming from a
+            // `classname` parameter we at least have a lower-bound.
+            let ty = ClassId::from_str("HackMixed", &state.strings);
+            let target = FunctionName::method(ty, IsStatic::Static, method);
+            let obj = state.lookup_vid(detail.class(operands));
+            state.fb.call_virtual(&target, obj, args)?
+        }
         CallDetail::FCallClsMethodS { .. } => state.write_todo("TODO_FCallClsMethodS")?,
         CallDetail::FCallClsMethodSD { clsref, method } => match clsref {
             SpecialClsRef::SelfCls => {

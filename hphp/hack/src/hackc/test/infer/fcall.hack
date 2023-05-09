@@ -196,6 +196,20 @@ function fcall_meth_caller(C $b): void {
   $x($b, 1, 2, 3);
 }
 
+// TEST-CHECK-BAL: define $root.fcall_cls_method
+// CHECK: define $root.fcall_cls_method($this: *void, $a: *Classname) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("HH\\classname"))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3: *HackMixed = load &$a
+// CHECK:   n4 = n3.HackMixed$static.static_fcall_self()
+// CHECK:   ret null
+// CHECK: }
+function fcall_cls_method(classname<D> $a): void {
+  $a::static_fcall_self();
+}
+
 // TEST-CHECK-1: declare C$static.f
 // CHECK: declare C$static.f(...): *HackMixed
 

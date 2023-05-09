@@ -702,6 +702,7 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
   ensureChar(apache::thrift::detail::json::kJSONStringDelimiter);
 
   std::string json = "\"";
+  bool fullDecodeRequired = false;
   val.clear();
   while (true) {
     auto ch = in_.read<uint8_t>();
@@ -713,6 +714,7 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
       if (ch == apache::thrift::detail::json::kJSONEscapeChar) {
         if (allowDecodeUTF8_) {
           json += "\\u";
+          fullDecodeRequired = true;
           continue;
         } else {
           readJSONEscapeChar(ch);
@@ -722,7 +724,7 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
         if (pos == std::string::npos) {
           throwInvalidEscapeChar(ch);
         }
-        if (allowDecodeUTF8_) {
+        if (fullDecodeRequired) {
           json += "\\";
           json += ch;
           continue;
@@ -732,14 +734,14 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
       }
     }
 
-    if (allowDecodeUTF8_) {
+    if (fullDecodeRequired) {
       json += ch;
     } else {
       val += ch;
     }
   }
 
-  if (allowDecodeUTF8_) {
+  if (fullDecodeRequired) {
     json += "\"";
     try {
       folly::dynamic parsed = folly::parseJson(json);

@@ -14,5 +14,5 @@ var _ = thrift.ZERO
 
 var GoUnusedProtection__ int
 
-var ExampleIncluded Included = *NewIncluded()
+var ExampleIncluded *Included = NewIncluded()
 const IncludedConstant int64 = 42

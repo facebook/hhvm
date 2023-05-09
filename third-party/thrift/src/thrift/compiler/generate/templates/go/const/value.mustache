@@ -14,6 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
+}}{{!
+
+  This template defines a constant value representation for a given value.
+
+  All type values are rendered as "concrete" values, except for structs - which
+  are rendered as struct pointers. Callers are responsible for dereferencing
+  appropriately if needed.
+
+  const/value.mustache and common/zero_value.mustache have complete type partity.
+
 }}
 {{#type:typedef?}}{{!
   }}{{#type:typedef_type}}{{!
@@ -66,7 +76,7 @@
         }}{{/value:owning_const}}{{!
       }}{{/value:referenceable?}}{{!
       }}{{^value:referenceable?}}{{!
-        }}*{{> const/struct_value}}{{!
+        }}{{> const/struct_value}}{{!
       }}{{/value:referenceable?}}{{!
     }}{{/type:struct}}{{!
   }}{{/type:struct?}}{{!
@@ -77,26 +87,12 @@
 {{#value:map_elements}}
     {{#element:key}}{{!
       }}{{#type:key_type}}{{!
-        }}{{#type:struct?}}{{!
-          }}{{#type:struct}}{{!
-            }}{{> const/struct_value}}{{!
-          }}{{/type:struct}}{{!
-        }}{{/type:struct?}}{{!
-        }}{{^type:struct?}}{{!
-          }}{{> const/value}}{{!
-        }}{{/type:struct?}}{{!
+        }}{{> const/value}}{{!
       }}{{/type:key_type}}{{!
     }}{{/element:key}}: {{!
     }}{{#element:value}}{{!
       }}{{#type:value_type}}{{!
-        }}{{#type:struct?}}{{!
-          }}{{#type:struct}}{{!
-            }}{{> const/struct_value}}{{!
-          }}{{/type:struct}}{{!
-        }}{{/type:struct?}}{{!
-        }}{{^type:struct?}}{{!
-          }}{{> const/value}}{{!
-        }}{{/type:struct?}}{{!
+        }}{{> const/value}}{{!
       }}{{/type:value_type}}{{!
     }}{{/element:value}},
 {{/value:map_elements}}
@@ -107,14 +103,7 @@
   }}{{> common/type}}{
 {{#value:list_elements}}
     {{#type:list_elem_type}}{{!
-      }}{{#type:struct?}}{{!
-        }}{{#type:struct}}{{!
-          }}{{> const/struct_value}},{{!
-        }}{{/type:struct}}{{!
-      }}{{/type:struct?}}{{!
-      }}{{^type:struct?}}{{!
-        }}{{> const/value}},{{!
-      }}{{/type:struct?}}{{!
+      }}{{> const/value}},{{!
     }}{{/type:list_elem_type}}
 {{/value:list_elements}}
 }{{/type:list?}}{{!
@@ -124,14 +113,7 @@
   }}{{> common/type}}{
 {{#value:list_elements}}
     {{#type:set_elem_type}}{{!
-      }}{{#type:struct?}}{{!
-        }}{{#type:struct}}{{!
-          }}{{> const/struct_value}},{{!
-        }}{{/type:struct}}{{!
-      }}{{/type:struct?}}{{!
-      }}{{^type:struct?}}{{!
-        }}{{> const/value}},{{!
-      }}{{/type:struct?}}{{!
+      }}{{> const/value}},{{!
     }}{{/type:set_elem_type}}
 {{/value:list_elements}}
 }{{/type:set?}}{{!

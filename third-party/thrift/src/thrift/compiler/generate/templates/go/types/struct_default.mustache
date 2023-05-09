@@ -28,7 +28,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
         {{field:go_setter_name}}({{!
           }}{{#field:type}}{{!
           }}{{^type:base?}}
-              {{> const/value}},
+              {{#type:struct?}}*{{/type:struct?}}{{> const/value}},
           {{/type:base?}}{{!
           }}{{#type:base?}}{{!
               }}{{> const/value}}{{!

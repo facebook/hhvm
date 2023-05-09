@@ -37,13 +37,13 @@ const Bar MyIntIdentifier = 42
 var Mymap MyMapIdentifier = map[string]string{
     "keys": "values",
 }
-var Instagram Internship = *NewInternship().
+var Instagram *Internship = NewInternship().
     SetWeeks(12).
     SetTitle("Software Engineer").
     SetEmployer(Company_INSTAGRAM).
     SetCompensation(1200).
     SetSchool("Monters University")
-var PartialConst Internship = *NewInternship().
+var PartialConst *Internship = NewInternship().
     SetWeeks(8).
     SetTitle("Some Job")
 var KRanges []*Range = []*Range{
@@ -55,27 +55,22 @@ var KRanges []*Range = []*Range{
     SetMax(6),
 }
 var InternList []*Internship = []*Internship{
-    NewInternship().
-    SetWeeks(12).
-    SetTitle("Software Engineer").
-    SetEmployer(Company_INSTAGRAM).
-    SetCompensation(1200).
-    SetSchool("Monters University"),
+    Instagram,
     NewInternship().
     SetWeeks(10).
     SetTitle("Sales Intern").
     SetEmployer(Company_FACEBOOK).
     SetCompensation(1000),
 }
-var Pod_0 Struct1 = *NewStruct1()
-var PodS_0 Struct1 = *NewStruct1()
-var Pod_1 Struct1 = *NewStruct1().
+var Pod_0 *Struct1 = NewStruct1()
+var PodS_0 *Struct1 = NewStruct1()
+var Pod_1 *Struct1 = NewStruct1().
     SetA(10).
     SetB("foo")
-var PodS_1 Struct1 = *NewStruct1().
+var PodS_1 *Struct1 = NewStruct1().
     SetA(10).
     SetB("foo")
-var Pod_2 Struct2 = *NewStruct2().
+var Pod_2 *Struct2 = NewStruct2().
     SetA(98).
     SetB("gaz").
     SetC(
@@ -90,7 +85,7 @@ var Pod_2 Struct2 = *NewStruct2().
     33,
 },
     )
-var PodTrailingCommas Struct2 = *NewStruct2().
+var PodTrailingCommas *Struct2 = NewStruct2().
     SetA(98).
     SetB("gaz").
     SetC(
@@ -105,7 +100,7 @@ var PodTrailingCommas Struct2 = *NewStruct2().
     33,
 },
     )
-var PodS_2 Struct2 = *NewStruct2().
+var PodS_2 *Struct2 = NewStruct2().
     SetA(98).
     SetB("gaz").
     SetC(
@@ -120,7 +115,7 @@ var PodS_2 Struct2 = *NewStruct2().
     33,
 },
     )
-var Pod_3 Struct3 = *NewStruct3().
+var Pod_3 *Struct3 = NewStruct3().
     SetA("abc").
     SetB(456).
     SetC(
@@ -138,7 +133,7 @@ var Pod_3 Struct3 = *NewStruct3().
 },
     ),
     )
-var PodS_3 Struct3 = *NewStruct3().
+var PodS_3 *Struct3 = NewStruct3().
     SetA("abc").
     SetB(456).
     SetC(
@@ -156,36 +151,36 @@ var PodS_3 Struct3 = *NewStruct3().
 },
     ),
     )
-var Pod_4 Struct4 = *NewStruct4().
+var Pod_4 *Struct4 = NewStruct4().
     SetA(1234).
     SetB(0.333).
     SetC(25)
-var U_1_1 Union1 = *NewUnion1().
+var U_1_1 *Union1 = NewUnion1().
     SetI(97)
-var U_1_2 Union1 = *NewUnion1().
+var U_1_2 *Union1 = NewUnion1().
     SetD(5.6)
-var U_1_3 Union1 = *NewUnion1()
-var U_2_1 Union2 = *NewUnion2().
+var U_1_3 *Union1 = NewUnion1()
+var U_2_1 *Union2 = NewUnion2().
     SetI(51)
-var U_2_2 Union2 = *NewUnion2().
+var U_2_2 *Union2 = NewUnion2().
     SetD(6.7)
-var U_2_3 Union2 = *NewUnion2().
+var U_2_3 *Union2 = NewUnion2().
     SetS(
         *NewStruct1().
     SetA(8).
     SetB("abacabb"),
     )
-var U_2_4 Union2 = *NewUnion2().
+var U_2_4 *Union2 = NewUnion2().
     SetU(
         *NewUnion1().
     SetI(43),
     )
-var U_2_5 Union2 = *NewUnion2().
+var U_2_5 *Union2 = NewUnion2().
     SetU(
         *NewUnion1().
     SetD(9.8),
     )
-var U_2_6 Union2 = *NewUnion2().
+var U_2_6 *Union2 = NewUnion2().
     SetU(
         *NewUnion1(),
     )

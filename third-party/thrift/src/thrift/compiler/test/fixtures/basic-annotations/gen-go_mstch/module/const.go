@@ -14,7 +14,7 @@ var _ = thrift.ZERO
 
 var GoUnusedProtection__ int
 
-var MyStruct MyStruct = *NewMyStruct().
+var MyStruct *MyStruct = NewMyStruct().
     SetMajor(42).
     SetPackage("package").
     SetMyEnum(MyEnum_DOMAIN)

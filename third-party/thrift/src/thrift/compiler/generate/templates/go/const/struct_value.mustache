@@ -22,7 +22,7 @@
     }}{{#constant:type}}{{!
     }}{{#constant:value}}{{!
     }}{{^value:base?}}
-        {{> const/value}},
+        {{#type:struct?}}*{{/type:struct?}}{{> const/value}},
     {{/value:base?}}{{!
     }}{{#value:base?}}{{!
         }}{{> const/value}}{{!

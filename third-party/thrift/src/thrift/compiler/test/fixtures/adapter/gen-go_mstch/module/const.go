@@ -26,7 +26,7 @@ var GoUnusedProtection__ int
 
 const Var1 int32 = 10
 const Var2 string = "20"
-var Var3 MyStruct = *NewMyStruct().
+var Var3 *MyStruct = NewMyStruct().
     SetField(30).
     SetSetString(
         []string{
@@ -36,7 +36,7 @@ var Var3 MyStruct = *NewMyStruct().
     )
 const Var4 int32 = 40
 const Var5 string = "50"
-var Var6 MyStruct = *NewMyStruct().
+var Var6 *MyStruct = NewMyStruct().
     SetField(60).
     SetSetString(
         []string{
@@ -46,14 +46,14 @@ var Var6 MyStruct = *NewMyStruct().
     )
 const Timeout int32 = 42
 const Msg string = "hello, world"
-var Person Person2 = *NewPerson2().
+var Person *Person2 = NewPerson2().
     SetName("DefaultName")
 const TimeoutNoTransitive int32 = 420
 const MsgNoTransitive string = "hello, world 2"
-var PersonNoTransitive Person2 = *NewPerson2().
+var PersonNoTransitive *Person2 = NewPerson2().
     SetName("DefaultName 2")
 const TypeAdapted AdaptedBool = true
-var NestedAdapted MoveOnly = *NewMoveOnly().
+var NestedAdapted *MoveOnly = NewMoveOnly().
     SetPtr(
         *NewHeapAllocated(),
     )

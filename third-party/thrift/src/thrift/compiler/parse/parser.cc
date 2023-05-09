@@ -498,14 +498,14 @@ class parser {
   }
 
   // typedef:
-  //   attributes "typedef" type identifier [annotations] [comma_or_semicolon]
+  //   attributes "typedef" type identifier [annotations] [";"]
   void parse_typedef(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_typedef);
     auto type = parse_type();
     auto name = parse_identifier();
     try_parse_annotations(attrs);
-    try_parse_comma_or_semicolon();
+    try_consume_token(';');
     actions_.on_typedef(range, std::move(attrs), std::move(type), name);
   }
 

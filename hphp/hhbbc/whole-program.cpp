@@ -54,8 +54,6 @@ namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
-bool g_crash{false};
-
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -165,17 +163,13 @@ std::vector<Context> const_pass_contexts(const Index& index) {
    * Set of functions that should be processed in the constant
    * propagation pass.
    *
-   * Must include every function with a DefCns for correctness; cinit,
-   * pinit and sinit functions are added to improve overall
-   * performance.
+   * None are needed for correctness. cinit, pinit, sinit, and linit
+   * functions are processed to improve overall performance.
    */
   std::vector<Context> ret;
   for (auto const& c : index.program().classes) {
     for (auto const& m : c->methods) {
-      if (m->name == s_86cinit.get() ||
-          m->name == s_86pinit.get() ||
-          m->name == s_86sinit.get() ||
-          m->name == s_86linit.get()) {
+      if (is_86init_func(*m)) {
         ret.emplace_back(
           Context {
             index.lookup_class_unit(*c),
@@ -430,7 +424,18 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
 
     work.clear();
     work.reserve(deps.size());
-    for (auto& d : deps) work.push_back(work_item_for(d, mode, index));
+    if (mode == AnalyzeMode::ConstPass) {
+      for (auto& d : deps) {
+        auto item = work_item_for(d, mode, index);
+        if (item.type != WorkType::Func || is_86init_func(*item.ctx.func)) {
+          work.emplace_back(std::move(item));
+        }
+      }
+    } else {
+      for (auto& d : deps) {
+        work.emplace_back(work_item_for(d, mode, index));
+      }
+    }
     deps.clear();
   }
 }

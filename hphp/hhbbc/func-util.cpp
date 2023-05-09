@@ -205,4 +205,14 @@ std::string func_fullname(const php::Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_86init_func(const php::Func& f) {
+  return
+    f.name == s_86cinit.get() ||
+    f.name == s_86pinit.get() ||
+    f.name == s_86sinit.get() ||
+    f.name == s_86linit.get();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

@@ -1485,7 +1485,7 @@ struct RuntimeOption {
   F(string, RecordDir, std::string(""))                                 \
   F(bool, Replay, false)                                                \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
-  F(bool, IncludeReopOptionsInFactsCacheBreaker, true)                  \
+  F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
   F(bool, ModuleLevelTraits, false)                                     \
   /* */
 

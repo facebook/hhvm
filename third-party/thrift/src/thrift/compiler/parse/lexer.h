@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <boost/optional.hpp>
 #include <fmt/core.h>
 #include <thrift/compiler/parse/token.h>
@@ -27,14 +28,8 @@ namespace compiler {
 
 class diagnostics_engine;
 
-// An interface that receives notifications of lexical elements.
-class lex_handler {
- public:
-  virtual ~lex_handler() {}
-
-  // Invoked on a documentation comment such as `/** ... */` or `/// ...`.
-  virtual void on_doc_comment(fmt::string_view text, source_location loc) = 0;
-};
+using doc_comment_handler =
+    std::function<void(fmt::string_view, source_location)>;
 
 // A Thrift lexer.
 class lexer {
@@ -43,8 +38,8 @@ class lexer {
   source_location start_;
   const char* ptr_; // Current position in the source.
   const char* token_start_;
-  lex_handler* handler_;
   diagnostics_engine* diags_;
+  doc_comment_handler on_doc_comment_;
 
   const char* end() const { return source_.data() + source_.size() - 1; }
 
@@ -82,8 +77,15 @@ class lexer {
   comment_lex_result lex_block_comment();
   comment_lex_result lex_whitespace_or_comment();
 
+  static void ignore_comments(fmt::string_view, source_location) {}
+
  public:
-  lexer(source src, lex_handler& handler, diagnostics_engine& diags);
+  // on_doc_comment is invoked on a documentation comment such as
+  // `/** ... */` or `/// ...`.
+  lexer(
+      source src,
+      diagnostics_engine& diags,
+      doc_comment_handler on_doc_comment = ignore_comments);
 
   // Lexes the content of a string literal and returns its value with escape
   // sequences translated or an empty optional on error.

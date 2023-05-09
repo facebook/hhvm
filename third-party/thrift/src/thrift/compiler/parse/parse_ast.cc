@@ -232,25 +232,6 @@ class ast_builder : public parser_actions {
   // A global map that holds a pointer to all programs already cached.
   std::map<std::string, t_program*> program_cache_;
 
-  class lex_handler_impl : public lex_handler {
-   private:
-    ast_builder& builder_;
-
-   public:
-    explicit lex_handler_impl(ast_builder& b) : builder_(b) {}
-
-    // Consume doctext and store it in `driver_.doctext`.
-    //
-    // It is non-trivial for a yacc-style LR(1) parser to accept doctext
-    // as an optional prefix before either a definition or standalone at
-    // the header. Hence this method of "pushing" it into the driver and
-    // "pop-ing" it on the node as needed.
-    void on_doc_comment(fmt::string_view text, source_location loc) override {
-      builder_.clear_doctext();
-      builder_.doctext_ = comment{builder_.strip_doctext(text), loc};
-    }
-  };
-
   [[noreturn]] void end_parsing() { throw parsing_terminator(); }
 
   // Finds the path for the given include filename.
@@ -1120,8 +1101,19 @@ class ast_builder : public parser_actions {
       diags_.error(source_location(), "{}", e.what());
       end_parsing();
     }
-    auto lex_handler = lex_handler_impl(*this);
-    auto lexer = compiler::lexer(src, lex_handler, diags_);
+
+    // Consume doctext and store it in `doctext_`.
+    //
+    // It is non-trivial for a yacc-style LR(1) parser to accept doctext
+    // as an optional prefix before either a definition or standalone at
+    // the header. Hence this method of "pushing" it into the driver and
+    // "pop-ing" it on the node as needed.
+    auto on_doc_comment = [this](fmt::string_view text, source_location loc) {
+      clear_doctext();
+      doctext_ = comment{strip_doctext(text), loc};
+    };
+
+    auto lexer = compiler::lexer(src, diags_, on_doc_comment);
     program_->set_src_range({src.start, src.start});
 
     // Create a new scope and scan for includes.
@@ -1180,7 +1172,7 @@ class ast_builder : public parser_actions {
       diags_.error(source_location(), "{}", e.what());
       end_parsing();
     }
-    lexer = compiler::lexer(src, lex_handler, diags_);
+    lexer = compiler::lexer(src, diags_, on_doc_comment);
 
     mode_ = parsing_mode::PROGRAM;
     diags_.report(

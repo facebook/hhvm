@@ -20,22 +20,17 @@
 
 using namespace apache::thrift::compiler;
 
-struct test_lex_handler : lex_handler {
-  fmt::string_view doc_comment;
-
-  void on_doc_comment(fmt::string_view text, source_location) override {
-    doc_comment = text;
-  }
-};
-
 class LexerTest : public testing::Test {
  public:
   source_manager source_mgr;
-  test_lex_handler handler;
+  fmt::string_view doc_comment;
   diagnostics_engine diags;
 
   lexer make_lexer(const std::string& source) {
-    return {source_mgr.add_virtual_file("", source), handler, diags};
+    return {
+        source_mgr.add_virtual_file("", source),
+        diags,
+        [this](fmt::string_view text, source_location) { doc_comment = text; }};
   }
 
   LexerTest() : diags(source_mgr, [](diagnostic) {}) {}
@@ -141,7 +136,7 @@ TEST_F(LexerTest, block_doc_comment) {
       )");
   auto token = lexer.get_next_token();
   EXPECT_EQ(token.kind, tok::int_literal);
-  EXPECT_EQ(handler.doc_comment, "/** Block comment */");
+  EXPECT_EQ(doc_comment, "/** Block comment */");
 }
 
 TEST_F(LexerTest, line_doc_comment) {

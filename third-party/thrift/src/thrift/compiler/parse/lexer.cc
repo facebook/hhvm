@@ -183,8 +183,12 @@ const std::unordered_map<fmt::string_view, tok> keywords = {
 
 } // namespace
 
-lexer::lexer(source src, lex_handler& handler, diagnostics_engine& diags)
-    : source_(src.text), start_(src.start), handler_(&handler), diags_(&diags) {
+lexer::lexer(
+    source src, diagnostics_engine& diags, doc_comment_handler on_doc_comment)
+    : source_(src.text),
+      start_(src.start),
+      diags_(&diags),
+      on_doc_comment_(on_doc_comment) {
   ptr_ = source_.data();
   token_start_ = ptr_;
 }
@@ -257,7 +261,7 @@ bool lexer::lex_doc_comment() {
     }
   } while (strncmp(ptr_, prefix, prefix_size) == 0);
   if (!is_inline) {
-    handler_->on_doc_comment(token_text(), location(ptr_));
+    on_doc_comment_(token_text(), location(ptr_));
   }
   return is_inline;
 }
@@ -282,7 +286,7 @@ lexer::comment_lex_result lexer::lex_block_comment() {
     auto non_star = std::find_if(
         token_start_ + 2, ptr_ - 1, [](char c) { return c != '*'; });
     if (non_star != ptr_ - 1) {
-      handler_->on_doc_comment(token_text(), location(ptr_));
+      on_doc_comment_(token_text(), location(ptr_));
     }
   }
   return comment_lex_result::skipped;

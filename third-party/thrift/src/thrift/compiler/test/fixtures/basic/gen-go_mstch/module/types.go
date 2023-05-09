@@ -154,8 +154,8 @@ func NewMyStruct() *MyStruct {
         SetNoHackCodegenField("")
 }
 
-// Deprecated: Use NewMyStruct().MyDataField instead.
-var MyStruct_MyDataField_DEFAULT = NewMyStruct().MyDataField
+// Deprecated: Use NewMyStruct().GetMyDataField() instead.
+var MyStruct_MyDataField_DEFAULT = NewMyStruct().GetMyDataField()
 
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField
@@ -848,14 +848,14 @@ func NewMyUnion() *MyUnion {
         SetFloatSet(make([]float32, 0))
 }
 
-// Deprecated: Use NewMyUnion().MyEnum instead.
-var MyUnion_MyEnum_DEFAULT = NewMyUnion().MyEnum
+// Deprecated: Use NewMyUnion().GetMyEnum() instead.
+var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
 
-// Deprecated: Use NewMyUnion().MyStruct instead.
-var MyUnion_MyStruct_DEFAULT = NewMyUnion().MyStruct
+// Deprecated: Use NewMyUnion().GetMyStruct() instead.
+var MyUnion_MyStruct_DEFAULT = NewMyUnion().GetMyStruct()
 
-// Deprecated: Use NewMyUnion().MyDataItem instead.
-var MyUnion_MyDataItem_DEFAULT = NewMyUnion().MyDataItem
+// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
+var MyUnion_MyDataItem_DEFAULT = NewMyUnion().GetMyDataItem()
 
 func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
     return x.MyEnum
@@ -1381,8 +1381,8 @@ func NewUnionToBeRenamed() *UnionToBeRenamed {
         SetReservedField(0)
 }
 
-// Deprecated: Use NewUnionToBeRenamed().ReservedField instead.
-var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().ReservedField
+// Deprecated: Use NewUnionToBeRenamed().GetReservedField() instead.
+var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().GetReservedField()
 
 func (x *UnionToBeRenamed) GetReservedFieldNonCompat() *int32 {
     return x.ReservedField

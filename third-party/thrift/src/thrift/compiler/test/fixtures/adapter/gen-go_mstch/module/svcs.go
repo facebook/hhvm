@@ -159,8 +159,8 @@ func newReqServiceFunc() *reqServiceFunc {
         SetArg3(*NewFoo())
 }
 
-// Deprecated: Use newReqServiceFunc().Arg3 instead.
-var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().Arg3
+// Deprecated: Use newReqServiceFunc().GetArg3() instead.
+var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().GetArg3()
 
 func (x *reqServiceFunc) GetArg1NonCompat() StringWithAdapter {
     return x.Arg1
@@ -860,8 +860,8 @@ func newRespAdapterServiceCount() *respAdapterServiceCount {
         SetValue(*NewCountingStruct())
 }
 
-// Deprecated: Use newRespAdapterServiceCount().Value instead.
-var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().Value
+// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
+var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().GetValue()
 
 func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
     return x.Value
@@ -1013,8 +1013,8 @@ func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
         SetArg_(*NewHeapAllocated())
 }
 
-// Deprecated: Use newReqAdapterServiceAdaptedTypes().Arg_ instead.
-var reqAdapterServiceAdaptedTypes_Arg__DEFAULT = newReqAdapterServiceAdaptedTypes().Arg_
+// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg_() instead.
+var reqAdapterServiceAdaptedTypes_Arg__DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg_()
 
 func (x *reqAdapterServiceAdaptedTypes) GetArg_NonCompat() *HeapAllocated {
     return x.Arg_
@@ -1163,8 +1163,8 @@ func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
         SetValue(*NewHeapAllocated())
 }
 
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().Value instead.
-var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().Value
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
+var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().GetValue()
 
 func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
     return x.Value

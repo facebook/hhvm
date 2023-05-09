@@ -438,8 +438,8 @@ func NewMyStruct() *MyStruct {
         SetMyID(NewMyId())
 }
 
-// Deprecated: Use NewMyStruct().MyUnion instead.
-var MyStruct_MyUnion_DEFAULT = NewMyStruct().MyUnion
+// Deprecated: Use NewMyStruct().GetMyUnion() instead.
+var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
 
 func (x *MyStruct) GetMajorVerNonCompat() int64 {
     return x.MajorVer

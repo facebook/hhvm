@@ -619,14 +619,14 @@ func NewMyUnion() *MyUnion {
         SetOption3(*NewInnerUnion())
 }
 
-// Deprecated: Use NewMyUnion().Option1 instead.
-var MyUnion_Option1_DEFAULT = NewMyUnion().Option1
+// Deprecated: Use NewMyUnion().GetOption1() instead.
+var MyUnion_Option1_DEFAULT = NewMyUnion().GetOption1()
 
-// Deprecated: Use NewMyUnion().Option2 instead.
-var MyUnion_Option2_DEFAULT = NewMyUnion().Option2
+// Deprecated: Use NewMyUnion().GetOption2() instead.
+var MyUnion_Option2_DEFAULT = NewMyUnion().GetOption2()
 
-// Deprecated: Use NewMyUnion().Option3 instead.
-var MyUnion_Option3_DEFAULT = NewMyUnion().Option3
+// Deprecated: Use NewMyUnion().GetOption3() instead.
+var MyUnion_Option3_DEFAULT = NewMyUnion().GetOption3()
 
 func (x *MyUnion) GetOption1NonCompat() *string {
     return x.Option1
@@ -973,53 +973,53 @@ func NewMyStruct() *MyStruct {
           )
 }
 
-// Deprecated: Use NewMyStruct().StructVal instead.
-var MyStruct_StructVal_DEFAULT = NewMyStruct().StructVal
+// Deprecated: Use NewMyStruct().GetStructVal() instead.
+var MyStruct_StructVal_DEFAULT = NewMyStruct().GetStructVal()
 
-// Deprecated: Use NewMyStruct().UnionVal instead.
-var MyStruct_UnionVal_DEFAULT = NewMyStruct().UnionVal
+// Deprecated: Use NewMyStruct().GetUnionVal() instead.
+var MyStruct_UnionVal_DEFAULT = NewMyStruct().GetUnionVal()
 
-// Deprecated: Use NewMyStruct().LateStructVal instead.
-var MyStruct_LateStructVal_DEFAULT = NewMyStruct().LateStructVal
+// Deprecated: Use NewMyStruct().GetLateStructVal() instead.
+var MyStruct_LateStructVal_DEFAULT = NewMyStruct().GetLateStructVal()
 
-// Deprecated: Use NewMyStruct().OptBoolVal instead.
-var MyStruct_OptBoolVal_DEFAULT = NewMyStruct().OptBoolVal
+// Deprecated: Use NewMyStruct().GetOptBoolVal() instead.
+var MyStruct_OptBoolVal_DEFAULT = NewMyStruct().GetOptBoolVal()
 
-// Deprecated: Use NewMyStruct().OptByteVal instead.
-var MyStruct_OptByteVal_DEFAULT = NewMyStruct().OptByteVal
+// Deprecated: Use NewMyStruct().GetOptByteVal() instead.
+var MyStruct_OptByteVal_DEFAULT = NewMyStruct().GetOptByteVal()
 
-// Deprecated: Use NewMyStruct().OptI16Val instead.
-var MyStruct_OptI16Val_DEFAULT = NewMyStruct().OptI16Val
+// Deprecated: Use NewMyStruct().GetOptI16Val() instead.
+var MyStruct_OptI16Val_DEFAULT = NewMyStruct().GetOptI16Val()
 
-// Deprecated: Use NewMyStruct().OptI32Val instead.
-var MyStruct_OptI32Val_DEFAULT = NewMyStruct().OptI32Val
+// Deprecated: Use NewMyStruct().GetOptI32Val() instead.
+var MyStruct_OptI32Val_DEFAULT = NewMyStruct().GetOptI32Val()
 
-// Deprecated: Use NewMyStruct().OptI64Val instead.
-var MyStruct_OptI64Val_DEFAULT = NewMyStruct().OptI64Val
+// Deprecated: Use NewMyStruct().GetOptI64Val() instead.
+var MyStruct_OptI64Val_DEFAULT = NewMyStruct().GetOptI64Val()
 
-// Deprecated: Use NewMyStruct().OptFloatVal instead.
-var MyStruct_OptFloatVal_DEFAULT = NewMyStruct().OptFloatVal
+// Deprecated: Use NewMyStruct().GetOptFloatVal() instead.
+var MyStruct_OptFloatVal_DEFAULT = NewMyStruct().GetOptFloatVal()
 
-// Deprecated: Use NewMyStruct().OptDoubleVal instead.
-var MyStruct_OptDoubleVal_DEFAULT = NewMyStruct().OptDoubleVal
+// Deprecated: Use NewMyStruct().GetOptDoubleVal() instead.
+var MyStruct_OptDoubleVal_DEFAULT = NewMyStruct().GetOptDoubleVal()
 
-// Deprecated: Use NewMyStruct().OptStringVal instead.
-var MyStruct_OptStringVal_DEFAULT = NewMyStruct().OptStringVal
+// Deprecated: Use NewMyStruct().GetOptStringVal() instead.
+var MyStruct_OptStringVal_DEFAULT = NewMyStruct().GetOptStringVal()
 
-// Deprecated: Use NewMyStruct().OptEnumVal instead.
-var MyStruct_OptEnumVal_DEFAULT = NewMyStruct().OptEnumVal
+// Deprecated: Use NewMyStruct().GetOptEnumVal() instead.
+var MyStruct_OptEnumVal_DEFAULT = NewMyStruct().GetOptEnumVal()
 
-// Deprecated: Use NewMyStruct().OptStructVal instead.
-var MyStruct_OptStructVal_DEFAULT = NewMyStruct().OptStructVal
+// Deprecated: Use NewMyStruct().GetOptStructVal() instead.
+var MyStruct_OptStructVal_DEFAULT = NewMyStruct().GetOptStructVal()
 
-// Deprecated: Use NewMyStruct().OptLateStructVal instead.
-var MyStruct_OptLateStructVal_DEFAULT = NewMyStruct().OptLateStructVal
+// Deprecated: Use NewMyStruct().GetOptLateStructVal() instead.
+var MyStruct_OptLateStructVal_DEFAULT = NewMyStruct().GetOptLateStructVal()
 
-// Deprecated: Use NewMyStruct().StructWithCustomDefault instead.
-var MyStruct_StructWithCustomDefault_DEFAULT = NewMyStruct().StructWithCustomDefault
+// Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
+var MyStruct_StructWithCustomDefault_DEFAULT = NewMyStruct().GetStructWithCustomDefault()
 
-// Deprecated: Use NewMyStruct().StructWithFieldCustomDefault instead.
-var MyStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStruct().StructWithFieldCustomDefault
+// Deprecated: Use NewMyStruct().GetStructWithFieldCustomDefault() instead.
+var MyStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStruct().GetStructWithFieldCustomDefault()
 
 func (x *MyStruct) GetBoolValNonCompat() bool {
     return x.BoolVal
@@ -3648,8 +3648,8 @@ func NewBar() *Bar {
         SetLoop(*NewLoop())
 }
 
-// Deprecated: Use NewBar().Loop instead.
-var Bar_Loop_DEFAULT = NewBar().Loop
+// Deprecated: Use NewBar().GetLoop() instead.
+var Bar_Loop_DEFAULT = NewBar().GetLoop()
 
 func (x *Bar) GetLoopNonCompat() *Loop {
     return x.Loop
@@ -3798,8 +3798,8 @@ func NewLoop() *Loop {
         SetBar(*NewBar())
 }
 
-// Deprecated: Use NewLoop().Bar instead.
-var Loop_Bar_DEFAULT = NewLoop().Bar
+// Deprecated: Use NewLoop().GetBar() instead.
+var Loop_Bar_DEFAULT = NewLoop().GetBar()
 
 func (x *Loop) GetBarNonCompat() *Bar {
     return x.Bar
@@ -3955,17 +3955,17 @@ func NewMyDataPatch() *MyDataPatch {
         SetPatch(*NewMyDataFieldPatch())
 }
 
-// Deprecated: Use NewMyDataPatch().Assign instead.
-var MyDataPatch_Assign_DEFAULT = NewMyDataPatch().Assign
+// Deprecated: Use NewMyDataPatch().GetAssign() instead.
+var MyDataPatch_Assign_DEFAULT = NewMyDataPatch().GetAssign()
 
-// Deprecated: Use NewMyDataPatch().PatchPrior instead.
-var MyDataPatch_PatchPrior_DEFAULT = NewMyDataPatch().PatchPrior
+// Deprecated: Use NewMyDataPatch().GetPatchPrior() instead.
+var MyDataPatch_PatchPrior_DEFAULT = NewMyDataPatch().GetPatchPrior()
 
-// Deprecated: Use NewMyDataPatch().Ensure instead.
-var MyDataPatch_Ensure_DEFAULT = NewMyDataPatch().Ensure
+// Deprecated: Use NewMyDataPatch().GetEnsure() instead.
+var MyDataPatch_Ensure_DEFAULT = NewMyDataPatch().GetEnsure()
 
-// Deprecated: Use NewMyDataPatch().Patch instead.
-var MyDataPatch_Patch_DEFAULT = NewMyDataPatch().Patch
+// Deprecated: Use NewMyDataPatch().GetPatch() instead.
+var MyDataPatch_Patch_DEFAULT = NewMyDataPatch().GetPatch()
 
 func (x *MyDataPatch) GetAssignNonCompat() *MyData {
     return x.Assign
@@ -4363,11 +4363,11 @@ func NewMyDataFieldPatch() *MyDataFieldPatch {
         SetData2(*patch.NewI32Patch())
 }
 
-// Deprecated: Use NewMyDataFieldPatch().Data1 instead.
-var MyDataFieldPatch_Data1_DEFAULT = NewMyDataFieldPatch().Data1
+// Deprecated: Use NewMyDataFieldPatch().GetData1() instead.
+var MyDataFieldPatch_Data1_DEFAULT = NewMyDataFieldPatch().GetData1()
 
-// Deprecated: Use NewMyDataFieldPatch().Data2 instead.
-var MyDataFieldPatch_Data2_DEFAULT = NewMyDataFieldPatch().Data2
+// Deprecated: Use NewMyDataFieldPatch().GetData2() instead.
+var MyDataFieldPatch_Data2_DEFAULT = NewMyDataFieldPatch().GetData2()
 
 func (x *MyDataFieldPatch) GetData1NonCompat() *patch.StringPatch {
     return x.Data1
@@ -4581,11 +4581,11 @@ func NewMyDataEnsureStruct() *MyDataEnsureStruct {
     return (&MyDataEnsureStruct{})
 }
 
-// Deprecated: Use NewMyDataEnsureStruct().Data1 instead.
-var MyDataEnsureStruct_Data1_DEFAULT = NewMyDataEnsureStruct().Data1
+// Deprecated: Use NewMyDataEnsureStruct().GetData1() instead.
+var MyDataEnsureStruct_Data1_DEFAULT = NewMyDataEnsureStruct().GetData1()
 
-// Deprecated: Use NewMyDataEnsureStruct().Data2 instead.
-var MyDataEnsureStruct_Data2_DEFAULT = NewMyDataEnsureStruct().Data2
+// Deprecated: Use NewMyDataEnsureStruct().GetData2() instead.
+var MyDataEnsureStruct_Data2_DEFAULT = NewMyDataEnsureStruct().GetData2()
 
 func (x *MyDataEnsureStruct) GetData1NonCompat() *string {
     return x.Data1
@@ -4804,17 +4804,17 @@ func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
         SetPatch(*NewMyDataWithCustomDefaultFieldPatch())
 }
 
-// Deprecated: Use NewMyDataWithCustomDefaultPatch().Assign instead.
-var MyDataWithCustomDefaultPatch_Assign_DEFAULT = NewMyDataWithCustomDefaultPatch().Assign
+// Deprecated: Use NewMyDataWithCustomDefaultPatch().GetAssign() instead.
+var MyDataWithCustomDefaultPatch_Assign_DEFAULT = NewMyDataWithCustomDefaultPatch().GetAssign()
 
-// Deprecated: Use NewMyDataWithCustomDefaultPatch().PatchPrior instead.
-var MyDataWithCustomDefaultPatch_PatchPrior_DEFAULT = NewMyDataWithCustomDefaultPatch().PatchPrior
+// Deprecated: Use NewMyDataWithCustomDefaultPatch().GetPatchPrior() instead.
+var MyDataWithCustomDefaultPatch_PatchPrior_DEFAULT = NewMyDataWithCustomDefaultPatch().GetPatchPrior()
 
-// Deprecated: Use NewMyDataWithCustomDefaultPatch().Ensure instead.
-var MyDataWithCustomDefaultPatch_Ensure_DEFAULT = NewMyDataWithCustomDefaultPatch().Ensure
+// Deprecated: Use NewMyDataWithCustomDefaultPatch().GetEnsure() instead.
+var MyDataWithCustomDefaultPatch_Ensure_DEFAULT = NewMyDataWithCustomDefaultPatch().GetEnsure()
 
-// Deprecated: Use NewMyDataWithCustomDefaultPatch().Patch instead.
-var MyDataWithCustomDefaultPatch_Patch_DEFAULT = NewMyDataWithCustomDefaultPatch().Patch
+// Deprecated: Use NewMyDataWithCustomDefaultPatch().GetPatch() instead.
+var MyDataWithCustomDefaultPatch_Patch_DEFAULT = NewMyDataWithCustomDefaultPatch().GetPatch()
 
 func (x *MyDataWithCustomDefaultPatch) GetAssignNonCompat() *MyDataWithCustomDefault {
     return x.Assign
@@ -5212,11 +5212,11 @@ func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
         SetData2(*patch.NewI32Patch())
 }
 
-// Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().Data1 instead.
-var MyDataWithCustomDefaultFieldPatch_Data1_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().Data1
+// Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().GetData1() instead.
+var MyDataWithCustomDefaultFieldPatch_Data1_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().GetData1()
 
-// Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().Data2 instead.
-var MyDataWithCustomDefaultFieldPatch_Data2_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().Data2
+// Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().GetData2() instead.
+var MyDataWithCustomDefaultFieldPatch_Data2_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().GetData2()
 
 func (x *MyDataWithCustomDefaultFieldPatch) GetData1NonCompat() *patch.StringPatch {
     return x.Data1
@@ -5430,11 +5430,11 @@ func NewMyDataWithCustomDefaultEnsureStruct() *MyDataWithCustomDefaultEnsureStru
     return (&MyDataWithCustomDefaultEnsureStruct{})
 }
 
-// Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().Data1 instead.
-var MyDataWithCustomDefaultEnsureStruct_Data1_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().Data1
+// Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().GetData1() instead.
+var MyDataWithCustomDefaultEnsureStruct_Data1_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().GetData1()
 
-// Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().Data2 instead.
-var MyDataWithCustomDefaultEnsureStruct_Data2_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().Data2
+// Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().GetData2() instead.
+var MyDataWithCustomDefaultEnsureStruct_Data2_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().GetData2()
 
 func (x *MyDataWithCustomDefaultEnsureStruct) GetData1NonCompat() *string {
     return x.Data1
@@ -5653,17 +5653,17 @@ func NewInnerUnionPatch() *InnerUnionPatch {
         SetPatch(*NewInnerUnionFieldPatch())
 }
 
-// Deprecated: Use NewInnerUnionPatch().Assign instead.
-var InnerUnionPatch_Assign_DEFAULT = NewInnerUnionPatch().Assign
+// Deprecated: Use NewInnerUnionPatch().GetAssign() instead.
+var InnerUnionPatch_Assign_DEFAULT = NewInnerUnionPatch().GetAssign()
 
-// Deprecated: Use NewInnerUnionPatch().PatchPrior instead.
-var InnerUnionPatch_PatchPrior_DEFAULT = NewInnerUnionPatch().PatchPrior
+// Deprecated: Use NewInnerUnionPatch().GetPatchPrior() instead.
+var InnerUnionPatch_PatchPrior_DEFAULT = NewInnerUnionPatch().GetPatchPrior()
 
-// Deprecated: Use NewInnerUnionPatch().Ensure instead.
-var InnerUnionPatch_Ensure_DEFAULT = NewInnerUnionPatch().Ensure
+// Deprecated: Use NewInnerUnionPatch().GetEnsure() instead.
+var InnerUnionPatch_Ensure_DEFAULT = NewInnerUnionPatch().GetEnsure()
 
-// Deprecated: Use NewInnerUnionPatch().Patch instead.
-var InnerUnionPatch_Patch_DEFAULT = NewInnerUnionPatch().Patch
+// Deprecated: Use NewInnerUnionPatch().GetPatch() instead.
+var InnerUnionPatch_Patch_DEFAULT = NewInnerUnionPatch().GetPatch()
 
 func (x *InnerUnionPatch) GetAssignNonCompat() *InnerUnion {
     return x.Assign
@@ -6059,8 +6059,8 @@ func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
         SetInnerOption(*patch.NewBinaryPatch())
 }
 
-// Deprecated: Use NewInnerUnionFieldPatch().InnerOption instead.
-var InnerUnionFieldPatch_InnerOption_DEFAULT = NewInnerUnionFieldPatch().InnerOption
+// Deprecated: Use NewInnerUnionFieldPatch().GetInnerOption() instead.
+var InnerUnionFieldPatch_InnerOption_DEFAULT = NewInnerUnionFieldPatch().GetInnerOption()
 
 func (x *InnerUnionFieldPatch) GetInnerOptionNonCompat() *patch.BinaryPatch {
     return x.InnerOption
@@ -6216,17 +6216,17 @@ func NewMyUnionPatch() *MyUnionPatch {
         SetPatch(*NewMyUnionFieldPatch())
 }
 
-// Deprecated: Use NewMyUnionPatch().Assign instead.
-var MyUnionPatch_Assign_DEFAULT = NewMyUnionPatch().Assign
+// Deprecated: Use NewMyUnionPatch().GetAssign() instead.
+var MyUnionPatch_Assign_DEFAULT = NewMyUnionPatch().GetAssign()
 
-// Deprecated: Use NewMyUnionPatch().PatchPrior instead.
-var MyUnionPatch_PatchPrior_DEFAULT = NewMyUnionPatch().PatchPrior
+// Deprecated: Use NewMyUnionPatch().GetPatchPrior() instead.
+var MyUnionPatch_PatchPrior_DEFAULT = NewMyUnionPatch().GetPatchPrior()
 
-// Deprecated: Use NewMyUnionPatch().Ensure instead.
-var MyUnionPatch_Ensure_DEFAULT = NewMyUnionPatch().Ensure
+// Deprecated: Use NewMyUnionPatch().GetEnsure() instead.
+var MyUnionPatch_Ensure_DEFAULT = NewMyUnionPatch().GetEnsure()
 
-// Deprecated: Use NewMyUnionPatch().Patch instead.
-var MyUnionPatch_Patch_DEFAULT = NewMyUnionPatch().Patch
+// Deprecated: Use NewMyUnionPatch().GetPatch() instead.
+var MyUnionPatch_Patch_DEFAULT = NewMyUnionPatch().GetPatch()
 
 func (x *MyUnionPatch) GetAssignNonCompat() *MyUnion {
     return x.Assign
@@ -6626,14 +6626,14 @@ func NewMyUnionFieldPatch() *MyUnionFieldPatch {
         SetOption3(*NewInnerUnionPatch())
 }
 
-// Deprecated: Use NewMyUnionFieldPatch().Option1 instead.
-var MyUnionFieldPatch_Option1_DEFAULT = NewMyUnionFieldPatch().Option1
+// Deprecated: Use NewMyUnionFieldPatch().GetOption1() instead.
+var MyUnionFieldPatch_Option1_DEFAULT = NewMyUnionFieldPatch().GetOption1()
 
-// Deprecated: Use NewMyUnionFieldPatch().Option2 instead.
-var MyUnionFieldPatch_Option2_DEFAULT = NewMyUnionFieldPatch().Option2
+// Deprecated: Use NewMyUnionFieldPatch().GetOption2() instead.
+var MyUnionFieldPatch_Option2_DEFAULT = NewMyUnionFieldPatch().GetOption2()
 
-// Deprecated: Use NewMyUnionFieldPatch().Option3 instead.
-var MyUnionFieldPatch_Option3_DEFAULT = NewMyUnionFieldPatch().Option3
+// Deprecated: Use NewMyUnionFieldPatch().GetOption3() instead.
+var MyUnionFieldPatch_Option3_DEFAULT = NewMyUnionFieldPatch().GetOption3()
 
 func (x *MyUnionFieldPatch) GetOption1NonCompat() *patch.StringPatch {
     return x.Option1
@@ -6919,17 +6919,17 @@ func NewMyStructPatch() *MyStructPatch {
         SetPatch(*NewMyStructFieldPatch())
 }
 
-// Deprecated: Use NewMyStructPatch().Assign instead.
-var MyStructPatch_Assign_DEFAULT = NewMyStructPatch().Assign
+// Deprecated: Use NewMyStructPatch().GetAssign() instead.
+var MyStructPatch_Assign_DEFAULT = NewMyStructPatch().GetAssign()
 
-// Deprecated: Use NewMyStructPatch().PatchPrior instead.
-var MyStructPatch_PatchPrior_DEFAULT = NewMyStructPatch().PatchPrior
+// Deprecated: Use NewMyStructPatch().GetPatchPrior() instead.
+var MyStructPatch_PatchPrior_DEFAULT = NewMyStructPatch().GetPatchPrior()
 
-// Deprecated: Use NewMyStructPatch().Ensure instead.
-var MyStructPatch_Ensure_DEFAULT = NewMyStructPatch().Ensure
+// Deprecated: Use NewMyStructPatch().GetEnsure() instead.
+var MyStructPatch_Ensure_DEFAULT = NewMyStructPatch().GetEnsure()
 
-// Deprecated: Use NewMyStructPatch().Patch instead.
-var MyStructPatch_Patch_DEFAULT = NewMyStructPatch().Patch
+// Deprecated: Use NewMyStructPatch().GetPatch() instead.
+var MyStructPatch_Patch_DEFAULT = NewMyStructPatch().GetPatch()
 
 func (x *MyStructPatch) GetAssignNonCompat() *MyStruct {
     return x.Assign
@@ -7326,8 +7326,8 @@ func NewMyStructField10Patch() *MyStructField10Patch {
         SetClear(false)
 }
 
-// Deprecated: Use NewMyStructField10Patch().Assign instead.
-var MyStructField10Patch_Assign_DEFAULT = NewMyStructField10Patch().Assign
+// Deprecated: Use NewMyStructField10Patch().GetAssign() instead.
+var MyStructField10Patch_Assign_DEFAULT = NewMyStructField10Patch().GetAssign()
 
 func (x *MyStructField10Patch) GetAssignNonCompat() *MyEnum {
     return x.Assign
@@ -7529,8 +7529,8 @@ func NewMyStructField23Patch() *MyStructField23Patch {
         SetClear(false)
 }
 
-// Deprecated: Use NewMyStructField23Patch().Assign instead.
-var MyStructField23Patch_Assign_DEFAULT = NewMyStructField23Patch().Assign
+// Deprecated: Use NewMyStructField23Patch().GetAssign() instead.
+var MyStructField23Patch_Assign_DEFAULT = NewMyStructField23Patch().GetAssign()
 
 func (x *MyStructField23Patch) GetAssignNonCompat() *MyEnum {
     return x.Assign
@@ -12949,104 +12949,104 @@ func NewMyStructFieldPatch() *MyStructFieldPatch {
         SetStructWithFieldCustomDefault(*NewMyDataPatch())
 }
 
-// Deprecated: Use NewMyStructFieldPatch().StructWithCustomDefault instead.
-var MyStructFieldPatch_StructWithCustomDefault_DEFAULT = NewMyStructFieldPatch().StructWithCustomDefault
+// Deprecated: Use NewMyStructFieldPatch().GetStructWithCustomDefault() instead.
+var MyStructFieldPatch_StructWithCustomDefault_DEFAULT = NewMyStructFieldPatch().GetStructWithCustomDefault()
 
-// Deprecated: Use NewMyStructFieldPatch().I32WithCustomDefault instead.
-var MyStructFieldPatch_I32WithCustomDefault_DEFAULT = NewMyStructFieldPatch().I32WithCustomDefault
+// Deprecated: Use NewMyStructFieldPatch().GetI32WithCustomDefault() instead.
+var MyStructFieldPatch_I32WithCustomDefault_DEFAULT = NewMyStructFieldPatch().GetI32WithCustomDefault()
 
-// Deprecated: Use NewMyStructFieldPatch().MapMap instead.
-var MyStructFieldPatch_MapMap_DEFAULT = NewMyStructFieldPatch().MapMap
+// Deprecated: Use NewMyStructFieldPatch().GetMapMap() instead.
+var MyStructFieldPatch_MapMap_DEFAULT = NewMyStructFieldPatch().GetMapMap()
 
-// Deprecated: Use NewMyStructFieldPatch().ListMap instead.
-var MyStructFieldPatch_ListMap_DEFAULT = NewMyStructFieldPatch().ListMap
+// Deprecated: Use NewMyStructFieldPatch().GetListMap() instead.
+var MyStructFieldPatch_ListMap_DEFAULT = NewMyStructFieldPatch().GetListMap()
 
-// Deprecated: Use NewMyStructFieldPatch().OptMapVal instead.
-var MyStructFieldPatch_OptMapVal_DEFAULT = NewMyStructFieldPatch().OptMapVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptMapVal() instead.
+var MyStructFieldPatch_OptMapVal_DEFAULT = NewMyStructFieldPatch().GetOptMapVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptSetVal instead.
-var MyStructFieldPatch_OptSetVal_DEFAULT = NewMyStructFieldPatch().OptSetVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptSetVal() instead.
+var MyStructFieldPatch_OptSetVal_DEFAULT = NewMyStructFieldPatch().GetOptSetVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptListVal instead.
-var MyStructFieldPatch_OptListVal_DEFAULT = NewMyStructFieldPatch().OptListVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptListVal() instead.
+var MyStructFieldPatch_OptListVal_DEFAULT = NewMyStructFieldPatch().GetOptListVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptLateStructVal instead.
-var MyStructFieldPatch_OptLateStructVal_DEFAULT = NewMyStructFieldPatch().OptLateStructVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptLateStructVal() instead.
+var MyStructFieldPatch_OptLateStructVal_DEFAULT = NewMyStructFieldPatch().GetOptLateStructVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptStructVal instead.
-var MyStructFieldPatch_OptStructVal_DEFAULT = NewMyStructFieldPatch().OptStructVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptStructVal() instead.
+var MyStructFieldPatch_OptStructVal_DEFAULT = NewMyStructFieldPatch().GetOptStructVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptEnumVal instead.
-var MyStructFieldPatch_OptEnumVal_DEFAULT = NewMyStructFieldPatch().OptEnumVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptEnumVal() instead.
+var MyStructFieldPatch_OptEnumVal_DEFAULT = NewMyStructFieldPatch().GetOptEnumVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptBinaryVal instead.
-var MyStructFieldPatch_OptBinaryVal_DEFAULT = NewMyStructFieldPatch().OptBinaryVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptBinaryVal() instead.
+var MyStructFieldPatch_OptBinaryVal_DEFAULT = NewMyStructFieldPatch().GetOptBinaryVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptStringVal instead.
-var MyStructFieldPatch_OptStringVal_DEFAULT = NewMyStructFieldPatch().OptStringVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptStringVal() instead.
+var MyStructFieldPatch_OptStringVal_DEFAULT = NewMyStructFieldPatch().GetOptStringVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptDoubleVal instead.
-var MyStructFieldPatch_OptDoubleVal_DEFAULT = NewMyStructFieldPatch().OptDoubleVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptDoubleVal() instead.
+var MyStructFieldPatch_OptDoubleVal_DEFAULT = NewMyStructFieldPatch().GetOptDoubleVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptFloatVal instead.
-var MyStructFieldPatch_OptFloatVal_DEFAULT = NewMyStructFieldPatch().OptFloatVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptFloatVal() instead.
+var MyStructFieldPatch_OptFloatVal_DEFAULT = NewMyStructFieldPatch().GetOptFloatVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptI64Val instead.
-var MyStructFieldPatch_OptI64Val_DEFAULT = NewMyStructFieldPatch().OptI64Val
+// Deprecated: Use NewMyStructFieldPatch().GetOptI64Val() instead.
+var MyStructFieldPatch_OptI64Val_DEFAULT = NewMyStructFieldPatch().GetOptI64Val()
 
-// Deprecated: Use NewMyStructFieldPatch().OptI32Val instead.
-var MyStructFieldPatch_OptI32Val_DEFAULT = NewMyStructFieldPatch().OptI32Val
+// Deprecated: Use NewMyStructFieldPatch().GetOptI32Val() instead.
+var MyStructFieldPatch_OptI32Val_DEFAULT = NewMyStructFieldPatch().GetOptI32Val()
 
-// Deprecated: Use NewMyStructFieldPatch().OptI16Val instead.
-var MyStructFieldPatch_OptI16Val_DEFAULT = NewMyStructFieldPatch().OptI16Val
+// Deprecated: Use NewMyStructFieldPatch().GetOptI16Val() instead.
+var MyStructFieldPatch_OptI16Val_DEFAULT = NewMyStructFieldPatch().GetOptI16Val()
 
-// Deprecated: Use NewMyStructFieldPatch().OptByteVal instead.
-var MyStructFieldPatch_OptByteVal_DEFAULT = NewMyStructFieldPatch().OptByteVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptByteVal() instead.
+var MyStructFieldPatch_OptByteVal_DEFAULT = NewMyStructFieldPatch().GetOptByteVal()
 
-// Deprecated: Use NewMyStructFieldPatch().OptBoolVal instead.
-var MyStructFieldPatch_OptBoolVal_DEFAULT = NewMyStructFieldPatch().OptBoolVal
+// Deprecated: Use NewMyStructFieldPatch().GetOptBoolVal() instead.
+var MyStructFieldPatch_OptBoolVal_DEFAULT = NewMyStructFieldPatch().GetOptBoolVal()
 
-// Deprecated: Use NewMyStructFieldPatch().LateStructVal instead.
-var MyStructFieldPatch_LateStructVal_DEFAULT = NewMyStructFieldPatch().LateStructVal
+// Deprecated: Use NewMyStructFieldPatch().GetLateStructVal() instead.
+var MyStructFieldPatch_LateStructVal_DEFAULT = NewMyStructFieldPatch().GetLateStructVal()
 
-// Deprecated: Use NewMyStructFieldPatch().UnionVal instead.
-var MyStructFieldPatch_UnionVal_DEFAULT = NewMyStructFieldPatch().UnionVal
+// Deprecated: Use NewMyStructFieldPatch().GetUnionVal() instead.
+var MyStructFieldPatch_UnionVal_DEFAULT = NewMyStructFieldPatch().GetUnionVal()
 
-// Deprecated: Use NewMyStructFieldPatch().StructVal instead.
-var MyStructFieldPatch_StructVal_DEFAULT = NewMyStructFieldPatch().StructVal
+// Deprecated: Use NewMyStructFieldPatch().GetStructVal() instead.
+var MyStructFieldPatch_StructVal_DEFAULT = NewMyStructFieldPatch().GetStructVal()
 
-// Deprecated: Use NewMyStructFieldPatch().EnumVal instead.
-var MyStructFieldPatch_EnumVal_DEFAULT = NewMyStructFieldPatch().EnumVal
+// Deprecated: Use NewMyStructFieldPatch().GetEnumVal() instead.
+var MyStructFieldPatch_EnumVal_DEFAULT = NewMyStructFieldPatch().GetEnumVal()
 
-// Deprecated: Use NewMyStructFieldPatch().BinaryVal instead.
-var MyStructFieldPatch_BinaryVal_DEFAULT = NewMyStructFieldPatch().BinaryVal
+// Deprecated: Use NewMyStructFieldPatch().GetBinaryVal() instead.
+var MyStructFieldPatch_BinaryVal_DEFAULT = NewMyStructFieldPatch().GetBinaryVal()
 
-// Deprecated: Use NewMyStructFieldPatch().StringVal instead.
-var MyStructFieldPatch_StringVal_DEFAULT = NewMyStructFieldPatch().StringVal
+// Deprecated: Use NewMyStructFieldPatch().GetStringVal() instead.
+var MyStructFieldPatch_StringVal_DEFAULT = NewMyStructFieldPatch().GetStringVal()
 
-// Deprecated: Use NewMyStructFieldPatch().DoubleVal instead.
-var MyStructFieldPatch_DoubleVal_DEFAULT = NewMyStructFieldPatch().DoubleVal
+// Deprecated: Use NewMyStructFieldPatch().GetDoubleVal() instead.
+var MyStructFieldPatch_DoubleVal_DEFAULT = NewMyStructFieldPatch().GetDoubleVal()
 
-// Deprecated: Use NewMyStructFieldPatch().FloatVal instead.
-var MyStructFieldPatch_FloatVal_DEFAULT = NewMyStructFieldPatch().FloatVal
+// Deprecated: Use NewMyStructFieldPatch().GetFloatVal() instead.
+var MyStructFieldPatch_FloatVal_DEFAULT = NewMyStructFieldPatch().GetFloatVal()
 
-// Deprecated: Use NewMyStructFieldPatch().I64Val instead.
-var MyStructFieldPatch_I64Val_DEFAULT = NewMyStructFieldPatch().I64Val
+// Deprecated: Use NewMyStructFieldPatch().GetI64Val() instead.
+var MyStructFieldPatch_I64Val_DEFAULT = NewMyStructFieldPatch().GetI64Val()
 
-// Deprecated: Use NewMyStructFieldPatch().I32Val instead.
-var MyStructFieldPatch_I32Val_DEFAULT = NewMyStructFieldPatch().I32Val
+// Deprecated: Use NewMyStructFieldPatch().GetI32Val() instead.
+var MyStructFieldPatch_I32Val_DEFAULT = NewMyStructFieldPatch().GetI32Val()
 
-// Deprecated: Use NewMyStructFieldPatch().I16Val instead.
-var MyStructFieldPatch_I16Val_DEFAULT = NewMyStructFieldPatch().I16Val
+// Deprecated: Use NewMyStructFieldPatch().GetI16Val() instead.
+var MyStructFieldPatch_I16Val_DEFAULT = NewMyStructFieldPatch().GetI16Val()
 
-// Deprecated: Use NewMyStructFieldPatch().ByteVal instead.
-var MyStructFieldPatch_ByteVal_DEFAULT = NewMyStructFieldPatch().ByteVal
+// Deprecated: Use NewMyStructFieldPatch().GetByteVal() instead.
+var MyStructFieldPatch_ByteVal_DEFAULT = NewMyStructFieldPatch().GetByteVal()
 
-// Deprecated: Use NewMyStructFieldPatch().BoolVal instead.
-var MyStructFieldPatch_BoolVal_DEFAULT = NewMyStructFieldPatch().BoolVal
+// Deprecated: Use NewMyStructFieldPatch().GetBoolVal() instead.
+var MyStructFieldPatch_BoolVal_DEFAULT = NewMyStructFieldPatch().GetBoolVal()
 
-// Deprecated: Use NewMyStructFieldPatch().StructWithFieldCustomDefault instead.
-var MyStructFieldPatch_StructWithFieldCustomDefault_DEFAULT = NewMyStructFieldPatch().StructWithFieldCustomDefault
+// Deprecated: Use NewMyStructFieldPatch().GetStructWithFieldCustomDefault() instead.
+var MyStructFieldPatch_StructWithFieldCustomDefault_DEFAULT = NewMyStructFieldPatch().GetStructWithFieldCustomDefault()
 
 func (x *MyStructFieldPatch) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefaultPatch {
     return x.StructWithCustomDefault
@@ -15306,83 +15306,83 @@ func NewMyStructEnsureStruct() *MyStructEnsureStruct {
     return (&MyStructEnsureStruct{})
 }
 
-// Deprecated: Use NewMyStructEnsureStruct().StructWithCustomDefault instead.
-var MyStructEnsureStruct_StructWithCustomDefault_DEFAULT = NewMyStructEnsureStruct().StructWithCustomDefault
+// Deprecated: Use NewMyStructEnsureStruct().GetStructWithCustomDefault() instead.
+var MyStructEnsureStruct_StructWithCustomDefault_DEFAULT = NewMyStructEnsureStruct().GetStructWithCustomDefault()
 
-// Deprecated: Use NewMyStructEnsureStruct().I32WithCustomDefault instead.
-var MyStructEnsureStruct_I32WithCustomDefault_DEFAULT = NewMyStructEnsureStruct().I32WithCustomDefault
+// Deprecated: Use NewMyStructEnsureStruct().GetI32WithCustomDefault() instead.
+var MyStructEnsureStruct_I32WithCustomDefault_DEFAULT = NewMyStructEnsureStruct().GetI32WithCustomDefault()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptLateStructVal instead.
-var MyStructEnsureStruct_OptLateStructVal_DEFAULT = NewMyStructEnsureStruct().OptLateStructVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptLateStructVal() instead.
+var MyStructEnsureStruct_OptLateStructVal_DEFAULT = NewMyStructEnsureStruct().GetOptLateStructVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptStructVal instead.
-var MyStructEnsureStruct_OptStructVal_DEFAULT = NewMyStructEnsureStruct().OptStructVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptStructVal() instead.
+var MyStructEnsureStruct_OptStructVal_DEFAULT = NewMyStructEnsureStruct().GetOptStructVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptEnumVal instead.
-var MyStructEnsureStruct_OptEnumVal_DEFAULT = NewMyStructEnsureStruct().OptEnumVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptEnumVal() instead.
+var MyStructEnsureStruct_OptEnumVal_DEFAULT = NewMyStructEnsureStruct().GetOptEnumVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptStringVal instead.
-var MyStructEnsureStruct_OptStringVal_DEFAULT = NewMyStructEnsureStruct().OptStringVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptStringVal() instead.
+var MyStructEnsureStruct_OptStringVal_DEFAULT = NewMyStructEnsureStruct().GetOptStringVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptDoubleVal instead.
-var MyStructEnsureStruct_OptDoubleVal_DEFAULT = NewMyStructEnsureStruct().OptDoubleVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptDoubleVal() instead.
+var MyStructEnsureStruct_OptDoubleVal_DEFAULT = NewMyStructEnsureStruct().GetOptDoubleVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptFloatVal instead.
-var MyStructEnsureStruct_OptFloatVal_DEFAULT = NewMyStructEnsureStruct().OptFloatVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptFloatVal() instead.
+var MyStructEnsureStruct_OptFloatVal_DEFAULT = NewMyStructEnsureStruct().GetOptFloatVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptI64Val instead.
-var MyStructEnsureStruct_OptI64Val_DEFAULT = NewMyStructEnsureStruct().OptI64Val
+// Deprecated: Use NewMyStructEnsureStruct().GetOptI64Val() instead.
+var MyStructEnsureStruct_OptI64Val_DEFAULT = NewMyStructEnsureStruct().GetOptI64Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptI32Val instead.
-var MyStructEnsureStruct_OptI32Val_DEFAULT = NewMyStructEnsureStruct().OptI32Val
+// Deprecated: Use NewMyStructEnsureStruct().GetOptI32Val() instead.
+var MyStructEnsureStruct_OptI32Val_DEFAULT = NewMyStructEnsureStruct().GetOptI32Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptI16Val instead.
-var MyStructEnsureStruct_OptI16Val_DEFAULT = NewMyStructEnsureStruct().OptI16Val
+// Deprecated: Use NewMyStructEnsureStruct().GetOptI16Val() instead.
+var MyStructEnsureStruct_OptI16Val_DEFAULT = NewMyStructEnsureStruct().GetOptI16Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptByteVal instead.
-var MyStructEnsureStruct_OptByteVal_DEFAULT = NewMyStructEnsureStruct().OptByteVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptByteVal() instead.
+var MyStructEnsureStruct_OptByteVal_DEFAULT = NewMyStructEnsureStruct().GetOptByteVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().OptBoolVal instead.
-var MyStructEnsureStruct_OptBoolVal_DEFAULT = NewMyStructEnsureStruct().OptBoolVal
+// Deprecated: Use NewMyStructEnsureStruct().GetOptBoolVal() instead.
+var MyStructEnsureStruct_OptBoolVal_DEFAULT = NewMyStructEnsureStruct().GetOptBoolVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().LateStructVal instead.
-var MyStructEnsureStruct_LateStructVal_DEFAULT = NewMyStructEnsureStruct().LateStructVal
+// Deprecated: Use NewMyStructEnsureStruct().GetLateStructVal() instead.
+var MyStructEnsureStruct_LateStructVal_DEFAULT = NewMyStructEnsureStruct().GetLateStructVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().UnionVal instead.
-var MyStructEnsureStruct_UnionVal_DEFAULT = NewMyStructEnsureStruct().UnionVal
+// Deprecated: Use NewMyStructEnsureStruct().GetUnionVal() instead.
+var MyStructEnsureStruct_UnionVal_DEFAULT = NewMyStructEnsureStruct().GetUnionVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().StructVal instead.
-var MyStructEnsureStruct_StructVal_DEFAULT = NewMyStructEnsureStruct().StructVal
+// Deprecated: Use NewMyStructEnsureStruct().GetStructVal() instead.
+var MyStructEnsureStruct_StructVal_DEFAULT = NewMyStructEnsureStruct().GetStructVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().EnumVal instead.
-var MyStructEnsureStruct_EnumVal_DEFAULT = NewMyStructEnsureStruct().EnumVal
+// Deprecated: Use NewMyStructEnsureStruct().GetEnumVal() instead.
+var MyStructEnsureStruct_EnumVal_DEFAULT = NewMyStructEnsureStruct().GetEnumVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().StringVal instead.
-var MyStructEnsureStruct_StringVal_DEFAULT = NewMyStructEnsureStruct().StringVal
+// Deprecated: Use NewMyStructEnsureStruct().GetStringVal() instead.
+var MyStructEnsureStruct_StringVal_DEFAULT = NewMyStructEnsureStruct().GetStringVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().DoubleVal instead.
-var MyStructEnsureStruct_DoubleVal_DEFAULT = NewMyStructEnsureStruct().DoubleVal
+// Deprecated: Use NewMyStructEnsureStruct().GetDoubleVal() instead.
+var MyStructEnsureStruct_DoubleVal_DEFAULT = NewMyStructEnsureStruct().GetDoubleVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().FloatVal instead.
-var MyStructEnsureStruct_FloatVal_DEFAULT = NewMyStructEnsureStruct().FloatVal
+// Deprecated: Use NewMyStructEnsureStruct().GetFloatVal() instead.
+var MyStructEnsureStruct_FloatVal_DEFAULT = NewMyStructEnsureStruct().GetFloatVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().I64Val instead.
-var MyStructEnsureStruct_I64Val_DEFAULT = NewMyStructEnsureStruct().I64Val
+// Deprecated: Use NewMyStructEnsureStruct().GetI64Val() instead.
+var MyStructEnsureStruct_I64Val_DEFAULT = NewMyStructEnsureStruct().GetI64Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().I32Val instead.
-var MyStructEnsureStruct_I32Val_DEFAULT = NewMyStructEnsureStruct().I32Val
+// Deprecated: Use NewMyStructEnsureStruct().GetI32Val() instead.
+var MyStructEnsureStruct_I32Val_DEFAULT = NewMyStructEnsureStruct().GetI32Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().I16Val instead.
-var MyStructEnsureStruct_I16Val_DEFAULT = NewMyStructEnsureStruct().I16Val
+// Deprecated: Use NewMyStructEnsureStruct().GetI16Val() instead.
+var MyStructEnsureStruct_I16Val_DEFAULT = NewMyStructEnsureStruct().GetI16Val()
 
-// Deprecated: Use NewMyStructEnsureStruct().ByteVal instead.
-var MyStructEnsureStruct_ByteVal_DEFAULT = NewMyStructEnsureStruct().ByteVal
+// Deprecated: Use NewMyStructEnsureStruct().GetByteVal() instead.
+var MyStructEnsureStruct_ByteVal_DEFAULT = NewMyStructEnsureStruct().GetByteVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().BoolVal instead.
-var MyStructEnsureStruct_BoolVal_DEFAULT = NewMyStructEnsureStruct().BoolVal
+// Deprecated: Use NewMyStructEnsureStruct().GetBoolVal() instead.
+var MyStructEnsureStruct_BoolVal_DEFAULT = NewMyStructEnsureStruct().GetBoolVal()
 
-// Deprecated: Use NewMyStructEnsureStruct().StructWithFieldCustomDefault instead.
-var MyStructEnsureStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStructEnsureStruct().StructWithFieldCustomDefault
+// Deprecated: Use NewMyStructEnsureStruct().GetStructWithFieldCustomDefault() instead.
+var MyStructEnsureStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStructEnsureStruct().GetStructWithFieldCustomDefault()
 
 func (x *MyStructEnsureStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
     return x.StructWithCustomDefault
@@ -17865,17 +17865,17 @@ func NewLateDefStructPatch() *LateDefStructPatch {
         SetPatch(*NewLateDefStructFieldPatch())
 }
 
-// Deprecated: Use NewLateDefStructPatch().Assign instead.
-var LateDefStructPatch_Assign_DEFAULT = NewLateDefStructPatch().Assign
+// Deprecated: Use NewLateDefStructPatch().GetAssign() instead.
+var LateDefStructPatch_Assign_DEFAULT = NewLateDefStructPatch().GetAssign()
 
-// Deprecated: Use NewLateDefStructPatch().PatchPrior instead.
-var LateDefStructPatch_PatchPrior_DEFAULT = NewLateDefStructPatch().PatchPrior
+// Deprecated: Use NewLateDefStructPatch().GetPatchPrior() instead.
+var LateDefStructPatch_PatchPrior_DEFAULT = NewLateDefStructPatch().GetPatchPrior()
 
-// Deprecated: Use NewLateDefStructPatch().Ensure instead.
-var LateDefStructPatch_Ensure_DEFAULT = NewLateDefStructPatch().Ensure
+// Deprecated: Use NewLateDefStructPatch().GetEnsure() instead.
+var LateDefStructPatch_Ensure_DEFAULT = NewLateDefStructPatch().GetEnsure()
 
-// Deprecated: Use NewLateDefStructPatch().Patch instead.
-var LateDefStructPatch_Patch_DEFAULT = NewLateDefStructPatch().Patch
+// Deprecated: Use NewLateDefStructPatch().GetPatch() instead.
+var LateDefStructPatch_Patch_DEFAULT = NewLateDefStructPatch().GetPatch()
 
 func (x *LateDefStructPatch) GetAssignNonCompat() *LateDefStruct {
     return x.Assign
@@ -18438,17 +18438,17 @@ func NewRecursivePatch() *RecursivePatch {
         SetPatch(*NewRecursiveFieldPatch())
 }
 
-// Deprecated: Use NewRecursivePatch().Assign instead.
-var RecursivePatch_Assign_DEFAULT = NewRecursivePatch().Assign
+// Deprecated: Use NewRecursivePatch().GetAssign() instead.
+var RecursivePatch_Assign_DEFAULT = NewRecursivePatch().GetAssign()
 
-// Deprecated: Use NewRecursivePatch().PatchPrior instead.
-var RecursivePatch_PatchPrior_DEFAULT = NewRecursivePatch().PatchPrior
+// Deprecated: Use NewRecursivePatch().GetPatchPrior() instead.
+var RecursivePatch_PatchPrior_DEFAULT = NewRecursivePatch().GetPatchPrior()
 
-// Deprecated: Use NewRecursivePatch().Ensure instead.
-var RecursivePatch_Ensure_DEFAULT = NewRecursivePatch().Ensure
+// Deprecated: Use NewRecursivePatch().GetEnsure() instead.
+var RecursivePatch_Ensure_DEFAULT = NewRecursivePatch().GetEnsure()
 
-// Deprecated: Use NewRecursivePatch().Patch instead.
-var RecursivePatch_Patch_DEFAULT = NewRecursivePatch().Patch
+// Deprecated: Use NewRecursivePatch().GetPatch() instead.
+var RecursivePatch_Patch_DEFAULT = NewRecursivePatch().GetPatch()
 
 func (x *RecursivePatch) GetAssignNonCompat() *Recursive {
     return x.Assign
@@ -19090,8 +19090,8 @@ func NewRecursiveFieldPatch() *RecursiveFieldPatch {
         SetNodes(*NewRecursiveField1Patch())
 }
 
-// Deprecated: Use NewRecursiveFieldPatch().Nodes instead.
-var RecursiveFieldPatch_Nodes_DEFAULT = NewRecursiveFieldPatch().Nodes
+// Deprecated: Use NewRecursiveFieldPatch().GetNodes() instead.
+var RecursiveFieldPatch_Nodes_DEFAULT = NewRecursiveFieldPatch().GetNodes()
 
 func (x *RecursiveFieldPatch) GetNodesNonCompat() *RecursiveField1Patch {
     return x.Nodes
@@ -19439,17 +19439,17 @@ func NewBarPatch() *BarPatch {
         SetPatch(*NewBarFieldPatch())
 }
 
-// Deprecated: Use NewBarPatch().Assign instead.
-var BarPatch_Assign_DEFAULT = NewBarPatch().Assign
+// Deprecated: Use NewBarPatch().GetAssign() instead.
+var BarPatch_Assign_DEFAULT = NewBarPatch().GetAssign()
 
-// Deprecated: Use NewBarPatch().PatchPrior instead.
-var BarPatch_PatchPrior_DEFAULT = NewBarPatch().PatchPrior
+// Deprecated: Use NewBarPatch().GetPatchPrior() instead.
+var BarPatch_PatchPrior_DEFAULT = NewBarPatch().GetPatchPrior()
 
-// Deprecated: Use NewBarPatch().Ensure instead.
-var BarPatch_Ensure_DEFAULT = NewBarPatch().Ensure
+// Deprecated: Use NewBarPatch().GetEnsure() instead.
+var BarPatch_Ensure_DEFAULT = NewBarPatch().GetEnsure()
 
-// Deprecated: Use NewBarPatch().Patch instead.
-var BarPatch_Patch_DEFAULT = NewBarPatch().Patch
+// Deprecated: Use NewBarPatch().GetPatch() instead.
+var BarPatch_Patch_DEFAULT = NewBarPatch().GetPatch()
 
 func (x *BarPatch) GetAssignNonCompat() *Bar {
     return x.Assign
@@ -19845,8 +19845,8 @@ func NewBarFieldPatch() *BarFieldPatch {
         SetLoop(*NewLoopPatch())
 }
 
-// Deprecated: Use NewBarFieldPatch().Loop instead.
-var BarFieldPatch_Loop_DEFAULT = NewBarFieldPatch().Loop
+// Deprecated: Use NewBarFieldPatch().GetLoop() instead.
+var BarFieldPatch_Loop_DEFAULT = NewBarFieldPatch().GetLoop()
 
 func (x *BarFieldPatch) GetLoopNonCompat() *LoopPatch {
     return x.Loop
@@ -19994,8 +19994,8 @@ func NewBarEnsureStruct() *BarEnsureStruct {
     return (&BarEnsureStruct{})
 }
 
-// Deprecated: Use NewBarEnsureStruct().Loop instead.
-var BarEnsureStruct_Loop_DEFAULT = NewBarEnsureStruct().Loop
+// Deprecated: Use NewBarEnsureStruct().GetLoop() instead.
+var BarEnsureStruct_Loop_DEFAULT = NewBarEnsureStruct().GetLoop()
 
 func (x *BarEnsureStruct) GetLoopNonCompat() *Loop {
     return x.Loop
@@ -20145,8 +20145,8 @@ func NewLoopPatch() *LoopPatch {
         SetClear(false)
 }
 
-// Deprecated: Use NewLoopPatch().Assign instead.
-var LoopPatch_Assign_DEFAULT = NewLoopPatch().Assign
+// Deprecated: Use NewLoopPatch().GetAssign() instead.
+var LoopPatch_Assign_DEFAULT = NewLoopPatch().GetAssign()
 
 func (x *LoopPatch) GetAssignNonCompat() *Loop {
     return x.Assign

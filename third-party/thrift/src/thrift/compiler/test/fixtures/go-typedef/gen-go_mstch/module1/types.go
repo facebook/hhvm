@@ -253,11 +253,11 @@ func NewAutomobile() *Automobile {
         SetPartNames(make(map[int32]*CarPartName))
 }
 
-// Deprecated: Use NewAutomobile().PreviousPlate instead.
-var Automobile_PreviousPlate_DEFAULT = NewAutomobile().PreviousPlate
+// Deprecated: Use NewAutomobile().GetPreviousPlate() instead.
+var Automobile_PreviousPlate_DEFAULT = NewAutomobile().GetPreviousPlate()
 
-// Deprecated: Use NewAutomobile().FirstPlate instead.
-var Automobile_FirstPlate_DEFAULT = NewAutomobile().FirstPlate
+// Deprecated: Use NewAutomobile().GetFirstPlate() instead.
+var Automobile_FirstPlate_DEFAULT = NewAutomobile().GetFirstPlate()
 
 func (x *Automobile) GetPlateNonCompat() Plate {
     return x.Plate
@@ -1230,11 +1230,11 @@ func NewPair() *Pair {
         SetCar(*NewCar())
 }
 
-// Deprecated: Use NewPair().Automobile instead.
-var Pair_Automobile_DEFAULT = NewPair().Automobile
+// Deprecated: Use NewPair().GetAutomobile() instead.
+var Pair_Automobile_DEFAULT = NewPair().GetAutomobile()
 
-// Deprecated: Use NewPair().Car instead.
-var Pair_Car_DEFAULT = NewPair().Car
+// Deprecated: Use NewPair().GetCar() instead.
+var Pair_Car_DEFAULT = NewPair().GetCar()
 
 func (x *Pair) GetAutomobileNonCompat() *Automobile {
     return x.Automobile

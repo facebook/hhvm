@@ -1138,8 +1138,8 @@ func NewFoo() *Foo {
         SetDoubleAdaptedField(NewDoubleTypedefI64())
 }
 
-// Deprecated: Use NewFoo().OptionalIntField instead.
-var Foo_OptionalIntField_DEFAULT = NewFoo().OptionalIntField
+// Deprecated: Use NewFoo().GetOptionalIntField() instead.
+var Foo_OptionalIntField_DEFAULT = NewFoo().GetOptionalIntField()
 
 func (x *Foo) GetIntFieldNonCompat() int32 {
     return x.IntField
@@ -1974,11 +1974,11 @@ func NewBaz() *Baz {
         SetLongField(NewMyI64())
 }
 
-// Deprecated: Use NewBaz().IntField instead.
-var Baz_IntField_DEFAULT = NewBaz().IntField
+// Deprecated: Use NewBaz().GetIntField() instead.
+var Baz_IntField_DEFAULT = NewBaz().GetIntField()
 
-// Deprecated: Use NewBaz().LongField instead.
-var Baz_LongField_DEFAULT = NewBaz().LongField
+// Deprecated: Use NewBaz().GetLongField() instead.
+var Baz_LongField_DEFAULT = NewBaz().GetLongField()
 
 func (x *Baz) GetIntFieldNonCompat() *int32 {
     return x.IntField
@@ -2463,20 +2463,20 @@ func NewBar() *Bar {
         SetAdaptedStructField(*NewDirectlyAdapted())
 }
 
-// Deprecated: Use NewBar().StructField instead.
-var Bar_StructField_DEFAULT = NewBar().StructField
+// Deprecated: Use NewBar().GetStructField() instead.
+var Bar_StructField_DEFAULT = NewBar().GetStructField()
 
-// Deprecated: Use NewBar().OptionalStructField instead.
-var Bar_OptionalStructField_DEFAULT = NewBar().OptionalStructField
+// Deprecated: Use NewBar().GetOptionalStructField() instead.
+var Bar_OptionalStructField_DEFAULT = NewBar().GetOptionalStructField()
 
-// Deprecated: Use NewBar().UnionField instead.
-var Bar_UnionField_DEFAULT = NewBar().UnionField
+// Deprecated: Use NewBar().GetUnionField() instead.
+var Bar_UnionField_DEFAULT = NewBar().GetUnionField()
 
-// Deprecated: Use NewBar().OptionalUnionField instead.
-var Bar_OptionalUnionField_DEFAULT = NewBar().OptionalUnionField
+// Deprecated: Use NewBar().GetOptionalUnionField() instead.
+var Bar_OptionalUnionField_DEFAULT = NewBar().GetOptionalUnionField()
 
-// Deprecated: Use NewBar().AdaptedStructField instead.
-var Bar_AdaptedStructField_DEFAULT = NewBar().AdaptedStructField
+// Deprecated: Use NewBar().GetAdaptedStructField() instead.
+var Bar_AdaptedStructField_DEFAULT = NewBar().GetAdaptedStructField()
 
 func (x *Bar) GetStructFieldNonCompat() *Foo {
     return x.StructField
@@ -3345,11 +3345,11 @@ func NewStructWithFieldAdapter() *StructWithFieldAdapter {
         SetSharedField(0)
 }
 
-// Deprecated: Use NewStructWithFieldAdapter().OptSharedField instead.
-var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().OptSharedField
+// Deprecated: Use NewStructWithFieldAdapter().GetOptSharedField() instead.
+var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().GetOptSharedField()
 
-// Deprecated: Use NewStructWithFieldAdapter().OptBoxedField instead.
-var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().OptBoxedField
+// Deprecated: Use NewStructWithFieldAdapter().GetOptBoxedField() instead.
+var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().GetOptBoxedField()
 
 func (x *StructWithFieldAdapter) GetFieldNonCompat() int32 {
     return x.Field
@@ -3948,8 +3948,8 @@ func NewB() *B {
         SetA(*NewAdaptedA())
 }
 
-// Deprecated: Use NewB().A instead.
-var B_A_DEFAULT = NewB().A
+// Deprecated: Use NewB().GetA() instead.
+var B_A_DEFAULT = NewB().GetA()
 
 func (x *B) GetANonCompat() *AdaptedA {
     return x.A
@@ -6740,8 +6740,8 @@ func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
         SetAdaptedStruct(*NewAdaptTemplatedTestStruct())
 }
 
-// Deprecated: Use NewAdaptTemplatedNestedTestStruct().AdaptedStruct instead.
-var AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT = NewAdaptTemplatedNestedTestStruct().AdaptedStruct
+// Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
+var AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT = NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct()
 
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStructNonCompat() *AdaptTemplatedTestStruct {
     return x.AdaptedStruct
@@ -6892,8 +6892,8 @@ func NewAdaptTestUnion() *AdaptTestUnion {
         SetCustom(NewCustomProtocolType())
 }
 
-// Deprecated: Use NewAdaptTestUnion().Delay instead.
-var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().Delay
+// Deprecated: Use NewAdaptTestUnion().GetDelay() instead.
+var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().GetDelay()
 
 func (x *AdaptTestUnion) GetDelayNonCompat() *DurationMs {
     return x.Delay
@@ -7395,17 +7395,17 @@ func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
         SetTypedefOfAdapted(*NewTypedefOfDirect())
 }
 
-// Deprecated: Use NewStructFieldAdaptedStruct().AdaptedStruct instead.
-var StructFieldAdaptedStruct_AdaptedStruct_DEFAULT = NewStructFieldAdaptedStruct().AdaptedStruct
+// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
+var StructFieldAdaptedStruct_AdaptedStruct_DEFAULT = NewStructFieldAdaptedStruct().GetAdaptedStruct()
 
-// Deprecated: Use NewStructFieldAdaptedStruct().AdaptedTypedef instead.
-var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT = NewStructFieldAdaptedStruct().AdaptedTypedef
+// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedTypedef() instead.
+var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT = NewStructFieldAdaptedStruct().GetAdaptedTypedef()
 
-// Deprecated: Use NewStructFieldAdaptedStruct().DirectlyAdapted instead.
-var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT = NewStructFieldAdaptedStruct().DirectlyAdapted
+// Deprecated: Use NewStructFieldAdaptedStruct().GetDirectlyAdapted() instead.
+var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT = NewStructFieldAdaptedStruct().GetDirectlyAdapted()
 
-// Deprecated: Use NewStructFieldAdaptedStruct().TypedefOfAdapted instead.
-var StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT = NewStructFieldAdaptedStruct().TypedefOfAdapted
+// Deprecated: Use NewStructFieldAdaptedStruct().GetTypedefOfAdapted() instead.
+var StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT = NewStructFieldAdaptedStruct().GetTypedefOfAdapted()
 
 func (x *StructFieldAdaptedStruct) GetAdaptedStructNonCompat() *AdaptedStruct {
     return x.AdaptedStruct
@@ -7749,8 +7749,8 @@ func NewCircularAdaptee() *CircularAdaptee {
         SetField(*NewCircularStruct())
 }
 
-// Deprecated: Use NewCircularAdaptee().Field instead.
-var CircularAdaptee_Field_DEFAULT = NewCircularAdaptee().Field
+// Deprecated: Use NewCircularAdaptee().GetField() instead.
+var CircularAdaptee_Field_DEFAULT = NewCircularAdaptee().GetField()
 
 func (x *CircularAdaptee) GetFieldNonCompat() *CircularStruct {
     return x.Field
@@ -7898,8 +7898,8 @@ func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
 }
 
-// Deprecated: Use NewCircularStruct().Field instead.
-var CircularStruct_Field_DEFAULT = NewCircularStruct().Field
+// Deprecated: Use NewCircularStruct().GetField() instead.
+var CircularStruct_Field_DEFAULT = NewCircularStruct().GetField()
 
 func (x *CircularStruct) GetFieldNonCompat() *AdaptedCircularAdaptee {
     return x.Field
@@ -8048,8 +8048,8 @@ func NewReorderedStruct() *ReorderedStruct {
         SetReorderedDependentAdapted(*NewDeclaredAfterStruct())
 }
 
-// Deprecated: Use NewReorderedStruct().ReorderedDependentAdapted instead.
-var ReorderedStruct_ReorderedDependentAdapted_DEFAULT = NewReorderedStruct().ReorderedDependentAdapted
+// Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
+var ReorderedStruct_ReorderedDependentAdapted_DEFAULT = NewReorderedStruct().GetReorderedDependentAdapted()
 
 func (x *ReorderedStruct) GetReorderedDependentAdaptedNonCompat() *DeclaredAfterStruct {
     return x.ReorderedDependentAdapted
@@ -8626,8 +8626,8 @@ func NewMoveOnly() *MoveOnly {
         SetPtr(*NewHeapAllocated())
 }
 
-// Deprecated: Use NewMoveOnly().Ptr instead.
-var MoveOnly_Ptr_DEFAULT = NewMoveOnly().Ptr
+// Deprecated: Use NewMoveOnly().GetPtr() instead.
+var MoveOnly_Ptr_DEFAULT = NewMoveOnly().GetPtr()
 
 func (x *MoveOnly) GetPtrNonCompat() *HeapAllocated {
     return x.Ptr
@@ -9071,14 +9071,14 @@ func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
 }
 
-// Deprecated: Use NewCountingStruct().RegularInt instead.
-var CountingStruct_RegularInt_DEFAULT = NewCountingStruct().RegularInt
+// Deprecated: Use NewCountingStruct().GetRegularInt() instead.
+var CountingStruct_RegularInt_DEFAULT = NewCountingStruct().GetRegularInt()
 
-// Deprecated: Use NewCountingStruct().CountingInt instead.
-var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().CountingInt
+// Deprecated: Use NewCountingStruct().GetCountingInt() instead.
+var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().GetCountingInt()
 
-// Deprecated: Use NewCountingStruct().RegularString instead.
-var CountingStruct_RegularString_DEFAULT = NewCountingStruct().RegularString
+// Deprecated: Use NewCountingStruct().GetRegularString() instead.
+var CountingStruct_RegularString_DEFAULT = NewCountingStruct().GetRegularString()
 
 func (x *CountingStruct) GetRegularIntNonCompat() *int64 {
     return x.RegularInt

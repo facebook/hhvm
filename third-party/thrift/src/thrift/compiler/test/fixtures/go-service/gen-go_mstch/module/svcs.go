@@ -360,8 +360,8 @@ func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
         SetR(*NewGetEntityRequest())
 }
 
-// Deprecated: Use newReqGetEntityGetEntity().R instead.
-var reqGetEntityGetEntity_R_DEFAULT = newReqGetEntityGetEntity().R
+// Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
+var reqGetEntityGetEntity_R_DEFAULT = newReqGetEntityGetEntity().GetR()
 
 func (x *reqGetEntityGetEntity) GetRNonCompat() *GetEntityRequest {
     return x.R
@@ -510,8 +510,8 @@ func newRespGetEntityGetEntity() *respGetEntityGetEntity {
         SetValue(*NewGetEntityResponse())
 }
 
-// Deprecated: Use newRespGetEntityGetEntity().Value instead.
-var respGetEntityGetEntity_Value_DEFAULT = newRespGetEntityGetEntity().Value
+// Deprecated: Use newRespGetEntityGetEntity().GetValue() instead.
+var respGetEntityGetEntity_Value_DEFAULT = newRespGetEntityGetEntity().GetValue()
 
 func (x *respGetEntityGetEntity) GetValueNonCompat() *GetEntityResponse {
     return x.Value

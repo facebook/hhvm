@@ -2031,8 +2031,8 @@ func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
           )
 }
 
-// Deprecated: Use NewTrivialNestedWithDefault().N instead.
-var TrivialNestedWithDefault_N_DEFAULT = NewTrivialNestedWithDefault().N
+// Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
+var TrivialNestedWithDefault_N_DEFAULT = NewTrivialNestedWithDefault().GetN()
 
 func (x *TrivialNestedWithDefault) GetZNonCompat() int32 {
     return x.Z
@@ -2489,8 +2489,8 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
           )
 }
 
-// Deprecated: Use NewComplexNestedWithDefault().N instead.
-var ComplexNestedWithDefault_N_DEFAULT = NewComplexNestedWithDefault().N
+// Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
+var ComplexNestedWithDefault_N_DEFAULT = NewComplexNestedWithDefault().GetN()
 
 func (x *ComplexNestedWithDefault) GetZNonCompat() string {
     return x.Z
@@ -3397,8 +3397,8 @@ func NewMyStruct() *MyStruct {
         SetData(*NewMyDataItem())
 }
 
-// Deprecated: Use NewMyStruct().Data instead.
-var MyStruct_Data_DEFAULT = NewMyStruct().Data
+// Deprecated: Use NewMyStruct().GetData() instead.
+var MyStruct_Data_DEFAULT = NewMyStruct().GetData()
 
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField
@@ -4131,11 +4131,11 @@ func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
 }
 
-// Deprecated: Use NewForwardUsageRoot().ForwardUsageStruct instead.
-var ForwardUsageRoot_ForwardUsageStruct_DEFAULT = NewForwardUsageRoot().ForwardUsageStruct
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
+var ForwardUsageRoot_ForwardUsageStruct_DEFAULT = NewForwardUsageRoot().GetForwardUsageStruct()
 
-// Deprecated: Use NewForwardUsageRoot().ForwardUsageByRef instead.
-var ForwardUsageRoot_ForwardUsageByRef_DEFAULT = NewForwardUsageRoot().ForwardUsageByRef
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageByRef() instead.
+var ForwardUsageRoot_ForwardUsageByRef_DEFAULT = NewForwardUsageRoot().GetForwardUsageByRef()
 
 func (x *ForwardUsageRoot) GetForwardUsageStructNonCompat() *ForwardUsageStruct {
     return x.ForwardUsageStruct
@@ -4348,8 +4348,8 @@ func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
 
-// Deprecated: Use NewForwardUsageStruct().Foo instead.
-var ForwardUsageStruct_Foo_DEFAULT = NewForwardUsageStruct().Foo
+// Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
+var ForwardUsageStruct_Foo_DEFAULT = NewForwardUsageStruct().GetFoo()
 
 func (x *ForwardUsageStruct) GetFooNonCompat() *ForwardUsageRoot {
     return x.Foo
@@ -4497,8 +4497,8 @@ func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
 }
 
-// Deprecated: Use NewForwardUsageByRef().Foo instead.
-var ForwardUsageByRef_Foo_DEFAULT = NewForwardUsageByRef().Foo
+// Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
+var ForwardUsageByRef_Foo_DEFAULT = NewForwardUsageByRef().GetFoo()
 
 func (x *ForwardUsageByRef) GetFooNonCompat() *ForwardUsageRoot {
     return x.Foo
@@ -5876,8 +5876,8 @@ func NewAdaptedListDep() *AdaptedListDep {
         SetField(*NewAdaptedList())
 }
 
-// Deprecated: Use NewAdaptedListDep().Field instead.
-var AdaptedListDep_Field_DEFAULT = NewAdaptedListDep().Field
+// Deprecated: Use NewAdaptedListDep().GetField() instead.
+var AdaptedListDep_Field_DEFAULT = NewAdaptedListDep().GetField()
 
 func (x *AdaptedListDep) GetFieldNonCompat() *AdaptedList {
     return x.Field
@@ -6200,8 +6200,8 @@ func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
 
-// Deprecated: Use NewDependentAdaptedListDep().Field instead.
-var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().Field
+// Deprecated: Use NewDependentAdaptedListDep().GetField() instead.
+var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().GetField()
 
 func (x *DependentAdaptedListDep) GetFieldNonCompat() *int16 {
     return x.Field
@@ -6948,8 +6948,8 @@ func NewAllocatorAware2() *AllocatorAware2 {
         SetNotAContainer(0)
 }
 
-// Deprecated: Use NewAllocatorAware2().BoxField instead.
-var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().BoxField
+// Deprecated: Use NewAllocatorAware2().GetBoxField() instead.
+var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().GetBoxField()
 
 func (x *AllocatorAware2) GetNotAContainerNonCompat() int32 {
     return x.NotAContainer

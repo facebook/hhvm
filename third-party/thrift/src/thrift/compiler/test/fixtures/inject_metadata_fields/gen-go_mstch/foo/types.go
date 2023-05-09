@@ -30,11 +30,11 @@ func NewFields() *Fields {
         SetInjectedField("")
 }
 
-// Deprecated: Use NewFields().InjectedStructuredAnnotationField instead.
-var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().InjectedStructuredAnnotationField
+// Deprecated: Use NewFields().GetInjectedStructuredAnnotationField() instead.
+var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedStructuredAnnotationField()
 
-// Deprecated: Use NewFields().InjectedUnstructuredAnnotationField instead.
-var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().InjectedUnstructuredAnnotationField
+// Deprecated: Use NewFields().GetInjectedUnstructuredAnnotationField() instead.
+var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
 
 func (x *Fields) GetInjectedFieldNonCompat() string {
     return x.InjectedField

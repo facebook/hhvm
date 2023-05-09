@@ -108,14 +108,14 @@ func NewComplexUnion() *ComplexUnion {
         SetStringRef("")
 }
 
-// Deprecated: Use NewComplexUnion().IntValue instead.
-var ComplexUnion_IntValue_DEFAULT = NewComplexUnion().IntValue
+// Deprecated: Use NewComplexUnion().GetIntValue() instead.
+var ComplexUnion_IntValue_DEFAULT = NewComplexUnion().GetIntValue()
 
-// Deprecated: Use NewComplexUnion().StringValue instead.
-var ComplexUnion_StringValue_DEFAULT = NewComplexUnion().StringValue
+// Deprecated: Use NewComplexUnion().GetStringValue() instead.
+var ComplexUnion_StringValue_DEFAULT = NewComplexUnion().GetStringValue()
 
-// Deprecated: Use NewComplexUnion().StringRef instead.
-var ComplexUnion_StringRef_DEFAULT = NewComplexUnion().StringRef
+// Deprecated: Use NewComplexUnion().GetStringRef() instead.
+var ComplexUnion_StringRef_DEFAULT = NewComplexUnion().GetStringRef()
 
 func (x *ComplexUnion) GetIntValueNonCompat() *int64 {
     return x.IntValue
@@ -954,8 +954,8 @@ func NewDataUnion() *DataUnion {
         SetStringData("")
 }
 
-// Deprecated: Use NewDataUnion().StringData instead.
-var DataUnion_StringData_DEFAULT = NewDataUnion().StringData
+// Deprecated: Use NewDataUnion().GetStringData() instead.
+var DataUnion_StringData_DEFAULT = NewDataUnion().GetStringData()
 
 func (x *DataUnion) GetBinaryDataNonCompat() []byte {
     return x.BinaryData
@@ -1438,11 +1438,11 @@ func NewValUnion() *ValUnion {
         SetV2(*NewVal())
 }
 
-// Deprecated: Use NewValUnion().V1 instead.
-var ValUnion_V1_DEFAULT = NewValUnion().V1
+// Deprecated: Use NewValUnion().GetV1() instead.
+var ValUnion_V1_DEFAULT = NewValUnion().GetV1()
 
-// Deprecated: Use NewValUnion().V2 instead.
-var ValUnion_V2_DEFAULT = NewValUnion().V2
+// Deprecated: Use NewValUnion().GetV2() instead.
+var ValUnion_V2_DEFAULT = NewValUnion().GetV2()
 
 func (x *ValUnion) GetV1NonCompat() *Val {
     return x.V1
@@ -1672,11 +1672,11 @@ func NewVirtualComplexUnion() *VirtualComplexUnion {
         SetThingTwo("")
 }
 
-// Deprecated: Use NewVirtualComplexUnion().ThingOne instead.
-var VirtualComplexUnion_ThingOne_DEFAULT = NewVirtualComplexUnion().ThingOne
+// Deprecated: Use NewVirtualComplexUnion().GetThingOne() instead.
+var VirtualComplexUnion_ThingOne_DEFAULT = NewVirtualComplexUnion().GetThingOne()
 
-// Deprecated: Use NewVirtualComplexUnion().ThingTwo instead.
-var VirtualComplexUnion_ThingTwo_DEFAULT = NewVirtualComplexUnion().ThingTwo
+// Deprecated: Use NewVirtualComplexUnion().GetThingTwo() instead.
+var VirtualComplexUnion_ThingTwo_DEFAULT = NewVirtualComplexUnion().GetThingTwo()
 
 func (x *VirtualComplexUnion) GetThingOneNonCompat() *string {
     return x.ThingOne
@@ -2036,8 +2036,8 @@ func NewNonCopyableUnion() *NonCopyableUnion {
         SetS(*NewNonCopyableStruct())
 }
 
-// Deprecated: Use NewNonCopyableUnion().S instead.
-var NonCopyableUnion_S_DEFAULT = NewNonCopyableUnion().S
+// Deprecated: Use NewNonCopyableUnion().GetS() instead.
+var NonCopyableUnion_S_DEFAULT = NewNonCopyableUnion().GetS()
 
 func (x *NonCopyableUnion) GetSNonCompat() *NonCopyableStruct {
     return x.S

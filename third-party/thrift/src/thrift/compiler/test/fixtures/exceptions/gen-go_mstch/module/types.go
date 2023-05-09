@@ -165,8 +165,8 @@ func NewSerious() *Serious {
     return (&Serious{})
 }
 
-// Deprecated: Use NewSerious().Sonnet instead.
-var Serious_Sonnet_DEFAULT = NewSerious().Sonnet
+// Deprecated: Use NewSerious().GetSonnet() instead.
+var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
 
 func (x *Serious) GetSonnetNonCompat() *string {
     return x.Sonnet

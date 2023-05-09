@@ -264,11 +264,11 @@ func NewU() *U {
         SetS("")
 }
 
-// Deprecated: Use NewU().I instead.
-var U_I_DEFAULT = NewU().I
+// Deprecated: Use NewU().GetI() instead.
+var U_I_DEFAULT = NewU().GetI()
 
-// Deprecated: Use NewU().S instead.
-var U_S_DEFAULT = NewU().S
+// Deprecated: Use NewU().GetS() instead.
+var U_S_DEFAULT = NewU().GetS()
 
 func (x *U) GetINonCompat() *int32 {
     return x.I

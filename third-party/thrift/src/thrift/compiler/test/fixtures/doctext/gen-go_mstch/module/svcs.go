@@ -610,8 +610,8 @@ func newRespCThing() *respCThing {
         SetValue("")
 }
 
-// Deprecated: Use newRespCThing().Bang instead.
-var respCThing_Bang_DEFAULT = newRespCThing().Bang
+// Deprecated: Use newRespCThing().GetBang() instead.
+var respCThing_Bang_DEFAULT = newRespCThing().GetBang()
 
 func (x *respCThing) GetValueNonCompat() string {
     return x.Value

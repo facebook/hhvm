@@ -357,14 +357,14 @@ func NewInternship() *Internship {
         SetTitle("")
 }
 
-// Deprecated: Use NewInternship().Employer instead.
-var Internship_Employer_DEFAULT = NewInternship().Employer
+// Deprecated: Use NewInternship().GetEmployer() instead.
+var Internship_Employer_DEFAULT = NewInternship().GetEmployer()
 
-// Deprecated: Use NewInternship().Compensation instead.
-var Internship_Compensation_DEFAULT = NewInternship().Compensation
+// Deprecated: Use NewInternship().GetCompensation() instead.
+var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
 
-// Deprecated: Use NewInternship().School instead.
-var Internship_School_DEFAULT = NewInternship().School
+// Deprecated: Use NewInternship().GetSchool() instead.
+var Internship_School_DEFAULT = NewInternship().GetSchool()
 
 func (x *Internship) GetWeeksNonCompat() int32 {
     return x.Weeks
@@ -1127,8 +1127,8 @@ func NewStruct2() *Struct2 {
         SetD(make([]int32, 0))
 }
 
-// Deprecated: Use NewStruct2().C instead.
-var Struct2_C_DEFAULT = NewStruct2().C
+// Deprecated: Use NewStruct2().GetC() instead.
+var Struct2_C_DEFAULT = NewStruct2().GetC()
 
 func (x *Struct2) GetANonCompat() int32 {
     return x.A
@@ -1478,8 +1478,8 @@ func NewStruct3() *Struct3 {
         SetC(*NewStruct2())
 }
 
-// Deprecated: Use NewStruct3().C instead.
-var Struct3_C_DEFAULT = NewStruct3().C
+// Deprecated: Use NewStruct3().GetC() instead.
+var Struct3_C_DEFAULT = NewStruct3().GetC()
 
 func (x *Struct3) GetANonCompat() string {
     return x.A
@@ -1734,11 +1734,11 @@ func NewStruct4() *Struct4 {
         SetA(0)
 }
 
-// Deprecated: Use NewStruct4().B instead.
-var Struct4_B_DEFAULT = NewStruct4().B
+// Deprecated: Use NewStruct4().GetB() instead.
+var Struct4_B_DEFAULT = NewStruct4().GetB()
 
-// Deprecated: Use NewStruct4().C instead.
-var Struct4_C_DEFAULT = NewStruct4().C
+// Deprecated: Use NewStruct4().GetC() instead.
+var Struct4_C_DEFAULT = NewStruct4().GetC()
 
 func (x *Struct4) GetANonCompat() int32 {
     return x.A
@@ -2004,11 +2004,11 @@ func NewUnion1() *Union1 {
         SetD(0.0)
 }
 
-// Deprecated: Use NewUnion1().I instead.
-var Union1_I_DEFAULT = NewUnion1().I
+// Deprecated: Use NewUnion1().GetI() instead.
+var Union1_I_DEFAULT = NewUnion1().GetI()
 
-// Deprecated: Use NewUnion1().D instead.
-var Union1_D_DEFAULT = NewUnion1().D
+// Deprecated: Use NewUnion1().GetD() instead.
+var Union1_D_DEFAULT = NewUnion1().GetD()
 
 func (x *Union1) GetINonCompat() *int32 {
     return x.I
@@ -2240,17 +2240,17 @@ func NewUnion2() *Union2 {
         SetU(*NewUnion1())
 }
 
-// Deprecated: Use NewUnion2().I instead.
-var Union2_I_DEFAULT = NewUnion2().I
+// Deprecated: Use NewUnion2().GetI() instead.
+var Union2_I_DEFAULT = NewUnion2().GetI()
 
-// Deprecated: Use NewUnion2().D instead.
-var Union2_D_DEFAULT = NewUnion2().D
+// Deprecated: Use NewUnion2().GetD() instead.
+var Union2_D_DEFAULT = NewUnion2().GetD()
 
-// Deprecated: Use NewUnion2().S instead.
-var Union2_S_DEFAULT = NewUnion2().S
+// Deprecated: Use NewUnion2().GetS() instead.
+var Union2_S_DEFAULT = NewUnion2().GetS()
 
-// Deprecated: Use NewUnion2().U instead.
-var Union2_U_DEFAULT = NewUnion2().U
+// Deprecated: Use NewUnion2().GetU() instead.
+var Union2_U_DEFAULT = NewUnion2().GetU()
 
 func (x *Union2) GetINonCompat() *int32 {
     return x.I

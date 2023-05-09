@@ -230,8 +230,8 @@ func NewTypeUri() *TypeUri {
         SetTypeHashPrefixSha2_256(NewByteString())
 }
 
-// Deprecated: Use NewTypeUri().Uri instead.
-var TypeUri_Uri_DEFAULT = NewTypeUri().Uri
+// Deprecated: Use NewTypeUri().GetUri() instead.
+var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
 
 func (x *TypeUri) GetUriNonCompat() *Uri {
     return x.Uri
@@ -491,56 +491,56 @@ func NewTypeName() *TypeName {
         SetMapType(0)
 }
 
-// Deprecated: Use NewTypeName().BoolType instead.
-var TypeName_BoolType_DEFAULT = NewTypeName().BoolType
+// Deprecated: Use NewTypeName().GetBoolType() instead.
+var TypeName_BoolType_DEFAULT = NewTypeName().GetBoolType()
 
-// Deprecated: Use NewTypeName().ByteType instead.
-var TypeName_ByteType_DEFAULT = NewTypeName().ByteType
+// Deprecated: Use NewTypeName().GetByteType() instead.
+var TypeName_ByteType_DEFAULT = NewTypeName().GetByteType()
 
-// Deprecated: Use NewTypeName().I16Type instead.
-var TypeName_I16Type_DEFAULT = NewTypeName().I16Type
+// Deprecated: Use NewTypeName().GetI16Type() instead.
+var TypeName_I16Type_DEFAULT = NewTypeName().GetI16Type()
 
-// Deprecated: Use NewTypeName().I32Type instead.
-var TypeName_I32Type_DEFAULT = NewTypeName().I32Type
+// Deprecated: Use NewTypeName().GetI32Type() instead.
+var TypeName_I32Type_DEFAULT = NewTypeName().GetI32Type()
 
-// Deprecated: Use NewTypeName().I64Type instead.
-var TypeName_I64Type_DEFAULT = NewTypeName().I64Type
+// Deprecated: Use NewTypeName().GetI64Type() instead.
+var TypeName_I64Type_DEFAULT = NewTypeName().GetI64Type()
 
-// Deprecated: Use NewTypeName().FloatType instead.
-var TypeName_FloatType_DEFAULT = NewTypeName().FloatType
+// Deprecated: Use NewTypeName().GetFloatType() instead.
+var TypeName_FloatType_DEFAULT = NewTypeName().GetFloatType()
 
-// Deprecated: Use NewTypeName().DoubleType instead.
-var TypeName_DoubleType_DEFAULT = NewTypeName().DoubleType
+// Deprecated: Use NewTypeName().GetDoubleType() instead.
+var TypeName_DoubleType_DEFAULT = NewTypeName().GetDoubleType()
 
-// Deprecated: Use NewTypeName().StringType instead.
-var TypeName_StringType_DEFAULT = NewTypeName().StringType
+// Deprecated: Use NewTypeName().GetStringType() instead.
+var TypeName_StringType_DEFAULT = NewTypeName().GetStringType()
 
-// Deprecated: Use NewTypeName().BinaryType instead.
-var TypeName_BinaryType_DEFAULT = NewTypeName().BinaryType
+// Deprecated: Use NewTypeName().GetBinaryType() instead.
+var TypeName_BinaryType_DEFAULT = NewTypeName().GetBinaryType()
 
-// Deprecated: Use NewTypeName().EnumType instead.
-var TypeName_EnumType_DEFAULT = NewTypeName().EnumType
+// Deprecated: Use NewTypeName().GetEnumType() instead.
+var TypeName_EnumType_DEFAULT = NewTypeName().GetEnumType()
 
-// Deprecated: Use NewTypeName().TypedefType instead.
-var TypeName_TypedefType_DEFAULT = NewTypeName().TypedefType
+// Deprecated: Use NewTypeName().GetTypedefType() instead.
+var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
 
-// Deprecated: Use NewTypeName().StructType instead.
-var TypeName_StructType_DEFAULT = NewTypeName().StructType
+// Deprecated: Use NewTypeName().GetStructType() instead.
+var TypeName_StructType_DEFAULT = NewTypeName().GetStructType()
 
-// Deprecated: Use NewTypeName().UnionType instead.
-var TypeName_UnionType_DEFAULT = NewTypeName().UnionType
+// Deprecated: Use NewTypeName().GetUnionType() instead.
+var TypeName_UnionType_DEFAULT = NewTypeName().GetUnionType()
 
-// Deprecated: Use NewTypeName().ExceptionType instead.
-var TypeName_ExceptionType_DEFAULT = NewTypeName().ExceptionType
+// Deprecated: Use NewTypeName().GetExceptionType() instead.
+var TypeName_ExceptionType_DEFAULT = NewTypeName().GetExceptionType()
 
-// Deprecated: Use NewTypeName().ListType instead.
-var TypeName_ListType_DEFAULT = NewTypeName().ListType
+// Deprecated: Use NewTypeName().GetListType() instead.
+var TypeName_ListType_DEFAULT = NewTypeName().GetListType()
 
-// Deprecated: Use NewTypeName().SetType instead.
-var TypeName_SetType_DEFAULT = NewTypeName().SetType
+// Deprecated: Use NewTypeName().GetSetType() instead.
+var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
 
-// Deprecated: Use NewTypeName().MapType instead.
-var TypeName_MapType_DEFAULT = NewTypeName().MapType
+// Deprecated: Use NewTypeName().GetMapType() instead.
+var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
 
 func (x *TypeName) GetBoolTypeNonCompat() *Void {
     return x.BoolType

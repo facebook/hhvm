@@ -28,8 +28,8 @@ func NewIncludesAlso() *IncludesAlso {
         SetAlso(*includesAlso.NewAlso())
 }
 
-// Deprecated: Use NewIncludesAlso().Also instead.
-var IncludesAlso_Also_DEFAULT = NewIncludesAlso().Also
+// Deprecated: Use NewIncludesAlso().GetAlso() instead.
+var IncludesAlso_Also_DEFAULT = NewIncludesAlso().GetAlso()
 
 func (x *IncludesAlso) GetAlsoNonCompat() *includesAlso.Also {
     return x.Also

@@ -85,8 +85,8 @@ func NewIncluded() *Included {
           )
 }
 
-// Deprecated: Use NewIncluded().MyTransitiveField instead.
-var Included_MyTransitiveField_DEFAULT = NewIncluded().MyTransitiveField
+// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
+var Included_MyTransitiveField_DEFAULT = NewIncluded().GetMyTransitiveField()
 
 func (x *Included) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField

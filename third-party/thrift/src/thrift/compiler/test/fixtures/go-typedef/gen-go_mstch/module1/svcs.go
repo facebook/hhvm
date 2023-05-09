@@ -316,8 +316,8 @@ func newRespFinderByPlate() *respFinderByPlate {
         SetValue(*NewAutomobile())
 }
 
-// Deprecated: Use newRespFinderByPlate().Value instead.
-var respFinderByPlate_Value_DEFAULT = newRespFinderByPlate().Value
+// Deprecated: Use newRespFinderByPlate().GetValue() instead.
+var respFinderByPlate_Value_DEFAULT = newRespFinderByPlate().GetValue()
 
 func (x *respFinderByPlate) GetValueNonCompat() *Automobile {
     return x.Value
@@ -604,8 +604,8 @@ func newRespFinderAliasByPlate() *respFinderAliasByPlate {
         SetValue(*NewCar())
 }
 
-// Deprecated: Use newRespFinderAliasByPlate().Value instead.
-var respFinderAliasByPlate_Value_DEFAULT = newRespFinderAliasByPlate().Value
+// Deprecated: Use newRespFinderAliasByPlate().GetValue() instead.
+var respFinderAliasByPlate_Value_DEFAULT = newRespFinderAliasByPlate().GetValue()
 
 func (x *respFinderAliasByPlate) GetValueNonCompat() *Car {
     return x.Value

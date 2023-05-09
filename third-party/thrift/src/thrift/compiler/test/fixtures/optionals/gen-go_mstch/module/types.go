@@ -413,20 +413,20 @@ func NewVehicle() *Vehicle {
         SetHasAC(false)
 }
 
-// Deprecated: Use NewVehicle().Color instead.
-var Vehicle_Color_DEFAULT = NewVehicle().Color
+// Deprecated: Use NewVehicle().GetColor() instead.
+var Vehicle_Color_DEFAULT = NewVehicle().GetColor()
 
-// Deprecated: Use NewVehicle().LicensePlate instead.
-var Vehicle_LicensePlate_DEFAULT = NewVehicle().LicensePlate
+// Deprecated: Use NewVehicle().GetLicensePlate() instead.
+var Vehicle_LicensePlate_DEFAULT = NewVehicle().GetLicensePlate()
 
-// Deprecated: Use NewVehicle().Description instead.
-var Vehicle_Description_DEFAULT = NewVehicle().Description
+// Deprecated: Use NewVehicle().GetDescription() instead.
+var Vehicle_Description_DEFAULT = NewVehicle().GetDescription()
 
-// Deprecated: Use NewVehicle().Name instead.
-var Vehicle_Name_DEFAULT = NewVehicle().Name
+// Deprecated: Use NewVehicle().GetName() instead.
+var Vehicle_Name_DEFAULT = NewVehicle().GetName()
 
-// Deprecated: Use NewVehicle().HasAC instead.
-var Vehicle_HasAC_DEFAULT = NewVehicle().HasAC
+// Deprecated: Use NewVehicle().GetHasAC() instead.
+var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
 
 func (x *Vehicle) GetColorNonCompat() *Color {
     return x.Color
@@ -841,20 +841,20 @@ func NewPerson() *Person {
         SetName("")
 }
 
-// Deprecated: Use NewPerson().Age instead.
-var Person_Age_DEFAULT = NewPerson().Age
+// Deprecated: Use NewPerson().GetAge() instead.
+var Person_Age_DEFAULT = NewPerson().GetAge()
 
-// Deprecated: Use NewPerson().Address instead.
-var Person_Address_DEFAULT = NewPerson().Address
+// Deprecated: Use NewPerson().GetAddress() instead.
+var Person_Address_DEFAULT = NewPerson().GetAddress()
 
-// Deprecated: Use NewPerson().FavoriteColor instead.
-var Person_FavoriteColor_DEFAULT = NewPerson().FavoriteColor
+// Deprecated: Use NewPerson().GetFavoriteColor() instead.
+var Person_FavoriteColor_DEFAULT = NewPerson().GetFavoriteColor()
 
-// Deprecated: Use NewPerson().BestFriend instead.
-var Person_BestFriend_DEFAULT = NewPerson().BestFriend
+// Deprecated: Use NewPerson().GetBestFriend() instead.
+var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
 
-// Deprecated: Use NewPerson().AfraidOfAnimal instead.
-var Person_AfraidOfAnimal_DEFAULT = NewPerson().AfraidOfAnimal
+// Deprecated: Use NewPerson().GetAfraidOfAnimal() instead.
+var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 func (x *Person) GetIdNonCompat() PersonID {
     return x.Id

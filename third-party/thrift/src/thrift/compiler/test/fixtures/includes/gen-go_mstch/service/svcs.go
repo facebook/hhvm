@@ -168,11 +168,11 @@ func newReqMyServiceQuery() *reqMyServiceQuery {
         SetI(*includes.NewIncluded())
 }
 
-// Deprecated: Use newReqMyServiceQuery().S instead.
-var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().S
+// Deprecated: Use newReqMyServiceQuery().GetS() instead.
+var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().GetS()
 
-// Deprecated: Use newReqMyServiceQuery().I instead.
-var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().I
+// Deprecated: Use newReqMyServiceQuery().GetI() instead.
+var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().GetI()
 
 func (x *reqMyServiceQuery) GetSNonCompat() *module.MyStruct {
     return x.S
@@ -471,11 +471,11 @@ func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
         SetI(*includes.NewIncluded())
 }
 
-// Deprecated: Use newReqMyServiceHasArgDocs().S instead.
-var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().S
+// Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
+var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().GetS()
 
-// Deprecated: Use newReqMyServiceHasArgDocs().I instead.
-var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().I
+// Deprecated: Use newReqMyServiceHasArgDocs().GetI() instead.
+var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().GetI()
 
 func (x *reqMyServiceHasArgDocs) GetSNonCompat() *module.MyStruct {
     return x.S

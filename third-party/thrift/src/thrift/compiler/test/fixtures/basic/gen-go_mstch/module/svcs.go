@@ -647,8 +647,8 @@ func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
         SetValue(*NewReservedKeyword())
 }
 
-// Deprecated: Use newRespFB303ServiceSimpleRPC().Value instead.
-var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().Value
+// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
+var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().GetValue()
 
 func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
     return x.Value

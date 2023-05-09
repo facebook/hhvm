@@ -332,8 +332,8 @@ func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
 
-// Deprecated: Use newRespMyServicePing().MyExcept instead.
-var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().MyExcept
+// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
+var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().GetMyExcept()
 
 func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
     return x.MyExcept

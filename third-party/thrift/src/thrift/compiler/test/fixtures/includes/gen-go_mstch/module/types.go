@@ -34,11 +34,11 @@ func NewMyStruct() *MyStruct {
         SetMyIncludedInt(42)
 }
 
-// Deprecated: Use NewMyStruct().MyIncludedField instead.
-var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().MyIncludedField
+// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
+var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().GetMyIncludedField()
 
-// Deprecated: Use NewMyStruct().MyOtherIncludedField instead.
-var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().MyOtherIncludedField
+// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
+var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().GetMyOtherIncludedField()
 
 func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
     return x.MyIncludedField

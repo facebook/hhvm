@@ -318,8 +318,8 @@ func NewBoolPatch() *BoolPatch {
         SetInvert(false)
 }
 
-// Deprecated: Use NewBoolPatch().Assign instead.
-var BoolPatch_Assign_DEFAULT = NewBoolPatch().Assign
+// Deprecated: Use NewBoolPatch().GetAssign() instead.
+var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
 
 func (x *BoolPatch) GetAssignNonCompat() *bool {
     return x.Assign
@@ -574,8 +574,8 @@ func NewBytePatch() *BytePatch {
         SetAdd(0)
 }
 
-// Deprecated: Use NewBytePatch().Assign instead.
-var BytePatch_Assign_DEFAULT = NewBytePatch().Assign
+// Deprecated: Use NewBytePatch().GetAssign() instead.
+var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
 func (x *BytePatch) GetAssignNonCompat() *byte {
     return x.Assign
@@ -830,8 +830,8 @@ func NewI16Patch() *I16Patch {
         SetAdd(0)
 }
 
-// Deprecated: Use NewI16Patch().Assign instead.
-var I16Patch_Assign_DEFAULT = NewI16Patch().Assign
+// Deprecated: Use NewI16Patch().GetAssign() instead.
+var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
 
 func (x *I16Patch) GetAssignNonCompat() *int16 {
     return x.Assign
@@ -1086,8 +1086,8 @@ func NewI32Patch() *I32Patch {
         SetAdd(0)
 }
 
-// Deprecated: Use NewI32Patch().Assign instead.
-var I32Patch_Assign_DEFAULT = NewI32Patch().Assign
+// Deprecated: Use NewI32Patch().GetAssign() instead.
+var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
 
 func (x *I32Patch) GetAssignNonCompat() *int32 {
     return x.Assign
@@ -1342,8 +1342,8 @@ func NewI64Patch() *I64Patch {
         SetAdd(0)
 }
 
-// Deprecated: Use NewI64Patch().Assign instead.
-var I64Patch_Assign_DEFAULT = NewI64Patch().Assign
+// Deprecated: Use NewI64Patch().GetAssign() instead.
+var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
 
 func (x *I64Patch) GetAssignNonCompat() *int64 {
     return x.Assign
@@ -1598,8 +1598,8 @@ func NewFloatPatch() *FloatPatch {
         SetAdd(0.0)
 }
 
-// Deprecated: Use NewFloatPatch().Assign instead.
-var FloatPatch_Assign_DEFAULT = NewFloatPatch().Assign
+// Deprecated: Use NewFloatPatch().GetAssign() instead.
+var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
 
 func (x *FloatPatch) GetAssignNonCompat() *float32 {
     return x.Assign
@@ -1854,8 +1854,8 @@ func NewDoublePatch() *DoublePatch {
         SetAdd(0.0)
 }
 
-// Deprecated: Use NewDoublePatch().Assign instead.
-var DoublePatch_Assign_DEFAULT = NewDoublePatch().Assign
+// Deprecated: Use NewDoublePatch().GetAssign() instead.
+var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
 
 func (x *DoublePatch) GetAssignNonCompat() *float64 {
     return x.Assign
@@ -2112,8 +2112,8 @@ func NewStringPatch() *StringPatch {
         SetAppend("")
 }
 
-// Deprecated: Use NewStringPatch().Assign instead.
-var StringPatch_Assign_DEFAULT = NewStringPatch().Assign
+// Deprecated: Use NewStringPatch().GetAssign() instead.
+var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 func (x *StringPatch) GetAssignNonCompat() *string {
     return x.Assign

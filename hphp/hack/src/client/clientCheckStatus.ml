@@ -114,6 +114,29 @@ let go_streaming_on_fd
   let start_time = Unix.gettimeofday () in
   let first_error_time = ref None in
   let latest_progress = ref None in
+  let errors_file_telemetry = ref (Telemetry.create ()) in
+
+  (* This constructs a telemetry that we'll use for both partial-progress
+     and completed events. *)
+  let telemetry_so_far displayed_count =
+    !errors_file_telemetry
+    |> Telemetry.bool_ ~key:"streaming" ~value:true
+    |> Telemetry.int_opt ~key:"max_errors" ~value:max_errors
+    |> Telemetry.float_opt
+         ~key:"first_error_time"
+         ~value:(Option.map !first_error_time ~f:(fun t -> t -. start_time))
+    |> Telemetry.int_ ~key:"displayed_count" ~value:displayed_count
+  in
+
+  (* If the user does Ctrl+C, it generates SIGINT and we can't run any code in response.
+     But we'd still like to report telemetry in that case. So we pre-emptively store
+     telemetry in [partial_telemetry_ref] which the SIGINT handler will be able to read:
+     if it finds [Some], then the SIGINT handler will deem the operation a success
+     and will log CLIENT_CHECK_PARTIAL instead of CLIENT_CHECK_BAD_EXIT. *)
+  let update_partial_telemetry displayed_count =
+    if displayed_count > 0 then
+      partial_telemetry_ref := Some (telemetry_so_far displayed_count)
+  in
 
   (* this lwt process reads the progress.json file once a second and displays a spinner;
      it never terminates *)
@@ -143,6 +166,11 @@ let go_streaming_on_fd
       failwith "Expected end_sentinel before end of stream"
     | Some (Error (end_sentinel, log_message)) ->
       Lwt.return (displayed_count, end_sentinel, log_message)
+    | Some (Ok (ServerProgress.Telemetry telemetry_item)) ->
+      errors_file_telemetry :=
+        Telemetry.merge !errors_file_telemetry telemetry_item;
+      update_partial_telemetry displayed_count;
+      consume displayed_count
     | Some (Ok (ServerProgress.Errors { errors; timestamp = _ })) ->
       first_error_time :=
         Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
@@ -168,16 +196,7 @@ let go_streaming_on_fd
       end;
       progress_callback !latest_progress;
       let displayed_count = displayed_count + !found_new in
-      partial_telemetry_ref :=
-        Some
-          (Telemetry.create ()
-          |> Telemetry.float_
-               ~key:"first_error_time"
-               ~value:(Option.value_exn !first_error_time)
-          |> Telemetry.float_
-               ~key:"latest_error_time"
-               ~value:(Unix.gettimeofday ())
-          |> Telemetry.int_ ~key:"displayed_count" ~value:displayed_count);
+      update_partial_telemetry displayed_count;
       if displayed_count >= Option.value max_errors ~default:Int.max_value then
         Lwt.return
           ( displayed_count,
@@ -206,6 +225,9 @@ let go_streaming_on_fd
            ~dropped_count:None
            ~max_errors)
         ~f:(fun msg -> Printf.printf "%s" msg);
+      let telemetry =
+        Telemetry.merge (telemetry_so_far displayed_count) telemetry
+      in
       if displayed_count = 0 then
         (Exit_status.No_error, telemetry)
       else
@@ -235,27 +257,6 @@ let go_streaming_on_fd
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 
-  (* telemetry about streaming *)
-  let ms_to_first_error =
-    Option.map !first_error_time ~f:(fun t ->
-        int_of_float (1000.0 *. (t -. start_time)))
-  in
-  let telemetry =
-    telemetry
-    |> Telemetry.object_
-         ~key:"streaming"
-         ~value:
-           (Telemetry.create ()
-           |> Telemetry.bool_ ~key:"streaming" ~value:true
-           |> Telemetry.string_
-                ~key:"end_sentinel"
-                ~value:(ServerProgress.show_errors_file_error end_sentinel)
-           |> Telemetry.int_ ~key:"displayed_count" ~value:displayed_count
-           |> Telemetry.int_opt ~key:"max_errors" ~value:max_errors
-           |> Telemetry.int_opt
-                ~key:"ms_to_first_error"
-                ~value:ms_to_first_error)
-  in
   Lwt.return (exit_status, telemetry)
 
 (** Gets all files-changed since [clock] which match the standard hack

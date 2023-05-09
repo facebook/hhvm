@@ -519,6 +519,8 @@ let event_to_string (event : event) : string =
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
   | Errors_file None -> "Errors_file(anomalous end-of-stream)"
+  | Errors_file (Some (Ok (ServerProgress.Telemetry _))) ->
+    "Errors_file: telemetry"
   | Errors_file (Some (Ok (ServerProgress.Errors { errors; timestamp = _ }))) ->
   begin
     match Relative_path.Map.choose_opt errors with
@@ -4398,6 +4400,7 @@ let handle_errors_file_item
         ()
     end;
     Lwt.return_none
+  | Some (Ok (ServerProgress.Telemetry _)) -> Lwt.return_none
   | Some (Ok (ServerProgress.Errors { errors; timestamp })) ->
     let lenv =
       validate_error_item_TEMPORARY lenv ide_service errors ~start_time

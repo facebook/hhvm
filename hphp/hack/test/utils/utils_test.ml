@@ -302,6 +302,59 @@ let test_telemetry_diff () =
   end;
   true
 
+let test_telemetry_add () =
+  let t =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i" ~value:1
+    |> Telemetry.float_ ~key:"f" ~value:1.0
+    |> Telemetry.string_ ~key:"s" ~value:"a"
+    |> Telemetry.string_list ~key:"sl" ~value:["a"; "b"]
+    |> Telemetry.int_list ~key:"il" ~value:[1; 2]
+    |> Telemetry.bool_ ~key:"b" ~value:true
+    |> Telemetry.json_ ~key:"j1" ~value:(Hh_json.JSON_Number "1.0")
+    |> Telemetry.json_ ~key:"j2" ~value:Hh_json.JSON_Null
+  in
+  let t = t |> Telemetry.object_ ~key:"o" ~value:t in
+  String_asserter.assert_equals
+    {|{"f":1,"i":1,"j1":1.0,"o":{"j1":1.0,"i":1,"f":1}}|}
+    (Telemetry.add t (Telemetry.create ()) |> Telemetry.to_string)
+    "add t blank";
+  String_asserter.assert_equals
+    {|{"f":1,"i":1,"j1":1.0,"o":{"j1":1.0,"i":1,"f":1}}|}
+    (Telemetry.add (Telemetry.create ()) t |> Telemetry.to_string)
+    "add blank t";
+  String_asserter.assert_equals
+    {|{"f":2,"i":2,"j1":2,"o":{"j1":2,"i":2,"f":2}}|}
+    (Telemetry.add t t |> Telemetry.to_string)
+    "add t t";
+  true
+
+let test_telemetry_merge () =
+  let t1 =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i1" ~value:1
+    |> Telemetry.string_ ~key:"s1" ~value:"a"
+  in
+  let t2 =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i2" ~value:2
+    |> Telemetry.object_
+         ~key:"o"
+         ~value:(Telemetry.create () |> Telemetry.int_ ~key:"i" ~value:2)
+  in
+  (* disjoint merge *)
+  let m = Telemetry.merge t1 t2 in
+  String_asserter.assert_equals
+    {|{"i1":1,"s1":"a","i2":2,"o":{"i":2}}|}
+    (m |> Telemetry.to_string)
+    "merge t1 t2";
+  (* overlappingmerge *)
+  String_asserter.assert_equals
+    {|{"i1":1,"s1":"a","i1":1,"s1":"a","i2":2,"o":{"i":2}}|}
+    (Telemetry.merge t1 m |> Telemetry.to_string)
+    "merge m m";
+  true
+
 let () =
   Unit_test.run_all
     [
@@ -310,4 +363,6 @@ let () =
       ("test strip namespace functions", test_strip_namespace);
       ("test telemetry_test functions", test_telemetry_test);
       ("test telemetry_diff", test_telemetry_diff);
+      ("test telemetry_add", test_telemetry_add);
+      ("test telemetry_merge", test_telemetry_merge);
     ]

@@ -184,6 +184,7 @@ type errors_file_item =
       errors: Errors.finalized_error list Relative_path.Map.t;
       timestamp: float;
     }
+  | Telemetry of Telemetry.t
 
 val is_complete : errors_file_error -> bool
 
@@ -204,6 +205,11 @@ module ErrorsWrite : sig
   Anyone reading the current errors file will get this error report as [Ok errors].
   This call will failwith if called before [new_empty_file], or after [complete]/[unlink_at_server_stop]. *)
   val report : Errors.t -> unit
+
+  (** To be called during typechecking.
+  Anyone reading the current errors file will get this as [Ok Telemetry].
+  This call will failwith if called before [new_empty_file], or after [complete]/[unlink_at_server_stop]. *)
+  val telemetry : Telemetry.t -> unit
 
   (** To be called at the end of typechecking.
   After this, anyone reading the errors file will get [Error Complete].

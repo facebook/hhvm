@@ -31,7 +31,7 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
     }
 
     {{/field:nilable?}}
-    return {{#field:compat_getter_dereference?}}*{{/field:compat_getter_dereference?}}x.{{field:go_name}}
+    return {{#field:dereference?}}*{{/field:dereference?}}x.{{field:go_name}}
 }
 {{/program:compat_getters?}}
 {{! new line }}

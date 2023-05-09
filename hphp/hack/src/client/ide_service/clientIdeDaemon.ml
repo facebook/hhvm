@@ -1209,14 +1209,56 @@ let handle_request
             in
             let result =
               match result with
-              | Ok ide_result -> ClientIdeMessage.Local_var_result ide_result
+              | Ok ide_result ->
+                let lsp_uri_map =
+                  begin
+                    match ide_result with
+                    | None -> Lsp.UriMap.empty
+                    | Some (_str, []) ->
+                      (* If we find-refs on a localvar via right-click, is it possible that it doesn't return references?
+                         It's possible some nondeterminism changed the cached TAST,
+                         but assert that it's a failure for now
+                      *)
+                      let err =
+                        Printf.sprintf
+                          "FindRefs returned an empty list of positions for localvar %s"
+                          name
+                      in
+                      log "%s" err;
+                      HackEventLogger.invariant_violation_bug err;
+                      failwith err
+                    | Some (_str, positions) ->
+                      let filename = Pos.filename @@ List.hd_exn positions in
+                      let uri =
+                        Lsp_helpers.path_to_lsp_uri
+                          ~default_path:filename
+                          filename
+                      in
+                      Lsp.UriMap.add uri positions Lsp.UriMap.empty
+                  end
+                in
+                let () =
+                  if lsp_uri_map |> Lsp.UriMap.values |> List.length = 1 then
+                    ()
+                  else
+                    (* Can a localvar cross file boundaries? I sure hope not. *)
+                    let err =
+                      Printf.sprintf
+                        "Found more than one file when executing find refs for localvar %s"
+                        name
+                    in
+                    log "%s" err;
+                    HackEventLogger.invariant_violation_bug err;
+                    failwith err
+                in
+                ClientIdeMessage.Find_refs_success (name, None, lsp_uri_map)
               | Error _action ->
                 let err =
                   Printf.sprintf "Failed to find refs for localvar %s" name
                 in
                 log "%s" err;
                 HackEventLogger.invariant_violation_bug err;
-                failwith "ClientIDEDaemon failed to find-refs for a localvar"
+                failwith err
             in
             (istate, result)
             (* clientLsp should raise if we return a LocalVar action *)
@@ -1271,8 +1313,8 @@ let handle_request
                 ~init:(istate, Lsp.UriMap.empty)
             in
             ( istate,
-              ClientIdeMessage.Shell_out_and_augment
-                (name, action, single_file_refs) ))
+              ClientIdeMessage.Find_refs_success
+                (name, Some action, single_file_refs) ))
     in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete *)

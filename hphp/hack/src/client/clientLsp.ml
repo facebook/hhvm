@@ -3457,7 +3457,17 @@ let do_findReferences_local
         lsp_id
         (FindReferencesResult []);
       Lwt.return state
-    | ClientIdeMessage.Local_var_result (Some (_name, positions)) ->
+    | ClientIdeMessage.Find_refs_success
+        (_symbol_name, None, ide_calculated_refs) ->
+      let positions =
+        match UriMap.values ide_calculated_refs with
+        (*
+          UriMap.values returns [Pos.absolute list list] and if we're here,
+          we should only have one element - the list of positions in the file the localvar is defined.
+        *)
+        | positions :: [] -> positions
+        | _ -> assert false (* Explicitly handled in ClientIdeDaemon *)
+      in
       let filename =
         Lsp_helpers.lsp_textDocumentIdentifier_to_filename
           params.FindReferences.loc.TextDocumentPositionParams.textDocument
@@ -3470,14 +3480,8 @@ let do_findReferences_local
         lsp_id
         (FindReferencesResult positions);
       Lwt.return state
-    | ClientIdeMessage.Local_var_result None ->
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        lsp_id
-        (FindReferencesResult []);
-      Lwt.return state
-    | ClientIdeMessage.Shell_out_and_augment
-        (symbol_name, action, ide_calculated_refs) ->
+    | ClientIdeMessage.Find_refs_success
+        (symbol_name, Some action, ide_calculated_refs) ->
       (* ClientIdeMessage.Find_references only supports localvar.
          Receiving an error with a non-localvar action indicates that we attempted to
          try and find references for a non-localvar

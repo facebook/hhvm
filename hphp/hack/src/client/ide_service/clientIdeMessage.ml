@@ -36,10 +36,9 @@ type location = {
 
 type find_refs_result =
   | Invalid_symbol
-  | Local_var_result of ServerCommandTypes.Find_refs.ide_result
-  | Shell_out_and_augment of
+  | Find_refs_success of
       (string
-      * ServerCommandTypes.Find_refs.action
+      * ServerCommandTypes.Find_refs.action option
       * Pos.absolute list Lsp.UriMap.t)
 
 type rename_result =
@@ -115,14 +114,15 @@ type _ t =
   | Workspace_symbol : string -> SearchUtils.result t
   | Find_references : document * location * document list -> find_refs_result t
       (** The result of Find_references is one of:
-       - Local_var_success of a [Find_refs.ide_result], which is an optional tuple of
-         symbol name from [SymbolDefinition.full_name] and positions for that symbol.
        - Invalid_symbol, indicating find-refs on something that isn't a symbol
-       - Shell_out_and_augment, where we return a triple of:
+       - Find_refs_success, where we return a triple of:
           - a symbol's name from [SymbolDefinition.full_name],
-          - the [Find_refs.action] which describes what the symbol refers to,
+          - an optional[Find_refs.action] which describes what the symbol refers to,
             e.g. Class of class_name, Member of member_name with a Method of method_name.
-          - A mapping of the URI of a file to the absolute positions that ClientIDEDaemon discovered
+            The presence of this value indicates that clientLsp must shell out to hh_server to collect
+            more positions.
+          - A mapping of the URI of a file to the absolute positions that ClientIDEDaemon discovered.
+            Localvar find-refs will return a single entry in this map.
           *)
   | Rename : document * location * string * document list -> rename_result t
       (** The result of Rename is one of:

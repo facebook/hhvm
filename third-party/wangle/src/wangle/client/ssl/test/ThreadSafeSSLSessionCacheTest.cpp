@@ -66,6 +66,12 @@ class ThreadSafeSSLSessionCacheTest : public Test {
         std::make_unique<FakeSessionCallbacks>()));
   }
 
+  void TearDown() override {
+    for (auto& it : sessions_) {
+      SSL_SESSION_free(it.first);
+    }
+  }
+
   std::vector<std::pair<SSL_SESSION*, size_t>> sessions_;
   std::unique_ptr<ThreadSafeSSLSessionCache> cache_;
 };

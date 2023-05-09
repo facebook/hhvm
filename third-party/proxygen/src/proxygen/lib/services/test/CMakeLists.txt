@@ -5,3 +5,4 @@
 # LICENSE file in the root directory of this source tree.
 
 proxygen_add_test(TARGET AcceptorTest DEPENDS proxygen testmain)
+proxygen_add_test(TARGET RequestWorkerThreadTest DEPENDS proxygen testmain)

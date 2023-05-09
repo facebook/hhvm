@@ -28,6 +28,10 @@ RequestWorkerThread::RequestWorkerThread(FinishCallback& callback,
       evb_(evb) {
 }
 
+RequestWorkerThread::~RequestWorkerThread() {
+  currentRequestWorker_ = nullptr;
+}
+
 uint8_t RequestWorkerThread::getWorkerId() const {
   return static_cast<uint8_t>(nextRequestId_ >> requestIdBits);
 }
@@ -81,7 +85,6 @@ void RequestWorkerThread::cleanup() {
     LOG(INFO) << "Looping to finish pending work";
     evb_->loop();
   }
-  currentRequestWorker_ = nullptr;
   callback_.workerFinished(this);
 }
 

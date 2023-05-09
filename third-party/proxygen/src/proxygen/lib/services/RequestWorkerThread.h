@@ -43,6 +43,8 @@ class RequestWorkerThread {
                       uint8_t threadId,
                       folly::EventBase* evb);
 
+  ~RequestWorkerThread();
+
   /**
    * Return a unique 64bit identifier.
    */

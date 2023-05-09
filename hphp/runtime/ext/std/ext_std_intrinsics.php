@@ -19,6 +19,9 @@ function trigger_break(bool $break): void;
 <<__Native>>
 function trigger_crash(): void;
 
+<<__Native>>
+function memory_manager_stats(): dict;
+
 /**
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.

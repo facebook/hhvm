@@ -60,6 +60,29 @@ void HHVM_FUNCTION(launder_value_inout, Variant& val) {
   return;
 }
 
+Array HHVM_FUNCTION(memory_manager_stats) {
+  auto const& stats = tl_heap->getStats();
+  return make_dict_array(
+    "mm_udebt", stats.mm_udebt,
+    "mm_uallocated", stats.mm_uallocated,
+    "mm_freed", stats.mm_freed,
+    "extUsage", stats.extUsage,
+    "malloc_cap", stats.malloc_cap,
+    "mmap_cap", stats.mmap_cap,
+    "peakUsage", stats.peakUsage,
+    "peakCap", stats.peakCap,
+    "peakIntervalUsage", stats.peakIntervalUsage,
+    "peakIntervalCap", stats.peakIntervalCap,
+    "totalAlloc", stats.totalAlloc,
+    "mmap_volume", stats.mmap_volume,
+    "mmAllocated", stats.mmAllocated(),
+    "mmUsage", stats.mmUsage(),
+    "usage", stats.usage(),
+    "capacity", stats.capacity(),
+    "auxUsage", stats.auxUsage()
+  );
+}
+
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
   if (arr.isVec()) return arr;
   return Array::CreateVec();
@@ -484,6 +507,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value_inout, launder_value_inout);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\memory_manager_stats, memory_manager_stats);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);

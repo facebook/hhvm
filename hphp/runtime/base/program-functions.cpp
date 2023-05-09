@@ -781,7 +781,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
                             RuntimeOption::EnvVariables);
 }
 
-void execute_command_line_end(int xhprof, bool coverage, const char *program) {
+void execute_command_line_end(int xhprof, bool coverage, const char *program,
+                              bool runCleanup) {
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
@@ -797,8 +798,10 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
   g_context->onShutdownPostSend(); // runs more php
   Eval::Debugger::InterruptPSPEnded(program);
-  hphp_context_exit();
-  hphp_session_exit();
+  if (runCleanup) {
+    hphp_context_exit();
+    hphp_session_exit();
+  }
 }
 
 #define AT_END_OF_TEXT    __attribute__((__section__(".stub")))

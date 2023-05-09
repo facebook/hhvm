@@ -169,6 +169,7 @@ way to determine how much progress the server made.
 #include <pwd.h>
 #include <utime.h>
 
+#include <sys/wait.h>
 #include <sys/xattr.h>
 
 TRACE_SET_MOD(clisrv);
@@ -196,6 +197,10 @@ const uint32_t CLI_SERVER_API_BASE_VERSION = 6;
 std::atomic<uint64_t> s_cliServerComputedVersion(0);
 
 const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
+
+// When running with Eval.UnixServerRunPSPInBackground this pipe allows us to
+// send an exit code to the foreground process prior to PSP completing.
+int s_foreground_pipe = -1;
 
 }
 
@@ -906,6 +911,9 @@ MonitorThread::MonitorThread(int client) {
 }
 
 const StaticString s_hhvm_prelude_path("hhvm.prelude_path");
+const StaticString s_hhvm_background_psp_path(
+  "hhvm.unix_server_run_psp_in_background"
+);
 
 void CLIWorker::doJob(int client) {
   FTRACE(1, "CLIWorker::doJob({}): starting job...\n", client);
@@ -973,19 +981,27 @@ void CLIWorker::doJob(int client) {
     int ret = 1;
     init_command_line_session(args.size(), buf.get());
 
-    SCOPE_EXIT { Logger::FInfo("Completed command with return code {}", ret); };
+    SCOPE_EXIT {
+      Logger::FInfo("Completed command with return code {}", ret);
 
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+
+    MonitorThread monitor(client);
     CliStdoutHook stdout_hook(cli_out.fd);
     CliLoggerHook logging_hook(cli_err.fd);
+    CLIWrapper wrapper(client);
 
     {
-      auto const finish = [&] {
-        execute_command_line_end(xhprofFlags, true, args[0].c_str());
+      SCOPE_EXIT {
+        execute_command_line_end(xhprofFlags, true, args[0].c_str(), false);
         envArr.detach();
         tl_env = nullptr;
-        clearThreadLocalIO();
         LightProcess::setThreadLocalAfdtOverride(nullptr);
+        Stream::setThreadLocalFileHandler(nullptr);
         Logger::SetThreadHook(nullptr);
+        clearThreadLocalIO();
         try {
           cli_write(client, "exit", ret);
         } catch (const Exception& ex) {
@@ -993,9 +1009,17 @@ void CLIWorker::doJob(int client) {
                           ret, ex.what());
         }
       };
-      auto guard = folly::makeGuard(finish);
 
       auto ini = init_ini_settings(iniSettings);
+      auto const pspInBackground = [&] () -> bool {
+        if (!ini.exists(s_hhvm_background_psp_path, true)) return false;
+        auto const detail = ini[s_hhvm_background_psp_path];
+        if (!detail.isArray()) return false;
+        auto const detailArr = detail.toArray();
+        if (!detailArr.exists(s_local_value)) return false;
+        auto const val = detailArr[s_local_value];
+        return val.isString() ? val.toString().toBoolean() : false;
+      }();
 
       auto const api_version = [&] () -> uint64_t {
         // Treat the absence of a version as being the same as version 0.
@@ -1031,15 +1055,10 @@ void CLIWorker::doJob(int client) {
       LightProcess::setThreadLocalAfdtOverride(cli_afdt.fd);
       Logger::SetThreadHook(&logging_hook);
 
-      CLIWrapper wrapper(client);
       Stream::setThreadLocalFileHandler(&wrapper);
-      SCOPE_EXIT {
-        Stream::setThreadLocalFileHandler(nullptr);
-      };
       RID().setSafeFileAccess(false);
       define_stdio_constants();
 
-      MonitorThread monitor(client);
       FTRACE(1, "CLIWorker::doJob({}): invoking {}...\n", client, args[0]);
       auto const prelude = [&] () -> std::string {
         if (!ini.exists(s_hhvm_prelude_path, true)) {
@@ -1082,9 +1101,14 @@ void CLIWorker::doJob(int client) {
       if (invoke_result) {
         ret = *rl_exit_code;
       }
-      monitor.join();
-      guard.dismiss();
-      finish();
+
+      if (pspInBackground) {
+        g_context->obFlushAll();
+        Logger::SetThreadHook(nullptr);
+        clearThreadLocalIO();
+        cli_write(client, "background", ret);
+      }
+
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
     }
   } catch (const Exception& ex) {
@@ -1333,7 +1357,7 @@ int mkdir_recursive(const char* path, int mode) {
   return 0;
 }
 
-Optional<int> cli_process_command_loop(int fd) {
+Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
   FTRACE(1, "cli_process_command_loop({}): starting...\n", fd);
   std::string cmd;
   cli_read(fd, cmd);
@@ -1624,6 +1648,39 @@ Optional<int> cli_process_command_loop(int fd) {
       continue;
     }
 
+    if (cmd == "background") {
+      int ret;
+      cli_read(fd, ret);
+
+      if (ignore_bg) continue;
+      if (setsid() == -1) {
+        Logger::FError("Failed to set session ID on background process: {}",
+                       folly::errnoStr(errno));
+        continue;
+      }
+
+      if (folly::writeFull(s_foreground_pipe, &ret, sizeof(ret)) == -1) {
+        Logger::FError("Failed to communicate with foreground process: {}",
+                       folly::errnoStr(errno));
+      }
+      close(s_foreground_pipe);
+      s_foreground_pipe = -1;
+
+      auto fd = open("/dev/null", O_RDWR);
+      if (fd != -1) {
+        auto const logerr = [&] (const char* name) {
+          Logger::FError("Failed close {}: {}", name, folly::errnoStr(errno));
+        };
+        if (dup2(fd, STDIN_FILENO)  == -1) logerr("stdin");
+        if (dup2(fd, STDOUT_FILENO) == -1) logerr("stdout");
+        if (dup2(fd, STDERR_FILENO) == -1) logerr("stderr");
+        close(fd);
+      } else {
+        Logger::FError("Failed to open /dev/null: {}", folly::errnoStr(errno));
+      }
+      continue;
+    }
+
     // - if the unrecognized command takes no arguments, everything's fine
     // - if the unrecognized command takes a string first arg, we'll treat that
     //   string argument as a command on the next loop; recurse. Then we get
@@ -1640,7 +1697,8 @@ Optional<int> cli_process_command_loop(int fd) {
 }
 
 Optional<int> run_client(const char* sock_path,
-                                const std::vector<std::string>& args) {
+                         const std::vector<std::string>& args,
+                         bool ignore_bg) {
   if (RuntimeOption::RepoAuthoritative) {
     Logger::Warning("Unable to use CLI server to run script in "
                     "repo-auth mode.");
@@ -1701,7 +1759,7 @@ Optional<int> run_client(const char* sock_path,
 
     FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
     cli_write(fd, 0, args, env_vec);
-    return cli_process_command_loop(fd);
+    return cli_process_command_loop(fd, ignore_bg);
   } catch (const Exception& ex) {
     Logger::Error(
       "Problem communicating with CLI server: %s\n"
@@ -1710,6 +1768,48 @@ Optional<int> run_client(const char* sock_path,
     );
     exit(HPHP_EXIT_FAILURE);
   }
+}
+
+void moveToBackground(int count) {
+  int fg_pipe[2];
+  if (pipe(fg_pipe) == -1) {
+    throw Exception("Could not create foreground pipe: %s",
+                    folly::errnoStr(errno).c_str());
+  }
+
+  int background_pipe = fg_pipe[0];
+  int foreground_pipe = fg_pipe[1];
+
+  auto const pid = fork();
+  if (pid == -1) {
+    throw Exception("Could not create background process: %s",
+                    folly::errnoStr(errno).c_str());
+  }
+
+  if (pid != 0) {
+    int ret = -1;
+    close(foreground_pipe);
+    try {
+      while (count--) {
+        if (folly::readFull(background_pipe, &ret, sizeof(ret)) == -1) {
+          throw std::system_error(errno, std::generic_category(),
+                                  "read failed");
+        }
+      }
+    } catch (std::exception& ex) {
+      int status = 0;
+      if (waitpid(pid, &status, WNOHANG) == -1) {
+        Logger::FError("Lost communication with child: {}", ex.what());
+        exit(-1);
+      }
+      if (WIFEXITED(status))   exit(WEXITSTATUS(status));
+      if (WIFSIGNALED(status)) kill(getpid(), WTERMSIG(status));
+    }
+    exit(ret);
+  }
+
+  close(background_pipe);
+  s_foreground_pipe = foreground_pipe;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1853,10 +1953,24 @@ uint64_t cli_server_api_version() {
 void run_command_on_cli_server(const char* sock_path,
                                const std::vector<std::string>& args,
                                int& count) {
+  if (RO::EvalUnixServerRunPSPInBackground) moveToBackground(count);
+
   int ret = 0;
+  auto const finish = [&] {
+    if (s_foreground_pipe != -1) {
+      folly::writeFull(s_foreground_pipe, &ret, sizeof(ret));
+      close(s_foreground_pipe);
+      s_foreground_pipe = -1;
+    }
+  };
+  auto guard = folly::makeGuard(finish);
+
   while (count > 0) {
-    auto r = run_client(sock_path, args);
-    if (!r) return;
+    auto r = run_client(sock_path, args, count > 1);
+    if (!r) {
+      guard.dismiss();
+      return;
+    }
     ret = *r;
     count--;
     if (count > 0) {

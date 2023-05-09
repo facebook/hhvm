@@ -55,9 +55,14 @@ void setThreadLocalIO(FILE* in, FILE* out, FILE* err) {
 }
 
 void clearThreadLocalIO() {
-  if (rl_stdfiles->stdin)  fclose(rl_stdfiles->stdin);
-  if (rl_stdfiles->stdout) fclose(rl_stdfiles->stdout);
-  if (rl_stdfiles->stderr) fclose(rl_stdfiles->stderr);
+  auto const sync_and_close = [] (FILE* f) {
+    fflush(f);
+    fsync(fileno(f));
+    fclose(f);
+  };
+  if (rl_stdfiles->stdin)  sync_and_close(rl_stdfiles->stdin);
+  if (rl_stdfiles->stdout) sync_and_close(rl_stdfiles->stdout);
+  if (rl_stdfiles->stderr) sync_and_close(rl_stdfiles->stderr);
   rl_stdfiles->stdin = rl_stdfiles->stdout = rl_stdfiles->stderr = nullptr;
 }
 

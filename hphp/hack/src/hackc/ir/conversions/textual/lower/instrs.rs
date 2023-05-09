@@ -644,6 +644,14 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
             }
+            Instr::Hhbc(Hhbc::VerifyParamType(vid, _lid, _loc)) => {
+                // This is used to check the param type of default
+                // parameters. We'll hold off on actually checking for now since
+                // it's hard to turn the param type into a checkable TypeStruct
+                // (and right now the param type has been erased in this version
+                // of the function).
+                Instr::Special(Special::Copy(vid))
+            }
             Instr::Hhbc(Hhbc::VerifyParamTypeTS(ts, lid, loc)) => {
                 self.verify_param_type_ts(builder, lid, ts, loc)
             }

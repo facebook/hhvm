@@ -65,14 +65,11 @@ pub(crate) fn write_function(
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
-    let mut func_info = FuncInfo::Function(FunctionInfo {
+    let func_info = FuncInfo::Function(FunctionInfo {
         name: function.name,
     });
 
-    let func = lower::lower_func(function.func, &mut func_info, Arc::clone(&state.strings));
-    ir::verify::verify_func(&func, &Default::default(), &state.strings);
-
-    write_func(txf, state, textual::Ty::VoidPtr, func, Arc::new(func_info))
+    lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
 }
 
 pub(crate) fn compute_func_params<'a>(
@@ -97,7 +94,118 @@ pub(crate) fn compute_func_params<'a>(
     Ok((param_names, param_tys, param_lids))
 }
 
-pub(crate) fn write_func(
+pub(crate) fn lower_and_write_func(
+    txf: &mut TextualFile<'_>,
+    unit_state: &mut UnitState,
+    this_ty: textual::Ty,
+    func: ir::Func<'_>,
+    func_info: FuncInfo<'_>,
+) -> Result {
+    fn lower_and_write_func_(
+        txf: &mut TextualFile<'_>,
+        unit_state: &mut UnitState,
+        this_ty: textual::Ty,
+        func: ir::Func<'_>,
+        mut func_info: FuncInfo<'_>,
+    ) -> Result {
+        let func = lower::lower_func(func, &mut func_info, Arc::clone(&unit_state.strings));
+        ir::verify::verify_func(&func, &Default::default(), &unit_state.strings);
+
+        write_func(txf, unit_state, this_ty, func, Arc::new(func_info))
+    }
+
+    let has_defaults = func.params.iter().any(|p| p.default_value.is_some());
+    if has_defaults {
+        // When a function has defaults we need to split it into multiple
+        // functions which each take a different number of parameters,
+        // initialize them and then forward on to the function that takes all
+        // the parameters.
+        let inits = split_default_func(&func, &func_info, &unit_state.strings);
+        for init in inits {
+            lower_and_write_func_(txf, unit_state, this_ty.clone(), init, func_info.clone())?;
+        }
+    }
+
+    lower_and_write_func_(txf, unit_state, this_ty, func, func_info)
+}
+
+/// Given a Func that has default parameters make a version of the function with
+/// those parameters stripped out (one version is returned with each successive
+/// parameter removed).
+fn split_default_func<'a>(
+    orig_func: &Func<'a>,
+    func_info: &FuncInfo<'_>,
+    strings: &StringInterner,
+) -> Vec<Func<'a>> {
+    let mut result = Vec::new();
+    let loc = orig_func.loc_id;
+
+    let min_params = orig_func
+        .params
+        .iter()
+        .take_while(|p| p.default_value.is_none())
+        .count();
+    let max_params = orig_func.params.len();
+    for param_count in min_params..max_params {
+        let mut func = orig_func.clone();
+        let target_bid = func.params[param_count].default_value.unwrap().init;
+        func.params.truncate(param_count);
+        for i in min_params..param_count {
+            func.params[i].default_value = None;
+        }
+
+        // replace the entrypoint with a jump to the initializer.
+        let iid = func.alloc_instr(Instr::Terminator(ir::instr::Terminator::Jmp(
+            target_bid, loc,
+        )));
+        func.block_mut(Func::ENTRY_BID).iids = vec![iid];
+
+        // And turn the 'enter' calls into a tail call into the non-default
+        // function.
+        let exit_bid = {
+            let mut block = ir::Block::default();
+            let params = orig_func
+                .params
+                .iter()
+                .map(|param| {
+                    let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
+                    let iid = func.alloc_instr(instr);
+                    block.iids.push(iid);
+                    ValueId::from(iid)
+                })
+                .collect_vec();
+            let instr = match func_info {
+                FuncInfo::Function(fi) => Instr::simple_call(fi.name, &params, loc),
+                FuncInfo::Method(mi) => {
+                    let this_str = strings.intern_str(special_idents::THIS);
+                    let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(this_str), loc));
+                    let receiver = func.alloc_instr(instr);
+                    block.iids.push(receiver);
+                    Instr::simple_method_call(mi.name, receiver.into(), &params, loc)
+                }
+            };
+            let iid = func.alloc_instr(instr);
+            block.iids.push(iid);
+            let iid = func.alloc_instr(Instr::ret(iid.into(), loc));
+            block.iids.push(iid);
+
+            func.alloc_bid(block)
+        };
+
+        for instr in func.instrs.iter_mut() {
+            match instr {
+                Instr::Terminator(Terminator::Enter(bid, _)) => *bid = exit_bid,
+                _ => {}
+            }
+        }
+
+        result.push(func);
+    }
+
+    result
+}
+
+fn write_func(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     this_ty: textual::Ty,
@@ -1074,6 +1182,7 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
     func
 }
 
+#[derive(Clone)]
 pub(crate) enum FuncInfo<'a> {
     Function(FunctionInfo),
     Method(MethodInfo<'a>),
@@ -1097,11 +1206,13 @@ impl<'a> FuncInfo<'a> {
 
 // Extra data associated with a (non-class) function that aren't stored on the
 // Func.
+#[derive(Clone)]
 pub(crate) struct FunctionInfo {
     pub(crate) name: FunctionId,
 }
 
 // Extra data associated with class methods that aren't stored on the Func.
+#[derive(Clone)]
 pub(crate) struct MethodInfo<'a> {
     pub(crate) name: MethodId,
     pub(crate) class: &'a ir::Class<'a>,

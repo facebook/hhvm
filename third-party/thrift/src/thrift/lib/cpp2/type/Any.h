@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
 
@@ -55,6 +58,22 @@ class AnyData : public detail::Wrap<AnyStruct> {
   const Protocol& protocol() const { return *data_.protocol(); }
   const folly::IOBuf& data() const { return *data_.data(); }
 
+  template <StandardProtocol protocol, typename Tag>
+  static AnyData toAny(const native_type<Tag>&);
+
+  template <StandardProtocol protocol, typename T>
+  static AnyData toAny(const T& v) {
+    return toAny<protocol, infer_tag<T>>(v);
+  }
+
+  template <typename Tag>
+  void get(native_type<Tag>& t) const;
+
+  template <typename T>
+  void get(T& v) const {
+    get<infer_tag<T>>(v);
+  }
+
  private:
   friend bool operator==(AnyData lhs, AnyData rhs) noexcept {
     return lhs.data_ == rhs.data_;
@@ -65,7 +84,54 @@ class AnyData : public detail::Wrap<AnyStruct> {
   friend bool operator<(AnyData lhs, AnyData rhs) noexcept {
     return lhs.data_ < rhs.data_;
   }
+
+  [[noreturn]] static void throwTypeMismatchException(
+      const Type& want, const Type& actual);
 };
+
+template <StandardProtocol Protocol, typename Tag>
+AnyData AnyData::toAny(const native_type<Tag>& v) {
+  static_assert(
+      Protocol == StandardProtocol::Binary ||
+          Protocol == StandardProtocol::Compact,
+      "Unsupported protocol");
+
+  using Writer = std::conditional_t<
+      Protocol == StandardProtocol::Binary,
+      BinaryProtocolWriter,
+      CompactProtocolWriter>;
+
+  Writer writer;
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  writer.setOutput(&queue);
+  ::apache::thrift::op::encode<Tag>(writer, v);
+
+  SemiAny builder;
+  builder.data() = queue.moveAsValue();
+  builder.protocol() = Protocol;
+  builder.type() = Tag{};
+  return AnyData{std::move(builder)};
+}
+
+template <typename Tag>
+void AnyData::get(native_type<Tag>& v) const {
+  if (type() != Type{Tag{}}) {
+    throwTypeMismatchException(Type{Tag{}}, type());
+  }
+
+  if (protocol() == Protocol::get<StandardProtocol::Binary>()) {
+    BinaryProtocolReader reader;
+    reader.setInput(&data());
+    op::decode<Tag>(reader, v);
+  } else if (protocol() == Protocol::get<StandardProtocol::Compact>()) {
+    CompactProtocolReader reader;
+    reader.setInput(&data());
+    op::decode<Tag>(reader, v);
+  } else {
+    folly::throw_exception<std::runtime_error>(
+        "Unsupported protocol: " + std::string(protocol().name()));
+  }
+}
 
 } // namespace type
 

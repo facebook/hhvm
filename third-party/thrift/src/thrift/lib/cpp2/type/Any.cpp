@@ -18,7 +18,9 @@
 
 #include <stdexcept>
 
+#include <fmt/format.h>
 #include <folly/lang/Exception.h>
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
 namespace apache {
 namespace thrift {
@@ -34,6 +36,13 @@ AnyData::AnyData(SemiAny semiAny) {
   data_.type() = std::move(*semiAny.type());
   data_.protocol() = std::move(*semiAny.protocol());
   data_.data() = std::move(*semiAny.data());
+}
+
+void AnyData::throwTypeMismatchException(const Type& want, const Type& actual) {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Type mismatch. Want: {}, Actual: {}.",
+      debugStringViaRecursiveEncode(want),
+      debugStringViaRecursiveEncode(actual)));
 }
 
 } // namespace type

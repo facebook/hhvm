@@ -4507,7 +4507,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bumpalo",
- "core_utils_rust",
  "direct_decl_parser",
  "hackrs_provider_backend",
  "ocamlrep_ocamlpool",
@@ -4515,6 +4514,7 @@ dependencies = [
  "oxidized_by_ref",
  "rayon",
  "relative_path",
+ "si_addendum",
  "unwrap_ocaml",
 ]
 
@@ -4872,6 +4872,15 @@ dependencies = [
  "owning_ref",
  "rand 0.8.5",
  "static_assertions",
+]
+
+[[package]]
+name = "si_addendum"
+version = "0.0.0"
+dependencies = [
+ "core_utils_rust",
+ "oxidized",
+ "oxidized_by_ref",
 ]
 
 [[package]]

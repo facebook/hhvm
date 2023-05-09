@@ -50,7 +50,7 @@ ocaml_ffi! {
                     &arena,
                 );
 
-                let addenda = get_symbol_addenda(&with_hashes);
+                let addenda = si_addendum::get_si_addenda(&with_hashes);
 
                 (relpath, Some((with_hashes.into(), addenda)))
             })
@@ -77,45 +77,6 @@ fn par_read_file_root_only(
                 Err(e) if e.kind() == io::ErrorKind::NotFound => Ok((relpath, None)),
                 Err(e) => Err(e.into()),
             }
-        })
-        .collect()
-}
-
-fn get_symbol_addenda<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Vec<SiAddendum> {
-    parsed_file
-        .iter()
-        .filter_map(|(name, decl, _hash)| {
-            use oxidized::search_types::SiKind::*;
-            use oxidized_by_ref::shallow_decl_defs::Decl;
-            let kind = match decl {
-                Decl::Class(class) => {
-                    use oxidized::ast_defs::ClassishKind::*;
-                    match class.kind {
-                        Cclass(_) => SIClass,
-                        Cinterface => SIInterface,
-                        Ctrait => SITrait,
-                        Cenum | CenumClass(_) => SIEnum,
-                    }
-                }
-                Decl::Fun(_) => SIFunction,
-                Decl::Typedef(_) => SITypedef,
-                Decl::Const(_) => SIGlobalConstant,
-                Decl::Module(_) => {
-                    // TODO: SymbolIndex doesn't currently represent modules
-                    return None;
-                }
-            };
-            let (is_abstract, is_final) = match decl {
-                Decl::Class(class) => (class.abstract_, class.final_),
-                _ => (false, false),
-            };
-
-            Some(SiAddendum {
-                name: core_utils_rust::strip_ns(name).to_owned(),
-                kind,
-                is_abstract,
-                is_final,
-            })
         })
         .collect()
 }

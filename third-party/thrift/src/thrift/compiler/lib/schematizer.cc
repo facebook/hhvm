@@ -28,9 +28,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 namespace {
-// TODO: remove after fixing java builds.
-bool includeEmptyURI = true;
-
 template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
@@ -49,7 +46,7 @@ void add_definition(
   auto definition = val();
   definition->set_map();
   definition->add_map(val("name"), val(node.name()));
-  if (!node.uri().empty() || includeEmptyURI) {
+  if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
   }
 
@@ -69,7 +66,7 @@ void add_definition(
       annot->set_ttype(structured_annotation_ttype);
       annot->set_map();
       annot->add_map(val("name"), val(item->type()->name()));
-      if (!item->type()->uri().empty() || includeEmptyURI) {
+      if (!item->type()->uri().empty()) {
         annot->add_map(val("uri"), val(item->type()->uri()));
       }
       if (!item->value()->is_empty()) {
@@ -145,7 +142,7 @@ std::unique_ptr<t_const_value> gen_type(
 
     auto td = val();
     td->set_map();
-    if (!ptr->uri().empty() || includeEmptyURI) {
+    if (!ptr->uri().empty()) {
       td->add_map(val("uri"), val(ptr->uri()));
     }
     type_name->add_map(val("typedefType"), std::move(td));
@@ -230,7 +227,7 @@ std::unique_ptr<t_const_value> gen_type(
       }
       auto enm = val();
       enm->set_map();
-      if (!resolved_type.uri().empty() || includeEmptyURI) {
+      if (!resolved_type.uri().empty()) {
         enm->add_map(val("uri"), val(resolved_type.uri()));
       }
       type_name->add_map(val("enumType"), std::move(enm));
@@ -263,7 +260,7 @@ std::unique_ptr<t_const_value> gen_type(
       }
       auto structured = val();
       structured->set_map();
-      if (!resolved_type.uri().empty() || includeEmptyURI) {
+      if (!resolved_type.uri().empty()) {
         structured->add_map(val("uri"), val(resolved_type.uri()));
       }
       type_name->add_map(
@@ -532,7 +529,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   auto attrs = val();
   attrs->set_map();
   attrs->add_map(val("name"), val(node.get_name()));
-  if (!node.uri().empty() || includeEmptyURI) {
+  if (!node.uri().empty()) {
     attrs->add_map(val("uri"), val(node.uri()));
   }
   schema->add_map(val("attrs"), std::move(attrs));

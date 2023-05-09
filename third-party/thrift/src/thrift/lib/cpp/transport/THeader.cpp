@@ -56,6 +56,16 @@ const THeader::StringToStringMap& kEmptyMap() {
       *(new transport::THeader::StringToStringMap);
   return map;
 }
+
+struct infoIdType {
+  enum idType {
+    // start at 1 to avoid confusing header padding for an infoId
+    KEYVALUE = 1,
+    // for persistent header
+    PKEYVALUE = 2,
+    END // signal the end of infoIds we can handle
+  };
+};
 } // namespace
 
 using namespace apache::thrift::protocol;
@@ -73,7 +83,9 @@ std::string getReadableChars(Cursor c, size_t limit) {
   });
 }
 
-THeader::THeader(int options)
+THeader::THeader(int options) : c_(options) {}
+
+THeader::THeader::TriviallyCopiable::TriviallyCopiable(int options)
     : protoId_(T_COMPACT_PROTOCOL),
       protoVersion_(-1),
       clientType_(THRIFT_HEADER_CLIENT_TYPE),
@@ -83,7 +95,7 @@ THeader::THeader(int options)
       allowBigFrames_(options & ALLOW_BIG_FRAMES) {}
 
 int8_t THeader::getProtocolVersion() const {
-  return protoVersion_;
+  return c_.protoVersion_;
 }
 
 bool THeader::compactFramed(uint32_t magic) {
@@ -110,7 +122,7 @@ unique_ptr<IOBuf> THeader::removeUnframed(IOBufQueue* queue, size_t& needed) {
       const_cast<uint8_t*>(range.begin()),
       range.size(),
       TMemoryBuffer::OBSERVE);
-  protoId_ = ProtocolID;
+  c_.protoId_ = ProtocolID;
   ProtocolClass<TBufferBase> proto(&memBuffer);
   uint32_t msgSize = 0;
   try {
@@ -133,13 +145,13 @@ unique_ptr<IOBuf> THeader::removeUnframed(IOBufQueue* queue, size_t& needed) {
 }
 
 unique_ptr<IOBuf> THeader::removeHttpServer(IOBufQueue* queue) {
-  protoId_ = T_BINARY_PROTOCOL;
+  c_.protoId_ = T_BINARY_PROTOCOL;
   // Users must explicitly support this.
   return queue->move();
 }
 
 unique_ptr<IOBuf> THeader::removeHttpClient(IOBufQueue* queue, size_t& needed) {
-  protoId_ = T_BINARY_PROTOCOL;
+  c_.protoId_ = T_BINARY_PROTOCOL;
   TMemoryBuffer memBuffer;
   THttpClientParser parser;
   parser.setDataBuffer(&memBuffer);
@@ -159,7 +171,7 @@ unique_ptr<IOBuf> THeader::removeHttpClient(IOBufQueue* queue, size_t& needed) {
       bytesParsed += toCopyLen;
       if (parser.readDataAvailable(toCopyLen)) {
         queue->trimStart(bytesParsed - parser.getUnparsedDataLen());
-        readHeaders_ = parser.moveReadHeaders();
+        c_.readHeaders_ = parser.moveReadHeaders();
         return memBuffer.cloneBufferAsIOBuf();
       }
       remainingDataLen -= toCopyLen;
@@ -255,10 +267,10 @@ unique_ptr<IOBuf> THeader::removeNonHeader(
     IOBufQueue* queue, size_t& needed, CLIENT_TYPE type, uint32_t sz) {
   switch (type) {
     case THRIFT_FRAMED_DEPRECATED:
-      protoId_ = T_BINARY_PROTOCOL;
+      c_.protoId_ = T_BINARY_PROTOCOL;
       return removeFramed(sz, queue);
     case THRIFT_FRAMED_COMPACT:
-      protoId_ = T_COMPACT_PROTOCOL;
+      c_.protoId_ = T_COMPACT_PROTOCOL;
       return removeFramed(sz, queue);
     case THRIFT_UNFRAMED_DEPRECATED:
       return removeUnframed<TBinaryProtocolT, T_BINARY_PROTOCOL>(queue, needed);
@@ -302,14 +314,14 @@ unique_ptr<IOBuf> THeader::removeHeader(
   uint32_t sz32 = c.readBE<uint32_t>();
   remaining -= 4;
 
-  if (forceClientType_) {
+  if (c_.forceClientType_) {
     // Make sure we have read the whole frame in.
-    if (isFramed(clientType_) && (sz32 > remaining)) {
+    if (isFramed(c_.clientType_) && (sz32 > remaining)) {
       needed = sz32 - remaining;
       return nullptr;
     }
     unique_ptr<IOBuf> buf =
-        THeader::removeNonHeader(queue, needed, clientType_, sz32);
+        THeader::removeNonHeader(queue, needed, c_.clientType_, sz32);
     if (buf) {
       return buf;
     }
@@ -317,14 +329,14 @@ unique_ptr<IOBuf> THeader::removeHeader(
 
   auto clientT = THeader::analyzeFirst32bit(sz32);
   if (clientT) {
-    clientType_ = *clientT;
+    c_.clientType_ = *clientT;
     return THeader::removeNonHeader(queue, needed, *clientT, sz32);
   }
 
   size_t sz;
   if (sz32 > MAX_FRAME_SIZE) {
     if (sz32 == BIG_FRAME_MAGIC) {
-      if (!allowBigFrames_) {
+      if (!c_.allowBigFrames_) {
         throw TTransportException(
             TTransportException::INVALID_FRAME_SIZE, "Big frames not allowed");
       }
@@ -376,14 +388,14 @@ unique_ptr<IOBuf> THeader::removeHeader(
 
   // Could be header format or framed. Check next uint32
   uint32_t magic = c.readBE<uint32_t>();
-  clientType_ = analyzeSecond32bit(magic);
+  c_.clientType_ = analyzeSecond32bit(magic);
   unique_ptr<IOBuf> buf =
-      THeader::removeNonHeader(queue, needed, clientType_, sz);
+      THeader::removeNonHeader(queue, needed, c_.clientType_, sz);
   if (buf) {
     return buf;
   }
 
-  if (clientType_ == THRIFT_UNKNOWN_CLIENT_TYPE) {
+  if (c_.clientType_ == THRIFT_UNKNOWN_CLIENT_TYPE) {
     throw TTransportException(
         TTransportException::BAD_ARGS,
         folly::stringPrintf(
@@ -395,8 +407,8 @@ unique_ptr<IOBuf> THeader::removeHeader(
         TTransportException::INVALID_FRAME_SIZE,
         folly::stringPrintf("Header transport frame is too small: %zu", sz));
   }
-  flags_ = magic & FLAGS_MASK;
-  seqId_ = c.readBE<uint32_t>();
+  c_.flags_ = magic & FLAGS_MASK;
+  c_.seqId_ = c.readBE<uint32_t>();
 
   // Trim off the frame size.
   queue->trimStart(frameSizeBytes);
@@ -446,8 +458,8 @@ static void readInfoHeaders(
 
 unique_ptr<IOBuf> THeader::readHeaderFormat(
     unique_ptr<IOBuf> buf, StringToStringMap& persistentReadHeaders) {
-  readTrans_.clear(); // Clear out any previous transforms.
-  readHeaders_.reset(); // Clear out any previous headers.
+  c_.readTrans_.clear(); // Clear out any previous transforms.
+  c_.readHeaders_.reset(); // Clear out any previous headers.
 
   // magic(4), seqId(2), flags(2), headerSize(2)
   const uint8_t commonHeaderSize = 10;
@@ -465,16 +477,16 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
   }
   Cursor data(buf.get());
   data += headerSize;
-  protoId_ = readVarint<uint16_t>(c);
+  c_.protoId_ = readVarint<uint16_t>(c);
   uint16_t numTransforms = readVarint<uint16_t>(c);
-  readTrans_.reserve(numTransforms);
+  c_.readTrans_.reserve(numTransforms);
 
   uint16_t macSz = 0;
 
   // For now all transforms consist of only the ID, not data.
   for (int i = 0; i < numTransforms; i++) {
     int32_t transId = readVarint<int32_t>(c);
-    readTrans_.push_back(transId);
+    c_.readTrans_.push_back(transId);
     setTransform(transId);
   }
 
@@ -520,9 +532,10 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
   }
 
   // Untransform data section
-  buf = untransform(std::move(buf), readTrans_);
+  buf = untransform(std::move(buf), c_.readTrans_);
 
-  if (protoId_ == T_JSON_PROTOCOL && clientType_ != THRIFT_HTTP_SERVER_TYPE) {
+  if (c_.protoId_ == T_JSON_PROTOCOL &&
+      c_.clientType_ != THRIFT_HTTP_SERVER_TYPE) {
     throw TApplicationException(
         TApplicationException::UNSUPPORTED_CLIENT_TYPE,
         "Client is trying to send JSON without HTTP");
@@ -618,35 +631,35 @@ unique_ptr<IOBuf> THeader::transform(
 }
 
 void THeader::setTransform(uint16_t transId) {
-  for (auto& trans : writeTrans_) {
+  for (auto& trans : c_.writeTrans_) {
     if (trans == transId) {
       return;
     }
   }
-  writeTrans_.push_back(transId);
+  c_.writeTrans_.push_back(transId);
 }
 
 void THeader::setReadTransform(uint16_t transId) {
-  for (auto& trans : readTrans_) {
+  for (auto& trans : c_.readTrans_) {
     if (trans == transId) {
       return;
     }
   }
-  readTrans_.push_back(transId);
+  c_.readTrans_.push_back(transId);
 }
 
 void THeader::copyMetadataFrom(const THeader& src) {
-  setProtocolId(src.protoId_);
-  setTransforms(src.writeTrans_);
-  setSequenceNumber(src.seqId_);
-  setClientType(src.clientType_);
-  setFlags(src.flags_);
-  forceClientType(src.forceClientType_);
+  setProtocolId(src.c_.protoId_);
+  setTransforms(src.c_.writeTrans_);
+  setSequenceNumber(src.c_.seqId_);
+  setClientType(src.c_.clientType_);
+  setFlags(src.c_.flags_);
+  forceClientType(src.c_.forceClientType_);
 }
 
 void THeader::resetProtocol() {
   // Set to anything except HTTP type so we don't flush again
-  clientType_ = THRIFT_HEADER_CLIENT_TYPE;
+  c_.clientType_ = THRIFT_HEADER_CLIENT_TYPE;
 }
 
 /**
@@ -701,16 +714,16 @@ void THeader::setHeader(
 }
 
 void THeader::setHeaders(THeader::StringToStringMap&& headers) {
-  writeHeaders_ = std::move(headers);
+  c_.writeHeaders_ = std::move(headers);
 }
 
 void THeader::setReadHeaders(THeader::StringToStringMap&& headers) {
-  readHeaders_ = std::move(headers);
+  c_.readHeaders_ = std::move(headers);
 }
 
 void THeader::eraseReadHeader(const std::string& key) {
-  if (readHeaders_) {
-    readHeaders_->erase(key);
+  if (c_.readHeaders_) {
+    c_.readHeaders_->erase(key);
   }
 }
 
@@ -731,32 +744,33 @@ size_t THeader::getMaxWriteHeadersSize(
     const StringToStringMap& persistentWriteHeaders) const {
   size_t maxWriteHeadersSize = 0;
   maxWriteHeadersSize += getInfoHeaderSize(persistentWriteHeaders);
-  maxWriteHeadersSize += writeHeaders_ ? getInfoHeaderSize(*writeHeaders_) : 0;
-  if (extraWriteHeaders_) {
-    maxWriteHeadersSize += getInfoHeaderSize(*extraWriteHeaders_);
+  maxWriteHeadersSize +=
+      c_.writeHeaders_ ? getInfoHeaderSize(*c_.writeHeaders_) : 0;
+  if (c_.extraWriteHeaders_) {
+    maxWriteHeadersSize += getInfoHeaderSize(*c_.extraWriteHeaders_);
   }
   return maxWriteHeadersSize;
 }
 
 void THeader::clearHeaders() {
-  writeHeaders_.reset();
+  c_.writeHeaders_.reset();
 }
 
 THeader::StringToStringMap& THeader::ensureReadHeaders() {
-  if (!readHeaders_) {
-    readHeaders_.emplace();
+  if (!c_.readHeaders_) {
+    c_.readHeaders_.emplace();
   }
-  return *readHeaders_;
+  return *c_.readHeaders_;
 }
 THeader::StringToStringMap& THeader::ensureWriteHeaders() {
-  if (!writeHeaders_) {
-    writeHeaders_.emplace();
+  if (!c_.writeHeaders_) {
+    c_.writeHeaders_.emplace();
   }
-  return *writeHeaders_;
+  return *c_.writeHeaders_;
 }
 
 bool THeader::isWriteHeadersEmpty() const {
-  return !writeHeaders_ || writeHeaders_->empty();
+  return !c_.writeHeaders_ || c_.writeHeaders_->empty();
 }
 
 THeader::StringToStringMap& THeader::mutableWriteHeaders() {
@@ -764,20 +778,21 @@ THeader::StringToStringMap& THeader::mutableWriteHeaders() {
 }
 
 THeader::StringToStringMap THeader::releaseWriteHeaders() {
-  return writeHeaders_ ? *std::exchange(writeHeaders_, std::nullopt)
-                       : THeader::StringToStringMap{};
+  return c_.writeHeaders_ ? *std::exchange(c_.writeHeaders_, std::nullopt)
+                          : THeader::StringToStringMap{};
 }
 
 THeader::StringToStringMap THeader::extractAllWriteHeaders() {
   auto headers = releaseWriteHeaders();
-  if (extraWriteHeaders_ != nullptr) {
-    headers.insert(extraWriteHeaders_->begin(), extraWriteHeaders_->end());
+  if (c_.extraWriteHeaders_ != nullptr) {
+    headers.insert(
+        c_.extraWriteHeaders_->begin(), c_.extraWriteHeaders_->end());
   }
   return headers;
 }
 
 const THeader::StringToStringMap& THeader::getWriteHeaders() const {
-  return writeHeaders_ ? *writeHeaders_ : kEmptyMap();
+  return c_.writeHeaders_ ? *c_.writeHeaders_ : kEmptyMap();
 }
 
 void THeader::setReadHeader(std::string_view key, std::string&& value) {
@@ -785,20 +800,20 @@ void THeader::setReadHeader(std::string_view key, std::string&& value) {
 }
 
 const THeader::StringToStringMap& THeader::getHeaders() const {
-  return readHeaders_ ? *readHeaders_ : kEmptyMap();
+  return c_.readHeaders_ ? *c_.readHeaders_ : kEmptyMap();
 }
 
 THeader::StringToStringMap THeader::releaseHeaders() {
-  return readHeaders_ ? *std::exchange(readHeaders_, std::nullopt)
-                      : THeader::StringToStringMap{};
+  return c_.readHeaders_ ? *std::exchange(c_.readHeaders_, std::nullopt)
+                         : THeader::StringToStringMap{};
 }
 
 string THeader::getPeerIdentity() const {
-  if (!readHeaders_) {
+  if (!c_.readHeaders_) {
     return "";
   }
-  if (auto* id = folly::get_ptr(*readHeaders_, IDENTITY_HEADER)) {
-    if (auto* version = folly::get_ptr(*readHeaders_, ID_VERSION_HEADER);
+  if (auto* id = folly::get_ptr(*c_.readHeaders_, IDENTITY_HEADER)) {
+    if (auto* version = folly::get_ptr(*c_.readHeaders_, ID_VERSION_HEADER);
         version && *version == ID_VERSION) {
       return *id;
     }
@@ -807,7 +822,7 @@ string THeader::getPeerIdentity() const {
 }
 
 void THeader::setIdentity(const string& identity) {
-  this->identity_ = identity;
+  this->c_.identity_ = identity;
 }
 
 unique_ptr<IOBuf> THeader::addHeader(
@@ -816,21 +831,23 @@ unique_ptr<IOBuf> THeader::addHeader(
     bool transform) {
   // We may need to modify some transforms before send.  Make
   // a copy here
-  std::vector<uint16_t> writeTrans = writeTrans_;
+  std::vector<uint16_t> writeTrans = c_.writeTrans_;
 
-  if (clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
+  if (c_.clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
     if (transform) {
       buf = THeader::transform(std::move(buf), writeTrans);
     }
   }
   size_t chainSize = buf->computeChainDataLength();
 
-  if (protoId_ == T_JSON_PROTOCOL && clientType_ != THRIFT_HTTP_SERVER_TYPE) {
+  if (c_.protoId_ == T_JSON_PROTOCOL &&
+      c_.clientType_ != THRIFT_HTTP_SERVER_TYPE) {
     throw TTransportException(
         TTransportException::BAD_ARGS, "Trying to send JSON without HTTP");
   }
 
-  if (chainSize > MAX_FRAME_SIZE && clientType_ != THRIFT_HEADER_CLIENT_TYPE) {
+  if (chainSize > MAX_FRAME_SIZE &&
+      c_.clientType_ != THRIFT_HEADER_CLIENT_TYPE) {
     throw TTransportException(
         TTransportException::INVALID_FRAME_SIZE,
         "Attempting to send non-header frame that is too large");
@@ -838,13 +855,13 @@ unique_ptr<IOBuf> THeader::addHeader(
 
   // Add in special flags
   // All flags must be added before any calls to getMaxWriteHeadersSize
-  if (identity_.length() > 0) {
+  if (c_.identity_.length() > 0) {
     ensureWriteHeaders();
-    (*writeHeaders_)[IDENTITY_HEADER] = identity_;
-    (*writeHeaders_)[ID_VERSION_HEADER] = ID_VERSION;
+    (*c_.writeHeaders_)[IDENTITY_HEADER] = c_.identity_;
+    (*c_.writeHeaders_)[ID_VERSION_HEADER] = ID_VERSION;
   }
 
-  if (clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
+  if (c_.clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
     // header size will need to be updated at the end because of varints.
     // Make it big enough here for max varint size, plus 4 for padding.
     int headerSize =
@@ -871,10 +888,10 @@ unique_ptr<IOBuf> THeader::addHeader(
     uint16_t magicN = folly::Endian::big<uint16_t>(HEADER_MAGIC >> 16);
     memcpy(pkt, &magicN, sizeof(magicN));
     pkt += sizeof(magicN);
-    uint16_t flagsN = folly::Endian::big(flags_);
+    uint16_t flagsN = folly::Endian::big(c_.flags_);
     memcpy(pkt, &flagsN, sizeof(flagsN));
     pkt += sizeof(flagsN);
-    uint32_t seqIdN = folly::Endian::big(seqId_);
+    uint32_t seqIdN = folly::Endian::big(c_.seqId_);
     memcpy(pkt, &seqIdN, sizeof(seqIdN));
     pkt += sizeof(seqIdN);
     headerSizePtr = pkt;
@@ -882,7 +899,7 @@ unique_ptr<IOBuf> THeader::addHeader(
     pkt += sizeof(headerSizeN);
     headerStart = pkt;
 
-    pkt += writeVarint32(protoId_, pkt);
+    pkt += writeVarint32(c_.protoId_, pkt);
     pkt += writeVarint32(getNumTransforms(writeTrans), pkt);
 
     for (auto& transId : writeTrans) {
@@ -895,11 +912,12 @@ unique_ptr<IOBuf> THeader::addHeader(
     flushInfoHeaders(pkt, persistentWriteHeaders, infoIdType::PKEYVALUE);
 
     // write non-persistent kv-headers
-    if (writeHeaders_) {
-      flushInfoHeaders(pkt, *writeHeaders_, infoIdType::KEYVALUE);
+    if (c_.writeHeaders_) {
+      flushInfoHeaders(pkt, *c_.writeHeaders_, infoIdType::KEYVALUE);
     }
-    if (extraWriteHeaders_) {
-      flushInfoHeaders(pkt, *extraWriteHeaders_, infoIdType::KEYVALUE, false);
+    if (c_.extraWriteHeaders_) {
+      flushInfoHeaders(
+          pkt, *c_.extraWriteHeaders_, infoIdType::KEYVALUE, false);
     }
 
     // TODO(davejwatson) optimize this for writing twice/memcopy to pkt buffer.
@@ -924,7 +942,7 @@ unique_ptr<IOBuf> THeader::addHeader(
 
     // Set framing size.
     if (szHbo > MAX_FRAME_SIZE) {
-      if (!allowBigFrames_) {
+      if (!c_.allowBigFrames_) {
         throw TTransportException(
             TTransportException::INVALID_FRAME_SIZE, "Big frames not allowed");
       }
@@ -943,8 +961,8 @@ unique_ptr<IOBuf> THeader::addHeader(
     header->prependChain(std::move(buf));
     buf = std::move(header);
   } else if (
-      (clientType_ == THRIFT_FRAMED_DEPRECATED) ||
-      (clientType_ == THRIFT_FRAMED_COMPACT)) {
+      (c_.clientType_ == THRIFT_FRAMED_DEPRECATED) ||
+      (c_.clientType_ == THRIFT_FRAMED_COMPACT)) {
     uint32_t szHbo = (uint32_t)chainSize;
     uint32_t szNbo = folly::Endian::big<uint32_t>(szHbo);
 
@@ -954,19 +972,19 @@ unique_ptr<IOBuf> THeader::addHeader(
     header->prependChain(std::move(buf));
     buf = std::move(header);
   } else if (
-      clientType_ == THRIFT_UNFRAMED_DEPRECATED ||
-      clientType_ == THRIFT_UNFRAMED_COMPACT_DEPRECATED ||
-      clientType_ == THRIFT_HTTP_SERVER_TYPE) {
+      c_.clientType_ == THRIFT_UNFRAMED_DEPRECATED ||
+      c_.clientType_ == THRIFT_UNFRAMED_COMPACT_DEPRECATED ||
+      c_.clientType_ == THRIFT_HTTP_SERVER_TYPE) {
     // We just return buf
     // TODO: IOBufize httpTransport.
-  } else if (clientType_ == THRIFT_HTTP_CLIENT_TYPE) {
-    CHECK(httpClientParser_.get() != nullptr);
-    buf = httpClientParser_->constructHeader(
+  } else if (c_.clientType_ == THRIFT_HTTP_CLIENT_TYPE) {
+    CHECK(c_.httpClientParser_.get() != nullptr);
+    buf = c_.httpClientParser_->constructHeader(
         std::move(buf),
         persistentWriteHeaders,
-        writeHeaders_ ? *writeHeaders_ : kEmptyMap(),
-        extraWriteHeaders_);
-    writeHeaders_.reset();
+        c_.writeHeaders_ ? *c_.writeHeaders_ : kEmptyMap(),
+        c_.extraWriteHeaders_);
+    c_.writeHeaders_.reset();
   } else {
     throw TTransportException(
         TTransportException::BAD_ARGS, "Unknown client type");
@@ -976,8 +994,8 @@ unique_ptr<IOBuf> THeader::addHeader(
 }
 
 apache::thrift::concurrency::PRIORITY THeader::getCallPriority() const {
-  if (priority_) {
-    return *priority_;
+  if (c_.priority_) {
+    return *c_.priority_;
   }
   const auto& map = getHeaders();
   auto iter = map.find(PRIORITY_HEADER);
@@ -1012,16 +1030,16 @@ std::chrono::milliseconds THeader::getTimeoutFromHeader(
 }
 
 std::chrono::milliseconds THeader::getClientTimeout() const {
-  if (clientTimeout_) {
-    return *clientTimeout_;
+  if (c_.clientTimeout_) {
+    return *c_.clientTimeout_;
   } else {
     return getTimeoutFromHeader(CLIENT_TIMEOUT_HEADER);
   }
 }
 
 std::chrono::milliseconds THeader::getClientQueueTimeout() const {
-  if (queueTimeout_) {
-    return *queueTimeout_;
+  if (c_.queueTimeout_) {
+    return *c_.queueTimeout_;
   } else {
     return getTimeoutFromHeader(QUEUE_TIMEOUT_HEADER);
   }
@@ -1029,50 +1047,50 @@ std::chrono::milliseconds THeader::getClientQueueTimeout() const {
 
 folly::Optional<std::chrono::milliseconds> THeader::getServerQueueTimeout()
     const {
-  return serverQueueTimeout_;
+  return c_.serverQueueTimeout_;
 }
 
 folly::Optional<std::chrono::milliseconds> THeader::getProcessDelay() const {
-  return processDelay_;
+  return c_.processDelay_;
 }
 
 const folly::Optional<std::string>& THeader::clientId() const {
-  return clientId_;
+  return c_.clientId_;
 }
 const folly::Optional<std::string>& THeader::serviceTraceMeta() const {
-  return serviceTraceMeta_;
+  return c_.serviceTraceMeta_;
 }
 
 void THeader::setHttpClientParser(shared_ptr<THttpClientParser> parser) {
-  CHECK(clientType_ == THRIFT_HTTP_CLIENT_TYPE);
-  httpClientParser_ = parser;
+  CHECK(c_.clientType_ == THRIFT_HTTP_CLIENT_TYPE);
+  c_.httpClientParser_ = parser;
 }
 
 void THeader::setClientTimeout(std::chrono::milliseconds timeout) {
-  clientTimeout_ = timeout;
+  c_.clientTimeout_ = timeout;
 }
 
 void THeader::setClientQueueTimeout(std::chrono::milliseconds timeout) {
-  queueTimeout_ = timeout;
+  c_.queueTimeout_ = timeout;
 }
 
 void THeader::setServerQueueTimeout(std::chrono::milliseconds timeout) {
-  serverQueueTimeout_ = timeout;
+  c_.serverQueueTimeout_ = timeout;
 }
 
 void THeader::setProcessDelay(std::chrono::milliseconds timeQueued) {
-  processDelay_ = timeQueued;
+  c_.processDelay_ = timeQueued;
 }
 
 void THeader::setCallPriority(apache::thrift::concurrency::PRIORITY priority) {
-  priority_ = priority;
+  c_.priority_ = priority;
 }
 
 void THeader::setClientId(const std::string& clientId) {
-  clientId_ = clientId;
+  c_.clientId_ = clientId;
 }
 void THeader::setServiceTraceMeta(const std::string& serviceTraceMeta) {
-  serviceTraceMeta_ = serviceTraceMeta;
+  c_.serviceTraceMeta_ = serviceTraceMeta;
 }
 
 static constexpr folly::StringPiece TRANSFORMS_STRING_LIST[] = {
@@ -1110,14 +1128,14 @@ std::optional<ClientMetadata> THeader::extractClientMetadata() {
 }
 
 std::optional<std::string> THeader::extractHeader(std::string_view key) {
-  if (!readHeaders_) {
+  if (!c_.readHeaders_) {
     return std::nullopt;
   }
   std::optional<std::string> res;
-  auto itr = readHeaders_->find(std::string{key});
-  if (itr != readHeaders_->end()) {
+  auto itr = c_.readHeaders_->find(std::string{key});
+  if (itr != c_.readHeaders_->end()) {
     res = std::move(itr->second);
-    readHeaders_->erase(itr);
+    c_.readHeaders_->erase(itr);
   }
   return res;
 }

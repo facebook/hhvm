@@ -145,22 +145,22 @@ class THeader final {
 
   explicit THeader(int options = 0);
 
-  void setClientType(CLIENT_TYPE ct) { this->clientType_ = ct; }
+  void setClientType(CLIENT_TYPE ct) { c_.clientType_ = ct; }
   // Force using specified client type when using legacy client types
   // i.e. sniffing out client type is disabled.
-  void forceClientType(bool enable) { forceClientType_ = enable; }
-  CLIENT_TYPE getClientType() const { return clientType_; }
+  void forceClientType(bool enable) { c_.forceClientType_ = enable; }
+  CLIENT_TYPE getClientType() const { return c_.clientType_; }
 
-  uint16_t getProtocolId() const { return protoId_; }
-  void setProtocolId(uint16_t protoId) { this->protoId_ = protoId; }
+  uint16_t getProtocolId() const { return c_.protoId_; }
+  void setProtocolId(uint16_t protoId) { c_.protoId_ = protoId; }
 
   int8_t getProtocolVersion() const;
-  void setProtocolVersion(uint8_t ver) { this->protoVersion_ = ver; }
+  void setProtocolVersion(uint8_t ver) { c_.protoVersion_ = ver; }
 
   void resetProtocol();
 
-  uint16_t getFlags() const { return flags_; }
-  void setFlags(uint16_t flags) { flags_ = flags; }
+  uint16_t getFlags() const { return c_.flags_; }
+  void setFlags(uint16_t flags) { c_.flags_ = flags; }
 
   // Info headers
   // NB: we're using F14NodeMap here because it's a very≥ general map, which
@@ -212,10 +212,10 @@ class THeader final {
   void setTransform(uint16_t transId);
   void setReadTransform(uint16_t transId);
   void setTransforms(const std::vector<uint16_t>& trans) {
-    writeTrans_ = trans;
+    c_.writeTrans_ = trans;
   }
-  const std::vector<uint16_t>& getTransforms() const { return readTrans_; }
-  std::vector<uint16_t>& getWriteTransforms() { return writeTrans_; }
+  const std::vector<uint16_t>& getTransforms() const { return c_.readTrans_; }
+  std::vector<uint16_t>& getWriteTransforms() { return c_.writeTrans_; }
 
   void setClientMetadata(const ClientMetadata& clientMetadata);
   std::optional<ClientMetadata> extractClientMetadata();
@@ -241,16 +241,18 @@ class THeader final {
   StringToStringMap releaseHeaders();
 
   void setExtraWriteHeaders(StringToStringMap* extraWriteHeaders) {
-    extraWriteHeaders_ = extraWriteHeaders;
+    c_.extraWriteHeaders_ = extraWriteHeaders;
   }
-  StringToStringMap* getExtraWriteHeaders() const { return extraWriteHeaders_; }
+  StringToStringMap* getExtraWriteHeaders() const {
+    return c_.extraWriteHeaders_;
+  }
 
   std::string getPeerIdentity() const;
   void setIdentity(const std::string& identity);
 
   // accessors for seqId
-  uint32_t getSequenceNumber() const { return seqId_; }
-  void setSequenceNumber(uint32_t sid) { this->seqId_ = sid; }
+  uint32_t getSequenceNumber() const { return c_.seqId_; }
+  void setSequenceNumber(uint32_t sid) { c_.seqId_ = sid; }
 
   enum TRANSFORMS {
     NONE = 0x00,
@@ -302,29 +304,29 @@ class THeader final {
       StringToStringMap& persistentReadHeaders);
 
   void setDesiredCompressionConfig(CompressionConfig compressionConfig) {
-    compressionConfig_ = compressionConfig;
+    c_.compressionConfig_ = compressionConfig;
   }
 
   folly::Optional<CompressionConfig> getDesiredCompressionConfig() const {
-    return compressionConfig_;
+    return c_.compressionConfig_;
   }
 
   void setProxiedPayloadMetadata(
       ProxiedPayloadMetadata proxiedPayloadMetadata) {
-    proxiedPayloadMetadata_ = proxiedPayloadMetadata;
+    c_.proxiedPayloadMetadata_ = proxiedPayloadMetadata;
   }
 
   std::optional<ProxiedPayloadMetadata> extractProxiedPayloadMetadata() {
-    return std::exchange(proxiedPayloadMetadata_, {});
+    return std::exchange(c_.proxiedPayloadMetadata_, {});
   }
 
-  void setCrc32c(folly::Optional<uint32_t> crc32c) { crc32c_ = crc32c; }
+  void setCrc32c(folly::Optional<uint32_t> crc32c) { c_.crc32c_ = crc32c; }
 
-  folly::Optional<uint32_t> getCrc32c() const { return crc32c_; }
+  folly::Optional<uint32_t> getCrc32c() const { return c_.crc32c_; }
 
-  void setServerLoad(folly::Optional<int64_t> load) { serverLoad_ = load; }
+  void setServerLoad(folly::Optional<int64_t> load) { c_.serverLoad_ = load; }
 
-  folly::Optional<int64_t> getServerLoad() const { return serverLoad_; }
+  folly::Optional<int64_t> getServerLoad() const { return c_.serverLoad_; }
 
   apache::thrift::concurrency::PRIORITY getCallPriority() const;
 
@@ -363,9 +365,11 @@ class THeader final {
   static CLIENT_TYPE tryGetClientType(const folly::IOBuf& data);
 
   void setRoutingData(std::shared_ptr<void> data) {
-    routingData_ = std::move(data);
+    c_.routingData_ = std::move(data);
   }
-  std::shared_ptr<void> releaseRoutingData() { return std::move(routingData_); }
+  std::shared_ptr<void> releaseRoutingData() {
+    return std::move(c_.routingData_);
+  }
 
   // 0 and 16th bits must be 0 to differentiate from framed & unframed
   static const uint32_t HEADER_MAGIC = 0x0FFF0000;
@@ -429,61 +433,58 @@ class THeader final {
   StringToStringMap& ensureReadHeaders();
   StringToStringMap& ensureWriteHeaders();
 
-  // Http client parser
-  std::shared_ptr<apache::thrift::util::THttpClientParser> httpClientParser_;
-
-  int16_t protoId_;
-  int8_t protoVersion_;
-  CLIENT_TYPE clientType_;
-  bool forceClientType_;
-  uint32_t seqId_;
-  uint16_t flags_;
-  std::string identity_;
-
-  std::vector<uint16_t> readTrans_;
-  std::vector<uint16_t> writeTrans_;
-
-  // Map to use for headers
-  std::optional<StringToStringMap> readHeaders_;
-  std::optional<StringToStringMap> writeHeaders_;
-
-  // Won't be cleared when flushing
-  StringToStringMap* extraWriteHeaders_{nullptr};
-
-  // If these values are set, they are used instead of looking inside
-  // the header map.
-  folly::Optional<std::chrono::milliseconds> clientTimeout_;
-  folly::Optional<std::chrono::milliseconds> queueTimeout_;
-  folly::Optional<std::chrono::milliseconds> processDelay_;
-  folly::Optional<std::chrono::milliseconds> serverQueueTimeout_;
-  folly::Optional<apache::thrift::concurrency::PRIORITY> priority_;
-  folly::Optional<std::string> clientId_;
-  folly::Optional<std::string> serviceTraceMeta_;
-
   static constexpr std::string_view IDENTITY_HEADER = "identity";
   static constexpr std::string_view ID_VERSION_HEADER = "id_version";
   static constexpr std::string_view ID_VERSION = "1";
 
-  bool allowBigFrames_;
-  folly::Optional<CompressionConfig> compressionConfig_;
+  // Anything not in this sub-struct must be copied explicitly in XXX
+  struct TriviallyCopiable {
+    explicit TriviallyCopiable(int options);
 
-  std::shared_ptr<void> routingData_;
+    // Http client parser
+    std::shared_ptr<apache::thrift::util::THttpClientParser> httpClientParser_;
 
-  struct infoIdType {
-    enum idType {
-      // start at 1 to avoid confusing header padding for an infoId
-      KEYVALUE = 1,
-      // for persistent header
-      PKEYVALUE = 2,
-      END // signal the end of infoIds we can handle
-    };
+    int16_t protoId_;
+    int8_t protoVersion_;
+    CLIENT_TYPE clientType_;
+    bool forceClientType_;
+    uint32_t seqId_;
+    uint16_t flags_;
+    std::string identity_;
+
+    std::vector<uint16_t> readTrans_;
+    std::vector<uint16_t> writeTrans_;
+
+    // Map to use for headers
+    std::optional<StringToStringMap> readHeaders_;
+    std::optional<StringToStringMap> writeHeaders_;
+
+    // Won't be cleared when flushing
+    StringToStringMap* extraWriteHeaders_{nullptr};
+
+    // If these values are set, they are used instead of looking inside
+    // the header map.
+    folly::Optional<std::chrono::milliseconds> clientTimeout_;
+    folly::Optional<std::chrono::milliseconds> queueTimeout_;
+    folly::Optional<std::chrono::milliseconds> processDelay_;
+    folly::Optional<std::chrono::milliseconds> serverQueueTimeout_;
+    folly::Optional<apache::thrift::concurrency::PRIORITY> priority_;
+    folly::Optional<std::string> clientId_;
+    folly::Optional<std::string> serviceTraceMeta_;
+
+    bool allowBigFrames_;
+    folly::Optional<CompressionConfig> compressionConfig_;
+
+    std::shared_ptr<void> routingData_;
+
+    // CRC32C of message payload for checksum.
+    folly::Optional<uint32_t> crc32c_;
+    folly::Optional<int64_t> serverLoad_;
+
+    std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
   };
 
-  // CRC32C of message payload for checksum.
-  folly::Optional<uint32_t> crc32c_;
-  folly::Optional<int64_t> serverLoad_;
-
-  std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
+  TriviallyCopiable c_;
 };
 
 } // namespace transport

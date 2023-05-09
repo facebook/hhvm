@@ -176,7 +176,6 @@ type t = {
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
-  tco_pessimise_builtins: bool;
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
   tco_type_printer_fuel: int;
@@ -311,7 +310,6 @@ let default =
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
-    tco_pessimise_builtins = false;
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
     tco_type_printer_fuel = 100;
@@ -444,7 +442,6 @@ let set
     ?tco_strict_value_equality
     ?tco_enforce_sealed_subclasses
     ?tco_everything_sdt
-    ?tco_pessimise_builtins
     ?tco_explicit_consistent_constructors
     ?tco_require_types_class_consts
     ?tco_type_printer_fuel
@@ -752,8 +749,6 @@ let set
         tco_enforce_sealed_subclasses
         options.tco_enforce_sealed_subclasses;
     tco_everything_sdt = setting tco_everything_sdt options.tco_everything_sdt;
-    tco_pessimise_builtins =
-      setting tco_pessimise_builtins options.tco_pessimise_builtins;
     tco_explicit_consistent_constructors =
       setting
         tco_explicit_consistent_constructors

@@ -717,7 +717,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     in
     Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
     let right_expected_ty =
-      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
         MakeType.locl_like
           (Reason.Renforceable (get_pos expected_ty))
           expected_ty
@@ -1005,7 +1005,7 @@ let expand_expected_and_get_node
         let (env, opt_ty) =
           if
             (not strip_supportdyn)
-            && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+            && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
             && pessimisable_builtin
           then
             (env, None)
@@ -1191,7 +1191,7 @@ let fun_type_of_id env x tal el =
     | Tfun ft ->
       let ft =
         let pessimise =
-          TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+          TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
         in
         Typing_special_fun.transform_special_fun_ty
           ~pessimise
@@ -3408,7 +3408,8 @@ and expr_
       expr_infer =
     (* Is this a pessimisable builtin constructor *and* the flag is set? *)
     let do_pessimise_builtin =
-      can_pessimise && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+      can_pessimise
+      && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
     in
     (* Under Sound Dynamic, for pessimisable builtins we add a like to the expected type
      * that is used to check the element expressions.
@@ -6138,7 +6139,7 @@ and et_splice env dsl_opt p e =
     let raw_spliceable_type =
       MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
     in
-    if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
       MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
     else
       raw_spliceable_type

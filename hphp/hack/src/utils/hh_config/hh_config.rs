@@ -250,9 +250,6 @@ impl HhConfig {
                 "like_type_hints" => {
                     go.tco_like_type_hints = parse_json(&value)?;
                 }
-                "pessimise_builtins" => {
-                    go.tco_pessimise_builtins = parse_json(&value)?;
-                }
                 "union_intersection_type_hints" => {
                     go.tco_union_intersection_type_hints = parse_json(&value)?;
                 }

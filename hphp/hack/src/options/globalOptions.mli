@@ -304,8 +304,6 @@ type t = {
   tco_enforce_sealed_subclasses: bool;
   (* All classes are implcitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
-  (* All collections and Hack arrays are treated as containing ~T *)
-  tco_pessimise_builtins: bool;
   (* Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
    * explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
    * for all classish *)
@@ -461,7 +459,6 @@ val set :
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
-  ?tco_pessimise_builtins:bool ->
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
   ?tco_type_printer_fuel:int ->

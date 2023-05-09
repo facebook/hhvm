@@ -264,7 +264,7 @@ let pessimise_type env ty =
   Typing_union.union env ty (Typing_make_type.dynamic (get_reason ty))
 
 let maybe_pessimise_type env ty =
-  if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+  if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
     pessimise_type env ty
   else
     (env, ty)

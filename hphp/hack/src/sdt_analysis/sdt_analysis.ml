@@ -22,7 +22,6 @@ let exit_if_incorrect_tcopt ctx : unit =
     TypecheckerOptions.(
       enable_sound_dynamic tcopt
       && tast_under_dynamic tcopt
-      && pessimise_builtins tcopt
       && everything_sdt tcopt)
   in
   if not has_correct_options then (

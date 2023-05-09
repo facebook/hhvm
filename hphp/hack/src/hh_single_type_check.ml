@@ -90,7 +90,6 @@ type options = {
   custom_hhi_path: string option;
   profile_type_check_multi: int option;
   memtrace: string option;
-  pessimise_builtins: bool;
   rust_provider_backend: bool;
 }
 
@@ -298,7 +297,6 @@ let parse_options () =
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
-  let pessimise_builtins = ref false in
   let custom_hhi_path = ref None in
   let explicit_consistent_constructors = ref 0 in
   let require_types_class_consts = ref 0 in
@@ -592,8 +590,7 @@ let parse_options () =
             set_bool_ like_type_hints ();
             set_bool_ always_pessimise_return ();
             set_bool_ consider_type_const_enforceable ();
-            set_bool_ enable_supportdyn_hint ();
-            set_bool_ pessimise_builtins ()),
+            set_bool_ enable_supportdyn_hint ()),
         " Enables naive implicit pessimisation" );
       ( "--implicit-pess",
         Arg.Unit
@@ -601,8 +598,7 @@ let parse_options () =
             set_bool_ enable_sound_dynamic ();
             set_bool_ everything_sdt ();
             set_bool_ like_type_hints ();
-            set_bool_ enable_supportdyn_hint ();
-            set_bool_ pessimise_builtins ()),
+            set_bool_ enable_supportdyn_hint ()),
         " Enables implicit pessimisation" );
       ( "--explicit-pess",
         Arg.String
@@ -610,7 +606,6 @@ let parse_options () =
             set_bool_ enable_sound_dynamic ();
             set_bool_ like_type_hints ();
             set_bool_ enable_supportdyn_hint ();
-            set_bool_ pessimise_builtins ();
             custom_hhi_path := Some dir),
         " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
       );
@@ -781,10 +776,6 @@ let parse_options () =
       ( "--everything-sdt",
         Arg.Set everything_sdt,
         " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
-      );
-      ( "--pessimise-builtins",
-        Arg.Set pessimise_builtins,
-        " Treat built-in collections and Hack arrays as though they contain ~T"
       );
       ( "--custom-hhi-path",
         Arg.String (fun s -> custom_hhi_path := Some s),
@@ -1002,7 +993,6 @@ let parse_options () =
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_everything_sdt:!everything_sdt
-      ~tco_pessimise_builtins:!pessimise_builtins
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
@@ -1106,7 +1096,6 @@ let parse_options () =
       custom_hhi_path = !custom_hhi_path;
       profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
-      pessimise_builtins = !pessimise_builtins;
       rust_provider_backend = !rust_provider_backend;
     },
     root,
@@ -2732,7 +2721,6 @@ let decl_and_run_mode
       custom_hhi_path;
       profile_type_check_multi;
       memtrace;
-      pessimise_builtins = _;
       rust_provider_backend;
     }
     (popt : TypecheckerOptions.t)

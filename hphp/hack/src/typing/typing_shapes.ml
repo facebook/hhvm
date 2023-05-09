@@ -82,7 +82,7 @@ let refine_shape field_name pos env shape =
     (MakeType.open_shape Reason.Rnone (TShapeMap.singleton field_name sft))
 
 let make_locl_like_type env ty =
-  if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+  if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
     let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
     Typing_union.union env dyn ty
   else
@@ -246,7 +246,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     in
     let nullable_super_shape = mk (Reason.Rnone, Toption fake_super_shape_ty) in
     let super_shape =
-      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
         let like_nullable_super_shape =
           MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
         in

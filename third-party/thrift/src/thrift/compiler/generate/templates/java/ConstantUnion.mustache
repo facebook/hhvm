@@ -14,11 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{> BoxedType}}{{!
 }}{{#value:const_struct}}{{!
-}}{{#constant:type}}{{!
+}}{{> BoxedType}}{{#constant:type}}{{!
   }}.from{{constant:javaFieldName}}({{#constant:value}}{{> DefaultValue}}{{/constant:value}}){{!
 }}{{/constant:type}}{{!
 }}{{/value:const_struct}}{{!
-}}
+}}{{^value:const_struct}}{{!
+}}new {{> BoxedType}}(){{!
+}}{{/value:const_struct}}

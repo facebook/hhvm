@@ -111,7 +111,7 @@ public final class ModuleConstants {
 
     public static final test.fixtures.constants.Union1 U_1_2 = test.fixtures.constants.Union1.fromD((double)5.6);
 
-    public static final test.fixtures.constants.Union1 U_1_3 = test.fixtures.constants.Union1;
+    public static final test.fixtures.constants.Union1 U_1_3 = new test.fixtures.constants.Union1();
 
     public static final test.fixtures.constants.Union2 U_2_1 = test.fixtures.constants.Union2.fromI(51);
 
@@ -123,7 +123,7 @@ public final class ModuleConstants {
 
     public static final test.fixtures.constants.Union2 U_2_5 = test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromD((double)9.8));
 
-    public static final test.fixtures.constants.Union2 U_2_6 = test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1);
+    public static final test.fixtures.constants.Union2 U_2_6 = test.fixtures.constants.Union2.fromU(new test.fixtures.constants.Union1());
 
     public static final String APOSTROPHE = "'";
 

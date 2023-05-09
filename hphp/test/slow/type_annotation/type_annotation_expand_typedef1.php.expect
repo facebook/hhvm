@@ -1,6 +1,6 @@
 dict(5) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
@@ -14,8 +14,8 @@ dict(5) {
   }
   ["typevars"]=>
   string(1) "T"
-  ["opaque"]=>
-  bool(true)
+  ["alias"]=>
+  string(7) "MyAlias"
 }
 dict(5) {
   ["kind"]=>
@@ -42,7 +42,7 @@ dict(5) {
   ["return_type"]=>
   dict(3) {
     ["kind"]=>
-    int(101)
+    int(15)
     ["classname"]=>
     string(6) "HH\Map"
     ["generic_types"]=>
@@ -72,8 +72,8 @@ dict(5) {
   }
   ["typevars"]=>
   string(5) "Tk,Tv"
-  ["opaque"]=>
-  bool(true)
+  ["alias"]=>
+  string(8) "MyAlias2"
 }
 dict(5) {
   ["kind"]=>

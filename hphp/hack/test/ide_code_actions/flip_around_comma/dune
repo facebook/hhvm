@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_flip_around_comma)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/flip_around_comma/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/flip_around_comma/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/flip_around_comma/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/flip_around_comma
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_flip_around_comma)))

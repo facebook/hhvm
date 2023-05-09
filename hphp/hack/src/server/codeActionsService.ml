@@ -195,3 +195,4 @@ let go
       ~entry
       ctx
       tast
+  @ CodeActionsServiceFlipAroundComma.find ~range:lsp_range ~path ~entry ctx

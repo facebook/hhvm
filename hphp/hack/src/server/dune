@@ -377,7 +377,9 @@
  (wrapped false)
  (modules
   codeActionsService
-  codeActionsServiceExtractVariable)
+  codeActionsServiceExtractVariable
+  codeActionsServiceFlipAroundComma
+ )
  (libraries
   annotated_ast
   ast

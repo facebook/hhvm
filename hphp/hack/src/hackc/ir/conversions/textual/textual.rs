@@ -85,6 +85,7 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub(crate) fn define_global(&mut self, name: GlobalName, ty: Ty) {
         self.internal_globals.insert(name, ty);
     }

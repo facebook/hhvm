@@ -7,6 +7,7 @@ use anyhow::Error;
 use ir::instr::BaseOp;
 use ir::instr::FinalOp;
 use ir::instr::MemberKey;
+use ir::instr::MemberOp;
 use ir::InstrId;
 use ir::LocalId;
 use ir::QueryMOp;
@@ -266,14 +267,15 @@ pub(crate) fn base_var(strings: &StringInterner) -> LocalId {
 }
 
 pub(crate) fn func_needs_base_var(func: &ir::Func<'_>) -> bool {
-    use ir::instr::MemberOp;
+    use ir::instr::Hhbc;
     use ir::Instr;
     for instr in func.instrs.iter() {
         match instr {
             Instr::MemberOp(MemberOp {
                 base_op: BaseOp::BaseC { .. } | BaseOp::BaseSC { .. },
                 ..
-            }) => {
+            })
+            | Instr::Hhbc(Hhbc::SetS(..)) => {
                 return true;
             }
             _ => {}
@@ -283,17 +285,24 @@ pub(crate) fn func_needs_base_var(func: &ir::Func<'_>) -> bool {
     false
 }
 
-pub(crate) fn base_from_vid(
+pub(crate) fn base_from_expr(
     state: &mut FuncState<'_, '_, '_>,
-    src: ValueId,
+    src: impl Into<textual::Expr>,
 ) -> Result<textual::Expr> {
     // Unfortunately we need base to be a pointer to a value, not a
     // value itself - so store it in `base` so we can return a pointer
     // to `base`.
-    let src = state.lookup_vid(src);
     let base_lid = base_var(&state.strings);
-    state.store_mixed(textual::Expr::deref(base_lid), src)?;
+    state.store_mixed(textual::Expr::deref(base_lid), src.into())?;
     Ok(base_from_lid(base_lid))
+}
+
+pub(crate) fn base_from_vid(
+    state: &mut FuncState<'_, '_, '_>,
+    src: ValueId,
+) -> Result<textual::Expr> {
+    let src = state.lookup_vid(src);
+    base_from_expr(state, src)
 }
 
 fn base_from_lid(lid: LocalId) -> textual::Expr {

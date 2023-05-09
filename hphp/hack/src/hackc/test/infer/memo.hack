@@ -62,7 +62,7 @@ class C {
   // CHECK:   prune ! $builtins.hack_is_true(n7)
   // CHECK:   n9: *HackMixed = load &$a
   // CHECK:   n10: *HackMixed = load &$b
-  // CHECK:   n11 = __sil_lazy_class_initialize(<C>)
+  // CHECK:   n11: *C$static = load &$this
   // CHECK:   n12 = C$static.memometh_static$memoize_impl(n11, n9, n10)
   // CHECK:   n13: *HackMixed = load &$this
   // CHECK:   n14: *HackMixed = load &$0

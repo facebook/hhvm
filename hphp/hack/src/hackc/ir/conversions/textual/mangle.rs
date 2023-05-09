@@ -85,11 +85,12 @@ impl Mangle for ir::PropId {
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub(crate) enum Intrinsic {
     AllocCurry,
+    ConstInit(ir::ClassId),
     Construct(ir::ClassId),
     Factory(ir::ClassId),
-    InitStatic(ir::ClassId),
     Invoke(TypeName),
     PropInit(ir::ClassId),
+    StaticInit(ir::ClassId),
 }
 
 /// Represents a named callable thing.  This includes top-level functions and
@@ -135,6 +136,10 @@ impl fmt::Display for FmtFunctionName<'_> {
                 let tn;
                 let (ty, name) = match intrinsic {
                     Intrinsic::AllocCurry => (None, "__sil_allocate_curry"),
+                    Intrinsic::ConstInit(cid) => {
+                        tn = TypeName::StaticClass(*cid);
+                        (Some(&tn), "_86cinit")
+                    }
                     Intrinsic::Construct(cid) => {
                         tn = TypeName::Class(*cid);
                         (Some(&tn), members::__CONSTRUCT)
@@ -143,14 +148,14 @@ impl fmt::Display for FmtFunctionName<'_> {
                         tn = TypeName::StaticClass(*cid);
                         (Some(&tn), "__factory")
                     }
-                    Intrinsic::InitStatic(cid) => {
-                        tn = TypeName::StaticClass(*cid);
-                        (Some(&tn), "$init_static")
-                    }
                     Intrinsic::Invoke(tn) => (Some(tn), "__invoke"),
                     Intrinsic::PropInit(cid) => {
                         tn = TypeName::Class(*cid);
                         (Some(&tn), "_86pinit")
+                    }
+                    Intrinsic::StaticInit(cid) => {
+                        tn = TypeName::StaticClass(*cid);
+                        (Some(&tn), "_86sinit")
                     }
                 };
                 if let Some(ty) = ty {
@@ -177,7 +182,6 @@ impl fmt::Display for FmtFunctionName<'_> {
 pub(crate) enum GlobalName {
     Global(ir::GlobalId),
     GlobalConst(ir::GlobalId),
-    StaticConst(ir::ClassId, ir::ConstId),
 }
 
 impl GlobalName {
@@ -203,14 +207,6 @@ impl fmt::Display for FmtGlobalName<'_> {
             }
             GlobalName::GlobalConst(id) => {
                 write!(f, "gconst::{}", id.as_bytes(strings).mangle(strings))
-            }
-            GlobalName::StaticConst(class, cid) => {
-                write!(
-                    f,
-                    "const::{}::{}",
-                    TypeName::StaticClass(*class).display(strings),
-                    cid.as_bytes(strings).mangle(strings)
-                )
             }
         }
     }

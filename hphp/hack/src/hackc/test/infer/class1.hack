@@ -36,11 +36,12 @@ class D extends C { }
 // CHECK:   jmp b3
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true($builtins.hack_bool(false))
-// CHECK:   n6: *HackMixed = load &const::C$static::A
-// CHECK:   n7 = &$this
-// CHECK:   n8 = $builtins.hack_string("prop")
-// CHECK:   n9 = $builtins.hack_dim_field_get(n7, n8)
-// CHECK:   store n9 <- n6: *HackMixed
+// CHECK:   n6 = __sil_lazy_class_initialize(<C>)
+// CHECK:   n7 = $builtins.hack_field_get(n6, "A")
+// CHECK:   n8 = &$this
+// CHECK:   n9 = $builtins.hack_string("prop")
+// CHECK:   n10 = $builtins.hack_dim_field_get(n8, n9)
+// CHECK:   store n10 <- n7: *HackMixed
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK:   ret null

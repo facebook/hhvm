@@ -15,12 +15,9 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use hash::IndexMap;
-use ir::LocalId;
-use ir::StringInterner;
 use itertools::Itertools;
 use log::trace;
 use naming_special_names_rust::special_idents;
-use naming_special_names_rust::typehints;
 
 use super::func;
 use super::textual;
@@ -28,14 +25,12 @@ use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 use crate::lower;
 use crate::mangle::FunctionName;
-use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
 use crate::mangle::Mangle;
 use crate::mangle::TypeName;
 use crate::state::UnitState;
 use crate::textual::FieldAttribute;
 use crate::textual::TextualFile;
-use crate::typed_value;
 use crate::types::convert_ty;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -107,18 +102,7 @@ impl ClassState<'_, '_, '_> {
         self.write_type(IsStatic::Static)?;
         self.write_type(IsStatic::NonStatic)?;
 
-        // Class constants are not inherited so we just turn them into globals.
-        for constant in &self.class.constants {
-            let name = GlobalName::StaticConst(self.class.name, constant.name);
-            let ty = if let Some(et) = self.class.enum_type.as_ref() {
-                convert_enum_ty(et, self.strings())
-            } else {
-                textual::Ty::mixed()
-            };
-            self.txf.define_global(name, ty);
-        }
-
-        self.write_init_static()?;
+        // Note: Class constants turn into static properties.
 
         if self.needs_factory {
             self.write_factory()?;
@@ -130,10 +114,6 @@ impl ClassState<'_, '_, '_> {
         }
 
         Ok(())
-    }
-
-    fn strings(&self) -> &StringInterner {
-        &self.unit_state.strings
     }
 
     /// Write the type for a (class, is_static) with the properties of the class.
@@ -263,48 +243,6 @@ impl ClassState<'_, '_, '_> {
         Ok(())
     }
 
-    /// Build the `init_static` function for a static class.
-    ///
-    /// Declares globals for:
-    ///   - static singleton
-    /// Writes the `init_static` function itself which initializes the globals and
-    /// returns the memoized static singleton.
-    fn write_init_static(&mut self) -> Result {
-        let singleton_name = static_singleton_name(self.class.name, &self.unit_state.strings);
-        self.txf
-            .define_global(singleton_name.clone(), static_ty(self.class.name));
-
-        let this_ty = static_ty(self.class.name);
-        self.txf.define_function(
-            &init_static_name(self.class.name),
-            &self.class.src_loc,
-            &[(special_idents::THIS, &this_ty)],
-            &textual::Ty::Void,
-            &[],
-            |fb| {
-                let var = LocalId::Named(self.unit_state.strings.intern_str(special_idents::THIS));
-                let _this = fb.load(&this_ty, textual::Expr::deref(var))?;
-
-                // TODO: Initialize static properties here
-
-                // constants are stored as independent globals instead of being
-                // on the class object itself.  However we initialize them as
-                // part of the Class initialization.
-                for constant in &self.class.constants {
-                    if let Some(value) = constant.value.as_ref() {
-                        let name = GlobalName::StaticConst(self.class.name, constant.name);
-                        let var = textual::Var::global(name);
-                        let value = typed_value::typed_value_expr(value, &self.unit_state.strings);
-                        fb.store(textual::Expr::deref(var), value, &textual::Ty::mixed())?;
-                    }
-                }
-
-                fb.ret(0)?;
-                Ok(())
-            },
-        )
-    }
-
     /// Build the factory for a class.
     ///
     /// The factory only allocates an object of the required type. The initialization is done via a separate constructor invocation on the allocated object.
@@ -368,31 +306,6 @@ impl ClassState<'_, '_, '_> {
     }
 }
 
-fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
-    // Enum types are unenforced - and yet the constants ARE real type. So scan
-    // the text of the type and do the best we can.
-    //
-    // If we recognize the type then use it.  Unless it's an "enum class" it can
-    // only be an arraykey.
-    //
-    if ti
-        .user_type
-        .map_or(false, |id| strings.eq_str(id, &typehints::HH_INT[1..]))
-    {
-        return textual::Ty::SpecialPtr(textual::SpecialTy::Int);
-    }
-    if ti
-        .user_type
-        .map_or(false, |id| strings.eq_str(id, &typehints::HH_STRING[1..]))
-    {
-        return textual::Ty::SpecialPtr(textual::SpecialTy::String);
-    }
-
-    // But it can be an alias - so we might just not recognize it - so default
-    // to mixed.
-    textual::Ty::mixed()
-}
-
 /// For a given class return the Ty for its non-static (instance) type.
 pub(crate) fn non_static_ty(class: ir::ClassId) -> textual::Ty {
     let cname = TypeName::Class(class);
@@ -412,17 +325,6 @@ pub(crate) fn class_ty(class: ir::ClassId, is_static: IsStatic) -> textual::Ty {
     }
 }
 
-/// For a given class return the Ty for its non-static type.
-fn init_static_name(class: ir::ClassId) -> FunctionName {
-    FunctionName::Intrinsic(Intrinsic::InitStatic(class))
-}
-
-/// The name of the global singleton for a static class.
-fn static_singleton_name(class: ir::ClassId, strings: &StringInterner) -> GlobalName {
-    let name = ir::ConstId::new(strings.intern_str("static_singleton"));
-    GlobalName::StaticConst(class, name)
-}
-
 fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     if class.flags.is_trait() {
         // Traits express bases through a 'require extends'.
@@ -434,14 +336,4 @@ fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     } else {
         class.base
     }
-}
-
-/// Loads the static singleton for a class.
-pub(crate) fn load_static_class(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    class: ir::ClassId,
-) -> Result<textual::Sid> {
-    let cname = TypeName::Class(class);
-    let ty = textual::Ty::Type(cname);
-    fb.lazy_class_initialize(&ty)
 }

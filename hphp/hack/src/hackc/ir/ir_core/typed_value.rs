@@ -11,6 +11,7 @@ use hash::IndexSet;
 use crate::ClassId;
 use crate::Constant;
 use crate::FloatBits;
+use crate::TypeInfo;
 use crate::UnitBytesId;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -25,6 +26,24 @@ pub enum TypedValue {
     String(UnitBytesId),
     Uninit,
     Vec(Vec<TypedValue>),
+}
+
+impl TypedValue {
+    pub fn type_info(&self) -> TypeInfo {
+        use crate::types::BaseType;
+        match self {
+            TypedValue::Bool(_) => BaseType::Bool.into(),
+            TypedValue::Dict(_) => BaseType::Dict.into(),
+            TypedValue::Float(_) => BaseType::Float.into(),
+            TypedValue::Int(_) => BaseType::Int.into(),
+            TypedValue::Keyset(_) => BaseType::Keyset.into(),
+            TypedValue::LazyClass(_) => BaseType::String.into(),
+            TypedValue::Null => BaseType::Null.into(),
+            TypedValue::String(_) => BaseType::String.into(),
+            TypedValue::Uninit => TypeInfo::empty(),
+            TypedValue::Vec(_) => BaseType::Vec.into(),
+        }
+    }
 }
 
 impl<'a> From<TypedValue> for Constant<'a> {

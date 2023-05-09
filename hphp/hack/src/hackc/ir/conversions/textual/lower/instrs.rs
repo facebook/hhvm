@@ -546,6 +546,12 @@ impl TransformInstr for LowerInstrs<'_> {
                 let const_id = builder.emit_constant(Constant::String(const_id.id));
                 builder.hhbc_builtin(builtin, &[cls, const_id], loc)
             }
+            Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, loc)) => {
+                // ClsCnsD(id, cid) -> CGetS(id, cid)
+                let cid = builder.emit_constant(Constant::String(cid.id));
+                let const_id = builder.emit_constant(Constant::String(const_id.id));
+                Instr::Hhbc(Hhbc::CGetS([const_id, cid], ReadonlyOp::Readonly, loc))
+            }
             Instr::Hhbc(Hhbc::ColFromArray(vid, col_type, loc)) => {
                 use ir::CollectionType;
                 let builtin = match col_type {

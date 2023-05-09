@@ -58,12 +58,22 @@ interned_hhbc_id!(ConstId, ConstName);
 interned_hhbc_id!(FunctionId, FunctionName);
 
 const __FACTORY: &str = "__factory";
+pub const _86CINIT: &str = "86cinit";
 pub const _86PINIT: &str = "86pinit";
+pub const _86SINIT: &str = "86sinit";
 
 interned_hhbc_id!(MethodId, MethodName);
 impl MethodId {
+    pub fn _86cinit(strings: &StringInterner) -> Self {
+        Self::from_str(_86CINIT, strings)
+    }
+
     pub fn _86pinit(strings: &StringInterner) -> Self {
         Self::from_str(_86PINIT, strings)
+    }
+
+    pub fn _86sinit(strings: &StringInterner) -> Self {
+        Self::from_str(_86SINIT, strings)
     }
 
     pub fn constructor(strings: &StringInterner) -> Self {
@@ -74,8 +84,16 @@ impl MethodId {
         Self::from_str(__FACTORY, strings)
     }
 
+    pub fn is_86cinit(&self, strings: &StringInterner) -> bool {
+        strings.eq_str(self.id, _86CINIT)
+    }
+
     pub fn is_86pinit(&self, strings: &StringInterner) -> bool {
         strings.eq_str(self.id, _86PINIT)
+    }
+
+    pub fn is_86sinit(&self, strings: &StringInterner) -> bool {
+        strings.eq_str(self.id, _86SINIT)
     }
 
     pub fn is_constructor(&self, strings: &StringInterner) -> bool {

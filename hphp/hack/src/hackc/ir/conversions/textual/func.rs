@@ -18,7 +18,6 @@ use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::BlockId;
 use ir::ClassId;
-use ir::ConstId;
 use ir::Constant;
 use ir::Func;
 use ir::FunctionId;
@@ -141,8 +140,14 @@ pub(crate) fn write_func(
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
+            name if name.is_86cinit(&strings) => {
+                FunctionName::Intrinsic(Intrinsic::ConstInit(mi.class.name))
+            }
             name if name.is_86pinit(&strings) => {
                 FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
+            }
+            name if name.is_86sinit(&strings) => {
+                FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
             }
             _ => FunctionName::method(mi.class.name, mi.is_static, mi.name),
         },
@@ -277,10 +282,6 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
 
     match *instr {
         Instr::Call(ref call) => write_call(state, iid, call)?,
-        Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, _)) => {
-            let vid = write_get_class_const(state, cid, const_id)?;
-            state.set_iid(iid, vid);
-        }
         Instr::Hhbc(Hhbc::CreateCl {
             ref operands,
             clsid,
@@ -303,20 +304,27 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             | Hhbc::ConsumeL(lid, _),
         ) => write_load_var(state, iid, lid)?,
         Instr::Hhbc(Hhbc::CGetS([field, class], _, _)) => {
-            let class_str = lookup_constant_string(state.func, class);
+            let class_id = lookup_constant_string(state.func, class).map(ClassId::new);
             let field_str = lookup_constant_string(state.func, field);
-            let output = match (class_str, field_str) {
-                (None, Some(f)) => {
-                    // "C"::foo
-                    let this = state.lookup_vid(class);
-                    let field = util::escaped_string(&state.strings.lookup_bstr(f));
-                    state.call_builtin(hack::Builtin::FieldGet, (this, field))?
-                }
+            let output = if let Some(field_str) = field_str {
+                let field = util::escaped_string(&state.strings.lookup_bstr(field_str));
+                let this = match class_id {
+                    None => {
+                        // "C"::foo
+                        state.lookup_vid(class)
+                    }
+                    Some(cid) => {
+                        // C::foo
+                        // This isn't created by HackC but can be created by infer
+                        // lowering.
+                        state.load_static_class(cid)?.into()
+                    }
+                };
+                state.call_builtin(hack::Builtin::FieldGet, (this, field))?
+            } else {
                 // Although the rest of these are technically valid they're
                 // basically impossible to produce with HackC.
-                _ => {
-                    panic!("Unhandled CGetS");
-                }
+                panic!("Unhandled CGetS");
             };
             state.set_iid(iid, output);
         }
@@ -511,19 +519,6 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
         ir::FullInstrId::None => unreachable!(),
     }
     Ok(())
-}
-
-fn write_get_class_const(
-    state: &mut FuncState<'_, '_, '_>,
-    class: ClassId,
-    cid: ConstId,
-) -> Result<Sid> {
-    // TODO: should we load the class static to ensure that the constants are initialized?
-    // let this = state.load_static_class(class)?;
-
-    let name = GlobalName::StaticConst(class, cid);
-    let var = textual::Var::global(name);
-    state.load_mixed(textual::Expr::deref(var))
 }
 
 fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
@@ -896,8 +891,27 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         self.func_info.expect_method("not in class context")
     }
 
+    /// Loads the static singleton for a class.
     fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
-        class::load_static_class(self.fb, cid)
+        match *self.func_info {
+            FuncInfo::Method(MethodInfo {
+                class, is_static, ..
+            }) if class.name == cid => {
+                // If we're already in a member of the class then use '$this'.
+                match is_static {
+                    IsStatic::Static => self.load_this(),
+                    IsStatic::NonStatic => {
+                        let this = self.load_this()?;
+                        hack::call_builtin(self.fb, hack::Builtin::GetStaticClass, [this])
+                    }
+                }
+            }
+            _ => {
+                let cname = TypeName::Class(cid);
+                let ty = textual::Ty::Type(cname);
+                self.fb.lazy_class_initialize(&ty)
+            }
+        }
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {

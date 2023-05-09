@@ -6,6 +6,7 @@
 use std::sync::Arc;
 
 use ir::instr::Hhbc;
+use ir::Constant;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::Instr;
@@ -13,8 +14,11 @@ use ir::LocId;
 use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::MethodFlags;
+use ir::MethodId;
+use ir::ReadonlyOp;
 use ir::SpecialClsRef;
 use ir::StringInterner;
+use ir::TypedValue;
 use log::trace;
 
 use crate::func::FuncInfo;
@@ -54,6 +58,9 @@ pub(crate) fn lower_func<'a>(
     match func_info {
         FuncInfo::Method(mi) if mi.name.is_86pinit(&strings) => {
             rewrite_86pinit(&mut builder, mi);
+        }
+        FuncInfo::Method(mi) if mi.name.is_86sinit(&strings) => {
+            rewrite_86sinit(&mut builder, mi);
         }
         _ => {}
     }
@@ -115,6 +122,76 @@ fn rewrite_86pinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) 
                 MemberOpBuilder::base_h(loc).emit_set_m_pt(builder, *name, vid);
             }
             _ => {}
+        }
+    }
+
+    builder.cur_block_mut().iids.extend(saved);
+}
+
+fn rewrite_86sinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) {
+    // In HHVM 86sinit is only used to initialize "complex" static properties
+    // (and doesn't exist if there aren't any). For textual we change that to
+    // use it to initialize all properties and be guaranteed to exist.  We also
+    // use it to initialize class constants.
+
+    builder.start_block(Func::ENTRY_BID);
+    let saved = std::mem::take(&mut builder.cur_block_mut().iids);
+    let loc = builder.func.loc_id;
+
+    call_base_func(builder, method_info, loc);
+
+    let class = &method_info.class;
+
+    let infer_const = ir::ClassId::from_str(crate::lower::class::INFER_CONSTANT, &builder.strings);
+
+    // Now emit the static properties.
+    let cls_name = builder.emit_constant(Constant::String(class.name.id));
+    let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(cls_name, loc)));
+    for prop in &class.properties {
+        if !prop.flags.is_static() {
+            continue;
+        }
+        let is_const = prop.attributes.iter().any(|attr| attr.name == infer_const);
+
+        let vid = match prop {
+            ir::Property {
+                name,
+                initial_value: Some(TypedValue::Uninit),
+                ..
+            } if is_const => {
+                // This is a "complex" constant - we need to call 86cinit to get
+                // the value.
+                let clsref = SpecialClsRef::SelfCls;
+                let method = MethodId::_86cinit(&builder.strings);
+                let name = builder.emit_constant(Constant::String(name.id));
+                Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
+            }
+            ir::Property {
+                initial_value: None,
+                ..
+            } if is_const => {
+                textual_todo! {
+                    trace!("TODO: abstract class constant");
+                }
+                Some(builder.emit_constant(Constant::Null))
+            }
+            ir::Property {
+                initial_value: Some(initial_value),
+                ..
+            } => {
+                // Either a normal property or non-complex constant.
+                Some(builder.emit_constant(initial_value.clone().into()))
+            }
+            _ => None,
+        };
+
+        if let Some(vid) = vid {
+            let prop_name = builder.emit_constant(Constant::String(prop.name.id));
+            builder.emit(Instr::Hhbc(Hhbc::SetS(
+                [prop_name, cls, vid],
+                ReadonlyOp::Any,
+                loc,
+            )));
         }
     }
 

@@ -194,6 +194,15 @@ impl Default for EnforceableType {
     }
 }
 
+impl From<BaseType> for EnforceableType {
+    fn from(ty: BaseType) -> Self {
+        EnforceableType {
+            ty,
+            modifiers: TypeConstraintFlags::NoFlags,
+        }
+    }
+}
+
 /// A TypeInfo represents a type written by the user.  It consists of the type
 /// written by the user (including generics) and an enforced constraint.
 #[derive(Clone, Debug, Default)]
@@ -254,6 +263,24 @@ impl TypeInfo {
         D {
             strings,
             self_: self,
+        }
+    }
+}
+
+impl From<EnforceableType> for TypeInfo {
+    fn from(enforced: EnforceableType) -> TypeInfo {
+        TypeInfo {
+            user_type: None,
+            enforced,
+        }
+    }
+}
+
+impl From<BaseType> for TypeInfo {
+    fn from(ty: BaseType) -> TypeInfo {
+        TypeInfo {
+            user_type: None,
+            enforced: ty.into(),
         }
     }
 }

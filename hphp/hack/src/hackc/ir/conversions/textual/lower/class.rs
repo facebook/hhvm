@@ -2,10 +2,13 @@ use std::sync::Arc;
 
 use ir::instr;
 use ir::Attr;
+use ir::Attribute;
 use ir::Class;
+use ir::ClassId;
 use ir::Coeffects;
 use ir::Constant;
 use ir::FuncBuilder;
+use ir::HackConstant;
 use ir::Instr;
 use ir::LocalId;
 use ir::MemberOpBuilder;
@@ -13,11 +16,17 @@ use ir::Method;
 use ir::MethodFlags;
 use ir::MethodId;
 use ir::Param;
+use ir::PropId;
+use ir::Property;
 use ir::StringInterner;
+use ir::TypeInfo;
 use ir::Visibility;
 use log::trace;
 
 use crate::class::IsStatic;
+
+/// This indicates a static property that started life as a class constant.
+pub(crate) const INFER_CONSTANT: &str = "__Infer_Constant__";
 
 pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
     if !class.ctx_constants.is_empty() {
@@ -48,9 +57,46 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
         IsStatic::NonStatic,
         Arc::clone(&strings),
     );
+    create_method_if_missing(
+        &mut class,
+        MethodId::_86sinit(&strings),
+        IsStatic::Static,
+        Arc::clone(&strings),
+    );
 
     if class.flags.contains(Attr::AttrIsClosureClass) {
-        create_default_closure_constructor(&mut class, strings);
+        create_default_closure_constructor(&mut class, Arc::clone(&strings));
+    }
+
+    // Turn class constants into properties.
+    // TODO: Need to think about abstract constants. Maybe constants lookups
+    // should really be function calls...
+    for constant in class.constants.drain(..) {
+        let HackConstant {
+            name,
+            value,
+            is_abstract: _,
+        } = constant;
+        // Mark the property as originally being a constant.
+        let attributes = vec![Attribute {
+            name: ClassId::from_str(INFER_CONSTANT, &strings),
+            arguments: Vec::new(),
+        }];
+        let type_info = if let Some(value) = value.as_ref() {
+            value.type_info()
+        } else {
+            TypeInfo::empty()
+        };
+        let prop = Property {
+            name: PropId::new(name.id),
+            flags: Attr::AttrStatic,
+            attributes,
+            visibility: Visibility::Public,
+            initial_value: value,
+            type_info,
+            doc_comment: Default::default(),
+        };
+        class.properties.push(prop);
     }
 
     class

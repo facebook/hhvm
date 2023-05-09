@@ -8,14 +8,15 @@
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
 // CHECK:   prune $builtins.hack_is_true(n1)
-// CHECK:   n2: *HackMixed = load &const::D$static::STRING
-// CHECK:   n3 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n2)
-// CHECK:   ret n3
+// CHECK:   n2 = __sil_lazy_class_initialize(<D>)
+// CHECK:   n3 = $builtins.hack_field_get(n2, "STRING")
+// CHECK:   n4 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n3)
+// CHECK:   ret n4
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n1)
-// CHECK:   n4: *HackMixed = load &$constName
-// CHECK:   n5 = $builtins.hhbc_concat($builtins.hack_string("Could not find initializer for "), n4, $builtins.hack_string(" in 86cinit"))
-// CHECK:   n6 = $builtins.hhbc_fatal(n5)
+// CHECK:   n5: *HackMixed = load &$constName
+// CHECK:   n6 = $builtins.hhbc_concat($builtins.hack_string("Could not find initializer for "), n5, $builtins.hack_string(" in 86cinit"))
+// CHECK:   n7 = $builtins.hhbc_fatal(n6)
 // CHECK:   unreachable
 // CHECK: }
 

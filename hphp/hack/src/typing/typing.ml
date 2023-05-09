@@ -1590,12 +1590,13 @@ let strip_supportdyn ty =
  * the typed AST.
  *)
 let refine_lvalue_type env ((ty, _, _) as te) ~refine =
-  let (env, ty) = refine env ty in
   let e = Tast.to_nast_expr te in
   let (env, localopt) = make_a_local_of ~include_this:false env e in
   (* TODO TAST: generate an assignment to the fake local in the TAST *)
   match localopt with
-  | Some lid -> (set_local env lid ty, Local_id.Set.singleton (snd lid))
+  | Some lid ->
+    let (env, ty) = refine env ty in
+    (set_local env lid ty, Local_id.Set.singleton (snd lid))
   | None -> (env, Local_id.Set.empty)
 
 let rec condition_nullity ~nonnull (env : env) te =

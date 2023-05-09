@@ -542,33 +542,6 @@ namespace {
 
 const StaticString s_classname("classname");
 
-Array typeStructureFromTypeAlias(const TypeAlias* typeAlias) {
-  auto const name = typeAlias->name();
-  auto const& preresolved = typeAlias->resolvedTypeStructure();
-  if (!preresolved.isNull()) {
-    assertx(!preresolved.empty());
-    assertx(preresolved.isDict());
-    return preresolved;
-  }
-
-  auto const& typeStructure = typeAlias->typeStructure();
-  assertx(!typeStructure.empty());
-  assertx(typeStructure.isDict());
-  Array resolved;
-  try {
-    bool persistent = true;
-    assertx(name->isStatic());
-    resolved = TypeStructure::resolve(StrNR{name}, typeStructure, persistent);
-  } catch (Exception& e) {
-    raise_error("resolving type alias %s failed. "
-                "Have you declared all classes in the type alias",
-                name->data());
-  }
-  assertx(!resolved.empty());
-  assertx(resolved.isDict());
-  return resolved;
-}
-
 Array implTypeStructure(const Variant& cls_or_obj,
                         const Variant& cns_name,
                         bool no_throw) {
@@ -576,10 +549,35 @@ Array implTypeStructure(const Variant& cls_or_obj,
   auto const cns_sd = cns_name.getStringDataOrNull();
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
-    if (auto const typeAlias = TypeAlias::load(name.get())) {
-      return typeStructureFromTypeAlias(typeAlias);
+
+    auto const typeAlias = TypeAlias::load(name.get());
+
+    if (!typeAlias) {
+      raise_error("Non-existent type alias %s", name.get()->data());
     }
-    raise_error("Non-existent type alias %s", name.get()->data());
+
+    auto const& preresolved = typeAlias->resolvedTypeStructure();
+    if (!preresolved.isNull()) {
+      assertx(!preresolved.empty());
+      assertx(preresolved.isDict());
+      return preresolved;
+    }
+
+    auto const& typeStructure = typeAlias->typeStructure();
+    assertx(!typeStructure.empty());
+    assertx(typeStructure.isDict());
+    Array resolved;
+    try {
+      bool persistent = true;
+      resolved = TypeStructure::resolve(name, typeStructure, persistent);
+    } catch (Exception& e) {
+      raise_error("resolving type alias %s failed. "
+                  "Have you declared all classes in the type alias",
+                  name.get()->data());
+    }
+    assertx(!resolved.empty());
+    assertx(resolved.isDict());
+    return resolved;
   }
 
   auto const cls = get_cls(cls_or_obj);
@@ -2257,7 +2255,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
-  auto const typeStructure = typeStructureFromTypeAlias(req);
+  auto const typeStructure = req->typeStructure();
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDict());
   return typeStructure;

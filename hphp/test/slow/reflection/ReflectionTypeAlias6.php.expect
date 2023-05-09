@@ -1,32 +1,17 @@
-dict(3) {
+dict(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
   dict(1) {
     ["foo"]=>
-    dict(2) {
-      ["kind"]=>
-      int(18)
-      ["classname"]=>
-      string(1) "E"
+    dict(1) {
+      ["value"]=>
+      dict(2) {
+        ["kind"]=>
+        int(101)
+        ["classname"]=>
+        string(1) "E"
+      }
     }
   }
-  ["alias"]=>
-  string(7) "MyAlias"
-}
-dict(3) {
-  ["kind"]=>
-  int(14)
-  ["fields"]=>
-  dict(1) {
-    ["foo"]=>
-    dict(2) {
-      ["kind"]=>
-      int(18)
-      ["classname"]=>
-      string(1) "E"
-    }
-  }
-  ["alias"]=>
-  string(7) "MyAlias"
 }

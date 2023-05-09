@@ -671,11 +671,26 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
       std::min(kRocketClientMaxVersion, THRIFT_FLAG(rocket_client_max_version));
   meta.minVersion_ref() = kRocketClientMinVersion;
   auto& clientMetadata = meta.clientMetadata_ref().ensure();
+
   if (const auto& hostMetadata = ClientChannel::getHostMetadata()) {
+    // TODO: verify if we can avoid overriding hostname blindly
+    // here.
     clientMetadata.hostname_ref().from_optional(hostMetadata->hostname);
-    clientMetadata.otherMetadata_ref().from_optional(
-        hostMetadata->otherMetadata);
+    // no otherMetadata provided in makeSetupFrame override, copy
+    // hostMetadata.otherMetadata directly instead of doing inserts
+    if (!clientMetadata.get_otherMetadata()) {
+      clientMetadata.otherMetadata_ref().from_optional(
+          hostMetadata->otherMetadata);
+    } else if (hostMetadata->otherMetadata) {
+      DCHECK(clientMetadata.otherMetadata_ref());
+      // append values from hostMetadata.otherMetadata to
+      // clientMetadata.otherMetadata
+      clientMetadata.otherMetadata_ref()->insert(
+          hostMetadata->otherMetadata->begin(),
+          hostMetadata->otherMetadata->end());
+    }
   }
+
   if (!clientMetadata.agent_ref()) {
     clientMetadata.agent_ref() = "RocketClientChannel.cpp";
   }

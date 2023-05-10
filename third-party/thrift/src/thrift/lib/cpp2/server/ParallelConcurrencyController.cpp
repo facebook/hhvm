@@ -143,6 +143,10 @@ void ParallelConcurrencyControllerBase::executeRequest(
     std::optional<ServerRequest> req) {
   if (req) {
     ServerRequest& serverRequest = req.value();
+
+    serverRequest.setConcurrencyControllerNotification(this);
+    serverRequest.setRequestPileNotification(&pile_);
+
     // Only continue when the request has not
     // expired (not queue-timeouted)
     if (!serverRequest.request()->isOneway() &&
@@ -151,11 +155,8 @@ void ParallelConcurrencyControllerBase::executeRequest(
       HandlerCallbackBase::releaseRequest(
           detail::ServerRequestHelper::request(std::move(serverRequest)), eb
           /*FIXME:roddym tile*/);
-      onExecuteFinish(true);
       return;
     }
-
-    serverRequest.setConcurrencyControllerNotification(this);
 
     serverRequest.requestData().setRequestExecutionBegin();
     AsyncProcessorHelper::executeRequest(std::move(*req));

@@ -20,8 +20,7 @@
 
 .filepath "newctx.php--Arraykey.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:15 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
 # newctx.php--Arraykey.php ends here
 # newctx.php--Bool.php starts here
@@ -35,8 +34,7 @@
 
 .filepath "newctx.php--Callable.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:15 Parse "Cannot use `Callable` as a type name as it is reserved";
 
 # newctx.php--Callable.php ends here
 # newctx.php--Classname.php starts here
@@ -59,8 +57,7 @@
 
 .filepath "newctx.php--Dynamic.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:14 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
 # newctx.php--Dynamic.php ends here
 # newctx.php--False.php starts here
@@ -74,8 +71,7 @@
 
 .filepath "newctx.php--Float.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:12 Parse "Cannot use `Float` as a type name as it is reserved";
 
 # newctx.php--Float.php ends here
 # newctx.php--Int.php starts here
@@ -89,32 +85,28 @@
 
 .filepath "newctx.php--Mixed.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:12 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
 # newctx.php--Mixed.php ends here
 # newctx.php--Nonnull.php starts here
 
 .filepath "newctx.php--Nonnull.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:14 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
 # newctx.php--Nonnull.php ends here
 # newctx.php--Noreturn.php starts here
 
 .filepath "newctx.php--Noreturn.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:15 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
 # newctx.php--Noreturn.php ends here
 # newctx.php--Nothing.php starts here
 
 .filepath "newctx.php--Nothing.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:14 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
 # newctx.php--Nothing.php ends here
 # newctx.php--Null.php starts here
@@ -128,8 +120,7 @@
 
 .filepath "newctx.php--Num.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:10 Parse "Cannot use `Num` as a type name as it is reserved";
 
 # newctx.php--Num.php ends here
 # newctx.php--Parent.php starts here
@@ -143,8 +134,7 @@
 
 .filepath "newctx.php--Resource.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:15 Parse "Cannot use `Resource` as a type name as it is reserved";
 
 # newctx.php--Resource.php ends here
 # newctx.php--Self.php starts here
@@ -165,8 +155,7 @@
 
 .filepath "newctx.php--This.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:11 Parse "Cannot use `This` as a type name as it is reserved";
 
 # newctx.php--This.php ends here
 # newctx.php--True.php starts here
@@ -195,8 +184,7 @@
 
 .filepath "newctx.php--_.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:8 Parse "Cannot use `_` as a type name as it is reserved";
 
 # newctx.php--_.php ends here
 # newctx.php--NFoo.php starts here
@@ -211,8 +199,7 @@
 
 .filepath "newctx.php--NArraykey.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:15 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
 # newctx.php--NArraykey.php ends here
 # newctx.php--NBool.php starts here
@@ -226,8 +213,7 @@
 
 .filepath "newctx.php--NCallable.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:15 Parse "Cannot use `Callable` as a type name as it is reserved";
 
 # newctx.php--NCallable.php ends here
 # newctx.php--NClassname.php starts here
@@ -250,8 +236,7 @@
 
 .filepath "newctx.php--NDynamic.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:14 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
 # newctx.php--NDynamic.php ends here
 # newctx.php--NFalse.php starts here
@@ -265,8 +250,7 @@
 
 .filepath "newctx.php--NFloat.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:12 Parse "Cannot use `Float` as a type name as it is reserved";
 
 # newctx.php--NFloat.php ends here
 # newctx.php--NInt.php starts here
@@ -280,32 +264,28 @@
 
 .filepath "newctx.php--NMixed.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:12 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
 # newctx.php--NMixed.php ends here
 # newctx.php--NNonnull.php starts here
 
 .filepath "newctx.php--NNonnull.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:14 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
 # newctx.php--NNonnull.php ends here
 # newctx.php--NNoreturn.php starts here
 
 .filepath "newctx.php--NNoreturn.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:15 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
 # newctx.php--NNoreturn.php ends here
 # newctx.php--NNothing.php starts here
 
 .filepath "newctx.php--NNothing.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:14 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
 # newctx.php--NNothing.php ends here
 # newctx.php--NNull.php starts here
@@ -319,8 +299,7 @@
 
 .filepath "newctx.php--NNum.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:10 Parse "Cannot use `Num` as a type name as it is reserved";
 
 # newctx.php--NNum.php ends here
 # newctx.php--NParent.php starts here
@@ -334,8 +313,7 @@
 
 .filepath "newctx.php--NResource.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:15 Parse "Cannot use `Resource` as a type name as it is reserved";
 
 # newctx.php--NResource.php ends here
 # newctx.php--NSelf.php starts here
@@ -356,8 +334,7 @@
 
 .filepath "newctx.php--NThis.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:11 Parse "Cannot use `This` as a type name as it is reserved";
 
 # newctx.php--NThis.php ends here
 # newctx.php--NTrue.php starts here
@@ -386,7 +363,6 @@
 
 .filepath "newctx.php--N_.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:8 Parse "Cannot use `_` as a type name as it is reserved";
 
 # newctx.php--N_.php ends here

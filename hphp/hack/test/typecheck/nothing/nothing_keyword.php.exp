@@ -1,2 +1,4 @@
 File "nothing_keyword.php", line 4, characters 9-15:
+Cannot use `nothing` as a type name as it is reserved (Parsing[1002])
+File "nothing_keyword.php", line 4, characters 9-15:
 `nothing` cannot be used as it is reserved. (Naming[2068])

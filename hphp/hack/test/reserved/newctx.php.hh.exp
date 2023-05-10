@@ -1,4 +1,6 @@
 File "newctx.php--Arraykey.php", line 3, characters 8-15:
+Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Arraykey.php", line 3, characters 8-15:
 `Arraykey` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Bool.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -7,7 +9,11 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--Bool.php", line 3, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Callable.php", line 3, characters 8-15:
+Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Callable.php", line 3, characters 8-15:
 `Callable` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--Dynamic.php", line 3, characters 8-14:
+Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Dynamic.php", line 3, characters 8-14:
 `Dynamic` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--False.php", line 3, characters 8-8:
@@ -17,6 +23,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--False.php", line 3, characters 18-27:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Float.php", line 3, characters 8-12:
+Cannot use `Float` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Float.php", line 3, characters 8-12:
 `Float` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Int.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -25,7 +33,11 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--Int.php", line 3, characters 16-25:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Mixed.php", line 3, characters 8-12:
+Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Mixed.php", line 3, characters 8-12:
 `Mixed` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--NArraykey.php", line 4, characters 8-15:
+Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--NArraykey.php", line 4, characters 8-15:
 `Arraykey` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NBool.php", line 4, characters 8-8:
@@ -35,7 +47,11 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NBool.php", line 4, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NCallable.php", line 4, characters 8-15:
+Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NCallable.php", line 4, characters 8-15:
 `Callable` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--NDynamic.php", line 4, characters 8-14:
+Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--NDynamic.php", line 4, characters 8-14:
 `Dynamic` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NFalse.php", line 4, characters 8-8:
@@ -45,6 +61,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NFalse.php", line 4, characters 18-27:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NFloat.php", line 4, characters 8-12:
+Cannot use `Float` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NFloat.php", line 4, characters 8-12:
 `Float` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NInt.php", line 4, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -53,11 +71,19 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NInt.php", line 4, characters 16-25:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NMixed.php", line 4, characters 8-12:
+Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NMixed.php", line 4, characters 8-12:
 `Mixed` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--NNonnull.php", line 4, characters 8-14:
+Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--NNonnull.php", line 4, characters 8-14:
 `Nonnull` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NNoreturn.php", line 4, characters 8-15:
+Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NNoreturn.php", line 4, characters 8-15:
 `Noreturn` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--NNothing.php", line 4, characters 8-14:
+Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--NNothing.php", line 4, characters 8-14:
 `Nothing` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NNull.php", line 4, characters 8-8:
@@ -67,6 +93,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NNull.php", line 4, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NNum.php", line 4, characters 8-10:
+Cannot use `Num` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NNum.php", line 4, characters 8-10:
 `Num` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NParent.php", line 4, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -74,6 +102,8 @@ File "newctx.php--NParent.php", line 4, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
 File "newctx.php--NParent.php", line 4, characters 19-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newctx.php--NResource.php", line 4, characters 8-15:
+Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--NResource.php", line 4, characters 8-15:
 `Resource` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NSelf.php", line 4, characters 8-8:
@@ -89,6 +119,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NString.php", line 4, characters 19-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NThis.php", line 4, characters 8-11:
+Cannot use `This` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--NThis.php", line 4, characters 8-11:
 `This` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--NTrue.php", line 4, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -103,11 +135,19 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--NVoid.php", line 4, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--N_.php", line 4, characters 8-8:
+Cannot use `_` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--N_.php", line 4, characters 8-8:
 `_` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--Nonnull.php", line 3, characters 8-14:
+Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Nonnull.php", line 3, characters 8-14:
 `Nonnull` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Noreturn.php", line 3, characters 8-15:
+Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Noreturn.php", line 3, characters 8-15:
 `Noreturn` cannot be used as it is reserved. (Naming[2068])
+File "newctx.php--Nothing.php", line 3, characters 8-14:
+Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Nothing.php", line 3, characters 8-14:
 `Nothing` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Null.php", line 3, characters 8-8:
@@ -117,6 +157,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--Null.php", line 3, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Num.php", line 3, characters 8-10:
+Cannot use `Num` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Num.php", line 3, characters 8-10:
 `Num` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Parent.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -124,6 +166,8 @@ File "newctx.php--Parent.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
 File "newctx.php--Parent.php", line 3, characters 19-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newctx.php--Resource.php", line 3, characters 8-15:
+Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Resource.php", line 3, characters 8-15:
 `Resource` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--Self.php", line 3, characters 8-8:
@@ -139,6 +183,8 @@ Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002
 File "newctx.php--String.php", line 3, characters 19-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--This.php", line 3, characters 8-11:
+Cannot use `This` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--This.php", line 3, characters 8-11:
 `This` cannot be used as it is reserved. (Naming[2068])
 File "newctx.php--True.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
@@ -152,5 +198,7 @@ File "newctx.php--Void.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
 File "newctx.php--Void.php", line 3, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newctx.php--_.php", line 3, characters 8-8:
+Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--_.php", line 3, characters 8-8:
 `_` cannot be used as it is reserved. (Naming[2068])

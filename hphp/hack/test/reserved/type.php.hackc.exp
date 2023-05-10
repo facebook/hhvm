@@ -9,8 +9,8 @@
 
 .filepath "type.php--Arraykey.php";
 
+.fatal 2:6,2:13 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
-.alias Arraykey = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Arraykey.php ends here
 # type.php--Bool.php starts here
 
@@ -23,8 +23,8 @@
 
 .filepath "type.php--Callable.php";
 
+.fatal 2:6,2:13 Parse "Cannot use `Callable` as a type name as it is reserved";
 
-.alias Callable = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Callable.php ends here
 # type.php--Classname.php starts here
 
@@ -44,8 +44,8 @@
 
 .filepath "type.php--Dynamic.php";
 
+.fatal 2:6,2:12 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
-.alias Dynamic = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Dynamic.php ends here
 # type.php--False.php starts here
 
@@ -58,8 +58,8 @@
 
 .filepath "type.php--Float.php";
 
+.fatal 2:6,2:10 Parse "Cannot use `Float` as a type name as it is reserved";
 
-.alias Float = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Float.php ends here
 # type.php--Int.php starts here
 
@@ -72,29 +72,29 @@
 
 .filepath "type.php--Mixed.php";
 
+.fatal 2:6,2:10 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
-.alias Mixed = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Mixed.php ends here
 # type.php--Nonnull.php starts here
 
 .filepath "type.php--Nonnull.php";
 
+.fatal 2:6,2:12 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
-.alias Nonnull = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Nonnull.php ends here
 # type.php--Noreturn.php starts here
 
 .filepath "type.php--Noreturn.php";
 
+.fatal 2:6,2:13 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
-.alias Noreturn = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Noreturn.php ends here
 # type.php--Nothing.php starts here
 
 .filepath "type.php--Nothing.php";
 
+.fatal 2:6,2:12 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
-.alias Nothing = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Nothing.php ends here
 # type.php--Null.php starts here
 
@@ -107,8 +107,8 @@
 
 .filepath "type.php--Num.php";
 
+.fatal 2:6,2:8 Parse "Cannot use `Num` as a type name as it is reserved";
 
-.alias Num = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Num.php ends here
 # type.php--Parent.php starts here
 
@@ -121,8 +121,8 @@
 
 .filepath "type.php--Resource.php";
 
+.fatal 2:6,2:13 Parse "Cannot use `Resource` as a type name as it is reserved";
 
-.alias Resource = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Resource.php ends here
 # type.php--Self.php starts here
 
@@ -142,8 +142,8 @@
 
 .filepath "type.php--This.php";
 
+.fatal 2:6,2:9 Parse "Cannot use `This` as a type name as it is reserved";
 
-.alias This = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--This.php ends here
 # type.php--True.php starts here
 
@@ -170,8 +170,8 @@
 
 .filepath "type.php--_.php";
 
+.fatal 2:6,2:6 Parse "Cannot use `_` as a type name as it is reserved";
 
-.alias _ = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--_.php ends here
 # type.php--NFoo.php starts here
 
@@ -184,8 +184,8 @@
 
 .filepath "type.php--NArraykey.php";
 
+.fatal 3:6,3:13 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
-.alias N\Arraykey = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NArraykey.php ends here
 # type.php--NBool.php starts here
 
@@ -198,8 +198,8 @@
 
 .filepath "type.php--NCallable.php";
 
+.fatal 3:6,3:13 Parse "Cannot use `Callable` as a type name as it is reserved";
 
-.alias N\Callable = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NCallable.php ends here
 # type.php--NClassname.php starts here
 
@@ -219,8 +219,8 @@
 
 .filepath "type.php--NDynamic.php";
 
+.fatal 3:6,3:12 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
-.alias N\Dynamic = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NDynamic.php ends here
 # type.php--NFalse.php starts here
 
@@ -233,8 +233,8 @@
 
 .filepath "type.php--NFloat.php";
 
+.fatal 3:6,3:10 Parse "Cannot use `Float` as a type name as it is reserved";
 
-.alias N\Float = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NFloat.php ends here
 # type.php--NInt.php starts here
 
@@ -247,29 +247,29 @@
 
 .filepath "type.php--NMixed.php";
 
+.fatal 3:6,3:10 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
-.alias N\Mixed = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NMixed.php ends here
 # type.php--NNonnull.php starts here
 
 .filepath "type.php--NNonnull.php";
 
+.fatal 3:6,3:12 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
-.alias N\Nonnull = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NNonnull.php ends here
 # type.php--NNoreturn.php starts here
 
 .filepath "type.php--NNoreturn.php";
 
+.fatal 3:6,3:13 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
-.alias N\Noreturn = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NNoreturn.php ends here
 # type.php--NNothing.php starts here
 
 .filepath "type.php--NNothing.php";
 
+.fatal 3:6,3:12 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
-.alias N\Nothing = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NNothing.php ends here
 # type.php--NNull.php starts here
 
@@ -282,8 +282,8 @@
 
 .filepath "type.php--NNum.php";
 
+.fatal 3:6,3:8 Parse "Cannot use `Num` as a type name as it is reserved";
 
-.alias N\Num = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NNum.php ends here
 # type.php--NParent.php starts here
 
@@ -296,8 +296,8 @@
 
 .filepath "type.php--NResource.php";
 
+.fatal 3:6,3:13 Parse "Cannot use `Resource` as a type name as it is reserved";
 
-.alias N\Resource = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NResource.php ends here
 # type.php--NSelf.php starts here
 
@@ -317,8 +317,8 @@
 
 .filepath "type.php--NThis.php";
 
+.fatal 3:6,3:9 Parse "Cannot use `This` as a type name as it is reserved";
 
-.alias N\This = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NThis.php ends here
 # type.php--NTrue.php starts here
 
@@ -345,6 +345,6 @@
 
 .filepath "type.php--N_.php";
 
+.fatal 3:6,3:6 Parse "Cannot use `_` as a type name as it is reserved";
 
-.alias N\_ = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--N_.php ends here

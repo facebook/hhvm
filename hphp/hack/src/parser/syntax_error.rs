@@ -774,6 +774,12 @@ pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
         class_name
     ))
 }
+pub fn reserved_keyword_as_type_name(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use `{}` as a type name as it is reserved",
+        name
+    ))
+}
 pub const xhp_class_multiple_category_decls: Error =
     Cow::Borrowed("An XHP class cannot have multiple category declarations");
 pub const xhp_class_multiple_children_decls: Error =

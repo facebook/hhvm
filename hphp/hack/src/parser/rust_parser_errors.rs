@@ -757,6 +757,21 @@ fn cant_be_classish_name(name: &str) -> bool {
     }
 }
 
+fn cant_be_reserved_alias_name(name: &str) -> bool {
+    // Keep in sync with test/reserved
+    // See additional rules naming_global:check_type_not_typehint
+    match name.to_ascii_lowercase().as_ref() {
+        // reserved_global_name
+        "callable" | "parent" | "self" => true,
+        // reserved_hh_name
+        "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
+        | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
+        // misc
+        "false" | "true" => true,
+        _ => false,
+    }
+}
+
 // Given a declaration node, returns the modifier node matching the given
 // predicate from its list of modifiers, or None if there isn't one.
 fn extract_keyword<'a, F>(modifier: F, declaration_node: S<'a>) -> Option<S<'a>>
@@ -3523,8 +3538,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn check_alias_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
+        self.produce_error(
+            |_, x| cant_be_reserved_alias_name(x),
+            name_text,
+            || errors::reserved_keyword_as_type_name(name_text),
+            name,
+        );
+        self.check_use_type_name(name, name_text, location);
+    }
+
     /// This reports "name already in use" relating to namespace use statements.
-    fn check_type_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
+    fn check_use_type_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
         match self.names.classes.get(name_text) {
             Some(FirstUseOrDef {
                 location,
@@ -3994,7 +4019,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             match token_kind(&cd.keyword) {
                 Some(TokenKind::Class) | Some(TokenKind::Trait) if !cd.name.is_missing() => {
                     let location = make_location_of_node(&cd.name);
-                    self.check_type_name(&cd.name, name, location)
+                    self.check_use_type_name(&cd.name, name, location)
                 }
                 _ => {}
             }
@@ -4127,7 +4152,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
 
-                self.check_type_name(&ad.name, name, location)
+                self.check_alias_name(&ad.name, name, location)
             }
         } else if let ContextAliasDeclaration(cad) = &node.children {
             if cad.equal.is_missing() {
@@ -4155,7 +4180,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
 
-                self.check_type_name(&cad.name, name, location)
+                self.check_alias_name(&cad.name, name, location)
             }
         } else if let CaseTypeDeclaration(ctd) = &node.children {
             self.check_can_use_feature(node, &UnstableFeatures::CaseTypes);
@@ -4171,7 +4196,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let name = self.text(&ctd.name);
                 let location = make_location_of_node(&ctd.name);
 
-                self.check_type_name(&ctd.name, name, location)
+                self.check_alias_name(&ctd.name, name, location)
             }
         }
     }
@@ -4925,7 +4950,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if !x.name.is_missing() {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);
-                self.check_type_name(&x.name, name, location);
+                self.check_use_type_name(&x.name, name, location);
                 self.produce_error(
                     |_, x| cant_be_classish_name(x),
                     name,

@@ -1,2 +1,4 @@
 File "nonnull_type_alias.php", line 3, characters 6-12:
+Cannot use `NonNull` as a type name as it is reserved (Parsing[1002])
+File "nonnull_type_alias.php", line 3, characters 6-12:
 `NonNull` cannot be used as it is reserved. (Naming[2068])

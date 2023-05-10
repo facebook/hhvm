@@ -42,13 +42,11 @@ use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use itertools::Itertools;
-use naming_special_names_rust as special_names;
 use oxidized::ast;
 use oxidized::ast::ClassReq;
 use oxidized::ast::Hint;
 use oxidized::ast::ReifyKind;
 use oxidized::ast::RequireKind;
-use oxidized::namespace_env;
 
 use super::TypeRefinementInHint;
 use crate::emit_adata;
@@ -366,44 +364,6 @@ fn from_enum_type<'arena>(
     .transpose()
 }
 
-fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id) -> Result<()> {
-    let is_global_namespace = |ns: &namespace_env::Env| ns.name.is_none();
-    let is_hh_namespace = |ns: &namespace_env::Env| {
-        ns.name
-            .as_ref()
-            .map_or(false, |x| x.eq_ignore_ascii_case("hh"))
-    };
-
-    // global names are always reserved in any namespace.
-    // hh_reserved names are checked either if
-    // - class is in global namespace
-    // - class is in HH namespace
-    // Keep in sync with test/reserved
-    let is_special_class = class_name.contains('$');
-    let check_hh_name = is_global_namespace(ns) || is_hh_namespace(ns);
-    let name = string_utils::strip_ns(class_name);
-    let lower_name = name.to_ascii_lowercase();
-    let is_reserved_global_name = special_names::typehints::is_reserved_global_name(&lower_name);
-    let name_is_reserved = !is_special_class
-        && (is_reserved_global_name
-            || (check_hh_name && special_names::typehints::is_reserved_hh_name(&lower_name)));
-    if name_is_reserved {
-        Err(Error::fatal_parse(
-            p,
-            format!(
-                "Cannot use '{}' as class name as it is reserved",
-                if is_reserved_global_name {
-                    name
-                } else {
-                    string_utils::strip_global_ns(class_name)
-                }
-            ),
-        ))
-    } else {
-        Ok(())
-    }
-}
-
 fn emit_reified_extends_params<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -579,8 +539,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
 ) -> Result<Class<'arena>> {
-    let namespace = &ast_class.namespace;
-    validate_class_name(namespace, &ast_class.name)?;
     let mut env = Env::make_class_env(alloc, ast_class);
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");

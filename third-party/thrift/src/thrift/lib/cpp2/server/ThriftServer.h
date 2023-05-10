@@ -151,6 +151,8 @@ class ThriftServerStopController final {
 class ThriftServer : public apache::thrift::BaseThriftServer,
                      public wangle::ServerBootstrap<Pipeline> {
  private:
+  void configureIOUring();
+
   //! SSL context
   std::optional<folly::observer::Observer<wangle::SSLContextConfig>>
       sslContextObserver_;

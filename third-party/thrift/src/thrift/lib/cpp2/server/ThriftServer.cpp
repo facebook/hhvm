@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/server/ThriftServer.h>
-
 #include <fcntl.h>
 #include <signal.h>
+
+#include <thrift/lib/cpp2/server/IOUringUtil.h>
+
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 
 #include <iostream>
 #include <random>
@@ -425,6 +427,24 @@ void ThriftServer::touchRequestTimestamp() noexcept {
   }
 }
 
+void ThriftServer::configureIOUring() {
+#ifdef HAS_IO_URING
+  if (preferIoUring_) {
+    VLOG(1) << "Preferring io_uring";
+    auto b = io_uring_util::validateExecutorSupportsIOUring(ioThreadPool_);
+
+    if (!b) {
+      VLOG(1) << "Configured IOThreadPoolExecutor does not support io_uring, "
+                 "configuring default io_uring IOThreadPoolExecutor pool";
+      ioThreadPool_ = io_uring_util::getDefaultIOUringExecutor(
+          THRIFT_FLAG(enable_io_queue_lag_detection));
+    } else {
+      VLOG(1) << "Configured IOThreadPoolExecutor supports io_uring";
+    }
+  }
+#endif
+}
+
 void ThriftServer::setup() {
   ensureDecoratedProcessorFactoryInitialized();
 
@@ -464,6 +484,8 @@ void ThriftServer::setup() {
     sigemptyset(&sa.sa_mask);
     sigaction(SIGPIPE, &sa, nullptr);
 #endif
+
+    configureIOUring();
 
     if (!getObserver() && server::observerFactory_) {
       setObserver(server::observerFactory_->getObserver());

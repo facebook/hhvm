@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifdef __linux__
+#include <thrift/lib/cpp2/server/IOUringUtil.h>
+
+#ifdef HAS_IO_URING
 
 #include <folly/experimental/io/IoUringEventBaseLocal.h>
-#include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 namespace apache {
 namespace thrift {

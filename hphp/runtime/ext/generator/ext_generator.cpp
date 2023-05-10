@@ -176,7 +176,7 @@ String HHVM_METHOD(Generator, getCalledClass) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct GeneratorExtension final : Extension {
-  GeneratorExtension() : Extension("generator") {}
+  GeneratorExtension() : Extension("generator", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     HHVM_ME(Generator, getOrigFuncName);

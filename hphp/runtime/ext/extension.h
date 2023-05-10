@@ -69,8 +69,8 @@ struct Extension : IDebuggable {
                                const Native::FuncTable& nativeFuncs);
 public:
   explicit Extension(const char name[],
-                     const char version[]= NO_EXTENSION_VERSION_YET,
-                     const char oncall[] = NO_ONCALL_YET);
+                     const char version[],
+                     const char oncall[]);
   ~Extension() override {}
 
   const char* getName() const { return m_name; }

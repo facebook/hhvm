@@ -1536,7 +1536,7 @@ bool HHVM_FUNCTION(package_exists, StringArg name) {
 }
 
 static struct HHExtension final : Extension {
-  HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
+  HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleInit() override {
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
@@ -1630,7 +1630,7 @@ static struct HHExtension final : Extension {
 } s_hh_extension;
 
 static struct XHPExtension final : Extension {
-  XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
+  XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }
 } s_xhp_extension;
 

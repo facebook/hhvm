@@ -178,7 +178,7 @@ Object HHVM_FUNCTION(newlocale_all,
 
 struct LocaleExtension final : Extension {
 
-  LocaleExtension() : Extension("hsl_locale", "0.1") {}
+  LocaleExtension() : Extension("hsl_locale", "0.1", NO_ONCALL_YET) {}
 
   void moduleInit() override {
     // Remember to update the HHI :)

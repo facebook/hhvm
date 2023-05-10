@@ -338,7 +338,7 @@ bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
 }
 
 struct xenonExtension final : Extension {
-  xenonExtension() : Extension("xenon", "2.0") { }
+  xenonExtension() : Extension("xenon", "2.0", NO_ONCALL_YET) { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);

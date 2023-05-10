@@ -310,7 +310,7 @@ TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct JsonExtension final : Extension {
-  JsonExtension() : Extension("json", "1.2.1") {}
+  JsonExtension() : Extension("json", "1.2.1", NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_RC_INT(JSON_HEX_TAG, k_JSON_HEX_TAG);
     HHVM_RC_INT(JSON_HEX_AMP, k_JSON_HEX_AMP);

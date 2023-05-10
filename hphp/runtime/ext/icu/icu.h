@@ -113,7 +113,7 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
 }
 
 struct IntlExtension final : Extension {
-  IntlExtension() : Extension("intl", "1.1.0") {}
+  IntlExtension() : Extension("intl", "1.1.0", NO_ONCALL_YET) {}
 
   void loadDecls() override {
     loadDeclsFrom("icu");

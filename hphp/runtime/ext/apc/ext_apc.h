@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct apcExtension final : Extension {
-  apcExtension() : Extension("apc", "4.0.2") {}
+  apcExtension() : Extension("apc", "4.0.2", NO_ONCALL_YET) {}
 
   static bool Enable;
   static bool EnableApcSerialize;

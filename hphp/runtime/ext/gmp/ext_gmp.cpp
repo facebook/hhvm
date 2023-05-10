@@ -1401,7 +1401,7 @@ void GMPData::setGMPMpz(const mpz_t data) {
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 struct GMPExtension final : Extension {
-  GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
+  GMPExtension() : Extension("gmp", "2.0.0-hhvm", NO_ONCALL_YET) { };
   void moduleInit() override {
     HHVM_RC_INT_SAME(GMP_MAX_BASE);
     HHVM_RC_INT_SAME(GMP_ROUND_ZERO);

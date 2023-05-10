@@ -4534,7 +4534,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 }
 
 static struct mbstringExtension final : Extension {
-  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
+  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     // TODO make these PHP_INI_ALL and thread local once we use them

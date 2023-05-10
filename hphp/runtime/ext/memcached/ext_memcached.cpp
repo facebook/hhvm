@@ -1222,7 +1222,7 @@ RDS_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 const StaticString s_Memcached("Memcached");
 
 struct MemcachedExtension final : Extension {
-  MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
+  MemcachedExtension() : Extension("memcached", "2.2.0b1", NO_ONCALL_YET) {}
   void threadInit() override {
     *s_memcached_globals = new MEMCACHEDGlobals;
     assertx(*s_memcached_globals);

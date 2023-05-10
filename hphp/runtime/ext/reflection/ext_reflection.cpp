@@ -2296,7 +2296,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
 
 ///////////////////////////////////////////////////////////////////////////////
 struct ReflectionExtension final : Extension {
-  ReflectionExtension() : Extension("reflection", "$Id$") { }
+  ReflectionExtension() : Extension("reflection", "$Id$", NO_ONCALL_YET) { }
   void loadDecls() override {
     loadDeclsFrom("reflection");
     loadDeclsFrom("reflection-classes");

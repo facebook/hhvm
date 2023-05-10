@@ -935,7 +935,7 @@ TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
 #define DATE_W3C "Y-m-d\\TH:i:sP"
 
 static struct DateTimeExtension final : Extension {
-  DateTimeExtension() : Extension("date") { }
+  DateTimeExtension() : Extension("date", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
   void loadDecls() override {
     loadDeclsFrom("datetime");

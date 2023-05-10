@@ -369,7 +369,7 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 extern RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 struct PcreExtension final : Extension {
-  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
+  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     HHVM_RC_STR(PCRE_VERSION, pcre_version());

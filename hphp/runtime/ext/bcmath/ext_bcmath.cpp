@@ -260,7 +260,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bcmathExtension final : Extension {
-  bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
+  bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_FE(bcscale);
     HHVM_FE(bcadd);

@@ -83,7 +83,7 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
 // pcntl
 
 static struct ProcessExtension final : Extension {
-  ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
+  ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void loadDecls() override {
     loadDeclsFrom("process");
   }

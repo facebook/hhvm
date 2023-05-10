@@ -252,7 +252,7 @@ Variant HHVM_FUNCTION(shmop_write,
 }
 
 struct ShmopExtension final : Extension {
-  ShmopExtension() : Extension("shmop", NO_EXTENSION_VERSION_YET) { }
+  ShmopExtension() : Extension("shmop", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
   void moduleInit() override {
 

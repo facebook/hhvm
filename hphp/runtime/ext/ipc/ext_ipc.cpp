@@ -42,17 +42,17 @@ using HPHP::ScopedMem;
 namespace HPHP {
 
 static struct SysvmsgExtension final : Extension {
-  SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
+  SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override;
 } s_sysvmsg_extension;
 
 static struct SysvsemExtension final : Extension {
-  SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
+  SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override;
 } s_sysvsem_extension;
 
 static struct SysvshmExtension final : Extension {
-  SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
+  SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override;
 } s_sysvshm_extension;
 

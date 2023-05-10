@@ -197,7 +197,7 @@ int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MailExtension final : Extension {
-  MailExtension() : Extension("mail") { }
+  MailExtension() : Extension("mail", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleInit() override {
     HHVM_FE(mail);
     HHVM_FE(ezmlm_hash);

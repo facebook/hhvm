@@ -188,7 +188,7 @@ void HHVM_METHOD(IntervalTimer, stop) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct IntervalTimerExtension final : Extension {
-  IntervalTimerExtension() : Extension("intervaltimer") {}
+  IntervalTimerExtension() : Extension("intervaltimer", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     Config::Bind(Enabled, ini, hdf, "IntervalTimer.Enable", true);

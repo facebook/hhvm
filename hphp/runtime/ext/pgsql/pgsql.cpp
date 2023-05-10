@@ -1678,7 +1678,7 @@ bool PGSQL::LogNotice           = false;
 
 namespace { // Anonymous Namespace
 static struct pgsqlExtension : Extension {
-  pgsqlExtension() : Extension("pgsql") {}
+  pgsqlExtension() : Extension("pgsql", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     Hdf pgsql = hdf["PGSQL"];

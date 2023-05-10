@@ -36,7 +36,7 @@ namespace {
   }
 
   struct RandomExtension final : Extension {
-    RandomExtension() : Extension("hsl_random", "1.0") {}
+    RandomExtension() : Extension("hsl_random", "1.0", NO_ONCALL_YET) {}
     void moduleInit() override {
       // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
       HHVM_FALIAS_FE_STR(

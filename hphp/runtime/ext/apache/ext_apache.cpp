@@ -140,7 +140,7 @@ Array HHVM_FUNCTION(get_headers_secure) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ApacheExtension::ApacheExtension() : Extension("apache") {}
+ApacheExtension::ApacheExtension() : Extension("apache", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
 ApacheExtension::~ApacheExtension() {}
 

@@ -29,7 +29,7 @@ namespace {
 
   struct TimeExtension final : Extension {
 
-    TimeExtension() : Extension("hsl_time", "1.0") {}
+    TimeExtension() : Extension("hsl_time", "1.0", NO_ONCALL_YET) {}
 
     void moduleInit() override {
       // Clang 15 doesn't like the HHVM_FALIAS macro with \\N

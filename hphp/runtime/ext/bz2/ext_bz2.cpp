@@ -359,7 +359,7 @@ void HHVM_METHOD(ChunkedBunzipper, close) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bz2Extension final : Extension {
-  bz2Extension() : Extension("bz2") {}
+  bz2Extension() : Extension("bz2", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) override {
     s_bzip2_stream_wrapper.registerAs("compress.bzip2");

@@ -1436,7 +1436,7 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 //////////////////////////////////////////////////////////////////////////////
 
 struct zipExtension final : Extension {
-  zipExtension() : Extension("zip", "1.12.4-dev") {}
+  zipExtension() : Extension("zip", "1.12.4-dev", NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);

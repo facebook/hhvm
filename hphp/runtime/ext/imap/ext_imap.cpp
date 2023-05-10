@@ -1557,7 +1557,7 @@ static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct imapExtension final : Extension {
-  imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
+  imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     mail_link(&unixdriver);   /* link in the unix driver */

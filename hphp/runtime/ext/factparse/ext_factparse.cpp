@@ -287,7 +287,7 @@ Array HHVM_FUNCTION(
 
 struct FactparseExtension : Extension {
   // See ext_factparse.php for version number bumps overview.
-  FactparseExtension() : Extension("factparse", "3") {}
+  FactparseExtension() : Extension("factparse", "3", NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_FALIAS(HH\\facts_parse, HH_facts_parse);
     loadSystemlib();

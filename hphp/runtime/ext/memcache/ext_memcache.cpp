@@ -758,7 +758,7 @@ HHVM_METHOD(Memcache, addserver, const String& host, int64_t port /* = 11211 */,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemcacheExtension final : Extension {
-    MemcacheExtension() : Extension("memcache", "3.0.8") {};
+    MemcacheExtension() : Extension("memcache", "3.0.8", NO_ONCALL_YET) {};
     void threadInit() override {
       *s_memcache_globals = new MEMCACHEGlobals;
       assertx(*s_memcache_globals);

@@ -53,7 +53,7 @@ String pdo_attr_strval(const Array& options, int opt, const char *def){
 
 const StaticString s_PDO("PDO");
 static struct PDOPGSQLExtension final : Extension {
-  PDOPGSQLExtension() : Extension("pdo_pgsql") {}
+  PDOPGSQLExtension() : Extension("pdo_pgsql", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     HHVM_RCC_INT(PDO, PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT,

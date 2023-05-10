@@ -1395,7 +1395,7 @@ void end_profiler_frame(Profiler *p,
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct HotProfilerExtension : Extension {
-  HotProfilerExtension(): Extension("hotprofiler") {}
+  HotProfilerExtension(): Extension("hotprofiler", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
 #ifdef CLOCK_REALTIME

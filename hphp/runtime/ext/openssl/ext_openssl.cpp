@@ -3359,7 +3359,7 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
 struct opensslExtension final : Extension {
-  opensslExtension() : Extension("openssl") {}
+  opensslExtension() : Extension("openssl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_RC_INT(OPENSSL_RAW_DATA, k_OPENSSL_RAW_DATA);
     HHVM_RC_INT(OPENSSL_ZERO_PADDING, k_OPENSSL_ZERO_PADDING);

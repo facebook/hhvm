@@ -489,7 +489,7 @@ struct WatchmanAutoloadMapFactory final : public FactsFactory {
 };
 
 struct Facts final : Extension {
-  Facts() : Extension("facts", "1.0") {}
+  Facts() : Extension("facts", "1.0", NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     if (!RuntimeOption::AutoloadEnabled) {

@@ -1389,7 +1389,7 @@ Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FBExtension : Extension {
-  FBExtension(): Extension("fb", "1.0.0") {}
+  FBExtension(): Extension("fb", "1.0.0", NO_ONCALL_YET) {}
 
   void moduleInit() override {
     HHVM_RC_BOOL_SAME(HHVM_FACEBOOK);

@@ -1058,7 +1058,7 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
 
 struct OSExtension final : Extension {
 
-  OSExtension() : Extension("hsl_os", "0.1") {}
+  OSExtension() : Extension("hsl_os", "0.1", NO_ONCALL_YET) {}
 
   void cliClientInit() override {
     CLI_REGISTER_HANDLER(HSL_os_open);

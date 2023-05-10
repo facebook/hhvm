@@ -985,7 +985,7 @@ SystemSettings s_system_settings;
 RDS_LOCAL(LocalSettings, s_saved_defaults);
 
 struct IniSettingExtension final : Extension {
-  IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
+  IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {

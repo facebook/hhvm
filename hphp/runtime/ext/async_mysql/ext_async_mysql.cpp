@@ -2256,7 +2256,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "7.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "7.0", NO_ONCALL_YET) {}
   void loadDecls() override {
     loadDeclsFrom("async_mysql");
     loadDeclsFrom("async_mysql_exceptions");

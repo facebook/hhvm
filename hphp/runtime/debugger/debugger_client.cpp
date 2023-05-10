@@ -84,7 +84,7 @@ static String wordwrap(const String& str, int width /* = 75 */,
 }
 
 struct DebuggerExtension final : Extension {
-  DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
+  DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 } s_debugger_extension;
 
 static DebuggerClient& getStaticDebuggerClient() {

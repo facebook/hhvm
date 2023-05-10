@@ -70,7 +70,7 @@ inline size_t getSize(const ObjectData* od) {
 /////////////////////////////////////////////////////////////////////////////
 
 struct CollectionsExtension : Extension {
-  CollectionsExtension(): Extension("collections") {}
+  CollectionsExtension(): Extension("collections", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     initPair();

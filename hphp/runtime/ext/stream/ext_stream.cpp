@@ -58,7 +58,7 @@ static
 req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 static struct StreamExtension final : Extension {
-  StreamExtension() : Extension("stream") {}
+  StreamExtension() : Extension("stream", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override;
 } s_stream_extension;
 

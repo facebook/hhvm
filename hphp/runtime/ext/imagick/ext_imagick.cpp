@@ -320,7 +320,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
 ImagickExtension::ImagickExtension() :
-  Extension("imagick", "3.2.0b2") {
+  Extension("imagick", "3.2.0b2", NO_ONCALL_YET) {
 }
 
 void ImagickExtension::moduleInit() {

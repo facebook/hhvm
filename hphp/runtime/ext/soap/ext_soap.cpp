@@ -3122,7 +3122,7 @@ void HHVM_METHOD(SoapHeader, __construct,
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct SoapExtension final : Extension {
-  SoapExtension() : Extension("soap", NO_EXTENSION_VERSION_YET) {}
+  SoapExtension() : Extension("soap", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_ME(SoapServer, __construct);
     HHVM_ME(SoapServer, setClass);

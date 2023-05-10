@@ -33,7 +33,7 @@
 namespace HPHP {
 
 static struct ServerExtension final : Extension {
-  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
+  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override;
 } s_server_extension;
 

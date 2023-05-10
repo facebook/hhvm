@@ -151,7 +151,7 @@ static Array HHVM_FUNCTION(
 }
 
 struct FribidiExtension final : Extension {
-  FribidiExtension() : Extension("fribidi") {}
+  FribidiExtension() : Extension("fribidi", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     // Charsets
     HHVM_RC_INT(FRIBIDI_CHARSET_UTF8, FRIBIDI_CHAR_SET_UTF8);

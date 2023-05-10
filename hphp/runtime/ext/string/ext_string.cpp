@@ -2580,7 +2580,7 @@ String HHVM_FUNCTION(HH_str_bitwise_xor, const String& s1, const String& s2) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StringExtension final : Extension {
-  StringExtension() : Extension("string") {}
+  StringExtension() : Extension("string", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     setlocale(LC_CTYPE, "");
 

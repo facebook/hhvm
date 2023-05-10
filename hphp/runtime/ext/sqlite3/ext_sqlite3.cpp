@@ -765,7 +765,7 @@ bool HHVM_METHOD(SQLite3Result, finalize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct SQLite3Extension final : Extension {
-  SQLite3Extension() : Extension("sqlite3", "0.7-dev") {}
+  SQLite3Extension() : Extension("sqlite3", "0.7-dev", NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_RC_INT(SQLITE3_ASSOC, PHP_SQLITE3_ASSOC);
     HHVM_RC_INT(SQLITE3_NUM, PHP_SQLITE3_NUM);

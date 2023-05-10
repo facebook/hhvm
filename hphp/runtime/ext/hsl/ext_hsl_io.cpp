@@ -75,7 +75,7 @@ namespace {
 
   struct IOExtension final : Extension {
 
-    IOExtension() : Extension("hsl_io", "1.0") {}
+    IOExtension() : Extension("hsl_io", "1.0", NO_ONCALL_YET) {}
 
     void moduleInit() override {
       // Clang 15 doesn't like the HHVM_FALIAS macro with \\N

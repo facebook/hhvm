@@ -21,7 +21,7 @@ namespace HPHP {
 
 static class HHClientExtension final : Extension {
  public:
-  HHClientExtension(): Extension("hh_client", NO_EXTENSION_VERSION_YET) { }
+  HHClientExtension(): Extension("hh_client", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
   void moduleInit() override {
     loadSystemlib();

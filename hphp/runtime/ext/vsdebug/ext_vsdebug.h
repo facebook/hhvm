@@ -26,7 +26,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 struct VSDebugExtension final : Extension {
-  VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }
+  VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION, NO_ONCALL_YET) { }
   ~VSDebugExtension();
 
   void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override;

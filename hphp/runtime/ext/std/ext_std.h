@@ -7,7 +7,7 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 struct StandardExtension final : Extension {
-  StandardExtension() : Extension("standard") {}
+  StandardExtension() : Extension("standard", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void loadDecls() override {
     loadDeclsFrom("std_classobj");

@@ -1673,7 +1673,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
 }
 
 struct SocketsExtension final : Extension {
-  SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET) {}
+  SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
     HHVM_RC_INT_SAME(AF_UNIX);

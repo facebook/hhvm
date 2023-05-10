@@ -229,9 +229,6 @@ pub mod members {
 }
 
 pub mod user_attributes {
-    use hash::HashSet;
-    use lazy_static::lazy_static;
-
     pub const OVERRIDE: &str = "__Override";
 
     pub const CONSISTENT_CONSTRUCT: &str = "__ConsistentConstruct";
@@ -325,52 +322,6 @@ pub mod user_attributes {
     pub const CROSS_PACKAGE: &str = "__CrossPackage";
 
     pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
-
-    lazy_static! {
-        pub static ref AS_SET: HashSet<&'static str> = vec![
-            OVERRIDE,
-            CONSISTENT_CONSTRUCT,
-            CONST,
-            DEPRECATED,
-            DOCS,
-            ENTRY_POINT,
-            MEMOIZE,
-            MEMOIZE_LSB,
-            PHP_STD_LIB,
-            ACCEPT_DISPOSABLE,
-            RETURN_DISPOSABLE,
-            LSB,
-            SEALED,
-            LATE_INIT,
-            NEWABLE,
-            ENFORCEABLE,
-            EXPLICIT,
-            NON_DISJOINT,
-            SOFT,
-            WARN,
-            MOCK_CLASS,
-            PROVENANCE_SKIP_FRAME,
-            DYNAMICALLY_CALLABLE,
-            DYNAMICALLY_CONSTRUCTIBLE,
-            REIFIABLE,
-            NEVER_INLINE,
-            DISABLE_TYPECHECKER_INTERNAL,
-            ENABLE_UNSTABLE_FEATURES,
-            ENUM_CLASS,
-            POLICIED,
-            INFERFLOWS,
-            EXTERNAL,
-            CAN_CALL,
-            SUPPORT_DYNAMIC_TYPE,
-            NO_AUTO_DYNAMIC,
-            REQUIRE_DYNAMIC,
-            ENABLE_METHOD_TRAIT_DIAMOND,
-            CROSS_PACKAGE,
-            MODULE_LEVEL_TRAIT,
-        ]
-        .into_iter()
-        .collect();
-    }
 
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB

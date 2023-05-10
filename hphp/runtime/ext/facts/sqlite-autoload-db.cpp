@@ -256,6 +256,10 @@ void rebuildIndices(SQLiteTxn& txn) {
   // type_attributes
   txn.exec(
       "CREATE INDEX IF NOT EXISTS "
+      "type_attributes__attribute_name__attribute_value"
+      " ON type_attributes (attribute_name, attribute_value)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS "
       "type_attributes__attribute_name__typeid__attribute_position"
       " ON type_attributes (attribute_name, typeid, attribute_position)");
 

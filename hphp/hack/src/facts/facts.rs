@@ -572,7 +572,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
         .iter()
         .filter_map(|ua| {
             let attr_name = format(ua.name.1);
-            if user_attributes::AS_SET.contains(attr_name.as_str()) {
+            if user_attributes::is_reserved(&attr_name) {
                 // skip builtins
                 None
             } else {

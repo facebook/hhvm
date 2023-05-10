@@ -19,16 +19,16 @@ namespace globals {
 namespace {
 
 bool getAddrHash(const sockaddr* addr, void* ctx) {
-  try {
-    folly::IPAddress ip(addr);
-    if (!ip.isLoopback() && !ip.isLinkLocal()) {
-      auto result = (uint32_t*)ctx;
-      result[0] = 1;
-      result[1] = ip.hash();
-      return false;
-    }
-  } catch (...) {
+  auto ipe = folly::IPAddress::tryFromSockAddr(addr);
+  if (ipe.hasError()) {
     return true;
+  }
+  auto ip = ipe.value();
+  if (!ip.isLoopback() && !ip.isLinkLocal()) {
+    auto result = (uint32_t*)ctx;
+    result[0] = 1;
+    result[1] = ip.hash();
+    return false;
   }
 
   return true;

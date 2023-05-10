@@ -1,4 +1,2 @@
 File "dynamic_keyword.php", line 3, characters 9-15:
 Cannot use `dynamic` as a type name as it is reserved (Parsing[1002])
-File "dynamic_keyword.php", line 3, characters 9-15:
-`dynamic` cannot be used as it is reserved. (Naming[2068])

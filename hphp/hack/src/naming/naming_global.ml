@@ -15,7 +15,6 @@
  *)
 
 open Hh_prelude
-module SN = Naming_special_names
 
 (*****************************************************************************)
 (* The types *)
@@ -206,20 +205,6 @@ let should_report_duplicate
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_type_not_typehint ctx (p, name, _) =
-    (* Keep in sync with test/reserved *)
-    let x = String.lowercase (Utils.strip_all_ns name) in
-    if
-      SN.Typehints.is_reserved_hh_name x
-      || SN.Typehints.is_reserved_global_name x
-    then (
-      let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
-      Errors.add_error
-        Naming_error.(to_user_error @@ Name_is_reserved { pos; name });
-      false
-    ) else
-      true
-
   let new_fun_skip_if_already_bound ctx fn (_p, name, _) =
     match Naming_provider.get_fun_canon_name ctx name with
     | Some _ -> ()
@@ -280,38 +265,33 @@ module Env = struct
       ~(kind : Naming_types.kind_of_type)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
-    if not (check_type_not_typehint ctx id) then
+    let (p, name, _) = id in
+    match Naming_provider.get_type_canon_name ctx name with
+    | Some canonical ->
+      let pc = Option.value_exn (Naming_provider.get_type_pos ctx canonical) in
+      begin
+        if
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, canonical, None)
+        then
+          let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
+          let (prev_pos, prev_name) =
+            GEnv.get_type_full_pos ctx (pc, canonical)
+          in
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound { pos; prev_pos; name; prev_name })
+      end;
       current_file_symbols_acc
-    else
-      let (p, name, _) = id in
-      match Naming_provider.get_type_canon_name ctx name with
-      | Some canonical ->
-        let pc =
-          Option.value_exn (Naming_provider.get_type_pos ctx canonical)
-        in
-        begin
-          if
-            should_report_duplicate
-              ctx
-              fi
-              current_file_symbols_acc
-              ~id
-              ~canonical_id:(pc, canonical, None)
-          then
-            let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
-            let (prev_pos, prev_name) =
-              GEnv.get_type_full_pos ctx (pc, canonical)
-            in
-            Errors.add_error
-              Naming_error.(
-                to_user_error
-                @@ Error_name_already_bound { pos; prev_pos; name; prev_name })
-        end;
-        current_file_symbols_acc
-      | None ->
-        let backend = Provider_context.get_backend ctx in
-        Naming_provider.add_type backend name p kind;
-        p :: current_file_symbols_acc
+    | None ->
+      let backend = Provider_context.get_backend ctx in
+      Naming_provider.add_type backend name p kind;
+      p :: current_file_symbols_acc
 
   let new_global_const_error_if_already_bound
       (ctx : Provider_context.t)

@@ -744,7 +744,6 @@ fn is_invalid_xhp_attr_enum_item(node: S<'_>) -> bool {
 
 fn cant_be_classish_name(name: &str) -> bool {
     // Keep in sync with test/reserved
-    // See additional rules in naming_global:check_type_not_typehint
     match name.to_ascii_lowercase().as_ref() {
         // reserved_global_name
         "callable" | "parent" | "self" => true,
@@ -759,7 +758,6 @@ fn cant_be_classish_name(name: &str) -> bool {
 
 fn cant_be_reserved_alias_name(name: &str) -> bool {
     // Keep in sync with test/reserved
-    // See additional rules naming_global:check_type_not_typehint
     match name.to_ascii_lowercase().as_ref() {
         // reserved_global_name
         "callable" | "parent" | "self" => true,

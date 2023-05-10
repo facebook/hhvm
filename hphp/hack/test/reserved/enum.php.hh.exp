@@ -4,8 +4,6 @@ File "enum.php--Bool.php", line 2, characters 6-6:
 A name is expected here. (Parsing[1002])
 File "enum.php--Callable.php", line 2, characters 6-13:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "enum.php--Classname.php", line 2, characters 6-14:
-Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "enum.php--Darray.php", line 2, characters 6-11:
 Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "enum.php--Dynamic.php", line 2, characters 6-12:
@@ -24,8 +22,6 @@ File "enum.php--NBool.php", line 3, characters 6-6:
 A name is expected here. (Parsing[1002])
 File "enum.php--NCallable.php", line 3, characters 6-13:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NClassname.php", line 3, characters 6-14:
-Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "enum.php--NDarray.php", line 3, characters 6-11:
 Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "enum.php--NDynamic.php", line 3, characters 6-12:

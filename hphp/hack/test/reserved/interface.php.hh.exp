@@ -4,8 +4,6 @@ File "interface.php--Bool.php", line 2, characters 11-14:
 Cannot use `Bool` as a type name as it is reserved (Parsing[1002])
 File "interface.php--Callable.php", line 2, characters 11-18:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "interface.php--Classname.php", line 2, characters 11-19:
-Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "interface.php--Darray.php", line 2, characters 11-16:
 Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "interface.php--Dynamic.php", line 2, characters 11-17:
@@ -24,8 +22,6 @@ File "interface.php--NBool.php", line 3, characters 11-14:
 Cannot use `Bool` as a type name as it is reserved (Parsing[1002])
 File "interface.php--NCallable.php", line 3, characters 11-18:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "interface.php--NClassname.php", line 3, characters 11-19:
-Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "interface.php--NDarray.php", line 3, characters 11-16:
 Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "interface.php--NDynamic.php", line 3, characters 11-17:

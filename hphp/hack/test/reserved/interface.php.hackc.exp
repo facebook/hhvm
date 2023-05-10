@@ -32,7 +32,9 @@
 
 .filepath "interface.php--Classname.php";
 
-.fatal 2:11,2:19 Parse "Cannot use `Classname` as a type name as it is reserved";
+
+.class {} [interface] Classname (2,2) {
+}
 
 # interface.php--Classname.php ends here
 # interface.php--Darray.php starts here
@@ -209,7 +211,9 @@
 
 .filepath "interface.php--NClassname.php";
 
-.fatal 3:11,3:19 Parse "Cannot use `Classname` as a type name as it is reserved";
+
+.class {} [interface] N\Classname (3,3) {
+}
 
 # interface.php--NClassname.php ends here
 # interface.php--NDarray.php starts here

@@ -742,21 +742,7 @@ fn is_invalid_xhp_attr_enum_item(node: S<'_>) -> bool {
     }
 }
 
-fn cant_be_classish_name(name: &str) -> bool {
-    // Keep in sync with test/reserved
-    match name.to_ascii_lowercase().as_ref() {
-        // reserved_global_name
-        "callable" | "parent" | "self" => true,
-        // reserved_hh_name
-        "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
-        | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
-        // misc
-        "classname" | "darray" | "false" | "true" | "varray" => true,
-        _ => false,
-    }
-}
-
-fn cant_be_reserved_alias_name(name: &str) -> bool {
+fn cant_be_reserved_type_name(name: &str) -> bool {
     // Keep in sync with test/reserved
     match name.to_ascii_lowercase().as_ref() {
         // reserved_global_name
@@ -3538,7 +3524,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn check_alias_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
         self.produce_error(
-            |_, x| cant_be_reserved_alias_name(x),
+            |_, x| cant_be_reserved_type_name(x),
             name_text,
             || errors::reserved_keyword_as_type_name(name_text),
             name,
@@ -3749,7 +3735,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let EnumClassDeclaration(c) = &node.children {
             let name = self.text(&c.name);
             self.produce_error(
-                |_, x| cant_be_classish_name(x),
+                |_, x| cant_be_reserved_type_name(x),
                 name,
                 || errors::reserved_keyword_as_type_name(name),
                 &c.name,
@@ -3912,7 +3898,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             let classish_name = self.text(&cd.name);
             self.produce_error(
-                |_, x| cant_be_classish_name(x),
+                |_, x| cant_be_reserved_type_name(x),
                 classish_name,
                 || errors::reserved_keyword_as_type_name(classish_name),
                 &cd.name,
@@ -4950,7 +4936,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let location = make_location_of_node(&x.name);
                 self.check_use_type_name(&x.name, name, location);
                 self.produce_error(
-                    |_, x| cant_be_classish_name(x),
+                    |_, x| cant_be_reserved_type_name(x),
                     name,
                     || errors::reserved_keyword_as_type_name(name),
                     &x.name,

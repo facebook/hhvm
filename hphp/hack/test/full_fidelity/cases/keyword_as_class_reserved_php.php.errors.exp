@@ -1,6 +1,5 @@
 (4,7)-(4,15) Cannot use `arraykey` as a type name as it is reserved
 (5,7)-(5,11) Cannot use `bool` as a type name as it is reserved
-(7,7)-(7,16) Cannot use `classname` as a type name as it is reserved
 (8,7)-(8,13) Cannot use `darray` as a type name as it is reserved
 (11,7)-(11,12) Cannot use `false` as a type name as it is reserved
 (12,7)-(12,12) Cannot use `float` as a type name as it is reserved

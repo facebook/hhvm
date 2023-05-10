@@ -37,7 +37,14 @@
 
 .filepath "enum_class.php--Classname.php";
 
-.fatal 2:12,2:20 Parse "Cannot use `Classname` as a type name as it is reserved";
+
+.class {} [enum_class "__EnumClass"("""v:0:{}""")] Classname (2,2) extends HH\BuiltinEnumClass {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.class_refs {
+  HH\BuiltinEnumClass
+}
 
 # enum_class.php--Classname.php ends here
 # enum_class.php--Darray.php starts here
@@ -219,7 +226,14 @@
 
 .filepath "enum_class.php--NClassname.php";
 
-.fatal 3:12,3:20 Parse "Cannot use `Classname` as a type name as it is reserved";
+
+.class {} [enum_class "__EnumClass"("""v:0:{}""")] N\Classname (3,3) extends HH\BuiltinEnumClass {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.class_refs {
+  HH\BuiltinEnumClass
+}
 
 # enum_class.php--NClassname.php ends here
 # enum_class.php--NDarray.php starts here

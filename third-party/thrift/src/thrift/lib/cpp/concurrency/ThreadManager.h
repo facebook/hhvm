@@ -242,7 +242,10 @@ class ThreadManager : public virtual folly::Executor {
    * and sets the name prefix
    */
   static std::shared_ptr<ThreadManager> newSimpleThreadManager(
-      const std::string& name, size_t count = 4);
+      const std::string& name,
+      size_t count = 4,
+      PosixThreadFactory::THREAD_PRIORITY priority =
+          PosixThreadFactory::NORMAL_PRI);
 
   /**
    * Creates a thread manager with support for priorities. Unlike

@@ -1676,14 +1676,17 @@ std::chrono::nanoseconds ThreadManager::Impl::getUsedCpuTime() const {
 
 std::shared_ptr<ThreadManager> ThreadManager::newSimpleThreadManager(
     size_t count) {
-  auto tm = std::make_shared<SimpleThreadManagerImpl>(count);
-  tm->threadFactory(Factory(PosixThreadFactory::NORMAL_PRI));
-  return tm;
+  auto simpleThreadManager = std::make_shared<SimpleThreadManagerImpl>(count);
+  simpleThreadManager->threadFactory(Factory(PosixThreadFactory::NORMAL_PRI));
+  return simpleThreadManager;
 }
 
 std::shared_ptr<ThreadManager> ThreadManager::newSimpleThreadManager(
-    const std::string& name, size_t count) {
+    const std::string& name,
+    size_t count,
+    PosixThreadFactory::THREAD_PRIORITY priority) {
   auto simpleThreadManager = std::make_shared<SimpleThreadManagerImpl>(count);
+  simpleThreadManager->threadFactory(Factory(priority));
   simpleThreadManager->setNamePrefix(name);
   return simpleThreadManager;
 }

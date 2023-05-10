@@ -8,6 +8,8 @@ File "newtype.php--Bool.php", line 2, characters 9-19:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newtype.php--Callable.php", line 2, characters 9-16:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "newtype.php--Darray.php", line 2, characters 9-14:
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--Dynamic.php", line 2, characters 9-15:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--False.php", line 2, characters 1-7:
@@ -36,6 +38,8 @@ File "newtype.php--NBool.php", line 3, characters 9-19:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newtype.php--NCallable.php", line 3, characters 9-16:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "newtype.php--NDarray.php", line 3, characters 9-14:
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--NDynamic.php", line 3, characters 9-15:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--NFalse.php", line 3, characters 1-7:
@@ -96,6 +100,8 @@ File "newtype.php--NTrue.php", line 3, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
 File "newtype.php--NTrue.php", line 3, characters 9-19:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newtype.php--NVarray.php", line 3, characters 9-14:
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--NVoid.php", line 3, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newtype.php--NVoid.php", line 3, characters 9-9:
@@ -146,6 +152,8 @@ File "newtype.php--True.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
 File "newtype.php--True.php", line 2, characters 9-19:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newtype.php--Varray.php", line 2, characters 9-14:
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "newtype.php--Void.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newtype.php--Void.php", line 2, characters 9-9:

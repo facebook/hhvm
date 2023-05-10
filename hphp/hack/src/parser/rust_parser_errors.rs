@@ -765,7 +765,7 @@ fn cant_be_reserved_alias_name(name: &str) -> bool {
         "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
         | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
         // misc
-        "false" | "true" => true,
+        "darray" | "false" | "true" | "varray" => true,
         _ => false,
     }
 }

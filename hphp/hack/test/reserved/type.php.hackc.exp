@@ -37,8 +37,8 @@
 
 .filepath "type.php--Darray.php";
 
+.fatal 2:6,2:11 Parse "Cannot use `Darray` as a type name as it is reserved";
 
-.alias Darray = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Darray.php ends here
 # type.php--Dynamic.php starts here
 
@@ -156,8 +156,8 @@
 
 .filepath "type.php--Varray.php";
 
+.fatal 2:6,2:11 Parse "Cannot use `Varray` as a type name as it is reserved";
 
-.alias Varray = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--Varray.php ends here
 # type.php--Void.php starts here
 
@@ -212,8 +212,8 @@
 
 .filepath "type.php--NDarray.php";
 
+.fatal 3:6,3:11 Parse "Cannot use `Darray` as a type name as it is reserved";
 
-.alias N\Darray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NDarray.php ends here
 # type.php--NDynamic.php starts here
 
@@ -331,8 +331,8 @@
 
 .filepath "type.php--NVarray.php";
 
+.fatal 3:6,3:11 Parse "Cannot use `Varray` as a type name as it is reserved";
 
-.alias N\Varray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
 # type.php--NVarray.php ends here
 # type.php--NVoid.php starts here
 

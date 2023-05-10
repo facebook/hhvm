@@ -49,8 +49,7 @@
 
 .filepath "newctx.php--Darray.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:13 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # newctx.php--Darray.php ends here
 # newctx.php--Dynamic.php starts here
@@ -169,8 +168,7 @@
 
 .filepath "newctx.php--Varray.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 3:8,3:13 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # newctx.php--Varray.php ends here
 # newctx.php--Void.php starts here
@@ -228,8 +226,7 @@
 
 .filepath "newctx.php--NDarray.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:13 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # newctx.php--NDarray.php ends here
 # newctx.php--NDynamic.php starts here
@@ -348,8 +345,7 @@
 
 .filepath "newctx.php--NVarray.php";
 
-
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:31:\"context_alias_declaration_short\";}""")] ;
+.fatal 4:8,4:13 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # newctx.php--NVarray.php ends here
 # newctx.php--NVoid.php starts here

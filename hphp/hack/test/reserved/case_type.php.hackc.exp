@@ -41,9 +41,7 @@
 
 .filepath "case_type.php--Darray.php";
 
-
-.alias Darray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:10:\"case_types\";}""")] ;
+.fatal 3:11,3:16 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # case_type.php--Darray.php ends here
 # case_type.php--Dynamic.php starts here
@@ -162,9 +160,7 @@
 
 .filepath "case_type.php--Varray.php";
 
-
-.alias Varray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:10:\"case_types\";}""")] ;
+.fatal 3:11,3:16 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # case_type.php--Varray.php ends here
 # case_type.php--Void.php starts here
@@ -224,9 +220,7 @@
 
 .filepath "case_type.php--NDarray.php";
 
-
-.alias N\Darray = <"HH\\int"> (4,4) """D:1:{s:4:\"kind\";i:1;}""";
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:10:\"case_types\";}""")] ;
+.fatal 4:11,4:16 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # case_type.php--NDarray.php ends here
 # case_type.php--NDynamic.php starts here
@@ -345,9 +339,7 @@
 
 .filepath "case_type.php--NVarray.php";
 
-
-.alias N\Varray = <"HH\\int"> (4,4) """D:1:{s:4:\"kind\";i:1;}""";
-.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:10:\"case_types\";}""")] ;
+.fatal 4:11,4:16 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # case_type.php--NVarray.php ends here
 # case_type.php--NVoid.php starts here

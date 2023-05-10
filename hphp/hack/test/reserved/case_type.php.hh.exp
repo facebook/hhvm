@@ -4,6 +4,8 @@ File "case_type.php--Bool.php", line 3, characters 11-11:
 A name is expected here. (Parsing[1002])
 File "case_type.php--Callable.php", line 3, characters 11-18:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "case_type.php--Darray.php", line 3, characters 11-16:
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--Dynamic.php", line 3, characters 11-17:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--False.php", line 3, characters 11-11:
@@ -20,6 +22,8 @@ File "case_type.php--NBool.php", line 4, characters 11-11:
 A name is expected here. (Parsing[1002])
 File "case_type.php--NCallable.php", line 4, characters 11-18:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+File "case_type.php--NDarray.php", line 4, characters 11-16:
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--NDynamic.php", line 4, characters 11-17:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--NFalse.php", line 4, characters 11-11:
@@ -52,6 +56,8 @@ File "case_type.php--NThis.php", line 4, characters 11-14:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--NTrue.php", line 4, characters 11-11:
 A name is expected here. (Parsing[1002])
+File "case_type.php--NVarray.php", line 4, characters 11-16:
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--NVoid.php", line 4, characters 11-11:
 A name is expected here. (Parsing[1002])
 File "case_type.php--N_.php", line 4, characters 11-11:
@@ -78,6 +84,8 @@ File "case_type.php--This.php", line 3, characters 11-14:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--True.php", line 3, characters 11-11:
 A name is expected here. (Parsing[1002])
+File "case_type.php--Varray.php", line 3, characters 11-16:
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--Void.php", line 3, characters 11-11:
 A name is expected here. (Parsing[1002])
 File "case_type.php--_.php", line 3, characters 11-11:

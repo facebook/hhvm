@@ -1525,7 +1525,11 @@ module Json = struct
       @ fields (TShapeMap.bindings fl)
     | (p, Tunion []) -> obj @@ kind p "nothing"
     | (_, Tunion [ty]) -> from_type env ty
-    | (p, Tunion tyl) -> obj @@ kind p "union" @ args tyl
+    | (p, Tunion tyl) -> begin
+      match List.filter tyl ~f:(fun ty -> not (is_dynamic ty)) with
+      | [ty] -> from_type env ty
+      | _ -> obj @@ kind p "union" @ args tyl
+    end
     | (p, Tintersection []) -> obj @@ kind p "mixed"
     | (_, Tintersection [ty]) -> from_type env ty
     | (p, Tintersection tyl) -> obj @@ kind p "intersection" @ args tyl

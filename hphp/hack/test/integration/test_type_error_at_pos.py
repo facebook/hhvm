@@ -23,6 +23,9 @@ auto_namespace_map = {}
 allowed_fixme_codes_strict = 4101,4323
 allowed_decl_fixme_codes = 4101,4323
 disable_xhp_element_mangling = false
+enable_sound_dynamic_type = true
+everything_sdt = true
+like_type_hints = true
 """.format(
                     self.auto_namespace_map
                 )

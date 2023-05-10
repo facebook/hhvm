@@ -56,7 +56,10 @@ let go status (output_json, prefer_stdout) from error_format max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  if output_json || (not (String.equal from "")) || List.is_empty error_list
+  if
+    output_json
+    || (not (String.equal from "" || String.equal from "[sh]"))
+    || List.is_empty error_list
   then
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)

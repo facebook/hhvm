@@ -42,7 +42,8 @@ module Common_argspecs = struct
     ( "--from",
       Arg.Set_string value_ref,
       " so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode"
-    )
+      (* This setting also controls whether spinner is displayed, and whether
+         clientCheckStatus.ml uses error-formatting. *) )
 
   let no_prechecked value_ref =
     ( "--no-prechecked",

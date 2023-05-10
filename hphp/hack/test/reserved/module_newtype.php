@@ -97,6 +97,11 @@ module newtype Resource as int = int;
 module mm;
 module newtype Self as int = int;
 
+//// Static.php
+<?hh
+module mm;
+module newtype Static as int = int;
+
 //// String.php
 <?hh
 module mm;
@@ -240,6 +245,12 @@ module newtype Resource as int = int;
 module mm;
 namespace N;
 module newtype Self as int = int;
+
+//// NStatic.php
+<?hh
+module mm;
+namespace N;
+module newtype Static as int = int;
 
 //// NString.php
 <?hh

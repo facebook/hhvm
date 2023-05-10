@@ -50,6 +50,8 @@ File "enum.php--NResource.php", line 3, characters 6-13:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "enum.php--NSelf.php", line 3, characters 6-6:
 A name is expected here. (Parsing[1002])
+File "enum.php--NStatic.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
 File "enum.php--NString.php", line 3, characters 6-6:
 A name is expected here. (Parsing[1002])
 File "enum.php--NThis.php", line 3, characters 6-9:
@@ -77,6 +79,8 @@ A name is expected here. (Parsing[1002])
 File "enum.php--Resource.php", line 2, characters 6-13:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "enum.php--Self.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Static.php", line 2, characters 6-6:
 A name is expected here. (Parsing[1002])
 File "enum.php--String.php", line 2, characters 6-6:
 A name is expected here. (Parsing[1002])

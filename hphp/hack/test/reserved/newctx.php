@@ -100,6 +100,11 @@ newctx Resource as [defaults];
 <<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
 newctx Self as [defaults];
 
+//// Static.php
+<?hh
+<<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
+newctx Static as [defaults];
+
 //// String.php
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
@@ -243,6 +248,12 @@ newctx Resource as [defaults];
 <<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
 namespace N;
 newctx Self as [defaults];
+
+//// NStatic.php
+<?hh
+<<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
+namespace N;
+newctx Static as [defaults];
 
 //// NString.php
 <?hh

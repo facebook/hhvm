@@ -86,6 +86,12 @@ File "type.php--NSelf.php", line 3, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
 File "type.php--NSelf.php", line 3, characters 6-16:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "type.php--NStatic.php", line 3, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "type.php--NStatic.php", line 3, characters 6-6:
+A semicolon `;` is expected here. (Parsing[1002])
+File "type.php--NStatic.php", line 3, characters 6-18:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--NString.php", line 3, characters 1-4:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--NString.php", line 3, characters 6-6:
@@ -137,6 +143,12 @@ Hack does not support top level statements. Use the `__EntryPoint` attribute on 
 File "type.php--Self.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
 File "type.php--Self.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "type.php--Static.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "type.php--Static.php", line 2, characters 6-6:
+A semicolon `;` is expected here. (Parsing[1002])
+File "type.php--Static.php", line 2, characters 6-18:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--String.php", line 2, characters 1-4:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])

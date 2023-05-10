@@ -145,6 +145,13 @@
 .fatal 2:6,2:6 Parse "A name is expected here.";
 
 # enum.php--Self.php ends here
+# enum.php--Static.php starts here
+
+.filepath "enum.php--Static.php";
+
+.fatal 2:6,2:6 Parse "A name is expected here.";
+
+# enum.php--Static.php ends here
 # enum.php--String.php starts here
 
 .filepath "enum.php--String.php";
@@ -334,6 +341,13 @@
 .fatal 3:6,3:6 Parse "A name is expected here.";
 
 # enum.php--NSelf.php ends here
+# enum.php--NStatic.php starts here
+
+.filepath "enum.php--NStatic.php";
+
+.fatal 3:6,3:6 Parse "A name is expected here.";
+
+# enum.php--NStatic.php ends here
 # enum.php--NString.php starts here
 
 .filepath "enum.php--NString.php";

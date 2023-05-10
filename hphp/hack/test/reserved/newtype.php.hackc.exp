@@ -131,6 +131,13 @@
 .fatal 2:9,2:9 Parse "A semicolon `;` is expected here.";
 
 # newtype.php--Self.php ends here
+# newtype.php--Static.php starts here
+
+.filepath "newtype.php--Static.php";
+
+.fatal 2:9,2:9 Parse "A semicolon `;` is expected here.";
+
+# newtype.php--Static.php ends here
 # newtype.php--String.php starts here
 
 .filepath "newtype.php--String.php";
@@ -306,6 +313,13 @@
 .fatal 3:9,3:9 Parse "A semicolon `;` is expected here.";
 
 # newtype.php--NSelf.php ends here
+# newtype.php--NStatic.php starts here
+
+.filepath "newtype.php--NStatic.php";
+
+.fatal 3:9,3:9 Parse "A semicolon `;` is expected here.";
+
+# newtype.php--NStatic.php ends here
 # newtype.php--NString.php starts here
 
 .filepath "newtype.php--NString.php";

@@ -144,6 +144,13 @@
 .fatal 3:16,3:19 Parse "Cannot use `Self` as a type name as it is reserved";
 
 # module_newtype.php--Self.php ends here
+# module_newtype.php--Static.php starts here
+
+.filepath "module_newtype.php--Static.php";
+
+.fatal 3:16,3:16 Parse "A name is expected here.";
+
+# module_newtype.php--Static.php ends here
 # module_newtype.php--String.php starts here
 
 .filepath "module_newtype.php--String.php";
@@ -323,6 +330,13 @@
 .fatal 4:16,4:19 Parse "Cannot use `Self` as a type name as it is reserved";
 
 # module_newtype.php--NSelf.php ends here
+# module_newtype.php--NStatic.php starts here
+
+.filepath "module_newtype.php--NStatic.php";
+
+.fatal 4:16,4:16 Parse "A name is expected here.";
+
+# module_newtype.php--NStatic.php ends here
 # module_newtype.php--NString.php starts here
 
 .filepath "module_newtype.php--NString.php";

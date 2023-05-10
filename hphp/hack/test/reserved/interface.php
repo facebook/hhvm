@@ -74,6 +74,10 @@ interface Resource {}
 <?hh
 interface Self {}
 
+//// Static.php
+<?hh
+interface Static {}
+
 //// String.php
 <?hh
 interface String {}
@@ -192,6 +196,11 @@ interface Resource {}
 <?hh
 namespace N;
 interface Self {}
+
+//// NStatic.php
+<?hh
+namespace N;
+interface Static {}
 
 //// NString.php
 <?hh

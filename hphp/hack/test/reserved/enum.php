@@ -74,6 +74,10 @@ enum Resource : int {}
 <?hh
 enum Self : int {}
 
+//// Static.php
+<?hh
+enum Static : int {}
+
 //// String.php
 <?hh
 enum String : int {}
@@ -192,6 +196,11 @@ enum Resource : int {}
 <?hh
 namespace N;
 enum Self : int {}
+
+//// NStatic.php
+<?hh
+namespace N;
+enum Static : int {}
 
 //// NString.php
 <?hh

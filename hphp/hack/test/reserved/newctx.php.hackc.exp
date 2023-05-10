@@ -143,6 +143,13 @@
 .fatal 3:8,3:8 Parse "A name is expected here.";
 
 # newctx.php--Self.php ends here
+# newctx.php--Static.php starts here
+
+.filepath "newctx.php--Static.php";
+
+.fatal 3:8,3:8 Parse "A name is expected here.";
+
+# newctx.php--Static.php ends here
 # newctx.php--String.php starts here
 
 .filepath "newctx.php--String.php";
@@ -320,6 +327,13 @@
 .fatal 4:8,4:8 Parse "A name is expected here.";
 
 # newctx.php--NSelf.php ends here
+# newctx.php--NStatic.php starts here
+
+.filepath "newctx.php--NStatic.php";
+
+.fatal 4:8,4:8 Parse "A name is expected here.";
+
+# newctx.php--NStatic.php ends here
 # newctx.php--NString.php starts here
 
 .filepath "newctx.php--NString.php";

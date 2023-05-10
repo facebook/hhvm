@@ -74,6 +74,10 @@ newtype Resource = int;
 <?hh
 newtype Self = int;
 
+//// Static.php
+<?hh
+newtype Static = int;
+
 //// String.php
 <?hh
 newtype String = int;
@@ -192,6 +196,11 @@ newtype Resource = int;
 <?hh
 namespace N;
 newtype Self = int;
+
+//// NStatic.php
+<?hh
+namespace N;
+newtype Static = int;
 
 //// NString.php
 <?hh

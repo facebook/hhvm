@@ -50,6 +50,8 @@ File "interface.php--NResource.php", line 3, characters 11-18:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "interface.php--NSelf.php", line 3, characters 11-14:
 Cannot use `Self` as a type name as it is reserved (Parsing[1002])
+File "interface.php--NStatic.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
 File "interface.php--NString.php", line 3, characters 11-16:
 Cannot use `String` as a type name as it is reserved (Parsing[1002])
 File "interface.php--NThis.php", line 3, characters 11-14:
@@ -78,6 +80,8 @@ File "interface.php--Resource.php", line 2, characters 11-18:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "interface.php--Self.php", line 2, characters 11-14:
 Cannot use `Self` as a type name as it is reserved (Parsing[1002])
+File "interface.php--Static.php", line 2, characters 11-11:
+A name is expected here. (Parsing[1002])
 File "interface.php--String.php", line 2, characters 11-16:
 Cannot use `String` as a type name as it is reserved (Parsing[1002])
 File "interface.php--This.php", line 2, characters 11-14:

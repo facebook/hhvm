@@ -135,6 +135,13 @@
 .fatal 2:11,2:14 Parse "Cannot use `Self` as a type name as it is reserved";
 
 # interface.php--Self.php ends here
+# interface.php--Static.php starts here
+
+.filepath "interface.php--Static.php";
+
+.fatal 2:11,2:11 Parse "A name is expected here.";
+
+# interface.php--Static.php ends here
 # interface.php--String.php starts here
 
 .filepath "interface.php--String.php";
@@ -314,6 +321,13 @@
 .fatal 3:11,3:14 Parse "Cannot use `Self` as a type name as it is reserved";
 
 # interface.php--NSelf.php ends here
+# interface.php--NStatic.php starts here
+
+.filepath "interface.php--NStatic.php";
+
+.fatal 3:11,3:11 Parse "A name is expected here.";
+
+# interface.php--NStatic.php ends here
 # interface.php--NString.php starts here
 
 .filepath "interface.php--NString.php";

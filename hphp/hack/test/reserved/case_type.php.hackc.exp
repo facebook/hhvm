@@ -135,6 +135,13 @@
 .fatal 3:11,3:11 Parse "A name is expected here.";
 
 # case_type.php--Self.php ends here
+# case_type.php--Static.php starts here
+
+.filepath "case_type.php--Static.php";
+
+.fatal 3:11,3:11 Parse "A name is expected here.";
+
+# case_type.php--Static.php ends here
 # case_type.php--String.php starts here
 
 .filepath "case_type.php--String.php";
@@ -314,6 +321,13 @@
 .fatal 4:11,4:11 Parse "A name is expected here.";
 
 # case_type.php--NSelf.php ends here
+# case_type.php--NStatic.php starts here
+
+.filepath "case_type.php--NStatic.php";
+
+.fatal 4:11,4:11 Parse "A name is expected here.";
+
+# case_type.php--NStatic.php ends here
 # case_type.php--NString.php starts here
 
 .filepath "case_type.php--NString.php";

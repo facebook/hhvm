@@ -86,6 +86,12 @@ File "newctx.php--NSelf.php", line 4, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
 File "newctx.php--NSelf.php", line 4, characters 17-26:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newctx.php--NStatic.php", line 4, characters 8-8:
+A name is expected here. (Parsing[1002])
+File "newctx.php--NStatic.php", line 4, characters 8-8:
+Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
+File "newctx.php--NStatic.php", line 4, characters 19-28:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--NString.php", line 4, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--NString.php", line 4, characters 8-8:
@@ -137,6 +143,12 @@ A name is expected here. (Parsing[1002])
 File "newctx.php--Self.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
 File "newctx.php--Self.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+File "newctx.php--Static.php", line 3, characters 8-8:
+A name is expected here. (Parsing[1002])
+File "newctx.php--Static.php", line 3, characters 8-8:
+Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
+File "newctx.php--Static.php", line 3, characters 19-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--String.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])

@@ -93,6 +93,11 @@ case type Resource = int;
 <<file:__EnableUnstableFeatures('case_types')>>
 case type Self = int;
 
+//// Static.php
+<?hh
+<<file:__EnableUnstableFeatures('case_types')>>
+case type Static = int;
+
 //// String.php
 <?hh
 <<file:__EnableUnstableFeatures('case_types')>>
@@ -236,6 +241,12 @@ case type Resource = int;
 <<file:__EnableUnstableFeatures('case_types')>>
 namespace N;
 case type Self = int;
+
+//// NStatic.php
+<?hh
+<<file:__EnableUnstableFeatures('case_types')>>
+namespace N;
+case type Static = int;
 
 //// NString.php
 <?hh

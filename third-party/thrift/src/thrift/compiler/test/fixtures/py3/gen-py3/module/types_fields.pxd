@@ -40,6 +40,7 @@ from thrift.py3.types cimport (
 from folly.optional cimport cOptional as __cOptional
 
 cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.python.types as _facebook_thrift_annotation_python_types
 
 cimport module.types as _module_types
 

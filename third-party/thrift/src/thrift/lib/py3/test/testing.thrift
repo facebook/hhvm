@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 
 cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"
@@ -77,11 +78,12 @@ exception SimpleError {
   1: Color color;
 }
 
+@python.Flags{}
 enum Perm {
   read = 4,
   write = 2,
   execute = 1,
-} (py3.flags)
+}
 
 enum Kind {
   None = 0,
@@ -152,7 +154,8 @@ struct easy {
   1: i32 val;
   2: I32List val_list;
   4: Integers an_int;
-  5: i64 py3_hidden (py3.hidden);
+  @python.Hidden{}
+  5: i64 py3_hidden;
 } (anno1 = "foo", bar)
 
 struct PrivateCppRefField {
@@ -272,7 +275,8 @@ struct Reserved {
 }
 
 union ReservedUnion {
-  1: string from (py3.name = "from_");
+  @python.Name{name = "from_"}
+  1: string from;
   2: i32 nonlocal (py3.name = "nonlocal_");
   3: string ok;
 }
@@ -394,8 +398,11 @@ struct ListNode {
   2: optional ListNode next;
 }
 
+@python.IOBuf{}
+typedef binary IOBuf
+
 struct IOBufListStruct {
-  1: list<binary (py3.iobuf)> iobufs;
+  1: list<IOBuf> iobufs;
 }
 
 service ClientMetadataTestingService {

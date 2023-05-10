@@ -22,6 +22,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
+#include <thrift/compiler/lib/uri.h>
 
 namespace apache {
 namespace thrift {
@@ -77,6 +78,13 @@ std::string get_py3_name(const T& node) {
       "ctypedef",
   };
 
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kPythonNameUri)) {
+    if (auto name =
+            annot->get_value_from_structured_annotation_or_null("name")) {
+      return name->get_string();
+    }
+  }
   if (const auto* name = node.find_annotation_or_null("py3.name")) {
     return *name;
   }

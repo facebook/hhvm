@@ -394,6 +394,11 @@ void lower_type_annotations(
     }
   }
 
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kPythonIOBufUri)) {
+    unstructured.insert({"py3.iobuf", ""});
+  }
+
   if (unstructured.empty()) {
     return;
   }

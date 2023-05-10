@@ -17,6 +17,380 @@ var _ = fmt.Printf
 var _ = thrift.ZERO
 
 
+type Hidden struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Hidden{}
+
+func NewHidden() *Hidden {
+    return (&Hidden{})
+}
+
+func (x *Hidden) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Hidden.Set* methods instead or set the fields directly.
+type HiddenBuilder struct {
+    obj *Hidden
+}
+
+func NewHiddenBuilder() *HiddenBuilder {
+    return &HiddenBuilder{
+        obj: NewHidden(),
+    }
+}
+
+func (x *HiddenBuilder) Emit() *Hidden {
+    var objCopy Hidden = *x.obj
+    return &objCopy
+}
+
+func (x *Hidden) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Hidden"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Hidden) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
+type Flags struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Flags{}
+
+func NewFlags() *Flags {
+    return (&Flags{})
+}
+
+func (x *Flags) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Flags.Set* methods instead or set the fields directly.
+type FlagsBuilder struct {
+    obj *Flags
+}
+
+func NewFlagsBuilder() *FlagsBuilder {
+    return &FlagsBuilder{
+        obj: NewFlags(),
+    }
+}
+
+func (x *FlagsBuilder) Emit() *Flags {
+    var objCopy Flags = *x.obj
+    return &objCopy
+}
+
+func (x *Flags) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Flags"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Flags) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
+type Name struct {
+    Name string `thrift:"name,1" json:"name" db:"name"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Name{}
+
+func NewName() *Name {
+    return (&Name{}).
+        SetName("")
+}
+
+func (x *Name) GetNameNonCompat() string {
+    return x.Name
+}
+
+func (x *Name) GetName() string {
+    return x.Name
+}
+
+func (x *Name) SetName(value string) *Name {
+    x.Name = value
+    return x
+}
+
+func (x *Name) writeField1(p thrift.Protocol) error {  // Name
+    if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetNameNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) readField1(p thrift.Protocol) error {  // Name
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetName(result)
+    return nil
+}
+
+func (x *Name) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Name.Set* methods instead or set the fields directly.
+type NameBuilder struct {
+    obj *Name
+}
+
+func NewNameBuilder() *NameBuilder {
+    return &NameBuilder{
+        obj: NewName(),
+    }
+}
+
+func (x *NameBuilder) Name(value string) *NameBuilder {
+    x.obj.Name = value
+    return x
+}
+
+func (x *NameBuilder) Emit() *Name {
+    var objCopy Name = *x.obj
+    return &objCopy
+}
+
+func (x *Name) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Name"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // name
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
+type IOBuf struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &IOBuf{}
+
+func NewIOBuf() *IOBuf {
+    return (&IOBuf{})
+}
+
+func (x *IOBuf) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use IOBuf.Set* methods instead or set the fields directly.
+type IOBufBuilder struct {
+    obj *IOBuf
+}
+
+func NewIOBufBuilder() *IOBufBuilder {
+    return &IOBufBuilder{
+        obj: NewIOBuf(),
+    }
+}
+
+func (x *IOBufBuilder) Emit() *IOBuf {
+    var objCopy IOBuf = *x.obj
+    return &objCopy
+}
+
+func (x *IOBuf) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("IOBuf"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *IOBuf) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
     TypeHint string `thrift:"typeHint,2" json:"typeHint" db:"typeHint"`

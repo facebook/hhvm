@@ -17,3 +17,4 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/DerivedService_custom_protocol.h"
 #include "thrift/annotation/gen-py3cpp/cpp_types_custom_protocol.h"
+#include "thrift/annotation/gen-py3cpp/python_types_custom_protocol.h"

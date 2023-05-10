@@ -128,7 +128,7 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     {5, "big_int", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
     {7, "smaller_real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
-    {8, "hidden_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {8, "hidden_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("python.Hidden", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_SimpleStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

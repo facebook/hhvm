@@ -840,7 +840,10 @@ class python_mstch_enum : public mstch_enum {
         });
   }
 
-  mstch::node has_flags() { return enum_->has_annotation("py3.flags"); }
+  mstch::node has_flags() {
+    return enum_->has_annotation("py3.flags") ||
+        enum_->find_structured_annotation_or_null(kPythonFlagsUri);
+  }
 
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*enum_);
@@ -887,7 +890,14 @@ class enum_member_union_field_names_validator : virtual public validator {
 
  private:
   void validate(const t_named* node, const std::string& name) {
-    const auto& pyname = node->get_annotation("py3.name", &name);
+    auto pyname = node->get_annotation("py3.name", &name);
+    if (const t_const* annot =
+            node->find_structured_annotation_or_null(kPythonNameUri)) {
+      if (auto annotation_name =
+              annot->get_value_from_structured_annotation_or_null("name")) {
+        pyname = annotation_name->get_string();
+      }
+    }
     if (pyname == "name" || pyname == "value") {
       report_error(
           *node,

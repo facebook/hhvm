@@ -98,6 +98,11 @@ constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
 // python
 constexpr auto kPythonAdapterUri =
     "facebook.com/thrift/annotation/python/Adapter";
+constexpr auto kPythonHiddenUri =
+    "facebook.com/thrift/annotation/python/Hidden";
+constexpr auto kPythonFlagsUri = "facebook.com/thrift/annotation/python/Flags";
+constexpr auto kPythonNameUri = "facebook.com/thrift/annotation/python/Name";
+constexpr auto kPythonIOBufUri = "facebook.com/thrift/annotation/python/IOBuf";
 
 // hack
 constexpr auto kHackAdapterUri = "facebook.com/thrift/annotation/hack/Adapter";

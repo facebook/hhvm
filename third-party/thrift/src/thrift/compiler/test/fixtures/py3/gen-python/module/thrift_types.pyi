@@ -20,6 +20,8 @@ import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 import facebook.thrift.annotation.cpp.thrift_types
 
+import facebook.thrift.annotation.python.thrift_types
+
 
 class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET: AnEnum = ...

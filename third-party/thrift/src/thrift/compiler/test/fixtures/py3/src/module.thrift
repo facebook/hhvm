@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 
 namespace cpp2 py3.simple
 
@@ -22,7 +23,8 @@ typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>", py3.iobuf) IOBufPtr
 typedef binary (cpp2.type = "folly::IOBuf", py3.iobuf) IOBuf
 
 enum AnEnum {
-  None = 0 (py3.name = "NOTSET"),
+  @python.Name{name = "NOTSET"}
+  None = 0,
   ONE = 1,
   TWO = 2,
   THREE = 3,
@@ -30,7 +32,8 @@ enum AnEnum {
 }
 
 enum AnEnumRenamed {
-  name = 0 (py3.name = "name_"),
+  @python.Name{name = "name_"}
+  name = 0,
   value = 1 (py3.name = "value_"),
   normal = 2 (py3.name = "renamed_"),
 }
@@ -59,7 +62,8 @@ struct SimpleStruct {
   6: double real;
   7: float smaller_real;
   // The next field should not show up anywhere in the generated code.
-  8: i16 hidden_field (py3.hidden);
+  @python.Hidden{}
+  8: i16 hidden_field;
 }
 
 @cpp.Adapter{name = "Adapter"}

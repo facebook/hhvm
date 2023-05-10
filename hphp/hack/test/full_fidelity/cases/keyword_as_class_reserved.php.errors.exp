@@ -1,12 +1,22 @@
+(4,7)-(4,15) Cannot use `arraykey` as class name as it is reserved
+(5,7)-(5,11) Cannot use `bool` as class name as it is reserved
 (7,7)-(7,16) Cannot use `classname` as class name as it is reserved
 (8,7)-(8,13) Cannot use `darray` as class name as it is reserved
 (11,7)-(11,12) Cannot use `false` as class name as it is reserved
+(12,7)-(12,12) Cannot use `float` as class name as it is reserved
+(13,7)-(13,10) Cannot use `int` as class name as it is reserved
+(16,7)-(16,12) Cannot use `mixed` as class name as it is reserved
+(17,7)-(17,15) Cannot use `noreturn` as class name as it is reserved
 (18,7)-(18,11) Cannot use `null` as class name as it is reserved
+(19,7)-(19,10) Cannot use `num` as class name as it is reserved
 (20,7)-(20,13) Cannot use `parent` as class name as it is reserved
+(22,7)-(22,15) Cannot use `resource` as class name as it is reserved
 (23,7)-(23,11) Cannot use `self` as class name as it is reserved
+(24,7)-(24,13) Cannot use `string` as class name as it is reserved
 (25,7)-(25,11) Cannot use `this` as class name as it is reserved
 (26,7)-(26,11) Cannot use `true` as class name as it is reserved
 (27,7)-(27,13) Cannot use `varray` as class name as it is reserved
+(29,7)-(29,11) Cannot use `void` as class name as it is reserved
 (38,5)-(38,10) `new` requires a class name or local variable, but got: `literal`
 (45,5)-(45,9) `new` requires a class name or local variable, but got: `literal`
 (53,5)-(53,9) `new` requires a class name or local variable, but got: `literal`

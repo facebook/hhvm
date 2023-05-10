@@ -744,9 +744,15 @@ fn is_invalid_xhp_attr_enum_item(node: S<'_>) -> bool {
 
 fn cant_be_classish_name(name: &str) -> bool {
     // Keep in sync with test/reserved
+    // See additional rules in emit_class.rs:validate_class_name and naming_global:check_type_not_typehint
     match name.to_ascii_lowercase().as_ref() {
-        "callable" | "classname" | "darray" | "false" | "null" | "parent" | "self" | "this"
-        | "true" | "varray" => true,
+        // reserved_global_name
+        "callable" | "parent" | "self" => true,
+        // reserved_hh_name
+        "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
+        | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
+        // misc
+        "classname" | "darray" | "false" | "true" | "varray" => true,
         _ => false,
     }
 }

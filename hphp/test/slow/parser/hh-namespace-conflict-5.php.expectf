@@ -1,1 +1,1 @@
-Fatal error: Cannot use `Foo\string` as `string` because the name is already in use in %s/test/slow/parser/hh-namespace-conflict-5.php on line 4
+Fatal error: Cannot use `string` as class name as it is reserved in %s on line 3

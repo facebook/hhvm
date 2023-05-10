@@ -33,8 +33,11 @@ let patch_location_collection_handler =
       match expr with
       | ( _,
           hole_pos,
-          Aast.Hole ((expr_ty, expr_pos, expr), _, dest_ty, Aast.UnsafeCast _)
-        )
+          Aast.Hole
+            ( (expr_ty, expr_pos, expr),
+              _,
+              dest_ty,
+              (Aast.UnsafeCast _ | Aast.UnsafeNonnullCast) ) )
         when (not @@ Typing_defs.is_any expr_ty)
              && Typing_subtype.is_sub_type typing_env expr_ty dest_ty ->
         let path = Tast_env.get_file env in

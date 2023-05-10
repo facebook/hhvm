@@ -31,8 +31,11 @@ let handler =
       function
       | ( _,
           hole_pos,
-          Aast.Hole ((expr_ty, expr_pos, expr), _, dest_ty, Aast.UnsafeCast _)
-        )
+          Aast.Hole
+            ( (expr_ty, expr_pos, expr),
+              _,
+              dest_ty,
+              (Aast.UnsafeCast _ | Aast.UnsafeNonnullCast) ) )
         when (not @@ Typing_defs.is_any expr_ty)
              && Typing_subtype.is_sub_type env expr_ty dest_ty ->
         let can_be_captured = Aast_utils.can_be_captured expr in

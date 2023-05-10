@@ -1,2 +1,2 @@
 File "reserved_name3.php", line 3, characters 7-12:
-Cannot use `String` as class name as it is reserved (Parsing[1002])
+Cannot use `String` as a type name as it is reserved (Parsing[1002])

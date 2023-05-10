@@ -768,12 +768,6 @@ pub fn async_magic_method(name: &str) -> Error {
 pub fn unsupported_magic_method(name: &str) -> Error {
     Cow::Owned(format!("Magic `{}` methods are no longer supported", name))
 }
-pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot use `{}` as class name as it is reserved",
-        class_name
-    ))
-}
 pub fn reserved_keyword_as_type_name(name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use `{}` as a type name as it is reserved",

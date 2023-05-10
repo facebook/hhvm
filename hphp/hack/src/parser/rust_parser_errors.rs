@@ -3751,7 +3751,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             self.produce_error(
                 |_, x| cant_be_classish_name(x),
                 name,
-                || errors::reserved_keyword_as_class_name(name),
+                || errors::reserved_keyword_as_type_name(name),
                 &c.name,
             );
             self.invalid_modifier_errors("Enum classes", node, |kind| {
@@ -3914,7 +3914,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             self.produce_error(
                 |_, x| cant_be_classish_name(x),
                 classish_name,
-                || errors::reserved_keyword_as_class_name(classish_name),
+                || errors::reserved_keyword_as_type_name(classish_name),
                 &cd.name,
             );
             if is_token_kind(&cd.keyword, TokenKind::Interface)
@@ -4952,7 +4952,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.produce_error(
                     |_, x| cant_be_classish_name(x),
                     name,
-                    || errors::reserved_keyword_as_class_name(name),
+                    || errors::reserved_keyword_as_type_name(name),
                     &x.name,
                 );
 

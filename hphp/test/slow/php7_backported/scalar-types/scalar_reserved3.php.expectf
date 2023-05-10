@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use `float` as class name as it is reserved in %s/scalar_reserved3.php on line 3
+Fatal error: Cannot use `float` as a type name as it is reserved in %s/scalar_reserved3.php on line 3

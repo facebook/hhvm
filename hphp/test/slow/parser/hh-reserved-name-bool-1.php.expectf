@@ -1,1 +1,1 @@
-Fatal error: Cannot use `Bool` as class name as it is reserved in %s on line 3
+Fatal error: Cannot use `Bool` as a type name as it is reserved in %s on line 3

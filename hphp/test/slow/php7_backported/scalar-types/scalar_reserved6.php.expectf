@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use `bool` as class name as it is reserved in %s/scalar_reserved6.php on line 3
+Fatal error: Cannot use `bool` as a type name as it is reserved in %s/scalar_reserved6.php on line 3

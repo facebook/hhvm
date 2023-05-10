@@ -1,2 +1,2 @@
 File "reserved_name2.php", line 5, characters 7-10:
-Cannot use `void` as class name as it is reserved (Parsing[1002])
+Cannot use `void` as a type name as it is reserved (Parsing[1002])

@@ -1,99 +1,99 @@
 File "enum_class.php--Arraykey.php", line 2, characters 12-19:
-Cannot use `Arraykey` as class name as it is reserved (Parsing[1002])
+Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Bool.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Callable.php", line 2, characters 12-19:
-Cannot use `Callable` as class name as it is reserved (Parsing[1002])
+Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Classname.php", line 2, characters 12-20:
-Cannot use `Classname` as class name as it is reserved (Parsing[1002])
+Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Darray.php", line 2, characters 12-17:
-Cannot use `Darray` as class name as it is reserved (Parsing[1002])
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Dynamic.php", line 2, characters 12-18:
-Cannot use `Dynamic` as class name as it is reserved (Parsing[1002])
+Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--False.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Float.php", line 2, characters 12-16:
-Cannot use `Float` as class name as it is reserved (Parsing[1002])
+Cannot use `Float` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Int.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
-Cannot use `Mixed` as class name as it is reserved (Parsing[1002])
+Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NArraykey.php", line 3, characters 12-19:
-Cannot use `Arraykey` as class name as it is reserved (Parsing[1002])
+Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NBool.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NCallable.php", line 3, characters 12-19:
-Cannot use `Callable` as class name as it is reserved (Parsing[1002])
+Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NClassname.php", line 3, characters 12-20:
-Cannot use `Classname` as class name as it is reserved (Parsing[1002])
+Cannot use `Classname` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NDarray.php", line 3, characters 12-17:
-Cannot use `Darray` as class name as it is reserved (Parsing[1002])
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NDynamic.php", line 3, characters 12-18:
-Cannot use `Dynamic` as class name as it is reserved (Parsing[1002])
+Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NFalse.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NFloat.php", line 3, characters 12-16:
-Cannot use `Float` as class name as it is reserved (Parsing[1002])
+Cannot use `Float` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NInt.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NMixed.php", line 3, characters 12-16:
-Cannot use `Mixed` as class name as it is reserved (Parsing[1002])
+Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NNonnull.php", line 3, characters 12-18:
-Cannot use `Nonnull` as class name as it is reserved (Parsing[1002])
+Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NNoreturn.php", line 3, characters 12-19:
-Cannot use `Noreturn` as class name as it is reserved (Parsing[1002])
+Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NNothing.php", line 3, characters 12-18:
-Cannot use `Nothing` as class name as it is reserved (Parsing[1002])
+Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NNull.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NNum.php", line 3, characters 12-14:
-Cannot use `Num` as class name as it is reserved (Parsing[1002])
+Cannot use `Num` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NParent.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NResource.php", line 3, characters 12-19:
-Cannot use `Resource` as class name as it is reserved (Parsing[1002])
+Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NSelf.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NString.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NThis.php", line 3, characters 12-15:
-Cannot use `This` as class name as it is reserved (Parsing[1002])
+Cannot use `This` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NTrue.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--NVarray.php", line 3, characters 12-17:
-Cannot use `Varray` as class name as it is reserved (Parsing[1002])
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--NVoid.php", line 3, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--N_.php", line 3, characters 12-12:
-Cannot use `_` as class name as it is reserved (Parsing[1002])
+Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Nonnull.php", line 2, characters 12-18:
-Cannot use `Nonnull` as class name as it is reserved (Parsing[1002])
+Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Noreturn.php", line 2, characters 12-19:
-Cannot use `Noreturn` as class name as it is reserved (Parsing[1002])
+Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Nothing.php", line 2, characters 12-18:
-Cannot use `Nothing` as class name as it is reserved (Parsing[1002])
+Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Null.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Num.php", line 2, characters 12-14:
-Cannot use `Num` as class name as it is reserved (Parsing[1002])
+Cannot use `Num` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Parent.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Resource.php", line 2, characters 12-19:
-Cannot use `Resource` as class name as it is reserved (Parsing[1002])
+Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Self.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--String.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--This.php", line 2, characters 12-15:
-Cannot use `This` as class name as it is reserved (Parsing[1002])
+Cannot use `This` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--True.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Varray.php", line 2, characters 12-17:
-Cannot use `Varray` as class name as it is reserved (Parsing[1002])
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Void.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--_.php", line 2, characters 12-12:
-Cannot use `_` as class name as it is reserved (Parsing[1002])
+Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Arraykey.php", line 2, characters 12-19:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Arraykey.php", line 2, characters 12-19:

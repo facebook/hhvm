@@ -1,1 +1,1 @@
-Fatal error: Cannot use `Resource` as class name as it is reserved in %s on line 3
+Fatal error: Cannot use `Resource` as a type name as it is reserved in %s on line 3

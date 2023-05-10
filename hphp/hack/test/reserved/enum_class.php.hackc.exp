@@ -16,7 +16,7 @@
 
 .filepath "enum_class.php--Arraykey.php";
 
-.fatal 2:12,2:19 Parse "Cannot use `Arraykey` as class name as it is reserved";
+.fatal 2:12,2:19 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
 # enum_class.php--Arraykey.php ends here
 # enum_class.php--Bool.php starts here
@@ -30,28 +30,28 @@
 
 .filepath "enum_class.php--Callable.php";
 
-.fatal 2:12,2:19 Parse "Cannot use `Callable` as class name as it is reserved";
+.fatal 2:12,2:19 Parse "Cannot use `Callable` as a type name as it is reserved";
 
 # enum_class.php--Callable.php ends here
 # enum_class.php--Classname.php starts here
 
 .filepath "enum_class.php--Classname.php";
 
-.fatal 2:12,2:20 Parse "Cannot use `Classname` as class name as it is reserved";
+.fatal 2:12,2:20 Parse "Cannot use `Classname` as a type name as it is reserved";
 
 # enum_class.php--Classname.php ends here
 # enum_class.php--Darray.php starts here
 
 .filepath "enum_class.php--Darray.php";
 
-.fatal 2:12,2:17 Parse "Cannot use `Darray` as class name as it is reserved";
+.fatal 2:12,2:17 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # enum_class.php--Darray.php ends here
 # enum_class.php--Dynamic.php starts here
 
 .filepath "enum_class.php--Dynamic.php";
 
-.fatal 2:12,2:18 Parse "Cannot use `Dynamic` as class name as it is reserved";
+.fatal 2:12,2:18 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
 # enum_class.php--Dynamic.php ends here
 # enum_class.php--False.php starts here
@@ -65,7 +65,7 @@
 
 .filepath "enum_class.php--Float.php";
 
-.fatal 2:12,2:16 Parse "Cannot use `Float` as class name as it is reserved";
+.fatal 2:12,2:16 Parse "Cannot use `Float` as a type name as it is reserved";
 
 # enum_class.php--Float.php ends here
 # enum_class.php--Int.php starts here
@@ -79,28 +79,28 @@
 
 .filepath "enum_class.php--Mixed.php";
 
-.fatal 2:12,2:16 Parse "Cannot use `Mixed` as class name as it is reserved";
+.fatal 2:12,2:16 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
 # enum_class.php--Mixed.php ends here
 # enum_class.php--Nonnull.php starts here
 
 .filepath "enum_class.php--Nonnull.php";
 
-.fatal 2:12,2:18 Parse "Cannot use `Nonnull` as class name as it is reserved";
+.fatal 2:12,2:18 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
 # enum_class.php--Nonnull.php ends here
 # enum_class.php--Noreturn.php starts here
 
 .filepath "enum_class.php--Noreturn.php";
 
-.fatal 2:12,2:19 Parse "Cannot use `Noreturn` as class name as it is reserved";
+.fatal 2:12,2:19 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
 # enum_class.php--Noreturn.php ends here
 # enum_class.php--Nothing.php starts here
 
 .filepath "enum_class.php--Nothing.php";
 
-.fatal 2:12,2:18 Parse "Cannot use `Nothing` as class name as it is reserved";
+.fatal 2:12,2:18 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
 # enum_class.php--Nothing.php ends here
 # enum_class.php--Null.php starts here
@@ -114,7 +114,7 @@
 
 .filepath "enum_class.php--Num.php";
 
-.fatal 2:12,2:14 Parse "Cannot use `Num` as class name as it is reserved";
+.fatal 2:12,2:14 Parse "Cannot use `Num` as a type name as it is reserved";
 
 # enum_class.php--Num.php ends here
 # enum_class.php--Parent.php starts here
@@ -128,7 +128,7 @@
 
 .filepath "enum_class.php--Resource.php";
 
-.fatal 2:12,2:19 Parse "Cannot use `Resource` as class name as it is reserved";
+.fatal 2:12,2:19 Parse "Cannot use `Resource` as a type name as it is reserved";
 
 # enum_class.php--Resource.php ends here
 # enum_class.php--Self.php starts here
@@ -149,7 +149,7 @@
 
 .filepath "enum_class.php--This.php";
 
-.fatal 2:12,2:15 Parse "Cannot use `This` as class name as it is reserved";
+.fatal 2:12,2:15 Parse "Cannot use `This` as a type name as it is reserved";
 
 # enum_class.php--This.php ends here
 # enum_class.php--True.php starts here
@@ -163,7 +163,7 @@
 
 .filepath "enum_class.php--Varray.php";
 
-.fatal 2:12,2:17 Parse "Cannot use `Varray` as class name as it is reserved";
+.fatal 2:12,2:17 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # enum_class.php--Varray.php ends here
 # enum_class.php--Void.php starts here
@@ -177,7 +177,7 @@
 
 .filepath "enum_class.php--_.php";
 
-.fatal 2:12,2:12 Parse "Cannot use `_` as class name as it is reserved";
+.fatal 2:12,2:12 Parse "Cannot use `_` as a type name as it is reserved";
 
 # enum_class.php--_.php ends here
 # enum_class.php--NFoo.php starts here
@@ -198,7 +198,7 @@
 
 .filepath "enum_class.php--NArraykey.php";
 
-.fatal 3:12,3:19 Parse "Cannot use `Arraykey` as class name as it is reserved";
+.fatal 3:12,3:19 Parse "Cannot use `Arraykey` as a type name as it is reserved";
 
 # enum_class.php--NArraykey.php ends here
 # enum_class.php--NBool.php starts here
@@ -212,28 +212,28 @@
 
 .filepath "enum_class.php--NCallable.php";
 
-.fatal 3:12,3:19 Parse "Cannot use `Callable` as class name as it is reserved";
+.fatal 3:12,3:19 Parse "Cannot use `Callable` as a type name as it is reserved";
 
 # enum_class.php--NCallable.php ends here
 # enum_class.php--NClassname.php starts here
 
 .filepath "enum_class.php--NClassname.php";
 
-.fatal 3:12,3:20 Parse "Cannot use `Classname` as class name as it is reserved";
+.fatal 3:12,3:20 Parse "Cannot use `Classname` as a type name as it is reserved";
 
 # enum_class.php--NClassname.php ends here
 # enum_class.php--NDarray.php starts here
 
 .filepath "enum_class.php--NDarray.php";
 
-.fatal 3:12,3:17 Parse "Cannot use `Darray` as class name as it is reserved";
+.fatal 3:12,3:17 Parse "Cannot use `Darray` as a type name as it is reserved";
 
 # enum_class.php--NDarray.php ends here
 # enum_class.php--NDynamic.php starts here
 
 .filepath "enum_class.php--NDynamic.php";
 
-.fatal 3:12,3:18 Parse "Cannot use `Dynamic` as class name as it is reserved";
+.fatal 3:12,3:18 Parse "Cannot use `Dynamic` as a type name as it is reserved";
 
 # enum_class.php--NDynamic.php ends here
 # enum_class.php--NFalse.php starts here
@@ -247,7 +247,7 @@
 
 .filepath "enum_class.php--NFloat.php";
 
-.fatal 3:12,3:16 Parse "Cannot use `Float` as class name as it is reserved";
+.fatal 3:12,3:16 Parse "Cannot use `Float` as a type name as it is reserved";
 
 # enum_class.php--NFloat.php ends here
 # enum_class.php--NInt.php starts here
@@ -261,28 +261,28 @@
 
 .filepath "enum_class.php--NMixed.php";
 
-.fatal 3:12,3:16 Parse "Cannot use `Mixed` as class name as it is reserved";
+.fatal 3:12,3:16 Parse "Cannot use `Mixed` as a type name as it is reserved";
 
 # enum_class.php--NMixed.php ends here
 # enum_class.php--NNonnull.php starts here
 
 .filepath "enum_class.php--NNonnull.php";
 
-.fatal 3:12,3:18 Parse "Cannot use `Nonnull` as class name as it is reserved";
+.fatal 3:12,3:18 Parse "Cannot use `Nonnull` as a type name as it is reserved";
 
 # enum_class.php--NNonnull.php ends here
 # enum_class.php--NNoreturn.php starts here
 
 .filepath "enum_class.php--NNoreturn.php";
 
-.fatal 3:12,3:19 Parse "Cannot use `Noreturn` as class name as it is reserved";
+.fatal 3:12,3:19 Parse "Cannot use `Noreturn` as a type name as it is reserved";
 
 # enum_class.php--NNoreturn.php ends here
 # enum_class.php--NNothing.php starts here
 
 .filepath "enum_class.php--NNothing.php";
 
-.fatal 3:12,3:18 Parse "Cannot use `Nothing` as class name as it is reserved";
+.fatal 3:12,3:18 Parse "Cannot use `Nothing` as a type name as it is reserved";
 
 # enum_class.php--NNothing.php ends here
 # enum_class.php--NNull.php starts here
@@ -296,7 +296,7 @@
 
 .filepath "enum_class.php--NNum.php";
 
-.fatal 3:12,3:14 Parse "Cannot use `Num` as class name as it is reserved";
+.fatal 3:12,3:14 Parse "Cannot use `Num` as a type name as it is reserved";
 
 # enum_class.php--NNum.php ends here
 # enum_class.php--NParent.php starts here
@@ -310,7 +310,7 @@
 
 .filepath "enum_class.php--NResource.php";
 
-.fatal 3:12,3:19 Parse "Cannot use `Resource` as class name as it is reserved";
+.fatal 3:12,3:19 Parse "Cannot use `Resource` as a type name as it is reserved";
 
 # enum_class.php--NResource.php ends here
 # enum_class.php--NSelf.php starts here
@@ -331,7 +331,7 @@
 
 .filepath "enum_class.php--NThis.php";
 
-.fatal 3:12,3:15 Parse "Cannot use `This` as class name as it is reserved";
+.fatal 3:12,3:15 Parse "Cannot use `This` as a type name as it is reserved";
 
 # enum_class.php--NThis.php ends here
 # enum_class.php--NTrue.php starts here
@@ -345,7 +345,7 @@
 
 .filepath "enum_class.php--NVarray.php";
 
-.fatal 3:12,3:17 Parse "Cannot use `Varray` as class name as it is reserved";
+.fatal 3:12,3:17 Parse "Cannot use `Varray` as a type name as it is reserved";
 
 # enum_class.php--NVarray.php ends here
 # enum_class.php--NVoid.php starts here
@@ -359,6 +359,6 @@
 
 .filepath "enum_class.php--N_.php";
 
-.fatal 3:12,3:12 Parse "Cannot use `_` as class name as it is reserved";
+.fatal 3:12,3:12 Parse "Cannot use `_` as a type name as it is reserved";
 
 # enum_class.php--N_.php ends here

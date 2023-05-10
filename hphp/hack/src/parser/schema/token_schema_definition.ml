@@ -23,7 +23,7 @@ type token_node = {
    * NB 2: for class names, in addition, a few other keywords are "reserved",
    * i.e. not allowed as class names. These include type names like int or
    * bool. Those "reserved" keywords are not defined here. See syntax error
-   * `reserved_keyword_as_class_name`.
+   * `reserved_keyword_as_type_name`.
    *)
   allowed_as_identifier: bool;
 }

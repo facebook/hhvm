@@ -305,6 +305,8 @@ TEST(RoundRobinRequestPileTest, requestCount) {
   WARNING: Benchmark running in DEBUG mode
 */
 BENCHMARK(DefaultPerf) {
+  folly::BenchmarkSuspender suspender;
+  suspender.dismiss();
   // This benchmark is a simple vanilla case
   // where we have a RoundRobinRequestPile with only
   // one priority and one bucket without any limit
@@ -324,7 +326,7 @@ BENCHMARK(DefaultPerf) {
   RoundRobinRequestPile pile(opts);
 
   auto numThreads = std::thread::hardware_concurrency();
-  unsigned numRoundEachWorker = 1000;
+  unsigned numRoundEachWorker = 10'000;
 
   folly::CPUThreadPoolExecutor producer(numThreads);
   folly::CPUThreadPoolExecutor consumer(numThreads);
@@ -337,20 +339,24 @@ BENCHMARK(DefaultPerf) {
     }
   };
 
-  for (unsigned i = 0; i < numThreads; ++i) {
-    producer.add(producerFunc);
-  }
-
   auto consumerFunc = [&]() {
     while (counter.load() != numThreads * numRoundEachWorker) {
       if (auto req = pile.dequeue()) {
         ++counter;
+      } else {
+        std::this_thread::yield();
       }
     }
   };
 
   for (unsigned i = 0; i < numThreads; ++i) {
     consumer.add(consumerFunc);
+  }
+
+  suspender.rehire();
+
+  for (unsigned i = 0; i < numThreads; ++i) {
+    producer.add(producerFunc);
   }
 
   producer.join();
@@ -367,6 +373,8 @@ BENCHMARK(DefaultPerf) {
   WARNING: Benchmark running in DEBUG mode
 */
 BENCHMARK(RoundRobinBehavior) {
+  folly::BenchmarkSuspender suspender;
+  suspender.dismiss();
   vector<unique_ptr<THeader>> tHeaderStorage;
   vector<unique_ptr<Cpp2RequestContext>> contextStorage;
   std::mutex lock;
@@ -376,7 +384,7 @@ BENCHMARK(RoundRobinBehavior) {
   };
 
   unsigned numBuckets = 100;
-  unsigned numRoundsPerWorker = 10;
+  unsigned numRoundsPerWorker = 100;
   auto numThreads = std::thread::hardware_concurrency();
 
   // single bucket, unlimited request pile, with control on
@@ -399,22 +407,26 @@ BENCHMARK(RoundRobinBehavior) {
     }
   };
 
-  for (unsigned i = 0; i < numThreads; ++i) {
-    producer.add(producerFunc);
-  }
-
   auto sum = numThreads * numRoundsPerWorker * numBuckets;
 
   auto consumerFunc = [&]() {
     while (counter.load() != sum) {
       if (auto req = pile.dequeue()) {
         ++counter;
+      } else {
+        std::this_thread::yield();
       }
     }
   };
 
   for (unsigned i = 0; i < numThreads; ++i) {
     consumer.add(consumerFunc);
+  }
+
+  suspender.rehire();
+
+  for (unsigned i = 0; i < numThreads; ++i) {
+    producer.add(producerFunc);
   }
 
   producer.join();

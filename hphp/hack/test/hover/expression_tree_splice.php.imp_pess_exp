@@ -1,0 +1,10 @@
+class ExampleDsl
+where TInfer#1 = ExampleInt
+An example DSL for testing expression trees (ETs).
+
+Any class can be used an an expression tree visitor. It needs to implement
+the methods shown here, and expression tree literals MyClass`...` will be
+converted (at compile time) to calls on these methods.
+
+This .hhi file is only used when testing the type checker. Otherwise
+every test file would need to include a class with all these methods.

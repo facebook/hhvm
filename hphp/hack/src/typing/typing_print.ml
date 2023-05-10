@@ -376,16 +376,6 @@ module Full = struct
   let tprim x = text @@ Aast_defs.string_of_tprim x
 
   let tfun ~fuel ~ty to_doc st penv ft fun_implicit_params =
-    let sdt =
-      match penv with
-      | Loclenv env when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-        ->
-        if get_ft_support_dynamic_type ft then
-          text "<<__SupportDynamicType>> "
-        else
-          Nothing
-      | _ -> Nothing
-    in
     let (fuel, fun_type_doc) =
       fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params
     in
@@ -397,7 +387,6 @@ module Full = struct
             text "readonly "
           else
             Nothing);
-          sdt;
           text "function";
           fun_type_doc;
           text ")";
@@ -1190,7 +1179,10 @@ module Full = struct
       match (occurrence, get_node x) with
       | ({ type_ = Function | Method _; _ }, Tnewtype (name, [tyarg], _))
         when String.equal name SN.Classes.cSupportDyn ->
-        (text "<<__SupportDynamicType>>" ^^ Newline ^^ prefix, tyarg)
+        if show_supportdyn env then
+          (text "<<__SupportDynamicType>>" ^^ Newline ^^ prefix, tyarg)
+        else
+          (prefix, tyarg)
       | (_, _) -> (prefix, x)
     in
     let (fuel, body_doc) =

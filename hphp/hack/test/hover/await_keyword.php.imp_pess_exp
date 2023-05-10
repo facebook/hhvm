@@ -1,0 +1,6 @@
+~void
+`await` waits for the result of an `Awaitable<_>` value.
+
+This does not give you threads. Only one function is running at any point in time. Instead, the runtime may switch to another function at an `await` expression, and come back to this function later.
+
+This allows data fetching (e.g. database requests) to happen in parallel.

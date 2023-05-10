@@ -86,6 +86,11 @@ let process_member ?(is_declaration = false) recv_class id ~is_method ~is_const
 
 (* If there's an exact class name can find for this type, return its name. *)
 let concrete_cls_name_from_ty enclosing_class_name ty : string option =
+  let ty =
+    match Typing_defs_core.get_node ty with
+    | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn -> ty
+    | _ -> ty
+  in
   match Typing_defs_core.get_node ty with
   | Tclass ((_, cls_name), _, _) -> Some cls_name
   | Tgeneric ("this", _) -> enclosing_class_name
@@ -652,8 +657,12 @@ let visitor =
       self#plus acc (super#on_fun_param env param)
 
     method! on_Happly env sid hl =
-      let acc = process_class_id sid in
-      self#plus acc (super#on_Happly env sid hl)
+      match hl with
+      | [h] when String.equal (snd sid) SN.Classes.cSupportDyn ->
+        self#on_hint env h
+      | _ ->
+        let acc = process_class_id sid in
+        self#plus acc (super#on_Happly env sid hl)
 
     method! on_catch env (sid, lid, block) =
       let acc = process_class_id sid in
@@ -813,8 +822,19 @@ let visitor =
       acc
 
     method! on_user_attribute env ua =
-      let acc = process_attribute ua.Aast.ua_name !class_name !method_name in
-      self#plus acc (super#on_user_attribute env ua)
+      let tcopt = Tast_env.get_tcopt env in
+      (* Don't show __SupportDynamicType if it's implicit everywhere *)
+      if
+        String.equal
+          (snd ua.Aast.ua_name)
+          SN.UserAttributes.uaSupportDynamicType
+        && TypecheckerOptions.everything_sdt tcopt
+        && not (TypecheckerOptions.enable_no_auto_dynamic tcopt)
+      then
+        Result_set.empty
+      else
+        let acc = process_attribute ua.Aast.ua_name !class_name !method_name in
+        self#plus acc (super#on_user_attribute env ua)
 
     method! on_SetModule env sm =
       let (pos, id) = sm in

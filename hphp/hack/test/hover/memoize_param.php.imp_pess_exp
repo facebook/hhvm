@@ -1,0 +1,5 @@
+HH\EnumClass\Label<
+  HH\MemoizeOption,
+  ~string
+> HH\MemoizeOption#KeyedByIC
+Incorporate the Implicit Context state into the memoization cache key.

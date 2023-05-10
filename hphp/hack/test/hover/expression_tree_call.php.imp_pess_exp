@@ -1,0 +1,7 @@
+async function bar(ExampleContext $_): Awaitable<
+  ~ExprTree<
+    ExampleDsl,
+    mixed,
+    (function(ExampleString): ~ExampleInt)
+  >
+>

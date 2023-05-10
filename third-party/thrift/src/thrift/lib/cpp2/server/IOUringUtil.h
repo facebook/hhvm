@@ -16,9 +16,7 @@
 
 #pragma once
 
-#if __linux__ && !FOLLY_MOBILE && __has_include(<liburing.h>)
-
-#define HAS_IO_URING 1
+#ifdef __linux__
 
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/io/IoUringBackend.h>

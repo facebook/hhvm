@@ -532,7 +532,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     StructuredLog::recordRequestGlobals(*entry);
     tl_heap->recordStats(*entry);
     entry->setInt("uptime", HHVM_FN(server_uptime)());
-    entry->setInt("rss", ProcStatus::adjustedRssKb());
   }
   HardwareCounter::UpdateServiceData(transport->getCpuTime(),
                                      transport->getWallTime(),
@@ -540,7 +539,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                      false /*psp*/);
   if (entry) {
     StructuredLog::log("hhvm_request_perf", *entry);
-    transport->resetStructuredLogEntry();
   }
 
   transport->onSendEnd();
@@ -548,10 +546,25 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   Eval::Debugger::InterruptPSPEnded(transport->getUrl());
 
   if (RuntimeOption::EvalProfileHWStructLog) {
-    // This step must be done before globals are torn down in hphp_context_exit.
-    entry = transport->createStructuredLogEntry();
-    StructuredLog::recordRequestGlobals(*entry);
+    // We now reuse the same entry created previously for non-psp, with updates
+    // on certain metrics (memory and hardware counters).
+    entry->setInt("response_code", transport->getResponseCode());
+    tl_heap->recordStats(*entry);
+    entry->setInt("uptime", HHVM_FN(server_uptime)());
+    entry->setInt("rss", ProcStatus::adjustedRssKb());
+    if (use_lowptr) {
+      entry->setInt("low_mem", alloc::getLowMapped());
+    }
   }
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                     transport->getWallTime(),
+                                     entry,
+                                     true /*psp*/);
+  if (entry) {
+    StructuredLog::log("hhvm_request_perf", *entry);
+    transport->resetStructuredLogEntry();
+  }
+
   hphp_context_exit();
   ServerStats::LogPage(file, code);
   return ret;

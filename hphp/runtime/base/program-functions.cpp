@@ -2976,36 +2976,11 @@ void hphp_session_exit(Transport* transport) {
   perf_event_consume(record_perf_mem_event);
   perf_event_disable();
 
-  // Get some memory-related counters before tearing down the MemoryManager.
-  auto entry = transport ? transport->getStructuredLogEntry() : nullptr;
-  if (entry) tl_heap->recordStats(*entry);
-
-  {
-    ServerStatsHelper ssh("rollback");
-    hphp_memory_cleanup();
-  }
-
+  hphp_memory_cleanup();
   assertx(tl_heap->empty());
 
   *s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;
-
-  if (transport) {
-    HardwareCounter::UpdateServiceData(transport->getCpuTime(),
-                                       transport->getWallTime(),
-                                       entry,
-                                       true /*psp*/);
-    if (entry) {
-      entry->setInt("response_code", transport->getResponseCode());
-      entry->setInt("uptime", HHVM_FN(server_uptime)());
-      entry->setInt("rss", ProcStatus::adjustedRssKb());
-      if (use_lowptr) {
-        entry->setInt("low_mem", alloc::getLowMapped());
-      }
-      StructuredLog::log("hhvm_request_perf", *entry);
-      transport->resetStructuredLogEntry();
-    }
-  }
 }
 
 void hphp_process_exit() noexcept {

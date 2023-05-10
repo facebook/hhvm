@@ -175,6 +175,10 @@ ALWAYS_INLINE const StringData* get_ts_root_name(const ArrayData* ts) {
   return detail::get_ts_string(ts, s_root_name);
 }
 
+ALWAYS_INLINE const StringData* get_ts_alias(const ArrayData* ts) {
+  return detail::get_ts_string(ts, s_alias);
+}
+
 ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
   auto const kind_field = ts->get(s_kind.get());
   assertx(isIntType(kind_field.type()));

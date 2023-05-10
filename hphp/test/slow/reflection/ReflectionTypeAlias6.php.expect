@@ -1,4 +1,4 @@
-dict(2) {
+dict(3) {
   ["kind"]=>
   int(14)
   ["fields"]=>
@@ -14,4 +14,6 @@ dict(2) {
       }
     }
   }
+  ["alias"]=>
+  string(7) "MyAlias"
 }

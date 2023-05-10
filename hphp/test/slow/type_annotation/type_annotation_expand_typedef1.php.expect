@@ -1,4 +1,4 @@
-dict(5) {
+dict(6) {
   ["kind"]=>
   int(101)
   ["classname"]=>
@@ -16,6 +16,8 @@ dict(5) {
   string(1) "T"
   ["opaque"]=>
   bool(true)
+  ["alias"]=>
+  string(7) "MyAlias"
 }
 dict(5) {
   ["kind"]=>
@@ -36,7 +38,7 @@ dict(5) {
   ["alias"]=>
   string(7) "MyAlias"
 }
-dict(5) {
+dict(6) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
@@ -74,6 +76,8 @@ dict(5) {
   string(5) "Tk,Tv"
   ["opaque"]=>
   bool(true)
+  ["alias"]=>
+  string(8) "MyAlias2"
 }
 dict(5) {
   ["kind"]=>

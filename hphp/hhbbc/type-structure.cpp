@@ -442,6 +442,7 @@ Resolution resolve_fun(ResolveCtx& ctx, SArray ts) {
     .resolve(s_param_types, get_ts_param_types(ts), ctx, resolve_list)
     .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolveBespoke)
     .optCopy(s_typevars, ts)
+    .optCopy(s_alias, ts)
     .finish();
 }
 
@@ -449,6 +450,7 @@ Resolution resolve_tuple(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_tuple)
     .resolve(s_elem_types, get_ts_elem_types(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
+    .optCopy(s_alias, ts)
     .finish();
 }
 
@@ -456,6 +458,7 @@ Resolution resolve_arraylike(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
   return Builder::copy(ts, kind)
     .resolve(s_generic_types, get_ts_generic_types_opt(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
+    .optCopy(s_alias, ts)
     .finish();
 }
 
@@ -555,6 +558,7 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_shape)
     .set(s_fields, b.finish())
     .optCopy(s_typevars, ts)
+    .optCopy(s_alias, ts)
     .finishTS();
 }
 
@@ -641,6 +645,7 @@ Resolution resolve_type_access(ResolveCtx& ctx, SArray ts) {
   return Builder::attach(
     resolve_type_access_list(ctx, clsType, get_ts_access_list(ts), 0)
   ).copyModifiers(ts)
+   .optCopy(s_alias, ts)
    .finish();
 }
 
@@ -658,6 +663,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   if (clsName->isame(s_callable.get())) {
     return setKindAndName(TS::Kind::T_class, clsName)
       .optCopy(s_typevars, ts)
+      .optCopy(s_alias, ts)
       .finish();
   }
 
@@ -676,6 +682,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       b.resolve(s_generic_types, get_ts_generic_types_opt(ts),
                 ctx, resolve_list)
         .optCopy(s_typevars, ts)
+        .optCopy(s_alias, ts)
         .finish();
   };
 

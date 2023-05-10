@@ -488,6 +488,11 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
     if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
         tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
     };
+    if !typedef.vis.is_case_type() {
+        let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
+        let name = ffi::Str::new_str(alloc, hhbc_string_utils::strip_global_ns(&mangled_name));
+        tconsts.push(encode_entry("alias", TypedValue::string(name)));
+    }
     Ok(TypedValue::dict(tconsts.into_bump_slice()))
 }
 

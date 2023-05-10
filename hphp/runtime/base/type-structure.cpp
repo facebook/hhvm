@@ -428,7 +428,7 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
 }
 
 Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
-  StringData* alias = nullptr, ArrayData* typevarTypes = nullptr);
+                ArrayData* typevarTypes);
 
 Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr);
 
@@ -447,7 +447,7 @@ Array resolveList(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
   VecInit newarr(sz);
   for (auto i = 0; i < sz; i++) {
-    newarr.append(Variant(resolveTS(env, ctx, arr[i].toArray())));
+    newarr.append(Variant(resolveTS(env, ctx, arr[i].toArray(), nullptr)));
   }
 
   return newarr.toArray();
@@ -682,7 +682,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       env.invalidType = true;
       assertx(arr.exists(s_return_type));
       auto const returnArr = arr[s_return_type].asCArrRef();
-      newarr.set(s_return_type, Variant(resolveTS(env, ctx, returnArr)));
+      newarr.set(s_return_type, Variant(resolveTS(env, ctx, returnArr, nullptr)));
 
       assertx(arr.exists(s_param_types));
       auto const paramsArr = arr[s_param_types].asCArrRef();
@@ -690,7 +690,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
       auto tv = arr.lookup(s_variadic_type);
       if (tv.is_init()) {
-        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, tvAsVariant(tv).asCArrRef())));
+        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, tvAsVariant(tv).asCArrRef(), nullptr)));
       }
 
       break;
@@ -731,7 +731,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         TSCtx newCtx;
         newCtx.name = clsName.get();
         newCtx.generics = generics;
-        return resolveTS(env, newCtx, ts, clsName.get(), generics);
+        return resolveTS(env, newCtx, ts, generics);
       };
 
       if (!ts.empty()) {
@@ -754,7 +754,8 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           ts = resolve();
         }
         copyTypeModifiers(arr, ts);
-        return ts;
+        newarr = ts;
+        break;
       }
 
       /* Special cases for 'callable': Hack typechecker throws a naming error
@@ -835,7 +836,8 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         clsName = typeCnsVal[s_classname].asCStrRef();
       }
       copyTypeModifiers(arr, typeCnsVal);
-      return typeCnsVal;
+      newarr = typeCnsVal;
+      break;
     }
     case TypeStructure::Kind::T_typevar: {
       env.invalidType = true;
@@ -843,7 +845,8 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       assertx(arr.exists(s_name));
       auto const generic = ctx.generics->get(arr[s_name].asCStrRef().get());
       if (!generic.is_init()) return arr.toDict();
-      return Variant::wrap(generic).toDict();
+      newarr = Variant::wrap(generic).toDict();
+      break;
     }
     case TypeStructure::Kind::T_reifiedtype: {
       assertx(env.tsList != nullptr);
@@ -875,18 +878,21 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_dynamic:
+      // Return the original type structure, no resolution needed
       return arr.toDict();
   }
 
   if (arr.exists(s_typevars)) newarr.set(s_typevars, arr[s_typevars]);
+  if (arr.exists(s_alias)) {
+    newarr.set(s_alias, Variant{arr[s_alias].asCStrRef()});
+  }
 
   return newarr;
 }
 
 Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
-    StringData* alias, ArrayData* typevarTypes) {
+                ArrayData* typevarTypes) {
   auto ts = resolveTSImpl(env, ctx, arr);
-  if (alias) ts.set(s_alias, Variant(alias));
   if (typevarTypes) ts.set(s_typevar_types, Variant(typevarTypes));
 
   return maybeMakeBespoke(ts);
@@ -919,7 +925,7 @@ Array TypeStructure::resolve(const ArrayData* ts,
   ctx.name = clsName;
   ctx.declCls = declCls;
   ctx.typeCnsCls = typeCnsCls;
-  auto resolved = resolveTS(env, ctx, ArrNR(ts));
+  auto resolved = resolveTS(env, ctx, ArrNR(ts), nullptr);
   persistent = env.persistent;
   return resolved;
 }
@@ -935,7 +941,7 @@ Array TypeStructure::resolve(const String& aliasName,
   TSCtx ctx;
   ctx.name = aliasName.get();
   ctx.generics = generics.get();
-  auto resolved = resolveTS(env, ctx, arr, aliasName.get());
+  auto resolved = resolveTS(env, ctx, arr, nullptr);
   persistent = env.persistent;
   return resolved;
 }
@@ -953,7 +959,7 @@ Array TypeStructure::resolve(const Array& ts,
   TSCtx ctx;
   ctx.declCls = declCls;
   ctx.typeCnsCls = typeCnsCls;
-  auto resolved = resolveTS(env, ctx, ts);
+  auto resolved = resolveTS(env, ctx, ts, nullptr);
   persistent = env.persistent;
   return resolved;
 }
@@ -973,7 +979,7 @@ Array TypeStructure::resolvePartial(const Array& ts,
   TSCtx ctx;
   ctx.declCls = declCls;
   ctx.typeCnsCls = typeCnsCls;
-  auto resolved = resolveTS(env, ctx, ts);
+  auto resolved = resolveTS(env, ctx, ts, nullptr);
   persistent = env.persistent;
   partial = env.partial;
   invalidType = env.invalidType;

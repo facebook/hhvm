@@ -77,6 +77,7 @@ const StaticString s_86reified_prop("86reified_prop");
 const StaticString s_86reifiedinit("86reifiedinit");
 const StaticString s___MockClass("__MockClass");
 const StaticString s___Reified("__Reified");
+const StaticString s___ModuleLevelTrait("__ModuleLevelTrait");
 
 Mutex g_classesMutex;
 
@@ -2112,6 +2113,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setEnumType();
   setInstanceMemoCacheInfo();
   setLSBMemoCacheInfo();
+  checkUserAttributes();
 
   // A class is allowed to implement two interfaces that share the same slot if
   // we'll fatal trying to define that class, so this has to happen after all
@@ -2301,6 +2303,29 @@ void Class::setRTAttributes() {
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||
       (m_parent && m_parent->hasNativePropHandler())) {
     m_RTAttrs |= Class::HasNativePropHandler;
+  }
+}
+
+/*
+ * Perform sanity checks on user attributes:
+ * - <<__ModuleLevelTrait>> can only be specified on public traits
+ * - a trait with the <<__MethodLevelTrait>> attribute can only use traits
+ *   that have the <<__MethodLevelTrait>> attribute themselves
+ */
+void Class::checkUserAttributes() {
+  if (m_preClass->userAttributes().count(s___ModuleLevelTrait.get())) {
+    if (!(attrs() & AttrTrait) || (attrs() & AttrInternal)) {
+      raise_error("Attribute <<__ModuleLevelTrait>> can only be specified on public traits");
+    }
+    if (m_extra) {
+      for (auto const& t : m_extra->m_usedTraits) {
+        auto trait = t.get();
+        if (!(trait->preClass()->userAttributes().count(s___ModuleLevelTrait.get()))) {
+          raise_error("Trait %s has attribute <<__ModuleLevelTrait>> but uses trait %s which doesn't",
+            m_preClass->name()->data(), trait->preClass()->name()->data());
+        }
+      }
+    }
   }
 }
 

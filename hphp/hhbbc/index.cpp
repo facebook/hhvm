@@ -6519,6 +6519,15 @@ private:
       );
     }
 
+    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
+    if (clsHasModuleLevelTrait && (!(cls.attrs & AttrTrait) || (cls.attrs & AttrInternal))) {
+      ITRACE(2,
+             "Making class-info failed for `{}' because "
+             "attribute <<__ModuleLevelTrait>> can only be specified on public traits\n",
+             cls.name);
+      return nullptr;
+    }
+
     for (auto const tname : cls.usedTraitNames) {
       assertx(!is_closure(cls));
       assertx(!is_closure_base(cls));
@@ -6531,6 +6540,14 @@ private:
       }
       auto const& trait = index.cls(tname);
       auto const& traitInfo = index.classInfo(tname);
+
+      if (clsHasModuleLevelTrait && !(trait.userAttributes.count(s___ModuleLevelTrait.get()))) {
+        ITRACE(2,
+               "Making class-info failed for `{}' because "
+               "it has attribute <<__ModuleLevelTrait>> but uses trait {} which doesn't\n",
+               cls.name, trait.name);
+        return nullptr;
+      }
 
       assertx(!is_closure(trait));
       if (!(trait.attrs & AttrTrait)) {

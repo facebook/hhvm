@@ -1768,6 +1768,7 @@ private:
 
   void checkInterfaceMethods();
   void checkInterfaceConstraints();
+  void checkUserAttributes();
 
   void setParent();
   void setSpecial();

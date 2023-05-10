@@ -7,7 +7,10 @@
 
 namespace cpp2 facebook.eden
 
-typedef i64 (cpp2.type = "uint64_t") ui64
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "uint64_t"}
+typedef i64 ui64
 
 // A list of takeover data serialization versions that the client supports
 struct TakeoverVersionQuery {

@@ -38,7 +38,7 @@ class TraceEventContext {
     }
   }
 
-  void traceEventAvailable(TraceEvent event);
+  void traceEventAvailable(const TraceEvent& event);
 
   bool isAllTraceEventNeeded() const;
 

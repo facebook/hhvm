@@ -3523,6 +3523,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    /// This reports "name already in use" relating to namespace use statements.
     fn check_type_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
         match self.names.classes.get(name_text) {
             Some(FirstUseOrDef {
@@ -3722,7 +3723,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn enum_class_errors(&mut self, node: S<'a>) {
-        if let EnumClassDeclaration(_c) = &node.children {
+        if let EnumClassDeclaration(c) = &node.children {
+            let name = self.text(&c.name);
+            self.produce_error(
+                |_, x| cant_be_classish_name(x),
+                name,
+                || errors::reserved_keyword_as_class_name(name),
+                &c.name,
+            );
             self.invalid_modifier_errors("Enum classes", node, |kind| {
                 kind == TokenKind::Abstract
                     || kind == TokenKind::Internal
@@ -4918,6 +4926,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);
                 self.check_type_name(&x.name, name, location);
+                self.produce_error(
+                    |_, x| cant_be_classish_name(x),
+                    name,
+                    || errors::reserved_keyword_as_class_name(name),
+                    &x.name,
+                );
 
                 if x.base.is_missing() {
                     // Create a zero width region to insert the new text.

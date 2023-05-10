@@ -743,6 +743,7 @@ fn is_invalid_xhp_attr_enum_item(node: S<'_>) -> bool {
 }
 
 fn cant_be_classish_name(name: &str) -> bool {
+    // Keep in sync with test/reserved
     match name.to_ascii_lowercase().as_ref() {
         "callable" | "classname" | "darray" | "false" | "null" | "parent" | "self" | "this"
         | "true" | "varray" => true,

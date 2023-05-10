@@ -377,7 +377,8 @@ fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id
     // global names are always reserved in any namespace.
     // hh_reserved names are checked either if
     // - class is in global namespace
-    // - class is in HH namespace *)
+    // - class is in HH namespace
+    // Keep in sync with test/reserved
     let is_special_class = class_name.contains('$');
     let check_hh_name = is_global_namespace(ns) || is_hh_namespace(ns);
     let name = string_utils::strip_ns(class_name);

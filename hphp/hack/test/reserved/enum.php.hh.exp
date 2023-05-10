@@ -1,0 +1,132 @@
+File "enum.php--Arraykey.php", line 2, characters 6-13:
+`Arraykey` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Bool.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Callable.php", line 2, characters 6-13:
+`Callable` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Dynamic.php", line 2, characters 6-12:
+`Dynamic` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--False.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Float.php", line 2, characters 6-10:
+`Float` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Int.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Mixed.php", line 2, characters 6-10:
+`Mixed` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NArraykey.php", line 3, characters 6-13:
+`Arraykey` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NBool.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NCallable.php", line 3, characters 6-13:
+`Callable` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NDynamic.php", line 3, characters 6-12:
+`Dynamic` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NFalse.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NFloat.php", line 3, characters 6-10:
+`Float` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NInt.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NMixed.php", line 3, characters 6-10:
+`Mixed` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NNonnull.php", line 3, characters 6-12:
+`Nonnull` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NNoreturn.php", line 3, characters 6-13:
+`Noreturn` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NNothing.php", line 3, characters 6-12:
+`Nothing` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NNull.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NNum.php", line 3, characters 6-8:
+`Num` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NParent.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NResource.php", line 3, characters 6-13:
+`Resource` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NSelf.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NString.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NThis.php", line 3, characters 6-9:
+`This` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--NTrue.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--NVoid.php", line 3, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--N_.php", line 3, characters 6-6:
+`_` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Nonnull.php", line 2, characters 6-12:
+`Nonnull` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Noreturn.php", line 2, characters 6-13:
+`Noreturn` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Nothing.php", line 2, characters 6-12:
+`Nothing` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Null.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Num.php", line 2, characters 6-8:
+`Num` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Parent.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Resource.php", line 2, characters 6-13:
+`Resource` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Self.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--String.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--This.php", line 2, characters 6-9:
+`This` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--True.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--Void.php", line 2, characters 6-6:
+A name is expected here. (Parsing[1002])
+File "enum.php--_.php", line 2, characters 6-6:
+`_` cannot be used as it is reserved. (Naming[2068])
+File "enum.php--Arraykey.php", line 2, characters 6-13:
+Unbound name: `Arraykey` (an object type) (Naming[2049])
+File "enum.php--Callable.php", line 2, characters 6-13:
+Unbound name: `Callable` (an object type) (Naming[2049])
+File "enum.php--Dynamic.php", line 2, characters 6-12:
+Unbound name: `Dynamic` (an object type) (Naming[2049])
+File "enum.php--Float.php", line 2, characters 6-10:
+Unbound name: `Float` (an object type) (Naming[2049])
+File "enum.php--Mixed.php", line 2, characters 6-10:
+Unbound name: `Mixed` (an object type) (Naming[2049])
+File "enum.php--NArraykey.php", line 3, characters 6-13:
+Unbound name: `N\Arraykey` (an object type) (Naming[2049])
+File "enum.php--NCallable.php", line 3, characters 6-13:
+Unbound name: `N\Callable` (an object type) (Naming[2049])
+File "enum.php--NDynamic.php", line 3, characters 6-12:
+Unbound name: `N\Dynamic` (an object type) (Naming[2049])
+File "enum.php--NFloat.php", line 3, characters 6-10:
+Unbound name: `N\Float` (an object type) (Naming[2049])
+File "enum.php--NMixed.php", line 3, characters 6-10:
+Unbound name: `N\Mixed` (an object type) (Naming[2049])
+File "enum.php--NNonnull.php", line 3, characters 6-12:
+Unbound name: `N\Nonnull` (an object type) (Naming[2049])
+File "enum.php--NNoreturn.php", line 3, characters 6-13:
+Unbound name: `N\Noreturn` (an object type) (Naming[2049])
+File "enum.php--NNothing.php", line 3, characters 6-12:
+Unbound name: `N\Nothing` (an object type) (Naming[2049])
+File "enum.php--NNum.php", line 3, characters 6-8:
+Unbound name: `N\Num` (an object type) (Naming[2049])
+File "enum.php--NResource.php", line 3, characters 6-13:
+Unbound name: `N\Resource` (an object type) (Naming[2049])
+File "enum.php--NThis.php", line 3, characters 6-9:
+Unbound name: `N\This` (an object type) (Naming[2049])
+File "enum.php--N_.php", line 3, characters 6-6:
+Unbound name: `N\_` (an object type) (Naming[2049])
+File "enum.php--Nonnull.php", line 2, characters 6-12:
+Unbound name: `Nonnull` (an object type) (Naming[2049])
+File "enum.php--Noreturn.php", line 2, characters 6-13:
+Unbound name: `Noreturn` (an object type) (Naming[2049])
+File "enum.php--Nothing.php", line 2, characters 6-12:
+Unbound name: `Nothing` (an object type) (Naming[2049])
+File "enum.php--Num.php", line 2, characters 6-8:
+Unbound name: `Num` (an object type) (Naming[2049])
+File "enum.php--Resource.php", line 2, characters 6-13:
+Unbound name: `Resource` (an object type) (Naming[2049])
+File "enum.php--This.php", line 2, characters 6-9:
+Unbound name: `This` (an object type) (Naming[2049])
+File "enum.php--_.php", line 2, characters 6-6:
+Unbound name: `_` (an object type) (Naming[2049])

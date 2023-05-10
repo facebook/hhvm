@@ -1,0 +1,459 @@
+# module_newtype.php--mm.php starts here
+
+.filepath "module_newtype.php--mm.php";
+
+
+.module mm (2,2) {
+}
+
+# module_newtype.php--mm.php ends here
+# module_newtype.php--Foo.php starts here
+
+.filepath "module_newtype.php--Foo.php";
+
+
+.module_use "mm";
+
+.alias Foo = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Foo.php ends here
+# module_newtype.php--Arraykey.php starts here
+
+.filepath "module_newtype.php--Arraykey.php";
+
+
+.module_use "mm";
+
+.alias Arraykey = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Arraykey.php ends here
+# module_newtype.php--Bool.php starts here
+
+.filepath "module_newtype.php--Bool.php";
+
+
+.module_use "mm";
+
+.alias Bool = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Bool.php ends here
+# module_newtype.php--Callable.php starts here
+
+.filepath "module_newtype.php--Callable.php";
+
+
+.module_use "mm";
+
+.alias Callable = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Callable.php ends here
+# module_newtype.php--Classname.php starts here
+
+.filepath "module_newtype.php--Classname.php";
+
+
+.module_use "mm";
+
+.alias Classname = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Classname.php ends here
+# module_newtype.php--Darray.php starts here
+
+.filepath "module_newtype.php--Darray.php";
+
+
+.module_use "mm";
+
+.alias Darray = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Darray.php ends here
+# module_newtype.php--Dynamic.php starts here
+
+.filepath "module_newtype.php--Dynamic.php";
+
+
+.module_use "mm";
+
+.alias Dynamic = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Dynamic.php ends here
+# module_newtype.php--False.php starts here
+
+.filepath "module_newtype.php--False.php";
+
+
+.module_use "mm";
+
+.alias False = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--False.php ends here
+# module_newtype.php--Float.php starts here
+
+.filepath "module_newtype.php--Float.php";
+
+
+.module_use "mm";
+
+.alias Float = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Float.php ends here
+# module_newtype.php--Int.php starts here
+
+.filepath "module_newtype.php--Int.php";
+
+
+.module_use "mm";
+
+.alias Int = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Int.php ends here
+# module_newtype.php--Mixed.php starts here
+
+.filepath "module_newtype.php--Mixed.php";
+
+
+.module_use "mm";
+
+.alias Mixed = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Mixed.php ends here
+# module_newtype.php--Nonnull.php starts here
+
+.filepath "module_newtype.php--Nonnull.php";
+
+
+.module_use "mm";
+
+.alias Nonnull = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Nonnull.php ends here
+# module_newtype.php--Noreturn.php starts here
+
+.filepath "module_newtype.php--Noreturn.php";
+
+
+.module_use "mm";
+
+.alias Noreturn = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Noreturn.php ends here
+# module_newtype.php--Nothing.php starts here
+
+.filepath "module_newtype.php--Nothing.php";
+
+
+.module_use "mm";
+
+.alias Nothing = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Nothing.php ends here
+# module_newtype.php--Null.php starts here
+
+.filepath "module_newtype.php--Null.php";
+
+
+.module_use "mm";
+
+.alias Null = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Null.php ends here
+# module_newtype.php--Num.php starts here
+
+.filepath "module_newtype.php--Num.php";
+
+
+.module_use "mm";
+
+.alias Num = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Num.php ends here
+# module_newtype.php--Parent.php starts here
+
+.filepath "module_newtype.php--Parent.php";
+
+
+.module_use "mm";
+
+.alias Parent = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Parent.php ends here
+# module_newtype.php--Resource.php starts here
+
+.filepath "module_newtype.php--Resource.php";
+
+
+.module_use "mm";
+
+.alias Resource = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Resource.php ends here
+# module_newtype.php--Self.php starts here
+
+.filepath "module_newtype.php--Self.php";
+
+
+.module_use "mm";
+
+.alias Self = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Self.php ends here
+# module_newtype.php--String.php starts here
+
+.filepath "module_newtype.php--String.php";
+
+
+.module_use "mm";
+
+.alias String = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--String.php ends here
+# module_newtype.php--This.php starts here
+
+.filepath "module_newtype.php--This.php";
+
+
+.module_use "mm";
+
+.alias This = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--This.php ends here
+# module_newtype.php--True.php starts here
+
+.filepath "module_newtype.php--True.php";
+
+
+.module_use "mm";
+
+.alias True = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--True.php ends here
+# module_newtype.php--Varray.php starts here
+
+.filepath "module_newtype.php--Varray.php";
+
+
+.module_use "mm";
+
+.alias Varray = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Varray.php ends here
+# module_newtype.php--Void.php starts here
+
+.filepath "module_newtype.php--Void.php";
+
+
+.module_use "mm";
+
+.alias Void = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--Void.php ends here
+# module_newtype.php--_.php starts here
+
+.filepath "module_newtype.php--_.php";
+
+
+.module_use "mm";
+
+.alias _ = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--_.php ends here
+# module_newtype.php--NFoo.php starts here
+
+.filepath "module_newtype.php--NFoo.php";
+
+
+.module_use "mm";
+
+.alias N\Foo = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NFoo.php ends here
+# module_newtype.php--NArraykey.php starts here
+
+.filepath "module_newtype.php--NArraykey.php";
+
+
+.module_use "mm";
+
+.alias N\Arraykey = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NArraykey.php ends here
+# module_newtype.php--NBool.php starts here
+
+.filepath "module_newtype.php--NBool.php";
+
+
+.module_use "mm";
+
+.alias N\Bool = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NBool.php ends here
+# module_newtype.php--NCallable.php starts here
+
+.filepath "module_newtype.php--NCallable.php";
+
+
+.module_use "mm";
+
+.alias N\Callable = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NCallable.php ends here
+# module_newtype.php--NClassname.php starts here
+
+.filepath "module_newtype.php--NClassname.php";
+
+
+.module_use "mm";
+
+.alias N\Classname = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NClassname.php ends here
+# module_newtype.php--NDarray.php starts here
+
+.filepath "module_newtype.php--NDarray.php";
+
+
+.module_use "mm";
+
+.alias N\Darray = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NDarray.php ends here
+# module_newtype.php--NDynamic.php starts here
+
+.filepath "module_newtype.php--NDynamic.php";
+
+
+.module_use "mm";
+
+.alias N\Dynamic = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NDynamic.php ends here
+# module_newtype.php--NFalse.php starts here
+
+.filepath "module_newtype.php--NFalse.php";
+
+
+.module_use "mm";
+
+.alias N\False = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NFalse.php ends here
+# module_newtype.php--NFloat.php starts here
+
+.filepath "module_newtype.php--NFloat.php";
+
+
+.module_use "mm";
+
+.alias N\Float = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NFloat.php ends here
+# module_newtype.php--NInt.php starts here
+
+.filepath "module_newtype.php--NInt.php";
+
+
+.module_use "mm";
+
+.alias N\Int = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NInt.php ends here
+# module_newtype.php--NMixed.php starts here
+
+.filepath "module_newtype.php--NMixed.php";
+
+
+.module_use "mm";
+
+.alias N\Mixed = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NMixed.php ends here
+# module_newtype.php--NNonnull.php starts here
+
+.filepath "module_newtype.php--NNonnull.php";
+
+
+.module_use "mm";
+
+.alias N\Nonnull = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NNonnull.php ends here
+# module_newtype.php--NNoreturn.php starts here
+
+.filepath "module_newtype.php--NNoreturn.php";
+
+
+.module_use "mm";
+
+.alias N\Noreturn = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NNoreturn.php ends here
+# module_newtype.php--NNothing.php starts here
+
+.filepath "module_newtype.php--NNothing.php";
+
+
+.module_use "mm";
+
+.alias N\Nothing = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NNothing.php ends here
+# module_newtype.php--NNull.php starts here
+
+.filepath "module_newtype.php--NNull.php";
+
+
+.module_use "mm";
+
+.alias N\Null = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NNull.php ends here
+# module_newtype.php--NNum.php starts here
+
+.filepath "module_newtype.php--NNum.php";
+
+
+.module_use "mm";
+
+.alias N\Num = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NNum.php ends here
+# module_newtype.php--NParent.php starts here
+
+.filepath "module_newtype.php--NParent.php";
+
+
+.module_use "mm";
+
+.alias N\Parent = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NParent.php ends here
+# module_newtype.php--NResource.php starts here
+
+.filepath "module_newtype.php--NResource.php";
+
+
+.module_use "mm";
+
+.alias N\Resource = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NResource.php ends here
+# module_newtype.php--NSelf.php starts here
+
+.filepath "module_newtype.php--NSelf.php";
+
+
+.module_use "mm";
+
+.alias N\Self = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NSelf.php ends here
+# module_newtype.php--NString.php starts here
+
+.filepath "module_newtype.php--NString.php";
+
+
+.module_use "mm";
+
+.alias N\String = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NString.php ends here
+# module_newtype.php--NThis.php starts here
+
+.filepath "module_newtype.php--NThis.php";
+
+
+.module_use "mm";
+
+.alias N\This = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NThis.php ends here
+# module_newtype.php--NTrue.php starts here
+
+.filepath "module_newtype.php--NTrue.php";
+
+
+.module_use "mm";
+
+.alias N\True = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NTrue.php ends here
+# module_newtype.php--NVarray.php starts here
+
+.filepath "module_newtype.php--NVarray.php";
+
+
+.module_use "mm";
+
+.alias N\Varray = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NVarray.php ends here
+# module_newtype.php--NVoid.php starts here
+
+.filepath "module_newtype.php--NVoid.php";
+
+
+.module_use "mm";
+
+.alias N\Void = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--NVoid.php ends here
+# module_newtype.php--N_.php starts here
+
+.filepath "module_newtype.php--N_.php";
+
+
+.module_use "mm";
+
+.alias N\_ = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+# module_newtype.php--N_.php ends here

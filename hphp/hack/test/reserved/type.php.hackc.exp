@@ -1,0 +1,350 @@
+# type.php--Foo.php starts here
+
+.filepath "type.php--Foo.php";
+
+
+.alias Foo = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Foo.php ends here
+# type.php--Arraykey.php starts here
+
+.filepath "type.php--Arraykey.php";
+
+
+.alias Arraykey = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Arraykey.php ends here
+# type.php--Bool.php starts here
+
+.filepath "type.php--Bool.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Bool.php ends here
+# type.php--Callable.php starts here
+
+.filepath "type.php--Callable.php";
+
+
+.alias Callable = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Callable.php ends here
+# type.php--Classname.php starts here
+
+.filepath "type.php--Classname.php";
+
+
+.alias Classname = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Classname.php ends here
+# type.php--Darray.php starts here
+
+.filepath "type.php--Darray.php";
+
+
+.alias Darray = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Darray.php ends here
+# type.php--Dynamic.php starts here
+
+.filepath "type.php--Dynamic.php";
+
+
+.alias Dynamic = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Dynamic.php ends here
+# type.php--False.php starts here
+
+.filepath "type.php--False.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--False.php ends here
+# type.php--Float.php starts here
+
+.filepath "type.php--Float.php";
+
+
+.alias Float = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Float.php ends here
+# type.php--Int.php starts here
+
+.filepath "type.php--Int.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Int.php ends here
+# type.php--Mixed.php starts here
+
+.filepath "type.php--Mixed.php";
+
+
+.alias Mixed = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Mixed.php ends here
+# type.php--Nonnull.php starts here
+
+.filepath "type.php--Nonnull.php";
+
+
+.alias Nonnull = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Nonnull.php ends here
+# type.php--Noreturn.php starts here
+
+.filepath "type.php--Noreturn.php";
+
+
+.alias Noreturn = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Noreturn.php ends here
+# type.php--Nothing.php starts here
+
+.filepath "type.php--Nothing.php";
+
+
+.alias Nothing = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Nothing.php ends here
+# type.php--Null.php starts here
+
+.filepath "type.php--Null.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Null.php ends here
+# type.php--Num.php starts here
+
+.filepath "type.php--Num.php";
+
+
+.alias Num = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Num.php ends here
+# type.php--Parent.php starts here
+
+.filepath "type.php--Parent.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Parent.php ends here
+# type.php--Resource.php starts here
+
+.filepath "type.php--Resource.php";
+
+
+.alias Resource = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Resource.php ends here
+# type.php--Self.php starts here
+
+.filepath "type.php--Self.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Self.php ends here
+# type.php--String.php starts here
+
+.filepath "type.php--String.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--String.php ends here
+# type.php--This.php starts here
+
+.filepath "type.php--This.php";
+
+
+.alias This = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--This.php ends here
+# type.php--True.php starts here
+
+.filepath "type.php--True.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--True.php ends here
+# type.php--Varray.php starts here
+
+.filepath "type.php--Varray.php";
+
+
+.alias Varray = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--Varray.php ends here
+# type.php--Void.php starts here
+
+.filepath "type.php--Void.php";
+
+.fatal 2:6,2:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--Void.php ends here
+# type.php--_.php starts here
+
+.filepath "type.php--_.php";
+
+
+.alias _ = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--_.php ends here
+# type.php--NFoo.php starts here
+
+.filepath "type.php--NFoo.php";
+
+
+.alias N\Foo = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NFoo.php ends here
+# type.php--NArraykey.php starts here
+
+.filepath "type.php--NArraykey.php";
+
+
+.alias N\Arraykey = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NArraykey.php ends here
+# type.php--NBool.php starts here
+
+.filepath "type.php--NBool.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NBool.php ends here
+# type.php--NCallable.php starts here
+
+.filepath "type.php--NCallable.php";
+
+
+.alias N\Callable = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NCallable.php ends here
+# type.php--NClassname.php starts here
+
+.filepath "type.php--NClassname.php";
+
+
+.alias N\Classname = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NClassname.php ends here
+# type.php--NDarray.php starts here
+
+.filepath "type.php--NDarray.php";
+
+
+.alias N\Darray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NDarray.php ends here
+# type.php--NDynamic.php starts here
+
+.filepath "type.php--NDynamic.php";
+
+
+.alias N\Dynamic = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NDynamic.php ends here
+# type.php--NFalse.php starts here
+
+.filepath "type.php--NFalse.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NFalse.php ends here
+# type.php--NFloat.php starts here
+
+.filepath "type.php--NFloat.php";
+
+
+.alias N\Float = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NFloat.php ends here
+# type.php--NInt.php starts here
+
+.filepath "type.php--NInt.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NInt.php ends here
+# type.php--NMixed.php starts here
+
+.filepath "type.php--NMixed.php";
+
+
+.alias N\Mixed = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NMixed.php ends here
+# type.php--NNonnull.php starts here
+
+.filepath "type.php--NNonnull.php";
+
+
+.alias N\Nonnull = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NNonnull.php ends here
+# type.php--NNoreturn.php starts here
+
+.filepath "type.php--NNoreturn.php";
+
+
+.alias N\Noreturn = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NNoreturn.php ends here
+# type.php--NNothing.php starts here
+
+.filepath "type.php--NNothing.php";
+
+
+.alias N\Nothing = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NNothing.php ends here
+# type.php--NNull.php starts here
+
+.filepath "type.php--NNull.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NNull.php ends here
+# type.php--NNum.php starts here
+
+.filepath "type.php--NNum.php";
+
+
+.alias N\Num = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NNum.php ends here
+# type.php--NParent.php starts here
+
+.filepath "type.php--NParent.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NParent.php ends here
+# type.php--NResource.php starts here
+
+.filepath "type.php--NResource.php";
+
+
+.alias N\Resource = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NResource.php ends here
+# type.php--NSelf.php starts here
+
+.filepath "type.php--NSelf.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NSelf.php ends here
+# type.php--NString.php starts here
+
+.filepath "type.php--NString.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NString.php ends here
+# type.php--NThis.php starts here
+
+.filepath "type.php--NThis.php";
+
+
+.alias N\This = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NThis.php ends here
+# type.php--NTrue.php starts here
+
+.filepath "type.php--NTrue.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NTrue.php ends here
+# type.php--NVarray.php starts here
+
+.filepath "type.php--NVarray.php";
+
+
+.alias N\Varray = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--NVarray.php ends here
+# type.php--NVoid.php starts here
+
+.filepath "type.php--NVoid.php";
+
+.fatal 3:6,3:6 Parse "A semicolon `;` is expected here.";
+
+# type.php--NVoid.php ends here
+# type.php--N_.php starts here
+
+.filepath "type.php--N_.php";
+
+
+.alias N\_ = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+# type.php--N_.php ends here

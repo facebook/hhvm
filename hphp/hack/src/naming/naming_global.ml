@@ -207,6 +207,7 @@ let should_report_duplicate
 (* The primitives to manipulate the naming environment *)
 module Env = struct
   let check_type_not_typehint ctx (p, name, _) =
+    (* Keep in sync with test/reserved *)
     let x = String.lowercase (Utils.strip_all_ns name) in
     if
       SN.Typehints.is_reserved_hh_name x

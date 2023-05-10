@@ -12,19 +12,6 @@ val flags_abstract : int
 
 val flags_final : int
 
-val extract_as_json_string :
-  php5_compat_mode:bool ->
-  hhvm_compat_mode:bool ->
-  disable_legacy_soft_typehints:bool ->
-  allow_new_attribute_syntax:bool ->
-  disable_legacy_attribute_syntax:bool ->
-  enable_xhp_class_modifier:bool ->
-  disable_xhp_element_mangling:bool ->
-  auto_namespace_map:(string * string) list ->
-  filename:Relative_path.t ->
-  text:string ->
-  string option
-
 val from_text :
   php5_compat_mode:bool ->
   hhvm_compat_mode:bool ->

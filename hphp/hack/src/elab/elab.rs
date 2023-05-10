@@ -395,6 +395,7 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         passes::validate_user_attribute_arity::ValidateUserAttributeArityPass::default(),
         passes::validate_user_attribute_deprecated_static::ValidateUserAttributeDeprecatedStaticPass::default(),
         passes::validate_user_attribute_entry_point::ValidateUserAttributeEntryPointPass::default(),
+        passes::validate_user_attribute_no_auto_dynamic::ValidateUserAttributeNoAutoDynamic::default(),
         passes::validate_user_attribute_infer_flows::ValidateUserAttributeInferFlowsPass::default(),
         passes::validate_user_attribute_memoize::ValidateUserAttributeMemoizePass::default(),
         passes::validate_user_attribute_soft_internal::ValidateUserAttributeSoftInternalPass::default(),

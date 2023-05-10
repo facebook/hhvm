@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<559d9953e9dd4b2fe2f6e5cf8443ee6f>>
+// @generated SignedSource<<9b692ed5f637fba5c6e43c995ba39bbf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -267,4 +267,6 @@ pub enum NastCheckError {
         pos: pos::Pos,
         x: String,
     },
+    #[rust_to_ocaml(name = "Attribute_no_auto_dynamic")]
+    AttributeNoAutoDynamic(pos::Pos),
 }

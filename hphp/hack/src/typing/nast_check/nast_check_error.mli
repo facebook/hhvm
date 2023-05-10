@@ -159,5 +159,6 @@ type t =
       pos: Pos.t;
       x: string;
     }
+  | Attribute_no_auto_dynamic of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

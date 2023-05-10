@@ -126,6 +126,7 @@ impl Default for GlobalOptions {
             tco_report_pos_from_reason: false,
             tco_typecheck_sample_rate: 1.0,
             tco_enable_sound_dynamic: false,
+            tco_enable_no_auto_dynamic: false,
             tco_skip_check_under_dynamic: false,
             tco_ifc_enabled: vec![],
             tco_global_access_check_enabled: false,

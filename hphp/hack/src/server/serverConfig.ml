@@ -343,6 +343,7 @@ let load_config config options =
     ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
     ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
     ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
+    ?tco_enable_no_auto_dynamic:(bool_opt "enable_no_auto_dynamic" config)
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
     ?tco_enable_modules:(bool_opt "enable_modules" config)
     ?po_interpret_soft_types_as_like_types:

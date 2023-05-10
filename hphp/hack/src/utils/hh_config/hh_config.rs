@@ -247,6 +247,9 @@ impl HhConfig {
                 "enable_sound_dynamic_type" => {
                     go.tco_enable_sound_dynamic = parse_json(&value)?;
                 }
+                "enable_no_auto_dynamic" => {
+                    go.tco_enable_no_auto_dynamic = parse_json(&value)?;
+                }
                 "like_type_hints" => {
                     go.tco_like_type_hints = parse_json(&value)?;
                 }

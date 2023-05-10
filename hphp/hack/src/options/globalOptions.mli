@@ -259,6 +259,8 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
+  (* Allow use of attribute <<__NoAutoDynamic>> *)
+  tco_enable_no_auto_dynamic: bool;
   (* Skip second check of method under dynamic assumptions *)
   tco_skip_check_under_dynamic: bool;
   (* Enable ifc on the specified list of path prefixes
@@ -440,6 +442,7 @@ val set :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
+  ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_enabled:bool ->

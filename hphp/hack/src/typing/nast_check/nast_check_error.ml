@@ -159,6 +159,7 @@ type t =
       pos: Pos.t;
       x: string;
     }
+  | Attribute_no_auto_dynamic of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -698,6 +699,12 @@ let attribute_param_type pos x =
     (pos, "This attribute parameter should be " ^ x)
     []
 
+let attribute_no_auto_dynamic pos =
+  User_error.make
+    Error_codes.Typing.(to_enum AttributeNoAutoDynamic)
+    (pos, "This attribute is not yet supported in user code")
+    []
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -777,3 +784,4 @@ let to_user_error = function
   | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
     attribute_not_exact_number_of_args pos name expected actual
   | Attribute_param_type { pos; x } -> attribute_param_type pos x
+  | Attribute_no_auto_dynamic pos -> attribute_no_auto_dynamic pos

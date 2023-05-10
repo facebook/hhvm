@@ -111,6 +111,18 @@ let check_deprecated_static attrs =
   end
   | _ -> ()
 
+let check_no_auto_dynamic env attrs =
+  if TypecheckerOptions.enable_no_auto_dynamic (Nast_check_env.get_tcopt env)
+  then
+    ()
+  else
+    let attr = Naming_attributes.find SN.UserAttributes.uaNoAutoDynamic attrs in
+    match attr with
+    | Some { ua_name = (pos, _); _ } when not (Pos.is_hhi pos) ->
+      Errors.add_error
+        Nast_check_error.(to_user_error @@ Attribute_no_auto_dynamic pos)
+    | _ -> ()
+
 let check_ifc_enabled tcopt attrs =
   let inferflows_opt = find_attribute SN.UserAttributes.uaInferFlows attrs in
   match
@@ -168,6 +180,7 @@ let handler =
         SN.UserAttributes.uaDeprecated
         (`Range (1, 2));
       check_deprecated_static f.f_user_attributes;
+      check_no_auto_dynamic env f.f_user_attributes;
       check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes;
       let params = f.f_params in
       List.iter
@@ -220,6 +233,7 @@ let handler =
         m.m_user_attributes;
       check_deprecated_static m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
+      check_no_auto_dynamic env m.m_user_attributes;
       List.iter check_soft_internal_on_param m.m_params;
       (* Ban variadic arguments on memoized methods. *)
       if
@@ -232,7 +246,8 @@ let handler =
             Nast_check_error.(to_user_error @@ Variadic_memoize p.param_pos)
         | None -> ()
 
-    method! at_class_ _env c =
+    method! at_class_ env c =
+      check_no_auto_dynamic env c.c_user_attributes;
       check_soft_internal_without_internal c.c_internal c.c_user_attributes;
       check_attribute_arity
         c.c_user_attributes

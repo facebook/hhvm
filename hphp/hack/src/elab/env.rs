@@ -29,6 +29,7 @@ bitflags! {
         const INFER_FLOWS = 1 << 10;
         const EVERYTHING_SDT = 1 << 11;
         const SUPPORTDYNAMIC_TYPE_HINT_ENABLED = 1 << 12;
+        const NO_AUTO_DYNAMIC_ENABLED = 1 << 13;
     }
 }
 
@@ -44,6 +45,10 @@ impl Flags {
         flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.tco_is_systemlib);
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
+        flags.set(
+            Self::NO_AUTO_DYNAMIC_ENABLED,
+            tco.tco_enable_no_auto_dynamic,
+        );
         flags.set(
             Self::SUPPORTDYNAMIC_TYPE_HINT_ENABLED,
             tco.tco_experimental_features
@@ -133,6 +138,10 @@ impl Env {
 
     pub fn supportdynamic_type_hint_enabled(&self) -> bool {
         self.flags.contains(Flags::SUPPORTDYNAMIC_TYPE_HINT_ENABLED)
+    }
+
+    pub fn no_auto_dynamic_enabled(&self) -> bool {
+        self.flags.contains(Flags::NO_AUTO_DYNAMIC_ENABLED)
     }
 
     pub fn everything_sdt(&self) -> bool {

@@ -91,6 +91,32 @@
                 Self::ApplicationException(exn)
             }
         }
+        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
 
         impl ::fbthrift::GetTType for {{function:upcamel}}StreamExn {
             const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -280,6 +306,32 @@
                 Self::ApplicationException(exn)
             }
         }
+        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
 
         impl ::fbthrift::GetTType for {{function:upcamel}}ResponseExn {
             {{#function:stream_has_first_response?}}
@@ -430,6 +482,32 @@
             }
         }{{!
         }}{{/function:uniqueExceptions}}
+        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
 
         impl ::std::convert::From<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> for {{function:upcamel}}Exn {
             fn from(err: {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error) -> Self {

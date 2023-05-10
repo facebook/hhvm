@@ -26,6 +26,33 @@ pub struct StructWithTransitiveDerives {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SomeError {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+impl ::fbthrift::ExceptionInfo for SomeError {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for SomeError {}
+
+impl ::std::fmt::Display for SomeError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::TransitiveDerives {
     fn default() -> Self {
@@ -206,6 +233,87 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTransitiveDerives {
         if let Some(r) = <crate::types::TransitiveDerives as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::SomeError {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::SomeError {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("SomeError")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::SomeError {}
+unsafe impl ::std::marker::Sync for self::SomeError {}
+impl ::std::marker::Unpin for self::SomeError {}
+
+impl ::fbthrift::GetTType for self::SomeError {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::SomeError
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("SomeError");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::SomeError
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for SomeError {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
 
         None
     }

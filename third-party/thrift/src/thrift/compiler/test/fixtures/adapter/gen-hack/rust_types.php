@@ -270,3 +270,124 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 
 }
 
+/**
+ * Original thrift struct:-
+ * ServiceExn
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/rust/ServiceExn'))>>
+class ServiceExn implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'anyhow_to_application_exn',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'anyhow_to_application_exn' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'anyhow_to_application_exn' => ?bool,
+  );
+
+  const type TShape = shape(
+    'anyhow_to_application_exn' => bool,
+  );
+  const int STRUCTURAL_ID = 7965253136079409026;
+  /**
+   * Original thrift field:-
+   * 1: bool anyhow_to_application_exn
+   */
+  public bool $anyhow_to_application_exn;
+
+  public function __construct(?bool $anyhow_to_application_exn = null)[] {
+    $this->anyhow_to_application_exn = $anyhow_to_application_exn ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'anyhow_to_application_exn'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ServiceExn';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "rust.ServiceExn",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "anyhow_to_application_exn",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\TFunction' => \thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Service' => \thrift\annotation\Service::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['anyhow_to_application_exn'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'anyhow_to_application_exn' => $this->anyhow_to_application_exn,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'anyhow_to_application_exn') !== null) {
+      $this->anyhow_to_application_exn = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['anyhow_to_application_exn']);
+    }
+  }
+
+}
+

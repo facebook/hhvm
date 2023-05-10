@@ -9,6 +9,4341 @@ pub use self::types::*;
 
 pub mod types;
 
+#[doc(hidden)]
+pub mod dependencies {
+    pub use rust as rust;
+    pub use scope as scope;
+}
+
+pub mod services {
+    pub mod all_methods {
+        #[derive(Clone, Debug)]
+        pub enum FooExn {
+            #[doc(hidden)]
+            Success(()),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for FooExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::all_methods::FooError> for FooExn {
+            fn from(err: crate::errors::all_methods::FooError) -> Self {
+                match err {
+                    crate::errors::all_methods::FooError::ApplicationException(aexn) => FooExn::ApplicationException(aexn),
+                    crate::errors::all_methods::FooError::ThriftError(err) => FooExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for FooExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for FooExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for FooExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for FooExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Foo");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::Void,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = Self::Success(());
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::Void, 0i32), false) => {
+                            once = true;
+                            alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "FooExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                ::std::result::Result::Ok(alt)
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub enum BarExn {
+            #[doc(hidden)]
+            Success(::std::string::String),
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarExn {
+            fn from(exn: crate::types::SomeError) -> Self {
+                Self::se(exn)
+            }
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for BarExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::all_methods::BarError> for BarExn {
+            fn from(err: crate::errors::all_methods::BarError) -> Self {
+                match err {
+                    crate::errors::all_methods::BarError::se(err) => BarExn::se(err),
+                    crate::errors::all_methods::BarError::ApplicationException(aexn) => BarExn::ApplicationException(aexn),
+                    crate::errors::all_methods::BarError::ThriftError(err) => BarExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for BarExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::se(exn) => exn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::se(exn) => exn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::se(exn) => exn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for BarExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::se(_exn) => fbthrift::ResultType::Error,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for BarExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Bar");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::String,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::se(inner) => {
+                        p.write_field_begin(
+                            "se",
+                            ::fbthrift::TType::Struct,
+                            1,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::String, 0),
+                    ::fbthrift::Field::new("se", ::fbthrift::TType::Struct, 1),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = ::std::option::Option::None;
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::String, 0i32), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((::fbthrift::TType::Struct, 1), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::se(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "BarExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                alt.ok_or_else(||
+                    ::fbthrift::ApplicationException::new(
+                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                        format!("Empty union {}", "BarExn"),
+                    )
+                    .into(),
+                )
+            }
+        }
+    }
+
+    pub mod one_method {
+        #[derive(Clone, Debug)]
+        pub enum FooExn {
+            #[doc(hidden)]
+            Success(()),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for FooExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::one_method::FooError> for FooExn {
+            fn from(err: crate::errors::one_method::FooError) -> Self {
+                match err {
+                    crate::errors::one_method::FooError::ApplicationException(aexn) => FooExn::ApplicationException(aexn),
+                    crate::errors::one_method::FooError::ThriftError(err) => FooExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for FooExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for FooExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for FooExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for FooExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Foo");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::Void,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = Self::Success(());
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::Void, 0i32), false) => {
+                            once = true;
+                            alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "FooExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                ::std::result::Result::Ok(alt)
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub enum BarExn {
+            #[doc(hidden)]
+            Success(::std::string::String),
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarExn {
+            fn from(exn: crate::types::SomeError) -> Self {
+                Self::se(exn)
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::one_method::BarError> for BarExn {
+            fn from(err: crate::errors::one_method::BarError) -> Self {
+                match err {
+                    crate::errors::one_method::BarError::se(err) => BarExn::se(err),
+                    crate::errors::one_method::BarError::ApplicationException(aexn) => BarExn::ApplicationException(aexn),
+                    crate::errors::one_method::BarError::ThriftError(err) => BarExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for BarExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::se(exn) => exn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::se(exn) => exn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::se(exn) => exn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for BarExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::se(_exn) => fbthrift::ResultType::Error,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for BarExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Bar");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::String,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::se(inner) => {
+                        p.write_field_begin(
+                            "se",
+                            ::fbthrift::TType::Struct,
+                            1,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::String, 0),
+                    ::fbthrift::Field::new("se", ::fbthrift::TType::Struct, 1),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = ::std::option::Option::None;
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::String, 0i32), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((::fbthrift::TType::Struct, 1), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::se(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "BarExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                alt.ok_or_else(||
+                    ::fbthrift::ApplicationException::new(
+                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                        format!("Empty union {}", "BarExn"),
+                    )
+                    .into(),
+                )
+            }
+        }
+    }
+
+    pub mod one_method_opt_out {
+        #[derive(Clone, Debug)]
+        pub enum FooExn {
+            #[doc(hidden)]
+            Success(()),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for FooExn {
+            fn from(exn: ::anyhow::Error) -> Self {
+                Self::ApplicationException(
+                    ::fbthrift::ApplicationException {
+                        message: format!("{exn:#}"),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                    }
+                )
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::one_method_opt_out::FooError> for FooExn {
+            fn from(err: crate::errors::one_method_opt_out::FooError) -> Self {
+                match err {
+                    crate::errors::one_method_opt_out::FooError::ApplicationException(aexn) => FooExn::ApplicationException(aexn),
+                    crate::errors::one_method_opt_out::FooError::ThriftError(err) => FooExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for FooExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for FooExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for FooExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for FooExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Foo");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::Void,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for FooExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = Self::Success(());
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::Void, 0i32), false) => {
+                            once = true;
+                            alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "FooExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                ::std::result::Result::Ok(alt)
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub enum BarExn {
+            #[doc(hidden)]
+            Success(::std::string::String),
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarExn {
+            fn from(exn: crate::types::SomeError) -> Self {
+                Self::se(exn)
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::one_method_opt_out::BarError> for BarExn {
+            fn from(err: crate::errors::one_method_opt_out::BarError) -> Self {
+                match err {
+                    crate::errors::one_method_opt_out::BarError::se(err) => BarExn::se(err),
+                    crate::errors::one_method_opt_out::BarError::ApplicationException(aexn) => BarExn::ApplicationException(aexn),
+                    crate::errors::one_method_opt_out::BarError::ThriftError(err) => BarExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for BarExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::se(exn) => exn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::se(exn) => exn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::se(exn) => exn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for BarExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::se(_exn) => fbthrift::ResultType::Error,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for BarExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Bar");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::String,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::se(inner) => {
+                        p.write_field_begin(
+                            "se",
+                            ::fbthrift::TType::Struct,
+                            1,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for BarExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::String, 0),
+                    ::fbthrift::Field::new("se", ::fbthrift::TType::Struct, 1),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = ::std::option::Option::None;
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::String, 0i32), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((::fbthrift::TType::Struct, 1), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::se(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "BarExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                alt.ok_or_else(||
+                    ::fbthrift::ApplicationException::new(
+                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                        format!("Empty union {}", "BarExn"),
+                    )
+                    .into(),
+                )
+            }
+        }
+    }
+}
+
+/// Client implementation for each service in `module`.
+pub mod client {
+
+    pub struct AllMethodsImpl<P, T, S = ::fbthrift::NoopSpawner> {
+        transport: T,
+        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+    }
+
+    impl<P, T, S> AllMethodsImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        pub fn new(
+            transport: T,
+        ) -> Self {
+            Self {
+                transport,
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn transport(&self) -> &T {
+            &self.transport
+        }
+
+
+        fn _foo_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "AllMethods";
+                SERVICE_METHOD_NAME = "AllMethods.foo";
+            }
+            let args = self::Args_AllMethods_foo {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("foo", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "AllMethods.foo"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::all_methods::FooExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::all_methods::FooError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "AllMethods.foo"))
+            .boxed()
+        }
+
+        fn _bar_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "AllMethods";
+                SERVICE_METHOD_NAME = "AllMethods.bar";
+            }
+            let args = self::Args_AllMethods_bar {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("bar", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "AllMethods.bar"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::all_methods::BarExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::all_methods::BarError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "AllMethods.bar"))
+            .boxed()
+        }
+    }
+
+    pub trait AllMethods: ::std::marker::Send {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
+
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
+    }
+
+    pub trait AllMethodsExt<T>: AllMethods
+    where
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
+
+        fn transport(&self) -> &T;
+    }
+
+    struct Args_AllMethods_foo<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_AllMethods_foo<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "AllMethods.foo"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    struct Args_AllMethods_bar<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_AllMethods_bar<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "AllMethods.bar"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl<P, T, S> AllMethods for AllMethodsImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+    }
+
+    impl<P, T, S> AllMethodsExt<T> for AllMethodsImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
+    }
+
+    impl<'a, S> AllMethods for S
+    where
+        S: ::std::convert::AsRef<dyn AllMethods + 'a>,
+        S: ::std::marker::Send,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            self.as_ref().foo(
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            self.as_ref().bar(
+            )
+        }
+    }
+
+    impl<S, T> AllMethodsExt<T> for S
+    where
+        S: ::std::convert::AsRef<dyn AllMethods + 'static>,
+        S: ::std::convert::AsRef<dyn AllMethodsExt<T> + 'static>,
+        S: ::std::marker::Send,
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).foo_with_rpc_opts(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).bar_with_rpc_opts(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn AllMethodsExt<T> as AllMethodsExt<T>>::transport(<Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self))
+        }
+    }
+
+    #[derive(Clone)]
+    pub struct make_AllMethods;
+
+    /// To be called by user directly setting up a client. Avoids
+    /// needing ClientFactory trait in scope, avoids unidiomatic
+    /// make_Trait name.
+    ///
+    /// ```
+    /// # const _: &str = stringify! {
+    /// use bgs::client::BuckGraphService;
+    ///
+    /// let protocol = BinaryProtocol::new();
+    /// let transport = HttpClient::new();
+    /// let client = <dyn BuckGraphService>::new(protocol, transport);
+    /// # };
+    /// ```
+    impl dyn AllMethods {
+        pub fn new<P, T>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl AllMethods + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, T, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl AllMethods + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(AllMethodsImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    impl<T> dyn AllMethodsExt<T>
+    where
+        T: ::fbthrift::Transport,
+    {
+        pub fn new<P>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl AllMethodsExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl AllMethodsExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(AllMethodsImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    pub type AllMethodsDynClient = <make_AllMethods as ::fbthrift::ClientFactory>::Api;
+    pub type AllMethodsClient = ::std::sync::Arc<AllMethodsDynClient>;
+
+    /// The same thing, but to be called from generic contexts where we are
+    /// working with a type parameter `C: ClientFactory` to produce clients.
+    impl ::fbthrift::ClientFactory for make_AllMethods {
+        type Api = dyn AllMethods + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+        fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            <dyn AllMethods>::with_spawner(protocol, transport, spawner)
+        }
+    }
+
+
+    pub struct OneMethodImpl<P, T, S = ::fbthrift::NoopSpawner> {
+        transport: T,
+        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+    }
+
+    impl<P, T, S> OneMethodImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        pub fn new(
+            transport: T,
+        ) -> Self {
+            Self {
+                transport,
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn transport(&self) -> &T {
+            &self.transport
+        }
+
+
+        fn _foo_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethod";
+                SERVICE_METHOD_NAME = "OneMethod.foo";
+            }
+            let args = self::Args_OneMethod_foo {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("foo", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "OneMethod.foo"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::one_method::FooExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::one_method::FooError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "OneMethod.foo"))
+            .boxed()
+        }
+
+        fn _bar_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethod";
+                SERVICE_METHOD_NAME = "OneMethod.bar";
+            }
+            let args = self::Args_OneMethod_bar {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("bar", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "OneMethod.bar"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::one_method::BarExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::one_method::BarError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "OneMethod.bar"))
+            .boxed()
+        }
+    }
+
+    pub trait OneMethod: ::std::marker::Send {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
+
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
+    }
+
+    pub trait OneMethodExt<T>: OneMethod
+    where
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
+
+        fn transport(&self) -> &T;
+    }
+
+    struct Args_OneMethod_foo<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_OneMethod_foo<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "OneMethod.foo"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    struct Args_OneMethod_bar<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_OneMethod_bar<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "OneMethod.bar"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl<P, T, S> OneMethod for OneMethodImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+    }
+
+    impl<P, T, S> OneMethodExt<T> for OneMethodImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
+    }
+
+    impl<'a, S> OneMethod for S
+    where
+        S: ::std::convert::AsRef<dyn OneMethod + 'a>,
+        S: ::std::marker::Send,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            self.as_ref().foo(
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            self.as_ref().bar(
+            )
+        }
+    }
+
+    impl<S, T> OneMethodExt<T> for S
+    where
+        S: ::std::convert::AsRef<dyn OneMethod + 'static>,
+        S: ::std::convert::AsRef<dyn OneMethodExt<T> + 'static>,
+        S: ::std::marker::Send,
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).foo_with_rpc_opts(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).bar_with_rpc_opts(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn OneMethodExt<T> as OneMethodExt<T>>::transport(<Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self))
+        }
+    }
+
+    #[derive(Clone)]
+    pub struct make_OneMethod;
+
+    /// To be called by user directly setting up a client. Avoids
+    /// needing ClientFactory trait in scope, avoids unidiomatic
+    /// make_Trait name.
+    ///
+    /// ```
+    /// # const _: &str = stringify! {
+    /// use bgs::client::BuckGraphService;
+    ///
+    /// let protocol = BinaryProtocol::new();
+    /// let transport = HttpClient::new();
+    /// let client = <dyn BuckGraphService>::new(protocol, transport);
+    /// # };
+    /// ```
+    impl dyn OneMethod {
+        pub fn new<P, T>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl OneMethod + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, T, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl OneMethod + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(OneMethodImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    impl<T> dyn OneMethodExt<T>
+    where
+        T: ::fbthrift::Transport,
+    {
+        pub fn new<P>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl OneMethodExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl OneMethodExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(OneMethodImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    pub type OneMethodDynClient = <make_OneMethod as ::fbthrift::ClientFactory>::Api;
+    pub type OneMethodClient = ::std::sync::Arc<OneMethodDynClient>;
+
+    /// The same thing, but to be called from generic contexts where we are
+    /// working with a type parameter `C: ClientFactory` to produce clients.
+    impl ::fbthrift::ClientFactory for make_OneMethod {
+        type Api = dyn OneMethod + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+        fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            <dyn OneMethod>::with_spawner(protocol, transport, spawner)
+        }
+    }
+
+
+    pub struct OneMethodOptOutImpl<P, T, S = ::fbthrift::NoopSpawner> {
+        transport: T,
+        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+    }
+
+    impl<P, T, S> OneMethodOptOutImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        pub fn new(
+            transport: T,
+        ) -> Self {
+            Self {
+                transport,
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn transport(&self) -> &T {
+            &self.transport
+        }
+
+
+        fn _foo_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethodOptOut";
+                SERVICE_METHOD_NAME = "OneMethodOptOut.foo";
+            }
+            let args = self::Args_OneMethodOptOut_foo {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("foo", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.foo"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::one_method_opt_out::FooExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::one_method_opt_out::FooError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "OneMethodOptOut.foo"))
+            .boxed()
+        }
+
+        fn _bar_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethodOptOut";
+                SERVICE_METHOD_NAME = "OneMethodOptOut.bar";
+            }
+            let args = self::Args_OneMethodOptOut_bar {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let transport = self.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("bar", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.bar"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::one_method_opt_out::BarExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::one_method_opt_out::BarError::ApplicationException(aexn))
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "OneMethodOptOut.bar"))
+            .boxed()
+        }
+    }
+
+    pub trait OneMethodOptOut: ::std::marker::Send {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
+
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
+    }
+
+    pub trait OneMethodOptOutExt<T>: OneMethodOptOut
+    where
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
+
+        fn transport(&self) -> &T;
+    }
+
+    struct Args_OneMethodOptOut_foo<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_OneMethodOptOut_foo<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "OneMethodOptOut.foo"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    struct Args_OneMethodOptOut_bar<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_OneMethodOptOut_bar<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "OneMethodOptOut.bar"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl<P, T, S> OneMethodOptOut for OneMethodOptOutImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+    }
+
+    impl<P, T, S> OneMethodOptOutExt<T> for OneMethodOptOutImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            self._bar_impl(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
+    }
+
+    impl<'a, S> OneMethodOptOut for S
+    where
+        S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a>,
+        S: ::std::marker::Send,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            self.as_ref().foo(
+            )
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            self.as_ref().bar(
+            )
+        }
+    }
+
+    impl<S, T> OneMethodOptOutExt<T> for S
+    where
+        S: ::std::convert::AsRef<dyn OneMethodOptOut + 'static>,
+        S: ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'static>,
+        S: ::std::marker::Send,
+        T: ::fbthrift::Transport,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).foo_with_rpc_opts(
+                rpc_options,
+            )
+        }
+        fn bar_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).bar_with_rpc_opts(
+                rpc_options,
+            )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn OneMethodOptOutExt<T> as OneMethodOptOutExt<T>>::transport(<Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self))
+        }
+    }
+
+    #[derive(Clone)]
+    pub struct make_OneMethodOptOut;
+
+    /// To be called by user directly setting up a client. Avoids
+    /// needing ClientFactory trait in scope, avoids unidiomatic
+    /// make_Trait name.
+    ///
+    /// ```
+    /// # const _: &str = stringify! {
+    /// use bgs::client::BuckGraphService;
+    ///
+    /// let protocol = BinaryProtocol::new();
+    /// let transport = HttpClient::new();
+    /// let client = <dyn BuckGraphService>::new(protocol, transport);
+    /// # };
+    /// ```
+    impl dyn OneMethodOptOut {
+        pub fn new<P, T>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl OneMethodOptOut + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, T, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl OneMethodOptOut + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(OneMethodOptOutImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    impl<T> dyn OneMethodOptOutExt<T>
+    where
+        T: ::fbthrift::Transport,
+    {
+        pub fn new<P>(
+            protocol: P,
+            transport: T,
+        ) -> ::std::sync::Arc<impl OneMethodOptOutExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+        {
+            let spawner = ::fbthrift::help::NoopSpawner;
+            Self::with_spawner(protocol, transport, spawner)
+        }
+
+        pub fn with_spawner<P, S>(
+            protocol: P,
+            transport: T,
+            spawner: S,
+        ) -> ::std::sync::Arc<impl OneMethodOptOutExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            let _ = protocol;
+            let _ = spawner;
+            ::std::sync::Arc::new(OneMethodOptOutImpl::<P, T, S>::new(transport))
+        }
+    }
+
+    pub type OneMethodOptOutDynClient = <make_OneMethodOptOut as ::fbthrift::ClientFactory>::Api;
+    pub type OneMethodOptOutClient = ::std::sync::Arc<OneMethodOptOutDynClient>;
+
+    /// The same thing, but to be called from generic contexts where we are
+    /// working with a type parameter `C: ClientFactory` to produce clients.
+    impl ::fbthrift::ClientFactory for make_OneMethodOptOut {
+        type Api = dyn OneMethodOptOut + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+        fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+        where
+            P: ::fbthrift::Protocol<Frame = T>,
+            T: ::fbthrift::Transport,
+            P::Deserializer: ::std::marker::Send,
+            S: ::fbthrift::help::Spawner,
+        {
+            <dyn OneMethodOptOut>::with_spawner(protocol, transport, spawner)
+        }
+    }
+
+}
+
+/// Server definitions for `module`.
+pub mod server {
+    #[::async_trait::async_trait]
+    pub trait AllMethods: ::std::marker::Send + ::std::marker::Sync + 'static {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::all_methods::FooExn> {
+            ::std::result::Result::Err(crate::services::all_methods::FooExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "AllMethods",
+                    "foo",
+                ),
+            ))
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::all_methods::BarExn> {
+            ::std::result::Result::Err(crate::services::all_methods::BarExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "AllMethods",
+                    "bar",
+                ),
+            ))
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<T> AllMethods for ::std::boxed::Box<T>
+    where
+        T: AllMethods + Send + Sync + ?Sized,
+    {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::all_methods::FooExn> {
+            (**self).foo(
+            ).await
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::all_methods::BarExn> {
+            (**self).bar(
+            ).await
+        }
+    }
+
+    /// Processor for AllMethods's methods.
+    #[derive(Clone, Debug)]
+    pub struct AllMethodsProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+
+    struct Args_AllMethods_foo {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AllMethods_foo {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AllMethods.foo"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+    struct Args_AllMethods_bar {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AllMethods_bar {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AllMethods.bar"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+
+    impl<P, H, R, RS> AllMethodsProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: AllMethods,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "AllMethods.foo"))]
+        async fn handle_foo<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "AllMethods";
+                METHOD_NAME = "foo";
+                SERVICE_METHOD_NAME = "AllMethods.foo";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_AllMethods_foo = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.foo(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "AllMethods.foo", "success");
+                    crate::services::all_methods::FooExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::all_methods::FooExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "foo",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "AllMethods.foo", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("AllMethods.foo", exn);
+                    ::tracing::error!(method = "AllMethods.foo", panic = ?aexn);
+                    crate::services::all_methods::FooExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "foo",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "AllMethods.bar"))]
+        async fn handle_bar<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "AllMethods";
+                METHOD_NAME = "bar";
+                SERVICE_METHOD_NAME = "AllMethods.bar";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_AllMethods_bar = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.bar(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "AllMethods.bar", "success");
+                    crate::services::all_methods::BarExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::all_methods::BarExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "bar",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "AllMethods.bar", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("AllMethods.bar", exn);
+                    ::tracing::error!(method = "AllMethods.bar", panic = ?aexn);
+                    crate::services::all_methods::BarExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "bar",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for AllMethodsProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: AllMethods,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"foo" => ::std::result::Result::Ok(0usize),
+                b"bar" => ::std::result::Result::Ok(1usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_foo(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_bar(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "AllMethodsProcessor",
+                    bad
+                ),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "AllMethodsProcessor",
+                    bad
+                ),
+            }
+        }
+
+        async fn handle_on_termination(&self) {
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for AllMethodsProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: AllMethods,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type Handler = H;
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[tracing::instrument(level="trace", skip_all, fields(service = "AllMethods"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+
+            Ok(())
+        }
+
+        fn create_interaction(
+            &self,
+            name: &str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from AllMethods
+                "foo",
+                "bar",
+            ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
+    }
+
+    /// Construct a new instance of a AllMethods service.
+    ///
+    /// This is called when a new instance of a Thrift service Processor
+    /// is needed for a particular Thrift protocol.
+    #[::tracing::instrument(level="debug", skip_all, fields(proto = ?proto))]
+    pub fn make_AllMethods_server<F, H, R, RS>(
+        proto: ::fbthrift::ProtocolID,
+        handler: H,
+    ) -> ::std::result::Result<::std::boxed::Box<dyn ::fbthrift::ThriftService<F, Handler = H, RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>, ::fbthrift::ApplicationException>
+    where
+        F: ::fbthrift::Framing + ::std::marker::Send + ::std::marker::Sync + 'static,
+        H: AllMethods,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::FramingDecoded<F>: ::std::clone::Clone,
+        ::fbthrift::FramingEncodedFinal<F>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        match proto {
+            ::fbthrift::ProtocolID::BinaryProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(AllMethodsProcessor::<::fbthrift::BinaryProtocol<F>, H, R, RS>::new(handler)))
+            }
+            ::fbthrift::ProtocolID::CompactProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(AllMethodsProcessor::<::fbthrift::CompactProtocol<F>, H, R, RS>::new(handler)))
+            }
+            bad => {
+                ::tracing::error!(method = "AllMethods.", invalid_protocol = ?bad);
+                ::std::result::Result::Err(::fbthrift::ApplicationException::invalid_protocol(bad))
+            }
+        }
+    }
+
+    #[::async_trait::async_trait]
+    pub trait OneMethod: ::std::marker::Send + ::std::marker::Sync + 'static {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::one_method::FooExn> {
+            ::std::result::Result::Err(crate::services::one_method::FooExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "OneMethod",
+                    "foo",
+                ),
+            ))
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::one_method::BarExn> {
+            ::std::result::Result::Err(crate::services::one_method::BarExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "OneMethod",
+                    "bar",
+                ),
+            ))
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<T> OneMethod for ::std::boxed::Box<T>
+    where
+        T: OneMethod + Send + Sync + ?Sized,
+    {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::one_method::FooExn> {
+            (**self).foo(
+            ).await
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::one_method::BarExn> {
+            (**self).bar(
+            ).await
+        }
+    }
+
+    /// Processor for OneMethod's methods.
+    #[derive(Clone, Debug)]
+    pub struct OneMethodProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+
+    struct Args_OneMethod_foo {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethod_foo {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethod.foo"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+    struct Args_OneMethod_bar {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethod_bar {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethod.bar"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+
+    impl<P, H, R, RS> OneMethodProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: OneMethod,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "OneMethod.foo"))]
+        async fn handle_foo<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethod";
+                METHOD_NAME = "foo";
+                SERVICE_METHOD_NAME = "OneMethod.foo";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_OneMethod_foo = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.foo(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "OneMethod.foo", "success");
+                    crate::services::one_method::FooExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::one_method::FooExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "foo",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "OneMethod.foo", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethod.foo", exn);
+                    ::tracing::error!(method = "OneMethod.foo", panic = ?aexn);
+                    crate::services::one_method::FooExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "foo",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "OneMethod.bar"))]
+        async fn handle_bar<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethod";
+                METHOD_NAME = "bar";
+                SERVICE_METHOD_NAME = "OneMethod.bar";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_OneMethod_bar = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.bar(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "OneMethod.bar", "success");
+                    crate::services::one_method::BarExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::one_method::BarExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "bar",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "OneMethod.bar", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethod.bar", exn);
+                    ::tracing::error!(method = "OneMethod.bar", panic = ?aexn);
+                    crate::services::one_method::BarExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "bar",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for OneMethodProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: OneMethod,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"foo" => ::std::result::Result::Ok(0usize),
+                b"bar" => ::std::result::Result::Ok(1usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_foo(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_bar(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "OneMethodProcessor",
+                    bad
+                ),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "OneMethodProcessor",
+                    bad
+                ),
+            }
+        }
+
+        async fn handle_on_termination(&self) {
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for OneMethodProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: OneMethod,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type Handler = H;
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[tracing::instrument(level="trace", skip_all, fields(service = "OneMethod"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+
+            Ok(())
+        }
+
+        fn create_interaction(
+            &self,
+            name: &str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from OneMethod
+                "foo",
+                "bar",
+            ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
+    }
+
+    /// Construct a new instance of a OneMethod service.
+    ///
+    /// This is called when a new instance of a Thrift service Processor
+    /// is needed for a particular Thrift protocol.
+    #[::tracing::instrument(level="debug", skip_all, fields(proto = ?proto))]
+    pub fn make_OneMethod_server<F, H, R, RS>(
+        proto: ::fbthrift::ProtocolID,
+        handler: H,
+    ) -> ::std::result::Result<::std::boxed::Box<dyn ::fbthrift::ThriftService<F, Handler = H, RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>, ::fbthrift::ApplicationException>
+    where
+        F: ::fbthrift::Framing + ::std::marker::Send + ::std::marker::Sync + 'static,
+        H: OneMethod,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::FramingDecoded<F>: ::std::clone::Clone,
+        ::fbthrift::FramingEncodedFinal<F>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        match proto {
+            ::fbthrift::ProtocolID::BinaryProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(OneMethodProcessor::<::fbthrift::BinaryProtocol<F>, H, R, RS>::new(handler)))
+            }
+            ::fbthrift::ProtocolID::CompactProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(OneMethodProcessor::<::fbthrift::CompactProtocol<F>, H, R, RS>::new(handler)))
+            }
+            bad => {
+                ::tracing::error!(method = "OneMethod.", invalid_protocol = ?bad);
+                ::std::result::Result::Err(::fbthrift::ApplicationException::invalid_protocol(bad))
+            }
+        }
+    }
+
+    #[::async_trait::async_trait]
+    pub trait OneMethodOptOut: ::std::marker::Send + ::std::marker::Sync + 'static {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::one_method_opt_out::FooExn> {
+            ::std::result::Result::Err(crate::services::one_method_opt_out::FooExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "OneMethodOptOut",
+                    "foo",
+                ),
+            ))
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::one_method_opt_out::BarExn> {
+            ::std::result::Result::Err(crate::services::one_method_opt_out::BarExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "OneMethodOptOut",
+                    "bar",
+                ),
+            ))
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<T> OneMethodOptOut for ::std::boxed::Box<T>
+    where
+        T: OneMethodOptOut + Send + Sync + ?Sized,
+    {
+        async fn foo(
+            &self,
+        ) -> ::std::result::Result<(), crate::services::one_method_opt_out::FooExn> {
+            (**self).foo(
+            ).await
+        }
+        async fn bar(
+            &self,
+        ) -> ::std::result::Result<::std::string::String, crate::services::one_method_opt_out::BarExn> {
+            (**self).bar(
+            ).await
+        }
+    }
+
+    /// Processor for OneMethodOptOut's methods.
+    #[derive(Clone, Debug)]
+    pub struct OneMethodOptOutProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+
+    struct Args_OneMethodOptOut_foo {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethodOptOut_foo {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethodOptOut.foo"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+    struct Args_OneMethodOptOut_bar {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethodOptOut_bar {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethodOptOut.bar"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
+
+    impl<P, H, R, RS> OneMethodOptOutProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: OneMethodOptOut,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "OneMethodOptOut.foo"))]
+        async fn handle_foo<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethodOptOut";
+                METHOD_NAME = "foo";
+                SERVICE_METHOD_NAME = "OneMethodOptOut.foo";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_OneMethodOptOut_foo = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.foo(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "OneMethodOptOut.foo", "success");
+                    crate::services::one_method_opt_out::FooExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::one_method_opt_out::FooExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "foo",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "OneMethodOptOut.foo", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethodOptOut.foo", exn);
+                    ::tracing::error!(method = "OneMethodOptOut.foo", panic = ?aexn);
+                    crate::services::one_method_opt_out::FooExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "foo",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "OneMethodOptOut.bar"))]
+        async fn handle_bar<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "OneMethodOptOut";
+                METHOD_NAME = "bar";
+                SERVICE_METHOD_NAME = "OneMethodOptOut.bar";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                SERVICE_METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_OneMethodOptOut_bar = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.bar(
+                )
+            )
+            .catch_unwind()
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "OneMethodOptOut.bar", "success");
+                    crate::services::one_method_opt_out::BarExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::one_method_opt_out::BarExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "bar",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::info!(method = "OneMethodOptOut.bar", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethodOptOut.bar", exn);
+                    ::tracing::error!(method = "OneMethodOptOut.bar", panic = ?aexn);
+                    crate::services::one_method_opt_out::BarExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "bar",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for OneMethodOptOutProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: OneMethodOptOut,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"foo" => ::std::result::Result::Ok(0usize),
+                b"bar" => ::std::result::Result::Ok(1usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_foo(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_bar(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "OneMethodOptOutProcessor",
+                    bad
+                ),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
+            }
+        }
+
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "OneMethodOptOutProcessor",
+                    bad
+                ),
+            }
+        }
+
+        async fn handle_on_termination(&self) {
+        }
+    }
+
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for OneMethodOptOutProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: OneMethodOptOut,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type Handler = H;
+        type RequestContext = R;
+        type ReplyState = RS;
+
+        #[tracing::instrument(level="trace", skip_all, fields(service = "OneMethodOptOut"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+
+            Ok(())
+        }
+
+        fn create_interaction(
+            &self,
+            name: &str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from OneMethodOptOut
+                "foo",
+                "bar",
+            ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
+    }
+
+    /// Construct a new instance of a OneMethodOptOut service.
+    ///
+    /// This is called when a new instance of a Thrift service Processor
+    /// is needed for a particular Thrift protocol.
+    #[::tracing::instrument(level="debug", skip_all, fields(proto = ?proto))]
+    pub fn make_OneMethodOptOut_server<F, H, R, RS>(
+        proto: ::fbthrift::ProtocolID,
+        handler: H,
+    ) -> ::std::result::Result<::std::boxed::Box<dyn ::fbthrift::ThriftService<F, Handler = H, RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>, ::fbthrift::ApplicationException>
+    where
+        F: ::fbthrift::Framing + ::std::marker::Send + ::std::marker::Sync + 'static,
+        H: OneMethodOptOut,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::FramingDecoded<F>: ::std::clone::Clone,
+        ::fbthrift::FramingEncodedFinal<F>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        match proto {
+            ::fbthrift::ProtocolID::BinaryProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(OneMethodOptOutProcessor::<::fbthrift::BinaryProtocol<F>, H, R, RS>::new(handler)))
+            }
+            ::fbthrift::ProtocolID::CompactProtocol => {
+                ::std::result::Result::Ok(::std::boxed::Box::new(OneMethodOptOutProcessor::<::fbthrift::CompactProtocol<F>, H, R, RS>::new(handler)))
+            }
+            bad => {
+                ::tracing::error!(method = "OneMethodOptOut.", invalid_protocol = ?bad);
+                ::std::result::Result::Err(::fbthrift::ApplicationException::invalid_protocol(bad))
+            }
+        }
+    }
+}
+
+/// Client mocks. For every service, a struct mock::TheService that implements
+/// client::TheService.
+///
+/// As an example of the generated API, for the following thrift service:
+///
+/// ```thrift
+/// service MyService {
+///     FunctionResponse myFunction(
+///         1: FunctionRequest request,
+///     ) throws {
+///         1: StorageException s,
+///         2: NotFoundException n,
+///     ),
+///
+///     // other functions
+/// }
+/// ```
+///
+/// we would end up with this mock object under crate::mock::MyService:
+///
+/// ```
+/// # const _: &str = stringify! {
+/// impl crate::client::MyService for MyService<'mock> {...}
+///
+/// pub struct MyService<'mock> {
+///     pub myFunction: myFunction<'mock>,
+///     // ...
+/// }
+///
+/// impl dyn crate::client::MyService {
+///     pub fn mock<'mock>() -> MyService<'mock>;
+/// }
+///
+/// impl myFunction<'mock> {
+///     // directly return the given success response
+///     pub fn ret(&self, value: FunctionResponse);
+///
+///     // invoke closure to compute success response
+///     pub fn mock(
+///         &self,
+///         mock: impl FnMut(FunctionRequest) -> FunctionResponse + Send + Sync + 'mock,
+///     );
+///
+///     // invoke closure to compute response
+///     pub fn mock_result(
+///         &self,
+///         mock: impl FnMut(FunctionRequest) -> Result<FunctionResponse, crate::services::MyService::MyFunctionExn> + Send + Sync + 'mock,
+///     );
+///
+///     // return one of the function's declared exceptions
+///     pub fn throw<E>(&self, exception: E)
+///     where
+///         E: Clone + Into<crate::services::MyService::MyFunctionExn> + Send + Sync + 'mock;
+/// }
+///
+/// impl From<StorageException> for MyFunctionExn {...}
+/// impl From<NotFoundException> for MyFunctionExn {...}
+/// # };
+/// ```
+///
+/// The intended usage from a test would be:
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use std::sync::Arc;
+/// use thrift_if::client::MyService;
+///
+/// #[test]
+/// fn test_my_client() {
+///     let mock = Arc::new(<dyn MyService>::mock());
+///
+///     // directly return a success response
+///     let resp = FunctionResponse {...};
+///     mock.myFunction.ret(resp);
+///
+///     // or give a closure to compute the success response
+///     mock.myFunction.mock(|request| FunctionResponse {...});
+///
+///     // or throw one of the function's exceptions
+///     mock.myFunction.throw(StorageException::ItFailed);
+///
+///     // or compute a Result (useful if your exceptions aren't Clone)
+///     mock.myFunction.mock_result(|request| Err(...));
+///
+///     let out = do_the_thing(mock).wait().unwrap();
+///     assert!(out.what_i_expected());
+/// }
+///
+/// fn do_the_thing(
+///     client: Arc<dyn MyService + Send + Sync + 'static>,
+/// ) -> impl Future<Item = Out> {...}
+/// # };
+/// ```
+pub mod mock {
+    pub struct AllMethods<'mock> {
+        pub foo: r#impl::all_methods::foo<'mock>,
+        pub bar: r#impl::all_methods::bar<'mock>,
+        _marker: ::std::marker::PhantomData<&'mock ()>,
+    }
+
+    impl dyn super::client::AllMethods {
+        pub fn mock<'mock>() -> AllMethods<'mock> {
+            AllMethods {
+                foo: r#impl::all_methods::foo::unimplemented(),
+                bar: r#impl::all_methods::bar::unimplemented(),
+                _marker: ::std::marker::PhantomData,
+            }
+        }
+    }
+
+    impl<'mock> super::client::AllMethods for AllMethods<'mock> {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+            let mut closure = self.foo.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+            let mut closure = self.bar.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+    }
+
+
+    pub struct OneMethod<'mock> {
+        pub foo: r#impl::one_method::foo<'mock>,
+        pub bar: r#impl::one_method::bar<'mock>,
+        _marker: ::std::marker::PhantomData<&'mock ()>,
+    }
+
+    impl dyn super::client::OneMethod {
+        pub fn mock<'mock>() -> OneMethod<'mock> {
+            OneMethod {
+                foo: r#impl::one_method::foo::unimplemented(),
+                bar: r#impl::one_method::bar::unimplemented(),
+                _marker: ::std::marker::PhantomData,
+            }
+        }
+    }
+
+    impl<'mock> super::client::OneMethod for OneMethod<'mock> {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+            let mut closure = self.foo.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+            let mut closure = self.bar.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+    }
+
+
+    pub struct OneMethodOptOut<'mock> {
+        pub foo: r#impl::one_method_opt_out::foo<'mock>,
+        pub bar: r#impl::one_method_opt_out::bar<'mock>,
+        _marker: ::std::marker::PhantomData<&'mock ()>,
+    }
+
+    impl dyn super::client::OneMethodOptOut {
+        pub fn mock<'mock>() -> OneMethodOptOut<'mock> {
+            OneMethodOptOut {
+                foo: r#impl::one_method_opt_out::foo::unimplemented(),
+                bar: r#impl::one_method_opt_out::bar::unimplemented(),
+                _marker: ::std::marker::PhantomData,
+            }
+        }
+    }
+
+    impl<'mock> super::client::OneMethodOptOut for OneMethodOptOut<'mock> {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+            let mut closure = self.foo.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+        fn bar(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+            let mut closure = self.bar.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure()))
+        }
+    }
+
+    pub mod r#impl {
+        pub mod all_methods {
+
+            pub struct foo<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        (),
+                        crate::errors::all_methods::FooError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> foo<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "AllMethods",
+                            "foo",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ()) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> () + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(), crate::errors::all_methods::FooError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::all_methods::FooError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+
+            pub struct bar<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        ::std::string::String,
+                        crate::errors::all_methods::BarError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> bar<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "AllMethods",
+                            "bar",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ::std::string::String) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::std::string::String + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::all_methods::BarError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+        }
+        pub mod one_method {
+
+            pub struct foo<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        (),
+                        crate::errors::one_method::FooError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> foo<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "OneMethod",
+                            "foo",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ()) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> () + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(), crate::errors::one_method::FooError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::one_method::FooError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+
+            pub struct bar<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        ::std::string::String,
+                        crate::errors::one_method::BarError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> bar<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "OneMethod",
+                            "bar",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ::std::string::String) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::std::string::String + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::std::string::String, crate::errors::one_method::BarError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::one_method::BarError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+        }
+        pub mod one_method_opt_out {
+
+            pub struct foo<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        (),
+                        crate::errors::one_method_opt_out::FooError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> foo<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "OneMethodOptOut",
+                            "foo",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ()) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> () + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(), crate::errors::one_method_opt_out::FooError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::one_method_opt_out::FooError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+
+            pub struct bar<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        ::std::string::String,
+                        crate::errors::one_method_opt_out::BarError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> bar<'mock> {
+                pub(crate) fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "OneMethodOptOut",
+                            "bar",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ::std::string::String) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::std::string::String + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::one_method_opt_out::BarError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+        }
+    }
+}
+
 /// Error return types.
 pub mod errors {
+    /// Errors for AllMethods functions.
+    pub mod all_methods {
+
+        pub trait AsSomeError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        }
+
+        impl AsSomeError for ::anyhow::Error {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                for cause in self.chain() {
+                    if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                        return Some(e);
+                    }
+                }
+                None
+            }
+        }
+
+        pub type FooError = ::fbthrift::NonthrowingFunctionError;
+
+        impl ::std::convert::From<crate::services::all_methods::FooExn> for
+            ::std::result::Result<(), FooError>
+        {
+            fn from(e: crate::services::all_methods::FooExn) -> Self {
+                match e {
+                    crate::services::all_methods::FooExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::all_methods::FooExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                }
+            }
+        }
+
+        /// Errors for bar (client side).
+        #[derive(Debug)]
+        pub enum BarError {
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::types::ApplicationException),
+            ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for BarError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::se(inner) => {
+                        if f.alternate() {
+                            write!(f, "AllMethods::bar failed with variant `se`: {:#}", inner)?;
+                        } else {
+                            write!(f, "AllMethods::bar failed with se(SomeError)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "AllMethods::bar failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "AllMethods::bar failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for BarError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::se(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarError {
+            fn from(e: crate::types::SomeError) -> Self {
+                Self::se(e)
+            }
+        }
+
+        impl AsSomeError for BarError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                match self {
+                    Self::se(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for BarError {
+            fn from(err: ::anyhow::Error) -> Self {
+                Self::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarError {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(ae)
+            }
+        }
+        impl ::std::convert::From<crate::services::all_methods::BarExn> for
+            ::std::result::Result<::std::string::String, BarError>
+        {
+            fn from(e: crate::services::all_methods::BarExn) -> Self {
+                match e {
+                    crate::services::all_methods::BarExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::all_methods::BarExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    crate::services::all_methods::BarExn::se(exn) =>
+                        ::std::result::Result::Err(BarError::se(exn)),
+                }
+            }
+        }
+
+    }
+
+    /// Errors for OneMethod functions.
+    pub mod one_method {
+
+        pub trait AsSomeError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        }
+
+        impl AsSomeError for ::anyhow::Error {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                for cause in self.chain() {
+                    if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                        return Some(e);
+                    }
+                }
+                None
+            }
+        }
+
+        pub type FooError = ::fbthrift::NonthrowingFunctionError;
+
+        impl ::std::convert::From<crate::services::one_method::FooExn> for
+            ::std::result::Result<(), FooError>
+        {
+            fn from(e: crate::services::one_method::FooExn) -> Self {
+                match e {
+                    crate::services::one_method::FooExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::one_method::FooExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                }
+            }
+        }
+
+        /// Errors for bar (client side).
+        #[derive(Debug)]
+        pub enum BarError {
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::types::ApplicationException),
+            ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for BarError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::se(inner) => {
+                        if f.alternate() {
+                            write!(f, "OneMethod::bar failed with variant `se`: {:#}", inner)?;
+                        } else {
+                            write!(f, "OneMethod::bar failed with se(SomeError)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "OneMethod::bar failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "OneMethod::bar failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for BarError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::se(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarError {
+            fn from(e: crate::types::SomeError) -> Self {
+                Self::se(e)
+            }
+        }
+
+        impl AsSomeError for BarError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                match self {
+                    Self::se(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for BarError {
+            fn from(err: ::anyhow::Error) -> Self {
+                Self::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarError {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(ae)
+            }
+        }
+        impl ::std::convert::From<crate::services::one_method::BarExn> for
+            ::std::result::Result<::std::string::String, BarError>
+        {
+            fn from(e: crate::services::one_method::BarExn) -> Self {
+                match e {
+                    crate::services::one_method::BarExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::one_method::BarExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    crate::services::one_method::BarExn::se(exn) =>
+                        ::std::result::Result::Err(BarError::se(exn)),
+                }
+            }
+        }
+
+    }
+
+    /// Errors for OneMethodOptOut functions.
+    pub mod one_method_opt_out {
+
+        pub trait AsSomeError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        }
+
+        impl AsSomeError for ::anyhow::Error {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                for cause in self.chain() {
+                    if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                        return Some(e);
+                    }
+                }
+                None
+            }
+        }
+
+        pub type FooError = ::fbthrift::NonthrowingFunctionError;
+
+        impl ::std::convert::From<crate::services::one_method_opt_out::FooExn> for
+            ::std::result::Result<(), FooError>
+        {
+            fn from(e: crate::services::one_method_opt_out::FooExn) -> Self {
+                match e {
+                    crate::services::one_method_opt_out::FooExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::one_method_opt_out::FooExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                }
+            }
+        }
+
+        /// Errors for bar (client side).
+        #[derive(Debug)]
+        pub enum BarError {
+            se(crate::types::SomeError),
+            ApplicationException(::fbthrift::types::ApplicationException),
+            ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for BarError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::se(inner) => {
+                        if f.alternate() {
+                            write!(f, "OneMethodOptOut::bar failed with variant `se`: {:#}", inner)?;
+                        } else {
+                            write!(f, "OneMethodOptOut::bar failed with se(SomeError)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "OneMethodOptOut::bar failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "OneMethodOptOut::bar failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for BarError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::se(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::types::SomeError> for BarError {
+            fn from(e: crate::types::SomeError) -> Self {
+                Self::se(e)
+            }
+        }
+
+        impl AsSomeError for BarError {
+            fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+                match self {
+                    Self::se(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for BarError {
+            fn from(err: ::anyhow::Error) -> Self {
+                Self::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for BarError {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(ae)
+            }
+        }
+        impl ::std::convert::From<crate::services::one_method_opt_out::BarExn> for
+            ::std::result::Result<::std::string::String, BarError>
+        {
+            fn from(e: crate::services::one_method_opt_out::BarExn) -> Self {
+                match e {
+                    crate::services::one_method_opt_out::BarExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::one_method_opt_out::BarExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    crate::services::one_method_opt_out::BarExn::se(exn) =>
+                        ::std::result::Result::Err(BarError::se(exn)),
+                }
+            }
+        }
+
+    }
+
 }

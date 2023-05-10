@@ -23,3 +23,24 @@ struct TransitiveDerives {}
 
 @TransitiveDerives
 struct StructWithTransitiveDerives {}
+
+safe transient server exception SomeError {}
+
+@rust.ServiceExn{anyhow_to_application_exn = true}
+service AllMethods {
+  void foo();
+  string bar() throws (1: SomeError se);
+}
+
+service OneMethod {
+  @rust.ServiceExn{anyhow_to_application_exn = true}
+  void foo();
+  string bar() throws (1: SomeError se);
+}
+
+@rust.ServiceExn{anyhow_to_application_exn = true}
+service OneMethodOptOut {
+  void foo();
+  @rust.ServiceExn{anyhow_to_application_exn = false}
+  string bar() throws (1: SomeError se);
+}

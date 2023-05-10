@@ -325,3 +325,137 @@ func (x *Derive) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+type ServiceExn struct {
+    AnyhowToApplicationExn bool `thrift:"anyhow_to_application_exn,1" json:"anyhow_to_application_exn" db:"anyhow_to_application_exn"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &ServiceExn{}
+
+func NewServiceExn() *ServiceExn {
+    return (&ServiceExn{}).
+        SetAnyhowToApplicationExn(false)
+}
+
+func (x *ServiceExn) GetAnyhowToApplicationExnNonCompat() bool {
+    return x.AnyhowToApplicationExn
+}
+
+func (x *ServiceExn) GetAnyhowToApplicationExn() bool {
+    return x.AnyhowToApplicationExn
+}
+
+func (x *ServiceExn) SetAnyhowToApplicationExn(value bool) *ServiceExn {
+    x.AnyhowToApplicationExn = value
+    return x
+}
+
+func (x *ServiceExn) writeField1(p thrift.Protocol) error {  // AnyhowToApplicationExn
+    if err := p.WriteFieldBegin("anyhow_to_application_exn", thrift.BOOL, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetAnyhowToApplicationExnNonCompat()
+    if err := p.WriteBool(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ServiceExn) readField1(p thrift.Protocol) error {  // AnyhowToApplicationExn
+    result, err := p.ReadBool()
+if err != nil {
+    return err
+}
+
+    x.SetAnyhowToApplicationExn(result)
+    return nil
+}
+
+func (x *ServiceExn) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use ServiceExn.Set* methods instead or set the fields directly.
+type ServiceExnBuilder struct {
+    obj *ServiceExn
+}
+
+func NewServiceExnBuilder() *ServiceExnBuilder {
+    return &ServiceExnBuilder{
+        obj: NewServiceExn(),
+    }
+}
+
+func (x *ServiceExnBuilder) AnyhowToApplicationExn(value bool) *ServiceExnBuilder {
+    x.obj.AnyhowToApplicationExn = value
+    return x
+}
+
+func (x *ServiceExnBuilder) Emit() *ServiceExn {
+    var objCopy ServiceExn = *x.obj
+    return &objCopy
+}
+
+func (x *ServiceExn) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("ServiceExn"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ServiceExn) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // anyhow_to_application_exn
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+

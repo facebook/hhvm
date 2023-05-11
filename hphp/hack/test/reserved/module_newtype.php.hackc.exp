@@ -14,7 +14,7 @@
 
 .module_use "mm";
 
-.alias Foo = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias Foo = <"HH\\int"> (3,3) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:3:\"Foo\";}""";
 # module_newtype.php--Foo.php ends here
 # module_newtype.php--Arraykey.php starts here
 
@@ -44,7 +44,7 @@
 
 .module_use "mm";
 
-.alias Classname = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias Classname = <"HH\\int"> (3,3) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:9:\"Classname\";}""";
 # module_newtype.php--Classname.php ends here
 # module_newtype.php--Darray.php starts here
 
@@ -200,7 +200,7 @@
 
 .module_use "mm";
 
-.alias N\Foo = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias N\Foo = <"HH\\int"> (4,4) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:5:\"N\\Foo\";}""";
 # module_newtype.php--NFoo.php ends here
 # module_newtype.php--NArraykey.php starts here
 
@@ -230,7 +230,7 @@
 
 .module_use "mm";
 
-.alias N\Classname = <"HH\\int"> (4,4) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias N\Classname = <"HH\\int"> (4,4) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:11:\"N\\Classname\";}""";
 # module_newtype.php--NClassname.php ends here
 # module_newtype.php--NDarray.php starts here
 

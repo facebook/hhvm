@@ -3,7 +3,7 @@
 .filepath "newtype.php--Foo.php";
 
 
-.alias Foo = <"HH\\int"> (2,2) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias Foo = <"HH\\int"> (2,2) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:3:\"Foo\";}""";
 # newtype.php--Foo.php ends here
 # newtype.php--Arraykey.php starts here
 
@@ -31,7 +31,7 @@
 .filepath "newtype.php--Classname.php";
 
 
-.alias Classname = <"HH\\int"> (2,2) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias Classname = <"HH\\int"> (2,2) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:9:\"Classname\";}""";
 # newtype.php--Classname.php ends here
 # newtype.php--Darray.php starts here
 
@@ -185,7 +185,7 @@
 .filepath "newtype.php--NFoo.php";
 
 
-.alias N\Foo = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias N\Foo = <"HH\\int"> (3,3) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:5:\"N\\Foo\";}""";
 # newtype.php--NFoo.php ends here
 # newtype.php--NArraykey.php starts here
 
@@ -213,7 +213,7 @@
 .filepath "newtype.php--NClassname.php";
 
 
-.alias N\Classname = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;}""";
+.alias N\Classname = <"HH\\int"> (3,3) """D:3:{s:4:\"kind\";i:1;s:6:\"opaque\";b:1;s:5:\"alias\";s:11:\"N\\Classname\";}""";
 # newtype.php--NClassname.php ends here
 # newtype.php--NDarray.php starts here
 

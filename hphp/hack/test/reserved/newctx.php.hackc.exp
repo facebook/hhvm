@@ -6,7 +6,7 @@
 .class {} [interface] HH\Contexts\I (4,4) {
 }
 
-.alias HH\Contexts\defaults = <"HH\\varray"> (3,3) """D:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";v:1:{D:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:13:\"HH\\Contexts\\I\";}}}""";
+.alias HH\Contexts\defaults = <"HH\\varray"> (3,3) """D:3:{s:4:\"kind\";i:10;s:10:\"elem_types\";v:1:{D:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:13:\"HH\\Contexts\\I\";}}s:5:\"alias\";s:20:\"HH\\Contexts\\defaults\";}""";
 # newctx.php--defaults.php ends here
 # newctx.php--Foo.php starts here
 

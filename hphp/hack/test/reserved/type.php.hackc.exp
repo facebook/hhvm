@@ -3,7 +3,7 @@
 .filepath "type.php--Foo.php";
 
 
-.alias Foo = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+.alias Foo = <"HH\\int"> (2,2) """D:2:{s:4:\"kind\";i:1;s:5:\"alias\";s:3:\"Foo\";}""";
 # type.php--Foo.php ends here
 # type.php--Arraykey.php starts here
 
@@ -31,7 +31,7 @@
 .filepath "type.php--Classname.php";
 
 
-.alias Classname = <"HH\\int"> (2,2) """D:1:{s:4:\"kind\";i:1;}""";
+.alias Classname = <"HH\\int"> (2,2) """D:2:{s:4:\"kind\";i:1;s:5:\"alias\";s:9:\"Classname\";}""";
 # type.php--Classname.php ends here
 # type.php--Darray.php starts here
 
@@ -185,7 +185,7 @@
 .filepath "type.php--NFoo.php";
 
 
-.alias N\Foo = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+.alias N\Foo = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:5:\"alias\";s:5:\"N\\Foo\";}""";
 # type.php--NFoo.php ends here
 # type.php--NArraykey.php starts here
 
@@ -213,7 +213,7 @@
 .filepath "type.php--NClassname.php";
 
 
-.alias N\Classname = <"HH\\int"> (3,3) """D:1:{s:4:\"kind\";i:1;}""";
+.alias N\Classname = <"HH\\int"> (3,3) """D:2:{s:4:\"kind\";i:1;s:5:\"alias\";s:11:\"N\\Classname\";}""";
 # type.php--NClassname.php ends here
 # type.php--NDarray.php starts here
 

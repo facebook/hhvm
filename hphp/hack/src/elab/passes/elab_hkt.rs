@@ -3,10 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use nast::Class_;
+use nast::FunDef;
 use nast::Hint;
 use nast::Hint_;
 use nast::Id;
+use nast::Method_;
 use nast::Tparam;
+use nast::Typedef;
 
 use crate::prelude::*;
 
@@ -30,18 +34,58 @@ impl Pass for ElabHktPass {
         Continue(())
     }
 
-    fn on_ty_tparam_top_down(&mut self, env: &Env, elem: &mut Tparam) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         if !env.hkt_enabled() {
-            if !elem.parameters.is_empty() {
-                let Id(pos, tp_name) = &elem.name;
-                env.emit_error(NamingError::TparamWithTparam {
-                    pos: pos.clone(),
-                    tparam_name: tp_name.clone(),
-                });
-                elem.parameters.clear()
-            }
+            elem.tparams
+                .iter_mut()
+                .for_each(|tparam| elab_tparam(env, tparam));
         }
         Continue(())
+    }
+
+    fn on_ty_typedef_top_down(&mut self, env: &Env, elem: &mut Typedef) -> ControlFlow<()> {
+        if !env.hkt_enabled() {
+            elem.tparams
+                .iter_mut()
+                .for_each(|tparam| elab_tparam(env, tparam));
+        }
+        Continue(())
+    }
+
+    fn on_ty_fun_def_top_down(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
+        if !env.hkt_enabled() {
+            elem.tparams
+                .iter_mut()
+                .for_each(|tparam| elab_tparam(env, tparam));
+        }
+        Continue(())
+    }
+
+    fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
+        if !env.hkt_enabled() {
+            elem.tparams
+                .iter_mut()
+                .for_each(|tparam| elab_tparam(env, tparam));
+        }
+        Continue(())
+    }
+
+    fn on_ty_tparam_top_down(&mut self, env: &Env, elem: &mut Tparam) -> ControlFlow<()> {
+        if !env.hkt_enabled() {
+            elab_tparam(env, elem);
+        }
+        Continue(())
+    }
+}
+
+fn elab_tparam(env: &Env, tparam: &mut Tparam) {
+    if !tparam.parameters.is_empty() {
+        let Id(pos, tp_name) = &tparam.name;
+        env.emit_error(NamingError::TparamWithTparam {
+            pos: pos.clone(),
+            tparam_name: tp_name.clone(),
+        });
+        tparam.parameters.clear()
     }
 }
 

@@ -105,7 +105,8 @@ impl ValidateHintHabstrPass {
                 .for_each(|tp| {
                     tparam_info
                         .entry(tp.name.name().to_string())
-                        .and_modify(|e| e.1 = false);
+                        .and_modify(|e| e.1 = false)
+                        .or_insert((tp.name.pos().clone(), false, TparamKind::Concrete));
                 });
         }
     }

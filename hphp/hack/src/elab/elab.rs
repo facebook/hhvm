@@ -375,9 +375,7 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         passes::validate_user_attribute_dynamically_callable::ValidateUserAttributeDynamicallyCallable::default(),
 
-        // This pass (`nast_generic_check.ml`) is not in the passes run from
-        // `naming.ml`!
-        //passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
+        passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
 
         passes::validate_class_methods::ValidateClassMethodsPass::default(),
 

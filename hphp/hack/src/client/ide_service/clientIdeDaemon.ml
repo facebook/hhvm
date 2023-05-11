@@ -242,6 +242,7 @@ let load_naming_table
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
+      let start_time = Unix.gettimeofday () in
       let%lwt result =
         match naming_table_load_info with
         | Some naming_table_load_info ->
@@ -349,6 +350,7 @@ let load_naming_table
         (* Track how many files we have to change locally *)
         HackEventLogger.serverless_ide_local_files
           ~local_file_count:(List.length changed_files);
+        HackEventLogger.serverless_ide_load_naming_table ~start_time;
 
         Lwt.return_ok (naming_table, changed_files)
       | Error load_error ->

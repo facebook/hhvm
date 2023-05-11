@@ -49,6 +49,7 @@ pub struct HhConfig {
     pub sharedmem_hash_table_pow: usize,
     pub sharedmem_heap_size: usize,
     pub ide_fall_back_to_full_index: bool,
+    pub hh_distc_should_disable_trace_store: bool,
 }
 
 impl HhConfig {
@@ -93,6 +94,16 @@ impl HhConfig {
             hash,
             ..Self::from_configs(hhconfig, hh_conf)?
         })
+    }
+
+    pub fn into_config_files(root: impl AsRef<Path>) -> Result<(ConfigFile, ConfigFile)> {
+        let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
+        let hh_conf_path = system_config_path();
+        let hh_config_file = ConfigFile::from_file(&hhconfig_path)
+            .with_context(|| hhconfig_path.display().to_string())?;
+        let hh_conf_file = ConfigFile::from_file(&hh_conf_path)
+            .with_context(|| hh_conf_path.display().to_string())?;
+        Ok((hh_conf_file, hh_config_file))
     }
 
     pub fn from_slice(bytes: &[u8]) -> Result<Self> {
@@ -294,6 +305,9 @@ impl HhConfig {
                 }
                 "ide_fall_back_to_full_index" => {
                     c.ide_fall_back_to_full_index = parse_json(&value)?;
+                }
+                "hh_distc_should_disable_trace_store" => {
+                    c.hh_distc_should_disable_trace_store = parse_json(&value)?;
                 }
                 _ => c.unknown.push((key, value)),
             }

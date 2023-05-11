@@ -19,6 +19,9 @@ pub struct LocalConfig {
     /// Use the Rust implementation of naming elaboration and NAST checks.
     pub rust_elab: bool,
 
+    /// Used when fetching JustKnobs, but not in GlobalOptions
+    pub rollout_group: Option<String>,
+
     pub saved_state: SavedState,
 }
 
@@ -45,6 +48,9 @@ impl LocalConfig {
         }
         if let Some(b) = config.bool_if_min_version("rust_elab", current_version) {
             lc.rust_elab = b?;
+        }
+        if let Some(rollout_group) = config.get_str("rollout_group") {
+            lc.rollout_group = Some(rollout_group.into());
         }
         Ok(lc)
     }

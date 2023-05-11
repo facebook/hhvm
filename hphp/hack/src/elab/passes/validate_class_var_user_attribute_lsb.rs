@@ -14,7 +14,7 @@ pub struct ValidateClassVarUserAttributeLsbPass {
 }
 
 impl Pass for ValidateClassVarUserAttributeLsbPass {
-    fn on_ty_class__bottom_up(&mut self, _: &Env, elem: &mut nast::Class_) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut nast::Class_) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
             Some(Rc::new(elem.name.clone()))
         } else {

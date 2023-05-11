@@ -160,7 +160,7 @@ impl ClassState<'_, '_, '_> {
         let cname = TypeName::class(self.class.name, is_static);
         self.txf.define_type(
             &cname,
-            &self.class.src_loc,
+            Some(&self.class.src_loc),
             extends.iter(),
             fields.into_iter(),
             metadata.iter().map(|(k, v)| (*k, v)),
@@ -255,7 +255,7 @@ impl ClassState<'_, '_, '_> {
         let params = vec![(special_idents::THIS, &static_ty)];
 
         self.txf
-            .define_function(&name, &self.class.src_loc, &params, &ty, &[], |fb| {
+            .define_function(&name, Some(&self.class.src_loc), &params, &ty, &[], |fb| {
                 let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.deref()))?;
                 fb.ret(obj)?;
                 Ok(())

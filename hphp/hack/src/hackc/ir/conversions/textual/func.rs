@@ -263,7 +263,7 @@ fn write_func(
     };
 
     let span = func.loc(func.loc_id).clone();
-    txf.define_function(&name, &span, &tx_params, &ret_ty, &locals, {
+    txf.define_function(&name, Some(&span), &tx_params, &ret_ty, &locals, {
         let func_info = Arc::clone(&func_info);
         |fb| {
             let mut func = rewrite_jmp_ops(func);
@@ -323,7 +323,7 @@ fn write_instance_stub(
     tx_params[0].1 = &inst_ty;
 
     let locals = Vec::default();
-    txf.define_function(&name_str, span, &tx_params, ret_ty, &locals, |fb| {
+    txf.define_function(&name_str, Some(span), &tx_params, ret_ty, &locals, |fb| {
         fb.comment("forward to the static method")?;
         let this_str = strings.intern_str(special_idents::THIS);
         let this_lid = LocalId::Named(this_str);

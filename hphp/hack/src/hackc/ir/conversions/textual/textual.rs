@@ -112,7 +112,7 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn define_function<R>(
         &mut self,
         name: &FunctionName,
-        loc: &SrcLoc,
+        loc: Option<&SrcLoc>,
         params: &[(&str, &Ty)],
         ret_ty: &Ty,
         locals: &[(LocalId, &Ty)],
@@ -122,7 +122,9 @@ impl<'a> TextualFile<'a> {
             self.internal_functions.insert(name.clone());
         }
 
-        self.write_full_loc(loc)?;
+        if let Some(loc) = loc {
+            self.write_full_loc(loc)?;
+        }
 
         write!(self.w, "define {}(", name.display(&self.strings))?;
         let mut sep = "";
@@ -148,7 +150,7 @@ impl<'a> TextualFile<'a> {
         }
 
         let mut writer = FuncBuilder {
-            cur_loc: loc.clone(),
+            cur_loc: loc.cloned(),
             next_id: Sid::from_usize(0),
             txf: self,
         };
@@ -186,12 +188,14 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn define_type<'s>(
         &mut self,
         name: &TypeName,
-        src_loc: &SrcLoc,
+        src_loc: Option<&SrcLoc>,
         extends: impl Iterator<Item = &'s TypeName>,
         fields: impl Iterator<Item = Field<'s>>,
         metadata: impl Iterator<Item = (&'s str, &'s Expr)>,
     ) -> Result {
-        self.write_full_loc(src_loc)?;
+        if let Some(src_loc) = src_loc {
+            self.write_full_loc(src_loc)?;
+        }
 
         write!(self.w, "type {}", name.display(&self.strings))?;
 
@@ -266,19 +270,21 @@ impl<'a> TextualFile<'a> {
         &mut self,
         builtins: &HashMap<FunctionName, T>,
     ) -> Result<HashSet<T>> {
+        let strings = &Arc::clone(&self.strings);
+
         if !self.internal_globals.is_empty() {
             self.write_comment("----- GLOBALS -----")?;
 
             for (name, ty) in self
                 .internal_globals
                 .iter()
-                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, &self.strings))
+                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, strings))
             {
                 writeln!(
                     self.w,
                     "global {name} : {ty}",
-                    name = name.display(&self.strings),
-                    ty = ty.display(&self.strings)
+                    name = name.display(strings),
+                    ty = ty.display(strings)
                 )?;
             }
             self.debug_separator()?;
@@ -291,7 +297,7 @@ impl<'a> TextualFile<'a> {
                     Some(b) => itertools::Either::Left(b),
                     None => itertools::Either::Right(f),
                 });
-        non_builtin_fns.sort_by(|a, b| a.cmp(b, &self.strings));
+        non_builtin_fns.sort_by(|a, b| a.cmp(b, strings));
 
         let referenced_globals =
             &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
@@ -861,7 +867,7 @@ pub(crate) enum FileAttribute {
 }
 
 pub(crate) struct FuncBuilder<'a, 'b> {
-    cur_loc: SrcLoc,
+    cur_loc: Option<SrcLoc>,
     next_id: Sid,
     pub(crate) txf: &'a mut TextualFile<'b>,
 }
@@ -1094,12 +1100,17 @@ impl FuncBuilder<'_, '_> {
     }
 
     pub(crate) fn write_loc(&mut self, src_loc: &SrcLoc) -> Result {
-        if src_loc.filename != self.cur_loc.filename {
+        if let Some(cur_loc) = self.cur_loc.as_ref() {
+            if src_loc.filename != cur_loc.filename {
+                self.txf.write_full_loc(src_loc)?;
+                self.cur_loc = Some(src_loc.clone());
+            } else if src_loc.line_begin != cur_loc.line_begin {
+                self.txf.write_line_loc(src_loc)?;
+                self.cur_loc = Some(src_loc.clone());
+            }
+        } else {
             self.txf.write_full_loc(src_loc)?;
-            self.cur_loc = src_loc.clone();
-        } else if src_loc.line_begin != self.cur_loc.line_begin {
-            self.txf.write_line_loc(src_loc)?;
-            self.cur_loc = src_loc.clone();
+            self.cur_loc = Some(src_loc.clone());
         }
         Ok(())
     }

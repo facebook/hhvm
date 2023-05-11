@@ -11,7 +11,7 @@
 
 namespace proxygen {
 
-void TraceEventContext::traceEventAvailable(TraceEvent event) {
+void TraceEventContext::traceEventAvailable(const TraceEvent& event) {
   for (const auto observer : observers_) {
     observer->traceEventAvailable(event);
   }

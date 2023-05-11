@@ -1020,15 +1020,6 @@ impl FuncBuilder<'_, '_> {
         Ok(())
     }
 
-    pub(crate) fn copy(&mut self, src: impl Into<Expr>) -> Result<Sid> {
-        let src = src.into();
-        let dst = self.alloc_sid();
-        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
-        self.txf.write_expr(&src)?;
-        writeln!(self.txf.w)?;
-        Ok(dst)
-    }
-
     pub(crate) fn lazy_class_initialize(&mut self, ty: &Ty) -> Result<Sid> {
         let dst = self.alloc_sid();
         let strings = &self.txf.strings;

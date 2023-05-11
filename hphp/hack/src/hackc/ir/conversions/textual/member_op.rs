@@ -76,7 +76,7 @@ fn write_base(
         BaseOp::BaseC { .. } => {
             // Get base from value.
             let base = base_from_vid(state, operands.next().unwrap())?;
-            state.fb.copy(base)
+            state.fb.write_expr_stmt(base)
         }
         BaseOp::BaseGC { .. } => {
             // Get base from global name.
@@ -88,7 +88,7 @@ fn write_base(
             // Just pretend to be a BaseL w/ $this.
             let lid = LocalId::Named(state.strings.intern_str(special_idents::THIS));
             let base = base_from_lid(lid);
-            state.fb.copy(base)
+            state.fb.write_expr_stmt(base)
         }
         BaseOp::BaseL {
             mode: _,
@@ -97,7 +97,7 @@ fn write_base(
         } => {
             // Get base from local.
             let base = base_from_lid(locals.next().unwrap());
-            state.fb.copy(base)
+            state.fb.write_expr_stmt(base)
         }
         BaseOp::BaseSC {
             mode: _,

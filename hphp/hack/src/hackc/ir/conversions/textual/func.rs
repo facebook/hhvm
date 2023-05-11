@@ -490,7 +490,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let name = FunctionName::Function(func_id);
             let that = textual::Expr::null();
             let curry = textual::Expr::alloc_curry(name, that, ());
-            let expr = state.fb.copy(curry)?;
+            let expr = state.fb.write_expr_stmt(curry)?;
             state.set_iid(iid, expr);
         }
         Instr::Hhbc(Hhbc::SelfCls(_)) => {
@@ -547,7 +547,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                 let s = state.strings.lookup_bstr(s);
                 let s = util::escaped_string(&s);
                 let s = hack::expr_builtin(hack::Builtin::String, [s]);
-                state.fb.copy(s)?
+                state.fb.write_expr_stmt(s)?
             };
             state.set_iid(iid, expr);
         }
@@ -560,7 +560,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Instr::Special(Special::Select(vid, _idx)) => {
             textual_todo! {
                 let vid = state.lookup_vid(vid);
-                let expr = state.fb.copy(vid)?;
+                let expr = state.fb.write_expr_stmt(vid)?;
                 state.set_iid(iid, expr);
             }
         }

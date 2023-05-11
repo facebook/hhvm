@@ -107,13 +107,15 @@ add_library(
   type/TypeRegistry.cpp
   type/UniversalName.cpp
 )
-add_dependencies(thrifttype type-cpp2-target thriftannotation thrifttyperep)
+add_dependencies(thrifttype type-cpp2-target thriftannotation thrifttyperep
+  thriftprotocol)
 target_link_libraries(
   thrifttype
   PUBLIC
     Folly::folly
     thriftannotation
     thrifttyperep
+    thriftprotocol
 )
 
 bypass_source_check("${any_rep-cpp2-SOURCES}")

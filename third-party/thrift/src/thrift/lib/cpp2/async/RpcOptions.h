@@ -164,6 +164,9 @@ class RpcOptions {
   RpcOptions& setDefconPriority(DefconPriority defconPriority);
   const std::optional<DefconPriority>& getDefconPriority() const;
 
+  RpcOptions& setRequestDeadlineMs(uint32_t deadlineMs);
+  const std::optional<uint32_t>& getRequestDeadlineMs() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -200,6 +203,9 @@ class RpcOptions {
 
   // Classifies the current request based on its impact on the end user
   std::optional<DefconPriority> defconPriority_;
+
+  // Pre request deadline.
+  std::optional<uint32_t> requestDeadlineMs_;
 };
 
 } // namespace thrift

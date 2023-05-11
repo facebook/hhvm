@@ -270,5 +270,14 @@ const std::optional<RpcOptions::DefconPriority>& RpcOptions::getDefconPriority()
   return defconPriority_;
 }
 
+RpcOptions& RpcOptions::setRequestDeadlineMs(uint32_t requestDeadlineMs) {
+  requestDeadlineMs_ = requestDeadlineMs;
+  return *this;
+}
+
+const std::optional<uint32_t>& RpcOptions::getRequestDeadlineMs() const {
+  return requestDeadlineMs_;
+}
+
 } // namespace thrift
 } // namespace apache

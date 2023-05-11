@@ -5,6 +5,7 @@
 
 use std::ops::ControlFlow;
 
+use nast::Class_;
 use nast::Fun_;
 use nast::Method_;
 use nast::UserAttribute;
@@ -15,18 +16,25 @@ use crate::prelude::*;
 pub struct ValidateUserAttributeNoAutoDynamic;
 
 impl Pass for ValidateUserAttributeNoAutoDynamic {
-    fn on_ty_fun__bottom_up(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<(), ()> {
+    fn on_ty_fun__bottom_up(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         if !env.is_hhi() && !env.no_auto_dynamic_enabled() {
             check_no_auto_dynamic(&elem.user_attributes, env);
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
-    fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<(), ()> {
+    fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         if !env.is_hhi() && !env.no_auto_dynamic_enabled() {
             check_no_auto_dynamic(&elem.user_attributes, env);
         }
-        ControlFlow::Continue(())
+        Continue(())
+    }
+
+    fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
+        if !env.is_hhi() && !env.no_auto_dynamic_enabled() {
+            check_no_auto_dynamic(&elem.user_attributes, env);
+        }
+        Continue(())
     }
 }
 

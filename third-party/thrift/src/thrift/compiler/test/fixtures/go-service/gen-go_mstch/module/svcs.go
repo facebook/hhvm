@@ -23,7 +23,7 @@ var _ = thrift.ZERO
 type GetEntity interface {
     GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
     GetBool(ctx context.Context) (bool, error)
-    GetByte(ctx context.Context) (byte, error)
+    GetByte(ctx context.Context) (int8, error)
     GetI16(ctx context.Context) (int16, error)
     GetI32(ctx context.Context) (int32, error)
     GetI64(ctx context.Context) (int64, error)
@@ -41,7 +41,7 @@ type GetEntityClientInterface interface {
     thrift.ClientInterface
     GetEntity(r *GetEntityRequest) (*GetEntityResponse, error)
     GetBool() (bool, error)
-    GetByte() (byte, error)
+    GetByte() (int8, error)
     GetI16() (int16, error)
     GetI32() (int32, error)
     GetI64() (int64, error)
@@ -170,7 +170,7 @@ func (c *GetEntityClient) GetBool() (bool, error) {
 }
 
 
-func (c *GetEntityChannelClient) GetByte(ctx context.Context) (byte, error) {
+func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     in := &reqGetEntityGetByte{
     }
     out := newRespGetEntityGetByte()
@@ -181,7 +181,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (byte, error) {
     return out.Value, nil
 }
 
-func (c *GetEntityClient) GetByte() (byte, error) {
+func (c *GetEntityClient) GetByte() (int8, error) {
     return c.chClient.GetByte(nil)
 }
 
@@ -964,7 +964,7 @@ func (x *reqGetEntityGetByte) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetByte struct {
-    Value byte `thrift:"value,0" json:"value" db:"value"`
+    Value int8 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetByte{}
@@ -975,20 +975,20 @@ func newRespGetEntityGetByte() *respGetEntityGetByte {
         SetValueNonCompat(0)
 }
 
-func (x *respGetEntityGetByte) GetValueNonCompat() byte {
+func (x *respGetEntityGetByte) GetValueNonCompat() int8 {
     return x.Value
 }
 
-func (x *respGetEntityGetByte) GetValue() byte {
+func (x *respGetEntityGetByte) GetValue() int8 {
     return x.Value
 }
 
-func (x *respGetEntityGetByte) SetValueNonCompat(value byte) *respGetEntityGetByte {
+func (x *respGetEntityGetByte) SetValueNonCompat(value int8) *respGetEntityGetByte {
     x.Value = value
     return x
 }
 
-func (x *respGetEntityGetByte) SetValue(value byte) *respGetEntityGetByte {
+func (x *respGetEntityGetByte) SetValue(value int8) *respGetEntityGetByte {
     x.Value = value
     return x
 }
@@ -999,7 +999,7 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Value
     }
 
     item := x.GetValueNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -1010,7 +1010,8 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Value
 }
 
 func (x *respGetEntityGetByte) readField0(p thrift.Protocol) error {  // Value
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -1035,7 +1036,7 @@ func newRespGetEntityGetByteBuilder() *respGetEntityGetByteBuilder {
     }
 }
 
-func (x *respGetEntityGetByteBuilder) Value(value byte) *respGetEntityGetByteBuilder {
+func (x *respGetEntityGetByteBuilder) Value(value int8) *respGetEntityGetByteBuilder {
     x.obj.Value = value
     return x
 }

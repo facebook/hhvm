@@ -576,9 +576,9 @@ func (x *BoolPatch) Read(p thrift.Protocol) error {
 
 
 type BytePatch struct {
-    Assign *byte `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
+    Assign *int8 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Add byte `thrift:"add,8" json:"add" db:"add"`
+    Add int8 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BytePatch{}
@@ -592,11 +592,11 @@ func NewBytePatch() *BytePatch {
 // Deprecated: Use NewBytePatch().GetAssign() instead.
 var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
-func (x *BytePatch) GetAssignNonCompat() *byte {
+func (x *BytePatch) GetAssignNonCompat() *int8 {
     return x.Assign
 }
 
-func (x *BytePatch) GetAssign() byte {
+func (x *BytePatch) GetAssign() int8 {
     if !x.IsSetAssign() {
         return 0
     }
@@ -612,20 +612,20 @@ func (x *BytePatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *BytePatch) GetAddNonCompat() byte {
+func (x *BytePatch) GetAddNonCompat() int8 {
     return x.Add
 }
 
-func (x *BytePatch) GetAdd() byte {
+func (x *BytePatch) GetAdd() int8 {
     return x.Add
 }
 
-func (x *BytePatch) SetAssignNonCompat(value byte) *BytePatch {
+func (x *BytePatch) SetAssignNonCompat(value int8) *BytePatch {
     x.Assign = &value
     return x
 }
 
-func (x *BytePatch) SetAssign(value *byte) *BytePatch {
+func (x *BytePatch) SetAssign(value *int8) *BytePatch {
     x.Assign = value
     return x
 }
@@ -640,12 +640,12 @@ func (x *BytePatch) SetClear(value bool) *BytePatch {
     return x
 }
 
-func (x *BytePatch) SetAddNonCompat(value byte) *BytePatch {
+func (x *BytePatch) SetAddNonCompat(value int8) *BytePatch {
     x.Add = value
     return x
 }
 
-func (x *BytePatch) SetAdd(value byte) *BytePatch {
+func (x *BytePatch) SetAdd(value int8) *BytePatch {
     x.Add = value
     return x
 }
@@ -664,7 +664,7 @@ func (x *BytePatch) writeField1(p thrift.Protocol) error {  // Assign
     }
 
     item := *x.GetAssignNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -696,7 +696,7 @@ func (x *BytePatch) writeField8(p thrift.Protocol) error {  // Add
     }
 
     item := x.GetAddNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -707,7 +707,8 @@ func (x *BytePatch) writeField8(p thrift.Protocol) error {  // Add
 }
 
 func (x *BytePatch) readField1(p thrift.Protocol) error {  // Assign
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -727,7 +728,8 @@ if err != nil {
 }
 
 func (x *BytePatch) readField8(p thrift.Protocol) error {  // Add
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -752,7 +754,7 @@ func NewBytePatchBuilder() *BytePatchBuilder {
     }
 }
 
-func (x *BytePatchBuilder) Assign(value *byte) *BytePatchBuilder {
+func (x *BytePatchBuilder) Assign(value *int8) *BytePatchBuilder {
     x.obj.Assign = value
     return x
 }
@@ -762,7 +764,7 @@ func (x *BytePatchBuilder) Clear(value bool) *BytePatchBuilder {
     return x
 }
 
-func (x *BytePatchBuilder) Add(value byte) *BytePatchBuilder {
+func (x *BytePatchBuilder) Add(value int8) *BytePatchBuilder {
     x.obj.Add = value
     return x
 }

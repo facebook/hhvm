@@ -223,7 +223,7 @@ var EscapedStrings []string = []string{
 }
 const FalseC bool = false
 const TrueC bool = true
-const ZeroByte byte = 0
+const ZeroByte int8 = 0
 const Zero16 int16 = 0
 const Zero32 int32 = 0
 const Zero64 int64 = 0

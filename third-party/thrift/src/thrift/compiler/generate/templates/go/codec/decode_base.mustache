@@ -18,8 +18,18 @@
 
   This file defines the decoding/read code for a base type.
 
+  Note: byte type is special, it is sent/received on a Protocol object
+        as Go 'byte' type, but is represented in the generated code as
+        Go 'int8' type, so we need to do some type-converting here.
+
 }}
+{{#type:byte?}}
+resultByte, err := p.{{> common/primitive_decode_func}}()
+result := int8(resultByte)
+{{/type:byte?}}
+{{^type:byte?}}
 result, err := p.{{> common/primitive_decode_func}}()
+{{/type:byte?}}
 if err != nil {
     return err
 }

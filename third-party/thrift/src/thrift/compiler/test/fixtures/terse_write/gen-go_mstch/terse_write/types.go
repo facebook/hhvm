@@ -184,7 +184,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
 
 type MyUnion struct {
     BoolField *bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
-    ByteField *byte `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
+    ByteField *int8 `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
     ShortField *int16 `thrift:"short_field,3" json:"short_field" db:"short_field"`
     IntField *int32 `thrift:"int_field,4" json:"int_field" db:"int_field"`
     LongField *int64 `thrift:"long_field,5" json:"long_field" db:"long_field"`
@@ -261,11 +261,11 @@ func (x *MyUnion) GetBoolField() bool {
     return *x.BoolField
 }
 
-func (x *MyUnion) GetByteFieldNonCompat() *byte {
+func (x *MyUnion) GetByteFieldNonCompat() *int8 {
     return x.ByteField
 }
 
-func (x *MyUnion) GetByteField() byte {
+func (x *MyUnion) GetByteField() int8 {
     if !x.IsSetByteField() {
         return 0
     }
@@ -427,12 +427,12 @@ func (x *MyUnion) SetBoolField(value *bool) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetByteFieldNonCompat(value byte) *MyUnion {
+func (x *MyUnion) SetByteFieldNonCompat(value int8) *MyUnion {
     x.ByteField = &value
     return x
 }
 
-func (x *MyUnion) SetByteField(value *byte) *MyUnion {
+func (x *MyUnion) SetByteField(value *int8) *MyUnion {
     x.ByteField = value
     return x
 }
@@ -643,7 +643,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // ByteField
     }
 
     item := *x.GetByteFieldNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -944,7 +944,8 @@ if err != nil {
 }
 
 func (x *MyUnion) readField2(p thrift.Protocol) error {  // ByteField
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -1207,7 +1208,7 @@ func (x *MyUnionBuilder) BoolField(value *bool) *MyUnionBuilder {
     return x
 }
 
-func (x *MyUnionBuilder) ByteField(value *byte) *MyUnionBuilder {
+func (x *MyUnionBuilder) ByteField(value *int8) *MyUnionBuilder {
     x.obj.ByteField = value
     return x
 }
@@ -1583,7 +1584,7 @@ func (x *MyStructWithCustomDefault) Read(p thrift.Protocol) error {
 
 type StructLevelTerseStruct struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
-    ByteField byte `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
+    ByteField int8 `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
     ShortField int16 `thrift:"short_field,3" json:"short_field" db:"short_field"`
     IntField int32 `thrift:"int_field,4" json:"int_field" db:"int_field"`
     LongField int64 `thrift:"long_field,5" json:"long_field" db:"long_field"`
@@ -1634,11 +1635,11 @@ func (x *StructLevelTerseStruct) GetBoolField() bool {
     return x.BoolField
 }
 
-func (x *StructLevelTerseStruct) GetByteFieldNonCompat() byte {
+func (x *StructLevelTerseStruct) GetByteFieldNonCompat() int8 {
     return x.ByteField
 }
 
-func (x *StructLevelTerseStruct) GetByteField() byte {
+func (x *StructLevelTerseStruct) GetByteField() int8 {
     return x.ByteField
 }
 
@@ -1780,12 +1781,12 @@ func (x *StructLevelTerseStruct) SetBoolField(value bool) *StructLevelTerseStruc
     return x
 }
 
-func (x *StructLevelTerseStruct) SetByteFieldNonCompat(value byte) *StructLevelTerseStruct {
+func (x *StructLevelTerseStruct) SetByteFieldNonCompat(value int8) *StructLevelTerseStruct {
     x.ByteField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetByteField(value byte) *StructLevelTerseStruct {
+func (x *StructLevelTerseStruct) SetByteField(value int8) *StructLevelTerseStruct {
     x.ByteField = value
     return x
 }
@@ -1966,7 +1967,7 @@ func (x *StructLevelTerseStruct) writeField2(p thrift.Protocol) error {  // Byte
     }
 
     item := x.GetByteFieldNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -2259,7 +2260,8 @@ if err != nil {
 }
 
 func (x *StructLevelTerseStruct) readField2(p thrift.Protocol) error {  // ByteField
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -2486,7 +2488,7 @@ func (x *StructLevelTerseStructBuilder) BoolField(value bool) *StructLevelTerseS
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) ByteField(value byte) *StructLevelTerseStructBuilder {
+func (x *StructLevelTerseStructBuilder) ByteField(value int8) *StructLevelTerseStructBuilder {
     x.obj.ByteField = value
     return x
 }
@@ -2733,7 +2735,7 @@ func (x *StructLevelTerseStruct) Read(p thrift.Protocol) error {
 
 type FieldLevelTerseStruct struct {
     TerseBoolField bool `thrift:"terse_bool_field,1" json:"terse_bool_field" db:"terse_bool_field"`
-    TerseByteField byte `thrift:"terse_byte_field,2" json:"terse_byte_field" db:"terse_byte_field"`
+    TerseByteField int8 `thrift:"terse_byte_field,2" json:"terse_byte_field" db:"terse_byte_field"`
     TerseShortField int16 `thrift:"terse_short_field,3" json:"terse_short_field" db:"terse_short_field"`
     TerseIntField int32 `thrift:"terse_int_field,4" json:"terse_int_field" db:"terse_int_field"`
     TerseLongField int64 `thrift:"terse_long_field,5" json:"terse_long_field" db:"terse_long_field"`
@@ -2748,7 +2750,7 @@ type FieldLevelTerseStruct struct {
     TerseStructField *MyStruct `thrift:"terse_struct_field,14" json:"terse_struct_field" db:"terse_struct_field"`
     TerseUnionField *MyUnion `thrift:"terse_union_field,29" json:"terse_union_field" db:"terse_union_field"`
     BoolField bool `thrift:"bool_field,15" json:"bool_field" db:"bool_field"`
-    ByteField byte `thrift:"byte_field,16" json:"byte_field" db:"byte_field"`
+    ByteField int8 `thrift:"byte_field,16" json:"byte_field" db:"byte_field"`
     ShortField int16 `thrift:"short_field,17" json:"short_field" db:"short_field"`
     IntField int32 `thrift:"int_field,18" json:"int_field" db:"int_field"`
     LongField int64 `thrift:"long_field,19" json:"long_field" db:"long_field"`
@@ -2820,11 +2822,11 @@ func (x *FieldLevelTerseStruct) GetTerseBoolField() bool {
     return x.TerseBoolField
 }
 
-func (x *FieldLevelTerseStruct) GetTerseByteFieldNonCompat() byte {
+func (x *FieldLevelTerseStruct) GetTerseByteFieldNonCompat() int8 {
     return x.TerseByteField
 }
 
-func (x *FieldLevelTerseStruct) GetTerseByteField() byte {
+func (x *FieldLevelTerseStruct) GetTerseByteField() int8 {
     return x.TerseByteField
 }
 
@@ -2964,11 +2966,11 @@ func (x *FieldLevelTerseStruct) GetBoolField() bool {
     return x.BoolField
 }
 
-func (x *FieldLevelTerseStruct) GetByteFieldNonCompat() byte {
+func (x *FieldLevelTerseStruct) GetByteFieldNonCompat() int8 {
     return x.ByteField
 }
 
-func (x *FieldLevelTerseStruct) GetByteField() byte {
+func (x *FieldLevelTerseStruct) GetByteField() int8 {
     return x.ByteField
 }
 
@@ -3110,12 +3112,12 @@ func (x *FieldLevelTerseStruct) SetTerseBoolField(value bool) *FieldLevelTerseSt
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseByteFieldNonCompat(value byte) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetTerseByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
     x.TerseByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseByteField(value byte) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetTerseByteField(value int8) *FieldLevelTerseStruct {
     x.TerseByteField = value
     return x
 }
@@ -3260,12 +3262,12 @@ func (x *FieldLevelTerseStruct) SetBoolField(value bool) *FieldLevelTerseStruct 
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetByteFieldNonCompat(value byte) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
     x.ByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetByteField(value byte) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetByteField(value int8) *FieldLevelTerseStruct {
     x.ByteField = value
     return x
 }
@@ -3470,7 +3472,7 @@ func (x *FieldLevelTerseStruct) writeField2(p thrift.Protocol) error {  // Terse
     }
 
     item := x.GetTerseByteFieldNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -3774,7 +3776,7 @@ func (x *FieldLevelTerseStruct) writeField16(p thrift.Protocol) error {  // Byte
     }
 
     item := x.GetByteFieldNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -4067,7 +4069,8 @@ if err != nil {
 }
 
 func (x *FieldLevelTerseStruct) readField2(p thrift.Protocol) error {  // TerseByteField
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -4284,7 +4287,8 @@ if err != nil {
 }
 
 func (x *FieldLevelTerseStruct) readField16(p thrift.Protocol) error {  // ByteField
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -4511,7 +4515,7 @@ func (x *FieldLevelTerseStructBuilder) TerseBoolField(value bool) *FieldLevelTer
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseByteField(value byte) *FieldLevelTerseStructBuilder {
+func (x *FieldLevelTerseStructBuilder) TerseByteField(value int8) *FieldLevelTerseStructBuilder {
     x.obj.TerseByteField = value
     return x
 }
@@ -4586,7 +4590,7 @@ func (x *FieldLevelTerseStructBuilder) BoolField(value bool) *FieldLevelTerseStr
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) ByteField(value byte) *FieldLevelTerseStructBuilder {
+func (x *FieldLevelTerseStructBuilder) ByteField(value int8) *FieldLevelTerseStructBuilder {
     x.obj.ByteField = value
     return x
 }
@@ -4953,7 +4957,7 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
 
 type TerseStructWithCustomDefault struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
-    ByteField byte `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
+    ByteField int8 `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
     ShortField int16 `thrift:"short_field,3" json:"short_field" db:"short_field"`
     IntField int32 `thrift:"int_field,4" json:"int_field" db:"int_field"`
     LongField int64 `thrift:"long_field,5" json:"long_field" db:"long_field"`
@@ -5013,11 +5017,11 @@ func (x *TerseStructWithCustomDefault) GetBoolField() bool {
     return x.BoolField
 }
 
-func (x *TerseStructWithCustomDefault) GetByteFieldNonCompat() byte {
+func (x *TerseStructWithCustomDefault) GetByteFieldNonCompat() int8 {
     return x.ByteField
 }
 
-func (x *TerseStructWithCustomDefault) GetByteField() byte {
+func (x *TerseStructWithCustomDefault) GetByteField() int8 {
     return x.ByteField
 }
 
@@ -5147,12 +5151,12 @@ func (x *TerseStructWithCustomDefault) SetBoolField(value bool) *TerseStructWith
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetByteFieldNonCompat(value byte) *TerseStructWithCustomDefault {
+func (x *TerseStructWithCustomDefault) SetByteFieldNonCompat(value int8) *TerseStructWithCustomDefault {
     x.ByteField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetByteField(value byte) *TerseStructWithCustomDefault {
+func (x *TerseStructWithCustomDefault) SetByteField(value int8) *TerseStructWithCustomDefault {
     x.ByteField = value
     return x
 }
@@ -5319,7 +5323,7 @@ func (x *TerseStructWithCustomDefault) writeField2(p thrift.Protocol) error {  /
     }
 
     item := x.GetByteFieldNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -5592,7 +5596,8 @@ if err != nil {
 }
 
 func (x *TerseStructWithCustomDefault) readField2(p thrift.Protocol) error {  // ByteField
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -5808,7 +5813,7 @@ func (x *TerseStructWithCustomDefaultBuilder) BoolField(value bool) *TerseStruct
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) ByteField(value byte) *TerseStructWithCustomDefaultBuilder {
+func (x *TerseStructWithCustomDefaultBuilder) ByteField(value int8) *TerseStructWithCustomDefaultBuilder {
     x.obj.ByteField = value
     return x
 }

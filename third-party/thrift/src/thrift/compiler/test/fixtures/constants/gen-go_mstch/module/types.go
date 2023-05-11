@@ -1804,7 +1804,7 @@ func (x *Struct3) Read(p thrift.Protocol) error {
 type Struct4 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B *float64 `thrift:"b,2,optional" json:"b,omitempty" db:"b"`
-    C *byte `thrift:"c,3,optional" json:"c,omitempty" db:"c"`
+    C *int8 `thrift:"c,3,optional" json:"c,omitempty" db:"c"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct4{}
@@ -1840,11 +1840,11 @@ func (x *Struct4) GetB() float64 {
     return *x.B
 }
 
-func (x *Struct4) GetCNonCompat() *byte {
+func (x *Struct4) GetCNonCompat() *int8 {
     return x.C
 }
 
-func (x *Struct4) GetC() byte {
+func (x *Struct4) GetC() int8 {
     if !x.IsSetC() {
         return 0
     }
@@ -1872,12 +1872,12 @@ func (x *Struct4) SetB(value *float64) *Struct4 {
     return x
 }
 
-func (x *Struct4) SetCNonCompat(value byte) *Struct4 {
+func (x *Struct4) SetCNonCompat(value int8) *Struct4 {
     x.C = &value
     return x
 }
 
-func (x *Struct4) SetC(value *byte) *Struct4 {
+func (x *Struct4) SetC(value *int8) *Struct4 {
     x.C = value
     return x
 }
@@ -1936,7 +1936,7 @@ func (x *Struct4) writeField3(p thrift.Protocol) error {  // C
     }
 
     item := *x.GetCNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -1967,7 +1967,8 @@ if err != nil {
 }
 
 func (x *Struct4) readField3(p thrift.Protocol) error {  // C
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -2002,7 +2003,7 @@ func (x *Struct4Builder) B(value *float64) *Struct4Builder {
     return x
 }
 
-func (x *Struct4Builder) C(value *byte) *Struct4Builder {
+func (x *Struct4Builder) C(value *int8) *Struct4Builder {
     x.obj.C = value
     return x
 }

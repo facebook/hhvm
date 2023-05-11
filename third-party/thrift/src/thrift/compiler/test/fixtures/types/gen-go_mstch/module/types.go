@@ -2786,11 +2786,11 @@ func (x *ComplexNestedWithDefault) Read(p thrift.Protocol) error {
 
 
 type MinPadding struct {
-    Small byte `thrift:"small,1,required" json:"small" db:"small"`
+    Small int8 `thrift:"small,1,required" json:"small" db:"small"`
     Big int64 `thrift:"big,2,required" json:"big" db:"big"`
     Medium int16 `thrift:"medium,3,required" json:"medium" db:"medium"`
     Biggish int32 `thrift:"biggish,4,required" json:"biggish" db:"biggish"`
-    Tiny byte `thrift:"tiny,5,required" json:"tiny" db:"tiny"`
+    Tiny int8 `thrift:"tiny,5,required" json:"tiny" db:"tiny"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPadding{}
@@ -2804,11 +2804,11 @@ func NewMinPadding() *MinPadding {
         SetTinyNonCompat(0)
 }
 
-func (x *MinPadding) GetSmallNonCompat() byte {
+func (x *MinPadding) GetSmallNonCompat() int8 {
     return x.Small
 }
 
-func (x *MinPadding) GetSmall() byte {
+func (x *MinPadding) GetSmall() int8 {
     return x.Small
 }
 
@@ -2836,20 +2836,20 @@ func (x *MinPadding) GetBiggish() int32 {
     return x.Biggish
 }
 
-func (x *MinPadding) GetTinyNonCompat() byte {
+func (x *MinPadding) GetTinyNonCompat() int8 {
     return x.Tiny
 }
 
-func (x *MinPadding) GetTiny() byte {
+func (x *MinPadding) GetTiny() int8 {
     return x.Tiny
 }
 
-func (x *MinPadding) SetSmallNonCompat(value byte) *MinPadding {
+func (x *MinPadding) SetSmallNonCompat(value int8) *MinPadding {
     x.Small = value
     return x
 }
 
-func (x *MinPadding) SetSmall(value byte) *MinPadding {
+func (x *MinPadding) SetSmall(value int8) *MinPadding {
     x.Small = value
     return x
 }
@@ -2884,12 +2884,12 @@ func (x *MinPadding) SetBiggish(value int32) *MinPadding {
     return x
 }
 
-func (x *MinPadding) SetTinyNonCompat(value byte) *MinPadding {
+func (x *MinPadding) SetTinyNonCompat(value int8) *MinPadding {
     x.Tiny = value
     return x
 }
 
-func (x *MinPadding) SetTiny(value byte) *MinPadding {
+func (x *MinPadding) SetTiny(value int8) *MinPadding {
     x.Tiny = value
     return x
 }
@@ -2900,7 +2900,7 @@ func (x *MinPadding) writeField1(p thrift.Protocol) error {  // Small
     }
 
     item := x.GetSmallNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -2964,7 +2964,7 @@ func (x *MinPadding) writeField5(p thrift.Protocol) error {  // Tiny
     }
 
     item := x.GetTinyNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -2975,7 +2975,8 @@ func (x *MinPadding) writeField5(p thrift.Protocol) error {  // Tiny
 }
 
 func (x *MinPadding) readField1(p thrift.Protocol) error {  // Small
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -3015,7 +3016,8 @@ if err != nil {
 }
 
 func (x *MinPadding) readField5(p thrift.Protocol) error {  // Tiny
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -3040,7 +3042,7 @@ func NewMinPaddingBuilder() *MinPaddingBuilder {
     }
 }
 
-func (x *MinPaddingBuilder) Small(value byte) *MinPaddingBuilder {
+func (x *MinPaddingBuilder) Small(value int8) *MinPaddingBuilder {
     x.obj.Small = value
     return x
 }
@@ -3060,7 +3062,7 @@ func (x *MinPaddingBuilder) Biggish(value int32) *MinPaddingBuilder {
     return x
 }
 
-func (x *MinPaddingBuilder) Tiny(value byte) *MinPaddingBuilder {
+func (x *MinPaddingBuilder) Tiny(value int8) *MinPaddingBuilder {
     x.obj.Tiny = value
     return x
 }
@@ -3161,11 +3163,11 @@ func (x *MinPadding) Read(p thrift.Protocol) error {
 
 
 type MinPaddingWithCustomType struct {
-    Small byte `thrift:"small,1" json:"small" db:"small"`
+    Small int8 `thrift:"small,1" json:"small" db:"small"`
     Big int64 `thrift:"big,2" json:"big" db:"big"`
     Medium int16 `thrift:"medium,3" json:"medium" db:"medium"`
     Biggish int32 `thrift:"biggish,4" json:"biggish" db:"biggish"`
-    Tiny byte `thrift:"tiny,5" json:"tiny" db:"tiny"`
+    Tiny int8 `thrift:"tiny,5" json:"tiny" db:"tiny"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPaddingWithCustomType{}
@@ -3179,11 +3181,11 @@ func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
         SetTinyNonCompat(0)
 }
 
-func (x *MinPaddingWithCustomType) GetSmallNonCompat() byte {
+func (x *MinPaddingWithCustomType) GetSmallNonCompat() int8 {
     return x.Small
 }
 
-func (x *MinPaddingWithCustomType) GetSmall() byte {
+func (x *MinPaddingWithCustomType) GetSmall() int8 {
     return x.Small
 }
 
@@ -3211,20 +3213,20 @@ func (x *MinPaddingWithCustomType) GetBiggish() int32 {
     return x.Biggish
 }
 
-func (x *MinPaddingWithCustomType) GetTinyNonCompat() byte {
+func (x *MinPaddingWithCustomType) GetTinyNonCompat() int8 {
     return x.Tiny
 }
 
-func (x *MinPaddingWithCustomType) GetTiny() byte {
+func (x *MinPaddingWithCustomType) GetTiny() int8 {
     return x.Tiny
 }
 
-func (x *MinPaddingWithCustomType) SetSmallNonCompat(value byte) *MinPaddingWithCustomType {
+func (x *MinPaddingWithCustomType) SetSmallNonCompat(value int8) *MinPaddingWithCustomType {
     x.Small = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetSmall(value byte) *MinPaddingWithCustomType {
+func (x *MinPaddingWithCustomType) SetSmall(value int8) *MinPaddingWithCustomType {
     x.Small = value
     return x
 }
@@ -3259,12 +3261,12 @@ func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustom
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetTinyNonCompat(value byte) *MinPaddingWithCustomType {
+func (x *MinPaddingWithCustomType) SetTinyNonCompat(value int8) *MinPaddingWithCustomType {
     x.Tiny = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetTiny(value byte) *MinPaddingWithCustomType {
+func (x *MinPaddingWithCustomType) SetTiny(value int8) *MinPaddingWithCustomType {
     x.Tiny = value
     return x
 }
@@ -3275,7 +3277,7 @@ func (x *MinPaddingWithCustomType) writeField1(p thrift.Protocol) error {  // Sm
     }
 
     item := x.GetSmallNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -3339,7 +3341,7 @@ func (x *MinPaddingWithCustomType) writeField5(p thrift.Protocol) error {  // Ti
     }
 
     item := x.GetTinyNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -3350,7 +3352,8 @@ func (x *MinPaddingWithCustomType) writeField5(p thrift.Protocol) error {  // Ti
 }
 
 func (x *MinPaddingWithCustomType) readField1(p thrift.Protocol) error {  // Small
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -3390,7 +3393,8 @@ if err != nil {
 }
 
 func (x *MinPaddingWithCustomType) readField5(p thrift.Protocol) error {  // Tiny
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -3415,7 +3419,7 @@ func NewMinPaddingWithCustomTypeBuilder() *MinPaddingWithCustomTypeBuilder {
     }
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Small(value byte) *MinPaddingWithCustomTypeBuilder {
+func (x *MinPaddingWithCustomTypeBuilder) Small(value int8) *MinPaddingWithCustomTypeBuilder {
     x.obj.Small = value
     return x
 }
@@ -3435,7 +3439,7 @@ func (x *MinPaddingWithCustomTypeBuilder) Biggish(value int32) *MinPaddingWithCu
     return x
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Tiny(value byte) *MinPaddingWithCustomTypeBuilder {
+func (x *MinPaddingWithCustomTypeBuilder) Tiny(value int8) *MinPaddingWithCustomTypeBuilder {
     x.obj.Tiny = value
     return x
 }

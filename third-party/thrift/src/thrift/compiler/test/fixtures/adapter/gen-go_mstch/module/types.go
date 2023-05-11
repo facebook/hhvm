@@ -430,14 +430,14 @@ if err != nil {
   return decodeResult, decodeErr
 }
 
-type AdaptedByte = byte
+type AdaptedByte = int8
 
 func NewAdaptedByte() AdaptedByte {
   return 0
 }
 
 func WriteAdaptedByte(item AdaptedByte, p thrift.Protocol) error {
-  if err := p.WriteByte(item); err != nil {
+  if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
   return nil
@@ -446,7 +446,8 @@ func WriteAdaptedByte(item AdaptedByte, p thrift.Protocol) error {
 func ReadAdaptedByte(p thrift.Protocol) (AdaptedByte, error) {
   var decodeResult AdaptedByte
   decodeErr := func() error {
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }

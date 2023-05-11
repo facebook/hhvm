@@ -18,8 +18,17 @@
 
   This file defines the encoding/write function for a base type.
 
+  Note: byte type is special, it is sent/received on a Protocol object
+        as Go 'byte' type, but is represented in the generated code as
+        Go 'int8' type, so we need to do some type-converting here.
+
 }}
+{{#type:byte?}}
+if err := p.{{> common/primitive_encode_func}}(byte(item)); err != nil {
+{{/type:byte?}}
+{{^type:byte?}}
 if err := p.{{> common/primitive_encode_func}}(item); err != nil {
+{{/type:byte?}}
     return err
 }
 {{!newline}}

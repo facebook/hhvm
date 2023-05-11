@@ -951,7 +951,7 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
 
 type MyStruct struct {
     BoolVal bool `thrift:"boolVal,-1" json:"boolVal" db:"boolVal"`
-    ByteVal byte `thrift:"byteVal,-2" json:"byteVal" db:"byteVal"`
+    ByteVal int8 `thrift:"byteVal,-2" json:"byteVal" db:"byteVal"`
     I16Val int16 `thrift:"i16Val,-3" json:"i16Val" db:"i16Val"`
     I32Val int32 `thrift:"i32Val,-4" json:"i32Val" db:"i32Val"`
     I64Val int64 `thrift:"i64Val,-5" json:"i64Val" db:"i64Val"`
@@ -964,7 +964,7 @@ type MyStruct struct {
     UnionVal *MyUnion `thrift:"unionVal,-12" json:"unionVal" db:"unionVal"`
     LateStructVal *LateDefStruct `thrift:"lateStructVal,-13" json:"lateStructVal" db:"lateStructVal"`
     OptBoolVal *bool `thrift:"optBoolVal,-14,optional" json:"optBoolVal,omitempty" db:"optBoolVal"`
-    OptByteVal *byte `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
+    OptByteVal *int8 `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
     OptI16Val *int16 `thrift:"optI16Val,-16,optional" json:"optI16Val,omitempty" db:"optI16Val"`
     OptI32Val *int32 `thrift:"optI32Val,-17,optional" json:"optI32Val,omitempty" db:"optI32Val"`
     OptI64Val *int64 `thrift:"optI64Val,-18,optional" json:"optI64Val,omitempty" db:"optI64Val"`
@@ -1069,11 +1069,11 @@ func (x *MyStruct) GetBoolVal() bool {
     return x.BoolVal
 }
 
-func (x *MyStruct) GetByteValNonCompat() byte {
+func (x *MyStruct) GetByteValNonCompat() int8 {
     return x.ByteVal
 }
 
-func (x *MyStruct) GetByteVal() byte {
+func (x *MyStruct) GetByteVal() int8 {
     return x.ByteVal
 }
 
@@ -1193,11 +1193,11 @@ func (x *MyStruct) GetOptBoolVal() bool {
     return *x.OptBoolVal
 }
 
-func (x *MyStruct) GetOptByteValNonCompat() *byte {
+func (x *MyStruct) GetOptByteValNonCompat() *int8 {
     return x.OptByteVal
 }
 
-func (x *MyStruct) GetOptByteVal() byte {
+func (x *MyStruct) GetOptByteVal() int8 {
     if !x.IsSetOptByteVal() {
         return 0
     }
@@ -1427,12 +1427,12 @@ func (x *MyStruct) SetBoolVal(value bool) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetByteValNonCompat(value byte) *MyStruct {
+func (x *MyStruct) SetByteValNonCompat(value int8) *MyStruct {
     x.ByteVal = value
     return x
 }
 
-func (x *MyStruct) SetByteVal(value byte) *MyStruct {
+func (x *MyStruct) SetByteVal(value int8) *MyStruct {
     x.ByteVal = value
     return x
 }
@@ -1557,12 +1557,12 @@ func (x *MyStruct) SetOptBoolVal(value *bool) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetOptByteValNonCompat(value byte) *MyStruct {
+func (x *MyStruct) SetOptByteValNonCompat(value int8) *MyStruct {
     x.OptByteVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptByteVal(value *byte) *MyStruct {
+func (x *MyStruct) SetOptByteVal(value *int8) *MyStruct {
     x.OptByteVal = value
     return x
 }
@@ -1861,7 +1861,7 @@ func (x *MyStruct) writeField_2(p thrift.Protocol) error {  // ByteVal
     }
 
     item := x.GetByteValNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -2093,7 +2093,7 @@ func (x *MyStruct) writeField_15(p thrift.Protocol) error {  // OptByteVal
     }
 
     item := *x.GetOptByteValNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -2575,7 +2575,8 @@ if err != nil {
 }
 
 func (x *MyStruct) readField_2(p thrift.Protocol) error {  // ByteVal
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -2709,7 +2710,8 @@ if err != nil {
 }
 
 func (x *MyStruct) readField_15(p thrift.Protocol) error {  // OptByteVal
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -3090,7 +3092,7 @@ func (x *MyStructBuilder) BoolVal(value bool) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) ByteVal(value byte) *MyStructBuilder {
+func (x *MyStructBuilder) ByteVal(value int8) *MyStructBuilder {
     x.obj.ByteVal = value
     return x
 }
@@ -3155,7 +3157,7 @@ func (x *MyStructBuilder) OptBoolVal(value *bool) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) OptByteVal(value *byte) *MyStructBuilder {
+func (x *MyStructBuilder) OptByteVal(value *int8) *MyStructBuilder {
     x.obj.OptByteVal = value
     return x
 }
@@ -16092,7 +16094,7 @@ type MyStructEnsureStruct struct {
     OptI64Val *int64 `thrift:"optI64Val,-18,optional" json:"optI64Val,omitempty" db:"optI64Val"`
     OptI32Val *int32 `thrift:"optI32Val,-17,optional" json:"optI32Val,omitempty" db:"optI32Val"`
     OptI16Val *int16 `thrift:"optI16Val,-16,optional" json:"optI16Val,omitempty" db:"optI16Val"`
-    OptByteVal *byte `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
+    OptByteVal *int8 `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
     OptBoolVal *bool `thrift:"optBoolVal,-14,optional" json:"optBoolVal,omitempty" db:"optBoolVal"`
     LateStructVal *LateDefStruct `thrift:"lateStructVal,-13,optional" json:"lateStructVal,omitempty" db:"lateStructVal"`
     UnionVal *MyUnion `thrift:"unionVal,-12,optional" json:"unionVal,omitempty" db:"unionVal"`
@@ -16105,7 +16107,7 @@ type MyStructEnsureStruct struct {
     I64Val *int64 `thrift:"i64Val,-5,optional" json:"i64Val,omitempty" db:"i64Val"`
     I32Val *int32 `thrift:"i32Val,-4,optional" json:"i32Val,omitempty" db:"i32Val"`
     I16Val *int16 `thrift:"i16Val,-3,optional" json:"i16Val,omitempty" db:"i16Val"`
-    ByteVal *byte `thrift:"byteVal,-2,optional" json:"byteVal,omitempty" db:"byteVal"`
+    ByteVal *int8 `thrift:"byteVal,-2,optional" json:"byteVal,omitempty" db:"byteVal"`
     BoolVal *bool `thrift:"boolVal,-1,optional" json:"boolVal,omitempty" db:"boolVal"`
     StructWithFieldCustomDefault *MyData `thrift:"structWithFieldCustomDefault,1,optional" json:"structWithFieldCustomDefault,omitempty" db:"structWithFieldCustomDefault"`
 }
@@ -16398,11 +16400,11 @@ func (x *MyStructEnsureStruct) GetOptI16Val() int16 {
     return *x.OptI16Val
 }
 
-func (x *MyStructEnsureStruct) GetOptByteValNonCompat() *byte {
+func (x *MyStructEnsureStruct) GetOptByteValNonCompat() *int8 {
     return x.OptByteVal
 }
 
-func (x *MyStructEnsureStruct) GetOptByteVal() byte {
+func (x *MyStructEnsureStruct) GetOptByteVal() int8 {
     if !x.IsSetOptByteVal() {
         return 0
     }
@@ -16554,11 +16556,11 @@ func (x *MyStructEnsureStruct) GetI16Val() int16 {
     return *x.I16Val
 }
 
-func (x *MyStructEnsureStruct) GetByteValNonCompat() *byte {
+func (x *MyStructEnsureStruct) GetByteValNonCompat() *int8 {
     return x.ByteVal
 }
 
-func (x *MyStructEnsureStruct) GetByteVal() byte {
+func (x *MyStructEnsureStruct) GetByteVal() int8 {
     if !x.IsSetByteVal() {
         return 0
     }
@@ -16760,12 +16762,12 @@ func (x *MyStructEnsureStruct) SetOptI16Val(value *int16) *MyStructEnsureStruct 
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptByteValNonCompat(value byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptByteValNonCompat(value int8) *MyStructEnsureStruct {
     x.OptByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptByteVal(value *byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptByteVal(value *int8) *MyStructEnsureStruct {
     x.OptByteVal = value
     return x
 }
@@ -16890,12 +16892,12 @@ func (x *MyStructEnsureStruct) SetI16Val(value *int16) *MyStructEnsureStruct {
     return x
 }
 
-func (x *MyStructEnsureStruct) SetByteValNonCompat(value byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetByteValNonCompat(value int8) *MyStructEnsureStruct {
     x.ByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetByteVal(value *byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetByteVal(value *int8) *MyStructEnsureStruct {
     x.ByteVal = value
     return x
 }
@@ -17507,7 +17509,7 @@ func (x *MyStructEnsureStruct) writeField_15(p thrift.Protocol) error {  // OptB
     }
 
     item := *x.GetOptByteValNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -17767,7 +17769,7 @@ func (x *MyStructEnsureStruct) writeField_2(p thrift.Protocol) error {  // ByteV
     }
 
     item := *x.GetByteValNonCompat()
-    if err := p.WriteByte(item); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
 
@@ -18158,7 +18160,8 @@ if err != nil {
 }
 
 func (x *MyStructEnsureStruct) readField_15(p thrift.Protocol) error {  // OptByteVal
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -18292,7 +18295,8 @@ if err != nil {
 }
 
 func (x *MyStructEnsureStruct) readField_2(p thrift.Protocol) error {  // ByteVal
-    result, err := p.ReadByte()
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
 if err != nil {
     return err
 }
@@ -18423,7 +18427,7 @@ func (x *MyStructEnsureStructBuilder) OptI16Val(value *int16) *MyStructEnsureStr
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptByteVal(value *byte) *MyStructEnsureStructBuilder {
+func (x *MyStructEnsureStructBuilder) OptByteVal(value *int8) *MyStructEnsureStructBuilder {
     x.obj.OptByteVal = value
     return x
 }
@@ -18488,7 +18492,7 @@ func (x *MyStructEnsureStructBuilder) I16Val(value *int16) *MyStructEnsureStruct
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) ByteVal(value *byte) *MyStructEnsureStructBuilder {
+func (x *MyStructEnsureStructBuilder) ByteVal(value *int8) *MyStructEnsureStructBuilder {
     x.obj.ByteVal = value
     return x
 }

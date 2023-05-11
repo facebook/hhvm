@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4a96c23e06f62f4c3fc1566eaacf9f2c>>
+// @generated SignedSource<<ff9f9949cce9bb0397807cd2baaa0a12>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1776,6 +1776,7 @@ pub struct ClassConst<Ex, En> {
 pub struct ClassAbstractTypeconst {
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub default: Option<Hint>,
 }
 
@@ -1982,6 +1983,7 @@ pub struct Typedef<Ex, En> {
     pub tparams: Vec<Tparam<Ex, En>>,
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub kind: Hint,
     pub user_attributes: UserAttributes<Ex, En>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,

@@ -982,7 +982,7 @@ and ('ex, 'en) class_const = {
 and class_abstract_typeconst = {
   c_atc_as_constraint: hint option;
   c_atc_super_constraint: hint option;
-  c_atc_default: hint option;
+  c_atc_default: hint option; [@transform.explicit]
 }
 
 and class_concrete_typeconst = { c_tc_type: hint }
@@ -1055,7 +1055,7 @@ and ('ex, 'en) typedef = {
   t_tparams: ('ex, 'en) tparam list;
   t_as_constraint: hint option;
   t_super_constraint: hint option;
-  t_kind: hint;
+  t_kind: hint; [@transform.explicit]
   t_user_attributes: ('ex, 'en) user_attributes;
   t_file_attributes: ('ex, 'en) file_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]

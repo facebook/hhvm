@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35ad5019c1e42ded11eff4ed7005019f>>
+// @generated SignedSource<<ca9973b2ae1880e49d4a2b69762617cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1392,7 +1392,19 @@ impl Transform for ClassAbstractTypeconst {
                 {
                     __binding_1.transform(env, pass)
                 }
-                { __binding_2.transform(env, pass) }
+                {
+                    {
+                        let pass = &mut pass.clone();
+                        let mut in_pass = pass.clone();
+                        if let Break(..) =
+                            pass.on_fld_class_abstract_typeconst_default_top_down(env, __binding_2)
+                        {
+                            return;
+                        }
+                        __binding_2.transform(env, pass);
+                        in_pass.on_fld_class_abstract_typeconst_default_bottom_up(env, __binding_2);
+                    }
+                }
             }
         }
     }
@@ -1684,7 +1696,15 @@ impl Transform for Typedef {
                     __binding_4.transform(env, pass)
                 }
                 {
-                    __binding_5.transform(env, pass)
+                    {
+                        let pass = &mut pass.clone();
+                        let mut in_pass = pass.clone();
+                        if let Break(..) = pass.on_fld_typedef_kind_top_down(env, __binding_5) {
+                            return;
+                        }
+                        __binding_5.transform(env, pass);
+                        in_pass.on_fld_typedef_kind_bottom_up(env, __binding_5);
+                    }
                 }
                 {
                     __binding_6.transform(env, pass)

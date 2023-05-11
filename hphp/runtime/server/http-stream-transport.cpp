@@ -29,8 +29,8 @@ void HttpStreamServerTransport::write(folly::StringPiece data) {
 }
 
 void HttpStreamServerTransport::setOnData(OnDataType callback) {
-  assertx(!callback || !onData);
-  onData = callback;
+  assertx(!callback || !m_onData);
+  m_onData = callback;
   assertx(m_transport);
   if (callback) {
     m_transport->onStreamReady();

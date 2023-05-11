@@ -70,43 +70,24 @@ struct StreamTransport {
   void writeUint8(uint8_t c) { writeRawObject(c); }
   void writeUint32(uint32_t i) { writeRawObject(i); }
 
-  /// Sets the `onData` callback. See `onData` for details.
+  /// Sets the `onData` callback.
   ///
-  /// When this is called if there is pending data the callback may be
-  /// immediately called before returning.
-  virtual void setOnData(OnDataType callback) {
-    onData = std::move(callback);
-  }
-
-  /// Sets the `onClose` callback. See `onClose` for details.
-  virtual void setOnClose(OnCloseType callback) {
-    onClose = std::move(callback);
-  }
-
-protected:
   /// Called when new data is available from the remote. The data
   /// may not persist after the callback returns; it's the responsibility of the
   /// callback to copy the data if required.
   ///
   /// This callback will almost certainly be called on a non-request thread.
-  OnDataType onData{nullptr};
+  ///
+  /// When this is called if there is pending data the callback may be
+  /// immediately called before returning.
+  virtual void setOnData(OnDataType callback) = 0;
 
+  /// Sets the `onClose` callback.
+  ///
   /// Called when the remote closes the connection.
   ///
   /// This callback will almost certainly be called on a non-request thread.
-  OnCloseType onClose{nullptr};
-
-  void doOnData(std::unique_ptr<folly::IOBuf> data) {
-    if (onData) {
-      onData(std::move(data));
-    }
-  }
-
-  void doOnClose() {
-    if (onClose) {
-      onClose();
-    }
-  }
+  virtual void setOnClose(OnCloseType callback) = 0;
 };
 
 } // namespace stream_transport

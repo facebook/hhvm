@@ -23,7 +23,7 @@ var _ thrift.Struct = &GetEntityRequest{}
 
 func NewGetEntityRequest() *GetEntityRequest {
     return (&GetEntityRequest{}).
-        SetId("")
+        SetIdNonCompat("")
 }
 
 func (x *GetEntityRequest) GetIdNonCompat() string {
@@ -32,6 +32,11 @@ func (x *GetEntityRequest) GetIdNonCompat() string {
 
 func (x *GetEntityRequest) GetId() string {
     return x.Id
+}
+
+func (x *GetEntityRequest) SetIdNonCompat(value string) *GetEntityRequest {
+    x.Id = value
+    return x
 }
 
 func (x *GetEntityRequest) SetId(value string) *GetEntityRequest {
@@ -61,7 +66,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -157,7 +162,7 @@ var _ thrift.Struct = &GetEntityResponse{}
 
 func NewGetEntityResponse() *GetEntityResponse {
     return (&GetEntityResponse{}).
-        SetEntity("")
+        SetEntityNonCompat("")
 }
 
 func (x *GetEntityResponse) GetEntityNonCompat() string {
@@ -166,6 +171,11 @@ func (x *GetEntityResponse) GetEntityNonCompat() string {
 
 func (x *GetEntityResponse) GetEntity() string {
     return x.Entity
+}
+
+func (x *GetEntityResponse) SetEntityNonCompat(value string) *GetEntityResponse {
+    x.Entity = value
+    return x
 }
 
 func (x *GetEntityResponse) SetEntity(value string) *GetEntityResponse {
@@ -195,7 +205,7 @@ if err != nil {
     return err
 }
 
-    x.SetEntity(result)
+    x.SetEntityNonCompat(result)
     return nil
 }
 

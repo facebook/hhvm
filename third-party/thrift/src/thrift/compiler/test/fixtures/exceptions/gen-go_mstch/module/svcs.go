@@ -497,18 +497,33 @@ func (x *respRaiserDoRaise) GetS() *Serious {
     return x.S
 }
 
-func (x *respRaiserDoRaise) SetB(value Banal) *respRaiserDoRaise {
+func (x *respRaiserDoRaise) SetBNonCompat(value Banal) *respRaiserDoRaise {
     x.B = &value
     return x
 }
 
-func (x *respRaiserDoRaise) SetF(value Fiery) *respRaiserDoRaise {
+func (x *respRaiserDoRaise) SetB(value *Banal) *respRaiserDoRaise {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetFNonCompat(value Fiery) *respRaiserDoRaise {
     x.F = &value
     return x
 }
 
-func (x *respRaiserDoRaise) SetS(value Serious) *respRaiserDoRaise {
+func (x *respRaiserDoRaise) SetF(value *Fiery) *respRaiserDoRaise {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetSNonCompat(value Serious) *respRaiserDoRaise {
     x.S = &value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetS(value *Serious) *respRaiserDoRaise {
+    x.S = value
     return x
 }
 
@@ -591,7 +606,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -602,7 +617,7 @@ if err != nil {
     return err
 }
 
-    x.SetF(result)
+    x.SetFNonCompat(result)
     return nil
 }
 
@@ -613,7 +628,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 
@@ -827,7 +842,7 @@ var _ thrift.WritableResult = &respRaiserGet200{}
 
 func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 func (x *respRaiserGet200) GetValueNonCompat() string {
@@ -836,6 +851,11 @@ func (x *respRaiserGet200) GetValueNonCompat() string {
 
 func (x *respRaiserGet200) GetValue() string {
     return x.Value
+}
+
+func (x *respRaiserGet200) SetValueNonCompat(value string) *respRaiserGet200 {
+    x.Value = value
+    return x
 }
 
 func (x *respRaiserGet200) SetValue(value string) *respRaiserGet200 {
@@ -865,7 +885,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1047,7 +1067,7 @@ var _ thrift.WritableResult = &respRaiserGet500{}
 
 func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
@@ -1103,23 +1123,43 @@ func (x *respRaiserGet500) GetS() *Serious {
     return x.S
 }
 
+func (x *respRaiserGet500) SetValueNonCompat(value string) *respRaiserGet500 {
+    x.Value = value
+    return x
+}
+
 func (x *respRaiserGet500) SetValue(value string) *respRaiserGet500 {
     x.Value = value
     return x
 }
 
-func (x *respRaiserGet500) SetF(value Fiery) *respRaiserGet500 {
+func (x *respRaiserGet500) SetFNonCompat(value Fiery) *respRaiserGet500 {
     x.F = &value
     return x
 }
 
-func (x *respRaiserGet500) SetB(value Banal) *respRaiserGet500 {
+func (x *respRaiserGet500) SetF(value *Fiery) *respRaiserGet500 {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserGet500) SetBNonCompat(value Banal) *respRaiserGet500 {
     x.B = &value
     return x
 }
 
-func (x *respRaiserGet500) SetS(value Serious) *respRaiserGet500 {
+func (x *respRaiserGet500) SetB(value *Banal) *respRaiserGet500 {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserGet500) SetSNonCompat(value Serious) *respRaiserGet500 {
     x.S = &value
+    return x
+}
+
+func (x *respRaiserGet500) SetS(value *Serious) *respRaiserGet500 {
+    x.S = value
     return x
 }
 
@@ -1217,7 +1257,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1228,7 +1268,7 @@ if err != nil {
     return err
 }
 
-    x.SetF(result)
+    x.SetFNonCompat(result)
     return nil
 }
 
@@ -1239,7 +1279,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1250,7 +1290,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 

@@ -357,7 +357,7 @@ var _ thrift.Struct = &reqGetEntityGetEntity{}
 
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{}).
-        SetR(*NewGetEntityRequest())
+        SetRNonCompat(*NewGetEntityRequest())
 }
 
 // Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
@@ -375,8 +375,13 @@ func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     return x.R
 }
 
-func (x *reqGetEntityGetEntity) SetR(value GetEntityRequest) *reqGetEntityGetEntity {
+func (x *reqGetEntityGetEntity) SetRNonCompat(value GetEntityRequest) *reqGetEntityGetEntity {
     x.R = &value
+    return x
+}
+
+func (x *reqGetEntityGetEntity) SetR(value *GetEntityRequest) *reqGetEntityGetEntity {
+    x.R = value
     return x
 }
 
@@ -411,7 +416,7 @@ if err != nil {
     return err
 }
 
-    x.SetR(result)
+    x.SetRNonCompat(result)
     return nil
 }
 
@@ -507,7 +512,7 @@ var _ thrift.WritableResult = &respGetEntityGetEntity{}
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{}).
-        SetValue(*NewGetEntityResponse())
+        SetValueNonCompat(*NewGetEntityResponse())
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().GetValue() instead.
@@ -525,8 +530,13 @@ func (x *respGetEntityGetEntity) GetValue() *GetEntityResponse {
     return x.Value
 }
 
-func (x *respGetEntityGetEntity) SetValue(value GetEntityResponse) *respGetEntityGetEntity {
+func (x *respGetEntityGetEntity) SetValueNonCompat(value GetEntityResponse) *respGetEntityGetEntity {
     x.Value = &value
+    return x
+}
+
+func (x *respGetEntityGetEntity) SetValue(value *GetEntityResponse) *respGetEntityGetEntity {
+    x.Value = value
     return x
 }
 
@@ -561,7 +571,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -740,7 +750,7 @@ var _ thrift.WritableResult = &respGetEntityGetBool{}
 
 func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{}).
-        SetValue(false)
+        SetValueNonCompat(false)
 }
 
 func (x *respGetEntityGetBool) GetValueNonCompat() bool {
@@ -749,6 +759,11 @@ func (x *respGetEntityGetBool) GetValueNonCompat() bool {
 
 func (x *respGetEntityGetBool) GetValue() bool {
     return x.Value
+}
+
+func (x *respGetEntityGetBool) SetValueNonCompat(value bool) *respGetEntityGetBool {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetBool) SetValue(value bool) *respGetEntityGetBool {
@@ -778,7 +793,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -957,7 +972,7 @@ var _ thrift.WritableResult = &respGetEntityGetByte{}
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respGetEntityGetByte) GetValueNonCompat() byte {
@@ -966,6 +981,11 @@ func (x *respGetEntityGetByte) GetValueNonCompat() byte {
 
 func (x *respGetEntityGetByte) GetValue() byte {
     return x.Value
+}
+
+func (x *respGetEntityGetByte) SetValueNonCompat(value byte) *respGetEntityGetByte {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetByte) SetValue(value byte) *respGetEntityGetByte {
@@ -995,7 +1015,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1174,7 +1194,7 @@ var _ thrift.WritableResult = &respGetEntityGetI16{}
 
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respGetEntityGetI16) GetValueNonCompat() int16 {
@@ -1183,6 +1203,11 @@ func (x *respGetEntityGetI16) GetValueNonCompat() int16 {
 
 func (x *respGetEntityGetI16) GetValue() int16 {
     return x.Value
+}
+
+func (x *respGetEntityGetI16) SetValueNonCompat(value int16) *respGetEntityGetI16 {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetI16) SetValue(value int16) *respGetEntityGetI16 {
@@ -1212,7 +1237,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1391,7 +1416,7 @@ var _ thrift.WritableResult = &respGetEntityGetI32{}
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respGetEntityGetI32) GetValueNonCompat() int32 {
@@ -1400,6 +1425,11 @@ func (x *respGetEntityGetI32) GetValueNonCompat() int32 {
 
 func (x *respGetEntityGetI32) GetValue() int32 {
     return x.Value
+}
+
+func (x *respGetEntityGetI32) SetValueNonCompat(value int32) *respGetEntityGetI32 {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetI32) SetValue(value int32) *respGetEntityGetI32 {
@@ -1429,7 +1459,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1608,7 +1638,7 @@ var _ thrift.WritableResult = &respGetEntityGetI64{}
 
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respGetEntityGetI64) GetValueNonCompat() int64 {
@@ -1617,6 +1647,11 @@ func (x *respGetEntityGetI64) GetValueNonCompat() int64 {
 
 func (x *respGetEntityGetI64) GetValue() int64 {
     return x.Value
+}
+
+func (x *respGetEntityGetI64) SetValueNonCompat(value int64) *respGetEntityGetI64 {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetI64) SetValue(value int64) *respGetEntityGetI64 {
@@ -1646,7 +1681,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1825,7 +1860,7 @@ var _ thrift.WritableResult = &respGetEntityGetDouble{}
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{}).
-        SetValue(0.0)
+        SetValueNonCompat(0.0)
 }
 
 func (x *respGetEntityGetDouble) GetValueNonCompat() float64 {
@@ -1834,6 +1869,11 @@ func (x *respGetEntityGetDouble) GetValueNonCompat() float64 {
 
 func (x *respGetEntityGetDouble) GetValue() float64 {
     return x.Value
+}
+
+func (x *respGetEntityGetDouble) SetValueNonCompat(value float64) *respGetEntityGetDouble {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetDouble) SetValue(value float64) *respGetEntityGetDouble {
@@ -1863,7 +1903,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2042,7 +2082,7 @@ var _ thrift.WritableResult = &respGetEntityGetString{}
 
 func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 func (x *respGetEntityGetString) GetValueNonCompat() string {
@@ -2051,6 +2091,11 @@ func (x *respGetEntityGetString) GetValueNonCompat() string {
 
 func (x *respGetEntityGetString) GetValue() string {
     return x.Value
+}
+
+func (x *respGetEntityGetString) SetValueNonCompat(value string) *respGetEntityGetString {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetString) SetValue(value string) *respGetEntityGetString {
@@ -2080,7 +2125,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2259,7 +2304,7 @@ var _ thrift.WritableResult = &respGetEntityGetBinary{}
 
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{}).
-        SetValue([]byte(""))
+        SetValueNonCompat([]byte(""))
 }
 
 func (x *respGetEntityGetBinary) GetValueNonCompat() []byte {
@@ -2272,6 +2317,11 @@ func (x *respGetEntityGetBinary) GetValue() []byte {
     }
 
     return x.Value
+}
+
+func (x *respGetEntityGetBinary) SetValueNonCompat(value []byte) *respGetEntityGetBinary {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetBinary) SetValue(value []byte) *respGetEntityGetBinary {
@@ -2309,7 +2359,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2488,7 +2538,7 @@ var _ thrift.WritableResult = &respGetEntityGetMap{}
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{}).
-        SetValue(make(map[string]string))
+        SetValueNonCompat(make(map[string]string))
 }
 
 func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
@@ -2501,6 +2551,11 @@ func (x *respGetEntityGetMap) GetValue() map[string]string {
     }
 
     return x.Value
+}
+
+func (x *respGetEntityGetMap) SetValueNonCompat(value map[string]string) *respGetEntityGetMap {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetMap) SetValue(value map[string]string) *respGetEntityGetMap {
@@ -2584,7 +2639,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2763,7 +2818,7 @@ var _ thrift.WritableResult = &respGetEntityGetSet{}
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{}).
-        SetValue(make([]string, 0))
+        SetValueNonCompat(make([]string, 0))
 }
 
 func (x *respGetEntityGetSet) GetValueNonCompat() []string {
@@ -2776,6 +2831,11 @@ func (x *respGetEntityGetSet) GetValue() []string {
     }
 
     return x.Value
+}
+
+func (x *respGetEntityGetSet) SetValueNonCompat(value []string) *respGetEntityGetSet {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetSet) SetValue(value []string) *respGetEntityGetSet {
@@ -2842,7 +2902,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -3021,7 +3081,7 @@ var _ thrift.WritableResult = &respGetEntityGetList{}
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{}).
-        SetValue(make([]string, 0))
+        SetValueNonCompat(make([]string, 0))
 }
 
 func (x *respGetEntityGetList) GetValueNonCompat() []string {
@@ -3034,6 +3094,11 @@ func (x *respGetEntityGetList) GetValue() []string {
     }
 
     return x.Value
+}
+
+func (x *respGetEntityGetList) SetValueNonCompat(value []string) *respGetEntityGetList {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetList) SetValue(value []string) *respGetEntityGetList {
@@ -3100,7 +3165,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -3201,9 +3266,9 @@ var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{}).
-        SetNumPos(0).
-        SetNumNeg1(0).
-        SetNumNeg2(0)
+        SetNumPosNonCompat(0).
+        SetNumNeg1NonCompat(0).
+        SetNumNeg2NonCompat(0)
 }
 
 func (x *reqGetEntityGetLegacyStuff) GetNumPosNonCompat() int64 {
@@ -3230,13 +3295,28 @@ func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
     return x.NumNeg2
 }
 
+func (x *reqGetEntityGetLegacyStuff) SetNumPosNonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
+    return x
+}
+
 func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
     x.NumPos = value
     return x
 }
 
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg1NonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg1 = value
+    return x
+}
+
 func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(value int64) *reqGetEntityGetLegacyStuff {
     x.NumNeg1 = value
+    return x
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg2NonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg2 = value
     return x
 }
 
@@ -3299,7 +3379,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumPos(result)
+    x.SetNumPosNonCompat(result)
     return nil
 }
 
@@ -3309,7 +3389,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNeg1(result)
+    x.SetNumNeg1NonCompat(result)
     return nil
 }
 
@@ -3319,7 +3399,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNeg2(result)
+    x.SetNumNeg2NonCompat(result)
     return nil
 }
 
@@ -3441,7 +3521,7 @@ var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
 
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respGetEntityGetLegacyStuff) GetValueNonCompat() int32 {
@@ -3450,6 +3530,11 @@ func (x *respGetEntityGetLegacyStuff) GetValueNonCompat() int32 {
 
 func (x *respGetEntityGetLegacyStuff) GetValue() int32 {
     return x.Value
+}
+
+func (x *respGetEntityGetLegacyStuff) SetValueNonCompat(value int32) *respGetEntityGetLegacyStuff {
+    x.Value = value
+    return x
 }
 
 func (x *respGetEntityGetLegacyStuff) SetValue(value int32) *respGetEntityGetLegacyStuff {
@@ -3479,7 +3564,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

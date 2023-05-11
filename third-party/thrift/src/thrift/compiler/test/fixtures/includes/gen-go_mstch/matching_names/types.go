@@ -25,7 +25,7 @@ var _ thrift.Struct = &IncludesAlso{}
 
 func NewIncludesAlso() *IncludesAlso {
     return (&IncludesAlso{}).
-        SetAlso(*includesAlso.NewAlso())
+        SetAlsoNonCompat(*includesAlso.NewAlso())
 }
 
 // Deprecated: Use NewIncludesAlso().GetAlso() instead.
@@ -43,8 +43,13 @@ func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     return x.Also
 }
 
-func (x *IncludesAlso) SetAlso(value includesAlso.Also) *IncludesAlso {
+func (x *IncludesAlso) SetAlsoNonCompat(value includesAlso.Also) *IncludesAlso {
     x.Also = &value
+    return x
+}
+
+func (x *IncludesAlso) SetAlso(value *includesAlso.Also) *IncludesAlso {
+    x.Also = value
     return x
 }
 
@@ -79,7 +84,7 @@ if err != nil {
     return err
 }
 
-    x.SetAlso(result)
+    x.SetAlsoNonCompat(result)
     return nil
 }
 

@@ -226,8 +226,8 @@ var _ thrift.Struct = &TypeUri{}
 
 func NewTypeUri() *TypeUri {
     return (&TypeUri{}).
-        SetUri(NewUri()).
-        SetTypeHashPrefixSha2_256(NewByteString())
+        SetUriNonCompat(NewUri()).
+        SetTypeHashPrefixSha2_256NonCompat(NewByteString())
 }
 
 // Deprecated: Use NewTypeUri().GetUri() instead.
@@ -257,8 +257,18 @@ func (x *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
     return x.TypeHashPrefixSha2_256
 }
 
-func (x *TypeUri) SetUri(value Uri) *TypeUri {
+func (x *TypeUri) SetUriNonCompat(value Uri) *TypeUri {
     x.Uri = &value
+    return x
+}
+
+func (x *TypeUri) SetUri(value *Uri) *TypeUri {
+    x.Uri = value
+    return x
+}
+
+func (x *TypeUri) SetTypeHashPrefixSha2_256NonCompat(value ByteString) *TypeUri {
+    x.TypeHashPrefixSha2_256 = value
     return x
 }
 
@@ -323,7 +333,7 @@ if err != nil {
     return err
 }
 
-    x.SetUri(result)
+    x.SetUriNonCompat(result)
     return nil
 }
 
@@ -333,7 +343,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeHashPrefixSha2_256(result)
+    x.SetTypeHashPrefixSha2_256NonCompat(result)
     return nil
 }
 
@@ -472,23 +482,23 @@ var _ thrift.Struct = &TypeName{}
 
 func NewTypeName() *TypeName {
     return (&TypeName{}).
-        SetBoolType(0).
-        SetByteType(0).
-        SetI16Type(0).
-        SetI32Type(0).
-        SetI64Type(0).
-        SetFloatType(0).
-        SetDoubleType(0).
-        SetStringType(0).
-        SetBinaryType(0).
-        SetEnumType(*NewTypeUri()).
-        SetTypedefType(*NewTypeUri()).
-        SetStructType(*NewTypeUri()).
-        SetUnionType(*NewTypeUri()).
-        SetExceptionType(*NewTypeUri()).
-        SetListType(0).
-        SetSetType(0).
-        SetMapType(0)
+        SetBoolTypeNonCompat(0).
+        SetByteTypeNonCompat(0).
+        SetI16TypeNonCompat(0).
+        SetI32TypeNonCompat(0).
+        SetI64TypeNonCompat(0).
+        SetFloatTypeNonCompat(0).
+        SetDoubleTypeNonCompat(0).
+        SetStringTypeNonCompat(0).
+        SetBinaryTypeNonCompat(0).
+        SetEnumTypeNonCompat(*NewTypeUri()).
+        SetTypedefTypeNonCompat(*NewTypeUri()).
+        SetStructTypeNonCompat(*NewTypeUri()).
+        SetUnionTypeNonCompat(*NewTypeUri()).
+        SetExceptionTypeNonCompat(*NewTypeUri()).
+        SetListTypeNonCompat(0).
+        SetSetTypeNonCompat(0).
+        SetMapTypeNonCompat(0)
 }
 
 // Deprecated: Use NewTypeName().GetBoolType() instead.
@@ -746,88 +756,173 @@ func (x *TypeName) GetMapType() Void {
     return *x.MapType
 }
 
-func (x *TypeName) SetBoolType(value Void) *TypeName {
+func (x *TypeName) SetBoolTypeNonCompat(value Void) *TypeName {
     x.BoolType = &value
     return x
 }
 
-func (x *TypeName) SetByteType(value Void) *TypeName {
+func (x *TypeName) SetBoolType(value *Void) *TypeName {
+    x.BoolType = value
+    return x
+}
+
+func (x *TypeName) SetByteTypeNonCompat(value Void) *TypeName {
     x.ByteType = &value
     return x
 }
 
-func (x *TypeName) SetI16Type(value Void) *TypeName {
+func (x *TypeName) SetByteType(value *Void) *TypeName {
+    x.ByteType = value
+    return x
+}
+
+func (x *TypeName) SetI16TypeNonCompat(value Void) *TypeName {
     x.I16Type = &value
     return x
 }
 
-func (x *TypeName) SetI32Type(value Void) *TypeName {
+func (x *TypeName) SetI16Type(value *Void) *TypeName {
+    x.I16Type = value
+    return x
+}
+
+func (x *TypeName) SetI32TypeNonCompat(value Void) *TypeName {
     x.I32Type = &value
     return x
 }
 
-func (x *TypeName) SetI64Type(value Void) *TypeName {
+func (x *TypeName) SetI32Type(value *Void) *TypeName {
+    x.I32Type = value
+    return x
+}
+
+func (x *TypeName) SetI64TypeNonCompat(value Void) *TypeName {
     x.I64Type = &value
     return x
 }
 
-func (x *TypeName) SetFloatType(value Void) *TypeName {
+func (x *TypeName) SetI64Type(value *Void) *TypeName {
+    x.I64Type = value
+    return x
+}
+
+func (x *TypeName) SetFloatTypeNonCompat(value Void) *TypeName {
     x.FloatType = &value
     return x
 }
 
-func (x *TypeName) SetDoubleType(value Void) *TypeName {
+func (x *TypeName) SetFloatType(value *Void) *TypeName {
+    x.FloatType = value
+    return x
+}
+
+func (x *TypeName) SetDoubleTypeNonCompat(value Void) *TypeName {
     x.DoubleType = &value
     return x
 }
 
-func (x *TypeName) SetStringType(value Void) *TypeName {
+func (x *TypeName) SetDoubleType(value *Void) *TypeName {
+    x.DoubleType = value
+    return x
+}
+
+func (x *TypeName) SetStringTypeNonCompat(value Void) *TypeName {
     x.StringType = &value
     return x
 }
 
-func (x *TypeName) SetBinaryType(value Void) *TypeName {
+func (x *TypeName) SetStringType(value *Void) *TypeName {
+    x.StringType = value
+    return x
+}
+
+func (x *TypeName) SetBinaryTypeNonCompat(value Void) *TypeName {
     x.BinaryType = &value
     return x
 }
 
-func (x *TypeName) SetEnumType(value TypeUri) *TypeName {
+func (x *TypeName) SetBinaryType(value *Void) *TypeName {
+    x.BinaryType = value
+    return x
+}
+
+func (x *TypeName) SetEnumTypeNonCompat(value TypeUri) *TypeName {
     x.EnumType = &value
     return x
 }
 
-func (x *TypeName) SetTypedefType(value TypeUri) *TypeName {
+func (x *TypeName) SetEnumType(value *TypeUri) *TypeName {
+    x.EnumType = value
+    return x
+}
+
+func (x *TypeName) SetTypedefTypeNonCompat(value TypeUri) *TypeName {
     x.TypedefType = &value
     return x
 }
 
-func (x *TypeName) SetStructType(value TypeUri) *TypeName {
+func (x *TypeName) SetTypedefType(value *TypeUri) *TypeName {
+    x.TypedefType = value
+    return x
+}
+
+func (x *TypeName) SetStructTypeNonCompat(value TypeUri) *TypeName {
     x.StructType = &value
     return x
 }
 
-func (x *TypeName) SetUnionType(value TypeUri) *TypeName {
+func (x *TypeName) SetStructType(value *TypeUri) *TypeName {
+    x.StructType = value
+    return x
+}
+
+func (x *TypeName) SetUnionTypeNonCompat(value TypeUri) *TypeName {
     x.UnionType = &value
     return x
 }
 
-func (x *TypeName) SetExceptionType(value TypeUri) *TypeName {
+func (x *TypeName) SetUnionType(value *TypeUri) *TypeName {
+    x.UnionType = value
+    return x
+}
+
+func (x *TypeName) SetExceptionTypeNonCompat(value TypeUri) *TypeName {
     x.ExceptionType = &value
     return x
 }
 
-func (x *TypeName) SetListType(value Void) *TypeName {
+func (x *TypeName) SetExceptionType(value *TypeUri) *TypeName {
+    x.ExceptionType = value
+    return x
+}
+
+func (x *TypeName) SetListTypeNonCompat(value Void) *TypeName {
     x.ListType = &value
     return x
 }
 
-func (x *TypeName) SetSetType(value Void) *TypeName {
+func (x *TypeName) SetListType(value *Void) *TypeName {
+    x.ListType = value
+    return x
+}
+
+func (x *TypeName) SetSetTypeNonCompat(value Void) *TypeName {
     x.SetType = &value
     return x
 }
 
-func (x *TypeName) SetMapType(value Void) *TypeName {
+func (x *TypeName) SetSetType(value *Void) *TypeName {
+    x.SetType = value
+    return x
+}
+
+func (x *TypeName) SetMapTypeNonCompat(value Void) *TypeName {
     x.MapType = &value
+    return x
+}
+
+func (x *TypeName) SetMapType(value *Void) *TypeName {
+    x.MapType = value
     return x
 }
 
@@ -1246,7 +1341,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetBoolType(result)
+    x.SetBoolTypeNonCompat(result)
     return nil
 }
 
@@ -1257,7 +1352,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetByteType(result)
+    x.SetByteTypeNonCompat(result)
     return nil
 }
 
@@ -1268,7 +1363,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI16Type(result)
+    x.SetI16TypeNonCompat(result)
     return nil
 }
 
@@ -1279,7 +1374,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI32Type(result)
+    x.SetI32TypeNonCompat(result)
     return nil
 }
 
@@ -1290,7 +1385,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI64Type(result)
+    x.SetI64TypeNonCompat(result)
     return nil
 }
 
@@ -1301,7 +1396,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetFloatType(result)
+    x.SetFloatTypeNonCompat(result)
     return nil
 }
 
@@ -1312,7 +1407,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetDoubleType(result)
+    x.SetDoubleTypeNonCompat(result)
     return nil
 }
 
@@ -1323,7 +1418,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetStringType(result)
+    x.SetStringTypeNonCompat(result)
     return nil
 }
 
@@ -1334,7 +1429,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetBinaryType(result)
+    x.SetBinaryTypeNonCompat(result)
     return nil
 }
 
@@ -1345,7 +1440,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnumType(result)
+    x.SetEnumTypeNonCompat(result)
     return nil
 }
 
@@ -1356,7 +1451,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefType(result)
+    x.SetTypedefTypeNonCompat(result)
     return nil
 }
 
@@ -1367,7 +1462,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructType(result)
+    x.SetStructTypeNonCompat(result)
     return nil
 }
 
@@ -1378,7 +1473,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionType(result)
+    x.SetUnionTypeNonCompat(result)
     return nil
 }
 
@@ -1389,7 +1484,7 @@ if err != nil {
     return err
 }
 
-    x.SetExceptionType(result)
+    x.SetExceptionTypeNonCompat(result)
     return nil
 }
 
@@ -1400,7 +1495,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetListType(result)
+    x.SetListTypeNonCompat(result)
     return nil
 }
 
@@ -1411,7 +1506,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetSetType(result)
+    x.SetSetTypeNonCompat(result)
     return nil
 }
 
@@ -1422,7 +1517,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetMapType(result)
+    x.SetMapTypeNonCompat(result)
     return nil
 }
 

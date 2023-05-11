@@ -25,7 +25,7 @@ var _ thrift.Struct = &Fiery{}
 
 func NewFiery() *Fiery {
     return (&Fiery{}).
-        SetMessage("")
+        SetMessageNonCompat("")
 }
 
 func (x *Fiery) GetMessageNonCompat() string {
@@ -34,6 +34,11 @@ func (x *Fiery) GetMessageNonCompat() string {
 
 func (x *Fiery) GetMessage() string {
     return x.Message
+}
+
+func (x *Fiery) SetMessageNonCompat(value string) *Fiery {
+    x.Message = value
+    return x
 }
 
 func (x *Fiery) SetMessage(value string) *Fiery {
@@ -63,7 +68,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 
@@ -180,8 +185,13 @@ func (x *Serious) GetSonnet() string {
     return *x.Sonnet
 }
 
-func (x *Serious) SetSonnet(value string) *Serious {
+func (x *Serious) SetSonnetNonCompat(value string) *Serious {
     x.Sonnet = &value
+    return x
+}
+
+func (x *Serious) SetSonnet(value *string) *Serious {
+    x.Sonnet = value
     return x
 }
 
@@ -215,7 +225,7 @@ if err != nil {
     return err
 }
 
-    x.SetSonnet(result)
+    x.SetSonnetNonCompat(result)
     return nil
 }
 
@@ -316,8 +326,8 @@ var _ thrift.Struct = &ComplexFieldNames{}
 
 func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{}).
-        SetErrorMessage("").
-        SetInternalErrorMessage("")
+        SetErrorMessageNonCompat("").
+        SetInternalErrorMessageNonCompat("")
 }
 
 func (x *ComplexFieldNames) GetErrorMessageNonCompat() string {
@@ -336,8 +346,18 @@ func (x *ComplexFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
 
+func (x *ComplexFieldNames) SetErrorMessageNonCompat(value string) *ComplexFieldNames {
+    x.ErrorMessage = value
+    return x
+}
+
 func (x *ComplexFieldNames) SetErrorMessage(value string) *ComplexFieldNames {
     x.ErrorMessage = value
+    return x
+}
+
+func (x *ComplexFieldNames) SetInternalErrorMessageNonCompat(value string) *ComplexFieldNames {
+    x.InternalErrorMessage = value
     return x
 }
 
@@ -384,7 +404,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorMessage(result)
+    x.SetErrorMessageNonCompat(result)
     return nil
 }
 
@@ -394,7 +414,7 @@ if err != nil {
     return err
 }
 
-    x.SetInternalErrorMessage(result)
+    x.SetInternalErrorMessageNonCompat(result)
     return nil
 }
 
@@ -508,8 +528,8 @@ var _ thrift.Struct = &CustomFieldNames{}
 
 func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{}).
-        SetErrorMessage("").
-        SetInternalErrorMessage("")
+        SetErrorMessageNonCompat("").
+        SetInternalErrorMessageNonCompat("")
 }
 
 func (x *CustomFieldNames) GetErrorMessageNonCompat() string {
@@ -528,8 +548,18 @@ func (x *CustomFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
 
+func (x *CustomFieldNames) SetErrorMessageNonCompat(value string) *CustomFieldNames {
+    x.ErrorMessage = value
+    return x
+}
+
 func (x *CustomFieldNames) SetErrorMessage(value string) *CustomFieldNames {
     x.ErrorMessage = value
+    return x
+}
+
+func (x *CustomFieldNames) SetInternalErrorMessageNonCompat(value string) *CustomFieldNames {
+    x.InternalErrorMessage = value
     return x
 }
 
@@ -576,7 +606,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorMessage(result)
+    x.SetErrorMessageNonCompat(result)
     return nil
 }
 
@@ -586,7 +616,7 @@ if err != nil {
     return err
 }
 
-    x.SetInternalErrorMessage(result)
+    x.SetInternalErrorMessageNonCompat(result)
     return nil
 }
 
@@ -700,8 +730,8 @@ var _ thrift.Struct = &ExceptionWithPrimitiveField{}
 
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{}).
-        SetMessage("").
-        SetErrorCode(0)
+        SetMessageNonCompat("").
+        SetErrorCodeNonCompat(0)
 }
 
 func (x *ExceptionWithPrimitiveField) GetMessageNonCompat() string {
@@ -720,8 +750,18 @@ func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
     return x.ErrorCode
 }
 
+func (x *ExceptionWithPrimitiveField) SetMessageNonCompat(value string) *ExceptionWithPrimitiveField {
+    x.Message = value
+    return x
+}
+
 func (x *ExceptionWithPrimitiveField) SetMessage(value string) *ExceptionWithPrimitiveField {
     x.Message = value
+    return x
+}
+
+func (x *ExceptionWithPrimitiveField) SetErrorCodeNonCompat(value int32) *ExceptionWithPrimitiveField {
+    x.ErrorCode = value
     return x
 }
 
@@ -768,7 +808,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 
@@ -778,7 +818,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorCode(result)
+    x.SetErrorCodeNonCompat(result)
     return nil
 }
 
@@ -892,8 +932,8 @@ var _ thrift.Struct = &ExceptionWithStructuredAnnotation{}
 
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{}).
-        SetMessageField("").
-        SetErrorCode(0)
+        SetMessageFieldNonCompat("").
+        SetErrorCodeNonCompat(0)
 }
 
 func (x *ExceptionWithStructuredAnnotation) GetMessageFieldNonCompat() string {
@@ -912,8 +952,18 @@ func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
     return x.ErrorCode
 }
 
+func (x *ExceptionWithStructuredAnnotation) SetMessageFieldNonCompat(value string) *ExceptionWithStructuredAnnotation {
+    x.MessageField = value
+    return x
+}
+
 func (x *ExceptionWithStructuredAnnotation) SetMessageField(value string) *ExceptionWithStructuredAnnotation {
     x.MessageField = value
+    return x
+}
+
+func (x *ExceptionWithStructuredAnnotation) SetErrorCodeNonCompat(value int32) *ExceptionWithStructuredAnnotation {
+    x.ErrorCode = value
     return x
 }
 
@@ -960,7 +1010,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageField(result)
+    x.SetMessageFieldNonCompat(result)
     return nil
 }
 
@@ -970,7 +1020,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorCode(result)
+    x.SetErrorCodeNonCompat(result)
     return nil
 }
 

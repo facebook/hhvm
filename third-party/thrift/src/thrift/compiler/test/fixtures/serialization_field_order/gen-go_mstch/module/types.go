@@ -27,9 +27,9 @@ var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetField1(0).
-        SetField2(0).
-        SetField3(0)
+        SetField1NonCompat(0).
+        SetField2NonCompat(0).
+        SetField3NonCompat(0)
 }
 
 func (x *Foo) GetField1NonCompat() int32 {
@@ -56,13 +56,28 @@ func (x *Foo) GetField3() int32 {
     return x.Field3
 }
 
+func (x *Foo) SetField1NonCompat(value int32) *Foo {
+    x.Field1 = value
+    return x
+}
+
 func (x *Foo) SetField1(value int32) *Foo {
     x.Field1 = value
     return x
 }
 
+func (x *Foo) SetField2NonCompat(value int32) *Foo {
+    x.Field2 = value
+    return x
+}
+
 func (x *Foo) SetField2(value int32) *Foo {
     x.Field2 = value
+    return x
+}
+
+func (x *Foo) SetField3NonCompat(value int32) *Foo {
+    x.Field3 = value
     return x
 }
 
@@ -125,7 +140,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1(result)
+    x.SetField1NonCompat(result)
     return nil
 }
 
@@ -135,7 +150,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2(result)
+    x.SetField2NonCompat(result)
     return nil
 }
 
@@ -145,7 +160,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3(result)
+    x.SetField3NonCompat(result)
     return nil
 }
 
@@ -269,9 +284,9 @@ var _ thrift.Struct = &Foo2{}
 
 func NewFoo2() *Foo2 {
     return (&Foo2{}).
-        SetField1(0).
-        SetField2(0).
-        SetField3(0)
+        SetField1NonCompat(0).
+        SetField2NonCompat(0).
+        SetField3NonCompat(0)
 }
 
 func (x *Foo2) GetField1NonCompat() int32 {
@@ -298,13 +313,28 @@ func (x *Foo2) GetField3() int32 {
     return x.Field3
 }
 
+func (x *Foo2) SetField1NonCompat(value int32) *Foo2 {
+    x.Field1 = value
+    return x
+}
+
 func (x *Foo2) SetField1(value int32) *Foo2 {
     x.Field1 = value
     return x
 }
 
+func (x *Foo2) SetField2NonCompat(value int32) *Foo2 {
+    x.Field2 = value
+    return x
+}
+
 func (x *Foo2) SetField2(value int32) *Foo2 {
     x.Field2 = value
+    return x
+}
+
+func (x *Foo2) SetField3NonCompat(value int32) *Foo2 {
+    x.Field3 = value
     return x
 }
 
@@ -367,7 +397,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1(result)
+    x.SetField1NonCompat(result)
     return nil
 }
 
@@ -377,7 +407,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2(result)
+    x.SetField2NonCompat(result)
     return nil
 }
 
@@ -387,7 +417,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3(result)
+    x.SetField3NonCompat(result)
     return nil
 }
 

@@ -25,7 +25,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
 
         // Fields with given default values.
         }}{{#field:value}}.
-        {{field:go_setter_name}}({{!
+        {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
           }}{{^type:base?}}
               {{#type:struct?}}*{{/type:struct?}}{{> const/value}},
@@ -39,7 +39,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
         // Non-optional fields without given default values.
         }}{{^field:value}}{{!
         }}{{^field:optional?}}.
-        {{field:go_setter_name}}({{!
+        {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
             }}{{#type:struct?}}*{{/type:struct?}}{{> common/zero_value}}{{!
           }}{{/field:type}}{{!

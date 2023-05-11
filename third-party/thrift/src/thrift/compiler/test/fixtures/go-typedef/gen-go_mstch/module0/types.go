@@ -24,8 +24,8 @@ var _ thrift.Struct = &Accessory{}
 
 func NewAccessory() *Accessory {
     return (&Accessory{}).
-        SetInventoryId(0).
-        SetName("")
+        SetInventoryIdNonCompat(0).
+        SetNameNonCompat("")
 }
 
 func (x *Accessory) GetInventoryIdNonCompat() int32 {
@@ -44,8 +44,18 @@ func (x *Accessory) GetName() string {
     return x.Name
 }
 
+func (x *Accessory) SetInventoryIdNonCompat(value int32) *Accessory {
+    x.InventoryId = value
+    return x
+}
+
 func (x *Accessory) SetInventoryId(value int32) *Accessory {
     x.InventoryId = value
+    return x
+}
+
+func (x *Accessory) SetNameNonCompat(value string) *Accessory {
+    x.Name = value
     return x
 }
 
@@ -92,7 +102,7 @@ if err != nil {
     return err
 }
 
-    x.SetInventoryId(result)
+    x.SetInventoryIdNonCompat(result)
     return nil
 }
 
@@ -102,7 +112,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -212,8 +222,8 @@ var _ thrift.Struct = &PartName{}
 
 func NewPartName() *PartName {
     return (&PartName{}).
-        SetInventoryId(0).
-        SetName("")
+        SetInventoryIdNonCompat(0).
+        SetNameNonCompat("")
 }
 
 func (x *PartName) GetInventoryIdNonCompat() int32 {
@@ -232,8 +242,18 @@ func (x *PartName) GetName() string {
     return x.Name
 }
 
+func (x *PartName) SetInventoryIdNonCompat(value int32) *PartName {
+    x.InventoryId = value
+    return x
+}
+
 func (x *PartName) SetInventoryId(value int32) *PartName {
     x.InventoryId = value
+    return x
+}
+
+func (x *PartName) SetNameNonCompat(value string) *PartName {
+    x.Name = value
     return x
 }
 
@@ -280,7 +300,7 @@ if err != nil {
     return err
 }
 
-    x.SetInventoryId(result)
+    x.SetInventoryIdNonCompat(result)
     return nil
 }
 
@@ -290,7 +310,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 

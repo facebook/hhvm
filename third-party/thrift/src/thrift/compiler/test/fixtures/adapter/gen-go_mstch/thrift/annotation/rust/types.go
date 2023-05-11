@@ -25,7 +25,7 @@ var _ thrift.Struct = &Adapter{}
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -34,6 +34,11 @@ func (x *Adapter) GetNameNonCompat() string {
 
 func (x *Adapter) GetName() string {
     return x.Name
+}
+
+func (x *Adapter) SetNameNonCompat(value string) *Adapter {
+    x.Name = value
+    return x
 }
 
 func (x *Adapter) SetName(value string) *Adapter {
@@ -63,7 +68,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -159,7 +164,7 @@ var _ thrift.Struct = &Derive{}
 
 func NewDerive() *Derive {
     return (&Derive{}).
-        SetDerives(make([]string, 0))
+        SetDerivesNonCompat(make([]string, 0))
 }
 
 func (x *Derive) GetDerivesNonCompat() []string {
@@ -172,6 +177,11 @@ func (x *Derive) GetDerives() []string {
     }
 
     return x.Derives
+}
+
+func (x *Derive) SetDerivesNonCompat(value []string) *Derive {
+    x.Derives = value
+    return x
 }
 
 func (x *Derive) SetDerives(value []string) *Derive {
@@ -238,7 +248,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetDerives(result)
+    x.SetDerivesNonCompat(result)
     return nil
 }
 
@@ -334,7 +344,7 @@ var _ thrift.Struct = &ServiceExn{}
 
 func NewServiceExn() *ServiceExn {
     return (&ServiceExn{}).
-        SetAnyhowToApplicationExn(false)
+        SetAnyhowToApplicationExnNonCompat(false)
 }
 
 func (x *ServiceExn) GetAnyhowToApplicationExnNonCompat() bool {
@@ -343,6 +353,11 @@ func (x *ServiceExn) GetAnyhowToApplicationExnNonCompat() bool {
 
 func (x *ServiceExn) GetAnyhowToApplicationExn() bool {
     return x.AnyhowToApplicationExn
+}
+
+func (x *ServiceExn) SetAnyhowToApplicationExnNonCompat(value bool) *ServiceExn {
+    x.AnyhowToApplicationExn = value
+    return x
 }
 
 func (x *ServiceExn) SetAnyhowToApplicationExn(value bool) *ServiceExn {
@@ -372,7 +387,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnyhowToApplicationExn(result)
+    x.SetAnyhowToApplicationExnNonCompat(result)
     return nil
 }
 

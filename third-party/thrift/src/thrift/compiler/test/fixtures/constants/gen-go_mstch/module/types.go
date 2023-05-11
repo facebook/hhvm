@@ -353,8 +353,8 @@ var _ thrift.Struct = &Internship{}
 
 func NewInternship() *Internship {
     return (&Internship{}).
-        SetWeeks(0).
-        SetTitle("")
+        SetWeeksNonCompat(0).
+        SetTitleNonCompat("")
 }
 
 // Deprecated: Use NewInternship().GetEmployer() instead.
@@ -418,8 +418,18 @@ func (x *Internship) GetSchool() string {
     return *x.School
 }
 
+func (x *Internship) SetWeeksNonCompat(value int32) *Internship {
+    x.Weeks = value
+    return x
+}
+
 func (x *Internship) SetWeeks(value int32) *Internship {
     x.Weeks = value
+    return x
+}
+
+func (x *Internship) SetTitleNonCompat(value string) *Internship {
+    x.Title = value
     return x
 }
 
@@ -428,18 +438,33 @@ func (x *Internship) SetTitle(value string) *Internship {
     return x
 }
 
-func (x *Internship) SetEmployer(value Company) *Internship {
+func (x *Internship) SetEmployerNonCompat(value Company) *Internship {
     x.Employer = &value
     return x
 }
 
-func (x *Internship) SetCompensation(value float64) *Internship {
+func (x *Internship) SetEmployer(value *Company) *Internship {
+    x.Employer = value
+    return x
+}
+
+func (x *Internship) SetCompensationNonCompat(value float64) *Internship {
     x.Compensation = &value
     return x
 }
 
-func (x *Internship) SetSchool(value string) *Internship {
+func (x *Internship) SetCompensation(value *float64) *Internship {
+    x.Compensation = value
+    return x
+}
+
+func (x *Internship) SetSchoolNonCompat(value string) *Internship {
     x.School = &value
+    return x
+}
+
+func (x *Internship) SetSchool(value *string) *Internship {
+    x.School = value
     return x
 }
 
@@ -553,7 +578,7 @@ if err != nil {
     return err
 }
 
-    x.SetWeeks(result)
+    x.SetWeeksNonCompat(result)
     return nil
 }
 
@@ -563,7 +588,7 @@ if err != nil {
     return err
 }
 
-    x.SetTitle(result)
+    x.SetTitleNonCompat(result)
     return nil
 }
 
@@ -574,7 +599,7 @@ if err != nil {
 }
 result := Company(enumResult)
 
-    x.SetEmployer(result)
+    x.SetEmployerNonCompat(result)
     return nil
 }
 
@@ -584,7 +609,7 @@ if err != nil {
     return err
 }
 
-    x.SetCompensation(result)
+    x.SetCompensationNonCompat(result)
     return nil
 }
 
@@ -594,7 +619,7 @@ if err != nil {
     return err
 }
 
-    x.SetSchool(result)
+    x.SetSchoolNonCompat(result)
     return nil
 }
 
@@ -743,8 +768,8 @@ var _ thrift.Struct = &Range{}
 
 func NewRange() *Range {
     return (&Range{}).
-        SetMin(0).
-        SetMax(0)
+        SetMinNonCompat(0).
+        SetMaxNonCompat(0)
 }
 
 func (x *Range) GetMinNonCompat() int32 {
@@ -763,8 +788,18 @@ func (x *Range) GetMax() int32 {
     return x.Max
 }
 
+func (x *Range) SetMinNonCompat(value int32) *Range {
+    x.Min = value
+    return x
+}
+
 func (x *Range) SetMin(value int32) *Range {
     x.Min = value
+    return x
+}
+
+func (x *Range) SetMaxNonCompat(value int32) *Range {
+    x.Max = value
     return x
 }
 
@@ -811,7 +846,7 @@ if err != nil {
     return err
 }
 
-    x.SetMin(result)
+    x.SetMinNonCompat(result)
     return nil
 }
 
@@ -821,7 +856,7 @@ if err != nil {
     return err
 }
 
-    x.SetMax(result)
+    x.SetMaxNonCompat(result)
     return nil
 }
 
@@ -931,8 +966,8 @@ var _ thrift.Struct = &Struct1{}
 
 func NewStruct1() *Struct1 {
     return (&Struct1{}).
-        SetA(1234567).
-        SetB("<uninitialized>")
+        SetANonCompat(1234567).
+        SetBNonCompat("<uninitialized>")
 }
 
 func (x *Struct1) GetANonCompat() int32 {
@@ -951,8 +986,18 @@ func (x *Struct1) GetB() string {
     return x.B
 }
 
+func (x *Struct1) SetANonCompat(value int32) *Struct1 {
+    x.A = value
+    return x
+}
+
 func (x *Struct1) SetA(value int32) *Struct1 {
     x.A = value
+    return x
+}
+
+func (x *Struct1) SetBNonCompat(value string) *Struct1 {
+    x.B = value
     return x
 }
 
@@ -999,7 +1044,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1009,7 +1054,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1121,10 +1166,10 @@ var _ thrift.Struct = &Struct2{}
 
 func NewStruct2() *Struct2 {
     return (&Struct2{}).
-        SetA(0).
-        SetB("").
-        SetC(*NewStruct1()).
-        SetD(make([]int32, 0))
+        SetANonCompat(0).
+        SetBNonCompat("").
+        SetCNonCompat(*NewStruct1()).
+        SetDNonCompat(make([]int32, 0))
 }
 
 // Deprecated: Use NewStruct2().GetC() instead.
@@ -1170,8 +1215,18 @@ func (x *Struct2) GetD() []int32 {
     return x.D
 }
 
+func (x *Struct2) SetANonCompat(value int32) *Struct2 {
+    x.A = value
+    return x
+}
+
 func (x *Struct2) SetA(value int32) *Struct2 {
     x.A = value
+    return x
+}
+
+func (x *Struct2) SetBNonCompat(value string) *Struct2 {
+    x.B = value
     return x
 }
 
@@ -1180,8 +1235,18 @@ func (x *Struct2) SetB(value string) *Struct2 {
     return x
 }
 
-func (x *Struct2) SetC(value Struct1) *Struct2 {
+func (x *Struct2) SetCNonCompat(value Struct1) *Struct2 {
     x.C = &value
+    return x
+}
+
+func (x *Struct2) SetC(value *Struct1) *Struct2 {
+    x.C = value
+    return x
+}
+
+func (x *Struct2) SetDNonCompat(value []int32) *Struct2 {
+    x.D = value
     return x
 }
 
@@ -1287,7 +1352,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1297,7 +1362,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1308,7 +1373,7 @@ if err != nil {
     return err
 }
 
-    x.SetC(result)
+    x.SetCNonCompat(result)
     return nil
 }
 
@@ -1336,7 +1401,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetD(result)
+    x.SetDNonCompat(result)
     return nil
 }
 
@@ -1473,9 +1538,9 @@ var _ thrift.Struct = &Struct3{}
 
 func NewStruct3() *Struct3 {
     return (&Struct3{}).
-        SetA("").
-        SetB(0).
-        SetC(*NewStruct2())
+        SetANonCompat("").
+        SetBNonCompat(0).
+        SetCNonCompat(*NewStruct2())
 }
 
 // Deprecated: Use NewStruct3().GetC() instead.
@@ -1509,8 +1574,18 @@ func (x *Struct3) GetC() *Struct2 {
     return x.C
 }
 
+func (x *Struct3) SetANonCompat(value string) *Struct3 {
+    x.A = value
+    return x
+}
+
 func (x *Struct3) SetA(value string) *Struct3 {
     x.A = value
+    return x
+}
+
+func (x *Struct3) SetBNonCompat(value int32) *Struct3 {
+    x.B = value
     return x
 }
 
@@ -1519,8 +1594,13 @@ func (x *Struct3) SetB(value int32) *Struct3 {
     return x
 }
 
-func (x *Struct3) SetC(value Struct2) *Struct3 {
+func (x *Struct3) SetCNonCompat(value Struct2) *Struct3 {
     x.C = &value
+    return x
+}
+
+func (x *Struct3) SetC(value *Struct2) *Struct3 {
+    x.C = value
     return x
 }
 
@@ -1586,7 +1666,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1596,7 +1676,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1607,7 +1687,7 @@ if err != nil {
     return err
 }
 
-    x.SetC(result)
+    x.SetCNonCompat(result)
     return nil
 }
 
@@ -1731,7 +1811,7 @@ var _ thrift.Struct = &Struct4{}
 
 func NewStruct4() *Struct4 {
     return (&Struct4{}).
-        SetA(0)
+        SetANonCompat(0)
 }
 
 // Deprecated: Use NewStruct4().GetB() instead.
@@ -1772,18 +1852,33 @@ func (x *Struct4) GetC() byte {
     return *x.C
 }
 
+func (x *Struct4) SetANonCompat(value int32) *Struct4 {
+    x.A = value
+    return x
+}
+
 func (x *Struct4) SetA(value int32) *Struct4 {
     x.A = value
     return x
 }
 
-func (x *Struct4) SetB(value float64) *Struct4 {
+func (x *Struct4) SetBNonCompat(value float64) *Struct4 {
     x.B = &value
     return x
 }
 
-func (x *Struct4) SetC(value byte) *Struct4 {
+func (x *Struct4) SetB(value *float64) *Struct4 {
+    x.B = value
+    return x
+}
+
+func (x *Struct4) SetCNonCompat(value byte) *Struct4 {
     x.C = &value
+    return x
+}
+
+func (x *Struct4) SetC(value *byte) *Struct4 {
+    x.C = value
     return x
 }
 
@@ -1857,7 +1952,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1867,7 +1962,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1877,7 +1972,7 @@ if err != nil {
     return err
 }
 
-    x.SetC(result)
+    x.SetCNonCompat(result)
     return nil
 }
 
@@ -2000,8 +2095,8 @@ var _ thrift.Struct = &Union1{}
 
 func NewUnion1() *Union1 {
     return (&Union1{}).
-        SetI(0).
-        SetD(0.0)
+        SetINonCompat(0).
+        SetDNonCompat(0.0)
 }
 
 // Deprecated: Use NewUnion1().GetI() instead.
@@ -2034,13 +2129,23 @@ func (x *Union1) GetD() float64 {
     return *x.D
 }
 
-func (x *Union1) SetI(value int32) *Union1 {
+func (x *Union1) SetINonCompat(value int32) *Union1 {
     x.I = &value
     return x
 }
 
-func (x *Union1) SetD(value float64) *Union1 {
+func (x *Union1) SetI(value *int32) *Union1 {
+    x.I = value
+    return x
+}
+
+func (x *Union1) SetDNonCompat(value float64) *Union1 {
     x.D = &value
+    return x
+}
+
+func (x *Union1) SetD(value *float64) *Union1 {
+    x.D = value
     return x
 }
 
@@ -2098,7 +2203,7 @@ if err != nil {
     return err
 }
 
-    x.SetI(result)
+    x.SetINonCompat(result)
     return nil
 }
 
@@ -2108,7 +2213,7 @@ if err != nil {
     return err
 }
 
-    x.SetD(result)
+    x.SetDNonCompat(result)
     return nil
 }
 
@@ -2234,10 +2339,10 @@ var _ thrift.Struct = &Union2{}
 
 func NewUnion2() *Union2 {
     return (&Union2{}).
-        SetI(0).
-        SetD(0.0).
-        SetS(*NewStruct1()).
-        SetU(*NewUnion1())
+        SetINonCompat(0).
+        SetDNonCompat(0.0).
+        SetSNonCompat(*NewStruct1()).
+        SetUNonCompat(*NewUnion1())
 }
 
 // Deprecated: Use NewUnion2().GetI() instead.
@@ -2300,23 +2405,43 @@ func (x *Union2) GetU() *Union1 {
     return x.U
 }
 
-func (x *Union2) SetI(value int32) *Union2 {
+func (x *Union2) SetINonCompat(value int32) *Union2 {
     x.I = &value
     return x
 }
 
-func (x *Union2) SetD(value float64) *Union2 {
+func (x *Union2) SetI(value *int32) *Union2 {
+    x.I = value
+    return x
+}
+
+func (x *Union2) SetDNonCompat(value float64) *Union2 {
     x.D = &value
     return x
 }
 
-func (x *Union2) SetS(value Struct1) *Union2 {
+func (x *Union2) SetD(value *float64) *Union2 {
+    x.D = value
+    return x
+}
+
+func (x *Union2) SetSNonCompat(value Struct1) *Union2 {
     x.S = &value
     return x
 }
 
-func (x *Union2) SetU(value Union1) *Union2 {
+func (x *Union2) SetS(value *Struct1) *Union2 {
+    x.S = value
+    return x
+}
+
+func (x *Union2) SetUNonCompat(value Union1) *Union2 {
     x.U = &value
+    return x
+}
+
+func (x *Union2) SetU(value *Union1) *Union2 {
+    x.U = value
     return x
 }
 
@@ -2422,7 +2547,7 @@ if err != nil {
     return err
 }
 
-    x.SetI(result)
+    x.SetINonCompat(result)
     return nil
 }
 
@@ -2432,7 +2557,7 @@ if err != nil {
     return err
 }
 
-    x.SetD(result)
+    x.SetDNonCompat(result)
     return nil
 }
 
@@ -2443,7 +2568,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 
@@ -2454,7 +2579,7 @@ if err != nil {
     return err
 }
 
-    x.SetU(result)
+    x.SetUNonCompat(result)
     return nil
 }
 

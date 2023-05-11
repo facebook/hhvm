@@ -100,12 +100,12 @@ var _ thrift.Struct = &ComplexUnion{}
 
 func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{}).
-        SetIntValue(0).
-        SetStringValue("").
-        SetIntListValue(make([]int64, 0)).
-        SetStringListValue(make([]string, 0)).
-        SetTypedefValue(NewContainerTypedef()).
-        SetStringRef("")
+        SetIntValueNonCompat(0).
+        SetStringValueNonCompat("").
+        SetIntListValueNonCompat(make([]int64, 0)).
+        SetStringListValueNonCompat(make([]string, 0)).
+        SetTypedefValueNonCompat(NewContainerTypedef()).
+        SetStringRefNonCompat("")
 }
 
 // Deprecated: Use NewComplexUnion().GetIntValue() instead.
@@ -189,13 +189,28 @@ func (x *ComplexUnion) GetStringRef() string {
     return *x.StringRef
 }
 
-func (x *ComplexUnion) SetIntValue(value int64) *ComplexUnion {
+func (x *ComplexUnion) SetIntValueNonCompat(value int64) *ComplexUnion {
     x.IntValue = &value
     return x
 }
 
-func (x *ComplexUnion) SetStringValue(value string) *ComplexUnion {
+func (x *ComplexUnion) SetIntValue(value *int64) *ComplexUnion {
+    x.IntValue = value
+    return x
+}
+
+func (x *ComplexUnion) SetStringValueNonCompat(value string) *ComplexUnion {
     x.StringValue = &value
+    return x
+}
+
+func (x *ComplexUnion) SetStringValue(value *string) *ComplexUnion {
+    x.StringValue = value
+    return x
+}
+
+func (x *ComplexUnion) SetIntListValueNonCompat(value []int64) *ComplexUnion {
+    x.IntListValue = value
     return x
 }
 
@@ -204,8 +219,18 @@ func (x *ComplexUnion) SetIntListValue(value []int64) *ComplexUnion {
     return x
 }
 
+func (x *ComplexUnion) SetStringListValueNonCompat(value []string) *ComplexUnion {
+    x.StringListValue = value
+    return x
+}
+
 func (x *ComplexUnion) SetStringListValue(value []string) *ComplexUnion {
     x.StringListValue = value
+    return x
+}
+
+func (x *ComplexUnion) SetTypedefValueNonCompat(value ContainerTypedef) *ComplexUnion {
+    x.TypedefValue = value
     return x
 }
 
@@ -214,8 +239,13 @@ func (x *ComplexUnion) SetTypedefValue(value ContainerTypedef) *ComplexUnion {
     return x
 }
 
-func (x *ComplexUnion) SetStringRef(value string) *ComplexUnion {
+func (x *ComplexUnion) SetStringRefNonCompat(value string) *ComplexUnion {
     x.StringRef = &value
+    return x
+}
+
+func (x *ComplexUnion) SetStringRef(value *string) *ComplexUnion {
+    x.StringRef = value
     return x
 }
 
@@ -392,7 +422,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntValue(result)
+    x.SetIntValueNonCompat(result)
     return nil
 }
 
@@ -402,7 +432,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringValue(result)
+    x.SetStringValueNonCompat(result)
     return nil
 }
 
@@ -430,7 +460,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIntListValue(result)
+    x.SetIntListValueNonCompat(result)
     return nil
 }
 
@@ -458,7 +488,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetStringListValue(result)
+    x.SetStringListValueNonCompat(result)
     return nil
 }
 
@@ -468,7 +498,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefValue(result)
+    x.SetTypedefValueNonCompat(result)
     return nil
 }
 
@@ -478,7 +508,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringRef(result)
+    x.SetStringRefNonCompat(result)
     return nil
 }
 
@@ -666,8 +696,8 @@ var _ thrift.Struct = &ListUnion{}
 
 func NewListUnion() *ListUnion {
     return (&ListUnion{}).
-        SetIntListValue(make([]int64, 0)).
-        SetStringListValue(make([]string, 0))
+        SetIntListValueNonCompat(make([]int64, 0)).
+        SetStringListValueNonCompat(make([]string, 0))
 }
 
 func (x *ListUnion) GetIntListValueNonCompat() []int64 {
@@ -694,8 +724,18 @@ func (x *ListUnion) GetStringListValue() []string {
     return x.StringListValue
 }
 
+func (x *ListUnion) SetIntListValueNonCompat(value []int64) *ListUnion {
+    x.IntListValue = value
+    return x
+}
+
 func (x *ListUnion) SetIntListValue(value []int64) *ListUnion {
     x.IntListValue = value
+    return x
+}
+
+func (x *ListUnion) SetStringListValueNonCompat(value []string) *ListUnion {
+    x.StringListValue = value
     return x
 }
 
@@ -798,7 +838,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIntListValue(result)
+    x.SetIntListValueNonCompat(result)
     return nil
 }
 
@@ -826,7 +866,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetStringListValue(result)
+    x.SetStringListValueNonCompat(result)
     return nil
 }
 
@@ -950,8 +990,8 @@ var _ thrift.Struct = &DataUnion{}
 
 func NewDataUnion() *DataUnion {
     return (&DataUnion{}).
-        SetBinaryData([]byte("")).
-        SetStringData("")
+        SetBinaryDataNonCompat([]byte("")).
+        SetStringDataNonCompat("")
 }
 
 // Deprecated: Use NewDataUnion().GetStringData() instead.
@@ -981,13 +1021,23 @@ func (x *DataUnion) GetStringData() string {
     return *x.StringData
 }
 
+func (x *DataUnion) SetBinaryDataNonCompat(value []byte) *DataUnion {
+    x.BinaryData = value
+    return x
+}
+
 func (x *DataUnion) SetBinaryData(value []byte) *DataUnion {
     x.BinaryData = value
     return x
 }
 
-func (x *DataUnion) SetStringData(value string) *DataUnion {
+func (x *DataUnion) SetStringDataNonCompat(value string) *DataUnion {
     x.StringData = &value
+    return x
+}
+
+func (x *DataUnion) SetStringData(value *string) *DataUnion {
+    x.StringData = value
     return x
 }
 
@@ -1045,7 +1095,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryData(result)
+    x.SetBinaryDataNonCompat(result)
     return nil
 }
 
@@ -1055,7 +1105,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringData(result)
+    x.SetStringDataNonCompat(result)
     return nil
 }
 
@@ -1180,9 +1230,9 @@ var _ thrift.Struct = &Val{}
 
 func NewVal() *Val {
     return (&Val{}).
-        SetStrVal("").
-        SetIntVal(0).
-        SetTypedefValue(NewContainerTypedef())
+        SetStrValNonCompat("").
+        SetIntValNonCompat(0).
+        SetTypedefValueNonCompat(NewContainerTypedef())
 }
 
 func (x *Val) GetStrValNonCompat() string {
@@ -1213,13 +1263,28 @@ func (x *Val) GetTypedefValue() ContainerTypedef {
     return x.TypedefValue
 }
 
+func (x *Val) SetStrValNonCompat(value string) *Val {
+    x.StrVal = value
+    return x
+}
+
 func (x *Val) SetStrVal(value string) *Val {
     x.StrVal = value
     return x
 }
 
+func (x *Val) SetIntValNonCompat(value int32) *Val {
+    x.IntVal = value
+    return x
+}
+
 func (x *Val) SetIntVal(value int32) *Val {
     x.IntVal = value
+    return x
+}
+
+func (x *Val) SetTypedefValueNonCompat(value ContainerTypedef) *Val {
+    x.TypedefValue = value
     return x
 }
 
@@ -1291,7 +1356,7 @@ if err != nil {
     return err
 }
 
-    x.SetStrVal(result)
+    x.SetStrValNonCompat(result)
     return nil
 }
 
@@ -1301,7 +1366,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntVal(result)
+    x.SetIntValNonCompat(result)
     return nil
 }
 
@@ -1311,7 +1376,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefValue(result)
+    x.SetTypedefValueNonCompat(result)
     return nil
 }
 
@@ -1434,8 +1499,8 @@ var _ thrift.Struct = &ValUnion{}
 
 func NewValUnion() *ValUnion {
     return (&ValUnion{}).
-        SetV1(*NewVal()).
-        SetV2(*NewVal())
+        SetV1NonCompat(*NewVal()).
+        SetV2NonCompat(*NewVal())
 }
 
 // Deprecated: Use NewValUnion().GetV1() instead.
@@ -1468,13 +1533,23 @@ func (x *ValUnion) GetV2() *Val {
     return x.V2
 }
 
-func (x *ValUnion) SetV1(value Val) *ValUnion {
+func (x *ValUnion) SetV1NonCompat(value Val) *ValUnion {
     x.V1 = &value
     return x
 }
 
-func (x *ValUnion) SetV2(value Val) *ValUnion {
+func (x *ValUnion) SetV1(value *Val) *ValUnion {
+    x.V1 = value
+    return x
+}
+
+func (x *ValUnion) SetV2NonCompat(value Val) *ValUnion {
     x.V2 = &value
+    return x
+}
+
+func (x *ValUnion) SetV2(value *Val) *ValUnion {
+    x.V2 = value
     return x
 }
 
@@ -1533,7 +1608,7 @@ if err != nil {
     return err
 }
 
-    x.SetV1(result)
+    x.SetV1NonCompat(result)
     return nil
 }
 
@@ -1544,7 +1619,7 @@ if err != nil {
     return err
 }
 
-    x.SetV2(result)
+    x.SetV2NonCompat(result)
     return nil
 }
 
@@ -1668,8 +1743,8 @@ var _ thrift.Struct = &VirtualComplexUnion{}
 
 func NewVirtualComplexUnion() *VirtualComplexUnion {
     return (&VirtualComplexUnion{}).
-        SetThingOne("").
-        SetThingTwo("")
+        SetThingOneNonCompat("").
+        SetThingTwoNonCompat("")
 }
 
 // Deprecated: Use NewVirtualComplexUnion().GetThingOne() instead.
@@ -1702,13 +1777,23 @@ func (x *VirtualComplexUnion) GetThingTwo() string {
     return *x.ThingTwo
 }
 
-func (x *VirtualComplexUnion) SetThingOne(value string) *VirtualComplexUnion {
+func (x *VirtualComplexUnion) SetThingOneNonCompat(value string) *VirtualComplexUnion {
     x.ThingOne = &value
     return x
 }
 
-func (x *VirtualComplexUnion) SetThingTwo(value string) *VirtualComplexUnion {
+func (x *VirtualComplexUnion) SetThingOne(value *string) *VirtualComplexUnion {
+    x.ThingOne = value
+    return x
+}
+
+func (x *VirtualComplexUnion) SetThingTwoNonCompat(value string) *VirtualComplexUnion {
     x.ThingTwo = &value
+    return x
+}
+
+func (x *VirtualComplexUnion) SetThingTwo(value *string) *VirtualComplexUnion {
+    x.ThingTwo = value
     return x
 }
 
@@ -1766,7 +1851,7 @@ if err != nil {
     return err
 }
 
-    x.SetThingOne(result)
+    x.SetThingOneNonCompat(result)
     return nil
 }
 
@@ -1776,7 +1861,7 @@ if err != nil {
     return err
 }
 
-    x.SetThingTwo(result)
+    x.SetThingTwoNonCompat(result)
     return nil
 }
 
@@ -1899,7 +1984,7 @@ var _ thrift.Struct = &NonCopyableStruct{}
 
 func NewNonCopyableStruct() *NonCopyableStruct {
     return (&NonCopyableStruct{}).
-        SetNum(0)
+        SetNumNonCompat(0)
 }
 
 func (x *NonCopyableStruct) GetNumNonCompat() int64 {
@@ -1908,6 +1993,11 @@ func (x *NonCopyableStruct) GetNumNonCompat() int64 {
 
 func (x *NonCopyableStruct) GetNum() int64 {
     return x.Num
+}
+
+func (x *NonCopyableStruct) SetNumNonCompat(value int64) *NonCopyableStruct {
+    x.Num = value
+    return x
 }
 
 func (x *NonCopyableStruct) SetNum(value int64) *NonCopyableStruct {
@@ -1937,7 +2027,7 @@ if err != nil {
     return err
 }
 
-    x.SetNum(result)
+    x.SetNumNonCompat(result)
     return nil
 }
 
@@ -2033,7 +2123,7 @@ var _ thrift.Struct = &NonCopyableUnion{}
 
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{}).
-        SetS(*NewNonCopyableStruct())
+        SetSNonCompat(*NewNonCopyableStruct())
 }
 
 // Deprecated: Use NewNonCopyableUnion().GetS() instead.
@@ -2051,8 +2141,13 @@ func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     return x.S
 }
 
-func (x *NonCopyableUnion) SetS(value NonCopyableStruct) *NonCopyableUnion {
+func (x *NonCopyableUnion) SetSNonCompat(value NonCopyableStruct) *NonCopyableUnion {
     x.S = &value
+    return x
+}
+
+func (x *NonCopyableUnion) SetS(value *NonCopyableStruct) *NonCopyableUnion {
+    x.S = value
     return x
 }
 
@@ -2087,7 +2182,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 

@@ -138,7 +138,7 @@ var _ thrift.Struct = &reqTestServiceInit{}
 
 func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{}).
-        SetInt1(0)
+        SetInt1NonCompat(0)
 }
 
 func (x *reqTestServiceInit) GetInt1NonCompat() int64 {
@@ -147,6 +147,11 @@ func (x *reqTestServiceInit) GetInt1NonCompat() int64 {
 
 func (x *reqTestServiceInit) GetInt1() int64 {
     return x.Int1
+}
+
+func (x *reqTestServiceInit) SetInt1NonCompat(value int64) *reqTestServiceInit {
+    x.Int1 = value
+    return x
 }
 
 func (x *reqTestServiceInit) SetInt1(value int64) *reqTestServiceInit {
@@ -176,7 +181,7 @@ if err != nil {
     return err
 }
 
-    x.SetInt1(result)
+    x.SetInt1NonCompat(result)
     return nil
 }
 
@@ -272,7 +277,7 @@ var _ thrift.WritableResult = &respTestServiceInit{}
 
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{}).
-        SetValue(0)
+        SetValueNonCompat(0)
 }
 
 func (x *respTestServiceInit) GetValueNonCompat() int64 {
@@ -281,6 +286,11 @@ func (x *respTestServiceInit) GetValueNonCompat() int64 {
 
 func (x *respTestServiceInit) GetValue() int64 {
     return x.Value
+}
+
+func (x *respTestServiceInit) SetValueNonCompat(value int64) *respTestServiceInit {
+    x.Value = value
+    return x
 }
 
 func (x *respTestServiceInit) SetValue(value int64) *respTestServiceInit {
@@ -310,7 +320,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

@@ -79,8 +79,8 @@ var _ thrift.Struct = &Included{}
 
 func NewIncluded() *Included {
     return (&Included{}).
-        SetMyIntField(0).
-        SetMyTransitiveField(
+        SetMyIntFieldNonCompat(0).
+        SetMyTransitiveFieldNonCompat(
               *transitive.NewFoo(),
           )
 }
@@ -108,13 +108,23 @@ func (x *Included) GetMyTransitiveField() *transitive.Foo {
     return x.MyTransitiveField
 }
 
+func (x *Included) SetMyIntFieldNonCompat(value int64) *Included {
+    x.MyIntField = value
+    return x
+}
+
 func (x *Included) SetMyIntField(value int64) *Included {
     x.MyIntField = value
     return x
 }
 
-func (x *Included) SetMyTransitiveField(value transitive.Foo) *Included {
+func (x *Included) SetMyTransitiveFieldNonCompat(value transitive.Foo) *Included {
     x.MyTransitiveField = &value
+    return x
+}
+
+func (x *Included) SetMyTransitiveField(value *transitive.Foo) *Included {
+    x.MyTransitiveField = value
     return x
 }
 
@@ -164,7 +174,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntField(result)
+    x.SetMyIntFieldNonCompat(result)
     return nil
 }
 
@@ -175,7 +185,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyTransitiveField(result)
+    x.SetMyTransitiveFieldNonCompat(result)
     return nil
 }
 

@@ -508,16 +508,16 @@ var _ thrift.Struct = &SomeStruct{}
 
 func NewSomeStruct() *SomeStruct {
     return (&SomeStruct{}).
-        SetReasonable(
+        SetReasonableNonCompat(
               Metasyntactic_FOO,
           ).
-        SetFine(
+        SetFineNonCompat(
               Metasyntactic_BAR,
           ).
-        SetQuestionable(
+        SetQuestionableNonCompat(
               Metasyntactic(-1),
           ).
-        SetTags(
+        SetTagsNonCompat(
               []int32{
 },
           )
@@ -559,8 +559,18 @@ func (x *SomeStruct) GetTags() []int32 {
     return x.Tags
 }
 
+func (x *SomeStruct) SetReasonableNonCompat(value Metasyntactic) *SomeStruct {
+    x.Reasonable = value
+    return x
+}
+
 func (x *SomeStruct) SetReasonable(value Metasyntactic) *SomeStruct {
     x.Reasonable = value
+    return x
+}
+
+func (x *SomeStruct) SetFineNonCompat(value Metasyntactic) *SomeStruct {
+    x.Fine = value
     return x
 }
 
@@ -569,8 +579,18 @@ func (x *SomeStruct) SetFine(value Metasyntactic) *SomeStruct {
     return x
 }
 
+func (x *SomeStruct) SetQuestionableNonCompat(value Metasyntactic) *SomeStruct {
+    x.Questionable = value
+    return x
+}
+
 func (x *SomeStruct) SetQuestionable(value Metasyntactic) *SomeStruct {
     x.Questionable = value
+    return x
+}
+
+func (x *SomeStruct) SetTagsNonCompat(value []int32) *SomeStruct {
+    x.Tags = value
     return x
 }
 
@@ -669,7 +689,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetReasonable(result)
+    x.SetReasonableNonCompat(result)
     return nil
 }
 
@@ -680,7 +700,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetFine(result)
+    x.SetFineNonCompat(result)
     return nil
 }
 
@@ -691,7 +711,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetQuestionable(result)
+    x.SetQuestionableNonCompat(result)
     return nil
 }
 
@@ -719,7 +739,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetTags(result)
+    x.SetTagsNonCompat(result)
     return nil
 }
 
@@ -857,16 +877,16 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMe2_3(
+        SetMe2_3NonCompat(
               MyEnum2(3),
           ).
-        SetMe3N3(
+        SetMe3N3NonCompat(
               MyEnum3(-3),
           ).
-        SetMe1T1(
+        SetMe1T1NonCompat(
               MyEnum1_ME1_1,
           ).
-        SetMe1T2(
+        SetMe1T2NonCompat(
               MyEnum1_ME1_1,
           )
 }
@@ -903,8 +923,18 @@ func (x *MyStruct) GetMe1T2() MyEnum1 {
     return x.Me1T2
 }
 
+func (x *MyStruct) SetMe2_3NonCompat(value MyEnum2) *MyStruct {
+    x.Me2_3 = value
+    return x
+}
+
 func (x *MyStruct) SetMe2_3(value MyEnum2) *MyStruct {
     x.Me2_3 = value
+    return x
+}
+
+func (x *MyStruct) SetMe3N3NonCompat(value MyEnum3) *MyStruct {
+    x.Me3N3 = value
     return x
 }
 
@@ -913,8 +943,18 @@ func (x *MyStruct) SetMe3N3(value MyEnum3) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetMe1T1NonCompat(value MyEnum1) *MyStruct {
+    x.Me1T1 = value
+    return x
+}
+
 func (x *MyStruct) SetMe1T1(value MyEnum1) *MyStruct {
     x.Me1T1 = value
+    return x
+}
+
+func (x *MyStruct) SetMe1T2NonCompat(value MyEnum1) *MyStruct {
+    x.Me1T2 = value
     return x
 }
 
@@ -994,7 +1034,7 @@ if err != nil {
 }
 result := MyEnum2(enumResult)
 
-    x.SetMe2_3(result)
+    x.SetMe2_3NonCompat(result)
     return nil
 }
 
@@ -1005,7 +1045,7 @@ if err != nil {
 }
 result := MyEnum3(enumResult)
 
-    x.SetMe3N3(result)
+    x.SetMe3N3NonCompat(result)
     return nil
 }
 
@@ -1016,7 +1056,7 @@ if err != nil {
 }
 result := MyEnum1(enumResult)
 
-    x.SetMe1T1(result)
+    x.SetMe1T1NonCompat(result)
     return nil
 }
 
@@ -1027,7 +1067,7 @@ if err != nil {
 }
 result := MyEnum1(enumResult)
 
-    x.SetMe1T2(result)
+    x.SetMe1T2NonCompat(result)
     return nil
 }
 

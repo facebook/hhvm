@@ -164,8 +164,8 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
-        SetS(*module.NewMyStruct()).
-        SetI(*includes.NewIncluded())
+        SetSNonCompat(*module.NewMyStruct()).
+        SetINonCompat(*includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceQuery().GetS() instead.
@@ -198,13 +198,23 @@ func (x *reqMyServiceQuery) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceQuery) SetS(value module.MyStruct) *reqMyServiceQuery {
+func (x *reqMyServiceQuery) SetSNonCompat(value module.MyStruct) *reqMyServiceQuery {
     x.S = &value
     return x
 }
 
-func (x *reqMyServiceQuery) SetI(value includes.Included) *reqMyServiceQuery {
+func (x *reqMyServiceQuery) SetS(value *module.MyStruct) *reqMyServiceQuery {
+    x.S = value
+    return x
+}
+
+func (x *reqMyServiceQuery) SetINonCompat(value includes.Included) *reqMyServiceQuery {
     x.I = &value
+    return x
+}
+
+func (x *reqMyServiceQuery) SetI(value *includes.Included) *reqMyServiceQuery {
+    x.I = value
     return x
 }
 
@@ -263,7 +273,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 
@@ -274,7 +284,7 @@ if err != nil {
     return err
 }
 
-    x.SetI(result)
+    x.SetINonCompat(result)
     return nil
 }
 
@@ -467,8 +477,8 @@ var _ thrift.Struct = &reqMyServiceHasArgDocs{}
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{}).
-        SetS(*module.NewMyStruct()).
-        SetI(*includes.NewIncluded())
+        SetSNonCompat(*module.NewMyStruct()).
+        SetINonCompat(*includes.NewIncluded())
 }
 
 // Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
@@ -501,13 +511,23 @@ func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceHasArgDocs) SetS(value module.MyStruct) *reqMyServiceHasArgDocs {
+func (x *reqMyServiceHasArgDocs) SetSNonCompat(value module.MyStruct) *reqMyServiceHasArgDocs {
     x.S = &value
     return x
 }
 
-func (x *reqMyServiceHasArgDocs) SetI(value includes.Included) *reqMyServiceHasArgDocs {
+func (x *reqMyServiceHasArgDocs) SetS(value *module.MyStruct) *reqMyServiceHasArgDocs {
+    x.S = value
+    return x
+}
+
+func (x *reqMyServiceHasArgDocs) SetINonCompat(value includes.Included) *reqMyServiceHasArgDocs {
     x.I = &value
+    return x
+}
+
+func (x *reqMyServiceHasArgDocs) SetI(value *includes.Included) *reqMyServiceHasArgDocs {
+    x.I = value
     return x
 }
 
@@ -566,7 +586,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 
@@ -577,7 +597,7 @@ if err != nil {
     return err
 }
 
-    x.SetI(result)
+    x.SetINonCompat(result)
     return nil
 }
 

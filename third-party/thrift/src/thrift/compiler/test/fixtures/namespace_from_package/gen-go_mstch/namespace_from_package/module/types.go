@@ -23,7 +23,7 @@ var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetMyInt(0)
+        SetMyIntNonCompat(0)
 }
 
 func (x *Foo) GetMyIntNonCompat() int64 {
@@ -32,6 +32,11 @@ func (x *Foo) GetMyIntNonCompat() int64 {
 
 func (x *Foo) GetMyInt() int64 {
     return x.MyInt
+}
+
+func (x *Foo) SetMyIntNonCompat(value int64) *Foo {
+    x.MyInt = value
+    return x
 }
 
 func (x *Foo) SetMyInt(value int64) *Foo {
@@ -61,7 +66,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyInt(result)
+    x.SetMyIntNonCompat(result)
     return nil
 }
 

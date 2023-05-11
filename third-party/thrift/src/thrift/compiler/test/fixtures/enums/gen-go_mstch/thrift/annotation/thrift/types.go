@@ -265,7 +265,7 @@ var _ thrift.Struct = &Deprecated{}
 
 func NewDeprecated() *Deprecated {
     return (&Deprecated{}).
-        SetMessage("")
+        SetMessageNonCompat("")
 }
 
 func (x *Deprecated) GetMessageNonCompat() string {
@@ -274,6 +274,11 @@ func (x *Deprecated) GetMessageNonCompat() string {
 
 func (x *Deprecated) GetMessage() string {
     return x.Message
+}
+
+func (x *Deprecated) SetMessageNonCompat(value string) *Deprecated {
+    x.Message = value
+    return x
 }
 
 func (x *Deprecated) SetMessage(value string) *Deprecated {
@@ -303,7 +308,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 
@@ -400,8 +405,8 @@ var _ thrift.Struct = &ReserveIds{}
 
 func NewReserveIds() *ReserveIds {
     return (&ReserveIds{}).
-        SetIds(make([]int32, 0)).
-        SetIdRanges(make(map[int32]int32))
+        SetIdsNonCompat(make([]int32, 0)).
+        SetIdRangesNonCompat(make(map[int32]int32))
 }
 
 func (x *ReserveIds) GetIdsNonCompat() []int32 {
@@ -428,8 +433,18 @@ func (x *ReserveIds) GetIdRanges() map[int32]int32 {
     return x.IdRanges
 }
 
+func (x *ReserveIds) SetIdsNonCompat(value []int32) *ReserveIds {
+    x.Ids = value
+    return x
+}
+
 func (x *ReserveIds) SetIds(value []int32) *ReserveIds {
     x.Ids = value
+    return x
+}
+
+func (x *ReserveIds) SetIdRangesNonCompat(value map[int32]int32) *ReserveIds {
+    x.IdRanges = value
     return x
 }
 
@@ -539,7 +554,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIds(result)
+    x.SetIdsNonCompat(result)
     return nil
 }
 
@@ -577,7 +592,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetIdRanges(result)
+    x.SetIdRangesNonCompat(result)
     return nil
 }
 
@@ -686,7 +701,7 @@ var _ thrift.Struct = &Legacy{}
 
 func NewLegacy() *Legacy {
     return (&Legacy{}).
-        SetMessage("")
+        SetMessageNonCompat("")
 }
 
 func (x *Legacy) GetMessageNonCompat() string {
@@ -695,6 +710,11 @@ func (x *Legacy) GetMessageNonCompat() string {
 
 func (x *Legacy) GetMessage() string {
     return x.Message
+}
+
+func (x *Legacy) SetMessageNonCompat(value string) *Legacy {
+    x.Message = value
+    return x
 }
 
 func (x *Legacy) SetMessage(value string) *Legacy {
@@ -724,7 +744,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 
@@ -820,7 +840,7 @@ var _ thrift.Struct = &RequiresBackwardCompatibility{}
 
 func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
     return (&RequiresBackwardCompatibility{}).
-        SetFieldName(false)
+        SetFieldNameNonCompat(false)
 }
 
 func (x *RequiresBackwardCompatibility) GetFieldNameNonCompat() bool {
@@ -829,6 +849,11 @@ func (x *RequiresBackwardCompatibility) GetFieldNameNonCompat() bool {
 
 func (x *RequiresBackwardCompatibility) GetFieldName() bool {
     return x.FieldName
+}
+
+func (x *RequiresBackwardCompatibility) SetFieldNameNonCompat(value bool) *RequiresBackwardCompatibility {
+    x.FieldName = value
+    return x
 }
 
 func (x *RequiresBackwardCompatibility) SetFieldName(value bool) *RequiresBackwardCompatibility {
@@ -858,7 +883,7 @@ if err != nil {
     return err
 }
 
-    x.SetFieldName(result)
+    x.SetFieldNameNonCompat(result)
     return nil
 }
 
@@ -1914,7 +1939,7 @@ var _ thrift.Struct = &GenDefaultEnumValue{}
 
 func NewGenDefaultEnumValue() *GenDefaultEnumValue {
     return (&GenDefaultEnumValue{}).
-        SetName("Unspecified")
+        SetNameNonCompat("Unspecified")
 }
 
 func (x *GenDefaultEnumValue) GetNameNonCompat() string {
@@ -1923,6 +1948,11 @@ func (x *GenDefaultEnumValue) GetNameNonCompat() string {
 
 func (x *GenDefaultEnumValue) GetName() string {
     return x.Name
+}
+
+func (x *GenDefaultEnumValue) SetNameNonCompat(value string) *GenDefaultEnumValue {
+    x.Name = value
+    return x
 }
 
 func (x *GenDefaultEnumValue) SetName(value string) *GenDefaultEnumValue {
@@ -1952,7 +1982,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -2048,7 +2078,7 @@ var _ thrift.Struct = &GenEnumSet{}
 
 func NewGenEnumSet() *GenEnumSet {
     return (&GenEnumSet{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *GenEnumSet) GetNameNonCompat() string {
@@ -2057,6 +2087,11 @@ func (x *GenEnumSet) GetNameNonCompat() string {
 
 func (x *GenEnumSet) GetName() string {
     return x.Name
+}
+
+func (x *GenEnumSet) SetNameNonCompat(value string) *GenEnumSet {
+    x.Name = value
+    return x
 }
 
 func (x *GenEnumSet) SetName(value string) *GenEnumSet {
@@ -2086,7 +2121,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -2502,7 +2537,7 @@ var _ thrift.Struct = &ExceptionMessage{}
 
 func NewExceptionMessage() *ExceptionMessage {
     return (&ExceptionMessage{}).
-        SetField("")
+        SetFieldNonCompat("")
 }
 
 func (x *ExceptionMessage) GetFieldNonCompat() string {
@@ -2511,6 +2546,11 @@ func (x *ExceptionMessage) GetFieldNonCompat() string {
 
 func (x *ExceptionMessage) GetField() string {
     return x.Field
+}
+
+func (x *ExceptionMessage) SetFieldNonCompat(value string) *ExceptionMessage {
+    x.Field = value
+    return x
 }
 
 func (x *ExceptionMessage) SetField(value string) *ExceptionMessage {
@@ -2540,7 +2580,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -2636,7 +2676,7 @@ var _ thrift.Struct = &GenerateRuntimeSchema{}
 
 func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
     return (&GenerateRuntimeSchema{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *GenerateRuntimeSchema) GetNameNonCompat() string {
@@ -2645,6 +2685,11 @@ func (x *GenerateRuntimeSchema) GetNameNonCompat() string {
 
 func (x *GenerateRuntimeSchema) GetName() string {
     return x.Name
+}
+
+func (x *GenerateRuntimeSchema) SetNameNonCompat(value string) *GenerateRuntimeSchema {
+    x.Name = value
+    return x
 }
 
 func (x *GenerateRuntimeSchema) SetName(value string) *GenerateRuntimeSchema {
@@ -2674,7 +2719,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 

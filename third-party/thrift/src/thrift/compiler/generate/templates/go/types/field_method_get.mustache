@@ -22,8 +22,8 @@
 func (x *{{struct:go_name}}) Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}() {{> types/field_type}} {
     return x.{{field:go_name}}
 }
-
 {{#program:compat_getters?}}
+
 func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/field:type}} {
     {{#field:nilable?}}
     if !x.IsSet{{field:go_name}}() {

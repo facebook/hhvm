@@ -178,7 +178,7 @@ var _ thrift.Struct = &reqFinderByPlate{}
 
 func newReqFinderByPlate() *reqFinderByPlate {
     return (&reqFinderByPlate{}).
-        SetPlate(NewPlate())
+        SetPlateNonCompat(NewPlate())
 }
 
 func (x *reqFinderByPlate) GetPlateNonCompat() Plate {
@@ -187,6 +187,11 @@ func (x *reqFinderByPlate) GetPlateNonCompat() Plate {
 
 func (x *reqFinderByPlate) GetPlate() Plate {
     return x.Plate
+}
+
+func (x *reqFinderByPlate) SetPlateNonCompat(value Plate) *reqFinderByPlate {
+    x.Plate = value
+    return x
 }
 
 func (x *reqFinderByPlate) SetPlate(value Plate) *reqFinderByPlate {
@@ -217,7 +222,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlate(result)
+    x.SetPlateNonCompat(result)
     return nil
 }
 
@@ -313,7 +318,7 @@ var _ thrift.WritableResult = &respFinderByPlate{}
 
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{}).
-        SetValue(*NewAutomobile())
+        SetValueNonCompat(*NewAutomobile())
 }
 
 // Deprecated: Use newRespFinderByPlate().GetValue() instead.
@@ -331,8 +336,13 @@ func (x *respFinderByPlate) GetValue() *Automobile {
     return x.Value
 }
 
-func (x *respFinderByPlate) SetValue(value Automobile) *respFinderByPlate {
+func (x *respFinderByPlate) SetValueNonCompat(value Automobile) *respFinderByPlate {
     x.Value = &value
+    return x
+}
+
+func (x *respFinderByPlate) SetValue(value *Automobile) *respFinderByPlate {
+    x.Value = value
     return x
 }
 
@@ -367,7 +377,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -466,7 +476,7 @@ var _ thrift.Struct = &reqFinderAliasByPlate{}
 
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
     return (&reqFinderAliasByPlate{}).
-        SetPlate(NewPlate())
+        SetPlateNonCompat(NewPlate())
 }
 
 func (x *reqFinderAliasByPlate) GetPlateNonCompat() Plate {
@@ -475,6 +485,11 @@ func (x *reqFinderAliasByPlate) GetPlateNonCompat() Plate {
 
 func (x *reqFinderAliasByPlate) GetPlate() Plate {
     return x.Plate
+}
+
+func (x *reqFinderAliasByPlate) SetPlateNonCompat(value Plate) *reqFinderAliasByPlate {
+    x.Plate = value
+    return x
 }
 
 func (x *reqFinderAliasByPlate) SetPlate(value Plate) *reqFinderAliasByPlate {
@@ -505,7 +520,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlate(result)
+    x.SetPlateNonCompat(result)
     return nil
 }
 
@@ -601,7 +616,7 @@ var _ thrift.WritableResult = &respFinderAliasByPlate{}
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{}).
-        SetValue(*NewCar())
+        SetValueNonCompat(*NewCar())
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().GetValue() instead.
@@ -619,8 +634,13 @@ func (x *respFinderAliasByPlate) GetValue() *Car {
     return x.Value
 }
 
-func (x *respFinderAliasByPlate) SetValue(value Car) *respFinderAliasByPlate {
+func (x *respFinderAliasByPlate) SetValueNonCompat(value Car) *respFinderAliasByPlate {
     x.Value = &value
+    return x
+}
+
+func (x *respFinderAliasByPlate) SetValue(value *Car) *respFinderAliasByPlate {
+    x.Value = value
     return x
 }
 
@@ -655,7 +675,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -754,7 +774,7 @@ var _ thrift.Struct = &reqFinderPreviousPlate{}
 
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
     return (&reqFinderPreviousPlate{}).
-        SetPlate(NewPlate())
+        SetPlateNonCompat(NewPlate())
 }
 
 func (x *reqFinderPreviousPlate) GetPlateNonCompat() Plate {
@@ -763,6 +783,11 @@ func (x *reqFinderPreviousPlate) GetPlateNonCompat() Plate {
 
 func (x *reqFinderPreviousPlate) GetPlate() Plate {
     return x.Plate
+}
+
+func (x *reqFinderPreviousPlate) SetPlateNonCompat(value Plate) *reqFinderPreviousPlate {
+    x.Plate = value
+    return x
 }
 
 func (x *reqFinderPreviousPlate) SetPlate(value Plate) *reqFinderPreviousPlate {
@@ -793,7 +818,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlate(result)
+    x.SetPlateNonCompat(result)
     return nil
 }
 
@@ -889,7 +914,7 @@ var _ thrift.WritableResult = &respFinderPreviousPlate{}
 
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{}).
-        SetValue(NewPlate())
+        SetValueNonCompat(NewPlate())
 }
 
 func (x *respFinderPreviousPlate) GetValueNonCompat() Plate {
@@ -898,6 +923,11 @@ func (x *respFinderPreviousPlate) GetValueNonCompat() Plate {
 
 func (x *respFinderPreviousPlate) GetValue() Plate {
     return x.Value
+}
+
+func (x *respFinderPreviousPlate) SetValueNonCompat(value Plate) *respFinderPreviousPlate {
+    x.Value = value
+    return x
 }
 
 func (x *respFinderPreviousPlate) SetValue(value Plate) *respFinderPreviousPlate {
@@ -928,7 +958,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

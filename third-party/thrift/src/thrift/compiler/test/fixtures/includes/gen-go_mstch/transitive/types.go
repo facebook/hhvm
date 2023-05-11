@@ -23,7 +23,7 @@ var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetA(2)
+        SetANonCompat(2)
 }
 
 func (x *Foo) GetANonCompat() int64 {
@@ -32,6 +32,11 @@ func (x *Foo) GetANonCompat() int64 {
 
 func (x *Foo) GetA() int64 {
     return x.A
+}
+
+func (x *Foo) SetANonCompat(value int64) *Foo {
+    x.A = value
+    return x
 }
 
 func (x *Foo) SetA(value int64) *Foo {
@@ -61,7 +66,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 

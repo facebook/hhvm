@@ -325,9 +325,9 @@ var _ thrift.Struct = &reqCThing{}
 
 func newReqCThing() *reqCThing {
     return (&reqCThing{}).
-        SetA(0).
-        SetB("").
-        SetC(make([]int32, 0))
+        SetANonCompat(0).
+        SetBNonCompat("").
+        SetCNonCompat(make([]int32, 0))
 }
 
 func (x *reqCThing) GetANonCompat() int32 {
@@ -358,13 +358,28 @@ func (x *reqCThing) GetC() []int32 {
     return x.C
 }
 
+func (x *reqCThing) SetANonCompat(value int32) *reqCThing {
+    x.A = value
+    return x
+}
+
 func (x *reqCThing) SetA(value int32) *reqCThing {
     x.A = value
     return x
 }
 
+func (x *reqCThing) SetBNonCompat(value string) *reqCThing {
+    x.B = value
+    return x
+}
+
 func (x *reqCThing) SetB(value string) *reqCThing {
     x.B = value
+    return x
+}
+
+func (x *reqCThing) SetCNonCompat(value []int32) *reqCThing {
+    x.C = value
     return x
 }
 
@@ -446,7 +461,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -456,7 +471,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -484,7 +499,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetC(result)
+    x.SetCNonCompat(result)
     return nil
 }
 
@@ -607,7 +622,7 @@ var _ thrift.WritableResult = &respCThing{}
 
 func newRespCThing() *respCThing {
     return (&respCThing{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 // Deprecated: Use newRespCThing().GetBang() instead.
@@ -633,13 +648,23 @@ func (x *respCThing) GetBang() *Bang {
     return x.Bang
 }
 
+func (x *respCThing) SetValueNonCompat(value string) *respCThing {
+    x.Value = value
+    return x
+}
+
 func (x *respCThing) SetValue(value string) *respCThing {
     x.Value = value
     return x
 }
 
-func (x *respCThing) SetBang(value Bang) *respCThing {
+func (x *respCThing) SetBangNonCompat(value Bang) *respCThing {
     x.Bang = &value
+    return x
+}
+
+func (x *respCThing) SetBang(value *Bang) *respCThing {
+    x.Bang = value
     return x
 }
 
@@ -689,7 +714,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -700,7 +725,7 @@ if err != nil {
     return err
 }
 
-    x.SetBang(result)
+    x.SetBangNonCompat(result)
     return nil
 }
 

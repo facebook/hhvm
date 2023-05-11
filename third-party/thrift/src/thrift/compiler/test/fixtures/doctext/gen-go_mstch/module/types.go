@@ -125,7 +125,7 @@ var _ thrift.Struct = &A{}
 
 func NewA() *A {
     return (&A{}).
-        SetUselessField(0)
+        SetUselessFieldNonCompat(0)
 }
 
 func (x *A) GetUselessFieldNonCompat() int32 {
@@ -134,6 +134,11 @@ func (x *A) GetUselessFieldNonCompat() int32 {
 
 func (x *A) GetUselessField() int32 {
     return x.UselessField
+}
+
+func (x *A) SetUselessFieldNonCompat(value int32) *A {
+    x.UselessField = value
+    return x
 }
 
 func (x *A) SetUselessField(value int32) *A {
@@ -163,7 +168,7 @@ if err != nil {
     return err
 }
 
-    x.SetUselessField(result)
+    x.SetUselessFieldNonCompat(result)
     return nil
 }
 
@@ -260,8 +265,8 @@ var _ thrift.Struct = &U{}
 
 func NewU() *U {
     return (&U{}).
-        SetI(0).
-        SetS("")
+        SetINonCompat(0).
+        SetSNonCompat("")
 }
 
 // Deprecated: Use NewU().GetI() instead.
@@ -294,13 +299,23 @@ func (x *U) GetS() string {
     return *x.S
 }
 
-func (x *U) SetI(value int32) *U {
+func (x *U) SetINonCompat(value int32) *U {
     x.I = &value
     return x
 }
 
-func (x *U) SetS(value string) *U {
+func (x *U) SetI(value *int32) *U {
+    x.I = value
+    return x
+}
+
+func (x *U) SetSNonCompat(value string) *U {
     x.S = &value
+    return x
+}
+
+func (x *U) SetS(value *string) *U {
+    x.S = value
     return x
 }
 
@@ -358,7 +373,7 @@ if err != nil {
     return err
 }
 
-    x.SetI(result)
+    x.SetINonCompat(result)
     return nil
 }
 
@@ -368,7 +383,7 @@ if err != nil {
     return err
 }
 
-    x.SetS(result)
+    x.SetSNonCompat(result)
     return nil
 }
 
@@ -491,7 +506,7 @@ var _ thrift.Struct = &Bang{}
 
 func NewBang() *Bang {
     return (&Bang{}).
-        SetMessage("")
+        SetMessageNonCompat("")
 }
 
 func (x *Bang) GetMessageNonCompat() string {
@@ -500,6 +515,11 @@ func (x *Bang) GetMessageNonCompat() string {
 
 func (x *Bang) GetMessage() string {
     return x.Message
+}
+
+func (x *Bang) SetMessageNonCompat(value string) *Bang {
+    x.Message = value
+    return x
 }
 
 func (x *Bang) SetMessage(value string) *Bang {
@@ -529,7 +549,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 

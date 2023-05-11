@@ -81,8 +81,8 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMyIntField(0).
-        SetMyStringField("")
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("")
 }
 
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
@@ -101,8 +101,18 @@ func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
 
+func (x *MyStruct) SetMyIntFieldNonCompat(value int64) *MyStruct {
+    x.MyIntField = value
+    return x
+}
+
 func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
     x.MyIntField = value
+    return x
+}
+
+func (x *MyStruct) SetMyStringFieldNonCompat(value string) *MyStruct {
+    x.MyStringField = value
     return x
 }
 
@@ -149,7 +159,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntField(result)
+    x.SetMyIntFieldNonCompat(result)
     return nil
 }
 
@@ -159,7 +169,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyStringField(result)
+    x.SetMyStringFieldNonCompat(result)
     return nil
 }
 
@@ -269,8 +279,8 @@ var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
-        SetMyEnum(0).
-        SetMyDataItem(*NewMyStruct())
+        SetMyEnumNonCompat(0).
+        SetMyDataItemNonCompat(*NewMyStruct())
 }
 
 // Deprecated: Use NewMyUnion().GetMyEnum() instead.
@@ -303,13 +313,23 @@ func (x *MyUnion) GetMyDataItem() *MyStruct {
     return x.MyDataItem
 }
 
-func (x *MyUnion) SetMyEnum(value MyEnum) *MyUnion {
+func (x *MyUnion) SetMyEnumNonCompat(value MyEnum) *MyUnion {
     x.MyEnum = &value
     return x
 }
 
-func (x *MyUnion) SetMyDataItem(value MyStruct) *MyUnion {
+func (x *MyUnion) SetMyEnum(value *MyEnum) *MyUnion {
+    x.MyEnum = value
+    return x
+}
+
+func (x *MyUnion) SetMyDataItemNonCompat(value MyStruct) *MyUnion {
     x.MyDataItem = &value
+    return x
+}
+
+func (x *MyUnion) SetMyDataItem(value *MyStruct) *MyUnion {
+    x.MyDataItem = value
     return x
 }
 
@@ -368,7 +388,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetMyEnum(result)
+    x.SetMyEnumNonCompat(result)
     return nil
 }
 
@@ -379,7 +399,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyDataItem(result)
+    x.SetMyDataItemNonCompat(result)
     return nil
 }
 

@@ -185,7 +185,7 @@ var _ thrift.Struct = &Name{}
 
 func NewName() *Name {
     return (&Name{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *Name) GetNameNonCompat() string {
@@ -194,6 +194,11 @@ func (x *Name) GetNameNonCompat() string {
 
 func (x *Name) GetName() string {
     return x.Name
+}
+
+func (x *Name) SetNameNonCompat(value string) *Name {
+    x.Name = value
+    return x
 }
 
 func (x *Name) SetName(value string) *Name {
@@ -223,7 +228,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -400,8 +405,8 @@ var _ thrift.Struct = &Adapter{}
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
-        SetName("").
-        SetTypeHint("")
+        SetNameNonCompat("").
+        SetTypeHintNonCompat("")
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -420,8 +425,18 @@ func (x *Adapter) GetTypeHint() string {
     return x.TypeHint
 }
 
+func (x *Adapter) SetNameNonCompat(value string) *Adapter {
+    x.Name = value
+    return x
+}
+
 func (x *Adapter) SetName(value string) *Adapter {
     x.Name = value
+    return x
+}
+
+func (x *Adapter) SetTypeHintNonCompat(value string) *Adapter {
+    x.TypeHint = value
     return x
 }
 
@@ -468,7 +483,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -478,7 +493,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeHint(result)
+    x.SetTypeHintNonCompat(result)
     return nil
 }
 

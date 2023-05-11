@@ -928,8 +928,8 @@ var _ thrift.Struct = &MyAnnotation{}
 
 func NewMyAnnotation() *MyAnnotation {
     return (&MyAnnotation{}).
-        SetSignature("").
-        SetColor(
+        SetSignatureNonCompat("").
+        SetColorNonCompat(
               Color_RED,
           )
 }
@@ -950,8 +950,18 @@ func (x *MyAnnotation) GetColor() Color {
     return x.Color
 }
 
+func (x *MyAnnotation) SetSignatureNonCompat(value string) *MyAnnotation {
+    x.Signature = value
+    return x
+}
+
 func (x *MyAnnotation) SetSignature(value string) *MyAnnotation {
     x.Signature = value
+    return x
+}
+
+func (x *MyAnnotation) SetColorNonCompat(value Color) *MyAnnotation {
+    x.Color = value
     return x
 }
 
@@ -998,7 +1008,7 @@ if err != nil {
     return err
 }
 
-    x.SetSignature(result)
+    x.SetSignatureNonCompat(result)
     return nil
 }
 
@@ -1009,7 +1019,7 @@ if err != nil {
 }
 result := Color(enumResult)
 
-    x.SetColor(result)
+    x.SetColorNonCompat(result)
     return nil
 }
 
@@ -1128,14 +1138,14 @@ var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetIntField(0).
-        SetIntFieldWithDefault(13).
-        SetSetField(NewSetWithAdapter()).
-        SetMapField(make(map[string]ListWithElemAdapterWithAdapter)).
-        SetBinaryField([]byte("")).
-        SetLongField(NewMyI64()).
-        SetAdaptedLongField(NewMyI64()).
-        SetDoubleAdaptedField(NewDoubleTypedefI64())
+        SetIntFieldNonCompat(0).
+        SetIntFieldWithDefaultNonCompat(13).
+        SetSetFieldNonCompat(NewSetWithAdapter()).
+        SetMapFieldNonCompat(make(map[string]ListWithElemAdapterWithAdapter)).
+        SetBinaryFieldNonCompat([]byte("")).
+        SetLongFieldNonCompat(NewMyI64()).
+        SetAdaptedLongFieldNonCompat(NewMyI64()).
+        SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
 }
 
 // Deprecated: Use NewFoo().GetOptionalIntField() instead.
@@ -1253,13 +1263,28 @@ func (x *Foo) GetDoubleAdaptedField() DoubleTypedefI64 {
     return x.DoubleAdaptedField
 }
 
+func (x *Foo) SetIntFieldNonCompat(value int32) *Foo {
+    x.IntField = value
+    return x
+}
+
 func (x *Foo) SetIntField(value int32) *Foo {
     x.IntField = value
     return x
 }
 
-func (x *Foo) SetOptionalIntField(value int32) *Foo {
+func (x *Foo) SetOptionalIntFieldNonCompat(value int32) *Foo {
     x.OptionalIntField = &value
+    return x
+}
+
+func (x *Foo) SetOptionalIntField(value *int32) *Foo {
+    x.OptionalIntField = value
+    return x
+}
+
+func (x *Foo) SetIntFieldWithDefaultNonCompat(value int32) *Foo {
+    x.IntFieldWithDefault = value
     return x
 }
 
@@ -1268,8 +1293,18 @@ func (x *Foo) SetIntFieldWithDefault(value int32) *Foo {
     return x
 }
 
+func (x *Foo) SetSetFieldNonCompat(value SetWithAdapter) *Foo {
+    x.SetField = value
+    return x
+}
+
 func (x *Foo) SetSetField(value SetWithAdapter) *Foo {
     x.SetField = value
+    return x
+}
+
+func (x *Foo) SetOptionalSetFieldNonCompat(value SetWithAdapter) *Foo {
+    x.OptionalSetField = value
     return x
 }
 
@@ -1278,8 +1313,18 @@ func (x *Foo) SetOptionalSetField(value SetWithAdapter) *Foo {
     return x
 }
 
+func (x *Foo) SetMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter) *Foo {
+    x.MapField = value
+    return x
+}
+
 func (x *Foo) SetMapField(value map[string]ListWithElemAdapterWithAdapter) *Foo {
     x.MapField = value
+    return x
+}
+
+func (x *Foo) SetOptionalMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter) *Foo {
+    x.OptionalMapField = value
     return x
 }
 
@@ -1288,8 +1333,18 @@ func (x *Foo) SetOptionalMapField(value map[string]ListWithElemAdapterWithAdapte
     return x
 }
 
+func (x *Foo) SetBinaryFieldNonCompat(value []byte) *Foo {
+    x.BinaryField = value
+    return x
+}
+
 func (x *Foo) SetBinaryField(value []byte) *Foo {
     x.BinaryField = value
+    return x
+}
+
+func (x *Foo) SetLongFieldNonCompat(value MyI64) *Foo {
+    x.LongField = value
     return x
 }
 
@@ -1298,8 +1353,18 @@ func (x *Foo) SetLongField(value MyI64) *Foo {
     return x
 }
 
+func (x *Foo) SetAdaptedLongFieldNonCompat(value MyI64) *Foo {
+    x.AdaptedLongField = value
+    return x
+}
+
 func (x *Foo) SetAdaptedLongField(value MyI64) *Foo {
     x.AdaptedLongField = value
+    return x
+}
+
+func (x *Foo) SetDoubleAdaptedFieldNonCompat(value DoubleTypedefI64) *Foo {
+    x.DoubleAdaptedField = value
     return x
 }
 
@@ -1581,7 +1646,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -1591,7 +1656,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalIntField(result)
+    x.SetOptionalIntFieldNonCompat(result)
     return nil
 }
 
@@ -1601,7 +1666,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntFieldWithDefault(result)
+    x.SetIntFieldWithDefaultNonCompat(result)
     return nil
 }
 
@@ -1611,7 +1676,7 @@ if err != nil {
     return err
 }
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -1621,7 +1686,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalSetField(result)
+    x.SetOptionalSetFieldNonCompat(result)
     return nil
 }
 
@@ -1659,7 +1724,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -1697,7 +1762,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetOptionalMapField(result)
+    x.SetOptionalMapFieldNonCompat(result)
     return nil
 }
 
@@ -1707,7 +1772,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -1717,7 +1782,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -1727,7 +1792,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedLongField(result)
+    x.SetAdaptedLongFieldNonCompat(result)
     return nil
 }
 
@@ -1737,7 +1802,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleAdaptedField(result)
+    x.SetDoubleAdaptedFieldNonCompat(result)
     return nil
 }
 
@@ -1967,11 +2032,11 @@ var _ thrift.Struct = &Baz{}
 
 func NewBaz() *Baz {
     return (&Baz{}).
-        SetIntField(0).
-        SetSetField(NewSetWithAdapter()).
-        SetMapField(make(map[string]ListWithElemAdapterWithAdapter)).
-        SetBinaryField([]byte("")).
-        SetLongField(NewMyI64())
+        SetIntFieldNonCompat(0).
+        SetSetFieldNonCompat(NewSetWithAdapter()).
+        SetMapFieldNonCompat(make(map[string]ListWithElemAdapterWithAdapter)).
+        SetBinaryFieldNonCompat([]byte("")).
+        SetLongFieldNonCompat(NewMyI64())
 }
 
 // Deprecated: Use NewBaz().GetIntField() instead.
@@ -2040,8 +2105,18 @@ func (x *Baz) GetLongField() MyI64 {
     return *x.LongField
 }
 
-func (x *Baz) SetIntField(value int32) *Baz {
+func (x *Baz) SetIntFieldNonCompat(value int32) *Baz {
     x.IntField = &value
+    return x
+}
+
+func (x *Baz) SetIntField(value *int32) *Baz {
+    x.IntField = value
+    return x
+}
+
+func (x *Baz) SetSetFieldNonCompat(value SetWithAdapter) *Baz {
+    x.SetField = value
     return x
 }
 
@@ -2050,8 +2125,18 @@ func (x *Baz) SetSetField(value SetWithAdapter) *Baz {
     return x
 }
 
+func (x *Baz) SetMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter) *Baz {
+    x.MapField = value
+    return x
+}
+
 func (x *Baz) SetMapField(value map[string]ListWithElemAdapterWithAdapter) *Baz {
     x.MapField = value
+    return x
+}
+
+func (x *Baz) SetBinaryFieldNonCompat(value []byte) *Baz {
+    x.BinaryField = value
     return x
 }
 
@@ -2060,8 +2145,13 @@ func (x *Baz) SetBinaryField(value []byte) *Baz {
     return x
 }
 
-func (x *Baz) SetLongField(value MyI64) *Baz {
+func (x *Baz) SetLongFieldNonCompat(value MyI64) *Baz {
     x.LongField = &value
+    return x
+}
+
+func (x *Baz) SetLongField(value *MyI64) *Baz {
+    x.LongField = value
     return x
 }
 
@@ -2212,7 +2302,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -2222,7 +2312,7 @@ if err != nil {
     return err
 }
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -2260,7 +2350,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -2270,7 +2360,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -2280,7 +2370,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -2457,10 +2547,10 @@ var _ thrift.Struct = &Bar{}
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetStructField(*NewFoo()).
-        SetStructListField(make([]*FooWithAdapter, 0)).
-        SetUnionField(*NewBaz()).
-        SetAdaptedStructField(*NewDirectlyAdapted())
+        SetStructFieldNonCompat(*NewFoo()).
+        SetStructListFieldNonCompat(make([]*FooWithAdapter, 0)).
+        SetUnionFieldNonCompat(*NewBaz()).
+        SetAdaptedStructFieldNonCompat(*NewDirectlyAdapted())
 }
 
 // Deprecated: Use NewBar().GetStructField() instead.
@@ -2562,13 +2652,28 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     return x.AdaptedStructField
 }
 
-func (x *Bar) SetStructField(value Foo) *Bar {
+func (x *Bar) SetStructFieldNonCompat(value Foo) *Bar {
     x.StructField = &value
     return x
 }
 
-func (x *Bar) SetOptionalStructField(value Foo) *Bar {
+func (x *Bar) SetStructField(value *Foo) *Bar {
+    x.StructField = value
+    return x
+}
+
+func (x *Bar) SetOptionalStructFieldNonCompat(value Foo) *Bar {
     x.OptionalStructField = &value
+    return x
+}
+
+func (x *Bar) SetOptionalStructField(value *Foo) *Bar {
+    x.OptionalStructField = value
+    return x
+}
+
+func (x *Bar) SetStructListFieldNonCompat(value []*FooWithAdapter) *Bar {
+    x.StructListField = value
     return x
 }
 
@@ -2577,23 +2682,43 @@ func (x *Bar) SetStructListField(value []*FooWithAdapter) *Bar {
     return x
 }
 
+func (x *Bar) SetOptionalStructListFieldNonCompat(value []*FooWithAdapter) *Bar {
+    x.OptionalStructListField = value
+    return x
+}
+
 func (x *Bar) SetOptionalStructListField(value []*FooWithAdapter) *Bar {
     x.OptionalStructListField = value
     return x
 }
 
-func (x *Bar) SetUnionField(value Baz) *Bar {
+func (x *Bar) SetUnionFieldNonCompat(value Baz) *Bar {
     x.UnionField = &value
     return x
 }
 
-func (x *Bar) SetOptionalUnionField(value Baz) *Bar {
+func (x *Bar) SetUnionField(value *Baz) *Bar {
+    x.UnionField = value
+    return x
+}
+
+func (x *Bar) SetOptionalUnionFieldNonCompat(value Baz) *Bar {
     x.OptionalUnionField = &value
     return x
 }
 
-func (x *Bar) SetAdaptedStructField(value DirectlyAdapted) *Bar {
+func (x *Bar) SetOptionalUnionField(value *Baz) *Bar {
+    x.OptionalUnionField = value
+    return x
+}
+
+func (x *Bar) SetAdaptedStructFieldNonCompat(value DirectlyAdapted) *Bar {
     x.AdaptedStructField = &value
+    return x
+}
+
+func (x *Bar) SetAdaptedStructField(value *DirectlyAdapted) *Bar {
+    x.AdaptedStructField = value
     return x
 }
 
@@ -2796,7 +2921,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructField(result)
+    x.SetStructFieldNonCompat(result)
     return nil
 }
 
@@ -2807,7 +2932,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalStructField(result)
+    x.SetOptionalStructFieldNonCompat(result)
     return nil
 }
 
@@ -2835,7 +2960,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetStructListField(result)
+    x.SetStructListFieldNonCompat(result)
     return nil
 }
 
@@ -2863,7 +2988,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptionalStructListField(result)
+    x.SetOptionalStructListFieldNonCompat(result)
     return nil
 }
 
@@ -2874,7 +2999,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionField(result)
+    x.SetUnionFieldNonCompat(result)
     return nil
 }
 
@@ -2885,7 +3010,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalUnionField(result)
+    x.SetOptionalUnionFieldNonCompat(result)
     return nil
 }
 
@@ -2896,7 +3021,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedStructField(result)
+    x.SetAdaptedStructFieldNonCompat(result)
     return nil
 }
 
@@ -3070,7 +3195,7 @@ var _ thrift.Struct = &DirectlyAdapted{}
 
 func NewDirectlyAdapted() *DirectlyAdapted {
     return (&DirectlyAdapted{}).
-        SetField(0)
+        SetFieldNonCompat(0)
 }
 
 func (x *DirectlyAdapted) GetFieldNonCompat() int32 {
@@ -3079,6 +3204,11 @@ func (x *DirectlyAdapted) GetFieldNonCompat() int32 {
 
 func (x *DirectlyAdapted) GetField() int32 {
     return x.Field
+}
+
+func (x *DirectlyAdapted) SetFieldNonCompat(value int32) *DirectlyAdapted {
+    x.Field = value
+    return x
 }
 
 func (x *DirectlyAdapted) SetField(value int32) *DirectlyAdapted {
@@ -3108,7 +3238,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -3204,7 +3334,7 @@ var _ thrift.Struct = &IndependentDirectlyAdapted{}
 
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
     return (&IndependentDirectlyAdapted{}).
-        SetField(0)
+        SetFieldNonCompat(0)
 }
 
 func (x *IndependentDirectlyAdapted) GetFieldNonCompat() int32 {
@@ -3213,6 +3343,11 @@ func (x *IndependentDirectlyAdapted) GetFieldNonCompat() int32 {
 
 func (x *IndependentDirectlyAdapted) GetField() int32 {
     return x.Field
+}
+
+func (x *IndependentDirectlyAdapted) SetFieldNonCompat(value int32) *IndependentDirectlyAdapted {
+    x.Field = value
+    return x
 }
 
 func (x *IndependentDirectlyAdapted) SetField(value int32) *IndependentDirectlyAdapted {
@@ -3242,7 +3377,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -3341,8 +3476,8 @@ var _ thrift.Struct = &StructWithFieldAdapter{}
 
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
     return (&StructWithFieldAdapter{}).
-        SetField(0).
-        SetSharedField(0)
+        SetFieldNonCompat(0).
+        SetSharedFieldNonCompat(0)
 }
 
 // Deprecated: Use NewStructWithFieldAdapter().GetOptSharedField() instead.
@@ -3391,8 +3526,18 @@ func (x *StructWithFieldAdapter) GetOptBoxedField() int32 {
     return *x.OptBoxedField
 }
 
+func (x *StructWithFieldAdapter) SetFieldNonCompat(value int32) *StructWithFieldAdapter {
+    x.Field = value
+    return x
+}
+
 func (x *StructWithFieldAdapter) SetField(value int32) *StructWithFieldAdapter {
     x.Field = value
+    return x
+}
+
+func (x *StructWithFieldAdapter) SetSharedFieldNonCompat(value int32) *StructWithFieldAdapter {
+    x.SharedField = value
     return x
 }
 
@@ -3401,13 +3546,23 @@ func (x *StructWithFieldAdapter) SetSharedField(value int32) *StructWithFieldAda
     return x
 }
 
-func (x *StructWithFieldAdapter) SetOptSharedField(value int32) *StructWithFieldAdapter {
+func (x *StructWithFieldAdapter) SetOptSharedFieldNonCompat(value int32) *StructWithFieldAdapter {
     x.OptSharedField = &value
     return x
 }
 
-func (x *StructWithFieldAdapter) SetOptBoxedField(value int32) *StructWithFieldAdapter {
+func (x *StructWithFieldAdapter) SetOptSharedField(value *int32) *StructWithFieldAdapter {
+    x.OptSharedField = value
+    return x
+}
+
+func (x *StructWithFieldAdapter) SetOptBoxedFieldNonCompat(value int32) *StructWithFieldAdapter {
     x.OptBoxedField = &value
+    return x
+}
+
+func (x *StructWithFieldAdapter) SetOptBoxedField(value *int32) *StructWithFieldAdapter {
+    x.OptBoxedField = value
     return x
 }
 
@@ -3497,7 +3652,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -3507,7 +3662,7 @@ if err != nil {
     return err
 }
 
-    x.SetSharedField(result)
+    x.SetSharedFieldNonCompat(result)
     return nil
 }
 
@@ -3517,7 +3672,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptSharedField(result)
+    x.SetOptSharedFieldNonCompat(result)
     return nil
 }
 
@@ -3527,7 +3682,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoxedField(result)
+    x.SetOptBoxedFieldNonCompat(result)
     return nil
 }
 
@@ -3664,9 +3819,9 @@ var _ thrift.Struct = &TerseAdaptedFields{}
 
 func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{}).
-        SetIntField(0).
-        SetStringField("").
-        SetSetField(make([]int32, 0))
+        SetIntFieldNonCompat(0).
+        SetStringFieldNonCompat("").
+        SetSetFieldNonCompat(make([]int32, 0))
 }
 
 func (x *TerseAdaptedFields) GetIntFieldNonCompat() int32 {
@@ -3697,13 +3852,28 @@ func (x *TerseAdaptedFields) GetSetField() []int32 {
     return x.SetField
 }
 
+func (x *TerseAdaptedFields) SetIntFieldNonCompat(value int32) *TerseAdaptedFields {
+    x.IntField = value
+    return x
+}
+
 func (x *TerseAdaptedFields) SetIntField(value int32) *TerseAdaptedFields {
     x.IntField = value
     return x
 }
 
+func (x *TerseAdaptedFields) SetStringFieldNonCompat(value string) *TerseAdaptedFields {
+    x.StringField = value
+    return x
+}
+
 func (x *TerseAdaptedFields) SetStringField(value string) *TerseAdaptedFields {
     x.StringField = value
+    return x
+}
+
+func (x *TerseAdaptedFields) SetSetFieldNonCompat(value []int32) *TerseAdaptedFields {
+    x.SetField = value
     return x
 }
 
@@ -3785,7 +3955,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -3795,7 +3965,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -3823,7 +3993,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -3945,7 +4115,7 @@ var _ thrift.Struct = &B{}
 
 func NewB() *B {
     return (&B{}).
-        SetA(*NewAdaptedA())
+        SetANonCompat(*NewAdaptedA())
 }
 
 // Deprecated: Use NewB().GetA() instead.
@@ -3963,8 +4133,13 @@ func (x *B) GetA() *AdaptedA {
     return x.A
 }
 
-func (x *B) SetA(value AdaptedA) *B {
+func (x *B) SetANonCompat(value AdaptedA) *B {
     x.A = &value
+    return x
+}
+
+func (x *B) SetA(value *AdaptedA) *B {
+    x.A = value
     return x
 }
 
@@ -3999,7 +4174,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -4175,7 +4350,7 @@ var _ thrift.Struct = &Config{}
 
 func NewConfig() *Config {
     return (&Config{}).
-        SetPath("")
+        SetPathNonCompat("")
 }
 
 func (x *Config) GetPathNonCompat() string {
@@ -4184,6 +4359,11 @@ func (x *Config) GetPathNonCompat() string {
 
 func (x *Config) GetPath() string {
     return x.Path
+}
+
+func (x *Config) SetPathNonCompat(value string) *Config {
+    x.Path = value
+    return x
 }
 
 func (x *Config) SetPath(value string) *Config {
@@ -4213,7 +4393,7 @@ if err != nil {
     return err
 }
 
-    x.SetPath(result)
+    x.SetPathNonCompat(result)
     return nil
 }
 
@@ -4310,8 +4490,8 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetField(0).
-        SetSetString(NewSetWithAdapter())
+        SetFieldNonCompat(0).
+        SetSetStringNonCompat(NewSetWithAdapter())
 }
 
 func (x *MyStruct) GetFieldNonCompat() int32 {
@@ -4334,8 +4514,18 @@ func (x *MyStruct) GetSetString() SetWithAdapter {
     return x.SetString
 }
 
+func (x *MyStruct) SetFieldNonCompat(value int32) *MyStruct {
+    x.Field = value
+    return x
+}
+
 func (x *MyStruct) SetField(value int32) *MyStruct {
     x.Field = value
+    return x
+}
+
+func (x *MyStruct) SetSetStringNonCompat(value SetWithAdapter) *MyStruct {
+    x.SetString = value
     return x
 }
 
@@ -4391,7 +4581,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -4401,7 +4591,7 @@ if err != nil {
     return err
 }
 
-    x.SetSetString(result)
+    x.SetSetStringNonCompat(result)
     return nil
 }
 
@@ -4519,16 +4709,16 @@ var _ thrift.Struct = &AdaptTestStruct{}
 
 func NewAdaptTestStruct() *AdaptTestStruct {
     return (&AdaptTestStruct{}).
-        SetDelay(NewDurationMs()).
-        SetCustom(NewCustomProtocolType()).
-        SetTimeout(0).
-        SetData(0).
-        SetMeta("").
-        SetIndirectionString(NewIndirectionString()).
-        SetStringData("").
-        SetDoubleWrappedBool(NewAdaptedBool()).
-        SetDoubleWrappedInteger(NewAdaptedInteger()).
-        SetBinaryData([]byte(""))
+        SetDelayNonCompat(NewDurationMs()).
+        SetCustomNonCompat(NewCustomProtocolType()).
+        SetTimeoutNonCompat(0).
+        SetDataNonCompat(0).
+        SetMetaNonCompat("").
+        SetIndirectionStringNonCompat(NewIndirectionString()).
+        SetStringDataNonCompat("").
+        SetDoubleWrappedBoolNonCompat(NewAdaptedBool()).
+        SetDoubleWrappedIntegerNonCompat(NewAdaptedInteger()).
+        SetBinaryDataNonCompat([]byte(""))
 }
 
 func (x *AdaptTestStruct) GetDelayNonCompat() DurationMs {
@@ -4619,8 +4809,18 @@ func (x *AdaptTestStruct) GetBinaryData() []byte {
     return x.BinaryData
 }
 
+func (x *AdaptTestStruct) SetDelayNonCompat(value DurationMs) *AdaptTestStruct {
+    x.Delay = value
+    return x
+}
+
 func (x *AdaptTestStruct) SetDelay(value DurationMs) *AdaptTestStruct {
     x.Delay = value
+    return x
+}
+
+func (x *AdaptTestStruct) SetCustomNonCompat(value CustomProtocolType) *AdaptTestStruct {
+    x.Custom = value
     return x
 }
 
@@ -4629,8 +4829,18 @@ func (x *AdaptTestStruct) SetCustom(value CustomProtocolType) *AdaptTestStruct {
     return x
 }
 
+func (x *AdaptTestStruct) SetTimeoutNonCompat(value int64) *AdaptTestStruct {
+    x.Timeout = value
+    return x
+}
+
 func (x *AdaptTestStruct) SetTimeout(value int64) *AdaptTestStruct {
     x.Timeout = value
+    return x
+}
+
+func (x *AdaptTestStruct) SetDataNonCompat(value int64) *AdaptTestStruct {
+    x.Data = value
     return x
 }
 
@@ -4639,8 +4849,18 @@ func (x *AdaptTestStruct) SetData(value int64) *AdaptTestStruct {
     return x
 }
 
+func (x *AdaptTestStruct) SetMetaNonCompat(value string) *AdaptTestStruct {
+    x.Meta = value
+    return x
+}
+
 func (x *AdaptTestStruct) SetMeta(value string) *AdaptTestStruct {
     x.Meta = value
+    return x
+}
+
+func (x *AdaptTestStruct) SetIndirectionStringNonCompat(value IndirectionString) *AdaptTestStruct {
+    x.IndirectionString = value
     return x
 }
 
@@ -4649,8 +4869,18 @@ func (x *AdaptTestStruct) SetIndirectionString(value IndirectionString) *AdaptTe
     return x
 }
 
+func (x *AdaptTestStruct) SetStringDataNonCompat(value string) *AdaptTestStruct {
+    x.StringData = value
+    return x
+}
+
 func (x *AdaptTestStruct) SetStringData(value string) *AdaptTestStruct {
     x.StringData = value
+    return x
+}
+
+func (x *AdaptTestStruct) SetDoubleWrappedBoolNonCompat(value AdaptedBool) *AdaptTestStruct {
+    x.DoubleWrappedBool = value
     return x
 }
 
@@ -4659,8 +4889,18 @@ func (x *AdaptTestStruct) SetDoubleWrappedBool(value AdaptedBool) *AdaptTestStru
     return x
 }
 
+func (x *AdaptTestStruct) SetDoubleWrappedIntegerNonCompat(value AdaptedInteger) *AdaptTestStruct {
+    x.DoubleWrappedInteger = value
+    return x
+}
+
 func (x *AdaptTestStruct) SetDoubleWrappedInteger(value AdaptedInteger) *AdaptTestStruct {
     x.DoubleWrappedInteger = value
+    return x
+}
+
+func (x *AdaptTestStruct) SetBinaryDataNonCompat(value []byte) *AdaptTestStruct {
+    x.BinaryData = value
     return x
 }
 
@@ -4856,7 +5096,7 @@ if err != nil {
     return err
 }
 
-    x.SetDelay(result)
+    x.SetDelayNonCompat(result)
     return nil
 }
 
@@ -4866,7 +5106,7 @@ if err != nil {
     return err
 }
 
-    x.SetCustom(result)
+    x.SetCustomNonCompat(result)
     return nil
 }
 
@@ -4876,7 +5116,7 @@ if err != nil {
     return err
 }
 
-    x.SetTimeout(result)
+    x.SetTimeoutNonCompat(result)
     return nil
 }
 
@@ -4886,7 +5126,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -4896,7 +5136,7 @@ if err != nil {
     return err
 }
 
-    x.SetMeta(result)
+    x.SetMetaNonCompat(result)
     return nil
 }
 
@@ -4906,7 +5146,7 @@ if err != nil {
     return err
 }
 
-    x.SetIndirectionString(result)
+    x.SetIndirectionStringNonCompat(result)
     return nil
 }
 
@@ -4916,7 +5156,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringData(result)
+    x.SetStringDataNonCompat(result)
     return nil
 }
 
@@ -4926,7 +5166,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleWrappedBool(result)
+    x.SetDoubleWrappedBoolNonCompat(result)
     return nil
 }
 
@@ -4936,7 +5176,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleWrappedInteger(result)
+    x.SetDoubleWrappedIntegerNonCompat(result)
     return nil
 }
 
@@ -4946,7 +5186,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryData(result)
+    x.SetBinaryDataNonCompat(result)
     return nil
 }
 
@@ -5180,42 +5420,42 @@ var _ thrift.Struct = &AdaptTemplatedTestStruct{}
 
 func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
     return (&AdaptTemplatedTestStruct{}).
-        SetAdaptedBool(NewAdaptedBool()).
-        SetAdaptedByte(NewAdaptedByte()).
-        SetAdaptedShort(NewAdaptedShort()).
-        SetAdaptedInteger(NewAdaptedInteger()).
-        SetAdaptedLong(NewAdaptedLong()).
-        SetAdaptedDouble(NewAdaptedDouble()).
-        SetAdaptedString(NewAdaptedString()).
-        SetAdaptedList(make([]int64, 0)).
-        SetAdaptedSet(make([]int64, 0)).
-        SetAdaptedMap(make(map[int64]int64)).
-        SetAdaptedBoolDefault(true).
-        SetAdaptedByteDefault(1).
-        SetAdaptedShortDefault(2).
-        SetAdaptedIntegerDefault(3).
-        SetAdaptedLongDefault(4).
-        SetAdaptedDoubleDefault(5.0).
-        SetAdaptedStringDefault("6").
-        SetAdaptedEnum(
+        SetAdaptedBoolNonCompat(NewAdaptedBool()).
+        SetAdaptedByteNonCompat(NewAdaptedByte()).
+        SetAdaptedShortNonCompat(NewAdaptedShort()).
+        SetAdaptedIntegerNonCompat(NewAdaptedInteger()).
+        SetAdaptedLongNonCompat(NewAdaptedLong()).
+        SetAdaptedDoubleNonCompat(NewAdaptedDouble()).
+        SetAdaptedStringNonCompat(NewAdaptedString()).
+        SetAdaptedListNonCompat(make([]int64, 0)).
+        SetAdaptedSetNonCompat(make([]int64, 0)).
+        SetAdaptedMapNonCompat(make(map[int64]int64)).
+        SetAdaptedBoolDefaultNonCompat(true).
+        SetAdaptedByteDefaultNonCompat(1).
+        SetAdaptedShortDefaultNonCompat(2).
+        SetAdaptedIntegerDefaultNonCompat(3).
+        SetAdaptedLongDefaultNonCompat(4).
+        SetAdaptedDoubleDefaultNonCompat(5.0).
+        SetAdaptedStringDefaultNonCompat("6").
+        SetAdaptedEnumNonCompat(
               ThriftAdaptedEnum_One,
           ).
-        SetAdaptedListDefault(
+        SetAdaptedListDefaultNonCompat(
               []int64{
     1,
 },
           ).
-        SetAdaptedSetDefault(
+        SetAdaptedSetDefaultNonCompat(
               []int64{
     1,
 },
           ).
-        SetAdaptedMapDefault(
+        SetAdaptedMapDefaultNonCompat(
               map[int64]int64{
     1: 1,
 },
           ).
-        SetDoubleTypedefBool(NewDoubleTypedefBool())
+        SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedBoolNonCompat() AdaptedBool {
@@ -5418,8 +5658,18 @@ func (x *AdaptTemplatedTestStruct) GetDoubleTypedefBool() DoubleTypedefBool {
     return x.DoubleTypedefBool
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedBoolNonCompat(value AdaptedBool) *AdaptTemplatedTestStruct {
+    x.AdaptedBool = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedBool(value AdaptedBool) *AdaptTemplatedTestStruct {
     x.AdaptedBool = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedByteNonCompat(value AdaptedByte) *AdaptTemplatedTestStruct {
+    x.AdaptedByte = value
     return x
 }
 
@@ -5428,8 +5678,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedByte(value AdaptedByte) *AdaptTempl
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedShortNonCompat(value AdaptedShort) *AdaptTemplatedTestStruct {
+    x.AdaptedShort = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedShort(value AdaptedShort) *AdaptTemplatedTestStruct {
     x.AdaptedShort = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedIntegerNonCompat(value AdaptedInteger) *AdaptTemplatedTestStruct {
+    x.AdaptedInteger = value
     return x
 }
 
@@ -5438,8 +5698,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedInteger(value AdaptedInteger) *Adap
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedLongNonCompat(value AdaptedLong) *AdaptTemplatedTestStruct {
+    x.AdaptedLong = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedLong(value AdaptedLong) *AdaptTemplatedTestStruct {
     x.AdaptedLong = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedDoubleNonCompat(value AdaptedDouble) *AdaptTemplatedTestStruct {
+    x.AdaptedDouble = value
     return x
 }
 
@@ -5448,8 +5718,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedDouble(value AdaptedDouble) *AdaptT
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedStringNonCompat(value AdaptedString) *AdaptTemplatedTestStruct {
+    x.AdaptedString = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedString(value AdaptedString) *AdaptTemplatedTestStruct {
     x.AdaptedString = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedListNonCompat(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedList = value
     return x
 }
 
@@ -5458,8 +5738,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedList(value []int64) *AdaptTemplated
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedSetNonCompat(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedSet = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedSet(value []int64) *AdaptTemplatedTestStruct {
     x.AdaptedSet = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedMapNonCompat(value map[int64]int64) *AdaptTemplatedTestStruct {
+    x.AdaptedMap = value
     return x
 }
 
@@ -5468,8 +5758,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedMap(value map[int64]int64) *AdaptTe
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedBoolDefaultNonCompat(value AdaptedBool) *AdaptTemplatedTestStruct {
+    x.AdaptedBoolDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedBoolDefault(value AdaptedBool) *AdaptTemplatedTestStruct {
     x.AdaptedBoolDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedByteDefaultNonCompat(value AdaptedByte) *AdaptTemplatedTestStruct {
+    x.AdaptedByteDefault = value
     return x
 }
 
@@ -5478,8 +5778,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedByteDefault(value AdaptedByte) *Ada
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedShortDefaultNonCompat(value AdaptedShort) *AdaptTemplatedTestStruct {
+    x.AdaptedShortDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedShortDefault(value AdaptedShort) *AdaptTemplatedTestStruct {
     x.AdaptedShortDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedIntegerDefaultNonCompat(value AdaptedInteger) *AdaptTemplatedTestStruct {
+    x.AdaptedIntegerDefault = value
     return x
 }
 
@@ -5488,8 +5798,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedIntegerDefault(value AdaptedInteger
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedLongDefaultNonCompat(value AdaptedLong) *AdaptTemplatedTestStruct {
+    x.AdaptedLongDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedLongDefault(value AdaptedLong) *AdaptTemplatedTestStruct {
     x.AdaptedLongDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedDoubleDefaultNonCompat(value AdaptedDouble) *AdaptTemplatedTestStruct {
+    x.AdaptedDoubleDefault = value
     return x
 }
 
@@ -5498,8 +5818,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedDoubleDefault(value AdaptedDouble) 
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedStringDefaultNonCompat(value AdaptedString) *AdaptTemplatedTestStruct {
+    x.AdaptedStringDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedStringDefault(value AdaptedString) *AdaptTemplatedTestStruct {
     x.AdaptedStringDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedEnumNonCompat(value AdaptedEnum) *AdaptTemplatedTestStruct {
+    x.AdaptedEnum = value
     return x
 }
 
@@ -5508,8 +5838,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedEnum(value AdaptedEnum) *AdaptTempl
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedListDefaultNonCompat(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedListDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedListDefault(value []int64) *AdaptTemplatedTestStruct {
     x.AdaptedListDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetAdaptedSetDefaultNonCompat(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedSetDefault = value
     return x
 }
 
@@ -5518,8 +5858,18 @@ func (x *AdaptTemplatedTestStruct) SetAdaptedSetDefault(value []int64) *AdaptTem
     return x
 }
 
+func (x *AdaptTemplatedTestStruct) SetAdaptedMapDefaultNonCompat(value map[int64]int64) *AdaptTemplatedTestStruct {
+    x.AdaptedMapDefault = value
+    return x
+}
+
 func (x *AdaptTemplatedTestStruct) SetAdaptedMapDefault(value map[int64]int64) *AdaptTemplatedTestStruct {
     x.AdaptedMapDefault = value
+    return x
+}
+
+func (x *AdaptTemplatedTestStruct) SetDoubleTypedefBoolNonCompat(value DoubleTypedefBool) *AdaptTemplatedTestStruct {
+    x.DoubleTypedefBool = value
     return x
 }
 
@@ -6030,7 +6380,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedBool(result)
+    x.SetAdaptedBoolNonCompat(result)
     return nil
 }
 
@@ -6040,7 +6390,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedByte(result)
+    x.SetAdaptedByteNonCompat(result)
     return nil
 }
 
@@ -6050,7 +6400,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedShort(result)
+    x.SetAdaptedShortNonCompat(result)
     return nil
 }
 
@@ -6060,7 +6410,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedInteger(result)
+    x.SetAdaptedIntegerNonCompat(result)
     return nil
 }
 
@@ -6070,7 +6420,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedLong(result)
+    x.SetAdaptedLongNonCompat(result)
     return nil
 }
 
@@ -6080,7 +6430,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedDouble(result)
+    x.SetAdaptedDoubleNonCompat(result)
     return nil
 }
 
@@ -6090,7 +6440,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedString(result)
+    x.SetAdaptedStringNonCompat(result)
     return nil
 }
 
@@ -6118,7 +6468,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAdaptedList(result)
+    x.SetAdaptedListNonCompat(result)
     return nil
 }
 
@@ -6146,7 +6496,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAdaptedSet(result)
+    x.SetAdaptedSetNonCompat(result)
     return nil
 }
 
@@ -6184,7 +6534,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdaptedMap(result)
+    x.SetAdaptedMapNonCompat(result)
     return nil
 }
 
@@ -6194,7 +6544,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedBoolDefault(result)
+    x.SetAdaptedBoolDefaultNonCompat(result)
     return nil
 }
 
@@ -6204,7 +6554,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedByteDefault(result)
+    x.SetAdaptedByteDefaultNonCompat(result)
     return nil
 }
 
@@ -6214,7 +6564,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedShortDefault(result)
+    x.SetAdaptedShortDefaultNonCompat(result)
     return nil
 }
 
@@ -6224,7 +6574,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedIntegerDefault(result)
+    x.SetAdaptedIntegerDefaultNonCompat(result)
     return nil
 }
 
@@ -6234,7 +6584,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedLongDefault(result)
+    x.SetAdaptedLongDefaultNonCompat(result)
     return nil
 }
 
@@ -6244,7 +6594,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedDoubleDefault(result)
+    x.SetAdaptedDoubleDefaultNonCompat(result)
     return nil
 }
 
@@ -6254,7 +6604,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedStringDefault(result)
+    x.SetAdaptedStringDefaultNonCompat(result)
     return nil
 }
 
@@ -6264,7 +6614,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedEnum(result)
+    x.SetAdaptedEnumNonCompat(result)
     return nil
 }
 
@@ -6292,7 +6642,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAdaptedListDefault(result)
+    x.SetAdaptedListDefaultNonCompat(result)
     return nil
 }
 
@@ -6320,7 +6670,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAdaptedSetDefault(result)
+    x.SetAdaptedSetDefaultNonCompat(result)
     return nil
 }
 
@@ -6358,7 +6708,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdaptedMapDefault(result)
+    x.SetAdaptedMapDefaultNonCompat(result)
     return nil
 }
 
@@ -6368,7 +6718,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleTypedefBool(result)
+    x.SetDoubleTypedefBoolNonCompat(result)
     return nil
 }
 
@@ -6737,7 +7087,7 @@ var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
 
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{}).
-        SetAdaptedStruct(*NewAdaptTemplatedTestStruct())
+        SetAdaptedStructNonCompat(*NewAdaptTemplatedTestStruct())
 }
 
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
@@ -6755,8 +7105,13 @@ func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestS
     return x.AdaptedStruct
 }
 
-func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStruct(value AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
+func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStructNonCompat(value AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
     x.AdaptedStruct = &value
+    return x
+}
+
+func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStruct(value *AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
+    x.AdaptedStruct = value
     return x
 }
 
@@ -6791,7 +7146,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedStruct(result)
+    x.SetAdaptedStructNonCompat(result)
     return nil
 }
 
@@ -6888,8 +7243,8 @@ var _ thrift.Struct = &AdaptTestUnion{}
 
 func NewAdaptTestUnion() *AdaptTestUnion {
     return (&AdaptTestUnion{}).
-        SetDelay(NewDurationMs()).
-        SetCustom(NewCustomProtocolType())
+        SetDelayNonCompat(NewDurationMs()).
+        SetCustomNonCompat(NewCustomProtocolType())
 }
 
 // Deprecated: Use NewAdaptTestUnion().GetDelay() instead.
@@ -6919,8 +7274,18 @@ func (x *AdaptTestUnion) GetCustom() CustomProtocolType {
     return x.Custom
 }
 
-func (x *AdaptTestUnion) SetDelay(value DurationMs) *AdaptTestUnion {
+func (x *AdaptTestUnion) SetDelayNonCompat(value DurationMs) *AdaptTestUnion {
     x.Delay = &value
+    return x
+}
+
+func (x *AdaptTestUnion) SetDelay(value *DurationMs) *AdaptTestUnion {
+    x.Delay = value
+    return x
+}
+
+func (x *AdaptTestUnion) SetCustomNonCompat(value CustomProtocolType) *AdaptTestUnion {
+    x.Custom = value
     return x
 }
 
@@ -6985,7 +7350,7 @@ if err != nil {
     return err
 }
 
-    x.SetDelay(result)
+    x.SetDelayNonCompat(result)
     return nil
 }
 
@@ -6995,7 +7360,7 @@ if err != nil {
     return err
 }
 
-    x.SetCustom(result)
+    x.SetCustomNonCompat(result)
     return nil
 }
 
@@ -7118,7 +7483,7 @@ var _ thrift.Struct = &AdaptedStruct{}
 
 func NewAdaptedStruct() *AdaptedStruct {
     return (&AdaptedStruct{}).
-        SetData(0)
+        SetDataNonCompat(0)
 }
 
 func (x *AdaptedStruct) GetDataNonCompat() int64 {
@@ -7127,6 +7492,11 @@ func (x *AdaptedStruct) GetDataNonCompat() int64 {
 
 func (x *AdaptedStruct) GetData() int64 {
     return x.Data
+}
+
+func (x *AdaptedStruct) SetDataNonCompat(value int64) *AdaptedStruct {
+    x.Data = value
+    return x
 }
 
 func (x *AdaptedStruct) SetData(value int64) *AdaptedStruct {
@@ -7156,7 +7526,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -7252,7 +7622,7 @@ var _ thrift.Struct = &DirectlyAdaptedStruct{}
 
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
     return (&DirectlyAdaptedStruct{}).
-        SetData(0)
+        SetDataNonCompat(0)
 }
 
 func (x *DirectlyAdaptedStruct) GetDataNonCompat() int64 {
@@ -7261,6 +7631,11 @@ func (x *DirectlyAdaptedStruct) GetDataNonCompat() int64 {
 
 func (x *DirectlyAdaptedStruct) GetData() int64 {
     return x.Data
+}
+
+func (x *DirectlyAdaptedStruct) SetDataNonCompat(value int64) *DirectlyAdaptedStruct {
+    x.Data = value
+    return x
 }
 
 func (x *DirectlyAdaptedStruct) SetData(value int64) *DirectlyAdaptedStruct {
@@ -7290,7 +7665,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -7389,10 +7764,10 @@ var _ thrift.Struct = &StructFieldAdaptedStruct{}
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{}).
-        SetAdaptedStruct(*NewAdaptedStruct()).
-        SetAdaptedTypedef(*NewAdaptedTypedef()).
-        SetDirectlyAdapted(*NewDirectlyAdaptedStruct()).
-        SetTypedefOfAdapted(*NewTypedefOfDirect())
+        SetAdaptedStructNonCompat(*NewAdaptedStruct()).
+        SetAdaptedTypedefNonCompat(*NewAdaptedTypedef()).
+        SetDirectlyAdaptedNonCompat(*NewDirectlyAdaptedStruct()).
+        SetTypedefOfAdaptedNonCompat(*NewTypedefOfDirect())
 }
 
 // Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
@@ -7455,23 +7830,43 @@ func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
     return x.TypedefOfAdapted
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedStruct(value AdaptedStruct) *StructFieldAdaptedStruct {
+func (x *StructFieldAdaptedStruct) SetAdaptedStructNonCompat(value AdaptedStruct) *StructFieldAdaptedStruct {
     x.AdaptedStruct = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedTypedef(value AdaptedTypedef) *StructFieldAdaptedStruct {
+func (x *StructFieldAdaptedStruct) SetAdaptedStruct(value *AdaptedStruct) *StructFieldAdaptedStruct {
+    x.AdaptedStruct = value
+    return x
+}
+
+func (x *StructFieldAdaptedStruct) SetAdaptedTypedefNonCompat(value AdaptedTypedef) *StructFieldAdaptedStruct {
     x.AdaptedTypedef = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetDirectlyAdapted(value DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
+func (x *StructFieldAdaptedStruct) SetAdaptedTypedef(value *AdaptedTypedef) *StructFieldAdaptedStruct {
+    x.AdaptedTypedef = value
+    return x
+}
+
+func (x *StructFieldAdaptedStruct) SetDirectlyAdaptedNonCompat(value DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
     x.DirectlyAdapted = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetTypedefOfAdapted(value TypedefOfDirect) *StructFieldAdaptedStruct {
+func (x *StructFieldAdaptedStruct) SetDirectlyAdapted(value *DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
+    x.DirectlyAdapted = value
+    return x
+}
+
+func (x *StructFieldAdaptedStruct) SetTypedefOfAdaptedNonCompat(value TypedefOfDirect) *StructFieldAdaptedStruct {
     x.TypedefOfAdapted = &value
+    return x
+}
+
+func (x *StructFieldAdaptedStruct) SetTypedefOfAdapted(value *TypedefOfDirect) *StructFieldAdaptedStruct {
+    x.TypedefOfAdapted = value
     return x
 }
 
@@ -7580,7 +7975,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedStruct(result)
+    x.SetAdaptedStructNonCompat(result)
     return nil
 }
 
@@ -7590,7 +7985,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedTypedef(result)
+    x.SetAdaptedTypedefNonCompat(result)
     return nil
 }
 
@@ -7601,7 +7996,7 @@ if err != nil {
     return err
 }
 
-    x.SetDirectlyAdapted(result)
+    x.SetDirectlyAdaptedNonCompat(result)
     return nil
 }
 
@@ -7611,7 +8006,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefOfAdapted(result)
+    x.SetTypedefOfAdaptedNonCompat(result)
     return nil
 }
 
@@ -7746,7 +8141,7 @@ var _ thrift.Struct = &CircularAdaptee{}
 
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{}).
-        SetField(*NewCircularStruct())
+        SetFieldNonCompat(*NewCircularStruct())
 }
 
 // Deprecated: Use NewCircularAdaptee().GetField() instead.
@@ -7764,8 +8159,13 @@ func (x *CircularAdaptee) GetField() *CircularStruct {
     return x.Field
 }
 
-func (x *CircularAdaptee) SetField(value CircularStruct) *CircularAdaptee {
+func (x *CircularAdaptee) SetFieldNonCompat(value CircularStruct) *CircularAdaptee {
     x.Field = &value
+    return x
+}
+
+func (x *CircularAdaptee) SetField(value *CircularStruct) *CircularAdaptee {
+    x.Field = value
     return x
 }
 
@@ -7800,7 +8200,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -7913,8 +8313,13 @@ func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     return x.Field
 }
 
-func (x *CircularStruct) SetField(value AdaptedCircularAdaptee) *CircularStruct {
+func (x *CircularStruct) SetFieldNonCompat(value AdaptedCircularAdaptee) *CircularStruct {
     x.Field = &value
+    return x
+}
+
+func (x *CircularStruct) SetField(value *AdaptedCircularAdaptee) *CircularStruct {
+    x.Field = value
     return x
 }
 
@@ -7949,7 +8354,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -8045,7 +8450,7 @@ var _ thrift.Struct = &ReorderedStruct{}
 
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{}).
-        SetReorderedDependentAdapted(*NewDeclaredAfterStruct())
+        SetReorderedDependentAdaptedNonCompat(*NewDeclaredAfterStruct())
 }
 
 // Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
@@ -8063,8 +8468,13 @@ func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     return x.ReorderedDependentAdapted
 }
 
-func (x *ReorderedStruct) SetReorderedDependentAdapted(value DeclaredAfterStruct) *ReorderedStruct {
+func (x *ReorderedStruct) SetReorderedDependentAdaptedNonCompat(value DeclaredAfterStruct) *ReorderedStruct {
     x.ReorderedDependentAdapted = &value
+    return x
+}
+
+func (x *ReorderedStruct) SetReorderedDependentAdapted(value *DeclaredAfterStruct) *ReorderedStruct {
+    x.ReorderedDependentAdapted = value
     return x
 }
 
@@ -8099,7 +8509,7 @@ if err != nil {
     return err
 }
 
-    x.SetReorderedDependentAdapted(result)
+    x.SetReorderedDependentAdaptedNonCompat(result)
     return nil
 }
 
@@ -8275,7 +8685,7 @@ var _ thrift.Struct = &RenamedStruct{}
 
 func NewRenamedStruct() *RenamedStruct {
     return (&RenamedStruct{}).
-        SetData(0)
+        SetDataNonCompat(0)
 }
 
 func (x *RenamedStruct) GetDataNonCompat() int64 {
@@ -8284,6 +8694,11 @@ func (x *RenamedStruct) GetDataNonCompat() int64 {
 
 func (x *RenamedStruct) GetData() int64 {
     return x.Data
+}
+
+func (x *RenamedStruct) SetDataNonCompat(value int64) *RenamedStruct {
+    x.Data = value
+    return x
 }
 
 func (x *RenamedStruct) SetData(value int64) *RenamedStruct {
@@ -8313,7 +8728,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -8409,7 +8824,7 @@ var _ thrift.Struct = &SameNamespaceStruct{}
 
 func NewSameNamespaceStruct() *SameNamespaceStruct {
     return (&SameNamespaceStruct{}).
-        SetData(0)
+        SetDataNonCompat(0)
 }
 
 func (x *SameNamespaceStruct) GetDataNonCompat() int64 {
@@ -8418,6 +8833,11 @@ func (x *SameNamespaceStruct) GetDataNonCompat() int64 {
 
 func (x *SameNamespaceStruct) GetData() int64 {
     return x.Data
+}
+
+func (x *SameNamespaceStruct) SetDataNonCompat(value int64) *SameNamespaceStruct {
+    x.Data = value
+    return x
 }
 
 func (x *SameNamespaceStruct) SetData(value int64) *SameNamespaceStruct {
@@ -8447,7 +8867,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -8623,7 +9043,7 @@ var _ thrift.Struct = &MoveOnly{}
 
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{}).
-        SetPtr(*NewHeapAllocated())
+        SetPtrNonCompat(*NewHeapAllocated())
 }
 
 // Deprecated: Use NewMoveOnly().GetPtr() instead.
@@ -8641,8 +9061,13 @@ func (x *MoveOnly) GetPtr() *HeapAllocated {
     return x.Ptr
 }
 
-func (x *MoveOnly) SetPtr(value HeapAllocated) *MoveOnly {
+func (x *MoveOnly) SetPtrNonCompat(value HeapAllocated) *MoveOnly {
     x.Ptr = &value
+    return x
+}
+
+func (x *MoveOnly) SetPtr(value *HeapAllocated) *MoveOnly {
+    x.Ptr = value
     return x
 }
 
@@ -8677,7 +9102,7 @@ if err != nil {
     return err
 }
 
-    x.SetPtr(result)
+    x.SetPtrNonCompat(result)
     return nil
 }
 
@@ -8773,7 +9198,7 @@ var _ thrift.Struct = &AlsoMoveOnly{}
 
 func NewAlsoMoveOnly() *AlsoMoveOnly {
     return (&AlsoMoveOnly{}).
-        SetPtr(0)
+        SetPtrNonCompat(0)
 }
 
 func (x *AlsoMoveOnly) GetPtrNonCompat() int64 {
@@ -8782,6 +9207,11 @@ func (x *AlsoMoveOnly) GetPtrNonCompat() int64 {
 
 func (x *AlsoMoveOnly) GetPtr() int64 {
     return x.Ptr
+}
+
+func (x *AlsoMoveOnly) SetPtrNonCompat(value int64) *AlsoMoveOnly {
+    x.Ptr = value
+    return x
 }
 
 func (x *AlsoMoveOnly) SetPtr(value int64) *AlsoMoveOnly {
@@ -8811,7 +9241,7 @@ if err != nil {
     return err
 }
 
-    x.SetPtr(result)
+    x.SetPtrNonCompat(result)
     return nil
 }
 
@@ -9116,18 +9546,33 @@ func (x *CountingStruct) GetRegularString() string {
     return *x.RegularString
 }
 
-func (x *CountingStruct) SetRegularInt(value int64) *CountingStruct {
+func (x *CountingStruct) SetRegularIntNonCompat(value int64) *CountingStruct {
     x.RegularInt = &value
     return x
 }
 
-func (x *CountingStruct) SetCountingInt(value CountingInt) *CountingStruct {
+func (x *CountingStruct) SetRegularInt(value *int64) *CountingStruct {
+    x.RegularInt = value
+    return x
+}
+
+func (x *CountingStruct) SetCountingIntNonCompat(value CountingInt) *CountingStruct {
     x.CountingInt = &value
     return x
 }
 
-func (x *CountingStruct) SetRegularString(value string) *CountingStruct {
+func (x *CountingStruct) SetCountingInt(value *CountingInt) *CountingStruct {
+    x.CountingInt = value
+    return x
+}
+
+func (x *CountingStruct) SetRegularStringNonCompat(value string) *CountingStruct {
     x.RegularString = &value
+    return x
+}
+
+func (x *CountingStruct) SetRegularString(value *string) *CountingStruct {
+    x.RegularString = value
     return x
 }
 
@@ -9210,7 +9655,7 @@ if err != nil {
     return err
 }
 
-    x.SetRegularInt(result)
+    x.SetRegularIntNonCompat(result)
     return nil
 }
 
@@ -9220,7 +9665,7 @@ if err != nil {
     return err
 }
 
-    x.SetCountingInt(result)
+    x.SetCountingIntNonCompat(result)
     return nil
 }
 
@@ -9230,7 +9675,7 @@ if err != nil {
     return err
 }
 
-    x.SetRegularString(result)
+    x.SetRegularStringNonCompat(result)
     return nil
 }
 
@@ -9352,7 +9797,7 @@ var _ thrift.Struct = &Person{}
 
 func NewPerson() *Person {
     return (&Person{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *Person) GetNameNonCompat() string {
@@ -9361,6 +9806,11 @@ func (x *Person) GetNameNonCompat() string {
 
 func (x *Person) GetName() string {
     return x.Name
+}
+
+func (x *Person) SetNameNonCompat(value string) *Person {
+    x.Name = value
+    return x
 }
 
 func (x *Person) SetName(value string) *Person {
@@ -9390,7 +9840,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -9486,7 +9936,7 @@ var _ thrift.Struct = &Person2{}
 
 func NewPerson2() *Person2 {
     return (&Person2{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *Person2) GetNameNonCompat() string {
@@ -9495,6 +9945,11 @@ func (x *Person2) GetNameNonCompat() string {
 
 func (x *Person2) GetName() string {
     return x.Name
+}
+
+func (x *Person2) SetNameNonCompat(value string) *Person2 {
+    x.Name = value
+    return x
 }
 
 func (x *Person2) SetName(value string) *Person2 {
@@ -9524,7 +9979,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 

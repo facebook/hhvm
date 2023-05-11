@@ -203,20 +203,20 @@ var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
-        SetBoolField(false).
-        SetByteField(0).
-        SetShortField(0).
-        SetIntField(0).
-        SetLongField(0).
-        SetFloatField(0.0).
-        SetDoubleField(0.0).
-        SetStringField("").
-        SetBinaryField([]byte("")).
-        SetEnumField(0).
-        SetListField(make([]int16, 0)).
-        SetSetField(make([]int16, 0)).
-        SetMapField(make(map[int16]int16)).
-        SetStructField(*NewMyStruct())
+        SetBoolFieldNonCompat(false).
+        SetByteFieldNonCompat(0).
+        SetShortFieldNonCompat(0).
+        SetIntFieldNonCompat(0).
+        SetLongFieldNonCompat(0).
+        SetFloatFieldNonCompat(0.0).
+        SetDoubleFieldNonCompat(0.0).
+        SetStringFieldNonCompat("").
+        SetBinaryFieldNonCompat([]byte("")).
+        SetEnumFieldNonCompat(0).
+        SetListFieldNonCompat(make([]int16, 0)).
+        SetSetFieldNonCompat(make([]int16, 0)).
+        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetStructFieldNonCompat(*NewMyStruct())
 }
 
 // Deprecated: Use NewMyUnion().GetBoolField() instead.
@@ -417,43 +417,88 @@ func (x *MyUnion) GetStructField() *MyStruct {
     return x.StructField
 }
 
-func (x *MyUnion) SetBoolField(value bool) *MyUnion {
+func (x *MyUnion) SetBoolFieldNonCompat(value bool) *MyUnion {
     x.BoolField = &value
     return x
 }
 
-func (x *MyUnion) SetByteField(value byte) *MyUnion {
+func (x *MyUnion) SetBoolField(value *bool) *MyUnion {
+    x.BoolField = value
+    return x
+}
+
+func (x *MyUnion) SetByteFieldNonCompat(value byte) *MyUnion {
     x.ByteField = &value
     return x
 }
 
-func (x *MyUnion) SetShortField(value int16) *MyUnion {
+func (x *MyUnion) SetByteField(value *byte) *MyUnion {
+    x.ByteField = value
+    return x
+}
+
+func (x *MyUnion) SetShortFieldNonCompat(value int16) *MyUnion {
     x.ShortField = &value
     return x
 }
 
-func (x *MyUnion) SetIntField(value int32) *MyUnion {
+func (x *MyUnion) SetShortField(value *int16) *MyUnion {
+    x.ShortField = value
+    return x
+}
+
+func (x *MyUnion) SetIntFieldNonCompat(value int32) *MyUnion {
     x.IntField = &value
     return x
 }
 
-func (x *MyUnion) SetLongField(value int64) *MyUnion {
+func (x *MyUnion) SetIntField(value *int32) *MyUnion {
+    x.IntField = value
+    return x
+}
+
+func (x *MyUnion) SetLongFieldNonCompat(value int64) *MyUnion {
     x.LongField = &value
     return x
 }
 
-func (x *MyUnion) SetFloatField(value float32) *MyUnion {
+func (x *MyUnion) SetLongField(value *int64) *MyUnion {
+    x.LongField = value
+    return x
+}
+
+func (x *MyUnion) SetFloatFieldNonCompat(value float32) *MyUnion {
     x.FloatField = &value
     return x
 }
 
-func (x *MyUnion) SetDoubleField(value float64) *MyUnion {
+func (x *MyUnion) SetFloatField(value *float32) *MyUnion {
+    x.FloatField = value
+    return x
+}
+
+func (x *MyUnion) SetDoubleFieldNonCompat(value float64) *MyUnion {
     x.DoubleField = &value
     return x
 }
 
-func (x *MyUnion) SetStringField(value string) *MyUnion {
+func (x *MyUnion) SetDoubleField(value *float64) *MyUnion {
+    x.DoubleField = value
+    return x
+}
+
+func (x *MyUnion) SetStringFieldNonCompat(value string) *MyUnion {
     x.StringField = &value
+    return x
+}
+
+func (x *MyUnion) SetStringField(value *string) *MyUnion {
+    x.StringField = value
+    return x
+}
+
+func (x *MyUnion) SetBinaryFieldNonCompat(value []byte) *MyUnion {
+    x.BinaryField = value
     return x
 }
 
@@ -462,8 +507,18 @@ func (x *MyUnion) SetBinaryField(value []byte) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetEnumField(value MyEnum) *MyUnion {
+func (x *MyUnion) SetEnumFieldNonCompat(value MyEnum) *MyUnion {
     x.EnumField = &value
+    return x
+}
+
+func (x *MyUnion) SetEnumField(value *MyEnum) *MyUnion {
+    x.EnumField = value
+    return x
+}
+
+func (x *MyUnion) SetListFieldNonCompat(value []int16) *MyUnion {
+    x.ListField = value
     return x
 }
 
@@ -472,8 +527,18 @@ func (x *MyUnion) SetListField(value []int16) *MyUnion {
     return x
 }
 
+func (x *MyUnion) SetSetFieldNonCompat(value []int16) *MyUnion {
+    x.SetField = value
+    return x
+}
+
 func (x *MyUnion) SetSetField(value []int16) *MyUnion {
     x.SetField = value
+    return x
+}
+
+func (x *MyUnion) SetMapFieldNonCompat(value map[int16]int16) *MyUnion {
+    x.MapField = value
     return x
 }
 
@@ -482,8 +547,13 @@ func (x *MyUnion) SetMapField(value map[int16]int16) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetStructField(value MyStruct) *MyUnion {
+func (x *MyUnion) SetStructFieldNonCompat(value MyStruct) *MyUnion {
     x.StructField = &value
+    return x
+}
+
+func (x *MyUnion) SetStructField(value *MyStruct) *MyUnion {
+    x.StructField = value
     return x
 }
 
@@ -869,7 +939,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolField(result)
+    x.SetBoolFieldNonCompat(result)
     return nil
 }
 
@@ -879,7 +949,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteField(result)
+    x.SetByteFieldNonCompat(result)
     return nil
 }
 
@@ -889,7 +959,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortField(result)
+    x.SetShortFieldNonCompat(result)
     return nil
 }
 
@@ -899,7 +969,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -909,7 +979,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -919,7 +989,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatField(result)
+    x.SetFloatFieldNonCompat(result)
     return nil
 }
 
@@ -929,7 +999,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleField(result)
+    x.SetDoubleFieldNonCompat(result)
     return nil
 }
 
@@ -939,7 +1009,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -949,7 +1019,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -960,7 +1030,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumField(result)
+    x.SetEnumFieldNonCompat(result)
     return nil
 }
 
@@ -988,7 +1058,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListField(result)
+    x.SetListFieldNonCompat(result)
     return nil
 }
 
@@ -1016,7 +1086,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -1054,7 +1124,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -1065,7 +1135,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructField(result)
+    x.SetStructFieldNonCompat(result)
     return nil
 }
 
@@ -1380,7 +1450,7 @@ var _ thrift.Struct = &MyStructWithCustomDefault{}
 
 func NewMyStructWithCustomDefault() *MyStructWithCustomDefault {
     return (&MyStructWithCustomDefault{}).
-        SetField1(1)
+        SetField1NonCompat(1)
 }
 
 func (x *MyStructWithCustomDefault) GetField1NonCompat() int64 {
@@ -1389,6 +1459,11 @@ func (x *MyStructWithCustomDefault) GetField1NonCompat() int64 {
 
 func (x *MyStructWithCustomDefault) GetField1() int64 {
     return x.Field1
+}
+
+func (x *MyStructWithCustomDefault) SetField1NonCompat(value int64) *MyStructWithCustomDefault {
+    x.Field1 = value
+    return x
 }
 
 func (x *MyStructWithCustomDefault) SetField1(value int64) *MyStructWithCustomDefault {
@@ -1418,7 +1493,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1(result)
+    x.SetField1NonCompat(result)
     return nil
 }
 
@@ -1528,21 +1603,21 @@ var _ thrift.Struct = &StructLevelTerseStruct{}
 
 func NewStructLevelTerseStruct() *StructLevelTerseStruct {
     return (&StructLevelTerseStruct{}).
-        SetBoolField(false).
-        SetByteField(0).
-        SetShortField(0).
-        SetIntField(0).
-        SetLongField(0).
-        SetFloatField(0.0).
-        SetDoubleField(0.0).
-        SetStringField("").
-        SetBinaryField([]byte("")).
-        SetEnumField(0).
-        SetListField(make([]int16, 0)).
-        SetSetField(make([]int16, 0)).
-        SetMapField(make(map[int16]int16)).
-        SetStructField(*NewMyStruct()).
-        SetUnionField(*NewMyUnion())
+        SetBoolFieldNonCompat(false).
+        SetByteFieldNonCompat(0).
+        SetShortFieldNonCompat(0).
+        SetIntFieldNonCompat(0).
+        SetLongFieldNonCompat(0).
+        SetFloatFieldNonCompat(0.0).
+        SetDoubleFieldNonCompat(0.0).
+        SetStringFieldNonCompat("").
+        SetBinaryFieldNonCompat([]byte("")).
+        SetEnumFieldNonCompat(0).
+        SetListFieldNonCompat(make([]int16, 0)).
+        SetSetFieldNonCompat(make([]int16, 0)).
+        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetStructFieldNonCompat(*NewMyStruct()).
+        SetUnionFieldNonCompat(*NewMyUnion())
 }
 
 // Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
@@ -1695,8 +1770,18 @@ func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
     return x.UnionField
 }
 
+func (x *StructLevelTerseStruct) SetBoolFieldNonCompat(value bool) *StructLevelTerseStruct {
+    x.BoolField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetBoolField(value bool) *StructLevelTerseStruct {
     x.BoolField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetByteFieldNonCompat(value byte) *StructLevelTerseStruct {
+    x.ByteField = value
     return x
 }
 
@@ -1705,8 +1790,18 @@ func (x *StructLevelTerseStruct) SetByteField(value byte) *StructLevelTerseStruc
     return x
 }
 
+func (x *StructLevelTerseStruct) SetShortFieldNonCompat(value int16) *StructLevelTerseStruct {
+    x.ShortField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetShortField(value int16) *StructLevelTerseStruct {
     x.ShortField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetIntFieldNonCompat(value int32) *StructLevelTerseStruct {
+    x.IntField = value
     return x
 }
 
@@ -1715,8 +1810,18 @@ func (x *StructLevelTerseStruct) SetIntField(value int32) *StructLevelTerseStruc
     return x
 }
 
+func (x *StructLevelTerseStruct) SetLongFieldNonCompat(value int64) *StructLevelTerseStruct {
+    x.LongField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetLongField(value int64) *StructLevelTerseStruct {
     x.LongField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetFloatFieldNonCompat(value float32) *StructLevelTerseStruct {
+    x.FloatField = value
     return x
 }
 
@@ -1725,8 +1830,18 @@ func (x *StructLevelTerseStruct) SetFloatField(value float32) *StructLevelTerseS
     return x
 }
 
+func (x *StructLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *StructLevelTerseStruct {
+    x.DoubleField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetDoubleField(value float64) *StructLevelTerseStruct {
     x.DoubleField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetStringFieldNonCompat(value string) *StructLevelTerseStruct {
+    x.StringField = value
     return x
 }
 
@@ -1735,8 +1850,18 @@ func (x *StructLevelTerseStruct) SetStringField(value string) *StructLevelTerseS
     return x
 }
 
+func (x *StructLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *StructLevelTerseStruct {
+    x.BinaryField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetBinaryField(value []byte) *StructLevelTerseStruct {
     x.BinaryField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *StructLevelTerseStruct {
+    x.EnumField = value
     return x
 }
 
@@ -1745,8 +1870,18 @@ func (x *StructLevelTerseStruct) SetEnumField(value MyEnum) *StructLevelTerseStr
     return x
 }
 
+func (x *StructLevelTerseStruct) SetListFieldNonCompat(value []int16) *StructLevelTerseStruct {
+    x.ListField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetListField(value []int16) *StructLevelTerseStruct {
     x.ListField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetSetFieldNonCompat(value []int16) *StructLevelTerseStruct {
+    x.SetField = value
     return x
 }
 
@@ -1755,18 +1890,33 @@ func (x *StructLevelTerseStruct) SetSetField(value []int16) *StructLevelTerseStr
     return x
 }
 
+func (x *StructLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *StructLevelTerseStruct {
+    x.MapField = value
+    return x
+}
+
 func (x *StructLevelTerseStruct) SetMapField(value map[int16]int16) *StructLevelTerseStruct {
     x.MapField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetStructField(value MyStruct) *StructLevelTerseStruct {
+func (x *StructLevelTerseStruct) SetStructFieldNonCompat(value MyStruct) *StructLevelTerseStruct {
     x.StructField = &value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetUnionField(value MyUnion) *StructLevelTerseStruct {
+func (x *StructLevelTerseStruct) SetStructField(value *MyStruct) *StructLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetUnionFieldNonCompat(value MyUnion) *StructLevelTerseStruct {
     x.UnionField = &value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetUnionField(value *MyUnion) *StructLevelTerseStruct {
+    x.UnionField = value
     return x
 }
 
@@ -2104,7 +2254,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolField(result)
+    x.SetBoolFieldNonCompat(result)
     return nil
 }
 
@@ -2114,7 +2264,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteField(result)
+    x.SetByteFieldNonCompat(result)
     return nil
 }
 
@@ -2124,7 +2274,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortField(result)
+    x.SetShortFieldNonCompat(result)
     return nil
 }
 
@@ -2134,7 +2284,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -2144,7 +2294,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -2154,7 +2304,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatField(result)
+    x.SetFloatFieldNonCompat(result)
     return nil
 }
 
@@ -2164,7 +2314,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleField(result)
+    x.SetDoubleFieldNonCompat(result)
     return nil
 }
 
@@ -2174,7 +2324,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -2184,7 +2334,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -2195,7 +2345,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumField(result)
+    x.SetEnumFieldNonCompat(result)
     return nil
 }
 
@@ -2223,7 +2373,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListField(result)
+    x.SetListFieldNonCompat(result)
     return nil
 }
 
@@ -2251,7 +2401,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -2289,7 +2439,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -2300,7 +2450,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructField(result)
+    x.SetStructFieldNonCompat(result)
     return nil
 }
 
@@ -2311,7 +2461,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionField(result)
+    x.SetUnionFieldNonCompat(result)
     return nil
 }
 
@@ -2618,36 +2768,36 @@ var _ thrift.Struct = &FieldLevelTerseStruct{}
 
 func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
     return (&FieldLevelTerseStruct{}).
-        SetTerseBoolField(false).
-        SetTerseByteField(0).
-        SetTerseShortField(0).
-        SetTerseIntField(0).
-        SetTerseLongField(0).
-        SetTerseFloatField(0.0).
-        SetTerseDoubleField(0.0).
-        SetTerseStringField("").
-        SetTerseBinaryField([]byte("")).
-        SetTerseEnumField(0).
-        SetTerseListField(make([]int16, 0)).
-        SetTerseSetField(make([]int16, 0)).
-        SetTerseMapField(make(map[int16]int16)).
-        SetTerseStructField(*NewMyStruct()).
-        SetTerseUnionField(*NewMyUnion()).
-        SetBoolField(false).
-        SetByteField(0).
-        SetShortField(0).
-        SetIntField(0).
-        SetLongField(0).
-        SetFloatField(0.0).
-        SetDoubleField(0.0).
-        SetStringField("").
-        SetBinaryField([]byte("")).
-        SetEnumField(0).
-        SetListField(make([]int16, 0)).
-        SetSetField(make([]int16, 0)).
-        SetMapField(make(map[int16]int16)).
-        SetStructField(*NewMyStruct()).
-        SetUnionField(*NewMyUnion())
+        SetTerseBoolFieldNonCompat(false).
+        SetTerseByteFieldNonCompat(0).
+        SetTerseShortFieldNonCompat(0).
+        SetTerseIntFieldNonCompat(0).
+        SetTerseLongFieldNonCompat(0).
+        SetTerseFloatFieldNonCompat(0.0).
+        SetTerseDoubleFieldNonCompat(0.0).
+        SetTerseStringFieldNonCompat("").
+        SetTerseBinaryFieldNonCompat([]byte("")).
+        SetTerseEnumFieldNonCompat(0).
+        SetTerseListFieldNonCompat(make([]int16, 0)).
+        SetTerseSetFieldNonCompat(make([]int16, 0)).
+        SetTerseMapFieldNonCompat(make(map[int16]int16)).
+        SetTerseStructFieldNonCompat(*NewMyStruct()).
+        SetTerseUnionFieldNonCompat(*NewMyUnion()).
+        SetBoolFieldNonCompat(false).
+        SetByteFieldNonCompat(0).
+        SetShortFieldNonCompat(0).
+        SetIntFieldNonCompat(0).
+        SetLongFieldNonCompat(0).
+        SetFloatFieldNonCompat(0.0).
+        SetDoubleFieldNonCompat(0.0).
+        SetStringFieldNonCompat("").
+        SetBinaryFieldNonCompat([]byte("")).
+        SetEnumFieldNonCompat(0).
+        SetListFieldNonCompat(make([]int16, 0)).
+        SetSetFieldNonCompat(make([]int16, 0)).
+        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetStructFieldNonCompat(*NewMyStruct()).
+        SetUnionFieldNonCompat(*NewMyUnion())
 }
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
@@ -2950,8 +3100,18 @@ func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
     return x.UnionField
 }
 
+func (x *FieldLevelTerseStruct) SetTerseBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
+    x.TerseBoolField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseBoolField(value bool) *FieldLevelTerseStruct {
     x.TerseBoolField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseByteFieldNonCompat(value byte) *FieldLevelTerseStruct {
+    x.TerseByteField = value
     return x
 }
 
@@ -2960,8 +3120,18 @@ func (x *FieldLevelTerseStruct) SetTerseByteField(value byte) *FieldLevelTerseSt
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
+    x.TerseShortField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseShortField(value int16) *FieldLevelTerseStruct {
     x.TerseShortField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
+    x.TerseIntField = value
     return x
 }
 
@@ -2970,8 +3140,18 @@ func (x *FieldLevelTerseStruct) SetTerseIntField(value int32) *FieldLevelTerseSt
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
+    x.TerseLongField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseLongField(value int64) *FieldLevelTerseStruct {
     x.TerseLongField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
+    x.TerseFloatField = value
     return x
 }
 
@@ -2980,8 +3160,18 @@ func (x *FieldLevelTerseStruct) SetTerseFloatField(value float32) *FieldLevelTer
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
+    x.TerseDoubleField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseDoubleField(value float64) *FieldLevelTerseStruct {
     x.TerseDoubleField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseStringFieldNonCompat(value string) *FieldLevelTerseStruct {
+    x.TerseStringField = value
     return x
 }
 
@@ -2990,8 +3180,18 @@ func (x *FieldLevelTerseStruct) SetTerseStringField(value string) *FieldLevelTer
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
+    x.TerseBinaryField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseBinaryField(value []byte) *FieldLevelTerseStruct {
     x.TerseBinaryField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
+    x.TerseEnumField = value
     return x
 }
 
@@ -3000,8 +3200,18 @@ func (x *FieldLevelTerseStruct) SetTerseEnumField(value MyEnum) *FieldLevelTerse
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.TerseListField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseListField(value []int16) *FieldLevelTerseStruct {
     x.TerseListField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.TerseSetField = value
     return x
 }
 
@@ -3010,18 +3220,38 @@ func (x *FieldLevelTerseStruct) SetTerseSetField(value []int16) *FieldLevelTerse
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
+    x.TerseMapField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetTerseMapField(value map[int16]int16) *FieldLevelTerseStruct {
     x.TerseMapField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseStructField(value MyStruct) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetTerseStructFieldNonCompat(value MyStruct) *FieldLevelTerseStruct {
     x.TerseStructField = &value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseUnionField(value MyUnion) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetTerseStructField(value *MyStruct) *FieldLevelTerseStruct {
+    x.TerseStructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
     x.TerseUnionField = &value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
+    x.BoolField = value
     return x
 }
 
@@ -3030,8 +3260,18 @@ func (x *FieldLevelTerseStruct) SetBoolField(value bool) *FieldLevelTerseStruct 
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetByteFieldNonCompat(value byte) *FieldLevelTerseStruct {
+    x.ByteField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetByteField(value byte) *FieldLevelTerseStruct {
     x.ByteField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
+    x.ShortField = value
     return x
 }
 
@@ -3040,8 +3280,18 @@ func (x *FieldLevelTerseStruct) SetShortField(value int16) *FieldLevelTerseStruc
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
+    x.IntField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetIntField(value int32) *FieldLevelTerseStruct {
     x.IntField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
+    x.LongField = value
     return x
 }
 
@@ -3050,8 +3300,18 @@ func (x *FieldLevelTerseStruct) SetLongField(value int64) *FieldLevelTerseStruct
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
+    x.FloatField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetFloatField(value float32) *FieldLevelTerseStruct {
     x.FloatField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
+    x.DoubleField = value
     return x
 }
 
@@ -3060,8 +3320,18 @@ func (x *FieldLevelTerseStruct) SetDoubleField(value float64) *FieldLevelTerseSt
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetStringFieldNonCompat(value string) *FieldLevelTerseStruct {
+    x.StringField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetStringField(value string) *FieldLevelTerseStruct {
     x.StringField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
+    x.BinaryField = value
     return x
 }
 
@@ -3070,8 +3340,18 @@ func (x *FieldLevelTerseStruct) SetBinaryField(value []byte) *FieldLevelTerseStr
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
+    x.EnumField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetEnumField(value MyEnum) *FieldLevelTerseStruct {
     x.EnumField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.ListField = value
     return x
 }
 
@@ -3080,8 +3360,18 @@ func (x *FieldLevelTerseStruct) SetListField(value []int16) *FieldLevelTerseStru
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.SetField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetSetField(value []int16) *FieldLevelTerseStruct {
     x.SetField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
+    x.MapField = value
     return x
 }
 
@@ -3090,13 +3380,23 @@ func (x *FieldLevelTerseStruct) SetMapField(value map[int16]int16) *FieldLevelTe
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetStructField(value MyStruct) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetStructFieldNonCompat(value MyStruct) *FieldLevelTerseStruct {
     x.StructField = &value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetUnionField(value MyUnion) *FieldLevelTerseStruct {
+func (x *FieldLevelTerseStruct) SetStructField(value *MyStruct) *FieldLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
     x.UnionField = &value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetUnionField(value *MyUnion) *FieldLevelTerseStruct {
+    x.UnionField = value
     return x
 }
 
@@ -3762,7 +4062,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseBoolField(result)
+    x.SetTerseBoolFieldNonCompat(result)
     return nil
 }
 
@@ -3772,7 +4072,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseByteField(result)
+    x.SetTerseByteFieldNonCompat(result)
     return nil
 }
 
@@ -3782,7 +4082,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseShortField(result)
+    x.SetTerseShortFieldNonCompat(result)
     return nil
 }
 
@@ -3792,7 +4092,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseIntField(result)
+    x.SetTerseIntFieldNonCompat(result)
     return nil
 }
 
@@ -3802,7 +4102,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseLongField(result)
+    x.SetTerseLongFieldNonCompat(result)
     return nil
 }
 
@@ -3812,7 +4112,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseFloatField(result)
+    x.SetTerseFloatFieldNonCompat(result)
     return nil
 }
 
@@ -3822,7 +4122,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseDoubleField(result)
+    x.SetTerseDoubleFieldNonCompat(result)
     return nil
 }
 
@@ -3832,7 +4132,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseStringField(result)
+    x.SetTerseStringFieldNonCompat(result)
     return nil
 }
 
@@ -3842,7 +4142,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseBinaryField(result)
+    x.SetTerseBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -3853,7 +4153,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetTerseEnumField(result)
+    x.SetTerseEnumFieldNonCompat(result)
     return nil
 }
 
@@ -3881,7 +4181,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetTerseListField(result)
+    x.SetTerseListFieldNonCompat(result)
     return nil
 }
 
@@ -3909,7 +4209,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetTerseSetField(result)
+    x.SetTerseSetFieldNonCompat(result)
     return nil
 }
 
@@ -3947,7 +4247,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetTerseMapField(result)
+    x.SetTerseMapFieldNonCompat(result)
     return nil
 }
 
@@ -3958,7 +4258,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseStructField(result)
+    x.SetTerseStructFieldNonCompat(result)
     return nil
 }
 
@@ -3969,7 +4269,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseUnionField(result)
+    x.SetTerseUnionFieldNonCompat(result)
     return nil
 }
 
@@ -3979,7 +4279,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolField(result)
+    x.SetBoolFieldNonCompat(result)
     return nil
 }
 
@@ -3989,7 +4289,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteField(result)
+    x.SetByteFieldNonCompat(result)
     return nil
 }
 
@@ -3999,7 +4299,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortField(result)
+    x.SetShortFieldNonCompat(result)
     return nil
 }
 
@@ -4009,7 +4309,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -4019,7 +4319,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -4029,7 +4329,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatField(result)
+    x.SetFloatFieldNonCompat(result)
     return nil
 }
 
@@ -4039,7 +4339,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleField(result)
+    x.SetDoubleFieldNonCompat(result)
     return nil
 }
 
@@ -4049,7 +4349,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -4059,7 +4359,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -4070,7 +4370,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumField(result)
+    x.SetEnumFieldNonCompat(result)
     return nil
 }
 
@@ -4098,7 +4398,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListField(result)
+    x.SetListFieldNonCompat(result)
     return nil
 }
 
@@ -4126,7 +4426,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -4164,7 +4464,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -4175,7 +4475,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructField(result)
+    x.SetStructFieldNonCompat(result)
     return nil
 }
 
@@ -4186,7 +4486,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionField(result)
+    x.SetUnionFieldNonCompat(result)
     return nil
 }
 
@@ -4672,34 +4972,34 @@ var _ thrift.Struct = &TerseStructWithCustomDefault{}
 
 func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
     return (&TerseStructWithCustomDefault{}).
-        SetBoolField(true).
-        SetByteField(1).
-        SetShortField(2).
-        SetIntField(3).
-        SetLongField(4).
-        SetFloatField(5).
-        SetDoubleField(6).
-        SetStringField("7").
-        SetBinaryField([]byte("8")).
-        SetEnumField(
+        SetBoolFieldNonCompat(true).
+        SetByteFieldNonCompat(1).
+        SetShortFieldNonCompat(2).
+        SetIntFieldNonCompat(3).
+        SetLongFieldNonCompat(4).
+        SetFloatFieldNonCompat(5).
+        SetDoubleFieldNonCompat(6).
+        SetStringFieldNonCompat("7").
+        SetBinaryFieldNonCompat([]byte("8")).
+        SetEnumFieldNonCompat(
               MyEnum_ME1,
           ).
-        SetListField(
+        SetListFieldNonCompat(
               []int16{
     1,
 },
           ).
-        SetSetField(
+        SetSetFieldNonCompat(
               []int16{
     1,
 },
           ).
-        SetMapField(
+        SetMapFieldNonCompat(
               map[int16]int16{
     1: 1,
 },
           ).
-        SetStructField(*NewMyStructWithCustomDefault())
+        SetStructFieldNonCompat(*NewMyStructWithCustomDefault())
 }
 
 // Deprecated: Use NewTerseStructWithCustomDefault().GetStructField() instead.
@@ -4837,8 +5137,18 @@ func (x *TerseStructWithCustomDefault) GetStructField() *MyStructWithCustomDefau
     return x.StructField
 }
 
+func (x *TerseStructWithCustomDefault) SetBoolFieldNonCompat(value bool) *TerseStructWithCustomDefault {
+    x.BoolField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetBoolField(value bool) *TerseStructWithCustomDefault {
     x.BoolField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetByteFieldNonCompat(value byte) *TerseStructWithCustomDefault {
+    x.ByteField = value
     return x
 }
 
@@ -4847,8 +5157,18 @@ func (x *TerseStructWithCustomDefault) SetByteField(value byte) *TerseStructWith
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetShortFieldNonCompat(value int16) *TerseStructWithCustomDefault {
+    x.ShortField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetShortField(value int16) *TerseStructWithCustomDefault {
     x.ShortField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetIntFieldNonCompat(value int32) *TerseStructWithCustomDefault {
+    x.IntField = value
     return x
 }
 
@@ -4857,8 +5177,18 @@ func (x *TerseStructWithCustomDefault) SetIntField(value int32) *TerseStructWith
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetLongFieldNonCompat(value int64) *TerseStructWithCustomDefault {
+    x.LongField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetLongField(value int64) *TerseStructWithCustomDefault {
     x.LongField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetFloatFieldNonCompat(value float32) *TerseStructWithCustomDefault {
+    x.FloatField = value
     return x
 }
 
@@ -4867,8 +5197,18 @@ func (x *TerseStructWithCustomDefault) SetFloatField(value float32) *TerseStruct
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetDoubleFieldNonCompat(value float64) *TerseStructWithCustomDefault {
+    x.DoubleField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetDoubleField(value float64) *TerseStructWithCustomDefault {
     x.DoubleField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetStringFieldNonCompat(value string) *TerseStructWithCustomDefault {
+    x.StringField = value
     return x
 }
 
@@ -4877,8 +5217,18 @@ func (x *TerseStructWithCustomDefault) SetStringField(value string) *TerseStruct
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetBinaryFieldNonCompat(value []byte) *TerseStructWithCustomDefault {
+    x.BinaryField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetBinaryField(value []byte) *TerseStructWithCustomDefault {
     x.BinaryField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetEnumFieldNonCompat(value MyEnum) *TerseStructWithCustomDefault {
+    x.EnumField = value
     return x
 }
 
@@ -4887,8 +5237,18 @@ func (x *TerseStructWithCustomDefault) SetEnumField(value MyEnum) *TerseStructWi
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetListFieldNonCompat(value []int16) *TerseStructWithCustomDefault {
+    x.ListField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetListField(value []int16) *TerseStructWithCustomDefault {
     x.ListField = value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetSetFieldNonCompat(value []int16) *TerseStructWithCustomDefault {
+    x.SetField = value
     return x
 }
 
@@ -4897,13 +5257,23 @@ func (x *TerseStructWithCustomDefault) SetSetField(value []int16) *TerseStructWi
     return x
 }
 
+func (x *TerseStructWithCustomDefault) SetMapFieldNonCompat(value map[int16]int16) *TerseStructWithCustomDefault {
+    x.MapField = value
+    return x
+}
+
 func (x *TerseStructWithCustomDefault) SetMapField(value map[int16]int16) *TerseStructWithCustomDefault {
     x.MapField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetStructField(value MyStructWithCustomDefault) *TerseStructWithCustomDefault {
+func (x *TerseStructWithCustomDefault) SetStructFieldNonCompat(value MyStructWithCustomDefault) *TerseStructWithCustomDefault {
     x.StructField = &value
+    return x
+}
+
+func (x *TerseStructWithCustomDefault) SetStructField(value *MyStructWithCustomDefault) *TerseStructWithCustomDefault {
+    x.StructField = value
     return x
 }
 
@@ -5217,7 +5587,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolField(result)
+    x.SetBoolFieldNonCompat(result)
     return nil
 }
 
@@ -5227,7 +5597,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteField(result)
+    x.SetByteFieldNonCompat(result)
     return nil
 }
 
@@ -5237,7 +5607,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortField(result)
+    x.SetShortFieldNonCompat(result)
     return nil
 }
 
@@ -5247,7 +5617,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntField(result)
+    x.SetIntFieldNonCompat(result)
     return nil
 }
 
@@ -5257,7 +5627,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongField(result)
+    x.SetLongFieldNonCompat(result)
     return nil
 }
 
@@ -5267,7 +5637,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatField(result)
+    x.SetFloatFieldNonCompat(result)
     return nil
 }
 
@@ -5277,7 +5647,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleField(result)
+    x.SetDoubleFieldNonCompat(result)
     return nil
 }
 
@@ -5287,7 +5657,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -5297,7 +5667,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -5308,7 +5678,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumField(result)
+    x.SetEnumFieldNonCompat(result)
     return nil
 }
 
@@ -5336,7 +5706,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListField(result)
+    x.SetListFieldNonCompat(result)
     return nil
 }
 
@@ -5364,7 +5734,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetField(result)
+    x.SetSetFieldNonCompat(result)
     return nil
 }
 
@@ -5402,7 +5772,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapField(result)
+    x.SetMapFieldNonCompat(result)
     return nil
 }
 
@@ -5413,7 +5783,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructField(result)
+    x.SetStructFieldNonCompat(result)
     return nil
 }
 
@@ -5680,9 +6050,9 @@ var _ thrift.Struct = &AdaptedFields{}
 
 func NewAdaptedFields() *AdaptedFields {
     return (&AdaptedFields{}).
-        SetField1(NewMyInteger()).
-        SetField2(0).
-        SetField3(NewMyInteger())
+        SetField1NonCompat(NewMyInteger()).
+        SetField2NonCompat(0).
+        SetField3NonCompat(NewMyInteger())
 }
 
 func (x *AdaptedFields) GetField1NonCompat() MyInteger {
@@ -5709,13 +6079,28 @@ func (x *AdaptedFields) GetField3() MyInteger {
     return x.Field3
 }
 
+func (x *AdaptedFields) SetField1NonCompat(value MyInteger) *AdaptedFields {
+    x.Field1 = value
+    return x
+}
+
 func (x *AdaptedFields) SetField1(value MyInteger) *AdaptedFields {
     x.Field1 = value
     return x
 }
 
+func (x *AdaptedFields) SetField2NonCompat(value int32) *AdaptedFields {
+    x.Field2 = value
+    return x
+}
+
 func (x *AdaptedFields) SetField2(value int32) *AdaptedFields {
     x.Field2 = value
+    return x
+}
+
+func (x *AdaptedFields) SetField3NonCompat(value MyInteger) *AdaptedFields {
+    x.Field3 = value
     return x
 }
 
@@ -5780,7 +6165,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1(result)
+    x.SetField1NonCompat(result)
     return nil
 }
 
@@ -5790,7 +6175,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2(result)
+    x.SetField2NonCompat(result)
     return nil
 }
 
@@ -5800,7 +6185,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3(result)
+    x.SetField3NonCompat(result)
     return nil
 }
 
@@ -5922,7 +6307,7 @@ var _ thrift.Struct = &WrappedFields{}
 
 func NewWrappedFields() *WrappedFields {
     return (&WrappedFields{}).
-        SetField1(7)
+        SetField1NonCompat(7)
 }
 
 func (x *WrappedFields) GetField1NonCompat() int32 {
@@ -5931,6 +6316,11 @@ func (x *WrappedFields) GetField1NonCompat() int32 {
 
 func (x *WrappedFields) GetField1() int32 {
     return x.Field1
+}
+
+func (x *WrappedFields) SetField1NonCompat(value int32) *WrappedFields {
+    x.Field1 = value
+    return x
 }
 
 func (x *WrappedFields) SetField1(value int32) *WrappedFields {
@@ -5960,7 +6350,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1(result)
+    x.SetField1NonCompat(result)
     return nil
 }
 
@@ -6056,7 +6446,7 @@ var _ thrift.Struct = &TerseException{}
 
 func NewTerseException() *TerseException {
     return (&TerseException{}).
-        SetMsg("")
+        SetMsgNonCompat("")
 }
 
 func (x *TerseException) GetMsgNonCompat() string {
@@ -6065,6 +6455,11 @@ func (x *TerseException) GetMsgNonCompat() string {
 
 func (x *TerseException) GetMsg() string {
     return x.Msg
+}
+
+func (x *TerseException) SetMsgNonCompat(value string) *TerseException {
+    x.Msg = value
+    return x
 }
 
 func (x *TerseException) SetMsg(value string) *TerseException {
@@ -6094,7 +6489,7 @@ if err != nil {
     return err
 }
 
-    x.SetMsg(result)
+    x.SetMsgNonCompat(result)
     return nil
 }
 

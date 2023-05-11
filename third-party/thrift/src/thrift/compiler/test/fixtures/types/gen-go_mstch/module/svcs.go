@@ -163,7 +163,7 @@ var _ thrift.Struct = &reqSomeServiceBounceMap{}
 
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{}).
-        SetM(included.NewSomeMap())
+        SetMNonCompat(included.NewSomeMap())
 }
 
 func (x *reqSomeServiceBounceMap) GetMNonCompat() included.SomeMap {
@@ -176,6 +176,11 @@ func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     }
 
     return x.M
+}
+
+func (x *reqSomeServiceBounceMap) SetMNonCompat(value included.SomeMap) *reqSomeServiceBounceMap {
+    x.M = value
+    return x
 }
 
 func (x *reqSomeServiceBounceMap) SetM(value included.SomeMap) *reqSomeServiceBounceMap {
@@ -214,7 +219,7 @@ if err != nil {
     return err
 }
 
-    x.SetM(result)
+    x.SetMNonCompat(result)
     return nil
 }
 
@@ -310,7 +315,7 @@ var _ thrift.WritableResult = &respSomeServiceBounceMap{}
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{}).
-        SetValue(included.NewSomeMap())
+        SetValueNonCompat(included.NewSomeMap())
 }
 
 func (x *respSomeServiceBounceMap) GetValueNonCompat() included.SomeMap {
@@ -323,6 +328,11 @@ func (x *respSomeServiceBounceMap) GetValue() included.SomeMap {
     }
 
     return x.Value
+}
+
+func (x *respSomeServiceBounceMap) SetValueNonCompat(value included.SomeMap) *respSomeServiceBounceMap {
+    x.Value = value
+    return x
 }
 
 func (x *respSomeServiceBounceMap) SetValue(value included.SomeMap) *respSomeServiceBounceMap {
@@ -361,7 +371,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -460,7 +470,7 @@ var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
-        SetR(make([]int64, 0))
+        SetRNonCompat(make([]int64, 0))
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
@@ -473,6 +483,11 @@ func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     }
 
     return x.R
+}
+
+func (x *reqSomeServiceBinaryKeyedMap) SetRNonCompat(value []int64) *reqSomeServiceBinaryKeyedMap {
+    x.R = value
+    return x
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) SetR(value []int64) *reqSomeServiceBinaryKeyedMap {
@@ -539,7 +554,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetR(result)
+    x.SetRNonCompat(result)
     return nil
 }
 
@@ -635,7 +650,7 @@ var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{}).
-        SetValue(make(map[TBinary]int64))
+        SetValueNonCompat(make(map[TBinary]int64))
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
@@ -648,6 +663,11 @@ func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
     }
 
     return x.Value
+}
+
+func (x *respSomeServiceBinaryKeyedMap) SetValueNonCompat(value map[TBinary]int64) *respSomeServiceBinaryKeyedMap {
+    x.Value = value
+    return x
 }
 
 func (x *respSomeServiceBinaryKeyedMap) SetValue(value map[TBinary]int64) *respSomeServiceBinaryKeyedMap {
@@ -732,7 +752,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

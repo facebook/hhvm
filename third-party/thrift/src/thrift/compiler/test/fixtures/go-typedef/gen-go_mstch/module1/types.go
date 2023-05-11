@@ -245,12 +245,12 @@ var _ thrift.Struct = &Automobile{}
 
 func NewAutomobile() *Automobile {
     return (&Automobile{}).
-        SetPlate(NewPlate()).
-        SetFirstPlate("0000").
-        SetYear(NewYear()).
-        SetDrivers(NewDrivers()).
-        SetAccessories(make([]*Accessory, 0)).
-        SetPartNames(make(map[int32]*CarPartName))
+        SetPlateNonCompat(NewPlate()).
+        SetFirstPlateNonCompat("0000").
+        SetYearNonCompat(NewYear()).
+        SetDriversNonCompat(NewDrivers()).
+        SetAccessoriesNonCompat(make([]*Accessory, 0)).
+        SetPartNamesNonCompat(make(map[int32]*CarPartName))
 }
 
 // Deprecated: Use NewAutomobile().GetPreviousPlate() instead.
@@ -335,13 +335,28 @@ func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     return x.PartNames
 }
 
+func (x *Automobile) SetPlateNonCompat(value Plate) *Automobile {
+    x.Plate = value
+    return x
+}
+
 func (x *Automobile) SetPlate(value Plate) *Automobile {
     x.Plate = value
     return x
 }
 
-func (x *Automobile) SetPreviousPlate(value Plate) *Automobile {
+func (x *Automobile) SetPreviousPlateNonCompat(value Plate) *Automobile {
     x.PreviousPlate = &value
+    return x
+}
+
+func (x *Automobile) SetPreviousPlate(value *Plate) *Automobile {
+    x.PreviousPlate = value
+    return x
+}
+
+func (x *Automobile) SetFirstPlateNonCompat(value Plate) *Automobile {
+    x.FirstPlate = &value
     return x
 }
 
@@ -350,8 +365,18 @@ func (x *Automobile) SetFirstPlate(value Plate) *Automobile {
     return x
 }
 
+func (x *Automobile) SetYearNonCompat(value Year) *Automobile {
+    x.Year = value
+    return x
+}
+
 func (x *Automobile) SetYear(value Year) *Automobile {
     x.Year = value
+    return x
+}
+
+func (x *Automobile) SetDriversNonCompat(value Drivers) *Automobile {
+    x.Drivers = value
     return x
 }
 
@@ -360,8 +385,18 @@ func (x *Automobile) SetDrivers(value Drivers) *Automobile {
     return x
 }
 
+func (x *Automobile) SetAccessoriesNonCompat(value []*Accessory) *Automobile {
+    x.Accessories = value
+    return x
+}
+
 func (x *Automobile) SetAccessories(value []*Accessory) *Automobile {
     x.Accessories = value
+    return x
+}
+
+func (x *Automobile) SetPartNamesNonCompat(value map[int32]*CarPartName) *Automobile {
+    x.PartNames = value
     return x
 }
 
@@ -564,7 +599,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlate(result)
+    x.SetPlateNonCompat(result)
     return nil
 }
 
@@ -574,7 +609,7 @@ if err != nil {
     return err
 }
 
-    x.SetPreviousPlate(result)
+    x.SetPreviousPlateNonCompat(result)
     return nil
 }
 
@@ -584,7 +619,7 @@ if err != nil {
     return err
 }
 
-    x.SetFirstPlate(result)
+    x.SetFirstPlateNonCompat(result)
     return nil
 }
 
@@ -594,7 +629,7 @@ if err != nil {
     return err
 }
 
-    x.SetYear(result)
+    x.SetYearNonCompat(result)
     return nil
 }
 
@@ -604,7 +639,7 @@ if err != nil {
     return err
 }
 
-    x.SetDrivers(result)
+    x.SetDriversNonCompat(result)
     return nil
 }
 
@@ -632,7 +667,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAccessories(result)
+    x.SetAccessoriesNonCompat(result)
     return nil
 }
 
@@ -670,7 +705,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPartNames(result)
+    x.SetPartNamesNonCompat(result)
     return nil
 }
 
@@ -845,8 +880,8 @@ var _ thrift.Struct = &MapKey{}
 
 func NewMapKey() *MapKey {
     return (&MapKey{}).
-        SetNum(0).
-        SetStrval("")
+        SetNumNonCompat(0).
+        SetStrvalNonCompat("")
 }
 
 func (x *MapKey) GetNumNonCompat() int64 {
@@ -865,8 +900,18 @@ func (x *MapKey) GetStrval() string {
     return x.Strval
 }
 
+func (x *MapKey) SetNumNonCompat(value int64) *MapKey {
+    x.Num = value
+    return x
+}
+
 func (x *MapKey) SetNum(value int64) *MapKey {
     x.Num = value
+    return x
+}
+
+func (x *MapKey) SetStrvalNonCompat(value string) *MapKey {
+    x.Strval = value
     return x
 }
 
@@ -913,7 +958,7 @@ if err != nil {
     return err
 }
 
-    x.SetNum(result)
+    x.SetNumNonCompat(result)
     return nil
 }
 
@@ -923,7 +968,7 @@ if err != nil {
     return err
 }
 
-    x.SetStrval(result)
+    x.SetStrvalNonCompat(result)
     return nil
 }
 
@@ -1032,7 +1077,7 @@ var _ thrift.Struct = &MapContainer{}
 
 func NewMapContainer() *MapContainer {
     return (&MapContainer{}).
-        SetMapval(make(map[*MapKey]string))
+        SetMapvalNonCompat(make(map[*MapKey]string))
 }
 
 func (x *MapContainer) GetMapvalNonCompat() map[*MapKey]string {
@@ -1045,6 +1090,11 @@ func (x *MapContainer) GetMapval() map[*MapKey]string {
     }
 
     return x.Mapval
+}
+
+func (x *MapContainer) SetMapvalNonCompat(value map[*MapKey]string) *MapContainer {
+    x.Mapval = value
+    return x
 }
 
 func (x *MapContainer) SetMapval(value map[*MapKey]string) *MapContainer {
@@ -1129,7 +1179,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapval(result)
+    x.SetMapvalNonCompat(result)
     return nil
 }
 
@@ -1226,8 +1276,8 @@ var _ thrift.Struct = &Pair{}
 
 func NewPair() *Pair {
     return (&Pair{}).
-        SetAutomobile(*NewAutomobile()).
-        SetCar(*NewCar())
+        SetAutomobileNonCompat(*NewAutomobile()).
+        SetCarNonCompat(*NewCar())
 }
 
 // Deprecated: Use NewPair().GetAutomobile() instead.
@@ -1260,13 +1310,23 @@ func (x *Pair) GetCar() *Car {
     return x.Car
 }
 
-func (x *Pair) SetAutomobile(value Automobile) *Pair {
+func (x *Pair) SetAutomobileNonCompat(value Automobile) *Pair {
     x.Automobile = &value
     return x
 }
 
-func (x *Pair) SetCar(value Car) *Pair {
+func (x *Pair) SetAutomobile(value *Automobile) *Pair {
+    x.Automobile = value
+    return x
+}
+
+func (x *Pair) SetCarNonCompat(value Car) *Pair {
     x.Car = &value
+    return x
+}
+
+func (x *Pair) SetCar(value *Car) *Pair {
+    x.Car = value
     return x
 }
 
@@ -1326,7 +1386,7 @@ if err != nil {
     return err
 }
 
-    x.SetAutomobile(result)
+    x.SetAutomobileNonCompat(result)
     return nil
 }
 
@@ -1336,7 +1396,7 @@ if err != nil {
     return err
 }
 
-    x.SetCar(result)
+    x.SetCarNonCompat(result)
     return nil
 }
 
@@ -1446,8 +1506,8 @@ var _ thrift.Struct = &Collection{}
 
 func NewCollection() *Collection {
     return (&Collection{}).
-        SetAutomobiles(make([]*Automobile, 0)).
-        SetCars(make([]*Car, 0))
+        SetAutomobilesNonCompat(make([]*Automobile, 0)).
+        SetCarsNonCompat(make([]*Car, 0))
 }
 
 func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
@@ -1474,8 +1534,18 @@ func (x *Collection) GetCars() []*Car {
     return x.Cars
 }
 
+func (x *Collection) SetAutomobilesNonCompat(value []*Automobile) *Collection {
+    x.Automobiles = value
+    return x
+}
+
 func (x *Collection) SetAutomobiles(value []*Automobile) *Collection {
     x.Automobiles = value
+    return x
+}
+
+func (x *Collection) SetCarsNonCompat(value []*Car) *Collection {
+    x.Cars = value
     return x
 }
 
@@ -1580,7 +1650,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAutomobiles(result)
+    x.SetAutomobilesNonCompat(result)
     return nil
 }
 
@@ -1608,7 +1678,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetCars(result)
+    x.SetCarsNonCompat(result)
     return nil
 }
 

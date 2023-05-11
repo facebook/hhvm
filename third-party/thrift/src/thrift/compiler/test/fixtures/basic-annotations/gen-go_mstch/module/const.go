@@ -15,6 +15,6 @@ var _ = thrift.ZERO
 var GoUnusedProtection__ int
 
 var MyStruct *MyStruct = NewMyStruct().
-    SetMajor(42).
-    SetPackage("package").
-    SetMyEnum(MyEnum_DOMAIN)
+    SetMajorNonCompat(42).
+    SetPackageNonCompat("package").
+    SetMyEnumNonCompat(MyEnum_DOMAIN)

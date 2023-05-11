@@ -154,9 +154,9 @@ var _ thrift.Struct = &reqServiceFunc{}
 
 func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{}).
-        SetArg1(NewStringWithAdapter()).
-        SetArg2("").
-        SetArg3(*NewFoo())
+        SetArg1NonCompat(NewStringWithAdapter()).
+        SetArg2NonCompat("").
+        SetArg3NonCompat(*NewFoo())
 }
 
 // Deprecated: Use newReqServiceFunc().GetArg3() instead.
@@ -190,8 +190,18 @@ func (x *reqServiceFunc) GetArg3() *Foo {
     return x.Arg3
 }
 
+func (x *reqServiceFunc) SetArg1NonCompat(value StringWithAdapter) *reqServiceFunc {
+    x.Arg1 = value
+    return x
+}
+
 func (x *reqServiceFunc) SetArg1(value StringWithAdapter) *reqServiceFunc {
     x.Arg1 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg2NonCompat(value string) *reqServiceFunc {
+    x.Arg2 = value
     return x
 }
 
@@ -200,8 +210,13 @@ func (x *reqServiceFunc) SetArg2(value string) *reqServiceFunc {
     return x
 }
 
-func (x *reqServiceFunc) SetArg3(value Foo) *reqServiceFunc {
+func (x *reqServiceFunc) SetArg3NonCompat(value Foo) *reqServiceFunc {
     x.Arg3 = &value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg3(value *Foo) *reqServiceFunc {
+    x.Arg3 = value
     return x
 }
 
@@ -268,7 +283,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg1(result)
+    x.SetArg1NonCompat(result)
     return nil
 }
 
@@ -278,7 +293,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg2(result)
+    x.SetArg2NonCompat(result)
     return nil
 }
 
@@ -289,7 +304,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg3(result)
+    x.SetArg3NonCompat(result)
     return nil
 }
 
@@ -411,7 +426,7 @@ var _ thrift.WritableResult = &respServiceFunc{}
 
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{}).
-        SetValue(NewMyI32())
+        SetValueNonCompat(NewMyI32())
 }
 
 func (x *respServiceFunc) GetValueNonCompat() MyI32 {
@@ -420,6 +435,11 @@ func (x *respServiceFunc) GetValueNonCompat() MyI32 {
 
 func (x *respServiceFunc) GetValue() MyI32 {
     return x.Value
+}
+
+func (x *respServiceFunc) SetValueNonCompat(value MyI32) *respServiceFunc {
+    x.Value = value
+    return x
 }
 
 func (x *respServiceFunc) SetValue(value MyI32) *respServiceFunc {
@@ -450,7 +470,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -857,7 +877,7 @@ var _ thrift.WritableResult = &respAdapterServiceCount{}
 
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{}).
-        SetValue(*NewCountingStruct())
+        SetValueNonCompat(*NewCountingStruct())
 }
 
 // Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
@@ -875,8 +895,13 @@ func (x *respAdapterServiceCount) GetValue() *CountingStruct {
     return x.Value
 }
 
-func (x *respAdapterServiceCount) SetValue(value CountingStruct) *respAdapterServiceCount {
+func (x *respAdapterServiceCount) SetValueNonCompat(value CountingStruct) *respAdapterServiceCount {
     x.Value = &value
+    return x
+}
+
+func (x *respAdapterServiceCount) SetValue(value *CountingStruct) *respAdapterServiceCount {
+    x.Value = value
     return x
 }
 
@@ -911,7 +936,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1010,7 +1035,7 @@ var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).
-        SetArg_(*NewHeapAllocated())
+        SetArg_NonCompat(*NewHeapAllocated())
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg_() instead.
@@ -1028,8 +1053,13 @@ func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
     return x.Arg_
 }
 
-func (x *reqAdapterServiceAdaptedTypes) SetArg_(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
+func (x *reqAdapterServiceAdaptedTypes) SetArg_NonCompat(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
     x.Arg_ = &value
+    return x
+}
+
+func (x *reqAdapterServiceAdaptedTypes) SetArg_(value *HeapAllocated) *reqAdapterServiceAdaptedTypes {
+    x.Arg_ = value
     return x
 }
 
@@ -1064,7 +1094,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg_(result)
+    x.SetArg_NonCompat(result)
     return nil
 }
 
@@ -1160,7 +1190,7 @@ var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{}).
-        SetValue(*NewHeapAllocated())
+        SetValueNonCompat(*NewHeapAllocated())
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
@@ -1178,8 +1208,13 @@ func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
     return x.Value
 }
 
-func (x *respAdapterServiceAdaptedTypes) SetValue(value HeapAllocated) *respAdapterServiceAdaptedTypes {
+func (x *respAdapterServiceAdaptedTypes) SetValueNonCompat(value HeapAllocated) *respAdapterServiceAdaptedTypes {
     x.Value = &value
+    return x
+}
+
+func (x *respAdapterServiceAdaptedTypes) SetValue(value *HeapAllocated) *respAdapterServiceAdaptedTypes {
+    x.Value = value
     return x
 }
 
@@ -1214,7 +1249,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

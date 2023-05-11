@@ -27,7 +27,7 @@ var _ thrift.Struct = &Fields{}
 
 func NewFields() *Fields {
     return (&Fields{}).
-        SetInjectedField("")
+        SetInjectedFieldNonCompat("")
 }
 
 func (x *Fields) GetInjectedFieldNonCompat() string {
@@ -36,6 +36,11 @@ func (x *Fields) GetInjectedFieldNonCompat() string {
 
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
+}
+
+func (x *Fields) SetInjectedFieldNonCompat(value string) *Fields {
+    x.InjectedField = value
+    return x
 }
 
 func (x *Fields) SetInjectedField(value string) *Fields {
@@ -65,7 +70,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedField(result)
+    x.SetInjectedFieldNonCompat(result)
     return nil
 }
 
@@ -161,7 +166,7 @@ var _ thrift.Struct = &FieldsInjectedToEmptyStruct{}
 
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
     return (&FieldsInjectedToEmptyStruct{}).
-        SetInjectedField("")
+        SetInjectedFieldNonCompat("")
 }
 
 func (x *FieldsInjectedToEmptyStruct) GetInjectedFieldNonCompat() string {
@@ -170,6 +175,11 @@ func (x *FieldsInjectedToEmptyStruct) GetInjectedFieldNonCompat() string {
 
 func (x *FieldsInjectedToEmptyStruct) GetInjectedField() string {
     return x.InjectedField
+}
+
+func (x *FieldsInjectedToEmptyStruct) SetInjectedFieldNonCompat(value string) *FieldsInjectedToEmptyStruct {
+    x.InjectedField = value
+    return x
 }
 
 func (x *FieldsInjectedToEmptyStruct) SetInjectedField(value string) *FieldsInjectedToEmptyStruct {
@@ -199,7 +209,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedField(result)
+    x.SetInjectedFieldNonCompat(result)
     return nil
 }
 
@@ -296,8 +306,8 @@ var _ thrift.Struct = &FieldsInjectedToStruct{}
 
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
     return (&FieldsInjectedToStruct{}).
-        SetStringField("").
-        SetInjectedField("")
+        SetStringFieldNonCompat("").
+        SetInjectedFieldNonCompat("")
 }
 
 func (x *FieldsInjectedToStruct) GetStringFieldNonCompat() string {
@@ -316,8 +326,18 @@ func (x *FieldsInjectedToStruct) GetInjectedField() string {
     return x.InjectedField
 }
 
+func (x *FieldsInjectedToStruct) SetStringFieldNonCompat(value string) *FieldsInjectedToStruct {
+    x.StringField = value
+    return x
+}
+
 func (x *FieldsInjectedToStruct) SetStringField(value string) *FieldsInjectedToStruct {
     x.StringField = value
+    return x
+}
+
+func (x *FieldsInjectedToStruct) SetInjectedFieldNonCompat(value string) *FieldsInjectedToStruct {
+    x.InjectedField = value
     return x
 }
 
@@ -364,7 +384,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -374,7 +394,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedField(result)
+    x.SetInjectedFieldNonCompat(result)
     return nil
 }
 
@@ -486,8 +506,8 @@ var _ thrift.Struct = &FieldsInjectedWithIncludedStruct{}
 
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
     return (&FieldsInjectedWithIncludedStruct{}).
-        SetStringField("").
-        SetInjectedField("")
+        SetStringFieldNonCompat("").
+        SetInjectedFieldNonCompat("")
 }
 
 // Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField() instead.
@@ -536,8 +556,18 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationFiel
     return *x.InjectedUnstructuredAnnotationField
 }
 
+func (x *FieldsInjectedWithIncludedStruct) SetStringFieldNonCompat(value string) *FieldsInjectedWithIncludedStruct {
+    x.StringField = value
+    return x
+}
+
 func (x *FieldsInjectedWithIncludedStruct) SetStringField(value string) *FieldsInjectedWithIncludedStruct {
     x.StringField = value
+    return x
+}
+
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedFieldNonCompat(value string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedField = value
     return x
 }
 
@@ -546,13 +576,23 @@ func (x *FieldsInjectedWithIncludedStruct) SetInjectedField(value string) *Field
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetInjectedStructuredAnnotationField(value string) *FieldsInjectedWithIncludedStruct {
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedStructuredAnnotationFieldNonCompat(value string) *FieldsInjectedWithIncludedStruct {
     x.InjectedStructuredAnnotationField = &value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationField(value string) *FieldsInjectedWithIncludedStruct {
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedStructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedStructuredAnnotationField = value
+    return x
+}
+
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationFieldNonCompat(value string) *FieldsInjectedWithIncludedStruct {
     x.InjectedUnstructuredAnnotationField = &value
+    return x
+}
+
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedUnstructuredAnnotationField = value
     return x
 }
 
@@ -642,7 +682,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringField(result)
+    x.SetStringFieldNonCompat(result)
     return nil
 }
 
@@ -652,7 +692,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedField(result)
+    x.SetInjectedFieldNonCompat(result)
     return nil
 }
 
@@ -662,7 +702,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedStructuredAnnotationField(result)
+    x.SetInjectedStructuredAnnotationFieldNonCompat(result)
     return nil
 }
 
@@ -672,7 +712,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedUnstructuredAnnotationField(result)
+    x.SetInjectedUnstructuredAnnotationFieldNonCompat(result)
     return nil
 }
 

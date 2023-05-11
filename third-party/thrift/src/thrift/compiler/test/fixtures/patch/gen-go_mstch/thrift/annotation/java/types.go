@@ -105,7 +105,7 @@ var _ thrift.Struct = &Annotation{}
 
 func NewAnnotation() *Annotation {
     return (&Annotation{}).
-        SetJavaAnnotation("")
+        SetJavaAnnotationNonCompat("")
 }
 
 func (x *Annotation) GetJavaAnnotationNonCompat() string {
@@ -114,6 +114,11 @@ func (x *Annotation) GetJavaAnnotationNonCompat() string {
 
 func (x *Annotation) GetJavaAnnotation() string {
     return x.JavaAnnotation
+}
+
+func (x *Annotation) SetJavaAnnotationNonCompat(value string) *Annotation {
+    x.JavaAnnotation = value
+    return x
 }
 
 func (x *Annotation) SetJavaAnnotation(value string) *Annotation {
@@ -143,7 +148,7 @@ if err != nil {
     return err
 }
 
-    x.SetJavaAnnotation(result)
+    x.SetJavaAnnotationNonCompat(result)
     return nil
 }
 
@@ -320,8 +325,8 @@ var _ thrift.Struct = &Adapter{}
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
-        SetAdapterClassName("").
-        SetTypeClassName("")
+        SetAdapterClassNameNonCompat("").
+        SetTypeClassNameNonCompat("")
 }
 
 func (x *Adapter) GetAdapterClassNameNonCompat() string {
@@ -340,8 +345,18 @@ func (x *Adapter) GetTypeClassName() string {
     return x.TypeClassName
 }
 
+func (x *Adapter) SetAdapterClassNameNonCompat(value string) *Adapter {
+    x.AdapterClassName = value
+    return x
+}
+
 func (x *Adapter) SetAdapterClassName(value string) *Adapter {
     x.AdapterClassName = value
+    return x
+}
+
+func (x *Adapter) SetTypeClassNameNonCompat(value string) *Adapter {
+    x.TypeClassName = value
     return x
 }
 
@@ -388,7 +403,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdapterClassName(result)
+    x.SetAdapterClassNameNonCompat(result)
     return nil
 }
 
@@ -398,7 +413,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeClassName(result)
+    x.SetTypeClassNameNonCompat(result)
     return nil
 }
 
@@ -508,8 +523,8 @@ var _ thrift.Struct = &Wrapper{}
 
 func NewWrapper() *Wrapper {
     return (&Wrapper{}).
-        SetWrapperClassName("").
-        SetTypeClassName("")
+        SetWrapperClassNameNonCompat("").
+        SetTypeClassNameNonCompat("")
 }
 
 func (x *Wrapper) GetWrapperClassNameNonCompat() string {
@@ -528,8 +543,18 @@ func (x *Wrapper) GetTypeClassName() string {
     return x.TypeClassName
 }
 
+func (x *Wrapper) SetWrapperClassNameNonCompat(value string) *Wrapper {
+    x.WrapperClassName = value
+    return x
+}
+
 func (x *Wrapper) SetWrapperClassName(value string) *Wrapper {
     x.WrapperClassName = value
+    return x
+}
+
+func (x *Wrapper) SetTypeClassNameNonCompat(value string) *Wrapper {
+    x.TypeClassName = value
     return x
 }
 
@@ -576,7 +601,7 @@ if err != nil {
     return err
 }
 
-    x.SetWrapperClassName(result)
+    x.SetWrapperClassNameNonCompat(result)
     return nil
 }
 
@@ -586,7 +611,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeClassName(result)
+    x.SetTypeClassNameNonCompat(result)
     return nil
 }
 

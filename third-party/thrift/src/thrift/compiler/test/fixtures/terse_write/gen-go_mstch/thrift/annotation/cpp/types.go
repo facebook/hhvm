@@ -158,8 +158,8 @@ var _ thrift.Struct = &Type{}
 
 func NewType() *Type {
     return (&Type{}).
-        SetName("").
-        SetTemplate("")
+        SetNameNonCompat("").
+        SetTemplateNonCompat("")
 }
 
 func (x *Type) GetNameNonCompat() string {
@@ -178,8 +178,18 @@ func (x *Type) GetTemplate() string {
     return x.Template
 }
 
+func (x *Type) SetNameNonCompat(value string) *Type {
+    x.Name = value
+    return x
+}
+
 func (x *Type) SetName(value string) *Type {
     x.Name = value
+    return x
+}
+
+func (x *Type) SetTemplateNonCompat(value string) *Type {
+    x.Template = value
     return x
 }
 
@@ -226,7 +236,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -236,7 +246,7 @@ if err != nil {
     return err
 }
 
-    x.SetTemplate(result)
+    x.SetTemplateNonCompat(result)
     return nil
 }
 
@@ -345,7 +355,7 @@ var _ thrift.Struct = &Ref{}
 
 func NewRef() *Ref {
     return (&Ref{}).
-        SetType(0)
+        SetTypeNonCompat(0)
 }
 
 func (x *Ref) GetTypeNonCompat() RefType {
@@ -354,6 +364,11 @@ func (x *Ref) GetTypeNonCompat() RefType {
 
 func (x *Ref) GetType() RefType {
     return x.Type
+}
+
+func (x *Ref) SetTypeNonCompat(value RefType) *Ref {
+    x.Type = value
+    return x
 }
 
 func (x *Ref) SetType(value RefType) *Ref {
@@ -384,7 +399,7 @@ if err != nil {
 }
 result := RefType(enumResult)
 
-    x.SetType(result)
+    x.SetTypeNonCompat(result)
     return nil
 }
 
@@ -480,7 +495,7 @@ var _ thrift.Struct = &Lazy{}
 
 func NewLazy() *Lazy {
     return (&Lazy{}).
-        SetRef(false)
+        SetRefNonCompat(false)
 }
 
 func (x *Lazy) GetRefNonCompat() bool {
@@ -489,6 +504,11 @@ func (x *Lazy) GetRefNonCompat() bool {
 
 func (x *Lazy) GetRef() bool {
     return x.Ref
+}
+
+func (x *Lazy) SetRefNonCompat(value bool) *Lazy {
+    x.Ref = value
+    return x
 }
 
 func (x *Lazy) SetRef(value bool) *Lazy {
@@ -518,7 +538,7 @@ if err != nil {
     return err
 }
 
-    x.SetRef(result)
+    x.SetRefNonCompat(result)
     return nil
 }
 
@@ -698,11 +718,11 @@ var _ thrift.Struct = &Adapter{}
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
-        SetName("").
-        SetAdaptedType("").
-        SetUnderlyingName("").
-        SetExtraNamespace("").
-        SetMoveOnly(false)
+        SetNameNonCompat("").
+        SetAdaptedTypeNonCompat("").
+        SetUnderlyingNameNonCompat("").
+        SetExtraNamespaceNonCompat("").
+        SetMoveOnlyNonCompat(false)
 }
 
 func (x *Adapter) GetNameNonCompat() string {
@@ -745,8 +765,18 @@ func (x *Adapter) GetMoveOnly() bool {
     return x.MoveOnly
 }
 
+func (x *Adapter) SetNameNonCompat(value string) *Adapter {
+    x.Name = value
+    return x
+}
+
 func (x *Adapter) SetName(value string) *Adapter {
     x.Name = value
+    return x
+}
+
+func (x *Adapter) SetAdaptedTypeNonCompat(value string) *Adapter {
+    x.AdaptedType = value
     return x
 }
 
@@ -755,13 +785,28 @@ func (x *Adapter) SetAdaptedType(value string) *Adapter {
     return x
 }
 
+func (x *Adapter) SetUnderlyingNameNonCompat(value string) *Adapter {
+    x.UnderlyingName = value
+    return x
+}
+
 func (x *Adapter) SetUnderlyingName(value string) *Adapter {
     x.UnderlyingName = value
     return x
 }
 
+func (x *Adapter) SetExtraNamespaceNonCompat(value string) *Adapter {
+    x.ExtraNamespace = value
+    return x
+}
+
 func (x *Adapter) SetExtraNamespace(value string) *Adapter {
     x.ExtraNamespace = value
+    return x
+}
+
+func (x *Adapter) SetMoveOnlyNonCompat(value bool) *Adapter {
+    x.MoveOnly = value
     return x
 }
 
@@ -856,7 +901,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -866,7 +911,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedType(result)
+    x.SetAdaptedTypeNonCompat(result)
     return nil
 }
 
@@ -876,7 +921,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnderlyingName(result)
+    x.SetUnderlyingNameNonCompat(result)
     return nil
 }
 
@@ -886,7 +931,7 @@ if err != nil {
     return err
 }
 
-    x.SetExtraNamespace(result)
+    x.SetExtraNamespaceNonCompat(result)
     return nil
 }
 
@@ -896,7 +941,7 @@ if err != nil {
     return err
 }
 
-    x.SetMoveOnly(result)
+    x.SetMoveOnlyNonCompat(result)
     return nil
 }
 
@@ -1044,7 +1089,7 @@ var _ thrift.Struct = &PackIsset{}
 
 func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
-        SetAtomic(true)
+        SetAtomicNonCompat(true)
 }
 
 func (x *PackIsset) GetAtomicNonCompat() bool {
@@ -1053,6 +1098,11 @@ func (x *PackIsset) GetAtomicNonCompat() bool {
 
 func (x *PackIsset) GetAtomic() bool {
     return x.Atomic
+}
+
+func (x *PackIsset) SetAtomicNonCompat(value bool) *PackIsset {
+    x.Atomic = value
+    return x
 }
 
 func (x *PackIsset) SetAtomic(value bool) *PackIsset {
@@ -1082,7 +1132,7 @@ if err != nil {
     return err
 }
 
-    x.SetAtomic(result)
+    x.SetAtomicNonCompat(result)
     return nil
 }
 
@@ -1499,8 +1549,8 @@ var _ thrift.Struct = &FieldInterceptor{}
 
 func NewFieldInterceptor() *FieldInterceptor {
     return (&FieldInterceptor{}).
-        SetName("").
-        SetNoinline(false)
+        SetNameNonCompat("").
+        SetNoinlineNonCompat(false)
 }
 
 func (x *FieldInterceptor) GetNameNonCompat() string {
@@ -1519,8 +1569,18 @@ func (x *FieldInterceptor) GetNoinline() bool {
     return x.Noinline
 }
 
+func (x *FieldInterceptor) SetNameNonCompat(value string) *FieldInterceptor {
+    x.Name = value
+    return x
+}
+
 func (x *FieldInterceptor) SetName(value string) *FieldInterceptor {
     x.Name = value
+    return x
+}
+
+func (x *FieldInterceptor) SetNoinlineNonCompat(value bool) *FieldInterceptor {
+    x.Noinline = value
     return x
 }
 
@@ -1567,7 +1627,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -1577,7 +1637,7 @@ if err != nil {
     return err
 }
 
-    x.SetNoinline(result)
+    x.SetNoinlineNonCompat(result)
     return nil
 }
 
@@ -1766,7 +1826,7 @@ var _ thrift.Struct = &EnumType{}
 
 func NewEnumType() *EnumType {
     return (&EnumType{}).
-        SetType(0)
+        SetTypeNonCompat(0)
 }
 
 func (x *EnumType) GetTypeNonCompat() EnumUnderlyingType {
@@ -1775,6 +1835,11 @@ func (x *EnumType) GetTypeNonCompat() EnumUnderlyingType {
 
 func (x *EnumType) GetType() EnumUnderlyingType {
     return x.Type
+}
+
+func (x *EnumType) SetTypeNonCompat(value EnumUnderlyingType) *EnumType {
+    x.Type = value
+    return x
 }
 
 func (x *EnumType) SetType(value EnumUnderlyingType) *EnumType {
@@ -1805,7 +1870,7 @@ if err != nil {
 }
 result := EnumUnderlyingType(enumResult)
 
-    x.SetType(result)
+    x.SetTypeNonCompat(result)
     return nil
 }
 

@@ -27,11 +27,11 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMyIncludedField(
+        SetMyIncludedFieldNonCompat(
               *includes.NewIncluded(),
           ).
-        SetMyOtherIncludedField(*includes.NewIncluded()).
-        SetMyIncludedInt(42)
+        SetMyOtherIncludedFieldNonCompat(*includes.NewIncluded()).
+        SetMyIncludedIntNonCompat(42)
 }
 
 // Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
@@ -72,13 +72,28 @@ func (x *MyStruct) GetMyIncludedInt() includes.IncludedInt64 {
     return x.MyIncludedInt
 }
 
-func (x *MyStruct) SetMyIncludedField(value includes.Included) *MyStruct {
+func (x *MyStruct) SetMyIncludedFieldNonCompat(value includes.Included) *MyStruct {
     x.MyIncludedField = &value
     return x
 }
 
-func (x *MyStruct) SetMyOtherIncludedField(value includes.Included) *MyStruct {
+func (x *MyStruct) SetMyIncludedField(value *includes.Included) *MyStruct {
+    x.MyIncludedField = value
+    return x
+}
+
+func (x *MyStruct) SetMyOtherIncludedFieldNonCompat(value includes.Included) *MyStruct {
     x.MyOtherIncludedField = &value
+    return x
+}
+
+func (x *MyStruct) SetMyOtherIncludedField(value *includes.Included) *MyStruct {
+    x.MyOtherIncludedField = value
+    return x
+}
+
+func (x *MyStruct) SetMyIncludedIntNonCompat(value includes.IncludedInt64) *MyStruct {
+    x.MyIncludedInt = value
     return x
 }
 
@@ -159,7 +174,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIncludedField(result)
+    x.SetMyIncludedFieldNonCompat(result)
     return nil
 }
 
@@ -170,7 +185,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyOtherIncludedField(result)
+    x.SetMyOtherIncludedFieldNonCompat(result)
     return nil
 }
 
@@ -180,7 +195,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIncludedInt(result)
+    x.SetMyIncludedIntNonCompat(result)
     return nil
 }
 

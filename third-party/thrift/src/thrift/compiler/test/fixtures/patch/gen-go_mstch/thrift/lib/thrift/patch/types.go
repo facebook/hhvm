@@ -314,8 +314,8 @@ var _ thrift.Struct = &BoolPatch{}
 
 func NewBoolPatch() *BoolPatch {
     return (&BoolPatch{}).
-        SetClear(false).
-        SetInvert(false)
+        SetClearNonCompat(false).
+        SetInvertNonCompat(false)
 }
 
 // Deprecated: Use NewBoolPatch().GetAssign() instead.
@@ -349,13 +349,28 @@ func (x *BoolPatch) GetInvert() bool {
     return x.Invert
 }
 
-func (x *BoolPatch) SetAssign(value bool) *BoolPatch {
+func (x *BoolPatch) SetAssignNonCompat(value bool) *BoolPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *BoolPatch) SetAssign(value *bool) *BoolPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *BoolPatch) SetClearNonCompat(value bool) *BoolPatch {
+    x.Clear = value
     return x
 }
 
 func (x *BoolPatch) SetClear(value bool) *BoolPatch {
     x.Clear = value
+    return x
+}
+
+func (x *BoolPatch) SetInvertNonCompat(value bool) *BoolPatch {
+    x.Invert = value
     return x
 }
 
@@ -426,7 +441,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -436,7 +451,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -446,7 +461,7 @@ if err != nil {
     return err
 }
 
-    x.SetInvert(result)
+    x.SetInvertNonCompat(result)
     return nil
 }
 
@@ -570,8 +585,8 @@ var _ thrift.Struct = &BytePatch{}
 
 func NewBytePatch() *BytePatch {
     return (&BytePatch{}).
-        SetClear(false).
-        SetAdd(0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0)
 }
 
 // Deprecated: Use NewBytePatch().GetAssign() instead.
@@ -605,13 +620,28 @@ func (x *BytePatch) GetAdd() byte {
     return x.Add
 }
 
-func (x *BytePatch) SetAssign(value byte) *BytePatch {
+func (x *BytePatch) SetAssignNonCompat(value byte) *BytePatch {
     x.Assign = &value
+    return x
+}
+
+func (x *BytePatch) SetAssign(value *byte) *BytePatch {
+    x.Assign = value
+    return x
+}
+
+func (x *BytePatch) SetClearNonCompat(value bool) *BytePatch {
+    x.Clear = value
     return x
 }
 
 func (x *BytePatch) SetClear(value bool) *BytePatch {
     x.Clear = value
+    return x
+}
+
+func (x *BytePatch) SetAddNonCompat(value byte) *BytePatch {
+    x.Add = value
     return x
 }
 
@@ -682,7 +712,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -692,7 +722,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -702,7 +732,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -826,8 +856,8 @@ var _ thrift.Struct = &I16Patch{}
 
 func NewI16Patch() *I16Patch {
     return (&I16Patch{}).
-        SetClear(false).
-        SetAdd(0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0)
 }
 
 // Deprecated: Use NewI16Patch().GetAssign() instead.
@@ -861,13 +891,28 @@ func (x *I16Patch) GetAdd() int16 {
     return x.Add
 }
 
-func (x *I16Patch) SetAssign(value int16) *I16Patch {
+func (x *I16Patch) SetAssignNonCompat(value int16) *I16Patch {
     x.Assign = &value
+    return x
+}
+
+func (x *I16Patch) SetAssign(value *int16) *I16Patch {
+    x.Assign = value
+    return x
+}
+
+func (x *I16Patch) SetClearNonCompat(value bool) *I16Patch {
+    x.Clear = value
     return x
 }
 
 func (x *I16Patch) SetClear(value bool) *I16Patch {
     x.Clear = value
+    return x
+}
+
+func (x *I16Patch) SetAddNonCompat(value int16) *I16Patch {
+    x.Add = value
     return x
 }
 
@@ -938,7 +983,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -948,7 +993,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -958,7 +1003,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -1082,8 +1127,8 @@ var _ thrift.Struct = &I32Patch{}
 
 func NewI32Patch() *I32Patch {
     return (&I32Patch{}).
-        SetClear(false).
-        SetAdd(0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0)
 }
 
 // Deprecated: Use NewI32Patch().GetAssign() instead.
@@ -1117,13 +1162,28 @@ func (x *I32Patch) GetAdd() int32 {
     return x.Add
 }
 
-func (x *I32Patch) SetAssign(value int32) *I32Patch {
+func (x *I32Patch) SetAssignNonCompat(value int32) *I32Patch {
     x.Assign = &value
+    return x
+}
+
+func (x *I32Patch) SetAssign(value *int32) *I32Patch {
+    x.Assign = value
+    return x
+}
+
+func (x *I32Patch) SetClearNonCompat(value bool) *I32Patch {
+    x.Clear = value
     return x
 }
 
 func (x *I32Patch) SetClear(value bool) *I32Patch {
     x.Clear = value
+    return x
+}
+
+func (x *I32Patch) SetAddNonCompat(value int32) *I32Patch {
+    x.Add = value
     return x
 }
 
@@ -1194,7 +1254,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -1204,7 +1264,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -1214,7 +1274,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -1338,8 +1398,8 @@ var _ thrift.Struct = &I64Patch{}
 
 func NewI64Patch() *I64Patch {
     return (&I64Patch{}).
-        SetClear(false).
-        SetAdd(0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0)
 }
 
 // Deprecated: Use NewI64Patch().GetAssign() instead.
@@ -1373,13 +1433,28 @@ func (x *I64Patch) GetAdd() int64 {
     return x.Add
 }
 
-func (x *I64Patch) SetAssign(value int64) *I64Patch {
+func (x *I64Patch) SetAssignNonCompat(value int64) *I64Patch {
     x.Assign = &value
+    return x
+}
+
+func (x *I64Patch) SetAssign(value *int64) *I64Patch {
+    x.Assign = value
+    return x
+}
+
+func (x *I64Patch) SetClearNonCompat(value bool) *I64Patch {
+    x.Clear = value
     return x
 }
 
 func (x *I64Patch) SetClear(value bool) *I64Patch {
     x.Clear = value
+    return x
+}
+
+func (x *I64Patch) SetAddNonCompat(value int64) *I64Patch {
+    x.Add = value
     return x
 }
 
@@ -1450,7 +1525,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -1460,7 +1535,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -1470,7 +1545,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -1594,8 +1669,8 @@ var _ thrift.Struct = &FloatPatch{}
 
 func NewFloatPatch() *FloatPatch {
     return (&FloatPatch{}).
-        SetClear(false).
-        SetAdd(0.0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0.0)
 }
 
 // Deprecated: Use NewFloatPatch().GetAssign() instead.
@@ -1629,13 +1704,28 @@ func (x *FloatPatch) GetAdd() float32 {
     return x.Add
 }
 
-func (x *FloatPatch) SetAssign(value float32) *FloatPatch {
+func (x *FloatPatch) SetAssignNonCompat(value float32) *FloatPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *FloatPatch) SetAssign(value *float32) *FloatPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *FloatPatch) SetClearNonCompat(value bool) *FloatPatch {
+    x.Clear = value
     return x
 }
 
 func (x *FloatPatch) SetClear(value bool) *FloatPatch {
     x.Clear = value
+    return x
+}
+
+func (x *FloatPatch) SetAddNonCompat(value float32) *FloatPatch {
+    x.Add = value
     return x
 }
 
@@ -1706,7 +1796,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -1716,7 +1806,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -1726,7 +1816,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -1850,8 +1940,8 @@ var _ thrift.Struct = &DoublePatch{}
 
 func NewDoublePatch() *DoublePatch {
     return (&DoublePatch{}).
-        SetClear(false).
-        SetAdd(0.0)
+        SetClearNonCompat(false).
+        SetAddNonCompat(0.0)
 }
 
 // Deprecated: Use NewDoublePatch().GetAssign() instead.
@@ -1885,13 +1975,28 @@ func (x *DoublePatch) GetAdd() float64 {
     return x.Add
 }
 
-func (x *DoublePatch) SetAssign(value float64) *DoublePatch {
+func (x *DoublePatch) SetAssignNonCompat(value float64) *DoublePatch {
     x.Assign = &value
+    return x
+}
+
+func (x *DoublePatch) SetAssign(value *float64) *DoublePatch {
+    x.Assign = value
+    return x
+}
+
+func (x *DoublePatch) SetClearNonCompat(value bool) *DoublePatch {
+    x.Clear = value
     return x
 }
 
 func (x *DoublePatch) SetClear(value bool) *DoublePatch {
     x.Clear = value
+    return x
+}
+
+func (x *DoublePatch) SetAddNonCompat(value float64) *DoublePatch {
+    x.Add = value
     return x
 }
 
@@ -1962,7 +2067,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -1972,7 +2077,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -1982,7 +2087,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -2107,9 +2212,9 @@ var _ thrift.Struct = &StringPatch{}
 
 func NewStringPatch() *StringPatch {
     return (&StringPatch{}).
-        SetClear(false).
-        SetPrepend("").
-        SetAppend("")
+        SetClearNonCompat(false).
+        SetPrependNonCompat("").
+        SetAppendNonCompat("")
 }
 
 // Deprecated: Use NewStringPatch().GetAssign() instead.
@@ -2151,8 +2256,18 @@ func (x *StringPatch) GetAppend() string {
     return x.Append
 }
 
-func (x *StringPatch) SetAssign(value string) *StringPatch {
+func (x *StringPatch) SetAssignNonCompat(value string) *StringPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *StringPatch) SetAssign(value *string) *StringPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *StringPatch) SetClearNonCompat(value bool) *StringPatch {
+    x.Clear = value
     return x
 }
 
@@ -2161,8 +2276,18 @@ func (x *StringPatch) SetClear(value bool) *StringPatch {
     return x
 }
 
+func (x *StringPatch) SetPrependNonCompat(value string) *StringPatch {
+    x.Prepend = value
+    return x
+}
+
 func (x *StringPatch) SetPrepend(value string) *StringPatch {
     x.Prepend = value
+    return x
+}
+
+func (x *StringPatch) SetAppendNonCompat(value string) *StringPatch {
+    x.Append = value
     return x
 }
 
@@ -2249,7 +2374,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -2259,7 +2384,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -2269,7 +2394,7 @@ if err != nil {
     return err
 }
 
-    x.SetPrepend(result)
+    x.SetPrependNonCompat(result)
     return nil
 }
 
@@ -2279,7 +2404,7 @@ if err != nil {
     return err
 }
 
-    x.SetAppend(result)
+    x.SetAppendNonCompat(result)
     return nil
 }
 
@@ -2417,9 +2542,9 @@ var _ thrift.Struct = &BinaryPatch{}
 
 func NewBinaryPatch() *BinaryPatch {
     return (&BinaryPatch{}).
-        SetClear(false).
-        SetPrepend(standard.NewByteBuffer()).
-        SetAppend(standard.NewByteBuffer())
+        SetClearNonCompat(false).
+        SetPrependNonCompat(standard.NewByteBuffer()).
+        SetAppendNonCompat(standard.NewByteBuffer())
 }
 
 func (x *BinaryPatch) GetAssignNonCompat() standard.ByteBuffer {
@@ -2466,8 +2591,18 @@ func (x *BinaryPatch) GetAppend() standard.ByteBuffer {
     return x.Append
 }
 
+func (x *BinaryPatch) SetAssignNonCompat(value standard.ByteBuffer) *BinaryPatch {
+    x.Assign = value
+    return x
+}
+
 func (x *BinaryPatch) SetAssign(value standard.ByteBuffer) *BinaryPatch {
     x.Assign = value
+    return x
+}
+
+func (x *BinaryPatch) SetClearNonCompat(value bool) *BinaryPatch {
+    x.Clear = value
     return x
 }
 
@@ -2476,8 +2611,18 @@ func (x *BinaryPatch) SetClear(value bool) *BinaryPatch {
     return x
 }
 
+func (x *BinaryPatch) SetPrependNonCompat(value standard.ByteBuffer) *BinaryPatch {
+    x.Prepend = value
+    return x
+}
+
 func (x *BinaryPatch) SetPrepend(value standard.ByteBuffer) *BinaryPatch {
     x.Prepend = value
+    return x
+}
+
+func (x *BinaryPatch) SetAppendNonCompat(value standard.ByteBuffer) *BinaryPatch {
+    x.Append = value
     return x
 }
 
@@ -2583,7 +2728,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -2593,7 +2738,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -2603,7 +2748,7 @@ if err != nil {
     return err
 }
 
-    x.SetPrepend(result)
+    x.SetPrependNonCompat(result)
     return nil
 }
 
@@ -2613,7 +2758,7 @@ if err != nil {
     return err
 }
 
-    x.SetAppend(result)
+    x.SetAppendNonCompat(result)
     return nil
 }
 

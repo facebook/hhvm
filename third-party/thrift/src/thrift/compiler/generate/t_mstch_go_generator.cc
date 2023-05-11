@@ -50,6 +50,9 @@ struct go_codegen_data {
   // whether to generate "legacy" getters which do not properly support optional
   // fields (to make the migration easier)
   bool compat_getters = true;
+  // whether to generate "legacy" setters which do not properly support optional
+  // fields (to make the migration easier)
+  bool compat_setters = true;
 
   // Key: package name according to Thrift.
   // Value: package name to use in generated code.
@@ -139,6 +142,8 @@ class mstch_go_program : public mstch_program {
             {"program:compat?", &mstch_go_program::go_gen_compat},
             {"program:compat_getters?",
              &mstch_go_program::go_gen_compat_getters},
+            {"program:compat_setters?",
+             &mstch_go_program::go_gen_compat_setters},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
             {"program:has_thrift_imports",
              &mstch_go_program::has_thrift_imports},
@@ -160,6 +165,7 @@ class mstch_go_program : public mstch_program {
   mstch::node go_doc_comment() { return doc_comment(program_); }
   mstch::node go_gen_compat() { return data_.compat; }
   mstch::node go_gen_compat_getters() { return data_.compat_getters; }
+  mstch::node go_gen_compat_setters() { return data_.compat_setters; }
   mstch::node thrift_imports() {
     mstch::array a;
     for (const auto* program : program_->get_included_programs()) {
@@ -314,6 +320,8 @@ class mstch_go_field : public mstch_field {
             {"field:go_arg_name", &mstch_go_field::go_arg_name},
             {"field:go_setter_name", &mstch_go_field::go_setter_name},
             {"field:pointer?", &mstch_go_field::is_pointer},
+            {"field:compat_setter_pointer?",
+             &mstch_go_field::is_compat_setter_pointer},
             {"field:nilable?", &mstch_go_field::is_nilable},
             {"field:dereference?", &mstch_go_field::should_dereference},
             {"field:key_str", &mstch_go_field::key_str},
@@ -363,6 +371,18 @@ class mstch_go_field : public mstch_field {
     // Dereference all pointers, except structs and exceptions.
     auto real_type = field_->type()->get_true_type();
     return is_pointer_() && !go::is_type_go_struct(real_type);
+  }
+  mstch::node is_compat_setter_pointer() {
+    // Whether this field's value should be a poitner in compat-setter.
+    // This is needed for a seamless migration from the legacy generator.
+    //
+    // Legacy generator would make optional fields with default values be
+    // impelemented as non-pointer fields. This is incorrect because such
+    // field cannot be unset (i.e set to nil) despite being optional.
+    // This ommision is fixed in the new generator, however, our compat
+    // setters must be backwards compatible to ensure graceful migration.
+    bool has_default_value = (field_->default_value() != nullptr);
+    return is_pointer_() && !(is_optional_() && has_default_value);
   }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.

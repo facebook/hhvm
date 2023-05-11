@@ -510,7 +510,7 @@ var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
 
 func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{}).
-        SetIntParameter(0)
+        SetIntParameterNonCompat(0)
 }
 
 func (x *reqFB303ServiceSimpleRPC) GetIntParameterNonCompat() int32 {
@@ -519,6 +519,11 @@ func (x *reqFB303ServiceSimpleRPC) GetIntParameterNonCompat() int32 {
 
 func (x *reqFB303ServiceSimpleRPC) GetIntParameter() int32 {
     return x.IntParameter
+}
+
+func (x *reqFB303ServiceSimpleRPC) SetIntParameterNonCompat(value int32) *reqFB303ServiceSimpleRPC {
+    x.IntParameter = value
+    return x
 }
 
 func (x *reqFB303ServiceSimpleRPC) SetIntParameter(value int32) *reqFB303ServiceSimpleRPC {
@@ -548,7 +553,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntParameter(result)
+    x.SetIntParameterNonCompat(result)
     return nil
 }
 
@@ -644,7 +649,7 @@ var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
 
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{}).
-        SetValue(*NewReservedKeyword())
+        SetValueNonCompat(*NewReservedKeyword())
 }
 
 // Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
@@ -662,8 +667,13 @@ func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
     return x.Value
 }
 
-func (x *respFB303ServiceSimpleRPC) SetValue(value ReservedKeyword) *respFB303ServiceSimpleRPC {
+func (x *respFB303ServiceSimpleRPC) SetValueNonCompat(value ReservedKeyword) *respFB303ServiceSimpleRPC {
     x.Value = &value
+    return x
+}
+
+func (x *respFB303ServiceSimpleRPC) SetValue(value *ReservedKeyword) *respFB303ServiceSimpleRPC {
+    x.Value = value
     return x
 }
 
@@ -698,7 +708,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1414,7 +1424,7 @@ var _ thrift.WritableResult = &respMyServiceGetRandomData{}
 
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
@@ -1423,6 +1433,11 @@ func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
 
 func (x *respMyServiceGetRandomData) GetValue() string {
     return x.Value
+}
+
+func (x *respMyServiceGetRandomData) SetValueNonCompat(value string) *respMyServiceGetRandomData {
+    x.Value = value
+    return x
 }
 
 func (x *respMyServiceGetRandomData) SetValue(value string) *respMyServiceGetRandomData {
@@ -1452,7 +1467,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -1551,7 +1566,7 @@ var _ thrift.Struct = &reqMyServiceSink{}
 
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{}).
-        SetSink(0)
+        SetSinkNonCompat(0)
 }
 
 func (x *reqMyServiceSink) GetSinkNonCompat() int64 {
@@ -1560,6 +1575,11 @@ func (x *reqMyServiceSink) GetSinkNonCompat() int64 {
 
 func (x *reqMyServiceSink) GetSink() int64 {
     return x.Sink
+}
+
+func (x *reqMyServiceSink) SetSinkNonCompat(value int64) *reqMyServiceSink {
+    x.Sink = value
+    return x
 }
 
 func (x *reqMyServiceSink) SetSink(value int64) *reqMyServiceSink {
@@ -1589,7 +1609,7 @@ if err != nil {
     return err
 }
 
-    x.SetSink(result)
+    x.SetSinkNonCompat(result)
     return nil
 }
 
@@ -1769,8 +1789,8 @@ var _ thrift.Struct = &reqMyServicePutDataById{}
 
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{}).
-        SetId(0).
-        SetData("")
+        SetIdNonCompat(0).
+        SetDataNonCompat("")
 }
 
 func (x *reqMyServicePutDataById) GetIdNonCompat() int64 {
@@ -1789,8 +1809,18 @@ func (x *reqMyServicePutDataById) GetData() string {
     return x.Data
 }
 
+func (x *reqMyServicePutDataById) SetIdNonCompat(value int64) *reqMyServicePutDataById {
+    x.Id = value
+    return x
+}
+
 func (x *reqMyServicePutDataById) SetId(value int64) *reqMyServicePutDataById {
     x.Id = value
+    return x
+}
+
+func (x *reqMyServicePutDataById) SetDataNonCompat(value string) *reqMyServicePutDataById {
+    x.Data = value
     return x
 }
 
@@ -1837,7 +1867,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -1847,7 +1877,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -2039,7 +2069,7 @@ var _ thrift.Struct = &reqMyServiceHasDataById{}
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{}).
-        SetId(0)
+        SetIdNonCompat(0)
 }
 
 func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
@@ -2048,6 +2078,11 @@ func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
 
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
+}
+
+func (x *reqMyServiceHasDataById) SetIdNonCompat(value int64) *reqMyServiceHasDataById {
+    x.Id = value
+    return x
 }
 
 func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
@@ -2077,7 +2112,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -2173,7 +2208,7 @@ var _ thrift.WritableResult = &respMyServiceHasDataById{}
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{}).
-        SetValue(false)
+        SetValueNonCompat(false)
 }
 
 func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
@@ -2182,6 +2217,11 @@ func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
 
 func (x *respMyServiceHasDataById) GetValue() bool {
     return x.Value
+}
+
+func (x *respMyServiceHasDataById) SetValueNonCompat(value bool) *respMyServiceHasDataById {
+    x.Value = value
+    return x
 }
 
 func (x *respMyServiceHasDataById) SetValue(value bool) *respMyServiceHasDataById {
@@ -2211,7 +2251,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2310,7 +2350,7 @@ var _ thrift.Struct = &reqMyServiceGetDataById{}
 
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{}).
-        SetId(0)
+        SetIdNonCompat(0)
 }
 
 func (x *reqMyServiceGetDataById) GetIdNonCompat() int64 {
@@ -2319,6 +2359,11 @@ func (x *reqMyServiceGetDataById) GetIdNonCompat() int64 {
 
 func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
+}
+
+func (x *reqMyServiceGetDataById) SetIdNonCompat(value int64) *reqMyServiceGetDataById {
+    x.Id = value
+    return x
 }
 
 func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
@@ -2348,7 +2393,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -2444,7 +2489,7 @@ var _ thrift.WritableResult = &respMyServiceGetDataById{}
 
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{}).
-        SetValue("")
+        SetValueNonCompat("")
 }
 
 func (x *respMyServiceGetDataById) GetValueNonCompat() string {
@@ -2453,6 +2498,11 @@ func (x *respMyServiceGetDataById) GetValueNonCompat() string {
 
 func (x *respMyServiceGetDataById) GetValue() string {
     return x.Value
+}
+
+func (x *respMyServiceGetDataById) SetValueNonCompat(value string) *respMyServiceGetDataById {
+    x.Value = value
+    return x
 }
 
 func (x *respMyServiceGetDataById) SetValue(value string) *respMyServiceGetDataById {
@@ -2482,7 +2532,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -2581,7 +2631,7 @@ var _ thrift.Struct = &reqMyServiceDeleteDataById{}
 
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{}).
-        SetId(0)
+        SetIdNonCompat(0)
 }
 
 func (x *reqMyServiceDeleteDataById) GetIdNonCompat() int64 {
@@ -2590,6 +2640,11 @@ func (x *reqMyServiceDeleteDataById) GetIdNonCompat() int64 {
 
 func (x *reqMyServiceDeleteDataById) GetId() int64 {
     return x.Id
+}
+
+func (x *reqMyServiceDeleteDataById) SetIdNonCompat(value int64) *reqMyServiceDeleteDataById {
+    x.Id = value
+    return x
 }
 
 func (x *reqMyServiceDeleteDataById) SetId(value int64) *reqMyServiceDeleteDataById {
@@ -2619,7 +2674,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -2799,8 +2854,8 @@ var _ thrift.Struct = &reqMyServiceLobDataById{}
 
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{}).
-        SetId(0).
-        SetData("")
+        SetIdNonCompat(0).
+        SetDataNonCompat("")
 }
 
 func (x *reqMyServiceLobDataById) GetIdNonCompat() int64 {
@@ -2819,8 +2874,18 @@ func (x *reqMyServiceLobDataById) GetData() string {
     return x.Data
 }
 
+func (x *reqMyServiceLobDataById) SetIdNonCompat(value int64) *reqMyServiceLobDataById {
+    x.Id = value
+    return x
+}
+
 func (x *reqMyServiceLobDataById) SetId(value int64) *reqMyServiceLobDataById {
     x.Id = value
+    return x
+}
+
+func (x *reqMyServiceLobDataById) SetDataNonCompat(value string) *reqMyServiceLobDataById {
+    x.Data = value
     return x
 }
 
@@ -2867,7 +2932,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -2877,7 +2942,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -3149,7 +3214,7 @@ var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{}).
-        SetValue(make([]float32, 0))
+        SetValueNonCompat(make([]float32, 0))
 }
 
 func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
@@ -3162,6 +3227,11 @@ func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
     }
 
     return x.Value
+}
+
+func (x *respMyServiceInvalidReturnForHack) SetValueNonCompat(value []float32) *respMyServiceInvalidReturnForHack {
+    x.Value = value
+    return x
 }
 
 func (x *respMyServiceInvalidReturnForHack) SetValue(value []float32) *respMyServiceInvalidReturnForHack {
@@ -3228,7 +3298,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -4194,7 +4264,7 @@ var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
 
 func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
     return (&reqDbMixedStackArgumentsGetDataByKey0{}).
-        SetKey("")
+        SetKeyNonCompat("")
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKeyNonCompat() string {
@@ -4203,6 +4273,11 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKeyNonCompat() string {
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
     return x.Key
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
+    x.Key = value
+    return x
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
@@ -4232,7 +4307,7 @@ if err != nil {
     return err
 }
 
-    x.SetKey(result)
+    x.SetKeyNonCompat(result)
     return nil
 }
 
@@ -4328,7 +4403,7 @@ var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey0{}
 
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{}).
-        SetValue([]byte(""))
+        SetValueNonCompat([]byte(""))
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) GetValueNonCompat() []byte {
@@ -4341,6 +4416,11 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) GetValue() []byte {
     }
 
     return x.Value
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) SetValueNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
+    x.Value = value
+    return x
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) SetValue(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
@@ -4378,7 +4458,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 
@@ -4477,7 +4557,7 @@ var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
 
 func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
     return (&reqDbMixedStackArgumentsGetDataByKey1{}).
-        SetKey("")
+        SetKeyNonCompat("")
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKeyNonCompat() string {
@@ -4486,6 +4566,11 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKeyNonCompat() string {
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
     return x.Key
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
+    x.Key = value
+    return x
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
@@ -4515,7 +4600,7 @@ if err != nil {
     return err
 }
 
-    x.SetKey(result)
+    x.SetKeyNonCompat(result)
     return nil
 }
 
@@ -4611,7 +4696,7 @@ var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey1{}
 
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{}).
-        SetValue([]byte(""))
+        SetValueNonCompat([]byte(""))
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) GetValueNonCompat() []byte {
@@ -4624,6 +4709,11 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) GetValue() []byte {
     }
 
     return x.Value
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) SetValueNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
+    x.Value = value
+    return x
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) SetValue(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
@@ -4661,7 +4751,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

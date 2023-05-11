@@ -23,7 +23,7 @@ var _ thrift.Struct = &CustomException{}
 
 func NewCustomException() *CustomException {
     return (&CustomException{}).
-        SetMessage("")
+        SetMessageNonCompat("")
 }
 
 func (x *CustomException) GetMessageNonCompat() string {
@@ -32,6 +32,11 @@ func (x *CustomException) GetMessageNonCompat() string {
 
 func (x *CustomException) GetMessage() string {
     return x.Message
+}
+
+func (x *CustomException) SetMessageNonCompat(value string) *CustomException {
+    x.Message = value
+    return x
 }
 
 func (x *CustomException) SetMessage(value string) *CustomException {
@@ -61,7 +66,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessage(result)
+    x.SetMessageNonCompat(result)
     return nil
 }
 

@@ -80,8 +80,8 @@ var _ thrift.Struct = &MyData{}
 
 func NewMyData() *MyData {
     return (&MyData{}).
-        SetData1("").
-        SetData2(0)
+        SetData1NonCompat("").
+        SetData2NonCompat(0)
 }
 
 func (x *MyData) GetData1NonCompat() string {
@@ -100,8 +100,18 @@ func (x *MyData) GetData2() int32 {
     return x.Data2
 }
 
+func (x *MyData) SetData1NonCompat(value string) *MyData {
+    x.Data1 = value
+    return x
+}
+
 func (x *MyData) SetData1(value string) *MyData {
     x.Data1 = value
+    return x
+}
+
+func (x *MyData) SetData2NonCompat(value int32) *MyData {
+    x.Data2 = value
     return x
 }
 
@@ -148,7 +158,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -158,7 +168,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -268,8 +278,8 @@ var _ thrift.Struct = &MyDataWithCustomDefault{}
 
 func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
     return (&MyDataWithCustomDefault{}).
-        SetData1("1").
-        SetData2(2)
+        SetData1NonCompat("1").
+        SetData2NonCompat(2)
 }
 
 func (x *MyDataWithCustomDefault) GetData1NonCompat() string {
@@ -288,8 +298,18 @@ func (x *MyDataWithCustomDefault) GetData2() int32 {
     return x.Data2
 }
 
+func (x *MyDataWithCustomDefault) SetData1NonCompat(value string) *MyDataWithCustomDefault {
+    x.Data1 = value
+    return x
+}
+
 func (x *MyDataWithCustomDefault) SetData1(value string) *MyDataWithCustomDefault {
     x.Data1 = value
+    return x
+}
+
+func (x *MyDataWithCustomDefault) SetData2NonCompat(value int32) *MyDataWithCustomDefault {
+    x.Data2 = value
     return x
 }
 
@@ -336,7 +356,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -346,7 +366,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -455,7 +475,7 @@ var _ thrift.Struct = &InnerUnion{}
 
 func NewInnerUnion() *InnerUnion {
     return (&InnerUnion{}).
-        SetInnerOption([]byte(""))
+        SetInnerOptionNonCompat([]byte(""))
 }
 
 func (x *InnerUnion) GetInnerOptionNonCompat() []byte {
@@ -468,6 +488,11 @@ func (x *InnerUnion) GetInnerOption() []byte {
     }
 
     return x.InnerOption
+}
+
+func (x *InnerUnion) SetInnerOptionNonCompat(value []byte) *InnerUnion {
+    x.InnerOption = value
+    return x
 }
 
 func (x *InnerUnion) SetInnerOption(value []byte) *InnerUnion {
@@ -505,7 +530,7 @@ if err != nil {
     return err
 }
 
-    x.SetInnerOption(result)
+    x.SetInnerOptionNonCompat(result)
     return nil
 }
 
@@ -614,9 +639,9 @@ var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{}).
-        SetOption1("").
-        SetOption2(0).
-        SetOption3(*NewInnerUnion())
+        SetOption1NonCompat("").
+        SetOption2NonCompat(0).
+        SetOption3NonCompat(*NewInnerUnion())
 }
 
 // Deprecated: Use NewMyUnion().GetOption1() instead.
@@ -664,18 +689,33 @@ func (x *MyUnion) GetOption3() *InnerUnion {
     return x.Option3
 }
 
-func (x *MyUnion) SetOption1(value string) *MyUnion {
+func (x *MyUnion) SetOption1NonCompat(value string) *MyUnion {
     x.Option1 = &value
     return x
 }
 
-func (x *MyUnion) SetOption2(value int32) *MyUnion {
+func (x *MyUnion) SetOption1(value *string) *MyUnion {
+    x.Option1 = value
+    return x
+}
+
+func (x *MyUnion) SetOption2NonCompat(value int32) *MyUnion {
     x.Option2 = &value
     return x
 }
 
-func (x *MyUnion) SetOption3(value InnerUnion) *MyUnion {
+func (x *MyUnion) SetOption2(value *int32) *MyUnion {
+    x.Option2 = value
+    return x
+}
+
+func (x *MyUnion) SetOption3NonCompat(value InnerUnion) *MyUnion {
     x.Option3 = &value
+    return x
+}
+
+func (x *MyUnion) SetOption3(value *InnerUnion) *MyUnion {
+    x.Option3 = value
     return x
 }
 
@@ -757,7 +797,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption1(result)
+    x.SetOption1NonCompat(result)
     return nil
 }
 
@@ -767,7 +807,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption2(result)
+    x.SetOption2NonCompat(result)
     return nil
 }
 
@@ -778,7 +818,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption3(result)
+    x.SetOption3NonCompat(result)
     return nil
 }
 
@@ -949,27 +989,27 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetBoolVal(false).
-        SetByteVal(0).
-        SetI16Val(0).
-        SetI32Val(0).
-        SetI64Val(0).
-        SetFloatVal(0.0).
-        SetDoubleVal(0.0).
-        SetStringVal("").
-        SetBinaryVal([]byte("")).
-        SetEnumVal(0).
-        SetStructVal(*NewMyData()).
-        SetUnionVal(*NewMyUnion()).
-        SetLateStructVal(*NewLateDefStruct()).
-        SetListMap(make([]map[string]int32, 0)).
-        SetMapMap(make(map[string]map[string]int32)).
-        SetI32WithCustomDefault(1).
-        SetStructWithCustomDefault(*NewMyDataWithCustomDefault()).
-        SetStructWithFieldCustomDefault(
+        SetBoolValNonCompat(false).
+        SetByteValNonCompat(0).
+        SetI16ValNonCompat(0).
+        SetI32ValNonCompat(0).
+        SetI64ValNonCompat(0).
+        SetFloatValNonCompat(0.0).
+        SetDoubleValNonCompat(0.0).
+        SetStringValNonCompat("").
+        SetBinaryValNonCompat([]byte("")).
+        SetEnumValNonCompat(0).
+        SetStructValNonCompat(*NewMyData()).
+        SetUnionValNonCompat(*NewMyUnion()).
+        SetLateStructValNonCompat(*NewLateDefStruct()).
+        SetListMapNonCompat(make([]map[string]int32, 0)).
+        SetMapMapNonCompat(make(map[string]map[string]int32)).
+        SetI32WithCustomDefaultNonCompat(1).
+        SetStructWithCustomDefaultNonCompat(*NewMyDataWithCustomDefault()).
+        SetStructWithFieldCustomDefaultNonCompat(
               *NewMyData().
-    SetData1("1").
-    SetData2(2),
+    SetData1NonCompat("1").
+    SetData2NonCompat(2),
           )
 }
 
@@ -1377,8 +1417,18 @@ func (x *MyStruct) GetStructWithFieldCustomDefault() *MyData {
     return x.StructWithFieldCustomDefault
 }
 
+func (x *MyStruct) SetBoolValNonCompat(value bool) *MyStruct {
+    x.BoolVal = value
+    return x
+}
+
 func (x *MyStruct) SetBoolVal(value bool) *MyStruct {
     x.BoolVal = value
+    return x
+}
+
+func (x *MyStruct) SetByteValNonCompat(value byte) *MyStruct {
+    x.ByteVal = value
     return x
 }
 
@@ -1387,8 +1437,18 @@ func (x *MyStruct) SetByteVal(value byte) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetI16ValNonCompat(value int16) *MyStruct {
+    x.I16Val = value
+    return x
+}
+
 func (x *MyStruct) SetI16Val(value int16) *MyStruct {
     x.I16Val = value
+    return x
+}
+
+func (x *MyStruct) SetI32ValNonCompat(value int32) *MyStruct {
+    x.I32Val = value
     return x
 }
 
@@ -1397,8 +1457,18 @@ func (x *MyStruct) SetI32Val(value int32) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetI64ValNonCompat(value int64) *MyStruct {
+    x.I64Val = value
+    return x
+}
+
 func (x *MyStruct) SetI64Val(value int64) *MyStruct {
     x.I64Val = value
+    return x
+}
+
+func (x *MyStruct) SetFloatValNonCompat(value float32) *MyStruct {
+    x.FloatVal = value
     return x
 }
 
@@ -1407,8 +1477,18 @@ func (x *MyStruct) SetFloatVal(value float32) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetDoubleValNonCompat(value float64) *MyStruct {
+    x.DoubleVal = value
+    return x
+}
+
 func (x *MyStruct) SetDoubleVal(value float64) *MyStruct {
     x.DoubleVal = value
+    return x
+}
+
+func (x *MyStruct) SetStringValNonCompat(value string) *MyStruct {
+    x.StringVal = value
     return x
 }
 
@@ -1417,8 +1497,18 @@ func (x *MyStruct) SetStringVal(value string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetBinaryValNonCompat(value []byte) *MyStruct {
+    x.BinaryVal = value
+    return x
+}
+
 func (x *MyStruct) SetBinaryVal(value []byte) *MyStruct {
     x.BinaryVal = value
+    return x
+}
+
+func (x *MyStruct) SetEnumValNonCompat(value MyEnum) *MyStruct {
+    x.EnumVal = value
     return x
 }
 
@@ -1427,58 +1517,118 @@ func (x *MyStruct) SetEnumVal(value MyEnum) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetStructVal(value MyData) *MyStruct {
+func (x *MyStruct) SetStructValNonCompat(value MyData) *MyStruct {
     x.StructVal = &value
     return x
 }
 
-func (x *MyStruct) SetUnionVal(value MyUnion) *MyStruct {
+func (x *MyStruct) SetStructVal(value *MyData) *MyStruct {
+    x.StructVal = value
+    return x
+}
+
+func (x *MyStruct) SetUnionValNonCompat(value MyUnion) *MyStruct {
     x.UnionVal = &value
     return x
 }
 
-func (x *MyStruct) SetLateStructVal(value LateDefStruct) *MyStruct {
+func (x *MyStruct) SetUnionVal(value *MyUnion) *MyStruct {
+    x.UnionVal = value
+    return x
+}
+
+func (x *MyStruct) SetLateStructValNonCompat(value LateDefStruct) *MyStruct {
     x.LateStructVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptBoolVal(value bool) *MyStruct {
+func (x *MyStruct) SetLateStructVal(value *LateDefStruct) *MyStruct {
+    x.LateStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptBoolValNonCompat(value bool) *MyStruct {
     x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptByteVal(value byte) *MyStruct {
+func (x *MyStruct) SetOptBoolVal(value *bool) *MyStruct {
+    x.OptBoolVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptByteValNonCompat(value byte) *MyStruct {
     x.OptByteVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptI16Val(value int16) *MyStruct {
+func (x *MyStruct) SetOptByteVal(value *byte) *MyStruct {
+    x.OptByteVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptI16ValNonCompat(value int16) *MyStruct {
     x.OptI16Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptI32Val(value int32) *MyStruct {
+func (x *MyStruct) SetOptI16Val(value *int16) *MyStruct {
+    x.OptI16Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptI32ValNonCompat(value int32) *MyStruct {
     x.OptI32Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptI64Val(value int64) *MyStruct {
+func (x *MyStruct) SetOptI32Val(value *int32) *MyStruct {
+    x.OptI32Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptI64ValNonCompat(value int64) *MyStruct {
     x.OptI64Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptFloatVal(value float32) *MyStruct {
+func (x *MyStruct) SetOptI64Val(value *int64) *MyStruct {
+    x.OptI64Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptFloatValNonCompat(value float32) *MyStruct {
     x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptDoubleVal(value float64) *MyStruct {
+func (x *MyStruct) SetOptFloatVal(value *float32) *MyStruct {
+    x.OptFloatVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptDoubleValNonCompat(value float64) *MyStruct {
     x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptStringVal(value string) *MyStruct {
+func (x *MyStruct) SetOptDoubleVal(value *float64) *MyStruct {
+    x.OptDoubleVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptStringValNonCompat(value string) *MyStruct {
     x.OptStringVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptStringVal(value *string) *MyStruct {
+    x.OptStringVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptBinaryValNonCompat(value []byte) *MyStruct {
+    x.OptBinaryVal = value
     return x
 }
 
@@ -1487,18 +1637,38 @@ func (x *MyStruct) SetOptBinaryVal(value []byte) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetOptEnumVal(value MyEnum) *MyStruct {
+func (x *MyStruct) SetOptEnumValNonCompat(value MyEnum) *MyStruct {
     x.OptEnumVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptStructVal(value MyData) *MyStruct {
+func (x *MyStruct) SetOptEnumVal(value *MyEnum) *MyStruct {
+    x.OptEnumVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptStructValNonCompat(value MyData) *MyStruct {
     x.OptStructVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptLateStructVal(value LateDefStruct) *MyStruct {
+func (x *MyStruct) SetOptStructVal(value *MyData) *MyStruct {
+    x.OptStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptLateStructValNonCompat(value LateDefStruct) *MyStruct {
     x.OptLateStructVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptLateStructVal(value *LateDefStruct) *MyStruct {
+    x.OptLateStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptListValNonCompat(value []int16) *MyStruct {
+    x.OptListVal = value
     return x
 }
 
@@ -1507,8 +1677,18 @@ func (x *MyStruct) SetOptListVal(value []int16) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetOptSetValNonCompat(value []string) *MyStruct {
+    x.OptSetVal = value
+    return x
+}
+
 func (x *MyStruct) SetOptSetVal(value []string) *MyStruct {
     x.OptSetVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptMapValNonCompat(value map[string]string) *MyStruct {
+    x.OptMapVal = value
     return x
 }
 
@@ -1517,8 +1697,18 @@ func (x *MyStruct) SetOptMapVal(value map[string]string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetListMapNonCompat(value []map[string]int32) *MyStruct {
+    x.ListMap = value
+    return x
+}
+
 func (x *MyStruct) SetListMap(value []map[string]int32) *MyStruct {
     x.ListMap = value
+    return x
+}
+
+func (x *MyStruct) SetMapMapNonCompat(value map[string]map[string]int32) *MyStruct {
+    x.MapMap = value
     return x
 }
 
@@ -1527,18 +1717,33 @@ func (x *MyStruct) SetMapMap(value map[string]map[string]int32) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetI32WithCustomDefaultNonCompat(value int32) *MyStruct {
+    x.I32WithCustomDefault = value
+    return x
+}
+
 func (x *MyStruct) SetI32WithCustomDefault(value int32) *MyStruct {
     x.I32WithCustomDefault = value
     return x
 }
 
-func (x *MyStruct) SetStructWithCustomDefault(value MyDataWithCustomDefault) *MyStruct {
+func (x *MyStruct) SetStructWithCustomDefaultNonCompat(value MyDataWithCustomDefault) *MyStruct {
     x.StructWithCustomDefault = &value
     return x
 }
 
-func (x *MyStruct) SetStructWithFieldCustomDefault(value MyData) *MyStruct {
+func (x *MyStruct) SetStructWithCustomDefault(value *MyDataWithCustomDefault) *MyStruct {
+    x.StructWithCustomDefault = value
+    return x
+}
+
+func (x *MyStruct) SetStructWithFieldCustomDefaultNonCompat(value MyData) *MyStruct {
     x.StructWithFieldCustomDefault = &value
+    return x
+}
+
+func (x *MyStruct) SetStructWithFieldCustomDefault(value *MyData) *MyStruct {
+    x.StructWithFieldCustomDefault = value
     return x
 }
 
@@ -2365,7 +2570,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolVal(result)
+    x.SetBoolValNonCompat(result)
     return nil
 }
 
@@ -2375,7 +2580,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteVal(result)
+    x.SetByteValNonCompat(result)
     return nil
 }
 
@@ -2385,7 +2590,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16Val(result)
+    x.SetI16ValNonCompat(result)
     return nil
 }
 
@@ -2395,7 +2600,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32Val(result)
+    x.SetI32ValNonCompat(result)
     return nil
 }
 
@@ -2405,7 +2610,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64Val(result)
+    x.SetI64ValNonCompat(result)
     return nil
 }
 
@@ -2415,7 +2620,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatVal(result)
+    x.SetFloatValNonCompat(result)
     return nil
 }
 
@@ -2425,7 +2630,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleVal(result)
+    x.SetDoubleValNonCompat(result)
     return nil
 }
 
@@ -2435,7 +2640,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringVal(result)
+    x.SetStringValNonCompat(result)
     return nil
 }
 
@@ -2445,7 +2650,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryVal(result)
+    x.SetBinaryValNonCompat(result)
     return nil
 }
 
@@ -2456,7 +2661,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumVal(result)
+    x.SetEnumValNonCompat(result)
     return nil
 }
 
@@ -2467,7 +2672,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructVal(result)
+    x.SetStructValNonCompat(result)
     return nil
 }
 
@@ -2478,7 +2683,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionVal(result)
+    x.SetUnionValNonCompat(result)
     return nil
 }
 
@@ -2489,7 +2694,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructVal(result)
+    x.SetLateStructValNonCompat(result)
     return nil
 }
 
@@ -2499,7 +2704,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolVal(result)
+    x.SetOptBoolValNonCompat(result)
     return nil
 }
 
@@ -2509,7 +2714,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteVal(result)
+    x.SetOptByteValNonCompat(result)
     return nil
 }
 
@@ -2519,7 +2724,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16Val(result)
+    x.SetOptI16ValNonCompat(result)
     return nil
 }
 
@@ -2529,7 +2734,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32Val(result)
+    x.SetOptI32ValNonCompat(result)
     return nil
 }
 
@@ -2539,7 +2744,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64Val(result)
+    x.SetOptI64ValNonCompat(result)
     return nil
 }
 
@@ -2549,7 +2754,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatVal(result)
+    x.SetOptFloatValNonCompat(result)
     return nil
 }
 
@@ -2559,7 +2764,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleVal(result)
+    x.SetOptDoubleValNonCompat(result)
     return nil
 }
 
@@ -2569,7 +2774,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringVal(result)
+    x.SetOptStringValNonCompat(result)
     return nil
 }
 
@@ -2579,7 +2784,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryVal(result)
+    x.SetOptBinaryValNonCompat(result)
     return nil
 }
 
@@ -2590,7 +2795,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetOptEnumVal(result)
+    x.SetOptEnumValNonCompat(result)
     return nil
 }
 
@@ -2601,7 +2806,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructVal(result)
+    x.SetOptStructValNonCompat(result)
     return nil
 }
 
@@ -2612,7 +2817,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructVal(result)
+    x.SetOptLateStructValNonCompat(result)
     return nil
 }
 
@@ -2640,7 +2845,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptListVal(result)
+    x.SetOptListValNonCompat(result)
     return nil
 }
 
@@ -2668,7 +2873,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetOptSetVal(result)
+    x.SetOptSetValNonCompat(result)
     return nil
 }
 
@@ -2706,7 +2911,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetOptMapVal(result)
+    x.SetOptMapValNonCompat(result)
     return nil
 }
 
@@ -2762,7 +2967,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListMap(result)
+    x.SetListMapNonCompat(result)
     return nil
 }
 
@@ -2828,7 +3033,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapMap(result)
+    x.SetMapMapNonCompat(result)
     return nil
 }
 
@@ -2838,7 +3043,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefault(result)
+    x.SetI32WithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -2849,7 +3054,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefault(result)
+    x.SetStructWithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -2860,7 +3065,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefault(result)
+    x.SetStructWithFieldCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -3452,7 +3657,7 @@ var _ thrift.Struct = &Recursive{}
 
 func NewRecursive() *Recursive {
     return (&Recursive{}).
-        SetNodes(make(map[string]*Recursive))
+        SetNodesNonCompat(make(map[string]*Recursive))
 }
 
 func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
@@ -3465,6 +3670,11 @@ func (x *Recursive) GetNodes() map[string]*Recursive {
     }
 
     return x.Nodes
+}
+
+func (x *Recursive) SetNodesNonCompat(value map[string]*Recursive) *Recursive {
+    x.Nodes = value
+    return x
 }
 
 func (x *Recursive) SetNodes(value map[string]*Recursive) *Recursive {
@@ -3549,7 +3759,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetNodes(result)
+    x.SetNodesNonCompat(result)
     return nil
 }
 
@@ -3645,7 +3855,7 @@ var _ thrift.Struct = &Bar{}
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetLoop(*NewLoop())
+        SetLoopNonCompat(*NewLoop())
 }
 
 // Deprecated: Use NewBar().GetLoop() instead.
@@ -3663,8 +3873,13 @@ func (x *Bar) GetLoop() *Loop {
     return x.Loop
 }
 
-func (x *Bar) SetLoop(value Loop) *Bar {
+func (x *Bar) SetLoopNonCompat(value Loop) *Bar {
     x.Loop = &value
+    return x
+}
+
+func (x *Bar) SetLoop(value *Loop) *Bar {
+    x.Loop = value
     return x
 }
 
@@ -3699,7 +3914,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoop(result)
+    x.SetLoopNonCompat(result)
     return nil
 }
 
@@ -3795,7 +4010,7 @@ var _ thrift.Struct = &Loop{}
 
 func NewLoop() *Loop {
     return (&Loop{}).
-        SetBar(*NewBar())
+        SetBarNonCompat(*NewBar())
 }
 
 // Deprecated: Use NewLoop().GetBar() instead.
@@ -3813,8 +4028,13 @@ func (x *Loop) GetBar() *Bar {
     return x.Bar
 }
 
-func (x *Loop) SetBar(value Bar) *Loop {
+func (x *Loop) SetBarNonCompat(value Bar) *Loop {
     x.Bar = &value
+    return x
+}
+
+func (x *Loop) SetBar(value *Bar) *Loop {
+    x.Bar = value
     return x
 }
 
@@ -3849,7 +4069,7 @@ if err != nil {
     return err
 }
 
-    x.SetBar(result)
+    x.SetBarNonCompat(result)
     return nil
 }
 
@@ -3949,10 +4169,10 @@ var _ thrift.Struct = &MyDataPatch{}
 
 func NewMyDataPatch() *MyDataPatch {
     return (&MyDataPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewMyDataFieldPatch()).
-        SetEnsure(*NewMyDataEnsureStruct()).
-        SetPatch(*NewMyDataFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewMyDataFieldPatch()).
+        SetEnsureNonCompat(*NewMyDataEnsureStruct()).
+        SetPatchNonCompat(*NewMyDataFieldPatch())
 }
 
 // Deprecated: Use NewMyDataPatch().GetAssign() instead.
@@ -4023,8 +4243,18 @@ func (x *MyDataPatch) GetPatch() *MyDataFieldPatch {
     return x.Patch
 }
 
-func (x *MyDataPatch) SetAssign(value MyData) *MyDataPatch {
+func (x *MyDataPatch) SetAssignNonCompat(value MyData) *MyDataPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyDataPatch) SetAssign(value *MyData) *MyDataPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyDataPatch) SetClearNonCompat(value bool) *MyDataPatch {
+    x.Clear = value
     return x
 }
 
@@ -4033,18 +4263,33 @@ func (x *MyDataPatch) SetClear(value bool) *MyDataPatch {
     return x
 }
 
-func (x *MyDataPatch) SetPatchPrior(value MyDataFieldPatch) *MyDataPatch {
+func (x *MyDataPatch) SetPatchPriorNonCompat(value MyDataFieldPatch) *MyDataPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *MyDataPatch) SetEnsure(value MyDataEnsureStruct) *MyDataPatch {
+func (x *MyDataPatch) SetPatchPrior(value *MyDataFieldPatch) *MyDataPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *MyDataPatch) SetEnsureNonCompat(value MyDataEnsureStruct) *MyDataPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *MyDataPatch) SetPatch(value MyDataFieldPatch) *MyDataPatch {
+func (x *MyDataPatch) SetEnsure(value *MyDataEnsureStruct) *MyDataPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *MyDataPatch) SetPatchNonCompat(value MyDataFieldPatch) *MyDataPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *MyDataPatch) SetPatch(value *MyDataFieldPatch) *MyDataPatch {
+    x.Patch = value
     return x
 }
 
@@ -4167,7 +4412,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -4177,7 +4422,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -4188,7 +4433,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -4199,7 +4444,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -4210,7 +4455,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -4359,8 +4604,8 @@ var _ thrift.Struct = &MyDataFieldPatch{}
 
 func NewMyDataFieldPatch() *MyDataFieldPatch {
     return (&MyDataFieldPatch{}).
-        SetData1(*patch.NewStringPatch()).
-        SetData2(*patch.NewI32Patch())
+        SetData1NonCompat(*patch.NewStringPatch()).
+        SetData2NonCompat(*patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataFieldPatch().GetData1() instead.
@@ -4393,13 +4638,23 @@ func (x *MyDataFieldPatch) GetData2() *patch.I32Patch {
     return x.Data2
 }
 
-func (x *MyDataFieldPatch) SetData1(value patch.StringPatch) *MyDataFieldPatch {
+func (x *MyDataFieldPatch) SetData1NonCompat(value patch.StringPatch) *MyDataFieldPatch {
     x.Data1 = &value
     return x
 }
 
-func (x *MyDataFieldPatch) SetData2(value patch.I32Patch) *MyDataFieldPatch {
+func (x *MyDataFieldPatch) SetData1(value *patch.StringPatch) *MyDataFieldPatch {
+    x.Data1 = value
+    return x
+}
+
+func (x *MyDataFieldPatch) SetData2NonCompat(value patch.I32Patch) *MyDataFieldPatch {
     x.Data2 = &value
+    return x
+}
+
+func (x *MyDataFieldPatch) SetData2(value *patch.I32Patch) *MyDataFieldPatch {
+    x.Data2 = value
     return x
 }
 
@@ -4458,7 +4713,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -4469,7 +4724,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -4611,13 +4866,23 @@ func (x *MyDataEnsureStruct) GetData2() int32 {
     return *x.Data2
 }
 
-func (x *MyDataEnsureStruct) SetData1(value string) *MyDataEnsureStruct {
+func (x *MyDataEnsureStruct) SetData1NonCompat(value string) *MyDataEnsureStruct {
     x.Data1 = &value
     return x
 }
 
-func (x *MyDataEnsureStruct) SetData2(value int32) *MyDataEnsureStruct {
+func (x *MyDataEnsureStruct) SetData1(value *string) *MyDataEnsureStruct {
+    x.Data1 = value
+    return x
+}
+
+func (x *MyDataEnsureStruct) SetData2NonCompat(value int32) *MyDataEnsureStruct {
     x.Data2 = &value
+    return x
+}
+
+func (x *MyDataEnsureStruct) SetData2(value *int32) *MyDataEnsureStruct {
+    x.Data2 = value
     return x
 }
 
@@ -4675,7 +4940,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -4685,7 +4950,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -4798,10 +5063,10 @@ var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
 
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
     return (&MyDataWithCustomDefaultPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewMyDataWithCustomDefaultFieldPatch()).
-        SetEnsure(*NewMyDataWithCustomDefaultEnsureStruct()).
-        SetPatch(*NewMyDataWithCustomDefaultFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewMyDataWithCustomDefaultFieldPatch()).
+        SetEnsureNonCompat(*NewMyDataWithCustomDefaultEnsureStruct()).
+        SetPatchNonCompat(*NewMyDataWithCustomDefaultFieldPatch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().GetAssign() instead.
@@ -4872,8 +5137,18 @@ func (x *MyDataWithCustomDefaultPatch) GetPatch() *MyDataWithCustomDefaultFieldP
     return x.Patch
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetAssign(value MyDataWithCustomDefault) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetAssignNonCompat(value MyDataWithCustomDefault) *MyDataWithCustomDefaultPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultPatch) SetAssign(value *MyDataWithCustomDefault) *MyDataWithCustomDefaultPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultPatch) SetClearNonCompat(value bool) *MyDataWithCustomDefaultPatch {
+    x.Clear = value
     return x
 }
 
@@ -4882,18 +5157,33 @@ func (x *MyDataWithCustomDefaultPatch) SetClear(value bool) *MyDataWithCustomDef
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetPatchPrior(value MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetPatchPriorNonCompat(value MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetEnsure(value MyDataWithCustomDefaultEnsureStruct) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetPatchPrior(value *MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultPatch) SetEnsureNonCompat(value MyDataWithCustomDefaultEnsureStruct) *MyDataWithCustomDefaultPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetPatch(value MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetEnsure(value *MyDataWithCustomDefaultEnsureStruct) *MyDataWithCustomDefaultPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultPatch) SetPatchNonCompat(value MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultPatch) SetPatch(value *MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatch {
+    x.Patch = value
     return x
 }
 
@@ -5016,7 +5306,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -5026,7 +5316,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -5037,7 +5327,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -5048,7 +5338,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -5059,7 +5349,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -5208,8 +5498,8 @@ var _ thrift.Struct = &MyDataWithCustomDefaultFieldPatch{}
 
 func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
     return (&MyDataWithCustomDefaultFieldPatch{}).
-        SetData1(*patch.NewStringPatch()).
-        SetData2(*patch.NewI32Patch())
+        SetData1NonCompat(*patch.NewStringPatch()).
+        SetData2NonCompat(*patch.NewI32Patch())
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().GetData1() instead.
@@ -5242,13 +5532,23 @@ func (x *MyDataWithCustomDefaultFieldPatch) GetData2() *patch.I32Patch {
     return x.Data2
 }
 
-func (x *MyDataWithCustomDefaultFieldPatch) SetData1(value patch.StringPatch) *MyDataWithCustomDefaultFieldPatch {
+func (x *MyDataWithCustomDefaultFieldPatch) SetData1NonCompat(value patch.StringPatch) *MyDataWithCustomDefaultFieldPatch {
     x.Data1 = &value
     return x
 }
 
-func (x *MyDataWithCustomDefaultFieldPatch) SetData2(value patch.I32Patch) *MyDataWithCustomDefaultFieldPatch {
+func (x *MyDataWithCustomDefaultFieldPatch) SetData1(value *patch.StringPatch) *MyDataWithCustomDefaultFieldPatch {
+    x.Data1 = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultFieldPatch) SetData2NonCompat(value patch.I32Patch) *MyDataWithCustomDefaultFieldPatch {
     x.Data2 = &value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultFieldPatch) SetData2(value *patch.I32Patch) *MyDataWithCustomDefaultFieldPatch {
+    x.Data2 = value
     return x
 }
 
@@ -5307,7 +5607,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -5318,7 +5618,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -5460,13 +5760,23 @@ func (x *MyDataWithCustomDefaultEnsureStruct) GetData2() int32 {
     return *x.Data2
 }
 
-func (x *MyDataWithCustomDefaultEnsureStruct) SetData1(value string) *MyDataWithCustomDefaultEnsureStruct {
+func (x *MyDataWithCustomDefaultEnsureStruct) SetData1NonCompat(value string) *MyDataWithCustomDefaultEnsureStruct {
     x.Data1 = &value
     return x
 }
 
-func (x *MyDataWithCustomDefaultEnsureStruct) SetData2(value int32) *MyDataWithCustomDefaultEnsureStruct {
+func (x *MyDataWithCustomDefaultEnsureStruct) SetData1(value *string) *MyDataWithCustomDefaultEnsureStruct {
+    x.Data1 = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultEnsureStruct) SetData2NonCompat(value int32) *MyDataWithCustomDefaultEnsureStruct {
     x.Data2 = &value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultEnsureStruct) SetData2(value *int32) *MyDataWithCustomDefaultEnsureStruct {
+    x.Data2 = value
     return x
 }
 
@@ -5524,7 +5834,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1(result)
+    x.SetData1NonCompat(result)
     return nil
 }
 
@@ -5534,7 +5844,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2(result)
+    x.SetData2NonCompat(result)
     return nil
 }
 
@@ -5647,10 +5957,10 @@ var _ thrift.Struct = &InnerUnionPatch{}
 
 func NewInnerUnionPatch() *InnerUnionPatch {
     return (&InnerUnionPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewInnerUnionFieldPatch()).
-        SetEnsure(*NewInnerUnion()).
-        SetPatch(*NewInnerUnionFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewInnerUnionFieldPatch()).
+        SetEnsureNonCompat(*NewInnerUnion()).
+        SetPatchNonCompat(*NewInnerUnionFieldPatch())
 }
 
 // Deprecated: Use NewInnerUnionPatch().GetAssign() instead.
@@ -5721,8 +6031,18 @@ func (x *InnerUnionPatch) GetPatch() *InnerUnionFieldPatch {
     return x.Patch
 }
 
-func (x *InnerUnionPatch) SetAssign(value InnerUnion) *InnerUnionPatch {
+func (x *InnerUnionPatch) SetAssignNonCompat(value InnerUnion) *InnerUnionPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *InnerUnionPatch) SetAssign(value *InnerUnion) *InnerUnionPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *InnerUnionPatch) SetClearNonCompat(value bool) *InnerUnionPatch {
+    x.Clear = value
     return x
 }
 
@@ -5731,18 +6051,33 @@ func (x *InnerUnionPatch) SetClear(value bool) *InnerUnionPatch {
     return x
 }
 
-func (x *InnerUnionPatch) SetPatchPrior(value InnerUnionFieldPatch) *InnerUnionPatch {
+func (x *InnerUnionPatch) SetPatchPriorNonCompat(value InnerUnionFieldPatch) *InnerUnionPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *InnerUnionPatch) SetEnsure(value InnerUnion) *InnerUnionPatch {
+func (x *InnerUnionPatch) SetPatchPrior(value *InnerUnionFieldPatch) *InnerUnionPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *InnerUnionPatch) SetEnsureNonCompat(value InnerUnion) *InnerUnionPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *InnerUnionPatch) SetPatch(value InnerUnionFieldPatch) *InnerUnionPatch {
+func (x *InnerUnionPatch) SetEnsure(value *InnerUnion) *InnerUnionPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *InnerUnionPatch) SetPatchNonCompat(value InnerUnionFieldPatch) *InnerUnionPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *InnerUnionPatch) SetPatch(value *InnerUnionFieldPatch) *InnerUnionPatch {
+    x.Patch = value
     return x
 }
 
@@ -5865,7 +6200,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -5875,7 +6210,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -5886,7 +6221,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -5897,7 +6232,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -5908,7 +6243,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -6056,7 +6391,7 @@ var _ thrift.Struct = &InnerUnionFieldPatch{}
 
 func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
     return (&InnerUnionFieldPatch{}).
-        SetInnerOption(*patch.NewBinaryPatch())
+        SetInnerOptionNonCompat(*patch.NewBinaryPatch())
 }
 
 // Deprecated: Use NewInnerUnionFieldPatch().GetInnerOption() instead.
@@ -6074,8 +6409,13 @@ func (x *InnerUnionFieldPatch) GetInnerOption() *patch.BinaryPatch {
     return x.InnerOption
 }
 
-func (x *InnerUnionFieldPatch) SetInnerOption(value patch.BinaryPatch) *InnerUnionFieldPatch {
+func (x *InnerUnionFieldPatch) SetInnerOptionNonCompat(value patch.BinaryPatch) *InnerUnionFieldPatch {
     x.InnerOption = &value
+    return x
+}
+
+func (x *InnerUnionFieldPatch) SetInnerOption(value *patch.BinaryPatch) *InnerUnionFieldPatch {
+    x.InnerOption = value
     return x
 }
 
@@ -6110,7 +6450,7 @@ if err != nil {
     return err
 }
 
-    x.SetInnerOption(result)
+    x.SetInnerOptionNonCompat(result)
     return nil
 }
 
@@ -6210,10 +6550,10 @@ var _ thrift.Struct = &MyUnionPatch{}
 
 func NewMyUnionPatch() *MyUnionPatch {
     return (&MyUnionPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewMyUnionFieldPatch()).
-        SetEnsure(*NewMyUnion()).
-        SetPatch(*NewMyUnionFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewMyUnionFieldPatch()).
+        SetEnsureNonCompat(*NewMyUnion()).
+        SetPatchNonCompat(*NewMyUnionFieldPatch())
 }
 
 // Deprecated: Use NewMyUnionPatch().GetAssign() instead.
@@ -6284,8 +6624,18 @@ func (x *MyUnionPatch) GetPatch() *MyUnionFieldPatch {
     return x.Patch
 }
 
-func (x *MyUnionPatch) SetAssign(value MyUnion) *MyUnionPatch {
+func (x *MyUnionPatch) SetAssignNonCompat(value MyUnion) *MyUnionPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyUnionPatch) SetAssign(value *MyUnion) *MyUnionPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyUnionPatch) SetClearNonCompat(value bool) *MyUnionPatch {
+    x.Clear = value
     return x
 }
 
@@ -6294,18 +6644,33 @@ func (x *MyUnionPatch) SetClear(value bool) *MyUnionPatch {
     return x
 }
 
-func (x *MyUnionPatch) SetPatchPrior(value MyUnionFieldPatch) *MyUnionPatch {
+func (x *MyUnionPatch) SetPatchPriorNonCompat(value MyUnionFieldPatch) *MyUnionPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *MyUnionPatch) SetEnsure(value MyUnion) *MyUnionPatch {
+func (x *MyUnionPatch) SetPatchPrior(value *MyUnionFieldPatch) *MyUnionPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *MyUnionPatch) SetEnsureNonCompat(value MyUnion) *MyUnionPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *MyUnionPatch) SetPatch(value MyUnionFieldPatch) *MyUnionPatch {
+func (x *MyUnionPatch) SetEnsure(value *MyUnion) *MyUnionPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *MyUnionPatch) SetPatchNonCompat(value MyUnionFieldPatch) *MyUnionPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *MyUnionPatch) SetPatch(value *MyUnionFieldPatch) *MyUnionPatch {
+    x.Patch = value
     return x
 }
 
@@ -6428,7 +6793,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -6438,7 +6803,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -6449,7 +6814,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -6460,7 +6825,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -6471,7 +6836,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -6621,9 +6986,9 @@ var _ thrift.Struct = &MyUnionFieldPatch{}
 
 func NewMyUnionFieldPatch() *MyUnionFieldPatch {
     return (&MyUnionFieldPatch{}).
-        SetOption1(*patch.NewStringPatch()).
-        SetOption2(*patch.NewI32Patch()).
-        SetOption3(*NewInnerUnionPatch())
+        SetOption1NonCompat(*patch.NewStringPatch()).
+        SetOption2NonCompat(*patch.NewI32Patch()).
+        SetOption3NonCompat(*NewInnerUnionPatch())
 }
 
 // Deprecated: Use NewMyUnionFieldPatch().GetOption1() instead.
@@ -6671,18 +7036,33 @@ func (x *MyUnionFieldPatch) GetOption3() *InnerUnionPatch {
     return x.Option3
 }
 
-func (x *MyUnionFieldPatch) SetOption1(value patch.StringPatch) *MyUnionFieldPatch {
+func (x *MyUnionFieldPatch) SetOption1NonCompat(value patch.StringPatch) *MyUnionFieldPatch {
     x.Option1 = &value
     return x
 }
 
-func (x *MyUnionFieldPatch) SetOption2(value patch.I32Patch) *MyUnionFieldPatch {
+func (x *MyUnionFieldPatch) SetOption1(value *patch.StringPatch) *MyUnionFieldPatch {
+    x.Option1 = value
+    return x
+}
+
+func (x *MyUnionFieldPatch) SetOption2NonCompat(value patch.I32Patch) *MyUnionFieldPatch {
     x.Option2 = &value
     return x
 }
 
-func (x *MyUnionFieldPatch) SetOption3(value InnerUnionPatch) *MyUnionFieldPatch {
+func (x *MyUnionFieldPatch) SetOption2(value *patch.I32Patch) *MyUnionFieldPatch {
+    x.Option2 = value
+    return x
+}
+
+func (x *MyUnionFieldPatch) SetOption3NonCompat(value InnerUnionPatch) *MyUnionFieldPatch {
     x.Option3 = &value
+    return x
+}
+
+func (x *MyUnionFieldPatch) SetOption3(value *InnerUnionPatch) *MyUnionFieldPatch {
+    x.Option3 = value
     return x
 }
 
@@ -6765,7 +7145,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption1(result)
+    x.SetOption1NonCompat(result)
     return nil
 }
 
@@ -6776,7 +7156,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption2(result)
+    x.SetOption2NonCompat(result)
     return nil
 }
 
@@ -6787,7 +7167,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption3(result)
+    x.SetOption3NonCompat(result)
     return nil
 }
 
@@ -6913,10 +7293,10 @@ var _ thrift.Struct = &MyStructPatch{}
 
 func NewMyStructPatch() *MyStructPatch {
     return (&MyStructPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewMyStructFieldPatch()).
-        SetEnsure(*NewMyStructEnsureStruct()).
-        SetPatch(*NewMyStructFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewMyStructFieldPatch()).
+        SetEnsureNonCompat(*NewMyStructEnsureStruct()).
+        SetPatchNonCompat(*NewMyStructFieldPatch())
 }
 
 // Deprecated: Use NewMyStructPatch().GetAssign() instead.
@@ -6987,8 +7367,18 @@ func (x *MyStructPatch) GetPatch() *MyStructFieldPatch {
     return x.Patch
 }
 
-func (x *MyStructPatch) SetAssign(value MyStruct) *MyStructPatch {
+func (x *MyStructPatch) SetAssignNonCompat(value MyStruct) *MyStructPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyStructPatch) SetAssign(value *MyStruct) *MyStructPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyStructPatch) SetClearNonCompat(value bool) *MyStructPatch {
+    x.Clear = value
     return x
 }
 
@@ -6997,18 +7387,33 @@ func (x *MyStructPatch) SetClear(value bool) *MyStructPatch {
     return x
 }
 
-func (x *MyStructPatch) SetPatchPrior(value MyStructFieldPatch) *MyStructPatch {
+func (x *MyStructPatch) SetPatchPriorNonCompat(value MyStructFieldPatch) *MyStructPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *MyStructPatch) SetEnsure(value MyStructEnsureStruct) *MyStructPatch {
+func (x *MyStructPatch) SetPatchPrior(value *MyStructFieldPatch) *MyStructPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *MyStructPatch) SetEnsureNonCompat(value MyStructEnsureStruct) *MyStructPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *MyStructPatch) SetPatch(value MyStructFieldPatch) *MyStructPatch {
+func (x *MyStructPatch) SetEnsure(value *MyStructEnsureStruct) *MyStructPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *MyStructPatch) SetPatchNonCompat(value MyStructFieldPatch) *MyStructPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *MyStructPatch) SetPatch(value *MyStructFieldPatch) *MyStructPatch {
+    x.Patch = value
     return x
 }
 
@@ -7131,7 +7536,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -7141,7 +7546,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -7152,7 +7557,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -7163,7 +7568,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -7174,7 +7579,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -7323,7 +7728,7 @@ var _ thrift.Struct = &MyStructField10Patch{}
 
 func NewMyStructField10Patch() *MyStructField10Patch {
     return (&MyStructField10Patch{}).
-        SetClear(false)
+        SetClearNonCompat(false)
 }
 
 // Deprecated: Use NewMyStructField10Patch().GetAssign() instead.
@@ -7349,8 +7754,18 @@ func (x *MyStructField10Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField10Patch) SetAssign(value MyEnum) *MyStructField10Patch {
+func (x *MyStructField10Patch) SetAssignNonCompat(value MyEnum) *MyStructField10Patch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyStructField10Patch) SetAssign(value *MyEnum) *MyStructField10Patch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyStructField10Patch) SetClearNonCompat(value bool) *MyStructField10Patch {
+    x.Clear = value
     return x
 }
 
@@ -7406,7 +7821,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -7416,7 +7831,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -7526,7 +7941,7 @@ var _ thrift.Struct = &MyStructField23Patch{}
 
 func NewMyStructField23Patch() *MyStructField23Patch {
     return (&MyStructField23Patch{}).
-        SetClear(false)
+        SetClearNonCompat(false)
 }
 
 // Deprecated: Use NewMyStructField23Patch().GetAssign() instead.
@@ -7552,8 +7967,18 @@ func (x *MyStructField23Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField23Patch) SetAssign(value MyEnum) *MyStructField23Patch {
+func (x *MyStructField23Patch) SetAssignNonCompat(value MyEnum) *MyStructField23Patch {
     x.Assign = &value
+    return x
+}
+
+func (x *MyStructField23Patch) SetAssign(value *MyEnum) *MyStructField23Patch {
+    x.Assign = value
+    return x
+}
+
+func (x *MyStructField23Patch) SetClearNonCompat(value bool) *MyStructField23Patch {
+    x.Clear = value
     return x
 }
 
@@ -7609,7 +8034,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -7619,7 +8044,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -7733,11 +8158,11 @@ var _ thrift.Struct = &MyStructField26Patch{}
 
 func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{}).
-        SetClear(false).
-        SetPatch(make(map[patch.ListPatchIndex]*patch.I16Patch)).
-        SetRemove(make([]int16, 0)).
-        SetPrepend(make([]int16, 0)).
-        SetAppend(make([]int16, 0))
+        SetClearNonCompat(false).
+        SetPatchNonCompat(make(map[patch.ListPatchIndex]*patch.I16Patch)).
+        SetRemoveNonCompat(make([]int16, 0)).
+        SetPrependNonCompat(make([]int16, 0)).
+        SetAppendNonCompat(make([]int16, 0))
 }
 
 func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
@@ -7808,8 +8233,18 @@ func (x *MyStructField26Patch) GetAppend() []int16 {
     return x.Append
 }
 
+func (x *MyStructField26Patch) SetAssignNonCompat(value []int16) *MyStructField26Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField26Patch) SetAssign(value []int16) *MyStructField26Patch {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField26Patch) SetClearNonCompat(value bool) *MyStructField26Patch {
+    x.Clear = value
     return x
 }
 
@@ -7818,8 +8253,18 @@ func (x *MyStructField26Patch) SetClear(value bool) *MyStructField26Patch {
     return x
 }
 
+func (x *MyStructField26Patch) SetPatchNonCompat(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26Patch {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField26Patch) SetPatch(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26Patch {
     x.Patch = value
+    return x
+}
+
+func (x *MyStructField26Patch) SetRemoveNonCompat(value []int16) *MyStructField26Patch {
+    x.Remove = value
     return x
 }
 
@@ -7828,8 +8273,18 @@ func (x *MyStructField26Patch) SetRemove(value []int16) *MyStructField26Patch {
     return x
 }
 
+func (x *MyStructField26Patch) SetPrependNonCompat(value []int16) *MyStructField26Patch {
+    x.Prepend = value
+    return x
+}
+
 func (x *MyStructField26Patch) SetPrepend(value []int16) *MyStructField26Patch {
     x.Prepend = value
+    return x
+}
+
+func (x *MyStructField26Patch) SetAppendNonCompat(value []int16) *MyStructField26Patch {
+    x.Append = value
     return x
 }
 
@@ -8061,7 +8516,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -8071,7 +8526,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -8110,7 +8565,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -8138,7 +8593,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -8166,7 +8621,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrepend(result)
+    x.SetPrependNonCompat(result)
     return nil
 }
 
@@ -8194,7 +8649,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppend(result)
+    x.SetAppendNonCompat(result)
     return nil
 }
 
@@ -8358,9 +8813,9 @@ var _ thrift.Struct = &MyStructField27Patch{}
 
 func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{}).
-        SetClear(false).
-        SetRemove(make([]string, 0)).
-        SetAdd(make([]string, 0))
+        SetClearNonCompat(false).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetAddNonCompat(make([]string, 0))
 }
 
 func (x *MyStructField27Patch) GetAssignNonCompat() []string {
@@ -8407,8 +8862,18 @@ func (x *MyStructField27Patch) GetAdd() []string {
     return x.Add
 }
 
+func (x *MyStructField27Patch) SetAssignNonCompat(value []string) *MyStructField27Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField27Patch) SetAssign(value []string) *MyStructField27Patch {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField27Patch) SetClearNonCompat(value bool) *MyStructField27Patch {
+    x.Clear = value
     return x
 }
 
@@ -8417,8 +8882,18 @@ func (x *MyStructField27Patch) SetClear(value bool) *MyStructField27Patch {
     return x
 }
 
+func (x *MyStructField27Patch) SetRemoveNonCompat(value []string) *MyStructField27Patch {
+    x.Remove = value
+    return x
+}
+
 func (x *MyStructField27Patch) SetRemove(value []string) *MyStructField27Patch {
     x.Remove = value
+    return x
+}
+
+func (x *MyStructField27Patch) SetAddNonCompat(value []string) *MyStructField27Patch {
+    x.Add = value
     return x
 }
 
@@ -8572,7 +9047,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -8582,7 +9057,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -8610,7 +9085,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -8638,7 +9113,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -8779,12 +9254,12 @@ var _ thrift.Struct = &MyStructField28Patch{}
 
 func NewMyStructField28Patch() *MyStructField28Patch {
     return (&MyStructField28Patch{}).
-        SetClear(false).
-        SetPatchPrior(make(map[string]*patch.StringPatch)).
-        SetAdd(make(map[string]string)).
-        SetPatch(make(map[string]*patch.StringPatch)).
-        SetRemove(make([]string, 0)).
-        SetPut(make(map[string]string))
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(make(map[string]*patch.StringPatch)).
+        SetAddNonCompat(make(map[string]string)).
+        SetPatchNonCompat(make(map[string]*patch.StringPatch)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]string))
 }
 
 func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
@@ -8867,8 +9342,18 @@ func (x *MyStructField28Patch) GetPut() map[string]string {
     return x.Put
 }
 
+func (x *MyStructField28Patch) SetAssignNonCompat(value map[string]string) *MyStructField28Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField28Patch) SetAssign(value map[string]string) *MyStructField28Patch {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField28Patch) SetClearNonCompat(value bool) *MyStructField28Patch {
+    x.Clear = value
     return x
 }
 
@@ -8877,8 +9362,18 @@ func (x *MyStructField28Patch) SetClear(value bool) *MyStructField28Patch {
     return x
 }
 
+func (x *MyStructField28Patch) SetPatchPriorNonCompat(value map[string]*patch.StringPatch) *MyStructField28Patch {
+    x.PatchPrior = value
+    return x
+}
+
 func (x *MyStructField28Patch) SetPatchPrior(value map[string]*patch.StringPatch) *MyStructField28Patch {
     x.PatchPrior = value
+    return x
+}
+
+func (x *MyStructField28Patch) SetAddNonCompat(value map[string]string) *MyStructField28Patch {
+    x.Add = value
     return x
 }
 
@@ -8887,13 +9382,28 @@ func (x *MyStructField28Patch) SetAdd(value map[string]string) *MyStructField28P
     return x
 }
 
+func (x *MyStructField28Patch) SetPatchNonCompat(value map[string]*patch.StringPatch) *MyStructField28Patch {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField28Patch) SetPatch(value map[string]*patch.StringPatch) *MyStructField28Patch {
     x.Patch = value
     return x
 }
 
+func (x *MyStructField28Patch) SetRemoveNonCompat(value []string) *MyStructField28Patch {
+    x.Remove = value
+    return x
+}
+
 func (x *MyStructField28Patch) SetRemove(value []string) *MyStructField28Patch {
     x.Remove = value
+    return x
+}
+
+func (x *MyStructField28Patch) SetPutNonCompat(value map[string]string) *MyStructField28Patch {
+    x.Put = value
     return x
 }
 
@@ -9197,7 +9707,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -9207,7 +9717,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -9246,7 +9756,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -9284,7 +9794,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -9323,7 +9833,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -9351,7 +9861,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -9389,7 +9899,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPut(result)
+    x.SetPutNonCompat(result)
     return nil
 }
 
@@ -9568,11 +10078,11 @@ var _ thrift.Struct = &MyStructField29Patch{}
 
 func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{}).
-        SetClear(false).
-        SetPatch(make(map[patch.ListPatchIndex]*MyStructField29Patch1)).
-        SetRemove(make([]map[string]int32, 0)).
-        SetPrepend(make([]map[string]int32, 0)).
-        SetAppend(make([]map[string]int32, 0))
+        SetClearNonCompat(false).
+        SetPatchNonCompat(make(map[patch.ListPatchIndex]*MyStructField29Patch1)).
+        SetRemoveNonCompat(make([]map[string]int32, 0)).
+        SetPrependNonCompat(make([]map[string]int32, 0)).
+        SetAppendNonCompat(make([]map[string]int32, 0))
 }
 
 func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
@@ -9643,8 +10153,18 @@ func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
     return x.Append
 }
 
+func (x *MyStructField29Patch) SetAssignNonCompat(value []map[string]int32) *MyStructField29Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField29Patch) SetAssign(value []map[string]int32) *MyStructField29Patch {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField29Patch) SetClearNonCompat(value bool) *MyStructField29Patch {
+    x.Clear = value
     return x
 }
 
@@ -9653,8 +10173,18 @@ func (x *MyStructField29Patch) SetClear(value bool) *MyStructField29Patch {
     return x
 }
 
+func (x *MyStructField29Patch) SetPatchNonCompat(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField29Patch) SetPatch(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
     x.Patch = value
+    return x
+}
+
+func (x *MyStructField29Patch) SetRemoveNonCompat(value []map[string]int32) *MyStructField29Patch {
+    x.Remove = value
     return x
 }
 
@@ -9663,8 +10193,18 @@ func (x *MyStructField29Patch) SetRemove(value []map[string]int32) *MyStructFiel
     return x
 }
 
+func (x *MyStructField29Patch) SetPrependNonCompat(value []map[string]int32) *MyStructField29Patch {
+    x.Prepend = value
+    return x
+}
+
 func (x *MyStructField29Patch) SetPrepend(value []map[string]int32) *MyStructField29Patch {
     x.Prepend = value
+    return x
+}
+
+func (x *MyStructField29Patch) SetAppendNonCompat(value []map[string]int32) *MyStructField29Patch {
+    x.Append = value
     return x
 }
 
@@ -9996,7 +10536,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -10006,7 +10546,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -10045,7 +10585,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -10101,7 +10641,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -10157,7 +10697,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrepend(result)
+    x.SetPrependNonCompat(result)
     return nil
 }
 
@@ -10213,7 +10753,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppend(result)
+    x.SetAppendNonCompat(result)
     return nil
 }
 
@@ -10380,12 +10920,12 @@ var _ thrift.Struct = &MyStructField29Patch1{}
 
 func NewMyStructField29Patch1() *MyStructField29Patch1 {
     return (&MyStructField29Patch1{}).
-        SetClear(false).
-        SetPatchPrior(make(map[string]*patch.I32Patch)).
-        SetAdd(make(map[string]int32)).
-        SetPatch(make(map[string]*patch.I32Patch)).
-        SetRemove(make([]string, 0)).
-        SetPut(make(map[string]int32))
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(make(map[string]*patch.I32Patch)).
+        SetAddNonCompat(make(map[string]int32)).
+        SetPatchNonCompat(make(map[string]*patch.I32Patch)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]int32))
 }
 
 func (x *MyStructField29Patch1) GetAssignNonCompat() map[string]int32 {
@@ -10468,8 +11008,18 @@ func (x *MyStructField29Patch1) GetPut() map[string]int32 {
     return x.Put
 }
 
+func (x *MyStructField29Patch1) SetAssignNonCompat(value map[string]int32) *MyStructField29Patch1 {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField29Patch1) SetAssign(value map[string]int32) *MyStructField29Patch1 {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField29Patch1) SetClearNonCompat(value bool) *MyStructField29Patch1 {
+    x.Clear = value
     return x
 }
 
@@ -10478,8 +11028,18 @@ func (x *MyStructField29Patch1) SetClear(value bool) *MyStructField29Patch1 {
     return x
 }
 
+func (x *MyStructField29Patch1) SetPatchPriorNonCompat(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
+    x.PatchPrior = value
+    return x
+}
+
 func (x *MyStructField29Patch1) SetPatchPrior(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
     x.PatchPrior = value
+    return x
+}
+
+func (x *MyStructField29Patch1) SetAddNonCompat(value map[string]int32) *MyStructField29Patch1 {
+    x.Add = value
     return x
 }
 
@@ -10488,13 +11048,28 @@ func (x *MyStructField29Patch1) SetAdd(value map[string]int32) *MyStructField29P
     return x
 }
 
+func (x *MyStructField29Patch1) SetPatchNonCompat(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField29Patch1) SetPatch(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
     x.Patch = value
     return x
 }
 
+func (x *MyStructField29Patch1) SetRemoveNonCompat(value []string) *MyStructField29Patch1 {
+    x.Remove = value
+    return x
+}
+
 func (x *MyStructField29Patch1) SetRemove(value []string) *MyStructField29Patch1 {
     x.Remove = value
+    return x
+}
+
+func (x *MyStructField29Patch1) SetPutNonCompat(value map[string]int32) *MyStructField29Patch1 {
+    x.Put = value
     return x
 }
 
@@ -10798,7 +11373,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -10808,7 +11383,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -10847,7 +11422,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -10885,7 +11460,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -10924,7 +11499,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -10952,7 +11527,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -10990,7 +11565,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPut(result)
+    x.SetPutNonCompat(result)
     return nil
 }
 
@@ -11170,12 +11745,12 @@ var _ thrift.Struct = &MyStructField30Patch{}
 
 func NewMyStructField30Patch() *MyStructField30Patch {
     return (&MyStructField30Patch{}).
-        SetClear(false).
-        SetPatchPrior(make(map[string]*MyStructField30Patch1)).
-        SetAdd(make(map[string]map[string]int32)).
-        SetPatch(make(map[string]*MyStructField30Patch1)).
-        SetRemove(make([]string, 0)).
-        SetPut(make(map[string]map[string]int32))
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(make(map[string]*MyStructField30Patch1)).
+        SetAddNonCompat(make(map[string]map[string]int32)).
+        SetPatchNonCompat(make(map[string]*MyStructField30Patch1)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]map[string]int32))
 }
 
 func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 {
@@ -11258,8 +11833,18 @@ func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
     return x.Put
 }
 
+func (x *MyStructField30Patch) SetAssignNonCompat(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField30Patch) SetAssign(value map[string]map[string]int32) *MyStructField30Patch {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField30Patch) SetClearNonCompat(value bool) *MyStructField30Patch {
+    x.Clear = value
     return x
 }
 
@@ -11268,8 +11853,18 @@ func (x *MyStructField30Patch) SetClear(value bool) *MyStructField30Patch {
     return x
 }
 
+func (x *MyStructField30Patch) SetPatchPriorNonCompat(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
+    x.PatchPrior = value
+    return x
+}
+
 func (x *MyStructField30Patch) SetPatchPrior(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
     x.PatchPrior = value
+    return x
+}
+
+func (x *MyStructField30Patch) SetAddNonCompat(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Add = value
     return x
 }
 
@@ -11278,13 +11873,28 @@ func (x *MyStructField30Patch) SetAdd(value map[string]map[string]int32) *MyStru
     return x
 }
 
+func (x *MyStructField30Patch) SetPatchNonCompat(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField30Patch) SetPatch(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
     x.Patch = value
     return x
 }
 
+func (x *MyStructField30Patch) SetRemoveNonCompat(value []string) *MyStructField30Patch {
+    x.Remove = value
+    return x
+}
+
 func (x *MyStructField30Patch) SetRemove(value []string) *MyStructField30Patch {
     x.Remove = value
+    return x
+}
+
+func (x *MyStructField30Patch) SetPutNonCompat(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Put = value
     return x
 }
 
@@ -11670,7 +12280,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -11680,7 +12290,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -11719,7 +12329,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -11785,7 +12395,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -11824,7 +12434,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -11852,7 +12462,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -11918,7 +12528,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPut(result)
+    x.SetPutNonCompat(result)
     return nil
 }
 
@@ -12098,12 +12708,12 @@ var _ thrift.Struct = &MyStructField30Patch1{}
 
 func NewMyStructField30Patch1() *MyStructField30Patch1 {
     return (&MyStructField30Patch1{}).
-        SetClear(false).
-        SetPatchPrior(make(map[string]*patch.I32Patch)).
-        SetAdd(make(map[string]int32)).
-        SetPatch(make(map[string]*patch.I32Patch)).
-        SetRemove(make([]string, 0)).
-        SetPut(make(map[string]int32))
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(make(map[string]*patch.I32Patch)).
+        SetAddNonCompat(make(map[string]int32)).
+        SetPatchNonCompat(make(map[string]*patch.I32Patch)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]int32))
 }
 
 func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
@@ -12186,8 +12796,18 @@ func (x *MyStructField30Patch1) GetPut() map[string]int32 {
     return x.Put
 }
 
+func (x *MyStructField30Patch1) SetAssignNonCompat(value map[string]int32) *MyStructField30Patch1 {
+    x.Assign = value
+    return x
+}
+
 func (x *MyStructField30Patch1) SetAssign(value map[string]int32) *MyStructField30Patch1 {
     x.Assign = value
+    return x
+}
+
+func (x *MyStructField30Patch1) SetClearNonCompat(value bool) *MyStructField30Patch1 {
+    x.Clear = value
     return x
 }
 
@@ -12196,8 +12816,18 @@ func (x *MyStructField30Patch1) SetClear(value bool) *MyStructField30Patch1 {
     return x
 }
 
+func (x *MyStructField30Patch1) SetPatchPriorNonCompat(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
+    x.PatchPrior = value
+    return x
+}
+
 func (x *MyStructField30Patch1) SetPatchPrior(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
     x.PatchPrior = value
+    return x
+}
+
+func (x *MyStructField30Patch1) SetAddNonCompat(value map[string]int32) *MyStructField30Patch1 {
+    x.Add = value
     return x
 }
 
@@ -12206,13 +12836,28 @@ func (x *MyStructField30Patch1) SetAdd(value map[string]int32) *MyStructField30P
     return x
 }
 
+func (x *MyStructField30Patch1) SetPatchNonCompat(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
+    x.Patch = value
+    return x
+}
+
 func (x *MyStructField30Patch1) SetPatch(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
     x.Patch = value
     return x
 }
 
+func (x *MyStructField30Patch1) SetRemoveNonCompat(value []string) *MyStructField30Patch1 {
+    x.Remove = value
+    return x
+}
+
 func (x *MyStructField30Patch1) SetRemove(value []string) *MyStructField30Patch1 {
     x.Remove = value
+    return x
+}
+
+func (x *MyStructField30Patch1) SetPutNonCompat(value map[string]int32) *MyStructField30Patch1 {
+    x.Put = value
     return x
 }
 
@@ -12516,7 +13161,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -12526,7 +13171,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -12565,7 +13210,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -12603,7 +13248,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAdd(result)
+    x.SetAddNonCompat(result)
     return nil
 }
 
@@ -12642,7 +13287,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -12670,7 +13315,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemove(result)
+    x.SetRemoveNonCompat(result)
     return nil
 }
 
@@ -12708,7 +13353,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPut(result)
+    x.SetPutNonCompat(result)
     return nil
 }
 
@@ -12914,39 +13559,39 @@ var _ thrift.Struct = &MyStructFieldPatch{}
 
 func NewMyStructFieldPatch() *MyStructFieldPatch {
     return (&MyStructFieldPatch{}).
-        SetStructWithCustomDefault(*NewMyDataWithCustomDefaultPatch()).
-        SetI32WithCustomDefault(*patch.NewI32Patch()).
-        SetMapMap(*NewMyStructField30Patch()).
-        SetListMap(*NewMyStructField29Patch()).
-        SetOptMapVal(*NewMyStructField28Patch()).
-        SetOptSetVal(*NewMyStructField27Patch()).
-        SetOptListVal(*NewMyStructField26Patch()).
-        SetOptLateStructVal(*NewLateDefStructPatch()).
-        SetOptStructVal(*NewMyDataPatch()).
-        SetOptEnumVal(*NewMyStructField23Patch()).
-        SetOptBinaryVal(*patch.NewBinaryPatch()).
-        SetOptStringVal(*patch.NewStringPatch()).
-        SetOptDoubleVal(*patch.NewDoublePatch()).
-        SetOptFloatVal(*patch.NewFloatPatch()).
-        SetOptI64Val(*patch.NewI64Patch()).
-        SetOptI32Val(*patch.NewI32Patch()).
-        SetOptI16Val(*patch.NewI16Patch()).
-        SetOptByteVal(*patch.NewBytePatch()).
-        SetOptBoolVal(*patch.NewBoolPatch()).
-        SetLateStructVal(*NewLateDefStructPatch()).
-        SetUnionVal(*NewMyUnionPatch()).
-        SetStructVal(*NewMyDataPatch()).
-        SetEnumVal(*NewMyStructField10Patch()).
-        SetBinaryVal(*patch.NewBinaryPatch()).
-        SetStringVal(*patch.NewStringPatch()).
-        SetDoubleVal(*patch.NewDoublePatch()).
-        SetFloatVal(*patch.NewFloatPatch()).
-        SetI64Val(*patch.NewI64Patch()).
-        SetI32Val(*patch.NewI32Patch()).
-        SetI16Val(*patch.NewI16Patch()).
-        SetByteVal(*patch.NewBytePatch()).
-        SetBoolVal(*patch.NewBoolPatch()).
-        SetStructWithFieldCustomDefault(*NewMyDataPatch())
+        SetStructWithCustomDefaultNonCompat(*NewMyDataWithCustomDefaultPatch()).
+        SetI32WithCustomDefaultNonCompat(*patch.NewI32Patch()).
+        SetMapMapNonCompat(*NewMyStructField30Patch()).
+        SetListMapNonCompat(*NewMyStructField29Patch()).
+        SetOptMapValNonCompat(*NewMyStructField28Patch()).
+        SetOptSetValNonCompat(*NewMyStructField27Patch()).
+        SetOptListValNonCompat(*NewMyStructField26Patch()).
+        SetOptLateStructValNonCompat(*NewLateDefStructPatch()).
+        SetOptStructValNonCompat(*NewMyDataPatch()).
+        SetOptEnumValNonCompat(*NewMyStructField23Patch()).
+        SetOptBinaryValNonCompat(*patch.NewBinaryPatch()).
+        SetOptStringValNonCompat(*patch.NewStringPatch()).
+        SetOptDoubleValNonCompat(*patch.NewDoublePatch()).
+        SetOptFloatValNonCompat(*patch.NewFloatPatch()).
+        SetOptI64ValNonCompat(*patch.NewI64Patch()).
+        SetOptI32ValNonCompat(*patch.NewI32Patch()).
+        SetOptI16ValNonCompat(*patch.NewI16Patch()).
+        SetOptByteValNonCompat(*patch.NewBytePatch()).
+        SetOptBoolValNonCompat(*patch.NewBoolPatch()).
+        SetLateStructValNonCompat(*NewLateDefStructPatch()).
+        SetUnionValNonCompat(*NewMyUnionPatch()).
+        SetStructValNonCompat(*NewMyDataPatch()).
+        SetEnumValNonCompat(*NewMyStructField10Patch()).
+        SetBinaryValNonCompat(*patch.NewBinaryPatch()).
+        SetStringValNonCompat(*patch.NewStringPatch()).
+        SetDoubleValNonCompat(*patch.NewDoublePatch()).
+        SetFloatValNonCompat(*patch.NewFloatPatch()).
+        SetI64ValNonCompat(*patch.NewI64Patch()).
+        SetI32ValNonCompat(*patch.NewI32Patch()).
+        SetI16ValNonCompat(*patch.NewI16Patch()).
+        SetByteValNonCompat(*patch.NewBytePatch()).
+        SetBoolValNonCompat(*patch.NewBoolPatch()).
+        SetStructWithFieldCustomDefaultNonCompat(*NewMyDataPatch())
 }
 
 // Deprecated: Use NewMyStructFieldPatch().GetStructWithCustomDefault() instead.
@@ -13444,168 +14089,333 @@ func (x *MyStructFieldPatch) GetStructWithFieldCustomDefault() *MyDataPatch {
     return x.StructWithFieldCustomDefault
 }
 
-func (x *MyStructFieldPatch) SetStructWithCustomDefault(value MyDataWithCustomDefaultPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetStructWithCustomDefaultNonCompat(value MyDataWithCustomDefaultPatch) *MyStructFieldPatch {
     x.StructWithCustomDefault = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI32WithCustomDefault(value patch.I32Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetStructWithCustomDefault(value *MyDataWithCustomDefaultPatch) *MyStructFieldPatch {
+    x.StructWithCustomDefault = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetI32WithCustomDefaultNonCompat(value patch.I32Patch) *MyStructFieldPatch {
     x.I32WithCustomDefault = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetMapMap(value MyStructField30Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetI32WithCustomDefault(value *patch.I32Patch) *MyStructFieldPatch {
+    x.I32WithCustomDefault = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetMapMapNonCompat(value MyStructField30Patch) *MyStructFieldPatch {
     x.MapMap = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetListMap(value MyStructField29Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetMapMap(value *MyStructField30Patch) *MyStructFieldPatch {
+    x.MapMap = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetListMapNonCompat(value MyStructField29Patch) *MyStructFieldPatch {
     x.ListMap = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptMapVal(value MyStructField28Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetListMap(value *MyStructField29Patch) *MyStructFieldPatch {
+    x.ListMap = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptMapValNonCompat(value MyStructField28Patch) *MyStructFieldPatch {
     x.OptMapVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptSetVal(value MyStructField27Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptMapVal(value *MyStructField28Patch) *MyStructFieldPatch {
+    x.OptMapVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptSetValNonCompat(value MyStructField27Patch) *MyStructFieldPatch {
     x.OptSetVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptListVal(value MyStructField26Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptSetVal(value *MyStructField27Patch) *MyStructFieldPatch {
+    x.OptSetVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptListValNonCompat(value MyStructField26Patch) *MyStructFieldPatch {
     x.OptListVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptLateStructVal(value LateDefStructPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptListVal(value *MyStructField26Patch) *MyStructFieldPatch {
+    x.OptListVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptLateStructValNonCompat(value LateDefStructPatch) *MyStructFieldPatch {
     x.OptLateStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptStructVal(value MyDataPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptLateStructVal(value *LateDefStructPatch) *MyStructFieldPatch {
+    x.OptLateStructVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptStructValNonCompat(value MyDataPatch) *MyStructFieldPatch {
     x.OptStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptEnumVal(value MyStructField23Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptStructVal(value *MyDataPatch) *MyStructFieldPatch {
+    x.OptStructVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptEnumValNonCompat(value MyStructField23Patch) *MyStructFieldPatch {
     x.OptEnumVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptBinaryVal(value patch.BinaryPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptEnumVal(value *MyStructField23Patch) *MyStructFieldPatch {
+    x.OptEnumVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptBinaryValNonCompat(value patch.BinaryPatch) *MyStructFieldPatch {
     x.OptBinaryVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptStringVal(value patch.StringPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptBinaryVal(value *patch.BinaryPatch) *MyStructFieldPatch {
+    x.OptBinaryVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptStringValNonCompat(value patch.StringPatch) *MyStructFieldPatch {
     x.OptStringVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptDoubleVal(value patch.DoublePatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptStringVal(value *patch.StringPatch) *MyStructFieldPatch {
+    x.OptStringVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptDoubleValNonCompat(value patch.DoublePatch) *MyStructFieldPatch {
     x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptFloatVal(value patch.FloatPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptDoubleVal(value *patch.DoublePatch) *MyStructFieldPatch {
+    x.OptDoubleVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptFloatValNonCompat(value patch.FloatPatch) *MyStructFieldPatch {
     x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI64Val(value patch.I64Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptFloatVal(value *patch.FloatPatch) *MyStructFieldPatch {
+    x.OptFloatVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptI64ValNonCompat(value patch.I64Patch) *MyStructFieldPatch {
     x.OptI64Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI32Val(value patch.I32Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptI64Val(value *patch.I64Patch) *MyStructFieldPatch {
+    x.OptI64Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptI32ValNonCompat(value patch.I32Patch) *MyStructFieldPatch {
     x.OptI32Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI16Val(value patch.I16Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptI32Val(value *patch.I32Patch) *MyStructFieldPatch {
+    x.OptI32Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptI16ValNonCompat(value patch.I16Patch) *MyStructFieldPatch {
     x.OptI16Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptByteVal(value patch.BytePatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptI16Val(value *patch.I16Patch) *MyStructFieldPatch {
+    x.OptI16Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptByteValNonCompat(value patch.BytePatch) *MyStructFieldPatch {
     x.OptByteVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptBoolVal(value patch.BoolPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptByteVal(value *patch.BytePatch) *MyStructFieldPatch {
+    x.OptByteVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetOptBoolValNonCompat(value patch.BoolPatch) *MyStructFieldPatch {
     x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetLateStructVal(value LateDefStructPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetOptBoolVal(value *patch.BoolPatch) *MyStructFieldPatch {
+    x.OptBoolVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetLateStructValNonCompat(value LateDefStructPatch) *MyStructFieldPatch {
     x.LateStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetUnionVal(value MyUnionPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetLateStructVal(value *LateDefStructPatch) *MyStructFieldPatch {
+    x.LateStructVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetUnionValNonCompat(value MyUnionPatch) *MyStructFieldPatch {
     x.UnionVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetStructVal(value MyDataPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetUnionVal(value *MyUnionPatch) *MyStructFieldPatch {
+    x.UnionVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetStructValNonCompat(value MyDataPatch) *MyStructFieldPatch {
     x.StructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetEnumVal(value MyStructField10Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetStructVal(value *MyDataPatch) *MyStructFieldPatch {
+    x.StructVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetEnumValNonCompat(value MyStructField10Patch) *MyStructFieldPatch {
     x.EnumVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetBinaryVal(value patch.BinaryPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetEnumVal(value *MyStructField10Patch) *MyStructFieldPatch {
+    x.EnumVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetBinaryValNonCompat(value patch.BinaryPatch) *MyStructFieldPatch {
     x.BinaryVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetStringVal(value patch.StringPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetBinaryVal(value *patch.BinaryPatch) *MyStructFieldPatch {
+    x.BinaryVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetStringValNonCompat(value patch.StringPatch) *MyStructFieldPatch {
     x.StringVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetDoubleVal(value patch.DoublePatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetStringVal(value *patch.StringPatch) *MyStructFieldPatch {
+    x.StringVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetDoubleValNonCompat(value patch.DoublePatch) *MyStructFieldPatch {
     x.DoubleVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetFloatVal(value patch.FloatPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetDoubleVal(value *patch.DoublePatch) *MyStructFieldPatch {
+    x.DoubleVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetFloatValNonCompat(value patch.FloatPatch) *MyStructFieldPatch {
     x.FloatVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI64Val(value patch.I64Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetFloatVal(value *patch.FloatPatch) *MyStructFieldPatch {
+    x.FloatVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetI64ValNonCompat(value patch.I64Patch) *MyStructFieldPatch {
     x.I64Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI32Val(value patch.I32Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetI64Val(value *patch.I64Patch) *MyStructFieldPatch {
+    x.I64Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetI32ValNonCompat(value patch.I32Patch) *MyStructFieldPatch {
     x.I32Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI16Val(value patch.I16Patch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetI32Val(value *patch.I32Patch) *MyStructFieldPatch {
+    x.I32Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetI16ValNonCompat(value patch.I16Patch) *MyStructFieldPatch {
     x.I16Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetByteVal(value patch.BytePatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetI16Val(value *patch.I16Patch) *MyStructFieldPatch {
+    x.I16Val = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetByteValNonCompat(value patch.BytePatch) *MyStructFieldPatch {
     x.ByteVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetBoolVal(value patch.BoolPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetByteVal(value *patch.BytePatch) *MyStructFieldPatch {
+    x.ByteVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetBoolValNonCompat(value patch.BoolPatch) *MyStructFieldPatch {
     x.BoolVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetStructWithFieldCustomDefault(value MyDataPatch) *MyStructFieldPatch {
+func (x *MyStructFieldPatch) SetBoolVal(value *patch.BoolPatch) *MyStructFieldPatch {
+    x.BoolVal = value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetStructWithFieldCustomDefaultNonCompat(value MyDataPatch) *MyStructFieldPatch {
     x.StructWithFieldCustomDefault = &value
+    return x
+}
+
+func (x *MyStructFieldPatch) SetStructWithFieldCustomDefault(value *MyDataPatch) *MyStructFieldPatch {
+    x.StructWithFieldCustomDefault = value
     return x
 }
 
@@ -14408,7 +15218,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefault(result)
+    x.SetStructWithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -14419,7 +15229,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefault(result)
+    x.SetI32WithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -14430,7 +15240,7 @@ if err != nil {
     return err
 }
 
-    x.SetMapMap(result)
+    x.SetMapMapNonCompat(result)
     return nil
 }
 
@@ -14441,7 +15251,7 @@ if err != nil {
     return err
 }
 
-    x.SetListMap(result)
+    x.SetListMapNonCompat(result)
     return nil
 }
 
@@ -14452,7 +15262,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptMapVal(result)
+    x.SetOptMapValNonCompat(result)
     return nil
 }
 
@@ -14463,7 +15273,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptSetVal(result)
+    x.SetOptSetValNonCompat(result)
     return nil
 }
 
@@ -14474,7 +15284,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptListVal(result)
+    x.SetOptListValNonCompat(result)
     return nil
 }
 
@@ -14485,7 +15295,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructVal(result)
+    x.SetOptLateStructValNonCompat(result)
     return nil
 }
 
@@ -14496,7 +15306,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructVal(result)
+    x.SetOptStructValNonCompat(result)
     return nil
 }
 
@@ -14507,7 +15317,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptEnumVal(result)
+    x.SetOptEnumValNonCompat(result)
     return nil
 }
 
@@ -14518,7 +15328,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryVal(result)
+    x.SetOptBinaryValNonCompat(result)
     return nil
 }
 
@@ -14529,7 +15339,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringVal(result)
+    x.SetOptStringValNonCompat(result)
     return nil
 }
 
@@ -14540,7 +15350,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleVal(result)
+    x.SetOptDoubleValNonCompat(result)
     return nil
 }
 
@@ -14551,7 +15361,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatVal(result)
+    x.SetOptFloatValNonCompat(result)
     return nil
 }
 
@@ -14562,7 +15372,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64Val(result)
+    x.SetOptI64ValNonCompat(result)
     return nil
 }
 
@@ -14573,7 +15383,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32Val(result)
+    x.SetOptI32ValNonCompat(result)
     return nil
 }
 
@@ -14584,7 +15394,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16Val(result)
+    x.SetOptI16ValNonCompat(result)
     return nil
 }
 
@@ -14595,7 +15405,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteVal(result)
+    x.SetOptByteValNonCompat(result)
     return nil
 }
 
@@ -14606,7 +15416,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolVal(result)
+    x.SetOptBoolValNonCompat(result)
     return nil
 }
 
@@ -14617,7 +15427,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructVal(result)
+    x.SetLateStructValNonCompat(result)
     return nil
 }
 
@@ -14628,7 +15438,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionVal(result)
+    x.SetUnionValNonCompat(result)
     return nil
 }
 
@@ -14639,7 +15449,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructVal(result)
+    x.SetStructValNonCompat(result)
     return nil
 }
 
@@ -14650,7 +15460,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnumVal(result)
+    x.SetEnumValNonCompat(result)
     return nil
 }
 
@@ -14661,7 +15471,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryVal(result)
+    x.SetBinaryValNonCompat(result)
     return nil
 }
 
@@ -14672,7 +15482,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringVal(result)
+    x.SetStringValNonCompat(result)
     return nil
 }
 
@@ -14683,7 +15493,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleVal(result)
+    x.SetDoubleValNonCompat(result)
     return nil
 }
 
@@ -14694,7 +15504,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatVal(result)
+    x.SetFloatValNonCompat(result)
     return nil
 }
 
@@ -14705,7 +15515,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64Val(result)
+    x.SetI64ValNonCompat(result)
     return nil
 }
 
@@ -14716,7 +15526,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32Val(result)
+    x.SetI32ValNonCompat(result)
     return nil
 }
 
@@ -14727,7 +15537,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16Val(result)
+    x.SetI16ValNonCompat(result)
     return nil
 }
 
@@ -14738,7 +15548,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteVal(result)
+    x.SetByteValNonCompat(result)
     return nil
 }
 
@@ -14749,7 +15559,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolVal(result)
+    x.SetBoolValNonCompat(result)
     return nil
 }
 
@@ -14760,7 +15570,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefault(result)
+    x.SetStructWithFieldCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -15780,13 +16590,28 @@ func (x *MyStructEnsureStruct) GetStructWithFieldCustomDefault() *MyData {
     return x.StructWithFieldCustomDefault
 }
 
-func (x *MyStructEnsureStruct) SetStructWithCustomDefault(value MyDataWithCustomDefault) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetStructWithCustomDefaultNonCompat(value MyDataWithCustomDefault) *MyStructEnsureStruct {
     x.StructWithCustomDefault = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI32WithCustomDefault(value int32) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetStructWithCustomDefault(value *MyDataWithCustomDefault) *MyStructEnsureStruct {
+    x.StructWithCustomDefault = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetI32WithCustomDefaultNonCompat(value int32) *MyStructEnsureStruct {
     x.I32WithCustomDefault = &value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetI32WithCustomDefault(value *int32) *MyStructEnsureStruct {
+    x.I32WithCustomDefault = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetMapMapNonCompat(value map[string]map[string]int32) *MyStructEnsureStruct {
+    x.MapMap = value
     return x
 }
 
@@ -15795,8 +16620,18 @@ func (x *MyStructEnsureStruct) SetMapMap(value map[string]map[string]int32) *MyS
     return x
 }
 
+func (x *MyStructEnsureStruct) SetListMapNonCompat(value []map[string]int32) *MyStructEnsureStruct {
+    x.ListMap = value
+    return x
+}
+
 func (x *MyStructEnsureStruct) SetListMap(value []map[string]int32) *MyStructEnsureStruct {
     x.ListMap = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptMapValNonCompat(value map[string]string) *MyStructEnsureStruct {
+    x.OptMapVal = value
     return x
 }
 
@@ -15805,8 +16640,18 @@ func (x *MyStructEnsureStruct) SetOptMapVal(value map[string]string) *MyStructEn
     return x
 }
 
+func (x *MyStructEnsureStruct) SetOptSetValNonCompat(value []string) *MyStructEnsureStruct {
+    x.OptSetVal = value
+    return x
+}
+
 func (x *MyStructEnsureStruct) SetOptSetVal(value []string) *MyStructEnsureStruct {
     x.OptSetVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptListValNonCompat(value []int16) *MyStructEnsureStruct {
+    x.OptListVal = value
     return x
 }
 
@@ -15815,18 +16660,38 @@ func (x *MyStructEnsureStruct) SetOptListVal(value []int16) *MyStructEnsureStruc
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptLateStructVal(value LateDefStruct) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptLateStructValNonCompat(value LateDefStruct) *MyStructEnsureStruct {
     x.OptLateStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptStructVal(value MyData) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptLateStructVal(value *LateDefStruct) *MyStructEnsureStruct {
+    x.OptLateStructVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptStructValNonCompat(value MyData) *MyStructEnsureStruct {
     x.OptStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptEnumVal(value MyEnum) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptStructVal(value *MyData) *MyStructEnsureStruct {
+    x.OptStructVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptEnumValNonCompat(value MyEnum) *MyStructEnsureStruct {
     x.OptEnumVal = &value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptEnumVal(value *MyEnum) *MyStructEnsureStruct {
+    x.OptEnumVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptBinaryValNonCompat(value []byte) *MyStructEnsureStruct {
+    x.OptBinaryVal = value
     return x
 }
 
@@ -15835,63 +16700,128 @@ func (x *MyStructEnsureStruct) SetOptBinaryVal(value []byte) *MyStructEnsureStru
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptStringVal(value string) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptStringValNonCompat(value string) *MyStructEnsureStruct {
     x.OptStringVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptDoubleVal(value float64) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptStringVal(value *string) *MyStructEnsureStruct {
+    x.OptStringVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptDoubleValNonCompat(value float64) *MyStructEnsureStruct {
     x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptFloatVal(value float32) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptDoubleVal(value *float64) *MyStructEnsureStruct {
+    x.OptDoubleVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptFloatValNonCompat(value float32) *MyStructEnsureStruct {
     x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI64Val(value int64) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptFloatVal(value *float32) *MyStructEnsureStruct {
+    x.OptFloatVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptI64ValNonCompat(value int64) *MyStructEnsureStruct {
     x.OptI64Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI32Val(value int32) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptI64Val(value *int64) *MyStructEnsureStruct {
+    x.OptI64Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptI32ValNonCompat(value int32) *MyStructEnsureStruct {
     x.OptI32Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI16Val(value int16) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptI32Val(value *int32) *MyStructEnsureStruct {
+    x.OptI32Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptI16ValNonCompat(value int16) *MyStructEnsureStruct {
     x.OptI16Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptByteVal(value byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptI16Val(value *int16) *MyStructEnsureStruct {
+    x.OptI16Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptByteValNonCompat(value byte) *MyStructEnsureStruct {
     x.OptByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptBoolVal(value bool) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptByteVal(value *byte) *MyStructEnsureStruct {
+    x.OptByteVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetOptBoolValNonCompat(value bool) *MyStructEnsureStruct {
     x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetLateStructVal(value LateDefStruct) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetOptBoolVal(value *bool) *MyStructEnsureStruct {
+    x.OptBoolVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetLateStructValNonCompat(value LateDefStruct) *MyStructEnsureStruct {
     x.LateStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetUnionVal(value MyUnion) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetLateStructVal(value *LateDefStruct) *MyStructEnsureStruct {
+    x.LateStructVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetUnionValNonCompat(value MyUnion) *MyStructEnsureStruct {
     x.UnionVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetStructVal(value MyData) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetUnionVal(value *MyUnion) *MyStructEnsureStruct {
+    x.UnionVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetStructValNonCompat(value MyData) *MyStructEnsureStruct {
     x.StructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetEnumVal(value MyEnum) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetStructVal(value *MyData) *MyStructEnsureStruct {
+    x.StructVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetEnumValNonCompat(value MyEnum) *MyStructEnsureStruct {
     x.EnumVal = &value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetEnumVal(value *MyEnum) *MyStructEnsureStruct {
+    x.EnumVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetBinaryValNonCompat(value []byte) *MyStructEnsureStruct {
+    x.BinaryVal = value
     return x
 }
 
@@ -15900,48 +16830,93 @@ func (x *MyStructEnsureStruct) SetBinaryVal(value []byte) *MyStructEnsureStruct 
     return x
 }
 
-func (x *MyStructEnsureStruct) SetStringVal(value string) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetStringValNonCompat(value string) *MyStructEnsureStruct {
     x.StringVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetDoubleVal(value float64) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetStringVal(value *string) *MyStructEnsureStruct {
+    x.StringVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetDoubleValNonCompat(value float64) *MyStructEnsureStruct {
     x.DoubleVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetFloatVal(value float32) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetDoubleVal(value *float64) *MyStructEnsureStruct {
+    x.DoubleVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetFloatValNonCompat(value float32) *MyStructEnsureStruct {
     x.FloatVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI64Val(value int64) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetFloatVal(value *float32) *MyStructEnsureStruct {
+    x.FloatVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetI64ValNonCompat(value int64) *MyStructEnsureStruct {
     x.I64Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI32Val(value int32) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetI64Val(value *int64) *MyStructEnsureStruct {
+    x.I64Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetI32ValNonCompat(value int32) *MyStructEnsureStruct {
     x.I32Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI16Val(value int16) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetI32Val(value *int32) *MyStructEnsureStruct {
+    x.I32Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetI16ValNonCompat(value int16) *MyStructEnsureStruct {
     x.I16Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetByteVal(value byte) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetI16Val(value *int16) *MyStructEnsureStruct {
+    x.I16Val = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetByteValNonCompat(value byte) *MyStructEnsureStruct {
     x.ByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetBoolVal(value bool) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetByteVal(value *byte) *MyStructEnsureStruct {
+    x.ByteVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetBoolValNonCompat(value bool) *MyStructEnsureStruct {
     x.BoolVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetStructWithFieldCustomDefault(value MyData) *MyStructEnsureStruct {
+func (x *MyStructEnsureStruct) SetBoolVal(value *bool) *MyStructEnsureStruct {
+    x.BoolVal = value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetStructWithFieldCustomDefaultNonCompat(value MyData) *MyStructEnsureStruct {
     x.StructWithFieldCustomDefault = &value
+    return x
+}
+
+func (x *MyStructEnsureStruct) SetStructWithFieldCustomDefault(value *MyData) *MyStructEnsureStruct {
+    x.StructWithFieldCustomDefault = value
     return x
 }
 
@@ -16849,7 +17824,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefault(result)
+    x.SetStructWithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -16859,7 +17834,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefault(result)
+    x.SetI32WithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -16925,7 +17900,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapMap(result)
+    x.SetMapMapNonCompat(result)
     return nil
 }
 
@@ -16981,7 +17956,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListMap(result)
+    x.SetListMapNonCompat(result)
     return nil
 }
 
@@ -17019,7 +17994,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetOptMapVal(result)
+    x.SetOptMapValNonCompat(result)
     return nil
 }
 
@@ -17047,7 +18022,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetOptSetVal(result)
+    x.SetOptSetValNonCompat(result)
     return nil
 }
 
@@ -17075,7 +18050,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptListVal(result)
+    x.SetOptListValNonCompat(result)
     return nil
 }
 
@@ -17086,7 +18061,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructVal(result)
+    x.SetOptLateStructValNonCompat(result)
     return nil
 }
 
@@ -17097,7 +18072,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructVal(result)
+    x.SetOptStructValNonCompat(result)
     return nil
 }
 
@@ -17108,7 +18083,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetOptEnumVal(result)
+    x.SetOptEnumValNonCompat(result)
     return nil
 }
 
@@ -17118,7 +18093,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryVal(result)
+    x.SetOptBinaryValNonCompat(result)
     return nil
 }
 
@@ -17128,7 +18103,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringVal(result)
+    x.SetOptStringValNonCompat(result)
     return nil
 }
 
@@ -17138,7 +18113,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleVal(result)
+    x.SetOptDoubleValNonCompat(result)
     return nil
 }
 
@@ -17148,7 +18123,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatVal(result)
+    x.SetOptFloatValNonCompat(result)
     return nil
 }
 
@@ -17158,7 +18133,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64Val(result)
+    x.SetOptI64ValNonCompat(result)
     return nil
 }
 
@@ -17168,7 +18143,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32Val(result)
+    x.SetOptI32ValNonCompat(result)
     return nil
 }
 
@@ -17178,7 +18153,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16Val(result)
+    x.SetOptI16ValNonCompat(result)
     return nil
 }
 
@@ -17188,7 +18163,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteVal(result)
+    x.SetOptByteValNonCompat(result)
     return nil
 }
 
@@ -17198,7 +18173,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolVal(result)
+    x.SetOptBoolValNonCompat(result)
     return nil
 }
 
@@ -17209,7 +18184,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructVal(result)
+    x.SetLateStructValNonCompat(result)
     return nil
 }
 
@@ -17220,7 +18195,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionVal(result)
+    x.SetUnionValNonCompat(result)
     return nil
 }
 
@@ -17231,7 +18206,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructVal(result)
+    x.SetStructValNonCompat(result)
     return nil
 }
 
@@ -17242,7 +18217,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumVal(result)
+    x.SetEnumValNonCompat(result)
     return nil
 }
 
@@ -17252,7 +18227,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryVal(result)
+    x.SetBinaryValNonCompat(result)
     return nil
 }
 
@@ -17262,7 +18237,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringVal(result)
+    x.SetStringValNonCompat(result)
     return nil
 }
 
@@ -17272,7 +18247,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleVal(result)
+    x.SetDoubleValNonCompat(result)
     return nil
 }
 
@@ -17282,7 +18257,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatVal(result)
+    x.SetFloatValNonCompat(result)
     return nil
 }
 
@@ -17292,7 +18267,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64Val(result)
+    x.SetI64ValNonCompat(result)
     return nil
 }
 
@@ -17302,7 +18277,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32Val(result)
+    x.SetI32ValNonCompat(result)
     return nil
 }
 
@@ -17312,7 +18287,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16Val(result)
+    x.SetI16ValNonCompat(result)
     return nil
 }
 
@@ -17322,7 +18297,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteVal(result)
+    x.SetByteValNonCompat(result)
     return nil
 }
 
@@ -17332,7 +18307,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolVal(result)
+    x.SetBoolValNonCompat(result)
     return nil
 }
 
@@ -17343,7 +18318,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefault(result)
+    x.SetStructWithFieldCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -17859,10 +18834,10 @@ var _ thrift.Struct = &LateDefStructPatch{}
 
 func NewLateDefStructPatch() *LateDefStructPatch {
     return (&LateDefStructPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewLateDefStructFieldPatch()).
-        SetEnsure(*NewLateDefStructEnsureStruct()).
-        SetPatch(*NewLateDefStructFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewLateDefStructFieldPatch()).
+        SetEnsureNonCompat(*NewLateDefStructEnsureStruct()).
+        SetPatchNonCompat(*NewLateDefStructFieldPatch())
 }
 
 // Deprecated: Use NewLateDefStructPatch().GetAssign() instead.
@@ -17933,8 +18908,18 @@ func (x *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
     return x.Patch
 }
 
-func (x *LateDefStructPatch) SetAssign(value LateDefStruct) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetAssignNonCompat(value LateDefStruct) *LateDefStructPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *LateDefStructPatch) SetAssign(value *LateDefStruct) *LateDefStructPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *LateDefStructPatch) SetClearNonCompat(value bool) *LateDefStructPatch {
+    x.Clear = value
     return x
 }
 
@@ -17943,18 +18928,33 @@ func (x *LateDefStructPatch) SetClear(value bool) *LateDefStructPatch {
     return x
 }
 
-func (x *LateDefStructPatch) SetPatchPrior(value LateDefStructFieldPatch) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetPatchPriorNonCompat(value LateDefStructFieldPatch) *LateDefStructPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *LateDefStructPatch) SetEnsure(value LateDefStructEnsureStruct) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetPatchPrior(value *LateDefStructFieldPatch) *LateDefStructPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *LateDefStructPatch) SetEnsureNonCompat(value LateDefStructEnsureStruct) *LateDefStructPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *LateDefStructPatch) SetPatch(value LateDefStructFieldPatch) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetEnsure(value *LateDefStructEnsureStruct) *LateDefStructPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *LateDefStructPatch) SetPatchNonCompat(value LateDefStructFieldPatch) *LateDefStructPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *LateDefStructPatch) SetPatch(value *LateDefStructFieldPatch) *LateDefStructPatch {
+    x.Patch = value
     return x
 }
 
@@ -18077,7 +19077,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -18087,7 +19087,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -18098,7 +19098,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -18109,7 +19109,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -18120,7 +19120,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -18432,10 +19432,10 @@ var _ thrift.Struct = &RecursivePatch{}
 
 func NewRecursivePatch() *RecursivePatch {
     return (&RecursivePatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewRecursiveFieldPatch()).
-        SetEnsure(*NewRecursiveEnsureStruct()).
-        SetPatch(*NewRecursiveFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewRecursiveFieldPatch()).
+        SetEnsureNonCompat(*NewRecursiveEnsureStruct()).
+        SetPatchNonCompat(*NewRecursiveFieldPatch())
 }
 
 // Deprecated: Use NewRecursivePatch().GetAssign() instead.
@@ -18506,8 +19506,18 @@ func (x *RecursivePatch) GetPatch() *RecursiveFieldPatch {
     return x.Patch
 }
 
-func (x *RecursivePatch) SetAssign(value Recursive) *RecursivePatch {
+func (x *RecursivePatch) SetAssignNonCompat(value Recursive) *RecursivePatch {
     x.Assign = &value
+    return x
+}
+
+func (x *RecursivePatch) SetAssign(value *Recursive) *RecursivePatch {
+    x.Assign = value
+    return x
+}
+
+func (x *RecursivePatch) SetClearNonCompat(value bool) *RecursivePatch {
+    x.Clear = value
     return x
 }
 
@@ -18516,18 +19526,33 @@ func (x *RecursivePatch) SetClear(value bool) *RecursivePatch {
     return x
 }
 
-func (x *RecursivePatch) SetPatchPrior(value RecursiveFieldPatch) *RecursivePatch {
+func (x *RecursivePatch) SetPatchPriorNonCompat(value RecursiveFieldPatch) *RecursivePatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *RecursivePatch) SetEnsure(value RecursiveEnsureStruct) *RecursivePatch {
+func (x *RecursivePatch) SetPatchPrior(value *RecursiveFieldPatch) *RecursivePatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *RecursivePatch) SetEnsureNonCompat(value RecursiveEnsureStruct) *RecursivePatch {
     x.Ensure = &value
     return x
 }
 
-func (x *RecursivePatch) SetPatch(value RecursiveFieldPatch) *RecursivePatch {
+func (x *RecursivePatch) SetEnsure(value *RecursiveEnsureStruct) *RecursivePatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *RecursivePatch) SetPatchNonCompat(value RecursiveFieldPatch) *RecursivePatch {
     x.Patch = &value
+    return x
+}
+
+func (x *RecursivePatch) SetPatch(value *RecursiveFieldPatch) *RecursivePatch {
+    x.Patch = value
     return x
 }
 
@@ -18650,7 +19675,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -18660,7 +19685,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -18671,7 +19696,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -18682,7 +19707,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -18693,7 +19718,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -18842,7 +19867,7 @@ var _ thrift.Struct = &RecursiveField1Patch{}
 
 func NewRecursiveField1Patch() *RecursiveField1Patch {
     return (&RecursiveField1Patch{}).
-        SetClear(false)
+        SetClearNonCompat(false)
 }
 
 func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
@@ -18865,8 +19890,18 @@ func (x *RecursiveField1Patch) GetClear() bool {
     return x.Clear
 }
 
+func (x *RecursiveField1Patch) SetAssignNonCompat(value map[string]*Recursive) *RecursiveField1Patch {
+    x.Assign = value
+    return x
+}
+
 func (x *RecursiveField1Patch) SetAssign(value map[string]*Recursive) *RecursiveField1Patch {
     x.Assign = value
+    return x
+}
+
+func (x *RecursiveField1Patch) SetClearNonCompat(value bool) *RecursiveField1Patch {
+    x.Clear = value
     return x
 }
 
@@ -18968,7 +20003,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -18978,7 +20013,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -19087,7 +20122,7 @@ var _ thrift.Struct = &RecursiveFieldPatch{}
 
 func NewRecursiveFieldPatch() *RecursiveFieldPatch {
     return (&RecursiveFieldPatch{}).
-        SetNodes(*NewRecursiveField1Patch())
+        SetNodesNonCompat(*NewRecursiveField1Patch())
 }
 
 // Deprecated: Use NewRecursiveFieldPatch().GetNodes() instead.
@@ -19105,8 +20140,13 @@ func (x *RecursiveFieldPatch) GetNodes() *RecursiveField1Patch {
     return x.Nodes
 }
 
-func (x *RecursiveFieldPatch) SetNodes(value RecursiveField1Patch) *RecursiveFieldPatch {
+func (x *RecursiveFieldPatch) SetNodesNonCompat(value RecursiveField1Patch) *RecursiveFieldPatch {
     x.Nodes = &value
+    return x
+}
+
+func (x *RecursiveFieldPatch) SetNodes(value *RecursiveField1Patch) *RecursiveFieldPatch {
+    x.Nodes = value
     return x
 }
 
@@ -19141,7 +20181,7 @@ if err != nil {
     return err
 }
 
-    x.SetNodes(result)
+    x.SetNodesNonCompat(result)
     return nil
 }
 
@@ -19251,6 +20291,11 @@ func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
     return x.Nodes
 }
 
+func (x *RecursiveEnsureStruct) SetNodesNonCompat(value map[string]*Recursive) *RecursiveEnsureStruct {
+    x.Nodes = value
+    return x
+}
+
 func (x *RecursiveEnsureStruct) SetNodes(value map[string]*Recursive) *RecursiveEnsureStruct {
     x.Nodes = value
     return x
@@ -19333,7 +20378,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetNodes(result)
+    x.SetNodesNonCompat(result)
     return nil
 }
 
@@ -19433,10 +20478,10 @@ var _ thrift.Struct = &BarPatch{}
 
 func NewBarPatch() *BarPatch {
     return (&BarPatch{}).
-        SetClear(false).
-        SetPatchPrior(*NewBarFieldPatch()).
-        SetEnsure(*NewBarEnsureStruct()).
-        SetPatch(*NewBarFieldPatch())
+        SetClearNonCompat(false).
+        SetPatchPriorNonCompat(*NewBarFieldPatch()).
+        SetEnsureNonCompat(*NewBarEnsureStruct()).
+        SetPatchNonCompat(*NewBarFieldPatch())
 }
 
 // Deprecated: Use NewBarPatch().GetAssign() instead.
@@ -19507,8 +20552,18 @@ func (x *BarPatch) GetPatch() *BarFieldPatch {
     return x.Patch
 }
 
-func (x *BarPatch) SetAssign(value Bar) *BarPatch {
+func (x *BarPatch) SetAssignNonCompat(value Bar) *BarPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *BarPatch) SetAssign(value *Bar) *BarPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *BarPatch) SetClearNonCompat(value bool) *BarPatch {
+    x.Clear = value
     return x
 }
 
@@ -19517,18 +20572,33 @@ func (x *BarPatch) SetClear(value bool) *BarPatch {
     return x
 }
 
-func (x *BarPatch) SetPatchPrior(value BarFieldPatch) *BarPatch {
+func (x *BarPatch) SetPatchPriorNonCompat(value BarFieldPatch) *BarPatch {
     x.PatchPrior = &value
     return x
 }
 
-func (x *BarPatch) SetEnsure(value BarEnsureStruct) *BarPatch {
+func (x *BarPatch) SetPatchPrior(value *BarFieldPatch) *BarPatch {
+    x.PatchPrior = value
+    return x
+}
+
+func (x *BarPatch) SetEnsureNonCompat(value BarEnsureStruct) *BarPatch {
     x.Ensure = &value
     return x
 }
 
-func (x *BarPatch) SetPatch(value BarFieldPatch) *BarPatch {
+func (x *BarPatch) SetEnsure(value *BarEnsureStruct) *BarPatch {
+    x.Ensure = value
+    return x
+}
+
+func (x *BarPatch) SetPatchNonCompat(value BarFieldPatch) *BarPatch {
     x.Patch = &value
+    return x
+}
+
+func (x *BarPatch) SetPatch(value *BarFieldPatch) *BarPatch {
+    x.Patch = value
     return x
 }
 
@@ -19651,7 +20721,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -19661,7 +20731,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 
@@ -19672,7 +20742,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPrior(result)
+    x.SetPatchPriorNonCompat(result)
     return nil
 }
 
@@ -19683,7 +20753,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsure(result)
+    x.SetEnsureNonCompat(result)
     return nil
 }
 
@@ -19694,7 +20764,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatch(result)
+    x.SetPatchNonCompat(result)
     return nil
 }
 
@@ -19842,7 +20912,7 @@ var _ thrift.Struct = &BarFieldPatch{}
 
 func NewBarFieldPatch() *BarFieldPatch {
     return (&BarFieldPatch{}).
-        SetLoop(*NewLoopPatch())
+        SetLoopNonCompat(*NewLoopPatch())
 }
 
 // Deprecated: Use NewBarFieldPatch().GetLoop() instead.
@@ -19860,8 +20930,13 @@ func (x *BarFieldPatch) GetLoop() *LoopPatch {
     return x.Loop
 }
 
-func (x *BarFieldPatch) SetLoop(value LoopPatch) *BarFieldPatch {
+func (x *BarFieldPatch) SetLoopNonCompat(value LoopPatch) *BarFieldPatch {
     x.Loop = &value
+    return x
+}
+
+func (x *BarFieldPatch) SetLoop(value *LoopPatch) *BarFieldPatch {
+    x.Loop = value
     return x
 }
 
@@ -19896,7 +20971,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoop(result)
+    x.SetLoopNonCompat(result)
     return nil
 }
 
@@ -20009,8 +21084,13 @@ func (x *BarEnsureStruct) GetLoop() *Loop {
     return x.Loop
 }
 
-func (x *BarEnsureStruct) SetLoop(value Loop) *BarEnsureStruct {
+func (x *BarEnsureStruct) SetLoopNonCompat(value Loop) *BarEnsureStruct {
     x.Loop = &value
+    return x
+}
+
+func (x *BarEnsureStruct) SetLoop(value *Loop) *BarEnsureStruct {
+    x.Loop = value
     return x
 }
 
@@ -20045,7 +21125,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoop(result)
+    x.SetLoopNonCompat(result)
     return nil
 }
 
@@ -20142,7 +21222,7 @@ var _ thrift.Struct = &LoopPatch{}
 
 func NewLoopPatch() *LoopPatch {
     return (&LoopPatch{}).
-        SetClear(false)
+        SetClearNonCompat(false)
 }
 
 // Deprecated: Use NewLoopPatch().GetAssign() instead.
@@ -20168,8 +21248,18 @@ func (x *LoopPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *LoopPatch) SetAssign(value Loop) *LoopPatch {
+func (x *LoopPatch) SetAssignNonCompat(value Loop) *LoopPatch {
     x.Assign = &value
+    return x
+}
+
+func (x *LoopPatch) SetAssign(value *Loop) *LoopPatch {
+    x.Assign = value
+    return x
+}
+
+func (x *LoopPatch) SetClearNonCompat(value bool) *LoopPatch {
+    x.Clear = value
     return x
 }
 
@@ -20225,7 +21315,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssign(result)
+    x.SetAssignNonCompat(result)
     return nil
 }
 
@@ -20235,7 +21325,7 @@ if err != nil {
     return err
 }
 
-    x.SetClear(result)
+    x.SetClearNonCompat(result)
     return nil
 }
 

@@ -368,7 +368,7 @@ var _ thrift.Struct = &DecoratedStruct{}
 
 func NewDecoratedStruct() *DecoratedStruct {
     return (&DecoratedStruct{}).
-        SetField("")
+        SetFieldNonCompat("")
 }
 
 func (x *DecoratedStruct) GetFieldNonCompat() string {
@@ -377,6 +377,11 @@ func (x *DecoratedStruct) GetFieldNonCompat() string {
 
 func (x *DecoratedStruct) GetField() string {
     return x.Field
+}
+
+func (x *DecoratedStruct) SetFieldNonCompat(value string) *DecoratedStruct {
+    x.Field = value
+    return x
 }
 
 func (x *DecoratedStruct) SetField(value string) *DecoratedStruct {
@@ -406,7 +411,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -509,14 +514,14 @@ var _ thrift.Struct = &ContainerStruct{}
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{}).
-        SetFieldA(make([]int32, 0)).
-        SetFieldB(make([]int32, 0)).
-        SetFieldC(make([]int32, 0)).
-        SetFieldD(make([]int32, 0)).
-        SetFieldE(make([]int32, 0)).
-        SetFieldF(make([]int32, 0)).
-        SetFieldG(make(map[int32]string)).
-        SetFieldH(included.NewSomeMap())
+        SetFieldANonCompat(make([]int32, 0)).
+        SetFieldBNonCompat(make([]int32, 0)).
+        SetFieldCNonCompat(make([]int32, 0)).
+        SetFieldDNonCompat(make([]int32, 0)).
+        SetFieldENonCompat(make([]int32, 0)).
+        SetFieldFNonCompat(make([]int32, 0)).
+        SetFieldGNonCompat(make(map[int32]string)).
+        SetFieldHNonCompat(included.NewSomeMap())
 }
 
 func (x *ContainerStruct) GetFieldANonCompat() []int32 {
@@ -615,8 +620,18 @@ func (x *ContainerStruct) GetFieldH() included.SomeMap {
     return x.FieldH
 }
 
+func (x *ContainerStruct) SetFieldANonCompat(value []int32) *ContainerStruct {
+    x.FieldA = value
+    return x
+}
+
 func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
     x.FieldA = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldBNonCompat(value []int32) *ContainerStruct {
+    x.FieldB = value
     return x
 }
 
@@ -625,8 +640,18 @@ func (x *ContainerStruct) SetFieldB(value []int32) *ContainerStruct {
     return x
 }
 
+func (x *ContainerStruct) SetFieldCNonCompat(value []int32) *ContainerStruct {
+    x.FieldC = value
+    return x
+}
+
 func (x *ContainerStruct) SetFieldC(value []int32) *ContainerStruct {
     x.FieldC = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldDNonCompat(value []int32) *ContainerStruct {
+    x.FieldD = value
     return x
 }
 
@@ -635,8 +660,18 @@ func (x *ContainerStruct) SetFieldD(value []int32) *ContainerStruct {
     return x
 }
 
+func (x *ContainerStruct) SetFieldENonCompat(value []int32) *ContainerStruct {
+    x.FieldE = value
+    return x
+}
+
 func (x *ContainerStruct) SetFieldE(value []int32) *ContainerStruct {
     x.FieldE = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldFNonCompat(value []int32) *ContainerStruct {
+    x.FieldF = value
     return x
 }
 
@@ -645,8 +680,18 @@ func (x *ContainerStruct) SetFieldF(value []int32) *ContainerStruct {
     return x
 }
 
+func (x *ContainerStruct) SetFieldGNonCompat(value map[int32]string) *ContainerStruct {
+    x.FieldG = value
+    return x
+}
+
 func (x *ContainerStruct) SetFieldG(value map[int32]string) *ContainerStruct {
     x.FieldG = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldHNonCompat(value included.SomeMap) *ContainerStruct {
+    x.FieldH = value
     return x
 }
 
@@ -956,7 +1001,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldA(result)
+    x.SetFieldANonCompat(result)
     return nil
 }
 
@@ -984,7 +1029,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldB(result)
+    x.SetFieldBNonCompat(result)
     return nil
 }
 
@@ -1012,7 +1057,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldC(result)
+    x.SetFieldCNonCompat(result)
     return nil
 }
 
@@ -1040,7 +1085,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldD(result)
+    x.SetFieldDNonCompat(result)
     return nil
 }
 
@@ -1068,7 +1113,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldE(result)
+    x.SetFieldENonCompat(result)
     return nil
 }
 
@@ -1096,7 +1141,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetFieldF(result)
+    x.SetFieldFNonCompat(result)
     return nil
 }
 
@@ -1134,7 +1179,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetFieldG(result)
+    x.SetFieldGNonCompat(result)
     return nil
 }
 
@@ -1144,7 +1189,7 @@ if err != nil {
     return err
 }
 
-    x.SetFieldH(result)
+    x.SetFieldHNonCompat(result)
     return nil
 }
 
@@ -1331,7 +1376,7 @@ var _ thrift.Struct = &CppTypeStruct{}
 
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{}).
-        SetFieldA(make([]int32, 0))
+        SetFieldANonCompat(make([]int32, 0))
 }
 
 func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
@@ -1344,6 +1389,11 @@ func (x *CppTypeStruct) GetFieldA() []int32 {
     }
 
     return x.FieldA
+}
+
+func (x *CppTypeStruct) SetFieldANonCompat(value []int32) *CppTypeStruct {
+    x.FieldA = value
+    return x
 }
 
 func (x *CppTypeStruct) SetFieldA(value []int32) *CppTypeStruct {
@@ -1410,7 +1460,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFieldA(result)
+    x.SetFieldANonCompat(result)
     return nil
 }
 
@@ -1506,7 +1556,7 @@ var _ thrift.Struct = &VirtualStruct{}
 
 func NewVirtualStruct() *VirtualStruct {
     return (&VirtualStruct{}).
-        SetMyIntField(0)
+        SetMyIntFieldNonCompat(0)
 }
 
 func (x *VirtualStruct) GetMyIntFieldNonCompat() int64 {
@@ -1515,6 +1565,11 @@ func (x *VirtualStruct) GetMyIntFieldNonCompat() int64 {
 
 func (x *VirtualStruct) GetMyIntField() int64 {
     return x.MyIntField
+}
+
+func (x *VirtualStruct) SetMyIntFieldNonCompat(value int64) *VirtualStruct {
+    x.MyIntField = value
+    return x
 }
 
 func (x *VirtualStruct) SetMyIntField(value int64) *VirtualStruct {
@@ -1544,7 +1599,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntField(result)
+    x.SetMyIntFieldNonCompat(result)
     return nil
 }
 
@@ -1641,10 +1696,10 @@ var _ thrift.Struct = &MyStructWithForwardRefEnum{}
 
 func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
     return (&MyStructWithForwardRefEnum{}).
-        SetA(
+        SetANonCompat(
               MyForwardRefEnum_NONZERO,
           ).
-        SetB(
+        SetBNonCompat(
               MyForwardRefEnum_NONZERO,
           )
 }
@@ -1665,8 +1720,18 @@ func (x *MyStructWithForwardRefEnum) GetB() MyForwardRefEnum {
     return x.B
 }
 
+func (x *MyStructWithForwardRefEnum) SetANonCompat(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.A = value
+    return x
+}
+
 func (x *MyStructWithForwardRefEnum) SetA(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
     x.A = value
+    return x
+}
+
+func (x *MyStructWithForwardRefEnum) SetBNonCompat(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.B = value
     return x
 }
 
@@ -1714,7 +1779,7 @@ if err != nil {
 }
 result := MyForwardRefEnum(enumResult)
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1725,7 +1790,7 @@ if err != nil {
 }
 result := MyForwardRefEnum(enumResult)
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -1835,8 +1900,8 @@ var _ thrift.Struct = &TrivialNumeric{}
 
 func NewTrivialNumeric() *TrivialNumeric {
     return (&TrivialNumeric{}).
-        SetA(0).
-        SetB(false)
+        SetANonCompat(0).
+        SetBNonCompat(false)
 }
 
 func (x *TrivialNumeric) GetANonCompat() int32 {
@@ -1855,8 +1920,18 @@ func (x *TrivialNumeric) GetB() bool {
     return x.B
 }
 
+func (x *TrivialNumeric) SetANonCompat(value int32) *TrivialNumeric {
+    x.A = value
+    return x
+}
+
 func (x *TrivialNumeric) SetA(value int32) *TrivialNumeric {
     x.A = value
+    return x
+}
+
+func (x *TrivialNumeric) SetBNonCompat(value bool) *TrivialNumeric {
+    x.B = value
     return x
 }
 
@@ -1903,7 +1978,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -1913,7 +1988,7 @@ if err != nil {
     return err
 }
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -2023,11 +2098,11 @@ var _ thrift.Struct = &TrivialNestedWithDefault{}
 
 func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     return (&TrivialNestedWithDefault{}).
-        SetZ(4).
-        SetN(
+        SetZNonCompat(4).
+        SetNNonCompat(
               *NewTrivialNumeric().
-    SetA(3).
-    SetB(true),
+    SetANonCompat(3).
+    SetBNonCompat(true),
           )
 }
 
@@ -2054,13 +2129,23 @@ func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
     return x.N
 }
 
+func (x *TrivialNestedWithDefault) SetZNonCompat(value int32) *TrivialNestedWithDefault {
+    x.Z = value
+    return x
+}
+
 func (x *TrivialNestedWithDefault) SetZ(value int32) *TrivialNestedWithDefault {
     x.Z = value
     return x
 }
 
-func (x *TrivialNestedWithDefault) SetN(value TrivialNumeric) *TrivialNestedWithDefault {
+func (x *TrivialNestedWithDefault) SetNNonCompat(value TrivialNumeric) *TrivialNestedWithDefault {
     x.N = &value
+    return x
+}
+
+func (x *TrivialNestedWithDefault) SetN(value *TrivialNumeric) *TrivialNestedWithDefault {
+    x.N = value
     return x
 }
 
@@ -2110,7 +2195,7 @@ if err != nil {
     return err
 }
 
-    x.SetZ(result)
+    x.SetZNonCompat(result)
     return nil
 }
 
@@ -2121,7 +2206,7 @@ if err != nil {
     return err
 }
 
-    x.SetN(result)
+    x.SetNNonCompat(result)
     return nil
 }
 
@@ -2231,8 +2316,8 @@ var _ thrift.Struct = &ComplexString{}
 
 func NewComplexString() *ComplexString {
     return (&ComplexString{}).
-        SetA("").
-        SetB(make(map[string]int32))
+        SetANonCompat("").
+        SetBNonCompat(make(map[string]int32))
 }
 
 func (x *ComplexString) GetANonCompat() string {
@@ -2255,8 +2340,18 @@ func (x *ComplexString) GetB() map[string]int32 {
     return x.B
 }
 
+func (x *ComplexString) SetANonCompat(value string) *ComplexString {
+    x.A = value
+    return x
+}
+
 func (x *ComplexString) SetA(value string) *ComplexString {
     x.A = value
+    return x
+}
+
+func (x *ComplexString) SetBNonCompat(value map[string]int32) *ComplexString {
+    x.B = value
     return x
 }
 
@@ -2329,7 +2424,7 @@ if err != nil {
     return err
 }
 
-    x.SetA(result)
+    x.SetANonCompat(result)
     return nil
 }
 
@@ -2367,7 +2462,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetB(result)
+    x.SetBNonCompat(result)
     return nil
 }
 
@@ -2477,11 +2572,11 @@ var _ thrift.Struct = &ComplexNestedWithDefault{}
 
 func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     return (&ComplexNestedWithDefault{}).
-        SetZ("4").
-        SetN(
+        SetZNonCompat("4").
+        SetNNonCompat(
               *NewComplexString().
-    SetA("3").
-    SetB(
+    SetANonCompat("3").
+    SetBNonCompat(
         map[string]int32{
     "a": 3,
 },
@@ -2512,13 +2607,23 @@ func (x *ComplexNestedWithDefault) GetN() *ComplexString {
     return x.N
 }
 
+func (x *ComplexNestedWithDefault) SetZNonCompat(value string) *ComplexNestedWithDefault {
+    x.Z = value
+    return x
+}
+
 func (x *ComplexNestedWithDefault) SetZ(value string) *ComplexNestedWithDefault {
     x.Z = value
     return x
 }
 
-func (x *ComplexNestedWithDefault) SetN(value ComplexString) *ComplexNestedWithDefault {
+func (x *ComplexNestedWithDefault) SetNNonCompat(value ComplexString) *ComplexNestedWithDefault {
     x.N = &value
+    return x
+}
+
+func (x *ComplexNestedWithDefault) SetN(value *ComplexString) *ComplexNestedWithDefault {
+    x.N = value
     return x
 }
 
@@ -2568,7 +2673,7 @@ if err != nil {
     return err
 }
 
-    x.SetZ(result)
+    x.SetZNonCompat(result)
     return nil
 }
 
@@ -2579,7 +2684,7 @@ if err != nil {
     return err
 }
 
-    x.SetN(result)
+    x.SetNNonCompat(result)
     return nil
 }
 
@@ -2692,11 +2797,11 @@ var _ thrift.Struct = &MinPadding{}
 
 func NewMinPadding() *MinPadding {
     return (&MinPadding{}).
-        SetSmall(0).
-        SetBig(0).
-        SetMedium(0).
-        SetBiggish(0).
-        SetTiny(0)
+        SetSmallNonCompat(0).
+        SetBigNonCompat(0).
+        SetMediumNonCompat(0).
+        SetBiggishNonCompat(0).
+        SetTinyNonCompat(0)
 }
 
 func (x *MinPadding) GetSmallNonCompat() byte {
@@ -2739,8 +2844,18 @@ func (x *MinPadding) GetTiny() byte {
     return x.Tiny
 }
 
+func (x *MinPadding) SetSmallNonCompat(value byte) *MinPadding {
+    x.Small = value
+    return x
+}
+
 func (x *MinPadding) SetSmall(value byte) *MinPadding {
     x.Small = value
+    return x
+}
+
+func (x *MinPadding) SetBigNonCompat(value int64) *MinPadding {
+    x.Big = value
     return x
 }
 
@@ -2749,13 +2864,28 @@ func (x *MinPadding) SetBig(value int64) *MinPadding {
     return x
 }
 
+func (x *MinPadding) SetMediumNonCompat(value int16) *MinPadding {
+    x.Medium = value
+    return x
+}
+
 func (x *MinPadding) SetMedium(value int16) *MinPadding {
     x.Medium = value
     return x
 }
 
+func (x *MinPadding) SetBiggishNonCompat(value int32) *MinPadding {
+    x.Biggish = value
+    return x
+}
+
 func (x *MinPadding) SetBiggish(value int32) *MinPadding {
     x.Biggish = value
+    return x
+}
+
+func (x *MinPadding) SetTinyNonCompat(value byte) *MinPadding {
+    x.Tiny = value
     return x
 }
 
@@ -2850,7 +2980,7 @@ if err != nil {
     return err
 }
 
-    x.SetSmall(result)
+    x.SetSmallNonCompat(result)
     return nil
 }
 
@@ -2860,7 +2990,7 @@ if err != nil {
     return err
 }
 
-    x.SetBig(result)
+    x.SetBigNonCompat(result)
     return nil
 }
 
@@ -2870,7 +3000,7 @@ if err != nil {
     return err
 }
 
-    x.SetMedium(result)
+    x.SetMediumNonCompat(result)
     return nil
 }
 
@@ -2880,7 +3010,7 @@ if err != nil {
     return err
 }
 
-    x.SetBiggish(result)
+    x.SetBiggishNonCompat(result)
     return nil
 }
 
@@ -2890,7 +3020,7 @@ if err != nil {
     return err
 }
 
-    x.SetTiny(result)
+    x.SetTinyNonCompat(result)
     return nil
 }
 
@@ -3042,11 +3172,11 @@ var _ thrift.Struct = &MinPaddingWithCustomType{}
 
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
     return (&MinPaddingWithCustomType{}).
-        SetSmall(0).
-        SetBig(0).
-        SetMedium(0).
-        SetBiggish(0).
-        SetTiny(0)
+        SetSmallNonCompat(0).
+        SetBigNonCompat(0).
+        SetMediumNonCompat(0).
+        SetBiggishNonCompat(0).
+        SetTinyNonCompat(0)
 }
 
 func (x *MinPaddingWithCustomType) GetSmallNonCompat() byte {
@@ -3089,8 +3219,18 @@ func (x *MinPaddingWithCustomType) GetTiny() byte {
     return x.Tiny
 }
 
+func (x *MinPaddingWithCustomType) SetSmallNonCompat(value byte) *MinPaddingWithCustomType {
+    x.Small = value
+    return x
+}
+
 func (x *MinPaddingWithCustomType) SetSmall(value byte) *MinPaddingWithCustomType {
     x.Small = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetBigNonCompat(value int64) *MinPaddingWithCustomType {
+    x.Big = value
     return x
 }
 
@@ -3099,13 +3239,28 @@ func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType
     return x
 }
 
+func (x *MinPaddingWithCustomType) SetMediumNonCompat(value int16) *MinPaddingWithCustomType {
+    x.Medium = value
+    return x
+}
+
 func (x *MinPaddingWithCustomType) SetMedium(value int16) *MinPaddingWithCustomType {
     x.Medium = value
     return x
 }
 
+func (x *MinPaddingWithCustomType) SetBiggishNonCompat(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
+    return x
+}
+
 func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
     x.Biggish = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetTinyNonCompat(value byte) *MinPaddingWithCustomType {
+    x.Tiny = value
     return x
 }
 
@@ -3200,7 +3355,7 @@ if err != nil {
     return err
 }
 
-    x.SetSmall(result)
+    x.SetSmallNonCompat(result)
     return nil
 }
 
@@ -3210,7 +3365,7 @@ if err != nil {
     return err
 }
 
-    x.SetBig(result)
+    x.SetBigNonCompat(result)
     return nil
 }
 
@@ -3220,7 +3375,7 @@ if err != nil {
     return err
 }
 
-    x.SetMedium(result)
+    x.SetMediumNonCompat(result)
     return nil
 }
 
@@ -3230,7 +3385,7 @@ if err != nil {
     return err
 }
 
-    x.SetBiggish(result)
+    x.SetBiggishNonCompat(result)
     return nil
 }
 
@@ -3240,7 +3395,7 @@ if err != nil {
     return err
 }
 
-    x.SetTiny(result)
+    x.SetTinyNonCompat(result)
     return nil
 }
 
@@ -3391,10 +3546,10 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMyIntField(0).
-        SetMyStringField("").
-        SetMajorVer(0).
-        SetData(*NewMyDataItem())
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMajorVerNonCompat(0).
+        SetDataNonCompat(*NewMyDataItem())
 }
 
 // Deprecated: Use NewMyStruct().GetData() instead.
@@ -3436,8 +3591,18 @@ func (x *MyStruct) GetData() *MyDataItem {
     return x.Data
 }
 
+func (x *MyStruct) SetMyIntFieldNonCompat(value int64) *MyStruct {
+    x.MyIntField = value
+    return x
+}
+
 func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
     x.MyIntField = value
+    return x
+}
+
+func (x *MyStruct) SetMyStringFieldNonCompat(value string) *MyStruct {
+    x.MyStringField = value
     return x
 }
 
@@ -3446,13 +3611,23 @@ func (x *MyStruct) SetMyStringField(value string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
 func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
     x.MajorVer = value
     return x
 }
 
-func (x *MyStruct) SetData(value MyDataItem) *MyStruct {
+func (x *MyStruct) SetDataNonCompat(value MyDataItem) *MyStruct {
     x.Data = &value
+    return x
+}
+
+func (x *MyStruct) SetData(value *MyDataItem) *MyStruct {
+    x.Data = value
     return x
 }
 
@@ -3534,7 +3709,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntField(result)
+    x.SetMyIntFieldNonCompat(result)
     return nil
 }
 
@@ -3544,7 +3719,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyStringField(result)
+    x.SetMyStringFieldNonCompat(result)
     return nil
 }
 
@@ -3554,7 +3729,7 @@ if err != nil {
     return err
 }
 
-    x.SetMajorVer(result)
+    x.SetMajorVerNonCompat(result)
     return nil
 }
 
@@ -3565,7 +3740,7 @@ if err != nil {
     return err
 }
 
-    x.SetData(result)
+    x.SetDataNonCompat(result)
     return nil
 }
 
@@ -3780,7 +3955,7 @@ var _ thrift.Struct = &Renaming{}
 
 func NewRenaming() *Renaming {
     return (&Renaming{}).
-        SetFoo(0)
+        SetFooNonCompat(0)
 }
 
 func (x *Renaming) GetFooNonCompat() int64 {
@@ -3789,6 +3964,11 @@ func (x *Renaming) GetFooNonCompat() int64 {
 
 func (x *Renaming) GetFoo() int64 {
     return x.Foo
+}
+
+func (x *Renaming) SetFooNonCompat(value int64) *Renaming {
+    x.Foo = value
+    return x
 }
 
 func (x *Renaming) SetFoo(value int64) *Renaming {
@@ -3818,7 +3998,7 @@ if err != nil {
     return err
 }
 
-    x.SetFoo(result)
+    x.SetFooNonCompat(result)
     return nil
 }
 
@@ -3915,8 +4095,8 @@ var _ thrift.Struct = &AnnotatedTypes{}
 
 func NewAnnotatedTypes() *AnnotatedTypes {
     return (&AnnotatedTypes{}).
-        SetBinaryField(NewTBinary()).
-        SetListField(included.NewSomeListOfTypeMap())
+        SetBinaryFieldNonCompat(NewTBinary()).
+        SetListFieldNonCompat(included.NewSomeListOfTypeMap())
 }
 
 func (x *AnnotatedTypes) GetBinaryFieldNonCompat() TBinary {
@@ -3943,8 +4123,18 @@ func (x *AnnotatedTypes) GetListField() included.SomeListOfTypeMap {
     return x.ListField
 }
 
+func (x *AnnotatedTypes) SetBinaryFieldNonCompat(value TBinary) *AnnotatedTypes {
+    x.BinaryField = value
+    return x
+}
+
 func (x *AnnotatedTypes) SetBinaryField(value TBinary) *AnnotatedTypes {
     x.BinaryField = value
+    return x
+}
+
+func (x *AnnotatedTypes) SetListFieldNonCompat(value included.SomeListOfTypeMap) *AnnotatedTypes {
+    x.ListField = value
     return x
 }
 
@@ -4009,7 +4199,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryField(result)
+    x.SetBinaryFieldNonCompat(result)
     return nil
 }
 
@@ -4019,7 +4209,7 @@ if err != nil {
     return err
 }
 
-    x.SetListField(result)
+    x.SetListFieldNonCompat(result)
     return nil
 }
 
@@ -4161,13 +4351,23 @@ func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
     return x.ForwardUsageByRef
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageStruct(value ForwardUsageStruct) *ForwardUsageRoot {
+func (x *ForwardUsageRoot) SetForwardUsageStructNonCompat(value ForwardUsageStruct) *ForwardUsageRoot {
     x.ForwardUsageStruct = &value
     return x
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageByRef(value ForwardUsageByRef) *ForwardUsageRoot {
+func (x *ForwardUsageRoot) SetForwardUsageStruct(value *ForwardUsageStruct) *ForwardUsageRoot {
+    x.ForwardUsageStruct = value
+    return x
+}
+
+func (x *ForwardUsageRoot) SetForwardUsageByRefNonCompat(value ForwardUsageByRef) *ForwardUsageRoot {
     x.ForwardUsageByRef = &value
+    return x
+}
+
+func (x *ForwardUsageRoot) SetForwardUsageByRef(value *ForwardUsageByRef) *ForwardUsageRoot {
+    x.ForwardUsageByRef = value
     return x
 }
 
@@ -4226,7 +4426,7 @@ if err != nil {
     return err
 }
 
-    x.SetForwardUsageStruct(result)
+    x.SetForwardUsageStructNonCompat(result)
     return nil
 }
 
@@ -4237,7 +4437,7 @@ if err != nil {
     return err
 }
 
-    x.SetForwardUsageByRef(result)
+    x.SetForwardUsageByRefNonCompat(result)
     return nil
 }
 
@@ -4363,8 +4563,13 @@ func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageStruct) SetFoo(value ForwardUsageRoot) *ForwardUsageStruct {
+func (x *ForwardUsageStruct) SetFooNonCompat(value ForwardUsageRoot) *ForwardUsageStruct {
     x.Foo = &value
+    return x
+}
+
+func (x *ForwardUsageStruct) SetFoo(value *ForwardUsageRoot) *ForwardUsageStruct {
+    x.Foo = value
     return x
 }
 
@@ -4399,7 +4604,7 @@ if err != nil {
     return err
 }
 
-    x.SetFoo(result)
+    x.SetFooNonCompat(result)
     return nil
 }
 
@@ -4512,8 +4717,13 @@ func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageByRef) SetFoo(value ForwardUsageRoot) *ForwardUsageByRef {
+func (x *ForwardUsageByRef) SetFooNonCompat(value ForwardUsageRoot) *ForwardUsageByRef {
     x.Foo = &value
+    return x
+}
+
+func (x *ForwardUsageByRef) SetFoo(value *ForwardUsageRoot) *ForwardUsageByRef {
+    x.Foo = value
     return x
 }
 
@@ -4548,7 +4758,7 @@ if err != nil {
     return err
 }
 
-    x.SetFoo(result)
+    x.SetFooNonCompat(result)
     return nil
 }
 
@@ -4658,6 +4868,11 @@ func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     return x.Field
 }
 
+func (x *IncompleteMap) SetFieldNonCompat(value map[int32]*IncompleteMapDep) *IncompleteMap {
+    x.Field = value
+    return x
+}
+
 func (x *IncompleteMap) SetField(value map[int32]*IncompleteMapDep) *IncompleteMap {
     x.Field = value
     return x
@@ -4740,7 +4955,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -4930,6 +5145,11 @@ func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     return x.Field
 }
 
+func (x *CompleteMap) SetFieldNonCompat(value map[int32]*CompleteMapDep) *CompleteMap {
+    x.Field = value
+    return x
+}
+
 func (x *CompleteMap) SetField(value map[int32]*CompleteMapDep) *CompleteMap {
     x.Field = value
     return x
@@ -5012,7 +5232,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -5202,6 +5422,11 @@ func (x *IncompleteList) GetField() []*IncompleteListDep {
     return x.Field
 }
 
+func (x *IncompleteList) SetFieldNonCompat(value []*IncompleteListDep) *IncompleteList {
+    x.Field = value
+    return x
+}
+
 func (x *IncompleteList) SetField(value []*IncompleteListDep) *IncompleteList {
     x.Field = value
     return x
@@ -5267,7 +5492,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -5457,6 +5682,11 @@ func (x *CompleteList) GetField() []*CompleteListDep {
     return x.Field
 }
 
+func (x *CompleteList) SetFieldNonCompat(value []*CompleteListDep) *CompleteList {
+    x.Field = value
+    return x
+}
+
 func (x *CompleteList) SetField(value []*CompleteListDep) *CompleteList {
     x.Field = value
     return x
@@ -5522,7 +5752,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -5712,6 +5942,11 @@ func (x *AdaptedList) GetField() []*AdaptedListDep {
     return x.Field
 }
 
+func (x *AdaptedList) SetFieldNonCompat(value []*AdaptedListDep) *AdaptedList {
+    x.Field = value
+    return x
+}
+
 func (x *AdaptedList) SetField(value []*AdaptedListDep) *AdaptedList {
     x.Field = value
     return x
@@ -5777,7 +6012,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -5873,7 +6108,7 @@ var _ thrift.Struct = &AdaptedListDep{}
 
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{}).
-        SetField(*NewAdaptedList())
+        SetFieldNonCompat(*NewAdaptedList())
 }
 
 // Deprecated: Use NewAdaptedListDep().GetField() instead.
@@ -5891,8 +6126,13 @@ func (x *AdaptedListDep) GetField() *AdaptedList {
     return x.Field
 }
 
-func (x *AdaptedListDep) SetField(value AdaptedList) *AdaptedListDep {
+func (x *AdaptedListDep) SetFieldNonCompat(value AdaptedList) *AdaptedListDep {
     x.Field = &value
+    return x
+}
+
+func (x *AdaptedListDep) SetField(value *AdaptedList) *AdaptedListDep {
+    x.Field = value
     return x
 }
 
@@ -5927,7 +6167,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -6037,6 +6277,11 @@ func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     return x.Field
 }
 
+func (x *DependentAdaptedList) SetFieldNonCompat(value []*DependentAdaptedListDep) *DependentAdaptedList {
+    x.Field = value
+    return x
+}
+
 func (x *DependentAdaptedList) SetField(value []*DependentAdaptedListDep) *DependentAdaptedList {
     x.Field = value
     return x
@@ -6102,7 +6347,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -6215,8 +6460,13 @@ func (x *DependentAdaptedListDep) GetField() int16 {
     return *x.Field
 }
 
-func (x *DependentAdaptedListDep) SetField(value int16) *DependentAdaptedListDep {
+func (x *DependentAdaptedListDep) SetFieldNonCompat(value int16) *DependentAdaptedListDep {
     x.Field = &value
+    return x
+}
+
+func (x *DependentAdaptedListDep) SetField(value *int16) *DependentAdaptedListDep {
+    x.Field = value
     return x
 }
 
@@ -6250,7 +6500,7 @@ if err != nil {
     return err
 }
 
-    x.SetField(result)
+    x.SetFieldNonCompat(result)
     return nil
 }
 
@@ -6352,13 +6602,13 @@ var _ thrift.Struct = &AllocatorAware{}
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{}).
-        SetAaList(make([]int32, 0)).
-        SetAaSet(make([]int32, 0)).
-        SetAaMap(make(map[int32]int32)).
-        SetAaString("").
-        SetNotAContainer(0).
-        SetAaUnique(0).
-        SetAaShared(0)
+        SetAaListNonCompat(make([]int32, 0)).
+        SetAaSetNonCompat(make([]int32, 0)).
+        SetAaMapNonCompat(make(map[int32]int32)).
+        SetAaStringNonCompat("").
+        SetNotAContainerNonCompat(0).
+        SetAaUniqueNonCompat(0).
+        SetAaSharedNonCompat(0)
 }
 
 func (x *AllocatorAware) GetAaListNonCompat() []int32 {
@@ -6429,8 +6679,18 @@ func (x *AllocatorAware) GetAaShared() int32 {
     return x.AaShared
 }
 
+func (x *AllocatorAware) SetAaListNonCompat(value []int32) *AllocatorAware {
+    x.AaList = value
+    return x
+}
+
 func (x *AllocatorAware) SetAaList(value []int32) *AllocatorAware {
     x.AaList = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaSetNonCompat(value []int32) *AllocatorAware {
+    x.AaSet = value
     return x
 }
 
@@ -6439,8 +6699,18 @@ func (x *AllocatorAware) SetAaSet(value []int32) *AllocatorAware {
     return x
 }
 
+func (x *AllocatorAware) SetAaMapNonCompat(value map[int32]int32) *AllocatorAware {
+    x.AaMap = value
+    return x
+}
+
 func (x *AllocatorAware) SetAaMap(value map[int32]int32) *AllocatorAware {
     x.AaMap = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaStringNonCompat(value string) *AllocatorAware {
+    x.AaString = value
     return x
 }
 
@@ -6449,13 +6719,28 @@ func (x *AllocatorAware) SetAaString(value string) *AllocatorAware {
     return x
 }
 
+func (x *AllocatorAware) SetNotAContainerNonCompat(value int32) *AllocatorAware {
+    x.NotAContainer = value
+    return x
+}
+
 func (x *AllocatorAware) SetNotAContainer(value int32) *AllocatorAware {
     x.NotAContainer = value
     return x
 }
 
+func (x *AllocatorAware) SetAaUniqueNonCompat(value int32) *AllocatorAware {
+    x.AaUnique = value
+    return x
+}
+
 func (x *AllocatorAware) SetAaUnique(value int32) *AllocatorAware {
     x.AaUnique = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaSharedNonCompat(value int32) *AllocatorAware {
+    x.AaShared = value
     return x
 }
 
@@ -6664,7 +6949,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAaList(result)
+    x.SetAaListNonCompat(result)
     return nil
 }
 
@@ -6692,7 +6977,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAaSet(result)
+    x.SetAaSetNonCompat(result)
     return nil
 }
 
@@ -6730,7 +7015,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAaMap(result)
+    x.SetAaMapNonCompat(result)
     return nil
 }
 
@@ -6740,7 +7025,7 @@ if err != nil {
     return err
 }
 
-    x.SetAaString(result)
+    x.SetAaStringNonCompat(result)
     return nil
 }
 
@@ -6750,7 +7035,7 @@ if err != nil {
     return err
 }
 
-    x.SetNotAContainer(result)
+    x.SetNotAContainerNonCompat(result)
     return nil
 }
 
@@ -6760,7 +7045,7 @@ if err != nil {
     return err
 }
 
-    x.SetAaUnique(result)
+    x.SetAaUniqueNonCompat(result)
     return nil
 }
 
@@ -6770,7 +7055,7 @@ if err != nil {
     return err
 }
 
-    x.SetAaShared(result)
+    x.SetAaSharedNonCompat(result)
     return nil
 }
 
@@ -6945,7 +7230,7 @@ var _ thrift.Struct = &AllocatorAware2{}
 
 func NewAllocatorAware2() *AllocatorAware2 {
     return (&AllocatorAware2{}).
-        SetNotAContainer(0)
+        SetNotAContainerNonCompat(0)
 }
 
 // Deprecated: Use NewAllocatorAware2().GetBoxField() instead.
@@ -6971,13 +7256,23 @@ func (x *AllocatorAware2) GetBoxField() int32 {
     return *x.BoxField
 }
 
+func (x *AllocatorAware2) SetNotAContainerNonCompat(value int32) *AllocatorAware2 {
+    x.NotAContainer = value
+    return x
+}
+
 func (x *AllocatorAware2) SetNotAContainer(value int32) *AllocatorAware2 {
     x.NotAContainer = value
     return x
 }
 
-func (x *AllocatorAware2) SetBoxField(value int32) *AllocatorAware2 {
+func (x *AllocatorAware2) SetBoxFieldNonCompat(value int32) *AllocatorAware2 {
     x.BoxField = &value
+    return x
+}
+
+func (x *AllocatorAware2) SetBoxField(value *int32) *AllocatorAware2 {
+    x.BoxField = value
     return x
 }
 
@@ -7027,7 +7322,7 @@ if err != nil {
     return err
 }
 
-    x.SetNotAContainer(result)
+    x.SetNotAContainerNonCompat(result)
     return nil
 }
 
@@ -7037,7 +7332,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoxField(result)
+    x.SetBoxFieldNonCompat(result)
     return nil
 }
 
@@ -7148,9 +7443,9 @@ var _ thrift.Struct = &TypedefStruct{}
 
 func NewTypedefStruct() *TypedefStruct {
     return (&TypedefStruct{}).
-        SetI32Field(0).
-        SetIntTypedefField(NewIntTypedef()).
-        SetUintTypedefField(NewUintTypedef())
+        SetI32FieldNonCompat(0).
+        SetIntTypedefFieldNonCompat(NewIntTypedef()).
+        SetUintTypedefFieldNonCompat(NewUintTypedef())
 }
 
 func (x *TypedefStruct) GetI32FieldNonCompat() int32 {
@@ -7177,13 +7472,28 @@ func (x *TypedefStruct) GetUintTypedefField() UintTypedef {
     return x.UintTypedefField
 }
 
+func (x *TypedefStruct) SetI32FieldNonCompat(value int32) *TypedefStruct {
+    x.I32Field = value
+    return x
+}
+
 func (x *TypedefStruct) SetI32Field(value int32) *TypedefStruct {
     x.I32Field = value
     return x
 }
 
+func (x *TypedefStruct) SetIntTypedefFieldNonCompat(value IntTypedef) *TypedefStruct {
+    x.IntTypedefField = value
+    return x
+}
+
 func (x *TypedefStruct) SetIntTypedefField(value IntTypedef) *TypedefStruct {
     x.IntTypedefField = value
+    return x
+}
+
+func (x *TypedefStruct) SetUintTypedefFieldNonCompat(value UintTypedef) *TypedefStruct {
+    x.UintTypedefField = value
     return x
 }
 
@@ -7248,7 +7558,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32Field(result)
+    x.SetI32FieldNonCompat(result)
     return nil
 }
 
@@ -7258,7 +7568,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntTypedefField(result)
+    x.SetIntTypedefFieldNonCompat(result)
     return nil
 }
 
@@ -7268,7 +7578,7 @@ if err != nil {
     return err
 }
 
-    x.SetUintTypedefField(result)
+    x.SetUintTypedefFieldNonCompat(result)
     return nil
 }
 
@@ -7390,7 +7700,7 @@ var _ thrift.Struct = &StructWithDoubleUnderscores{}
 
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
     return (&StructWithDoubleUnderscores{}).
-        Set_Field(0)
+        Set_FieldNonCompat(0)
 }
 
 func (x *StructWithDoubleUnderscores) Get_FieldNonCompat() int32 {
@@ -7399,6 +7709,11 @@ func (x *StructWithDoubleUnderscores) Get_FieldNonCompat() int32 {
 
 func (x *StructWithDoubleUnderscores) Get_Field() int32 {
     return x._Field
+}
+
+func (x *StructWithDoubleUnderscores) Set_FieldNonCompat(value int32) *StructWithDoubleUnderscores {
+    x._Field = value
+    return x
 }
 
 func (x *StructWithDoubleUnderscores) Set_Field(value int32) *StructWithDoubleUnderscores {
@@ -7428,7 +7743,7 @@ if err != nil {
     return err
 }
 
-    x.Set_Field(result)
+    x.Set_FieldNonCompat(result)
     return nil
 }
 

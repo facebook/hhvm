@@ -111,7 +111,7 @@ var _ thrift.Struct = &MyStructNestedAnnotation{}
 
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
     return (&MyStructNestedAnnotation{}).
-        SetName("")
+        SetNameNonCompat("")
 }
 
 func (x *MyStructNestedAnnotation) GetNameNonCompat() string {
@@ -120,6 +120,11 @@ func (x *MyStructNestedAnnotation) GetNameNonCompat() string {
 
 func (x *MyStructNestedAnnotation) GetName() string {
     return x.Name
+}
+
+func (x *MyStructNestedAnnotation) SetNameNonCompat(value string) *MyStructNestedAnnotation {
+    x.Name = value
+    return x
 }
 
 func (x *MyStructNestedAnnotation) SetName(value string) *MyStructNestedAnnotation {
@@ -149,7 +154,7 @@ if err != nil {
     return err
 }
 
-    x.SetName(result)
+    x.SetNameNonCompat(result)
     return nil
 }
 
@@ -426,16 +431,16 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMajorVer(0).
-        SetPackage("").
-        SetAnnotationWithQuote("").
-        SetClass_("").
-        SetAnnotationWithTrailingComma("").
-        SetEmptyAnnotations("").
-        SetMyEnum(0).
-        SetCppTypeAnnotation(make([]string, 0)).
-        SetMyUnion(*NewMyUnion()).
-        SetMyID(NewMyId())
+        SetMajorVerNonCompat(0).
+        SetPackageNonCompat("").
+        SetAnnotationWithQuoteNonCompat("").
+        SetClass_NonCompat("").
+        SetAnnotationWithTrailingCommaNonCompat("").
+        SetEmptyAnnotationsNonCompat("").
+        SetMyEnumNonCompat(0).
+        SetCppTypeAnnotationNonCompat(make([]string, 0)).
+        SetMyUnionNonCompat(*NewMyUnion()).
+        SetMyIDNonCompat(NewMyId())
 }
 
 // Deprecated: Use NewMyStruct().GetMyUnion() instead.
@@ -529,8 +534,18 @@ func (x *MyStruct) GetMyID() MyId {
     return x.MyID
 }
 
+func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
 func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
     x.MajorVer = value
+    return x
+}
+
+func (x *MyStruct) SetPackageNonCompat(value string) *MyStruct {
+    x.Package = value
     return x
 }
 
@@ -539,8 +554,18 @@ func (x *MyStruct) SetPackage(value string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetAnnotationWithQuoteNonCompat(value string) *MyStruct {
+    x.AnnotationWithQuote = value
+    return x
+}
+
 func (x *MyStruct) SetAnnotationWithQuote(value string) *MyStruct {
     x.AnnotationWithQuote = value
+    return x
+}
+
+func (x *MyStruct) SetClass_NonCompat(value string) *MyStruct {
+    x.Class_ = value
     return x
 }
 
@@ -549,8 +574,18 @@ func (x *MyStruct) SetClass_(value string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetAnnotationWithTrailingCommaNonCompat(value string) *MyStruct {
+    x.AnnotationWithTrailingComma = value
+    return x
+}
+
 func (x *MyStruct) SetAnnotationWithTrailingComma(value string) *MyStruct {
     x.AnnotationWithTrailingComma = value
+    return x
+}
+
+func (x *MyStruct) SetEmptyAnnotationsNonCompat(value string) *MyStruct {
+    x.EmptyAnnotations = value
     return x
 }
 
@@ -559,8 +594,18 @@ func (x *MyStruct) SetEmptyAnnotations(value string) *MyStruct {
     return x
 }
 
+func (x *MyStruct) SetMyEnumNonCompat(value MyEnum) *MyStruct {
+    x.MyEnum = value
+    return x
+}
+
 func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
     x.MyEnum = value
+    return x
+}
+
+func (x *MyStruct) SetCppTypeAnnotationNonCompat(value []string) *MyStruct {
+    x.CppTypeAnnotation = value
     return x
 }
 
@@ -569,8 +614,18 @@ func (x *MyStruct) SetCppTypeAnnotation(value []string) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyUnion(value MyUnion) *MyStruct {
+func (x *MyStruct) SetMyUnionNonCompat(value MyUnion) *MyStruct {
     x.MyUnion = &value
+    return x
+}
+
+func (x *MyStruct) SetMyUnion(value *MyUnion) *MyStruct {
+    x.MyUnion = value
+    return x
+}
+
+func (x *MyStruct) SetMyIDNonCompat(value MyId) *MyStruct {
+    x.MyID = value
     return x
 }
 
@@ -773,7 +828,7 @@ if err != nil {
     return err
 }
 
-    x.SetMajorVer(result)
+    x.SetMajorVerNonCompat(result)
     return nil
 }
 
@@ -783,7 +838,7 @@ if err != nil {
     return err
 }
 
-    x.SetPackage(result)
+    x.SetPackageNonCompat(result)
     return nil
 }
 
@@ -793,7 +848,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnnotationWithQuote(result)
+    x.SetAnnotationWithQuoteNonCompat(result)
     return nil
 }
 
@@ -803,7 +858,7 @@ if err != nil {
     return err
 }
 
-    x.SetClass_(result)
+    x.SetClass_NonCompat(result)
     return nil
 }
 
@@ -813,7 +868,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnnotationWithTrailingComma(result)
+    x.SetAnnotationWithTrailingCommaNonCompat(result)
     return nil
 }
 
@@ -823,7 +878,7 @@ if err != nil {
     return err
 }
 
-    x.SetEmptyAnnotations(result)
+    x.SetEmptyAnnotationsNonCompat(result)
     return nil
 }
 
@@ -834,7 +889,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetMyEnum(result)
+    x.SetMyEnumNonCompat(result)
     return nil
 }
 
@@ -862,7 +917,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetCppTypeAnnotation(result)
+    x.SetCppTypeAnnotationNonCompat(result)
     return nil
 }
 
@@ -873,7 +928,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyUnion(result)
+    x.SetMyUnionNonCompat(result)
     return nil
 }
 
@@ -883,7 +938,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyID(result)
+    x.SetMyIDNonCompat(result)
     return nil
 }
 
@@ -1097,8 +1152,8 @@ var _ thrift.Struct = &SecretStruct{}
 
 func NewSecretStruct() *SecretStruct {
     return (&SecretStruct{}).
-        SetId(0).
-        SetPassword("")
+        SetIdNonCompat(0).
+        SetPasswordNonCompat("")
 }
 
 func (x *SecretStruct) GetIdNonCompat() int64 {
@@ -1117,8 +1172,18 @@ func (x *SecretStruct) GetPassword() string {
     return x.Password
 }
 
+func (x *SecretStruct) SetIdNonCompat(value int64) *SecretStruct {
+    x.Id = value
+    return x
+}
+
 func (x *SecretStruct) SetId(value int64) *SecretStruct {
     x.Id = value
+    return x
+}
+
+func (x *SecretStruct) SetPasswordNonCompat(value string) *SecretStruct {
+    x.Password = value
     return x
 }
 
@@ -1165,7 +1230,7 @@ if err != nil {
     return err
 }
 
-    x.SetId(result)
+    x.SetIdNonCompat(result)
     return nil
 }
 
@@ -1175,7 +1240,7 @@ if err != nil {
     return err
 }
 
-    x.SetPassword(result)
+    x.SetPasswordNonCompat(result)
     return nil
 }
 

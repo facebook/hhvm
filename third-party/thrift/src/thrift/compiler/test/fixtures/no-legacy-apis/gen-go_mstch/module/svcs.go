@@ -140,7 +140,7 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
-        SetU(*NewMyUnion())
+        SetUNonCompat(*NewMyUnion())
 }
 
 // Deprecated: Use newReqMyServiceQuery().GetU() instead.
@@ -158,8 +158,13 @@ func (x *reqMyServiceQuery) GetU() *MyUnion {
     return x.U
 }
 
-func (x *reqMyServiceQuery) SetU(value MyUnion) *reqMyServiceQuery {
+func (x *reqMyServiceQuery) SetUNonCompat(value MyUnion) *reqMyServiceQuery {
     x.U = &value
+    return x
+}
+
+func (x *reqMyServiceQuery) SetU(value *MyUnion) *reqMyServiceQuery {
+    x.U = value
     return x
 }
 
@@ -194,7 +199,7 @@ if err != nil {
     return err
 }
 
-    x.SetU(result)
+    x.SetUNonCompat(result)
     return nil
 }
 
@@ -290,7 +295,7 @@ var _ thrift.WritableResult = &respMyServiceQuery{}
 
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{}).
-        SetValue(*NewMyStruct())
+        SetValueNonCompat(*NewMyStruct())
 }
 
 // Deprecated: Use newRespMyServiceQuery().GetValue() instead.
@@ -308,8 +313,13 @@ func (x *respMyServiceQuery) GetValue() *MyStruct {
     return x.Value
 }
 
-func (x *respMyServiceQuery) SetValue(value MyStruct) *respMyServiceQuery {
+func (x *respMyServiceQuery) SetValueNonCompat(value MyStruct) *respMyServiceQuery {
     x.Value = &value
+    return x
+}
+
+func (x *respMyServiceQuery) SetValue(value *MyStruct) *respMyServiceQuery {
+    x.Value = value
     return x
 }
 
@@ -344,7 +354,7 @@ if err != nil {
     return err
 }
 
-    x.SetValue(result)
+    x.SetValueNonCompat(result)
     return nil
 }
 

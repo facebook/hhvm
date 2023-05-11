@@ -27,7 +27,7 @@ var _ thrift.Struct = &InjectMetadataFields{}
 
 func NewInjectMetadataFields() *InjectMetadataFields {
     return (&InjectMetadataFields{}).
-        SetType("")
+        SetTypeNonCompat("")
 }
 
 func (x *InjectMetadataFields) GetTypeNonCompat() string {
@@ -36,6 +36,11 @@ func (x *InjectMetadataFields) GetTypeNonCompat() string {
 
 func (x *InjectMetadataFields) GetType() string {
     return x.Type
+}
+
+func (x *InjectMetadataFields) SetTypeNonCompat(value string) *InjectMetadataFields {
+    x.Type = value
+    return x
 }
 
 func (x *InjectMetadataFields) SetType(value string) *InjectMetadataFields {
@@ -65,7 +70,7 @@ if err != nil {
     return err
 }
 
-    x.SetType(result)
+    x.SetTypeNonCompat(result)
     return nil
 }
 

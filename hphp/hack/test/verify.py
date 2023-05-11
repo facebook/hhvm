@@ -25,6 +25,7 @@ flags_pessimise_unsupported = [
     "--like-types-all",
     "--enable-higher-kinded-types",
     "--enable-class-level-where-clauses",
+    "--enable-global-access-check",
 ]
 max_workers = 48
 verbose = False

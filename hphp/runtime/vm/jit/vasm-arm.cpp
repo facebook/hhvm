@@ -300,7 +300,18 @@ struct Vgen {
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const andqi64& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
-  void emit(const btrq& i) { a->Bic(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const btrq& i) {
+    // NB: We can't directly store the result to i.d because, in case i.s1 is
+    // dead after the btrq, the register allocator may allocated both i.d and
+    // i.s1 to the same physical register, thus breaking the comparison
+    // (subtraction) that is done below.
+    a->Bic(rVixlScratch0, X(i.s1), 1 << i.s0.q());
+
+    // Subtract the original value from the result to set the carry bit based on
+    // whether they differ.
+    a->Sub(vixl::xzr, rVixlScratch0, X(i.s1), UF(i.fl));
+    a->Mov(X(i.d), rVixlScratch0);
+  }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }

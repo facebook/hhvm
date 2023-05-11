@@ -33,6 +33,13 @@ type entry_contents =
       (** Terminal state. Raise an exception on an attempt to read the file
       contents from this file. *)
 
+type entry_tast =
+  | Entry_tast_no_dynamic of Tast.program
+      (** The tast that is cached was produced without checking for dynamic assumptions. *)
+  | Entry_tast_under_dynamic of Tast.program
+      (** The tast that is cached was produced including checking for dynamic assumptions. *)
+  | Entry_tast_missing  (** No tast was computed yet. *)
+
 (** Various information associated with a given file.
 
 It's important to create an [entry] when processing data about a single file for
@@ -69,7 +76,7 @@ type entry = {
       under ~full:true ~keep_errors:true *)
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
-  mutable tast: Tast.program option;
+  mutable tast: entry_tast;
       (** NOT monotonic: depends on the decls of other files. *)
   mutable all_errors: Errors.t option;
       (** NOT monotonic for the same reason as [tast]. *)

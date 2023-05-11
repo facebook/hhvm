@@ -33,13 +33,28 @@ let compute_tast_and_errors_unquarantined_internal
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
   match
-    (mode, entry.Provider_context.tast, entry.Provider_context.all_errors)
+    ( mode,
+      TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
+      entry.Provider_context.tast,
+      entry.Provider_context.all_errors )
   with
-  | (Compute_tast_only, Some tast, _) ->
+  | (Compute_tast_only, false, Provider_context.Entry_tast_no_dynamic tast, _)
+    ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors, Some tast, Some errors) ->
+  | (Compute_tast_only, true, Provider_context.Entry_tast_under_dynamic tast, _)
+    ->
+    { Compute_tast.tast; telemetry = Telemetry.create () }
+  | ( Compute_tast_and_errors,
+      false,
+      Provider_context.Entry_tast_no_dynamic tast,
+      Some errors ) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
-  | (mode, _, _) ->
+  | ( Compute_tast_and_errors,
+      true,
+      Provider_context.Entry_tast_under_dynamic tast,
+      Some errors ) ->
+    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+  | (mode, tast_under_dynamic, _, _) ->
     (* prepare logging *)
     Provider_context.reset_telemetry ctx;
     let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
@@ -124,16 +139,22 @@ let compute_tast_and_errors_unquarantined_internal
       ~path:entry.Provider_context.path
       ~start_time;
 
+    let some_tast =
+      if tast_under_dynamic then
+        Provider_context.Entry_tast_under_dynamic tast
+      else
+        Provider_context.Entry_tast_no_dynamic tast
+    in
     (match mode with
     | Compute_tast_and_errors ->
       let errors =
         naming_errors |> Errors.merge typing_errors |> Errors.merge ast_errors
       in
-      entry.Provider_context.tast <- Some tast;
+      entry.Provider_context.tast <- some_tast;
       entry.Provider_context.all_errors <- Some errors;
       { Compute_tast_and_errors.tast; errors; telemetry }
     | Compute_tast_only ->
-      entry.Provider_context.tast <- Some tast;
+      entry.Provider_context.tast <- some_tast;
       { Compute_tast.tast; telemetry })
 
 let compute_tast_and_errors_unquarantined
@@ -156,8 +177,14 @@ let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match (entry.Provider_context.tast, entry.Provider_context.all_errors) with
-  | (Some tast, Some errors) ->
+  match
+    ( TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
+      entry.Provider_context.tast,
+      entry.Provider_context.all_errors )
+  with
+  | (false, Provider_context.Entry_tast_no_dynamic tast, Some errors) ->
+    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+  | (true, Provider_context.Entry_tast_under_dynamic tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
@@ -170,10 +197,16 @@ let compute_tast_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Compute_tast.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match entry.Provider_context.tast with
-  | Some tast -> { Compute_tast.tast; telemetry = Telemetry.create () }
+  match
+    ( TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
+      entry.Provider_context.tast )
+  with
+  | (false, Provider_context.Entry_tast_no_dynamic tast) ->
+    { Compute_tast.tast; telemetry = Telemetry.create () }
+  | (true, Provider_context.Entry_tast_under_dynamic tast) ->
+    { Compute_tast.tast; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
-  | None ->
+  | (_, _) ->
     let f () =
       compute_tast_and_errors_unquarantined_internal
         ~ctx

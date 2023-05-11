@@ -1,0 +1,28 @@
+File "type-refinement.php", line 10, characters 13-38:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 11, characters 16-42:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 12, characters 17-53:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 13, characters 16-45:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 14, characters 17-59:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 16, characters 18-54:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 22, characters 16-45:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 23, characters 17-51:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 24, characters 29-66:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 25, characters 29-73:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 27, characters 19-68:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 28, characters 27-77:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-refinement.php", line 6, characters 23-24:
+Type constant `Tb` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "type-refinement.php", line 5, characters 7-9:
+  Or make the class abstract.

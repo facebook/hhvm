@@ -694,7 +694,9 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       XLOGF(INFO, "Trying to open SQLite DB at {}", dbData.m_path.native());
       auto txn = db.begin();
       createSchema(txn);
-      rebuildIndices(txn);
+      if (!db.isReadOnly()) {
+        rebuildIndices(txn);
+      }
       db.setBusyTimeout(60'000);
       txn.commit();
       XLOGF(INFO, "Connected to SQLite DB at {}", dbData.m_path.native());

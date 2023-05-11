@@ -57,10 +57,11 @@ impl Pass for ValidateIllegalNamePass {
     }
 
     fn on_ty_fun_def_bottom_up(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
-        let lower_name = elem.name.name().to_ascii_lowercase();
-        let lower_norm = lower_name
-            .strip_prefix('/')
-            .unwrap_or(&lower_name)
+        let name = elem.name.name();
+        let lower_norm = name
+            .strip_prefix('\\')
+            .unwrap_or(name)
+            .to_ascii_lowercase()
             .to_string();
         if lower_norm == sn::members::__CONSTRUCT || lower_norm == "using" {
             env.emit_error(NastCheckError::IllegalFunctionName {

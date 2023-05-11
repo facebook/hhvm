@@ -1,0 +1,4 @@
+File "higher_kinded_type_constraints2.php", line 15, characters 3-4:
+`T2` is a type parameter. Type parameters cannot themselves have type parameters (Naming[2047])
+File "higher_kinded_type_constraints2.php", line 24, characters 9-10:
+Unbound name: `T3` (Naming[2049])

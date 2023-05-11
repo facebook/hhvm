@@ -1,0 +1,4 @@
+File "higher_kinded_type_constraints1.php", line 17, characters 3-4:
+`T1` is a type parameter. Type parameters cannot themselves have type parameters (Naming[2047])
+File "higher_kinded_type_constraints1.php", line 18, characters 3-4:
+`T3` is a type parameter. Type parameters cannot themselves have type parameters (Naming[2047])

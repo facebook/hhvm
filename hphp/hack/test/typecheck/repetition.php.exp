@@ -1,0 +1,14 @@
+File "repetition.php", line 3, characters 43-44:
+Argument already bound: `$x` (Naming[2036])
+File "repetition.php", line 7, characters 32-32:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "repetition.php", line 7, characters 29-29:
+  `T` is already bound here
+File "repetition.php", line 9, characters 35-35:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "repetition.php", line 9, characters 32-32:
+  `T` is already bound here
+File "repetition.php", line 12, characters 46-46:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "repetition.php", line 12, characters 43-43:
+  `T` is already bound here

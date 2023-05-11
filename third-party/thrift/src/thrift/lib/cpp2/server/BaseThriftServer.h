@@ -580,7 +580,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return current setting.
    */
   std::string getCPUWorkerThreadName() const {
-    return thriftConfig_.getCPUWorkerThreadName();
+    return thriftConfig_.getCPUWorkerThreadName().get();
   }
 
   /**
@@ -752,7 +752,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return workers joing timeout in seconds
    */
   std::chrono::seconds getWorkersJoinTimeout() const {
-    return thriftConfig_.getWorkersJoinTimeout();
+    return thriftConfig_.getWorkersJoinTimeout().get();
   }
 
   /**
@@ -915,7 +915,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * hold.
    */
   uint32_t getMaxNumPendingConnectionsPerWorker() const {
-    return thriftConfig_.getMaxNumPendingConnectionsPerWorker();
+    return thriftConfig_.getMaxNumPendingConnectionsPerWorker().get();
   }
   /**
    * Set the maximum number of pending connections each io worker thread can
@@ -938,7 +938,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    *  @return number of milliseconds, or 0 if no timeout set.
    */
   std::chrono::milliseconds getIdleTimeout() const {
-    return thriftConfig_.getIdleTimeout();
+    return thriftConfig_.getIdleTimeout().get();
   }
 
   void setConnectionAgeTimeout(std::chrono::milliseconds timeout) {
@@ -947,7 +947,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   std::chrono::milliseconds getConnectionAgeTimeout() const {
-    return thriftConfig_.getConnectionAgeTimeout();
+    return thriftConfig_.getConnectionAgeTimeout().get();
   }
 
   /** Set maximum number of milliseconds we'll wait for data (0 = infinity).
@@ -975,7 +975,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return number of IO worker threads
    */
   size_t getNumIOWorkerThreads() const final {
-    return thriftConfig_.getNumIOWorkerThreads();
+    return thriftConfig_.getNumIOWorkerThreads().get();
   }
 
   /**
@@ -1000,7 +1000,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return number of CPU (pool) threads
    */
   size_t getNumCPUWorkerThreads() const {
-    return thriftConfig_.getNumCPUWorkerThreads();
+    return thriftConfig_.getNumCPUWorkerThreads().get();
   }
 
   bool getEnableCodel() const { return thriftConfig_.getEnableCodel().get(); }
@@ -1241,7 +1241,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    *
    * @return listen backlog.
    */
-  int getListenBacklog() const { return thriftConfig_.getListenBacklog(); }
+  int getListenBacklog() const {
+    return thriftConfig_.getListenBacklog().get();
+  }
 
   // Do not try to access ThreadManager in this function as
   // ThreadManagers are being deprecated from thrift server
@@ -1270,7 +1272,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   const folly::sorted_vector_set<std::string>&
   getMethodsBypassMaxRequestsLimit() const {
-    return thriftConfig_.getMethodsBypassMaxRequestsLimit();
+    return thriftConfig_.getMethodsBypassMaxRequestsLimit().get();
   }
 
   void setGetLoad(std::function<int64_t(const std::string&)> getLoad) {
@@ -1326,7 +1328,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * Return the maximum memory usage by each debug payload.
    */
   uint64_t getMaxDebugPayloadMemoryPerRequest() const {
-    return thriftConfig_.getMaxDebugPayloadMemoryPerRequest();
+    return thriftConfig_.getMaxDebugPayloadMemoryPerRequest().get();
   }
 
   /**
@@ -1342,7 +1344,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * payloads.
    */
   uint64_t getMaxDebugPayloadMemoryPerWorker() const {
-    return thriftConfig_.getMaxDebugPayloadMemoryPerWorker();
+    return thriftConfig_.getMaxDebugPayloadMemoryPerWorker().get();
   }
 
   /**
@@ -1361,7 +1363,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * payloads.
    */
   uint16_t getMaxFinishedDebugPayloadsPerWorker() const {
-    return thriftConfig_.getMaxFinishedDebugPayloadsPerWorker();
+    return thriftConfig_.getMaxFinishedDebugPayloadsPerWorker().get();
   }
 
   /**

@@ -844,25 +844,25 @@ let localize_targ env ta =
   let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
-let rec set_function_pointer ty =
+let rec set_function_pointer env ty =
   match get_node ty with
   | Tfun ft ->
     let ft = set_ft_is_function_pointer ft true in
-    mk (get_reason ty, Tfun ft)
-  | Tnewtype (name, [ty1], ty2) when String.equal name SN.Classes.cSupportDyn ->
-    let ty3 = set_function_pointer ty1 in
-    mk (get_reason ty, Tnewtype (name, [ty3], ty2))
-  | _ -> ty
+    (env, mk (get_reason ty, Tfun ft))
+  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
+    let (env, ty1) = set_function_pointer env ty1 in
+    Typing_utils.make_supportdyn (get_reason ty) env ty1
+  | _ -> (env, ty)
 
-let rec set_readonly_this ty =
+let rec set_readonly_this pos env ty =
   match get_node ty with
   | Tfun ft ->
     let ft = set_ft_readonly_this ft true in
-    mk (get_reason ty, Tfun ft)
-  | Tnewtype (name, [ty1], ty2) when String.equal name SN.Classes.cSupportDyn ->
-    let ty3 = set_readonly_this ty1 in
-    mk (get_reason ty, Tnewtype (name, [ty3], ty2))
-  | _ -> ty
+    (env, mk (get_reason ty, Tfun ft))
+  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
+    let (env, ty1) = set_readonly_this pos env ty1 in
+    Typing_utils.make_supportdyn (get_reason ty) env ty1
+  | _ -> (env, ty)
 
 let xhp_attribute_decl_ty env sid obj attr =
   let (namepstr, valpty) = attr in
@@ -4110,9 +4110,9 @@ and expr_
         cid
     in
     let env = Env.set_tyvar_variance env fpty in
-    let fpty = set_function_pointer fpty in
+    let (env, fpty) = set_function_pointer env fpty in
     (* All function pointers are readonly_this since they are either toplevel or static *)
-    let fpty = set_readonly_this fpty in
+    let (env, fpty) = set_readonly_this p env fpty in
     make_result
       env
       p
@@ -4338,9 +4338,9 @@ and expr_
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in
-    let fty = set_function_pointer fty in
+    let (env, fty) = set_function_pointer env fty in
     (* All function pointers are readonly_this since they are always a toplevel function or static method *)
-    let fty = set_readonly_this fty in
+    let (env, fty) = set_readonly_this p env fty in
     make_result env p e fty
   | Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 } ->
     let (env, te1, ty1) =

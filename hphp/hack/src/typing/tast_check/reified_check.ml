@@ -145,8 +145,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
 
 let rec get_ft_tparams fun_ty =
   match get_node fun_ty with
-  | Tnewtype (name, [ty1], _ty2) when String.equal name SN.Classes.cSupportDyn
-    ->
+  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
     get_ft_tparams ty1
   | Tfun ({ ft_tparams; _ } as fun_ty) -> Some (ft_tparams, fun_ty)
   | _ -> None

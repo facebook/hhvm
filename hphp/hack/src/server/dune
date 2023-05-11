@@ -379,6 +379,7 @@
   codeActionsService
   codeActionsServiceExtractVariable
   codeActionsServiceFlipAroundComma
+  codeActionsServiceInlineVariable
  )
  (libraries
   annotated_ast

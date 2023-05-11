@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"",
+            "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"0",
+            "range":{"end":{"character":31,"line":4},"start":{"character":29,"line":4}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Inline variable $x"
+  }
+]

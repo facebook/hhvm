@@ -342,22 +342,21 @@ let continue_in_switch pos =
 let await_in_sync_function pos func_pos =
   let quickfixes =
     match func_pos with
-    | None -> Some []
+    | None -> []
     | Some fix_pos ->
       let (_, start_col) = Pos.line_column fix_pos in
       let fix_pos = Pos.set_col_end (start_col - 9) fix_pos in
       let fix_pos = Pos.set_col_start (start_col - 9) fix_pos in
-      Some
-        [
-          Quickfix.make
-            ~title:("Make function " ^ Markdown_lite.md_codify "async")
-            ~new_text:"async "
-            fix_pos;
-        ]
+      [
+        Quickfix.make
+          ~title:("Make function " ^ Markdown_lite.md_codify "async")
+          ~new_text:"async "
+          fix_pos;
+      ]
   in
   User_error.make
     Error_code.(to_enum AwaitInSyncFunction)
-    ?quickfixes
+    ~quickfixes
     (pos, "`await` can only be used inside `async` functions")
     []
 

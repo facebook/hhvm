@@ -359,9 +359,7 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         passes::validate_fun_param_inout::ValidateFunParamInoutPass::default(),
 
         // Validate use of `Await` in sync functions and return in generators.
-        // This pass (`naming_coroutine_check.ml`) is not in the passes run from
-        // `naming.ml`!
-        //passes::validate_coroutine::ValidateCoroutinePass::default(),
+        passes::validate_coroutine::ValidateCoroutinePass::default(),
 
         // Checks for the presence of a function body in methods, use of traits
         // and instance and static member variables in an interface definition

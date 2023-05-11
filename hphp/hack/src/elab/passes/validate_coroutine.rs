@@ -7,6 +7,7 @@ use bitflags::bitflags;
 use nast::AsExpr;
 use nast::Expr;
 use nast::Expr_;
+use nast::FunDef;
 use nast::FunKind;
 use nast::Fun_;
 use nast::Method_;
@@ -103,9 +104,12 @@ impl Pass for ValidateCoroutinePass {
         Continue(())
     }
 
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
+        self.func_pos = Some(elem.name.pos().clone());
+        Continue(())
+    }
     fn on_ty_fun__top_down(&mut self, _: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun_kind);
-        self.func_pos = Some(elem.span.clone());
         Continue(())
     }
 }

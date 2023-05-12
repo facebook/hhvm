@@ -134,7 +134,13 @@ inline protocol::Value const_to_value(const t_const_value& val) {
   switch (type) {
     case t_type::type::t_bool:
       ret.emplace_bool();
-      ret.as_bool() = val.get_bool();
+      if (val.get_type() == t_const_value::CV_BOOL) {
+        ret.as_bool() = val.get_bool();
+      } else if (val.get_type() == t_const_value::CV_INTEGER) {
+        auto value = val.get_integer();
+        assert(value == 0 || value == 1);
+        ret.as_bool() = value;
+      }
       break;
     case t_type::type::t_byte:
       ret.emplace_byte();

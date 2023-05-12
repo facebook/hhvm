@@ -133,8 +133,8 @@ T& mergeServerAttributeRawValues(
     std::optional<T>& baseline,
     T& defaultValue) {
   if (!overrideInternal && override && baseline && !folly::kIsDebug) {
-    FB_LOG_EVERY_MS(ERROR, 60000)
-        << "using ThriftServer::set...() API is discouraged. Prefer using thrift server configs https://fburl.com/thrift-server-configuration";
+    FB_LOG_EVERY_MS(WARNING, 60000)
+        << "using ThriftServer::set...() API is discouraged. Prefer using thrift server configs https://fburl.com/no_thrift_configuration_in_code";
   }
   return overrideInternal ? *overrideInternal
       : override          ? *override

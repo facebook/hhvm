@@ -87,18 +87,6 @@ module Common_argspecs = struct
       Arg.String (fun s -> value_ref := Some s),
       " use the provided naming table instead of fetching it from a saved state"
     )
-
-  let log_retry_start log_retry_start_ref =
-    ( "--log-retry-start",
-      Arg.Float (fun n -> Option.iter log_retry_start_ref ~f:(fun r -> r := n)),
-      " (For telemetry) in case we're here because an earlier 'hh' ended in Server_hung_up_should_retry"
-    )
-
-  let log_retry_count log_retry_count_ref =
-    ( "--log-retry-count",
-      Arg.Int (fun n -> Option.iter log_retry_count_ref ~f:(fun r -> r := n)),
-      " (For telemetry) in case we're here because an earlier 'hh' ended in Server_hung_up_should_retry"
-    )
 end
 
 let parse_command () =
@@ -137,8 +125,6 @@ let parse_check_args cmd ~from_default =
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
   let from = ref from_default in
-  let log_retry_start = ref (Unix.gettimeofday ()) in
-  let log_retry_count = ref 0 in
   let show_spinner = ref None in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
@@ -594,8 +580,6 @@ let parse_check_args cmd ~from_default =
         Arg.Unit (fun () -> set_mode MODE_LIST_FILES),
         " (mode) list files with errors" );
       ("--lock-file", Arg.Set lock_file, " (mode) show lock file name and exit");
-      Common_argspecs.log_retry_count (Some log_retry_count);
-      Common_argspecs.log_retry_start (Some log_retry_start);
       ( "--log-inference-constraints",
         Arg.Set log_inference_constraints,
         "  (for hh debugging purpose only) log type"
@@ -922,8 +906,6 @@ let parse_check_args cmd ~from_default =
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     paths;
     log_inference_constraints = !log_inference_constraints;
-    log_retry_count = !log_retry_count;
-    log_retry_start = !log_retry_start;
     max_errors = !max_errors;
     mode;
     no_load =
@@ -985,8 +967,6 @@ let parse_start_env command ~from_default =
         Arg.Set log_inference_constraints,
         " (for hh debugging purpose only) log type"
         ^ " inference constraints into external logger (e.g. Scuba)" );
-      Common_argspecs.log_retry_count None;
-      Common_argspecs.log_retry_start None;
       ("--no-load", Arg.Set no_load, " start from a fresh state");
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.prechecked prechecked;
@@ -1041,13 +1021,7 @@ let parse_stop_args ~from_default =
       Sys.argv.(0)
   in
   let from = ref from_default in
-  let options =
-    [
-      Common_argspecs.from from;
-      Common_argspecs.log_retry_count None;
-      Common_argspecs.log_retry_start None;
-    ]
-  in
+  let options = [Common_argspecs.from from] in
   let args = parse_without_command options usage "stop" in
   let root = Wwwroot.interpret_command_line_root_parameter args in
   CStop { ClientStop.root; from = !from }
@@ -1071,8 +1045,6 @@ let parse_lsp_args () =
       ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       Common_argspecs.ignore_hh_version ignore_hh_version;
-      Common_argspecs.log_retry_count None;
-      Common_argspecs.log_retry_start None;
       Common_argspecs.naming_table naming_table;
       ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");
@@ -1112,8 +1084,6 @@ let parse_rage_args () =
       ( "--rageid",
         Arg.String (fun s -> rageid := Some s),
         " (optional) use this id, and finish even if parent process dies" );
-      Common_argspecs.log_retry_count None;
-      Common_argspecs.log_retry_start None;
       ( "--lsp-log",
         Arg.String (fun s -> lsp_log := Some s),
         " (optional) gather lsp logs from this filename" );
@@ -1236,8 +1206,6 @@ invocations of `hh` faster.|}
     Arg.align
       [
         Common_argspecs.from from;
-        Common_argspecs.log_retry_count None;
-        Common_argspecs.log_retry_start None;
         ( "--type",
           Arg.String (fun arg -> saved_state_type := Some arg),
           Printf.sprintf

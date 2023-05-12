@@ -116,8 +116,6 @@ let connect ?(use_priority_pipe = false) args =
     no_load;
     watchman_debug_logging;
     log_inference_constraints;
-    log_retry_count = _;
-    log_retry_start = _;
     remote;
     show_spinner;
     ignore_hh_version;
@@ -1086,13 +1084,7 @@ let main
           main_internal args local_config partial_telemetry_ref)
     in
     let spinner = ClientSpinner.get_latest_report () in
-    HackEventLogger.client_check
-      exit_status
-      telemetry
-      ~init_proc_stack
-      ~spinner
-      ~retry_start:args.log_retry_start
-      ~retry_count:args.log_retry_count;
+    HackEventLogger.client_check exit_status telemetry ~init_proc_stack ~spinner;
     Hh_logger.log "CLIENT_CHECK %s" (Exit_status.show exit_status);
     Exit.exit exit_status
   with
@@ -1123,9 +1115,7 @@ let main
           exit_status
           telemetry
           ~init_proc_stack
-          ~spinner
-          ~retry_start:args.log_retry_start
-          ~retry_count:args.log_retry_count;
+          ~spinner;
         Hh_logger.log
           "CLIENT_CHECK_PARTIAL [%s] %s"
           (Option.value_map spinner ~f:fst ~default:"")
@@ -1135,9 +1125,7 @@ let main
           exit_status
           e
           ~init_proc_stack
-          ~spinner
-          ~retry_start:args.log_retry_start
-          ~retry_count:args.log_retry_count;
+          ~spinner;
         Hh_logger.log
           "CLIENT_CHECK_EXIT [%s] %s"
           (Option.value_map spinner ~f:fst ~default:"")

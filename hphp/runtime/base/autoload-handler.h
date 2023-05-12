@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/user-autoload-map.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {
@@ -59,32 +58,6 @@ struct AutoloadHandler final : RequestEventHandler {
   bool autoloadTypeAlias(const String& name);
   bool autoloadModule(StringData* name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
-
-  /**
-   * Initialize the AutoloadHandler with a given root directory and map of
-   * symbols to files.
-   *
-   * The map has the form:
-   *
-   * ```
-   *  shape('class'    => dict['cls' => 'cls_file.php', ...],
-   *        'function' => dict['fun' => 'fun_file.php', ...],
-   *        'constant' => dict['con' => 'con_file.php', ...],
-   *        'type'     => dict['type' => 'type_file.php', ...],
-   *        'module'   => dict['module' => 'module_file.php', ...],
-   *        'failure'  => (string $type, string $name, mixed $err): ?bool ==> {
-   *          return null;  // KEEP_GOING We don't know where this symbol is,
-   *                                      but it isn't important. Ignore the
-   *                                      failure.
-   *          return true;  // RETRY We require_once'd the correct file and the
-   *                                 symbol should now be loaded. Try again.
-   *          return false; // STOP We don't know where this symbol is and we
-   *                                need to know where it is to correctly
-   *                                continue the request. Abort the request.
-   *        });
-   * ```
-   */
-  bool setMap(const Array& map, String root);
 
   const AutoloadMap* getAutoloadMap() const {
     return m_map;
@@ -162,11 +135,9 @@ private:
 
   // The value of m_map determines which data structure, if any, we'll be
   // using for autoloading within this request. m_map may have the same value
-  // as m_req_map (a request-scoped AutoloadMap set from userland) or m_facts
-  // (a statically-scoped native AutoloadMap that can answer additional
-  // queries about the codebase).
+  // as m_facts, a statically-scoped native AutoloadMap that can answer
+  // queries (aka Facts) about the codebase.
   FactsStore* m_facts = nullptr;
-  req::unique_ptr<UserAutoloadMap> m_req_map;
   AutoloadMap* m_map = nullptr;
   Variant m_onPostAutoloadFunc{Variant::NullInit{}};
 

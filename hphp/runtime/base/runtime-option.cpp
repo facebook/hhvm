@@ -812,8 +812,6 @@ std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 bool RuntimeOption::AutoloadEnabled;
-int RuntimeOption::AutoloadUserlandDisabled;
-int RuntimeOption::AutoloadUserlandDisabledSampleRate;
 bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;
 bool RuntimeOption::AutoloadDBCanCreate;
@@ -2414,11 +2412,9 @@ void RuntimeOption::Load(
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", true);
-    Config::Bind(AutoloadUserlandDisabled, ini, config, "Autoload.UserlandDisabled", 1);
-    Config::Bind(AutoloadUserlandDisabledSampleRate, ini, config,
-                 "Autoload.UserlandDisabledSampleRate", 1);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
-    Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
+    Config::Bind(AutoloadEnableExternFactExtractor, ini, config,
+                 "Autoload.EnableExternFactExtractor", true);
 
     /**
      * If this option is nonempty, Facts will check if a file exists at the

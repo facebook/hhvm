@@ -34,6 +34,7 @@
 
 #include <watchman/cppclient/WatchmanClient.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/autoload-map.h"

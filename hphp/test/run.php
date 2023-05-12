@@ -1125,7 +1125,7 @@ function hphp_cmd(Options $options, string $test): string {
     find_test_ext($test, 'ini', 'hphp_config'),
     $hdf,
     '--repo-options-dir='.\dirname($test),
-    '-vRuntime.ResourceLimit.CoreFileSize=0',
+    $options->cores ? '' : '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Debug.CoreDumpReportDirectory='.Status::getWorkingDir(),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.
@@ -1157,7 +1157,7 @@ function hhbbc_cmd(Options $options, string $test): string {
     hphpc_path($options),
     '--hhbbc',
     '--no-logging',
-    '--no-cores',
+    $options->cores ? '' : '--no-cores',
     '--parallel-num-threads=' . ($options->repo_threads ?? 1),
     '--parallel-final-threads=' . ($options->repo_threads ?? 1),
     '--extern-worker-working-dir=' . $working_dir,

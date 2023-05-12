@@ -53,7 +53,8 @@ struct SymbolRefEdge {
 struct Package {
   Package(const std::string& root,
           coro::TicketExecutor& executor,
-          extern_worker::Client& client);
+          extern_worker::Client& client,
+          bool coredump);
 
   size_t getTotalFiles() const { return m_total.load(); }
 
@@ -77,7 +78,7 @@ struct Package {
   struct Config {
     Config() = default;
 
-    static Config make() {
+    static Config make(bool coredump) {
       Config c;
       #define R(Opt) c.Opt = RO::Opt;
       UNITCACHEFLAGS()
@@ -86,6 +87,7 @@ struct Package {
       c.EvalAbortBuildOnVerifyError = RO::EvalAbortBuildOnVerifyError;
       c.IncludeRoots = RO::IncludeRoots;
       c.coeffects = CoeffectsConfig::exportForParse();
+      c.CoreDump = coredump;
       return c;
     }
 
@@ -106,8 +108,12 @@ struct Package {
       sd(EvalAbortBuildOnCompilerError)
         (EvalAbortBuildOnVerifyError)
         (IncludeRoots)
-        (coeffects);
+        (coeffects)
+        (CoreDump)
+        ;
     }
+
+    bool CoreDump;
 
   private:
     #define R(Opt) decltype(RuntimeOption::Opt) Opt;

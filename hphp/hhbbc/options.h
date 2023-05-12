@@ -97,6 +97,11 @@ struct Options {
    */
   Optional<std::string> SourceRootForFileBC;
 
+  /*
+   * Whether to dump core when crashing.
+   */
+  bool CoreDump = true;
+
   //////////////////////////////////////////////////////////////////////////////
   // Flags below this line do not affect HHBBC in a way that matters
   // to its extern-worker jobs. Therefore they are not
@@ -150,7 +155,9 @@ struct Options {
       (returnTypeRefineLimit)
       (publicSPropRefineLimit)
       (ContextSensitiveInterp)
-      (SourceRootForFileBC);
+      (SourceRootForFileBC)
+      (CoreDump)
+      ;
   }
 };
 extern Options options;

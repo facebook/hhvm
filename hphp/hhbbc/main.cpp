@@ -206,11 +206,7 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
-  if (no_cores) {
-    struct rlimit rl{};
-    setrlimit(RLIMIT_CORE, &rl);
-  }
-
+  options.CoreDump = !no_cores;
   options.TraceFunctions = make_method_map(trace_fns);
 
   if (!options.profileMemory.empty()) {
@@ -610,6 +606,13 @@ void compile_repo() {
 void process_init(const Options& o,
                   const RepoGlobalData& gd,
                   bool fullInit) {
+  if (!o.CoreDump) {
+    struct rlimit rl{};
+    rl.rlim_cur = 0;
+    rl.rlim_max = 0;
+    setrlimit(RLIMIT_CORE, &rl);
+  }
+
   rds::local::init();
   SCOPE_FAIL { rds::local::fini(); };
 

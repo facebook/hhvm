@@ -495,8 +495,7 @@ RepoGlobalData getGlobalData() {
   return gd;
 }
 
-void setCoredumps(const CompilerOptions& po) {
-  if (!po.coredump) return;
+void setCoredumps(CompilerOptions& po) {
 #ifdef _MSC_VER
 /**
  * Windows actually does core dump size and control at a system, not an app
@@ -505,6 +504,10 @@ void setCoredumps(const CompilerOptions& po) {
 #elif defined(__APPLE__) || defined(__FreeBSD__)
   struct rlimit rl;
   getrlimit(RLIMIT_CORE, &rl);
+  if (!po.coredump) {
+    po.coredump = rl.rlim_cur > 0;
+    return;
+  }
   rl.rlim_cur = 80000000LL;
   if (rl.rlim_max < rl.rlim_cur) {
     rl.rlim_max = rl.rlim_cur;
@@ -513,6 +516,10 @@ void setCoredumps(const CompilerOptions& po) {
 #else
   struct rlimit64 rl;
   getrlimit64(RLIMIT_CORE, &rl);
+  if (!po.coredump) {
+    po.coredump = rl.rlim_cur > 0;
+    return;
+  }
   rl.rlim_cur = 8000000000LL;
   if (rl.rlim_max < rl.rlim_cur) {
     rl.rlim_max = rl.rlim_cur;
@@ -906,7 +913,7 @@ std::unique_ptr<UnitIndex> computeIndex(
     insert(meta.modules, index->modules, "module");
   };
 
-  Package indexPackage{po.inputDir, executor, client};
+  Package indexPackage{po.inputDir, executor, client, po.coredump};
   Timer indexTimer(Timer::WallTime, "indexing");
 
   auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
@@ -1036,7 +1043,7 @@ using ParsedFiles = folly_concurrent_hash_map_simd<
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool process(const CompilerOptions &po) {
+bool process(CompilerOptions &po) {
 #ifndef _MSC_VER
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount,
@@ -1427,7 +1434,8 @@ bool process(const CompilerOptions &po) {
     auto parsePackage = std::make_unique<Package>(
       po.inputDir,
       *executor,
-      *client
+      *client,
+      po.coredump
     );
     Timer parseTimer(Timer::WallTime, "parsing");
 
@@ -1450,7 +1458,8 @@ bool process(const CompilerOptions &po) {
   auto package = std::make_unique<Package>(
     po.inputDir,
     *executor,
-    *client
+    *client,
+    po.coredump
   );
 
   {
@@ -1558,6 +1567,7 @@ bool process(const CompilerOptions &po) {
   if (Option::ConstFoldFileBC) {
     HHBBC::options.SourceRootForFileBC = RO::SourceRoot;
   }
+  HHBBC::options.CoreDump = po.coredump;
 
   Timer timer{Timer::WallTime, "running HHBBC"};
   HphpSession session{Treadmill::SessionKind::HHBBC};

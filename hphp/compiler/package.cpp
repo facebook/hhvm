@@ -67,14 +67,15 @@ const StaticString s_EntryPoint("__EntryPoint");
 
 Package::Package(const std::string& root,
                  coro::TicketExecutor& executor,
-                 extern_worker::Client& client)
+                 extern_worker::Client& client,
+                 bool coredump)
   : m_root{root}
   , m_failed{false}
   , m_total{0}
   , m_executor{executor}
   , m_client{client}
   , m_config{
-      [this] { return m_client.store(Config::make()); },
+      [this, coredump] { return m_client.store(Config::make(coredump)); },
       m_executor.sticky()
     }
   , m_repoOptions{client}
@@ -288,6 +289,13 @@ void finishJob() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Package::parseInit(const Config& config, FileMetaVec meta) {
+  if (!config.CoreDump) {
+    struct rlimit rl{};
+    rl.rlim_cur = 0;
+    rl.rlim_max = 0;
+    setrlimit(RLIMIT_CORE, &rl);
+  }
+
   rds::local::init();
 
   Hdf hdf;

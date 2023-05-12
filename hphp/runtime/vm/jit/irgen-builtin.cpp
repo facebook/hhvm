@@ -302,7 +302,7 @@ SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
 
   Array result = empty_dict_array();
   auto skipped = false;
-  auto found = true;
+  auto found = false;
 
   for (auto i = env.inlineState.depth; i > 0; i--) {
     auto const sk = env.inlineState.bcStateStack[i - 1];
@@ -1695,15 +1695,9 @@ SSATmp* builtinCall(IRGS& env,
                     ParamPrep& params) {
   assertx(callee->nativeFuncPtr());
 
-  if (isInlining(env)) {
-    // For FCallBuiltin, params are TypedValues, while for NativeImpl, they're
-    // pointers to these values on the frame. We only optimize native calls
-    // when we have the values.
-    auto const opt = optimizedFCallBuiltin(env, callee, params);
-    if (opt) return opt;
-
-    env.irb->exceptionStackBoundary();
-  }
+  auto const opt = optimizedFCallBuiltin(env, callee, params);
+  if (opt) return opt;
+  env.irb->exceptionStackBoundary();
 
   // Collect the realized parameters.
   auto realized = realize_params(env, callee, params);

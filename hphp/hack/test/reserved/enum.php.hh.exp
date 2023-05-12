@@ -16,54 +16,6 @@ File "enum.php--Int.php", line 2, characters 6-6:
 A name is expected here. (Parsing[1002])
 File "enum.php--Mixed.php", line 2, characters 6-10:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NArraykey.php", line 3, characters 6-13:
-Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NBool.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NCallable.php", line 3, characters 6-13:
-Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NDarray.php", line 3, characters 6-11:
-Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NDynamic.php", line 3, characters 6-12:
-Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NFalse.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NFloat.php", line 3, characters 6-10:
-Cannot use `Float` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NInt.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NMixed.php", line 3, characters 6-10:
-Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NNonnull.php", line 3, characters 6-12:
-Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NNoreturn.php", line 3, characters 6-13:
-Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NNothing.php", line 3, characters 6-12:
-Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NNull.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NNum.php", line 3, characters 6-8:
-Cannot use `Num` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NParent.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NResource.php", line 3, characters 6-13:
-Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NSelf.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NStatic.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NString.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NThis.php", line 3, characters 6-9:
-Cannot use `This` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NTrue.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--NVarray.php", line 3, characters 6-11:
-Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
-File "enum.php--NVoid.php", line 3, characters 6-6:
-A name is expected here. (Parsing[1002])
-File "enum.php--N_.php", line 3, characters 6-6:
-Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "enum.php--Nonnull.php", line 2, characters 6-12:
 Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "enum.php--Noreturn.php", line 2, characters 6-13:

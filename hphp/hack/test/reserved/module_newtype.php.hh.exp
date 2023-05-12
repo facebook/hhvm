@@ -16,60 +16,6 @@ File "module_newtype.php--Int.php", line 3, characters 16-18:
 Cannot use `Int` as a type name as it is reserved (Parsing[1002])
 File "module_newtype.php--Mixed.php", line 3, characters 16-20:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NArraykey.php", line 4, characters 16-23:
-Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NBool.php", line 4, characters 16-19:
-Cannot use `Bool` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NCallable.php", line 4, characters 16-23:
-Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NDarray.php", line 4, characters 16-21:
-Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NDynamic.php", line 4, characters 16-22:
-Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NFalse.php", line 4, characters 16-20:
-Cannot use `False` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NFloat.php", line 4, characters 16-20:
-Cannot use `Float` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NInt.php", line 4, characters 16-18:
-Cannot use `Int` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NMixed.php", line 4, characters 16-20:
-Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NNonnull.php", line 4, characters 16-22:
-Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NNoreturn.php", line 4, characters 16-23:
-Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NNothing.php", line 4, characters 16-22:
-Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NNull.php", line 4, characters 16-19:
-Cannot use `Null` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NNum.php", line 4, characters 16-18:
-Cannot use `Num` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NParent.php", line 4, characters 16-21:
-Cannot use `Parent` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NResource.php", line 4, characters 16-23:
-Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NSelf.php", line 4, characters 16-19:
-Cannot use `Self` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NStatic.php", line 4, characters 16-16:
-A name is expected here. (Parsing[1002])
-File "module_newtype.php--NStatic.php", line 4, characters 16-21:
-Encountered unexpected text `Static`, was expecting a type hint. (Parsing[1002])
-File "module_newtype.php--NStatic.php", line 4, characters 23-24:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "module_newtype.php--NStatic.php", line 4, characters 26-35:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "module_newtype.php--NString.php", line 4, characters 16-21:
-Cannot use `String` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NThis.php", line 4, characters 16-19:
-Cannot use `This` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NTrue.php", line 4, characters 16-19:
-Cannot use `True` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NVarray.php", line 4, characters 16-21:
-Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--NVoid.php", line 4, characters 16-19:
-Cannot use `Void` as a type name as it is reserved (Parsing[1002])
-File "module_newtype.php--N_.php", line 4, characters 16-16:
-Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "module_newtype.php--Nonnull.php", line 3, characters 16-22:
 Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "module_newtype.php--Noreturn.php", line 3, characters 16-23:

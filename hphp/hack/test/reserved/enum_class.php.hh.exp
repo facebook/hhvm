@@ -16,54 +16,6 @@ File "enum_class.php--Int.php", line 2, characters 12-12:
 A name is expected here. (Parsing[1002])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NArraykey.php", line 3, characters 12-19:
-Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NBool.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NCallable.php", line 3, characters 12-19:
-Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NDarray.php", line 3, characters 12-17:
-Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NDynamic.php", line 3, characters 12-18:
-Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NFalse.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NFloat.php", line 3, characters 12-16:
-Cannot use `Float` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NInt.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NMixed.php", line 3, characters 12-16:
-Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NNonnull.php", line 3, characters 12-18:
-Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NNoreturn.php", line 3, characters 12-19:
-Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NNothing.php", line 3, characters 12-18:
-Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NNull.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NNum.php", line 3, characters 12-14:
-Cannot use `Num` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NParent.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NResource.php", line 3, characters 12-19:
-Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NSelf.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NStatic.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NString.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NThis.php", line 3, characters 12-15:
-Cannot use `This` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NTrue.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--NVarray.php", line 3, characters 12-17:
-Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
-File "enum_class.php--NVoid.php", line 3, characters 12-12:
-A name is expected here. (Parsing[1002])
-File "enum_class.php--N_.php", line 3, characters 12-12:
-Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Nonnull.php", line 2, characters 12-18:
 Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "enum_class.php--Noreturn.php", line 2, characters 12-19:
@@ -125,70 +77,6 @@ Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NArraykey.php", line 3, characters 12-19:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NArraykey.php", line 3, characters 12-19:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NCallable.php", line 3, characters 12-19:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NCallable.php", line 3, characters 12-19:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NClassname.php", line 3, characters 12-20:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NClassname.php", line 3, characters 12-20:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NDarray.php", line 3, characters 12-17:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NDarray.php", line 3, characters 12-17:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NDynamic.php", line 3, characters 12-18:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NDynamic.php", line 3, characters 12-18:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NFloat.php", line 3, characters 12-16:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NFloat.php", line 3, characters 12-16:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NFoo.php", line 3, characters 12-14:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NFoo.php", line 3, characters 12-14:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NMixed.php", line 3, characters 12-16:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NMixed.php", line 3, characters 12-16:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NNonnull.php", line 3, characters 12-18:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NNonnull.php", line 3, characters 12-18:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NNoreturn.php", line 3, characters 12-19:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NNoreturn.php", line 3, characters 12-19:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NNothing.php", line 3, characters 12-18:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NNothing.php", line 3, characters 12-18:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NNum.php", line 3, characters 12-14:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NNum.php", line 3, characters 12-14:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NResource.php", line 3, characters 12-19:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NResource.php", line 3, characters 12-19:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NThis.php", line 3, characters 12-15:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NThis.php", line 3, characters 12-15:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--NVarray.php", line 3, characters 12-17:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--NVarray.php", line 3, characters 12-17:
-Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--N_.php", line 3, characters 12-12:
-Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--N_.php", line 3, characters 12-12:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
 File "enum_class.php--Nonnull.php", line 2, characters 12-18:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])

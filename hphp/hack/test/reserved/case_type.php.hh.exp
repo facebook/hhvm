@@ -16,54 +16,6 @@ File "case_type.php--Int.php", line 3, characters 11-11:
 A name is expected here. (Parsing[1002])
 File "case_type.php--Mixed.php", line 3, characters 11-15:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NArraykey.php", line 4, characters 11-18:
-Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NBool.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NCallable.php", line 4, characters 11-18:
-Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NDarray.php", line 4, characters 11-16:
-Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NDynamic.php", line 4, characters 11-17:
-Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NFalse.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NFloat.php", line 4, characters 11-15:
-Cannot use `Float` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NInt.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NMixed.php", line 4, characters 11-15:
-Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NNonnull.php", line 4, characters 11-17:
-Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NNoreturn.php", line 4, characters 11-18:
-Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NNothing.php", line 4, characters 11-17:
-Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NNull.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NNum.php", line 4, characters 11-13:
-Cannot use `Num` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NParent.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NResource.php", line 4, characters 11-18:
-Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NSelf.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NStatic.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NString.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NThis.php", line 4, characters 11-14:
-Cannot use `This` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NTrue.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--NVarray.php", line 4, characters 11-16:
-Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
-File "case_type.php--NVoid.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-File "case_type.php--N_.php", line 4, characters 11-11:
-Cannot use `_` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--Nonnull.php", line 3, characters 11-17:
 Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
 File "case_type.php--Noreturn.php", line 3, characters 11-18:

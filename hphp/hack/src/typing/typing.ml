@@ -398,6 +398,8 @@ let get_kvc_inst env p kvc_kind ty =
  *)
 let is_return_disposable_fun_type env ty =
   let (_env, ty) = Env.expand_type env ty in
+  let ty = TUtils.strip_dynamic env ty in
+  let (_, _env, ty) = TUtils.strip_supportdyn env ty in
   match get_node ty with
   | Tfun ft ->
     get_ft_return_disposable ft

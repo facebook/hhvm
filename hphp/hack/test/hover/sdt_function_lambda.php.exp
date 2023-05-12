@@ -1,1 +1,1 @@
-(dynamic | int) (dynamic when called dynamically)
+~int (dynamic when called dynamically)

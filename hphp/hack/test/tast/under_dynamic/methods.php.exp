@@ -20,7 +20,7 @@
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((vec<int>), [5:12-14], (Lvar ([5:12-14], $v))))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = (((dynamic | vec<int>)), (Some ([4:47-55], (Happly (([4:47-50], "\\HH\\vec"), [([4:51-54], (Hprim Tint))]))))); 
+         m_ret = ((~vec<int>), (Some ([4:47-55], (Happly (([4:47-50], "\\HH\\vec"), [([4:51-54], (Hprim Tint))]))))); 
          m_external = false; m_doc_comment = None };
         { m_span = [4:3-6:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -54,8 +54,8 @@
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((string), [9:12-14], (Lvar ([9:12-14], $s))))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = (((dynamic | string)), (Some ([8:47-53], (Hprim Tstring)))); 
-          m_external = false; m_doc_comment = None };
+          m_ret = ((~string), (Some ([8:47-53], (Hprim Tstring)))); m_external = false; 
+          m_doc_comment = None };
         { m_span = [8:3-10:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([8:19-21], "m2"); m_tparams = []; m_where_constraints = [];

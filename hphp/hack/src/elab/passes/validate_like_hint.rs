@@ -23,7 +23,7 @@ impl Pass for ValidateLikeHintPass {
     fn on_ty_hint_top_down(&mut self, env: &Env, hint: &mut Hint) -> ControlFlow<()> {
         match hint {
             Hint(pos, box Hint_::Hlike(_))
-                if !(self.allow_like || env.like_type_hints_enabled() || env.everything_sdt()) =>
+                if !(self.allow_like || env.like_type_hints_enabled()) =>
             {
                 env.emit_error(ExperimentalFeature::LikeType(pos.clone()));
             }

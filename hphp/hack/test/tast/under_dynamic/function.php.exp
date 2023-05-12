@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = (((dynamic | vec<int>)), (Some ([3:37-45], (Happly (([3:37-40], "\\HH\\vec"), [([3:41-44], (Hprim Tint))])))));
+        f_readonly_ret = None; f_ret = ((~vec<int>), (Some ([3:37-45], (Happly (([3:37-40], "\\HH\\vec"), [([3:41-44], (Hprim Tint))])))));
         f_params =
         [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:12-20], (Happly (([3:12-15], "\\HH\\vec"), [([3:16-19], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:21-23]; param_name = "$v"; 

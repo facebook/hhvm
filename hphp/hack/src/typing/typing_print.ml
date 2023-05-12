@@ -681,6 +681,10 @@ module Full = struct
         @ List.map (TySet.elements upper) ~f:(fun ty ->
               (tparam, Ast_defs.Constraint_as, ty))
 
+  let show_likes env =
+    TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+    || TypecheckerOptions.like_type_hints env.genv.tcopt
+
   let rec is_open_mixed env t =
     match get_node t with
     | Tnewtype (n, _, ty)
@@ -726,9 +730,7 @@ module Full = struct
     | Toption ty -> begin
       match deref ty with
       | (_, Tnonnull) -> (fuel, text "mixed")
-      | (r, Tunion tyl)
-        when TypecheckerOptions.like_type_hints env.genv.tcopt
-             && List.exists ~f:is_dynamic tyl ->
+      | (r, Tunion tyl) when show_likes env && List.exists ~f:is_dynamic tyl ->
         (* Unions with null become Toption, which leads to the awkward ?~...
          * The Tunion case can better handle this *)
         k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
@@ -828,7 +830,7 @@ module Full = struct
       *)
     | Ttuple tyl -> ttuple ~fuel k tyl
     | Tunion [] -> (fuel, text "nothing")
-    | Tunion tyl when TypecheckerOptions.like_type_hints env.genv.tcopt ->
+    | Tunion tyl when show_likes env ->
       let tyl =
         List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
         |> Typing_set.elements

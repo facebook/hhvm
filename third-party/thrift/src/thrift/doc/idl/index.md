@@ -358,23 +358,24 @@ namespace java.swift com.facebook.peoplesearch
 
 ## Definitions
 
-Thrift supports three kinds of definitions: type definitions, service definitions and constant definitions.
+Thrift supports three kinds of definitions: type definitions, interface definitions and constant definitions.
 
 ```grammar
-definition ::=  type_definition | interface_definition | constant_definition
+definition ::=
+  type_definition | interface_definition | constant_definition
 ```
 
-Type definitions appear at the top level of a Thrift file. A common property of all type definitions is that they introduce a name (an identifier) that can be used to denote the type.
+Definitions appear at the top level of a Thrift file. A common property of all definitions is that they introduce a name (an identifier) that can be used to denote the entity such as type.
 
-The name introduced by type definitions can be used anywhere in the Thrift file (either before or after the location of the definition), and in other Thrift files that include this Thrift file.
+The name introduced by definitions can be used anywhere in the Thrift file (either before or after the location of the definition), and in other Thrift files that include this Thrift file.
 
 ```grammar
 type_definition ::=
-  struct
-| union
-| exception
-| enumeration
-| typedef
+    struct
+  | union
+  | exception
+  | enumeration
+  | typedef
 ```
 
 ### Structs
@@ -383,17 +384,15 @@ type_definition ::=
 
 This section defines the primary aspects of the struct type. Separate sections below define qualifiers and default values for struct fields, constraints on serialization of structs, and compatibility between different versions of struct types.
 
-```
+```grammar
 struct ::=
+  [annotations]
   "struct" identifier "{"
-    ( FieldSpecification delimiter )*
+    (field delimiter)*
   "}"
 
-FieldSpecification ::=
-  FieldId ":" [ Qualifier ] type identifier [ DefaultValue ]
-
-FieldId ::=
-  integer
+field    ::=  field_id ":" [qualifier] type identifier [default_value]
+field_id ::=  integer
 ```
 
 Structs in Thrift look very similar to structs in C++ - though fields in Thrift structs have a field id, and optionally a qualifier and a default value. They are significantly different in that the order of appearance of fields is not important and there is no expectations on the memory layout of the objects in the corresponding programming language code.
@@ -457,10 +456,11 @@ Qualifiers and default values are described in a later section.
 
 ### Unions
 
-```
+```grammar
 union ::=
+  [annotations]
   "union" identifier "{"
-    ( FieldSpecification delimiter )*
+    (field delimiter)*
   "}"
 ```
 
@@ -482,16 +482,16 @@ NOTE: It is possible to serialize from an union type and deserialize into a comp
 
 ### Exceptions
 
-```
+```grammar
 exception ::=
-  attributes [error_safety] [error_kind] [error_blame]
+  [annotations] [error_safety] [error_kind] [error_blame]
   "exception" identifier "{"
-    ( FieldSpecification delimiter )*
+    (field delimiter)*
   "}"
 
-error_safety ::= "safe"
-error_kind   ::= "transient" | "stateful" | "permanent"
-error_blame  ::= "client" | "server"
+error_safety ::=  "safe"
+error_kind   ::=  "transient" | "stateful" | "permanent"
+error_blame  ::=  "client" | "server"
 ```
 
 Exception types are identical to struct types in all ways, except that these types can only be used as types within the `throws` clause of functions in service definitions. (This isn't enforced, but you still shouldn't do it).
@@ -554,7 +554,7 @@ typedef map<string, string> StringMap
 
 ```
 interface_definition ::=
-  ("service" | "interaction") identifier [ "extends" maybe_qualified_id ] "{"
+  ("service" | "interaction") identifier ["extends" maybe_qualified_id] "{"
     ( FunctionSpecification )*
   "}"
 
@@ -563,11 +563,11 @@ FunctionSpecification ::=
   "("
   ( ParameterSpecification )*
   ")"
-  [ "throws" "(" ( FieldSpecification )+ ")" ]
+  [ "throws" "(" field+ ")" ]
 
-ResultType ::= "void" | "oneway void" | [ "stream" ] type
+ResultType ::= "void" | "oneway void" | ["stream"] type
 
-ParameterSpecification ::= FieldId ":" type identifier [ DefaultValue ]
+ParameterSpecification ::= field_id ":" type identifier [default_value]
 ```
 
 An interface for RPC is defined in a Thrift file as a service.
@@ -782,8 +782,7 @@ The element, key, and value types can be any Thrift type, including nested conta
 ## Default Values
 
 ```
-DefaultValue ::=
-  "=" Constant
+default_value ::=  "=" Constant
 ```
 
 All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for listed below:

@@ -68,6 +68,7 @@ class ParallelWalker final {
   explicit ParallelWalker(
       std::shared_ptr<FileSystem> fileSystem,
       AbsolutePath rootPath,
+      std::optional<FileInformation> rootStat,
       size_t threadCountHint = 0);
 
   /**

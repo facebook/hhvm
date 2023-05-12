@@ -22,7 +22,6 @@ class TestEdenUnmount(WatchmanEdenTestCase.WatchmanEdenTestCase):
         clock = self.watchmanCommand("clock", root)
         self.touchRelative(root, "newfile")
 
-        # pyre-fixme[16]: Optional type has no attribute `unmount`.
         self.eden.unmount(root)
 
         with self.assertRaises(pywatchman.CommandError) as ctx:

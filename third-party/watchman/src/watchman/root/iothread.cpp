@@ -676,7 +676,12 @@ void InMemoryView::crawlerParallel(
   std::shared_ptr<CrawlerFileSystem> fs =
       std::make_shared<CrawlerFileSystem>(fileSystem_, root, watcher_);
   size_t threadCountHint = config_.getInt("parallel_crawl_thread_count", 0);
-  ParallelWalker walker{std::move(fs), path, threadCountHint};
+  ParallelWalker walker{
+      std::move(fs),
+      path,
+      root->allow_crawling_other_mounts ? std::nullopt
+                                        : std::optional{root->stat},
+      threadCountHint};
 
   // Step 1: Process readDir results.
   while (true) {
@@ -810,7 +815,7 @@ bool did_file_change(
 } // namespace
 
 void InMemoryView::statPath(
-    const RootConfig& root,
+    const Root& root,
     const CookieSync& cookies,
     ViewDatabase& view,
     PendingChanges& coll,
@@ -1000,6 +1005,15 @@ void InMemoryView::statPath(
       } else {
         // Ensure that we believe that this node exists
         dir_ent->last_check_existed = true;
+      }
+
+      if (!(root.allow_crawling_other_mounts ||
+            isOnSameMount(root.stat, st, path.c_str()))) {
+        logf(
+            DBG,
+            "Ignoring {} as it doesn't reside on the same mount point as the root directory\n",
+            pending.path);
+        return;
       }
 
       // Don't recurse if our parent is an ignore dir or via crawlerParallel

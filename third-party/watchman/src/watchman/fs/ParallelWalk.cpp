@@ -20,6 +20,7 @@ struct ParallelWalkerContext {
   // Input.
   std::shared_ptr<FileSystem> fileSystem;
   folly::Executor* executor;
+  std::optional<FileInformation> rootStat;
 
   // Task tracking. Other task states live in the Executor.
   std::atomic<size_t> readDirTaskCount{0};
@@ -31,8 +32,11 @@ struct ParallelWalkerContext {
 
   ParallelWalkerContext(
       std::shared_ptr<FileSystem> fileSystem,
-      folly::Executor* executor)
-      : fileSystem{std::move(fileSystem)}, executor{executor} {}
+      folly::Executor* executor,
+      std::optional<FileInformation> rootStat)
+      : fileSystem{std::move(fileSystem)},
+        executor{executor},
+        rootStat{rootStat} {}
 
   // Helper for (resultQueue or errorQueue).dequeue.
   // If no tasks are running, return nullopt.
@@ -214,8 +218,11 @@ void readDirTask(
   for (const auto& entry : entries) {
     if (entry.stat.isDir()) {
       AbsolutePath subdirPath = pathJoin(dirFullPath, entry.name);
-      size_t sizeHint = entry.stat.size / kApproximateSizePerEntry;
-      subdirsToRead.push_back(std::make_pair(subdirPath, sizeHint));
+      if (!context->rootStat ||
+          isOnSameMount(*context->rootStat, entry.stat, subdirPath.c_str())) {
+        size_t sizeHint = entry.stat.size / kApproximateSizePerEntry;
+        subdirsToRead.push_back(std::make_pair(subdirPath, sizeHint));
+      }
     }
   }
 
@@ -243,10 +250,11 @@ void readDirTask(
 ParallelWalker::ParallelWalker(
     std::shared_ptr<FileSystem> fileSystem,
     AbsolutePath rootPath,
+    std::optional<FileInformation> rootStat,
     size_t threadCountHint) {
   auto executor = getExecutor(threadCountHint);
-  context_ =
-      std::make_shared<ParallelWalkerContext>(std::move(fileSystem), executor);
+  context_ = std::make_shared<ParallelWalkerContext>(
+      std::move(fileSystem), executor, rootStat);
   auto task = [context = context_,
                path = std::move(rootPath),
                counter = ReadDirTaskCounter(context_)]() mutable {

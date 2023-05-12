@@ -73,6 +73,16 @@ FileInformation getFileInformation(
     const char* path,
     CaseSensitivity caseSensitive = CaseSensitivity::Unknown);
 
+/**
+ * Test to see if both the files are on the same mount point.
+ *
+ * In particular, EdenFS mount below the root will return false.
+ */
+bool isOnSameMount(
+    const FileInformation& root,
+    const FileInformation& file,
+    const char* file_path);
+
 /** equivalent to realpath() */
 w_string realPath(const char* path);
 

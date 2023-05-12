@@ -311,7 +311,7 @@ class InMemoryView final : public QueryableView {
    * `coll` if a directory needs to be rescanned.
    */
   void statPath(
-      const RootConfig& root,
+      const Root& root,
       const CookieSync& cookies,
       ViewDatabase& view,
       PendingChanges& coll,

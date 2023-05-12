@@ -220,9 +220,7 @@ class TestEdenJournal(WatchmanEdenTestCase.WatchmanEdenTestCase):
 
         clock = self.watchmanCommand("clock", root)
 
-        eden = self.eden
-        assert eden is not None
-        with eden.get_thrift_client_legacy() as thrift_client:
+        with self.eden.get_thrift_client_legacy() as thrift_client:
             thrift_client.setJournalMemoryLimit(root, 0)
             self.assertEqual(0, thrift_client.getJournalMemoryLimit(root))
 

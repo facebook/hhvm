@@ -18,7 +18,11 @@ void walk(watchman::AbsolutePath path, size_t threadCountHint) {
   auto start_time = std::chrono::steady_clock::now();
   std::shared_ptr<watchman::FileSystem> fileSystem(
       std::shared_ptr<watchman::FileSystem>{}, &watchman::realFileSystem);
-  auto walker = watchman::ParallelWalker(fileSystem, path, threadCountHint);
+  auto walker = watchman::ParallelWalker(
+      fileSystem,
+      path,
+      fileSystem->getFileInformation(path.c_str()),
+      threadCountHint);
   size_t directory_count = 0;
   size_t path_count = 0;
   off_t size = 0;

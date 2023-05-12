@@ -54,9 +54,9 @@ else:
             ".eden/this-dir",
         ]
 
-        eden: Optional[edenclient.EdenFS]
+        eden: edenclient.EdenFS
 
-        def setUp(self):
+        def setUp(self) -> None:
             super(WatchmanEdenTestCase, self).setUp()
 
             # The test EdenFS instance.
@@ -93,9 +93,7 @@ else:
             os.environ["HOME"] = self.save_home
 
         def cleanUpEden(self) -> None:
-            assert self.eden is not None
             self.eden.cleanup()
-            self.eden = None
 
         def cleanUpWatchman(self):
             roots = self.watchmanCommand("watch-list")["roots"]

@@ -98,6 +98,7 @@ class RootConfig {
   const w_string fs_type;
   const CaseSensitivity case_sensitive;
   const IgnoreSet ignore;
+  const FileInformation stat;
 };
 
 /**
@@ -237,6 +238,8 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
    */
   const std::chrono::seconds gc_age{DEFAULT_GC_AGE};
   const std::chrono::seconds idle_reap_age{0};
+
+  const bool allow_crawling_other_mounts;
 
   // Stream of broadcast unilateral items emitted by this root
   std::shared_ptr<Publisher> unilateralResponses;

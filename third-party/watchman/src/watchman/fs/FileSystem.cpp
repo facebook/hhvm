@@ -375,6 +375,26 @@ w_string readSymbolicLink(const char* path) {
 #endif
 }
 
+bool isOnSameMount(
+    const FileInformation& root,
+    const FileInformation& file,
+    const char* file_path) {
+#ifdef _WIN32
+  (void)root;
+  if ((file.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) ==
+      FILE_ATTRIBUTE_REPARSE_POINT) {
+    auto fd = openFileHandle(file_path, OpenFileHandleOptions::queryFileInfo());
+    auto reparseTag = fd.getReparseTag();
+    return reparseTag != IO_REPARSE_TAG_PROJFS;
+  } else {
+    return true;
+  }
+#else
+  (void)file_path;
+  return root.dev == file.dev;
+#endif
+}
+
 } // namespace watchman
 
 #ifdef _WIN32

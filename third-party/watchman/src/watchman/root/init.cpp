@@ -243,7 +243,12 @@ Root::Root(
     Configuration config_,
     std::shared_ptr<QueryableView> view,
     SaveGlobalStateHook saveGlobalStateHook)
-    : RootConfig{root_path, fs_type, getCaseSensitivityForPath(root_path.c_str()), computeIgnoreSet(root_path, config_)},
+    : RootConfig{
+          root_path,
+          fs_type,
+          getCaseSensitivityForPath(root_path.c_str()),
+          computeIgnoreSet(root_path, config_),
+          fileSystem.getFileInformation(root_path.c_str())},
       cookies(
           fileSystem,
           computeCookieDir(root_path, config_, case_sensitive, ignore)),
@@ -256,6 +261,7 @@ Root::Root(
       gc_age(int(config.getInt("gc_age_seconds", DEFAULT_GC_AGE))),
       idle_reap_age(
           int(config.getInt("idle_reap_age_seconds", kDefaultReapAge))),
+      allow_crawling_other_mounts{config_.getBool("allow_crawling_other_mounts", false)},
       unilateralResponses(std::make_shared<Publisher>()),
       view_{std::move(view)},
       saveGlobalStateHook_{std::move(saveGlobalStateHook)} {

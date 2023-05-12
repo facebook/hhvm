@@ -70,9 +70,9 @@ File "enum_class.php--Float.php", line 2, characters 12-16:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Float.php", line 2, characters 12-16:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
-File "enum_class.php--Foo.php", line 2, characters 12-14:
+File "enum_class.php--Foo.php", line 5, characters 12-14:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
-File "enum_class.php--Foo.php", line 2, characters 12-14:
+File "enum_class.php--Foo.php", line 5, characters 12-14:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])

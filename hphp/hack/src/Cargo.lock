@@ -2280,6 +2280,7 @@ dependencies = [
  "lz4",
  "moka",
  "naming_provider",
+ "oxidized",
  "pos",
  "rayon",
  "serde",

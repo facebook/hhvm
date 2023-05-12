@@ -11,6 +11,7 @@ use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
 use naming_provider::SqliteNamingTable;
+use oxidized::parser_options::ParserOptions;
 use shallow_decl_provider::EagerShallowDeclProvider;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
@@ -24,9 +25,9 @@ pub fn make_folded_decl_provider<R: Reason>(
     store_opts: StoreOpts,
     naming_table: Option<&PathBuf>,
     shallow_decl_store: ShallowDeclStore<R>,
+    opts: Arc<ParserOptions>,
     decl_parser: DeclParser<R>,
 ) -> impl FoldedDeclProvider<R> {
-    let opts = Arc::new(decl_parser.opts().clone());
     let shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>> =
         if let Some(naming_table_path) = naming_table {
             Arc::new(LazyShallowDeclProvider::new(

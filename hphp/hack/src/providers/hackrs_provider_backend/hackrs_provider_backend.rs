@@ -18,6 +18,7 @@ use anyhow::Result;
 use datastore::ChangesStore;
 use datastore::Store;
 use decl_parser::DeclParser;
+use decl_parser::DeclParserOptions;
 use file_provider::DiskProvider;
 use file_provider::FileProvider;
 use folded_decl_provider::FoldedDeclProvider;
@@ -89,7 +90,11 @@ impl HhServerProviderBackend {
                 disk: DiskProvider::new(Arc::clone(&path_ctx), None),
             },
         });
-        let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, opts.clone());
+        let decl_parser = DeclParser::new(
+            Arc::clone(&file_provider) as _,
+            DeclParserOptions::from_parser_options(&opts),
+            opts.po_deregister_php_stdlib,
+        );
         let naming_table = Arc::new(NamingTableWithContext {
             ctx_is_empty: Arc::clone(&ctx_is_empty),
             fallback: NamingTable::new(db_path)?,

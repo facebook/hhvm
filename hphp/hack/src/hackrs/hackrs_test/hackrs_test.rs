@@ -18,6 +18,8 @@ use hackrs_test_utils::serde_store::StoreOpts::Unserialized;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hh24_test::TestRepo;
 use naming_provider::SqliteNamingTable;
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::parser_options::ParserOptions;
 use pos::RelativePathCtx;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use tempdir::TempDir;
@@ -47,8 +49,12 @@ impl TestContext {
             dummy: PathBuf::new(),
             tmp: tmpdir.path().to_path_buf(),
         });
-        let decl_parser =
-            DeclParser::new(Arc::new(file_provider::DiskProvider::new(path_ctx, None)));
+        let parser_opts = ParserOptions::default();
+        let decl_parser = DeclParser::new(
+            Arc::new(file_provider::DiskProvider::new(path_ctx, None)),
+            DeclParserOptions::from_parser_options(&parser_opts),
+            parser_opts.po_deregister_php_stdlib,
+        );
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::new(make_shallow_decl_store::<BReason>(Unserialized)),
             naming_provider,

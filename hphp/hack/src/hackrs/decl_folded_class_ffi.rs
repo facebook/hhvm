@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 use bumpalo::Bump;
 use decl_parser::DeclParser;
+use decl_parser::DeclParserOptions;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::serde_store::Compression;
 use hackrs_test_utils::serde_store::StoreOpts;
@@ -87,7 +88,9 @@ ocaml_ffi! {
         });
         let file_provider: Arc<dyn file_provider::FileProvider> =
             Arc::new(file_provider::DiskProvider::new(path_ctx, None));
-        let decl_parser = DeclParser::with_options(file_provider, opts);
+        let decl_parser = DeclParser::new(file_provider,
+                                          DeclParserOptions::from_parser_options(&opts),
+                                          opts.po_deregister_php_stdlib);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
         let reverse_files = files.iter().copied().rev().collect::<Vec<_>>();
@@ -102,6 +105,7 @@ ocaml_ffi! {
                 StoreOpts::Unserialized,
                 None,
                 shallow_decl_store,
+                Arc::new(opts),
                 decl_parser.clone(),
             );
 
@@ -199,8 +203,13 @@ ocaml_ffi! {
         // Parse and gather shallow decls
         let file_provider: Arc<dyn file_provider::FileProvider> =
             Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-        let decl_parser: DeclParser<BReason> = DeclParser::with_options(file_provider, opts);
-        let shallow_decl_store = make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
+        let decl_parser: DeclParser<BReason> = DeclParser::new(
+            file_provider,
+            DeclParserOptions::from_parser_options(&opts),
+            opts.po_deregister_php_stdlib
+        );
+        let shallow_decl_store =
+            make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
         let mut classes =
             populate_shallow_decl_store(&shallow_decl_store, decl_parser.clone(), &filenames);
         classes.sort();
@@ -208,6 +217,7 @@ ocaml_ffi! {
             StoreOpts::Serialized(Compression::default()),
             None,
             shallow_decl_store,
+            Arc::new(opts),
             decl_parser,
         );
 

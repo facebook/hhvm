@@ -20,6 +20,7 @@ hackrs_test_utils = { version = "0.0.0", path = "../../hackrs_test_utils/cargo/h
 hhi = { version = "0.0.0", path = "../../../hhi/rust" }
 indicatif = { version = "0.17.3", features = ["improved_unicode", "rayon", "tokio"] }
 jwalk = "0.6"
+oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
 procfs = "0.10.1"
 rayon = "1.2"

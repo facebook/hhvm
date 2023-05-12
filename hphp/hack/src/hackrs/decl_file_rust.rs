@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use clap::Parser;
 use decl_parser::DeclParser;
+use decl_parser::DeclParserOptions;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
 use hackrs_test_utils::serde_store::StoreOpts;
@@ -97,7 +98,12 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-    let decl_parser = DeclParser::<R>::new(Arc::clone(&file_provider));
+    let parser_opts = oxidized::parser_options::ParserOptions::default();
+    let decl_parser = DeclParser::<R>::new(
+        Arc::clone(&file_provider),
+        DeclParserOptions::from_parser_options(&parser_opts),
+        parser_opts.po_deregister_php_stdlib,
+    );
     all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
@@ -107,6 +113,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         StoreOpts::Unserialized,
         opts.naming_table.as_ref(),
         shallow_decl_store,
+        Arc::new(parser_opts),
         decl_parser.clone(),
     ));
 

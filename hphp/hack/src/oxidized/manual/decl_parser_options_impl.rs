@@ -44,3 +44,16 @@ impl From<&DeclParserOptions> for ParserEnv {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_default_opts() {
+        // Make sure ParserOptions and DeclParserOptions defaults don't drift
+        // even if someone hand-edits or auto-derives Default for DeclParserOptions.
+        assert_eq!(
+            super::DeclParserOptions::default(),
+            super::DeclParserOptions::from_parser_options(&Default::default())
+        );
+    }
+}

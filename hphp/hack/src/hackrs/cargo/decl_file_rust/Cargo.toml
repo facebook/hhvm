@@ -17,6 +17,7 @@ folded_decl_provider = { version = "0.0.0", path = "../../folded_decl_provider/c
 hackrs_test_utils = { version = "0.0.0", path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { version = "0.0.0", path = "../../../hhi/rust" }
 jwalk = "0.6"
+oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
 tempdir = "0.3"
 ty = { version = "0.0.0", path = "../../ty/cargo/ty" }

@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use decl_parser::DeclParser;
+use decl_parser::DeclParserOptions;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
 use hackrs_test_utils::serde_store::Compression;
@@ -102,12 +103,18 @@ fn main() {
 }
 
 fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: TempDir) {
+    use oxidized::parser_options::ParserOptions;
     let names = collect_file_or_class_names(opts, &ctx);
 
     let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
         file_provider::DiskProvider::new(Arc::clone(&ctx), Some(hhi_root)),
     );
-    let parser = DeclParser::new(file_provider);
+    let parser_opts = ParserOptions::default();
+    let parser = DeclParser::new(
+        file_provider,
+        DeclParserOptions::from_parser_options(&parser_opts),
+        parser_opts.po_deregister_php_stdlib,
+    );
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.no_serialize {
         StoreOpts::Unserialized
     } else {
@@ -137,6 +144,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         },
         opts.naming_table.as_ref(),
         shallow_decl_store,
+        Arc::new(parser_opts),
         parser,
     );
     if opts.fold {

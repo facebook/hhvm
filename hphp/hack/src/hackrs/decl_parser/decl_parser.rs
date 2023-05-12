@@ -8,8 +8,7 @@ use std::sync::Arc;
 
 use file_provider::FileProvider;
 use names::FileSummary;
-use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::parser_options::ParserOptions;
+pub use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::RelativePath;
 use ty::decl::shallow;
@@ -19,7 +18,7 @@ use ty::reason::Reason;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
-    opts: ParserOptions,
+    deregister_php_stdlib: bool,
     decl_parser_opts: DeclParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
@@ -28,27 +27,17 @@ pub struct DeclParser<R: Reason> {
 }
 
 impl<R: Reason> DeclParser<R> {
-    pub fn new(file_provider: Arc<dyn FileProvider>) -> Self {
-        let opts = Default::default();
+    pub fn new(
+        file_provider: Arc<dyn FileProvider>,
+        decl_parser_opts: DeclParserOptions,
+        deregister_php_stdlib: bool,
+    ) -> Self {
         Self {
             file_provider,
-            decl_parser_opts: DeclParserOptions::from_parser_options(&opts),
-            opts,
+            decl_parser_opts,
+            deregister_php_stdlib,
             _phantom: PhantomData,
         }
-    }
-
-    pub fn with_options(file_provider: Arc<dyn FileProvider>, opts: ParserOptions) -> Self {
-        Self {
-            file_provider,
-            decl_parser_opts: DeclParserOptions::from_parser_options(&opts),
-            opts,
-            _phantom: PhantomData,
-        }
-    }
-
-    pub fn opts(&self) -> &ParserOptions {
-        &self.opts
     }
 
     pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::NamedDecl<R>>> {
@@ -84,7 +73,7 @@ impl<R: Reason> DeclParser<R> {
         arena: &'a bumpalo::Bump,
     ) -> ParsedFileWithHashes<'a> {
         let prefix = path.prefix();
-        let deregister_php_stdlib_if_hhi = self.opts.po_deregister_php_stdlib;
+        let deregister_php_stdlib_if_hhi = self.deregister_php_stdlib;
         let opts = &self.decl_parser_opts;
         let parsed_file =
             direct_decl_parser::parse_decls_for_typechecking(opts, path.into(), text, arena);

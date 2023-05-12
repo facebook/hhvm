@@ -20,6 +20,7 @@ intern = { version = "0.1.0", path = "../../../../utils/intern" }
 lz4 = "1.24.0"
 moka = { version = "0.10.0", features = ["future"] }
 naming_provider = { version = "0.0.0", path = "../../../naming_provider/cargo/naming_provider" }
+oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 rayon = "1.2"
 serde = { version = "1.0.136", features = ["derive", "rc"] }

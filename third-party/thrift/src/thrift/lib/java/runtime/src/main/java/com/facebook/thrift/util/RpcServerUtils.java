@@ -60,8 +60,6 @@ import reactor.core.publisher.Mono;
 public final class RpcServerUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(RpcServerUtils.class);
-  private static final String THRIFT_JAVA_REGISTER_TLS_PROTOCOL_VERSIONS_EXPLICITLY_PROPERTY_NAME =
-      "THRIFT_JAVA_REGISTER_TLS_PROTOCOL_VERSIONS_EXPLICITLY";
 
   private RpcServerUtils() {}
 
@@ -129,16 +127,6 @@ public final class RpcServerUtils {
               .sslProvider(sslProvider)
               .trustManager(caFile)
               .sessionCacheSize(config.getSessionCacheSize());
-
-      boolean registerTLSProtocolVersionsExplicitly =
-          Boolean.getBoolean(THRIFT_JAVA_REGISTER_TLS_PROTOCOL_VERSIONS_EXPLICITLY_PROPERTY_NAME);
-      if (registerTLSProtocolVersionsExplicitly) {
-        if (System.getProperty("java.version").startsWith("1.8")) {
-          contextBuilder.protocols("TLSv1.2", "TLSv1.1", "TLSv1");
-        } else {
-          contextBuilder.protocols("TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1");
-        }
-      }
 
       if (config.isEnableAlpn()) {
         contextBuilder.applicationProtocolConfig(

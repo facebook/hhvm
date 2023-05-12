@@ -535,9 +535,8 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 
 ### Typedefs
 
-```
-typedef ::=
-  "typedef" type identifier
+```grammar
+typedef ::=  "typedef" type identifier [";"]
 ```
 
 Typedefs introduce a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
@@ -635,9 +634,8 @@ Please refer [Thrift Streaming](/fb/features/streaming/index.md) for more inform
 
 ### Constants
 
-```
-constant_definition ::=
-  "const" type identifier "=" Constant
+```grammar
+constant_definition ::=  "const" type identifier "=" Constant [";"]
 ```
 
 A constant definition introduces a name for a value. This name can be used instead of the value after the completion of constant definition, and in other Thrift files that include this Thrift file.

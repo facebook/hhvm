@@ -774,7 +774,7 @@ func (c *AdapterServiceClient) Count() (*CountingStruct, error) {
 
 func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
     in := &reqAdapterServiceAdaptedTypes{
-        Arg_: arg,
+        Arg: arg,
     }
     out := newRespAdapterServiceAdaptedTypes()
     err := c.ch.Call(ctx, "adaptedTypes", in, out)
@@ -1028,47 +1028,47 @@ func (x *respAdapterServiceCount) Read(p thrift.Protocol) error {
 }
 
 type reqAdapterServiceAdaptedTypes struct {
-    Arg_ *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
+    Arg *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).
-        SetArg_NonCompat(*NewHeapAllocated())
+        SetArgNonCompat(*NewHeapAllocated())
 }
 
-// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg_() instead.
-var reqAdapterServiceAdaptedTypes_Arg__DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg_()
+// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
+var reqAdapterServiceAdaptedTypes_Arg_DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg()
 
-func (x *reqAdapterServiceAdaptedTypes) GetArg_NonCompat() *HeapAllocated {
-    return x.Arg_
+func (x *reqAdapterServiceAdaptedTypes) GetArgNonCompat() *HeapAllocated {
+    return x.Arg
 }
 
-func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
-    if !x.IsSetArg_() {
+func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
+    if !x.IsSetArg() {
         return NewHeapAllocated()
     }
 
-    return x.Arg_
+    return x.Arg
 }
 
-func (x *reqAdapterServiceAdaptedTypes) SetArg_NonCompat(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
-    x.Arg_ = &value
+func (x *reqAdapterServiceAdaptedTypes) SetArgNonCompat(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
+    x.Arg = &value
     return x
 }
 
-func (x *reqAdapterServiceAdaptedTypes) SetArg_(value *HeapAllocated) *reqAdapterServiceAdaptedTypes {
-    x.Arg_ = value
+func (x *reqAdapterServiceAdaptedTypes) SetArg(value *HeapAllocated) *reqAdapterServiceAdaptedTypes {
+    x.Arg = value
     return x
 }
 
-func (x *reqAdapterServiceAdaptedTypes) IsSetArg_() bool {
-    return x.Arg_ != nil
+func (x *reqAdapterServiceAdaptedTypes) IsSetArg() bool {
+    return x.Arg != nil
 }
 
-func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  // Arg_
-    if !x.IsSetArg_() {
+func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  // Arg
+    if !x.IsSetArg() {
         return nil
     }
 
@@ -1076,7 +1076,7 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg_NonCompat()
+    item := x.GetArgNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1087,14 +1087,14 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Protocol) error {  // Arg_
+func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Protocol) error {  // Arg
     result := *NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetArg_NonCompat(result)
+    x.SetArgNonCompat(result)
     return nil
 }
 
@@ -1114,8 +1114,8 @@ func newReqAdapterServiceAdaptedTypesBuilder() *reqAdapterServiceAdaptedTypesBui
     }
 }
 
-func (x *reqAdapterServiceAdaptedTypesBuilder) Arg_(value *HeapAllocated) *reqAdapterServiceAdaptedTypesBuilder {
-    x.obj.Arg_ = value
+func (x *reqAdapterServiceAdaptedTypesBuilder) Arg(value *HeapAllocated) *reqAdapterServiceAdaptedTypesBuilder {
+    x.obj.Arg = value
     return x
 }
 
@@ -1480,7 +1480,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.Wr
 func (p *procFuncAdapterServiceAdaptedTypes) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqAdapterServiceAdaptedTypes)
     result := newRespAdapterServiceAdaptedTypes()
-    retval, err := p.handler.AdaptedTypes(args.Arg_)
+    retval, err := p.handler.AdaptedTypes(args.Arg)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AdaptedTypes: " + err.Error(), err)
         return x, x

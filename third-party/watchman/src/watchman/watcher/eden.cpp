@@ -1227,6 +1227,7 @@ class EdenView final : public QueryableView {
     // 1 = added
     std::unordered_map<std::string, int> byFile;
     std::unordered_map<std::string, EdenDtype> dtypes;
+    bool freshInstance = false;
 
     std::move(stream).subscribeInline(
         [&](folly::Try<ChangedFileResult>&& changeTry) mutable {
@@ -1235,7 +1236,7 @@ class EdenView final : public QueryableView {
                 "Error: ",
                 folly::exceptionStr(changeTry.exception()),
                 "\n");
-            result = makeFreshInstance(ctx);
+            freshInstance = true;
             return false;
           }
 
@@ -1285,17 +1286,21 @@ class EdenView final : public QueryableView {
           if (thresholdForFreshInstance_ != 0 &&
               byFile.size() > thresholdForFreshInstance_ &&
               ctx->query->empty_on_fresh_instance) {
-            result = makeFreshInstance(ctx);
+            freshInstance = true;
             return false;
           }
 
           return true;
         });
 
-    for (auto& [name, count] : byFile) {
-      result.fileInfo.emplace_back(name, getDTypeFromEden(dtypes[name]));
-      if (count > 0) {
-        result.createdFileNames.emplace(name);
+    if (freshInstance) {
+      result = makeFreshInstance(ctx);
+    } else {
+      for (auto& [name, count] : byFile) {
+        result.fileInfo.emplace_back(name, getDTypeFromEden(dtypes[name]));
+        if (count > 0) {
+          result.createdFileNames.emplace(name);
+        }
       }
     }
 

@@ -292,7 +292,13 @@ class TestEdenSince(WatchmanEdenTestCase.WatchmanEdenTestCase):
         )
 
     def test_eden_since_over_threshold(self) -> None:
-        root = self.makeEdenMount(lambda repo: populate(repo, 1))
+        # Make sure to have a large amount of files to dwarf Mercurial
+        # modifying a ton of files in the .hg directory.
+        root = self.makeEdenMount(
+            lambda repo: populate(
+                repo, 50, extra_files=[f"bigdir/{i}" for i in range(100)]
+            )
+        )
         repo = self.repoForPath(root)
 
         res = self.watchmanCommand("watch", root)
@@ -315,7 +321,7 @@ class TestEdenSince(WatchmanEdenTestCase.WatchmanEdenTestCase):
                 },
             )
 
-        shutil.rmtree(os.path.join(root, "bdir"))
+        shutil.rmtree(os.path.join(root, "bigdir"))
         repo.hg("addremove")
         repo.commit("removal commit.")
 
@@ -334,6 +340,7 @@ class TestEdenSince(WatchmanEdenTestCase.WatchmanEdenTestCase):
         # configuration. This is expected to return a fresh instance.
         res = do_query(clock)
         self.assertTrue(res["is_fresh_instance"])
+        self.assertFileListsEqual([], res["files"])
         clock = res["clock"]
 
         # Make sure that we detect newly edited files afterwards.

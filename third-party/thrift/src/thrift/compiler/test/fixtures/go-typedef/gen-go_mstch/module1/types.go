@@ -1070,34 +1070,34 @@ func (x *MapKey) Read(p thrift.Protocol) error {
 
 
 type MapContainer struct {
-    Mapval map[*MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
+    Mapval map[MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MapContainer{}
 
 func NewMapContainer() *MapContainer {
     return (&MapContainer{}).
-        SetMapvalNonCompat(make(map[*MapKey]string))
+        SetMapvalNonCompat(make(map[MapKey]string))
 }
 
-func (x *MapContainer) GetMapvalNonCompat() map[*MapKey]string {
+func (x *MapContainer) GetMapvalNonCompat() map[MapKey]string {
     return x.Mapval
 }
 
-func (x *MapContainer) GetMapval() map[*MapKey]string {
+func (x *MapContainer) GetMapval() map[MapKey]string {
     if !x.IsSetMapval() {
-        return make(map[*MapKey]string)
+        return make(map[MapKey]string)
     }
 
     return x.Mapval
 }
 
-func (x *MapContainer) SetMapvalNonCompat(value map[*MapKey]string) *MapContainer {
+func (x *MapContainer) SetMapvalNonCompat(value map[MapKey]string) *MapContainer {
     x.Mapval = value
     return x
 }
 
-func (x *MapContainer) SetMapval(value map[*MapKey]string) *MapContainer {
+func (x *MapContainer) SetMapval(value map[MapKey]string) *MapContainer {
     x.Mapval = value
     return x
 }
@@ -1150,16 +1150,16 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make(map[*MapKey]string, size)
+mapResult := make(map[MapKey]string, size)
 for i := 0; i < size; i++ {
-    var key *MapKey
+    var key MapKey
     {
         result := *NewMapKey()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        key = &result
+        key = result
     }
 
     var value string
@@ -1199,7 +1199,7 @@ func NewMapContainerBuilder() *MapContainerBuilder {
     }
 }
 
-func (x *MapContainerBuilder) Mapval(value map[*MapKey]string) *MapContainerBuilder {
+func (x *MapContainerBuilder) Mapval(value map[MapKey]string) *MapContainerBuilder {
     x.obj.Mapval = value
     return x
 }

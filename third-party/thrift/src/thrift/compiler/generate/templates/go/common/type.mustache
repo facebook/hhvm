@@ -56,12 +56,12 @@
   }}{{#type:map?}}{{!
     }}map[{{!
       }}{{#type:key_type}}{{!
-        }}{{#type:struct?}}{{!
-          }}*{{> common/type}}{{!
-        }}{{/type:struct?}}{{!
-        }}{{^type:struct?}}{{!
+        }}{{#type:go_comparable?}}{{!
           }}{{> common/type}}{{!
-        }}{{/type:struct?}}{{!
+        }}{{/type:go_comparable?}}{{!
+        }}{{^type:go_comparable?}}{{!
+          }}*{{> common/type}}{{!
+        }}{{/type:go_comparable?}}{{!
       }}{{/type:key_type}}{{!
     }}]{{!
       }}{{#type:value_type}}{{!

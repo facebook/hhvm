@@ -28,14 +28,14 @@ var _ = thrift.ZERO
 
 type SomeService interface {
     BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
-    BinaryKeyedMap(ctx context.Context, r []int64) (map[TBinary]int64, error)
+    BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
 // Deprecated: Use SomeService instead.
 type SomeServiceClientInterface interface {
     thrift.ClientInterface
     BounceMap(m included.SomeMap) (included.SomeMap, error)
-    BinaryKeyedMap(r []int64) (map[TBinary]int64, error)
+    BinaryKeyedMap(r []int64) (map[*TBinary]int64, error)
 }
 
 type SomeServiceChannelClient struct {
@@ -138,7 +138,7 @@ func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, err
 }
 
 
-func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[TBinary]int64, error) {
+func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
     in := &reqSomeServiceBinaryKeyedMap{
         R: r,
     }
@@ -150,7 +150,7 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
     return out.Value, nil
 }
 
-func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[TBinary]int64, error) {
+func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[*TBinary]int64, error) {
     return c.chClient.BinaryKeyedMap(nil, r)
 }
 
@@ -642,7 +642,7 @@ func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
 }
 
 type respSomeServiceBinaryKeyedMap struct {
-    Value map[TBinary]int64 `thrift:"value,0" json:"value" db:"value"`
+    Value map[*TBinary]int64 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
@@ -650,27 +650,27 @@ var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{}).
-        SetValueNonCompat(make(map[TBinary]int64))
+        SetValueNonCompat(make(map[*TBinary]int64))
 }
 
-func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
+func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[*TBinary]int64 {
     return x.Value
 }
 
-func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
+func (x *respSomeServiceBinaryKeyedMap) GetValue() map[*TBinary]int64 {
     if !x.IsSetValue() {
-        return make(map[TBinary]int64)
+        return make(map[*TBinary]int64)
     }
 
     return x.Value
 }
 
-func (x *respSomeServiceBinaryKeyedMap) SetValueNonCompat(value map[TBinary]int64) *respSomeServiceBinaryKeyedMap {
+func (x *respSomeServiceBinaryKeyedMap) SetValueNonCompat(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
     x.Value = value
     return x
 }
 
-func (x *respSomeServiceBinaryKeyedMap) SetValue(value map[TBinary]int64) *respSomeServiceBinaryKeyedMap {
+func (x *respSomeServiceBinaryKeyedMap) SetValue(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
     x.Value = value
     return x
 }
@@ -724,15 +724,15 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make(map[TBinary]int64, size)
+mapResult := make(map[*TBinary]int64, size)
 for i := 0; i < size; i++ {
-    var key TBinary
+    var key *TBinary
     {
         result, err := ReadTBinary(p)
 if err != nil {
     return err
 }
-        key = result
+        key = &result
     }
 
     var value int64
@@ -772,7 +772,7 @@ func newRespSomeServiceBinaryKeyedMapBuilder() *respSomeServiceBinaryKeyedMapBui
     }
 }
 
-func (x *respSomeServiceBinaryKeyedMapBuilder) Value(value map[TBinary]int64) *respSomeServiceBinaryKeyedMapBuilder {
+func (x *respSomeServiceBinaryKeyedMapBuilder) Value(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMapBuilder {
     x.obj.Value = value
     return x
 }

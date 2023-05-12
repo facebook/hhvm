@@ -28,10 +28,10 @@ mapResult := make({{> common/type}}, size)
 for i := 0; i < size; i++ {
     {{! Use scopes to avoid multiple 'result' variable collisions }}
     {{#type:key_type}}
-    var key {{#type:struct?}}*{{/type:struct?}}{{> common/type}}
+    var key {{^type:go_comparable?}}*{{/type:go_comparable?}}{{> common/type}}
     {
         {{> codec/decode}}
-        key = {{#type:struct?}}&{{/type:struct?}}result
+        key = {{^type:go_comparable?}}&{{/type:go_comparable?}}result
     }
     {{/type:key_type}}
 

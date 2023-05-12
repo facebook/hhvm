@@ -612,8 +612,14 @@ class mstch_go_type : public mstch_type {
       go_codegen_data* data)
       : mstch_type(t, ctx, pos), data_(*data) {
     (void)data_;
-    register_methods(this, {});
+    register_methods(
+        this,
+        {
+            {"type:go_comparable?", &mstch_go_type::is_go_comparable},
+        });
   }
+
+  mstch::node is_go_comparable() { return go::is_type_go_comparable(type_); }
 
  private:
   go_codegen_data& data_;

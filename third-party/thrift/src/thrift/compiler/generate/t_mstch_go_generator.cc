@@ -31,10 +31,6 @@ namespace compiler {
 
 namespace {
 
-// Name of the field of the response helper struct where return value is stored
-// (if function call is not void).
-const std::string DEFAULT_RETVAL_FIELD_NAME = "value";
-
 struct go_codegen_data {
   // the import path for the supporting library
   std::string thrift_lib_import =
@@ -68,6 +64,9 @@ struct go_codegen_data {
   // Req/Resp structs are internal and must be unexported (i.e. lowercase)
   // This set will help us track these srtucts by name.
   std::set<std::string> req_resp_struct_names;
+  // Mapping of service name to a vector of req/resp structs for that service.
+  std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
+      {};
   // The current program being generated.
   const t_program* current_program;
 };
@@ -119,6 +118,7 @@ class t_mstch_go_generator : public t_mstch_generator {
   void set_mstch_factories();
   void set_go_package_aliases();
   void set_struct_to_field_names();
+  void set_service_to_req_resp_structs();
   go_codegen_data data_;
 };
 
@@ -331,16 +331,16 @@ class mstch_go_field : public mstch_field {
         });
   }
 
-  mstch::node go_name() { return go::get_field_name(field_); }
+  mstch::node go_name() { return go::get_go_field_name(field_); }
   mstch::node go_setter_name() {
-    auto setter_name = "Set" + go::get_field_name(field_);
+    auto setter_name = "Set" + go::get_go_field_name(field_);
     // Setters which collide with existing field names should be suffixed with
     // an underscore.
     if (field_context_ != nullptr && field_context_->strct != nullptr) {
       auto stfn_iter =
           data_.struct_to_field_names.find(field_context_->strct->name());
       if (stfn_iter != data_.struct_to_field_names.end()) {
-        if (stfn_iter->second.count(setter_name) > 0) {
+        while (stfn_iter->second.count(setter_name) > 0) {
           setter_name += "_";
         }
       }
@@ -403,7 +403,7 @@ class mstch_go_field : public mstch_field {
     return std::string();
   }
   mstch::node is_retval() {
-    return field_->name() == DEFAULT_RETVAL_FIELD_NAME;
+    return field_->name() == go::DEFAULT_RETVAL_FIELD_NAME;
   }
 
  private:
@@ -536,43 +536,14 @@ class mstch_go_service : public mstch_service {
   }
 
   mstch::node req_resp_structs() {
-    std::vector<t_struct*> req_resp_structs;
-    for (auto func : get_functions()) {
-      if (!go::is_func_go_supported(func)) {
-        continue;
-      }
-      auto svcGoName = go::munge_ident(service_->name());
-      auto funcGoName = go::get_go_func_name(func);
-
-      auto req_struct_name =
-          go::munge_ident("req" + svcGoName + funcGoName, false);
-      auto req_struct = new t_struct(service_->program(), req_struct_name);
-      for (auto member : func->params().get_members()) {
-        req_struct->append_field(std::unique_ptr<t_field>(member));
-      }
-      req_resp_structs.push_back(req_struct);
-      data_.req_resp_struct_names.insert(req_struct_name);
-
-      auto resp_struct_name =
-          go::munge_ident("resp" + svcGoName + funcGoName, false);
-      auto resp_struct = new t_struct(service_->program(), resp_struct_name);
-      if (!func->get_return_type()->is_void()) {
-        auto resp_field = std::make_unique<t_field>(
-            func->get_return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
-        resp_field->set_qualifier(t_field_qualifier::none);
-        resp_struct->append_field(std::move(resp_field));
-      }
-      if (func->exceptions() != nullptr) {
-        for (const auto& xs : func->exceptions()->get_members()) {
-          auto xc_ptr = std::unique_ptr<t_field>(xs);
-          xc_ptr->set_qualifier(t_field_qualifier::optional);
-          resp_struct->append_field(std::move(xc_ptr));
-        }
-      }
-      req_resp_structs.push_back(resp_struct);
-      data_.req_resp_struct_names.insert(resp_struct_name);
+    auto req_resp_structs =
+        data_.service_to_req_resp_structs.find(service_->name());
+    if (req_resp_structs != data_.service_to_req_resp_structs.end()) {
+      return make_mstch_array(
+          req_resp_structs->second, *context_.struct_factory);
     }
-    return make_mstch_array(req_resp_structs, *context_.struct_factory);
+    throw std::runtime_error(
+        "unable to get req/resp structs for service " + service_->name());
   }
 
  private:
@@ -698,6 +669,7 @@ void t_mstch_go_generator::generate_program() {
   set_mstch_factories();
   set_go_package_aliases();
   set_struct_to_field_names();
+  set_service_to_req_resp_structs();
   data_.current_program = program_;
 
   if (auto thrift_lib_import = get_option("thrift_import")) {
@@ -757,11 +729,22 @@ void t_mstch_go_generator::set_go_package_aliases() {
 void t_mstch_go_generator::set_struct_to_field_names() {
   auto program = get_program();
   for (auto struct_ : program->structs()) {
-    std::set<std::string> field_names;
-    for (const t_field& field : struct_->fields()) {
-      field_names.insert(go::get_field_name(&field));
+    data_.struct_to_field_names[struct_->name()] =
+        go::get_struct_go_field_names(struct_);
+  }
+}
+
+void t_mstch_go_generator::set_service_to_req_resp_structs() {
+  auto program = get_program();
+  for (auto service : program->services()) {
+    std::vector<t_struct*> req_resp_structs =
+        go::get_service_req_resp_structs(service);
+    data_.service_to_req_resp_structs[service->name()] = req_resp_structs;
+    for (auto struct_ : req_resp_structs) {
+      data_.req_resp_struct_names.insert(struct_->name());
+      data_.struct_to_field_names[struct_->name()] =
+          go::get_struct_go_field_names(struct_);
     }
-    data_.struct_to_field_names[struct_->name()] = field_names;
   }
 }
 } // namespace

@@ -25,6 +25,10 @@ namespace thrift {
 namespace compiler {
 namespace go {
 
+// Name of the field of the response helper struct where
+// the return value is stored (if function call is not void).
+extern const std::string DEFAULT_RETVAL_FIELD_NAME;
+
 // e.g. very.good.package
 std::string get_go_package_name(
     const t_program* program, std::string name_override = "");
@@ -44,8 +48,6 @@ std::string snakecase(const std::string& name);
 std::string make_unique_name(
     std::map<std::string, int32_t>& name_collisions, const std::string& name);
 
-std::string get_field_name(const t_field* field);
-
 bool is_func_go_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);
 
@@ -54,7 +56,12 @@ bool is_type_go_struct(const t_type* type);
 bool is_type_go_comparable(
     const t_type* type, std::set<std::string> visited_type_names = {});
 
+std::string get_go_field_name(const t_field* field);
 std::string get_go_func_name(const t_function* func);
+
+std::set<std::string> get_struct_go_field_names(const t_struct* struct_);
+
+std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
 
 } // namespace go
 } // namespace compiler

@@ -25,6 +25,10 @@ namespace thrift {
 namespace compiler {
 namespace go {
 
+// Name of the field of the response helper struct where
+// the return value is stored (if function call is not void).
+const std::string DEFAULT_RETVAL_FIELD_NAME = "value";
+
 // keywords
 // https://go.dev/ref/spec#Keywords
 static const std::set<std::string> go_keywords = {
@@ -355,7 +359,7 @@ std::string get_go_func_name(const t_function* func) {
   return munge_ident(func->name());
 }
 
-std::string get_field_name(const t_field* field) {
+std::string get_go_field_name(const t_field* field) {
   if (field->has_annotation("go.name")) {
     return field->get_annotation("go.name");
   }
@@ -365,6 +369,54 @@ std::string get_field_name(const t_field* field) {
     name += "_";
   }
   return name;
+}
+
+std::set<std::string> get_struct_go_field_names(const t_struct* struct_) {
+  // Returns a set of Go field names from the given struct.
+  std::set<std::string> field_names;
+  for (const t_field& field : struct_->fields()) {
+    field_names.insert(go::get_go_field_name(&field));
+  }
+  return field_names;
+}
+
+std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
+  std::vector<t_struct*> req_resp_structs;
+  auto svcGoName = go::munge_ident(service->name());
+  for (auto func : service->get_functions()) {
+    if (!go::is_func_go_supported(func)) {
+      continue;
+    }
+
+    auto funcGoName = go::get_go_func_name(func);
+
+    auto req_struct_name =
+        go::munge_ident("req" + svcGoName + funcGoName, false);
+    auto req_struct = new t_struct(service->program(), req_struct_name);
+    for (auto member : func->params().get_members()) {
+      req_struct->append_field(std::unique_ptr<t_field>(member));
+    }
+    req_resp_structs.push_back(req_struct);
+
+    auto resp_struct_name =
+        go::munge_ident("resp" + svcGoName + funcGoName, false);
+    auto resp_struct = new t_struct(service->program(), resp_struct_name);
+    if (!func->get_return_type()->is_void()) {
+      auto resp_field = std::make_unique<t_field>(
+          func->get_return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+      resp_field->set_qualifier(t_field_qualifier::none);
+      resp_struct->append_field(std::move(resp_field));
+    }
+    if (func->exceptions() != nullptr) {
+      for (const auto& xs : func->exceptions()->get_members()) {
+        auto xc_ptr = std::unique_ptr<t_field>(xs);
+        xc_ptr->set_qualifier(t_field_qualifier::optional);
+        resp_struct->append_field(std::move(xc_ptr));
+      }
+    }
+    req_resp_structs.push_back(resp_struct);
+  }
+  return req_resp_structs;
 }
 
 } // namespace go

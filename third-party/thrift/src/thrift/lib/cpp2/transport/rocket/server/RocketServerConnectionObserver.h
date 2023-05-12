@@ -31,6 +31,13 @@ class RocketServerConnectionObserver {
     WriteEvents = 1,
   };
 
+  struct WriteEventBatchContext {
+    // the raw byte offset at the beginning of the batch of writes
+    folly::Optional<size_t> startRawByteOffset;
+    // the raw byte offset at the end of the batch of writes
+    folly::Optional<size_t> endRawByteOffset;
+  };
+
   struct WriteEvent {
     // the stream id of the write
     const StreamId streamId;
@@ -53,7 +60,7 @@ class RocketServerConnectionObserver {
    * writeReady() is invoked when a new response is ready to be written to
    * the underlying transport
    */
-  virtual void writeReady(
+  virtual void writeStarting(
       RocketServerConnection* /* connection */,
       const WriteEvent& /* writeEvent */) {}
 
@@ -63,7 +70,8 @@ class RocketServerConnectionObserver {
    */
   virtual void writeSuccess(
       RocketServerConnection* /* connection */,
-      const WriteEvent& /* writeEvent */) {}
+      const WriteEvent& /* writeEvent */,
+      const WriteEventBatchContext& /* writeEventBatchContext */) {}
 };
 
 } // namespace rocket

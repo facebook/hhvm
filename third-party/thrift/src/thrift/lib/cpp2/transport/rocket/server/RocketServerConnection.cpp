@@ -155,16 +155,6 @@ void RocketServerConnection::flushWrites(
   DestructorGuard dg(this);
   DVLOG(10) << fmt::format("write: {} B", writes->computeChainDataLength());
 
-  if (auto observerContainer = getObserverContainer();
-      observerContainer && observerContainer->numObservers()) {
-    for (const auto& writeEvent : context.writeEvents) {
-      observerContainer->invokeInterfaceMethodAllObservers(
-          [&](auto observer, auto observed) {
-            observer->writeReady(observed, writeEvent);
-          });
-    }
-  }
-
   inflightWritesQueue_.push_back(std::move(context));
   socket_->writeChain(this, std::move(writes));
 }
@@ -746,6 +736,24 @@ void RocketServerConnection::closeWhenIdle() {
       "Closing due to imminent shutdown"));
 }
 
+void RocketServerConnection::writeStarting() noexcept {
+  DestructorGuard dg(this);
+  DCHECK(!inflightWritesQueue_.empty());
+  auto& context = inflightWritesQueue_.front();
+  DCHECK(!context.writeEventsContext.startRawByteOffset.has_value());
+  context.writeEventsContext.startRawByteOffset = socket_->getRawBytesWritten();
+
+  if (auto observerContainer = getObserverContainer();
+      observerContainer && observerContainer->numObservers()) {
+    for (const auto& writeEvent : context.writeEvents) {
+      observerContainer->invokeInterfaceMethodAllObservers(
+          [&](auto observer, auto observed) {
+            observer->writeStarting(observed, writeEvent);
+          });
+    }
+  }
+}
+
 void RocketServerConnection::writeSuccess() noexcept {
   DestructorGuard dg(this);
   DCHECK(!inflightWritesQueue_.empty());
@@ -755,13 +763,16 @@ void RocketServerConnection::writeSuccess() noexcept {
        --processingCompleteCount) {
     frameHandler_->requestComplete();
   }
+  DCHECK(!context.writeEventsContext.endRawByteOffset.has_value());
+  context.writeEventsContext.endRawByteOffset = socket_->getRawBytesWritten();
 
   if (auto observerContainer = getObserverContainer();
       observerContainer && observerContainer->numObservers()) {
     for (const auto& writeEvent : context.writeEvents) {
       observerContainer->invokeInterfaceMethodAllObservers(
           [&](auto observer, auto observed) {
-            observer->writeSuccess(observed, writeEvent);
+            observer->writeSuccess(
+                observed, writeEvent, context.writeEventsContext);
           });
     }
   }

@@ -10,5 +10,4 @@ val find :
   path:string ->
   entry:Provider_context.entry ->
   Provider_context.t ->
-  Tast.def list ->
   Lsp.CodeAction.command_or_action list

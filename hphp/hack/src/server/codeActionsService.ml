@@ -192,12 +192,7 @@ let go
       CodeActionsServiceInlineVariable.find ~range:lsp_range ~path ~entry ctx
     with
     | [] ->
-      CodeActionsServiceExtractVariable.find
-        ~range:lsp_range
-        ~path
-        ~entry
-        ctx
-        tast
+      CodeActionsServiceExtractVariable.find ~range:lsp_range ~path ~entry ctx
     | actions -> actions
   in
   actions_for_errors errors path classish_starts ~start_line ~start_col

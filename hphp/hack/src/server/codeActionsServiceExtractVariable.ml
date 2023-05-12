@@ -193,7 +193,7 @@ let command_or_action_of_candidate
   in
   Lsp.CodeAction.Action code_action
 
-let find ~(range : Lsp.range) ~path ~entry ctx tast =
+let find ~(range : Lsp.range) ~path ~entry ctx =
   let is_selection =
     Lsp.(
       range.start.line < range.end_.line
@@ -210,6 +210,10 @@ let find ~(range : Lsp.range) ~path ~entry ctx tast =
         ~line_to_offset
         entry.Provider_context.path
         range
+    in
+    let tast =
+      (Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry)
+        .Tast_provider.Compute_tast_and_errors.tast
     in
     (top_visitor selection ~source_text)#go ctx tast
     |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)

@@ -34,7 +34,7 @@ namespace HPHP {
 struct Func;
 struct ExecutionContext;
 
-enum class ExecMode { Normal=0, BB=1, Debugger=2, Coverage=4 };
+enum class ExecMode : uint32_t { Normal=0, BB=1, Debugger=2, Coverage=4 };
 
 // native and virtual pc pair. passed and stored by value
 struct PcPair { CodeAddress ip; PC pc; };
@@ -91,6 +91,7 @@ extern EntryStub g_enterCti;
 extern CodeAddress g_exitCti;
 extern const CodeAddress cti_ops[];
 extern const CodeAddress ctid_ops[];
+extern const CodeAddress updateCoverageFunc;
 
 constexpr auto kCtiIndirectJmpSize = 2;
 

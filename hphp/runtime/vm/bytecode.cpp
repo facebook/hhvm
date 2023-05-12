@@ -5606,6 +5606,13 @@ JitResumeAddr dispatchThreaded(bool coverage) {
   return JitResumeAddr::trans(retAddr);
 }
 #endif
+using ModeType = std::underlying_type_t<ExecMode>;
+ModeType updateCoverageModeThreaded(ModeType modes) {
+  // TODO: Support per-file coverage mode.
+  return RID().getCoverage() ?
+    (modes | (ModeType)ExecMode::Coverage) :
+    (modes & ~(ModeType)ExecMode::Coverage);
+}
 
 template <bool breakOnCtlFlow>
 JitResumeAddr dispatchImpl() {
@@ -5947,6 +5954,8 @@ const CodeAddress ctid_ops[] = {
   OPCODES
   #undef O
 };
+
+const CodeAddress updateCoverageFunc = (CodeAddress)&updateCoverageModeThreaded;
 
 #endif
 

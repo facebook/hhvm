@@ -126,13 +126,19 @@ auto const pc_arg   = rdx;  // passed & returned by all opcodes
 auto const next_ip  = rax;  // returned by opcodes with unpredictable targets
 auto const next_reg = rbx;  // for conditional branches
 auto const nextpc_arg = rdi; // for predicted calls
+auto const modes_arg = edi; // for updateCoverageModeThreaded
 auto const tl_reg = r12;
 auto const modes_reg = r13d;
 auto const ra_reg = r14;
+auto const next_ip_saved = r15;  // used when next_ip needs to be moved to a
+                                 // callee-saved register
 
 }
 
 Offset compile_cti(Func* func, PC unitpc) {
+  auto const needsCoverageCheck =
+    !RuntimeOption::RepoAuthoritative &&
+    RuntimeOption::EvalEnableCodeCoverage > 0;
   std::lock_guard<std::mutex> lock(g_mutex);
   auto cti_entry = func->ctiEntry();
   if (cti_entry) return cti_entry; // we lost the compile race
@@ -191,9 +197,19 @@ Offset compile_cti(Func* func, PC unitpc) {
         ((int32_t*)a.frontier())[-1] = instrLen(pc);
       }
       a.  call  (cti);
-      DEBUG_ONLY auto after = a.frontier();
-      a.  jmp   (next_ip);
-      assert(a.frontier() - after == kCtiIndirectJmpSize);
+      // Coverage mode can be turned on/off by native function calls.
+      // TODO: make it work with per-file coverage mode.
+      if (needsCoverageCheck && op == OpNativeImpl) {
+        a.movq(next_ip, next_ip_saved);
+        a.movl(modes_reg, modes_arg);
+        a.call(updateCoverageFunc);
+        a.movl(eax, modes_reg);
+        a.jmp(next_ip_saved);
+      } else {
+        DEBUG_ONLY auto after = a.frontier();
+        a.  jmp   (next_ip);
+        assert(a.frontier() - after == kCtiIndirectJmpSize);
+      }
     }
     auto size = a.frontier() - ip;
     if (!g_cti_sizes[(int)op]) {

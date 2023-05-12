@@ -380,9 +380,7 @@ type_definition ::=
 
 ### Structs
 
-*The struct type is the centerpiece of the Thrift language. This is the basic unit of serialization and versioning in the language.*
-
-This section defines the primary aspects of the struct type. Separate sections below define qualifiers and default values for struct fields, constraints on serialization of structs, and compatibility between different versions of struct types.
+A struct declaration introduces a named struct type into your program and has the following form:
 
 ```grammar
 struct ::=
@@ -395,16 +393,17 @@ field    ::=  field_id ":" [qualifier] type identifier [default_value]
 field_id ::=  integer
 ```
 
-Structs in Thrift look very similar to structs in C++ - though fields in Thrift structs have a field id, and optionally a qualifier and a default value. They are significantly different in that the order of appearance of fields is not important and there is no expectations on the memory layout of the objects in the corresponding programming language code.
+*The struct type is the centerpiece of the Thrift language. It is the basic unit of serialization and versioning in the language.*
+
+This section defines the primary aspects of structs. Separate sections define qualifiers and default values for fields, constraints on serialization of structs, and compatibility between different versions of struct types.
+
+Structs in Thrift look similar to structs in C++ though fields in Thrift have a field id and optionally a qualifier. They are significantly different in that the order of appearance of fields is not important and there is no expectations on the memory layout of the objects in the corresponding programming language code.
 
 ```thrift
-enum Gender { MALE = 1, FEMALE = 2 }
-
 struct PersonMetadata {
   1: string name;
-  2: Gender gender;
-  3: i32 age;
-  4: list<i64> friendIds;
+  2: i32 age;
+  3: list<i64> friendIds;
 }
 ```
 
@@ -421,10 +420,9 @@ As a consequence of the above rules, `PersonMetadata1` below defines the same ty
 ```thrift
 // Just a different ordering of fields.
 struct PersonMetadata1 {
-  3: i32 age;
+  2: i32 age;
   1: string name;
-  4: list<i64> friendIds;
-  2: Gender gender;
+  3: list<i64> friendIds;
 }
 ```
 
@@ -434,25 +432,23 @@ But the following two types are both legal, but different from `PersonMetadata`:
 // Some ids are different.
 struct PersonMetadata2 {
   590: string name;
-  2: Gender gender;
   36: i32 age;
-  4: list<i64> friendIds;
+  3: list<i64> friendIds;
 }
 
 // Some names are different.
 struct PersonMetadata3 {
   1: string firstName;
-  2: Gender gender
-  3: i32 age;
-  4: list<i64> friends;
+  2: i32 age;
+  3: list<i64> friends;
 }
 ```
 
 NOTE: Field ids do not have to start at 1.
 
-WARNING: Do not reuse ids. If a field is removed from a struct, it's a good practice to comment it out as a reminder to not to reuse it.
-
-Qualifiers and default values are described in a later section.
+:::caution
+Do not reuse ids. If a field is removed, it's a good practice to comment it out as a reminder to not to reuse it.
+:::
 
 ### Unions
 

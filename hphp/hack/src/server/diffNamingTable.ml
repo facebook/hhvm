@@ -25,17 +25,11 @@ let get_default_provider_context () =
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
     ~package_info:Package.Info.empty
 
-let get_naming_table_and_errors provider_context path is_sqlite =
-  let (sqlite_path, marshaled_blob_path) =
-    if is_sqlite then
-      (Some path, "")
-    else
-      (None, path)
-  in
-  let errors_path = path ^ ".err" in
-  SaveStateService.load_saved_state
+let get_naming_table_and_errors provider_context path =
+  let sqlite_path = Some path in
+  let errors_path = Str.replace_first (Str.regexp "_naming.sql") ".err" path in
+  SaveStateService.load_saved_state_exn
     ~naming_table_fallback_path:sqlite_path
-    ~naming_table_path:marshaled_blob_path
     ~errors_path
     provider_context
 
@@ -176,13 +170,13 @@ let print_diff print_count diff =
   Prints the diff of test and control (naming table, error) pairs, and
   returns whether test and control differ.
 *)
-let diff (control_path, is_control_sqlite) (test_path, is_test_sqlite) =
+let diff control_path test_path =
   let provider_context = get_default_provider_context () in
   let (control_naming_table, control_errors) =
-    get_naming_table_and_errors provider_context control_path is_control_sqlite
+    get_naming_table_and_errors provider_context control_path
   in
   let (test_naming_table, test_errors) =
-    get_naming_table_and_errors provider_context test_path is_test_sqlite
+    get_naming_table_and_errors provider_context test_path
   in
   let diff =
     calculate_diff

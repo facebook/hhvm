@@ -58,9 +58,8 @@ let partition_error_files_tf
   (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
 
 (* Loads the file info and the errors, if any. *)
-let load_saved_state
+let load_saved_state_exn
     ~(naming_table_fallback_path : string option)
-    ~(naming_table_path : string)
     ~(errors_path : string)
     (ctx : Provider_context.t) : Naming_table.t * saved_state_errors =
   let old_naming_table =
@@ -77,12 +76,21 @@ let load_saved_state
              nt_path);
       Naming_table.load_from_sqlite ctx nt_path
     | None ->
-      let chan = In_channel.create ~binary:true naming_table_path in
-      let (old_saved : Naming_table.saved_state_info) =
-        Marshal.from_channel chan
+      (*
+        If we reach here, then there was neither a SQLite naming table
+        in the saved state directory, nor was a path provided via
+        genv.local_config.naming_table_path.
+
+        ServerCheckUtils.get_naming_table_fallback_path will return None,
+        in which case we raise a failure, since the OCaml-marshalled
+        naming table no longer exists.
+      *)
+      HackEventLogger.naming_table_sqlite_missing ();
+      let str =
+        "No naming table path found, either from saved state directory or local config"
       in
-      Sys_utils.close_in_no_fail naming_table_path chan;
-      Naming_table.from_saved old_saved
+      Hh_logger.log "%s" str;
+      failwith str
   in
   let (old_errors : saved_state_errors) =
     if not (Sys.file_exists errors_path) then

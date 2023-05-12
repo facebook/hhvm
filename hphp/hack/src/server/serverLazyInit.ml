@@ -59,7 +59,7 @@ let lock_and_load_deptable
      * instead of stored in a global *)
     Hh_logger.log "Custom dependency graph will be loaded lazily from %s" fn
 
-let merge_saved_state_futures
+let run_saved_state_future
     (genv : genv)
     (ctx : Provider_context.t)
     (dependency_table_saved_state_future :
@@ -68,188 +68,113 @@ let merge_saved_state_futures
         Saved_state_loader.load_result,
         ServerInitTypes.load_state_error )
       result
-      Future.t)
-    (naming_table_saved_state_future :
-      ( ( Saved_state_loader.Naming_table_info.main_artifacts,
-          Saved_state_loader.Naming_table_info.additional_info )
-        Saved_state_loader.load_result
-        option,
-        string )
-      result
       Future.t) : (loaded_info, load_state_error) result =
   let t = Unix.gettimeofday () in
-
-  let merge dependency_table_saved_state_result naming_table_saved_state_result
-      =
-    match dependency_table_saved_state_result with
-    | Error error ->
-      Hh_logger.log
-        "Unhandled Future.error from state loader: %s"
-        (Future.error_to_string error);
-      let e = Exception.wrap_unraised (Future.error_to_exn error) in
-      Error (Load_state_unhandled_exception e)
-    | Ok (Error error) -> Error error
-    | Ok (Ok deptable_result) ->
-      let ( downloaded_naming_table_path,
-            naming_table_manifold_path,
-            dirty_naming_files ) =
-        match naming_table_saved_state_result with
-        | Ok (Ok None) -> (None, None, [])
-        | Ok
-            (Ok
-              (Some
-                {
-                  Saved_state_loader.main_artifacts;
-                  additional_info = ();
-                  changed_files;
-                  manifold_path;
-                  corresponding_rev = _;
-                  mergebase_rev = _;
-                  is_cached = _;
-                })) ->
-          let (_ : float) =
-            Hh_logger.log_duration
-              "Finished downloading naming table and dependency graph."
-              t
-          in
-          let path =
-            main_artifacts
-              .Saved_state_loader.Naming_table_info.naming_table_path
-          in
-          (Some (Path.to_string path), Some manifold_path, changed_files)
-        | Ok (Error err) ->
-          Hh_logger.warn "Failed to download naming table saved state: %s" err;
-          (None, None, [])
-        | Error error ->
-          Hh_logger.warn
-            "Failed to download the naming table saved state: %s"
-            (Future.error_to_string error);
-          (None, None, [])
-      in
-      let ignore_hh_version =
-        ServerArgs.ignore_hh_version genv.ServerEnv.options
-      in
-      let {
-        Saved_state_loader.main_artifacts;
-        additional_info;
-        changed_files = _;
-        manifold_path = _;
-        corresponding_rev;
-        mergebase_rev;
-        is_cached = _;
-      } =
-        deptable_result
-      in
-      let {
-        Saved_state_loader.Naming_and_dep_table_info.naming_table_path =
-          deptable_naming_table_blob_path;
-        dep_table_path;
-        naming_sqlite_table_path;
-        errors_path;
-      } =
-        main_artifacts
-      in
-      let {
-        Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
-        dirty_files_promise;
-        saved_state_distance;
-        saved_state_age;
-      } =
-        additional_info
-      in
-      let deptable = deptable_with_filename (Path.to_string dep_table_path) in
-      lock_and_load_deptable
-        ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
-        ~deptable
-        ~ignore_hh_version;
-      let naming_table_fallback_path =
-        if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
-          Hh_logger.log "Using sqlite naming table from hack/64 saved state";
-          Some (Path.to_string naming_sqlite_table_path)
-        ) else (
-          HackEventLogger.naming_table_sqlite_missing ();
-          if genv.local_config.SLC.disable_naming_table_fallback_loading then (
-            Hh_logger.log
-              "Naming table fallback loading disabled via JustKnob and SQLite table is missing";
-            None
-          ) else
-            ServerCheckUtils.get_naming_table_fallback_path
-              genv
-              downloaded_naming_table_path
-        )
-      in
-      let (old_naming_table, old_errors) =
-        SaveStateService.load_saved_state
-          ctx
-          ~naming_table_path:(Path.to_string deptable_naming_table_blob_path)
-          ~naming_table_fallback_path
-          ~errors_path:(Path.to_string errors_path)
-      in
-      let t = Unix.time () in
-      (match
-         dirty_files_promise
-         |> Future.get
-              ~timeout:
-                genv.local_config.SLC.load_state_natively_dirty_files_timeout
-       with
-      | Error error -> Error (Load_state_dirty_files_failure error)
-      | Ok
-          {
-            Saved_state_loader.Naming_and_dep_table_info.master_changes =
-              dirty_master_files;
-            local_changes = dirty_local_files;
-          } ->
-        let () = HackEventLogger.state_loader_dirty_files t in
-        let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
-        let dirty_master_files = dirty_master_files in
-        let dirty_local_files = dirty_local_files in
-
-        let saved_state_delta =
-          match (saved_state_distance, saved_state_age) with
-          | (_, None)
-          | (None, _) ->
-            None
-          | (Some distance, Some age) -> Some { distance; age }
-        in
-        Ok
-          {
-            naming_table_fn = Path.to_string deptable_naming_table_blob_path;
-            deptable_fn = Path.to_string dep_table_path;
-            naming_table_fallback_fn = naming_table_fallback_path;
-            corresponding_rev = Hg.Hg_rev corresponding_rev;
-            mergebase_rev = mergebase_global_rev;
-            mergebase = Some mergebase_rev;
-            dirty_naming_files;
+  match Future.get dependency_table_saved_state_future ~timeout:60 with
+  | Error error ->
+    Hh_logger.log
+      "Unhandled Future.error from state loader: %s"
+      (Future.error_to_string error);
+    let e = Exception.wrap_unraised (Future.error_to_exn error) in
+    Error (Load_state_unhandled_exception e)
+  | Ok (Error error) -> Error error
+  | Ok (Ok deptable_result) ->
+    let (_ : float) =
+      Hh_logger.log_duration
+        "Finished downloading naming table and dependency graph."
+        t
+    in
+    let {
+      Saved_state_loader.main_artifacts;
+      additional_info;
+      changed_files;
+      manifold_path;
+      corresponding_rev;
+      mergebase_rev;
+      is_cached = _;
+    } =
+      deptable_result
+    in
+    let {
+      Saved_state_loader.Naming_and_dep_table_info.naming_table_path =
+        deptable_naming_table_blob_path;
+      dep_table_path;
+      naming_sqlite_table_path;
+      errors_path;
+    } =
+      main_artifacts
+    in
+    let {
+      Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
+      dirty_files_promise;
+      saved_state_distance;
+      saved_state_age;
+    } =
+      additional_info
+    in
+    let ignore_hh_version =
+      ServerArgs.ignore_hh_version genv.ServerEnv.options
+    in
+    let deptable = deptable_with_filename (Path.to_string dep_table_path) in
+    lock_and_load_deptable
+      ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
+      ~deptable
+      ~ignore_hh_version;
+    let naming_table_fallback_path =
+      if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
+        Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+        Some (Path.to_string naming_sqlite_table_path)
+      ) else
+        ServerCheckUtils.get_naming_table_fallback_path genv
+    in
+    let (old_naming_table, old_errors) =
+      SaveStateService.load_saved_state_exn
+        ctx
+        ~naming_table_fallback_path
+        ~errors_path:(Path.to_string errors_path)
+    in
+    let t = Unix.time () in
+    (match
+       dirty_files_promise
+       |> Future.get
+            ~timeout:
+              genv.local_config.SLC.load_state_natively_dirty_files_timeout
+     with
+    | Error error -> Error (Load_state_dirty_files_failure error)
+    | Ok
+        {
+          Saved_state_loader.Naming_and_dep_table_info.master_changes =
             dirty_master_files;
-            dirty_local_files;
-            old_naming_table;
-            old_errors;
-            saved_state_delta;
-            naming_table_manifold_path;
-          })
-  in
-  let merge left right = Ok (merge left right) in
-  let future =
-    Future.merge
-      dependency_table_saved_state_future
-      naming_table_saved_state_future
-      merge
-  in
-  (* We don't call Future.get on the merged future until it's ready because
-      the implementation of Future.get blocks on the first future until it's
-      ready, then moves on to the second future, but the second future, since
-      it's composed of bound continuations, will not be making as much progress
-      on its own in this case. *)
-  let rec wait_until_ready future =
-    if not (Future.is_ready future) then begin
-      Sys_utils.sleep ~seconds:0.04;
-      wait_until_ready future
-    end else
-      match Future.get future ~timeout:0 with
-      | Ok result -> result
-      | Error error -> failwith (Future.error_to_string error)
-  in
-  wait_until_ready future
+          local_changes = dirty_local_files;
+        } ->
+      let () = HackEventLogger.state_loader_dirty_files t in
+      let dirty_naming_files = Relative_path.Set.of_list changed_files in
+      let dirty_master_files = dirty_master_files in
+      let dirty_local_files = dirty_local_files in
+      let naming_table_manifold_path = Some manifold_path in
+      let saved_state_delta =
+        match (saved_state_distance, saved_state_age) with
+        | (_, None)
+        | (None, _) ->
+          None
+        | (Some distance, Some age) -> Some { distance; age }
+      in
+      Ok
+        {
+          naming_table_fn = Path.to_string naming_sqlite_table_path;
+          deptable_fn = Path.to_string dep_table_path;
+          naming_table_fallback_fn = naming_table_fallback_path;
+          corresponding_rev = Hg.Hg_rev corresponding_rev;
+          mergebase_rev = mergebase_global_rev;
+          mergebase = Some mergebase_rev;
+          dirty_naming_files;
+          dirty_master_files;
+          dirty_local_files;
+          old_naming_table;
+          old_errors;
+          saved_state_delta;
+          naming_table_manifold_path;
+        })
 
 (** [report update p ~other] is called because we just got a report that progress-meter [p]
 should be updated with latest information [update]. The behavior of this function
@@ -292,36 +217,6 @@ let download_and_load_state_exn
     (ref None, ref None)
   in
   let ssopt = genv.local_config.ServerLocalConfig.saved_state in
-  (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)
-  let _ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
-  let naming_table_saved_state_future =
-    if genv.local_config.ServerLocalConfig.enable_naming_table_fallback then begin
-      Hh_logger.log "Starting naming table download.";
-
-      let loader_future =
-        State_loader_futures.load
-          ~ssopt
-          ~progress_callback:(fun update ->
-            report
-              update
-              progress_naming_table_load
-              ~other:progress_dep_table_load)
-          ~watchman_opts:
-            Saved_state_loader.Watchman_options.{ root; sockname = None }
-          ~ignore_hh_version
-          ~saved_state_type:Saved_state_loader.Naming_table
-        |> Future.with_timeout
-             ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
-      in
-      Future.continue_and_map_err loader_future @@ fun result ->
-      match result with
-      | Ok (Ok load_state) -> Ok (Some load_state)
-      | Ok (Error e) ->
-        Error (Saved_state_loader.LoadError.long_user_message_of_error e)
-      | Error e -> Error (Future.error_to_string e)
-    end else
-      Future.of_value (Ok None)
-  in
   let dependency_table_saved_state_future :
       ( ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
           Saved_state_loader.Naming_and_dep_table_info.additional_info )
@@ -358,11 +253,7 @@ let download_and_load_state_exn
     in
     loader_future
   in
-  merge_saved_state_futures
-    genv
-    ctx
-    dependency_table_saved_state_future
-    naming_table_saved_state_future
+  run_saved_state_future genv ctx dependency_table_saved_state_future
 
 let calculate_state_distance_and_age_from_hg
     (root : Path.t) (corresponding_base_revision : string) :
@@ -431,18 +322,17 @@ let use_precomputed_state_exn
   in
   let naming_table_fallback_path =
     if Sys.file_exists naming_sqlite_table_path then (
-      Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+      Hh_logger.log "Using sqlite naming table from saved state";
       Some naming_sqlite_table_path
     ) else
-      ServerCheckUtils.get_naming_table_fallback_path genv None
+      ServerCheckUtils.get_naming_table_fallback_path genv
   in
   let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
     CgroupProfiler.step_start_end cgroup_steps "load saved state"
     @@ fun _cgroup_step ->
-    SaveStateService.load_saved_state
+    SaveStateService.load_saved_state_exn
       ctx
-      ~naming_table_path
       ~naming_table_fallback_path
       ~errors_path
   in

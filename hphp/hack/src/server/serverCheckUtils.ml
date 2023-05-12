@@ -11,16 +11,14 @@ open ServerEnv
 open ServerLocalConfig
 include ServerRemoteUtils
 
-let get_naming_table_fallback_path genv (naming_table_fn : string option) :
-    string option =
-  Hh_logger.log "Figuring out naming table SQLite path...";
+let get_naming_table_fallback_path genv : string option =
   match genv.local_config.naming_sqlite_path with
-  | Some path ->
-    Hh_logger.log "Naming table path from config: %s" path;
-    Some path
+  | Some path as p ->
+    Hh_logger.log "Loading naming table path from config: %s" path;
+    p
   | None ->
     Hh_logger.log "No path set in config, using the loaded naming table";
-    naming_table_fn
+    None
 
 (** [extend_defs_per_file_sequential defs_per_file naming_table additional_files]
   extends [defs_per_file] file-to-defs table with definitions in [additional_files]

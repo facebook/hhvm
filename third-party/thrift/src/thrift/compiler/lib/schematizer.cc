@@ -421,7 +421,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     return_types_schema->set_list();
     for (const auto& ret : func.return_types()) {
       // TODO: Handle sink, stream, interactions
-      if (!ret->is_sink() && !ret->is_streamresponse()) {
+      if (!ret->is_sink() && !ret->is_streamresponse() && !ret->is_service()) {
         auto return_type_schema = val();
         return_type_schema->set_map();
         return_type_schema->add_map(

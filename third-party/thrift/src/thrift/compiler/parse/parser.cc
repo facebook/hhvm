@@ -761,8 +761,7 @@ class parser {
   }
 
   // const:
-  //   attributes
-  //   "const" type identifier "=" const_value [annotations] comma_or_semicolon?
+  //   attributes "const" type identifier "=" const_value [annotations] [";"]
   void parse_const(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_const);
@@ -771,7 +770,7 @@ class parser {
     expect_and_consume('=');
     auto value = parse_const_value();
     try_parse_annotations(attrs);
-    try_parse_comma_or_semicolon();
+    try_consume_token(';');
     actions_.on_const(range, std::move(attrs), type, name, std::move(value));
   }
 

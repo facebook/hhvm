@@ -85,7 +85,11 @@ Optional<State> entry_state(const Index& index, CollectedInfo& collect,
     }
     auto const maybeThisType = thisType(index, ctx);
     auto thisType = maybeThisType ? *maybeThisType : TObj;
-    if (index.lookup_this_available(ctx.func)) return thisType;
+    if (ctx.func->cls &&
+        !(ctx.func->cls->attrs & AttrTrait) &&
+        !(ctx.func->attrs & AttrStatic)) {
+      return thisType;
+    }
     return opt(std::move(thisType));
   }();
   ret.locals.resize(ctx.func->locals.size());

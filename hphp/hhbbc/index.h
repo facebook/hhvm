@@ -1150,13 +1150,6 @@ struct Index {
                             bool move = false) const;
 
   /*
-   * Return the availability of $this on entry to the provided method.
-   * If the Func provided is not a method of a class false is
-   * returned.
-   */
-  bool lookup_this_available(const php::Func*) const;
-
-  /*
    * Returns the parameter preparation kind (if known) for parameter
    * `paramId' on the given resolved Func.
    */

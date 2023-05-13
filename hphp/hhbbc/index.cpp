@@ -15137,10 +15137,6 @@ std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const 
   return { TInitCell, 0 };
 }
 
-bool Index::lookup_this_available(const php::Func* f) const {
-  return !(f->cls->attrs & AttrTrait) && !(f->attrs & AttrStatic);
-}
-
 Optional<uint32_t> Index::lookup_num_inout_params(
   Context,
   res::Func rfunc

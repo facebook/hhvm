@@ -122,7 +122,7 @@ class StreamElementEncoder {
 };
 
 template <typename T>
-struct PayloadAndHeader {
+struct RichPayloadToSend { // received as `RichPayloadReceived`
   T payload;
   transport::THeader::StringToStringMap metadata;
 };
@@ -134,7 +134,7 @@ struct OrderedHeader {
 };
 template <typename T>
 using MessageVariant =
-    std::variant<T, PayloadAndHeader<T>, UnorderedHeader, OrderedHeader>;
+    std::variant<T, RichPayloadToSend<T>, UnorderedHeader, OrderedHeader>;
 
 template <typename T>
 folly::Try<StreamPayload> encodeMessageVariant(
@@ -142,7 +142,7 @@ folly::Try<StreamPayload> encodeMessageVariant(
   return folly::variant_match(
       std::move(payload),
       [&](T&& val) { return (*encode)(std::move(val)); },
-      [&](PayloadAndHeader<T>&& val) {
+      [&](RichPayloadToSend<T>&& val) {
         auto ret = (*encode)(std::move(val.payload));
         ret->metadata.otherMetadata() = std::move(val.metadata);
         return ret;

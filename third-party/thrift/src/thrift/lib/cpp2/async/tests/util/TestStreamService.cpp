@@ -84,7 +84,7 @@ apache::thrift::ServerStream<int32_t> TestStreamPublisherService::rangeThrowUDE(
   return std::move(stream);
 }
 
-using Pair = apache::thrift::detail::PayloadAndHeader<int32_t>;
+using RichPayload = apache::thrift::detail::RichPayloadToSend<int32_t>;
 using MessageVariant = apache::thrift::detail::MessageVariant<int32_t>;
 using apache::thrift::detail::OrderedHeader;
 using apache::thrift::detail::UnorderedHeader;
@@ -94,7 +94,7 @@ TestStreamGeneratorWithHeaderService::range(int32_t from, int32_t to) {
   return folly::coro::co_invoke(
       [=]() -> folly::coro::AsyncGenerator<MessageVariant&&> {
         for (int i = from; i <= to; i++) {
-          co_yield Pair{i, {{"val", std::to_string(i)}}};
+          co_yield RichPayload{i, {{"val", std::to_string(i)}}};
           co_yield UnorderedHeader{{{"val", std::to_string(i)}}};
           co_yield OrderedHeader{{{"val", std::to_string(i)}}};
         }
@@ -106,7 +106,7 @@ TestStreamGeneratorWithHeaderService::rangeThrow(int32_t from, int32_t to) {
   return folly::coro::co_invoke(
       [=]() -> folly::coro::AsyncGenerator<MessageVariant&&> {
         for (int i = from; i <= to; i++) {
-          co_yield Pair{i, {{"val", std::to_string(i)}}};
+          co_yield RichPayload{i, {{"val", std::to_string(i)}}};
           co_yield UnorderedHeader{{{"val", std::to_string(i)}}};
           co_yield OrderedHeader{{{"val", std::to_string(i)}}};
         }
@@ -119,7 +119,7 @@ TestStreamGeneratorWithHeaderService::rangeThrowUDE(int32_t from, int32_t to) {
   return folly::coro::co_invoke(
       [=]() -> folly::coro::AsyncGenerator<MessageVariant&&> {
         for (int i = from; i <= to; i++) {
-          co_yield Pair{i, {{"val", std::to_string(i)}}};
+          co_yield RichPayload{i, {{"val", std::to_string(i)}}};
           co_yield UnorderedHeader{{{"val", std::to_string(i)}}};
           co_yield OrderedHeader{{{"val", std::to_string(i)}}};
         }
@@ -133,7 +133,7 @@ TestStreamPublisherWithHeaderService::range(int32_t from, int32_t to) {
       apache::thrift::ServerStream<int32_t>::createPublisherWithHeader([] {});
 
   for (int i = from; i <= to; i++) {
-    publisher.next(Pair{i, {{"val", std::to_string(i)}}});
+    publisher.next(RichPayload{i, {{"val", std::to_string(i)}}});
     publisher.next(UnorderedHeader{{{"val", std::to_string(i)}}});
     publisher.next(OrderedHeader{{{"val", std::to_string(i)}}});
   }
@@ -148,7 +148,7 @@ TestStreamPublisherWithHeaderService::rangeThrow(int32_t from, int32_t to) {
       apache::thrift::ServerStream<int32_t>::createPublisherWithHeader([] {});
 
   for (int i = from; i <= to; i++) {
-    publisher.next(Pair{i, {{"val", std::to_string(i)}}});
+    publisher.next(RichPayload{i, {{"val", std::to_string(i)}}});
     publisher.next(UnorderedHeader{{{"val", std::to_string(i)}}});
     publisher.next(OrderedHeader{{{"val", std::to_string(i)}}});
   }
@@ -163,7 +163,7 @@ TestStreamPublisherWithHeaderService::rangeThrowUDE(int32_t from, int32_t to) {
       apache::thrift::ServerStream<int32_t>::createPublisherWithHeader([] {});
 
   for (int i = from; i <= to; i++) {
-    publisher.next(Pair{i, {{"val", std::to_string(i)}}});
+    publisher.next(RichPayload{i, {{"val", std::to_string(i)}}});
     publisher.next(UnorderedHeader{{{"val", std::to_string(i)}}});
     publisher.next(OrderedHeader{{{"val", std::to_string(i)}}});
   }
@@ -297,7 +297,7 @@ TestStreamMultiPublisherWithHeaderService::range(
                 if (waitForCancellation && i == from + 1) {
                   co_await *waitForCancellation_;
                 }
-                multipub_.next(Pair{i, {{"val", std::to_string(i)}}});
+                multipub_.next(RichPayload{i, {{"val", std::to_string(i)}}});
                 multipub_.next(UnorderedHeader{{{"val", std::to_string(i)}}});
                 multipub_.next(OrderedHeader{{{"val", std::to_string(i)}}});
                 co_await folly::coro::co_reschedule_on_current_executor;

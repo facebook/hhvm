@@ -139,7 +139,7 @@ class ClientBufferedStream {
               std::move(streamBridge_), bufferOptions_.chunkSize, decode_);
   }
 
-  struct PayloadAndHeader {
+  struct RichPayloadReceived { // sent as `RichPayloadToSend` from server
     T payload;
     StreamPayloadMetadata metadata;
   };
@@ -150,7 +150,7 @@ class ClientBufferedStream {
     StreamPayloadMetadata metadata;
   };
   using MessageVariant =
-      std::variant<T, PayloadAndHeader, UnorderedHeader, OrderedHeader>;
+      std::variant<T, RichPayloadReceived, UnorderedHeader, OrderedHeader>;
   folly::coro::AsyncGenerator<MessageVariant&&>
   toAsyncGeneratorWithHeader() && {
     CHECK_EQ(bufferOptions_.memSize, 0)
@@ -262,7 +262,7 @@ class ClientBufferedStream {
           if (payload.hasValue()) {
             if (payloadSize) {
               if (payload->metadata.otherMetadata().has_value()) {
-                PayloadAndHeader ret;
+                RichPayloadReceived ret;
                 ret.metadata = std::move(payload->metadata);
                 ret.payload = *decode(std::move(payload));
                 queue.pop();

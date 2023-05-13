@@ -40,7 +40,7 @@ folly::coro::Task<...> co_METHOD(
 }
 ```
 
-Finally, to handle FDs on stream messages, the client / server must use the library flavor that passes `PayloadAndHeader` structures. These include `fds` both on the “send” (`StreamCallbacks.h`) and “receive” side (`ClientBufferedStream.h`).
+Finally, to handle FDs on stream messages, the client / server must use the library flavor that passes `RichPayloadToSend` / `RichPayloadReceived` structures. These include `fds` both on the “send” (`StreamCallbacks.h`) and “receive” side (`ClientBufferedStream.h`).
 
 The design & implementation of this feature is [documented here](../../contributions/fd-passing.md).
 

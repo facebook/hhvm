@@ -34,7 +34,7 @@ using TestTypes = ::testing::Types<
     TestStreamPublisherWithHeaderService>;
 TYPED_TEST_CASE(StreamServiceTest, TestTypes);
 
-using PayloadAndHeader = ClientBufferedStream<int32_t>::PayloadAndHeader;
+using RichPayloadReceived = ClientBufferedStream<int32_t>::RichPayloadReceived;
 using UnorderedHeader = ClientBufferedStream<int32_t>::UnorderedHeader;
 using OrderedHeader = ClientBufferedStream<int32_t>::OrderedHeader;
 
@@ -94,8 +94,8 @@ TYPED_TEST(StreamServiceTest, WithHeader) {
             (co_await client.co_range(0, 100)).toAsyncGeneratorWithHeader();
         int i = 0;
         while (auto t = co_await gen.next()) {
-          if (std::holds_alternative<PayloadAndHeader>(*t)) {
-            auto pair = std::get<PayloadAndHeader>(*t);
+          if (std::holds_alternative<RichPayloadReceived>(*t)) {
+            auto pair = std::get<RichPayloadReceived>(*t);
             EXPECT_EQ(i, pair.payload);
             EXPECT_EQ(
                 std::to_string(i), (*pair.metadata.otherMetadata_ref())["val"]);
@@ -345,8 +345,8 @@ TYPED_TEST(MultiStreamServiceTest, WithHeader) {
                                .toAsyncGeneratorWithHeader();
                 int i = 0;
                 while (auto t = co_await gen.next()) {
-                  if (std::holds_alternative<PayloadAndHeader>(*t)) {
-                    auto pair = std::get<PayloadAndHeader>(*t);
+                  if (std::holds_alternative<RichPayloadReceived>(*t)) {
+                    auto pair = std::get<RichPayloadReceived>(*t);
                     EXPECT_EQ(i, pair.payload);
                     EXPECT_EQ(
                         std::to_string(i),

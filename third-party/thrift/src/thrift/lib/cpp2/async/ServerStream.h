@@ -41,7 +41,7 @@ class ServerStreamMultiPublisher;
 template <typename T>
 class ServerStream {
  public:
-  using PayloadAndHeader = apache::thrift::detail::PayloadAndHeader<T>;
+  using RichPayloadToSend = apache::thrift::detail::RichPayloadToSend<T>;
   using UnorderedHeader = apache::thrift::detail::UnorderedHeader;
   using OrderedHeader = apache::thrift::detail::OrderedHeader;
   using MessageVariant = apache::thrift::detail::MessageVariant<T>;

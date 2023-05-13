@@ -248,6 +248,8 @@ add_library(
   server/LoggingEventHelper.cpp
   server/MonitoringMethodNames.cpp
   server/ParallelConcurrencyController.cpp
+  server/TokenBucketConcurrencyController.cpp
+  server/StandardConcurrencyController.cpp
   server/ThreadManagerLoggingWrapper.cpp
   server/RequestDebugLog.cpp
   server/RequestPileBase.cpp

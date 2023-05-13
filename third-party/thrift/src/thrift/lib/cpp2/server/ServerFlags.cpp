@@ -38,6 +38,16 @@ THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
 THRIFT_FLAG_DEFINE_bool(
     allow_resource_pools_set_thread_manager_from_executor, true);
 
+FOLLY_GFLAGS_DEFINE_bool(
+    thrift_use_token_bucket_concurrency_controller,
+    false,
+    "Use TokenBucketConcurrencyController as a standard concurrency controller in ThriftServer");
+
+FOLLY_GFLAGS_DEFINE_bool(
+    thrift_server_enforces_qps_limit,
+    true,
+    "Enforce QPS limit in ThriftServer::checkOverload");
+
 namespace apache::thrift {
 
 bool useResourcePoolsFlagsSet() {

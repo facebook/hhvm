@@ -756,6 +756,11 @@ void ThriftServer::setupThreadManager() {
                 << " enable gflag:"
                 << FLAGS_thrift_experimental_use_resource_pools;
 
+      LOG(INFO) << "QPS limit will be enforced by "
+                << (FLAGS_thrift_server_enforces_qps_limit
+                        ? "the thrift server"
+                        : "the concurrency controller");
+
       ensureResourcePools();
 
       // During resource pools roll out we want to track services that get
@@ -784,7 +789,22 @@ void ThriftServer::setupThreadManager() {
                           ? maxRequests
                           : std::numeric_limits<decltype(maxRequests)>::max());
             });
-
+    setMaxQpsCallbackHandle =
+        detail::getThriftServerConfig(*this)
+            .getMaxQps()
+            .getObserver()
+            .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
+              auto maxQps = *snapshot;
+              resourcePoolSet()
+                  .resourcePool(ResourcePoolHandle::defaultAsync())
+                  .concurrencyController()
+                  .value()
+                  .get()
+                  .setQpsLimit(
+                      maxQps != 0
+                          ? maxQps
+                          : std::numeric_limits<decltype(maxQps)>::max());
+            });
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools
     if (!threadManager_ &&
@@ -1723,6 +1743,7 @@ ThriftServer::checkOverload(
   }
 
   if (auto maxQps = getMaxQps(); maxQps > 0 &&
+      FLAGS_thrift_server_enforces_qps_limit &&
       (method == nullptr ||
        !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {

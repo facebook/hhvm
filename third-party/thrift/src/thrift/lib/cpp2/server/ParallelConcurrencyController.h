@@ -20,6 +20,7 @@
 
 #include <folly/executors/MeteredExecutor.h>
 #include <folly/lang/Align.h>
+#include <folly/logging/xlog.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
@@ -39,6 +40,17 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
 
   uint64_t getExecutionLimitRequests() const override final {
     return executionLimit_.load();
+  }
+
+  void setQpsLimit(uint64_t) override final {
+    XLOG_EVERY_MS(WARNING, 1000)
+        << "ParallelConcurrencyControllerBase does not support QPS limit";
+  }
+
+  uint64_t getQpsLimit() const override final {
+    XLOG_EVERY_MS(WARNING, 1000)
+        << "ParallelConcurrencyControllerBase does not support QPS limit";
+    return 0;
   }
 
   uint64_t requestCount() const override final {

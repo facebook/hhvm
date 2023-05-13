@@ -46,6 +46,10 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   // indicates unlimited. This is thread safe.
   virtual uint64_t getExecutionLimitRequests() const = 0;
 
+  virtual void setQpsLimit(uint64_t limit) = 0;
+
+  virtual uint64_t getQpsLimit() const = 0;
+
   // Returns the current number of requests being processed by this concurrency
   // controller. This is only intended for monitoring. This is thread safe.
   virtual uint64_t requestCount() const = 0;

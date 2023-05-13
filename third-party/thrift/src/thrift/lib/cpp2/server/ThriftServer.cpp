@@ -50,10 +50,11 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
-#include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
+#include <thrift/lib/cpp2/server/StandardConcurrencyController.h>
+#include <thrift/lib/cpp2/server/TMConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
@@ -865,9 +866,8 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
       auto requestPile =
           std::make_unique<apache::thrift::RoundRobinRequestPile>(
               std::move(options));
-      auto concurrencyController =
-          std::make_unique<apache::thrift::ParallelConcurrencyController>(
-              *requestPile.get(), *executor.get());
+      auto concurrencyController = makeStandardConcurrencyController(
+          *requestPile.get(), *executor.get());
       resourcePoolSet().addResourcePool(
           kPoolNames.at(i).name,
           std::move(requestPile),
@@ -1035,9 +1035,8 @@ void ThriftServer::ensureResourcePools() {
           ResourcePool::kPreferredExecutorNumPriorities,
           threadFactory());
 
-      auto concurrencyController =
-          std::make_unique<apache::thrift::ParallelConcurrencyController>(
-              *requestPile.get(), *executor.get());
+      auto concurrencyController = makeStandardConcurrencyController(
+          *requestPile.get(), *executor.get());
 
       resourcePoolSet().setResourcePool(
           ResourcePoolHandle::defaultAsync(),
@@ -1082,9 +1081,8 @@ void ThriftServer::ensureResourcePools() {
       auto requestPile =
           std::make_unique<apache::thrift::RoundRobinRequestPile>(
               std::move(options));
-      auto concurrencyController =
-          std::make_unique<apache::thrift::ParallelConcurrencyController>(
-              *requestPile.get(), *executor.get());
+      auto concurrencyController = makeStandardConcurrencyController(
+          *requestPile.get(), *executor.get());
       if (i == concurrency::PRIORITY::NORMAL) {
         resourcePoolSet().setResourcePool(
             ResourcePoolHandle::defaultAsync(),
@@ -1206,9 +1204,8 @@ void ThriftServer::ensureResourcePools() {
       auto requestPile =
           std::make_unique<apache::thrift::RoundRobinRequestPile>(
               std::move(options));
-      auto concurrencyController =
-          std::make_unique<apache::thrift::ParallelConcurrencyController>(
-              *requestPile.get(), *executor.get());
+      auto concurrencyController = makeStandardConcurrencyController(
+          *requestPile.get(), *executor.get());
       if (pool.handle) {
         resourcePoolSet().setResourcePool(
             ResourcePoolHandle::defaultAsync(),

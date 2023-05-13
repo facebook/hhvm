@@ -123,22 +123,6 @@ void ParallelConcurrencyController::scheduleOnExecutor() {
   }
 }
 
-void TMConcurrencyController::scheduleOnExecutor() {
-  auto req = pile_.dequeue();
-  auto es = req->requestContext()->getRequestExecutionScope();
-
-  if (req) {
-    apache::thrift::detail::ServerRequestHelper::setExecutor(
-        req.value(),
-        tm_.getKeepAlive(es, concurrency::ThreadManager::Source::INTERNAL));
-  }
-
-  tm_.getKeepAlive(es, concurrency::ThreadManager::Source::UPSTREAM)
-      ->add([this, req = std::move(req)]() mutable {
-        executeRequest(std::move(req));
-      });
-}
-
 void ParallelConcurrencyControllerBase::executeRequest(
     std::optional<ServerRequest> req) {
   if (req) {
@@ -179,12 +163,6 @@ void ParallelConcurrencyControllerBase::stop() {}
 std::string ParallelConcurrencyController::describe() const {
   return fmt::format(
       "{{ParallelConcurrencyController executionLimit={}}}",
-      executionLimit_.load());
-}
-
-std::string TMConcurrencyController::describe() const {
-  return fmt::format(
-      "{{ParallelTMConcurrencyController executionLimit={}}}",
       executionLimit_.load());
 }
 

@@ -96,17 +96,4 @@ class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {
   void scheduleOnExecutor() override;
 };
 
-class TMConcurrencyController : public ParallelConcurrencyControllerBase {
- public:
-  TMConcurrencyController(
-      RequestPileInterface& pile, concurrency::ThreadManager& tm)
-      : ParallelConcurrencyControllerBase(pile), tm_(tm) {}
-  std::string describe() const override;
-
- private:
-  concurrency::ThreadManager& tm_;
-
-  void scheduleOnExecutor() override;
-};
-
 } // namespace apache::thrift

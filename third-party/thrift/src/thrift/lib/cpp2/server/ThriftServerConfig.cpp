@@ -40,63 +40,88 @@ ThriftServerConfig::ThriftServerConfig(
   }
 }
 
-const ServerAttributeStatic<std::string>&
-ThriftServerConfig::getCPUWorkerThreadName() const {
-  return poolThreadName_;
+std::string ThriftServerConfig::getCPUWorkerThreadName() const {
+  return poolThreadName_.get();
 }
 
-const ServerAttributeStatic<std::chrono::seconds>&
-ThriftServerConfig::getWorkersJoinTimeout() const {
-  return workersJoinTimeout_;
-}
-
-const ServerAttributeStatic<int>& ThriftServerConfig::getListenBacklog() const {
-  return listenBacklog_;
-}
-
-const ServerAttributeStatic<std::chrono::milliseconds>&
-ThriftServerConfig::getIdleTimeout() const {
-  return timeout_;
-}
-
-const ServerAttributeStatic<size_t>& ThriftServerConfig::getNumIOWorkerThreads()
+std::optional<std::string> ThriftServerConfig::getBaselineCPUWorkerThreadName()
     const {
-  return nWorkers_;
+  return poolThreadName_.getBaseline();
 }
 
-const ServerAttributeStatic<size_t>&
-ThriftServerConfig::getNumCPUWorkerThreads() const {
-  return nPoolThreads_;
+std::chrono::seconds ThriftServerConfig::getWorkersJoinTimeout() const {
+  return workersJoinTimeout_.get();
 }
 
-const ServerAttributeStatic<folly::sorted_vector_set<std::string>>&
+std::optional<std::chrono::seconds>
+ThriftServerConfig::getBaselineWorkersJoinTimeout() const {
+  return workersJoinTimeout_.getBaseline();
+}
+
+int ThriftServerConfig::getListenBacklog() const {
+  return listenBacklog_.get();
+}
+
+std::optional<int> ThriftServerConfig::getBaselineListenBacklog() const {
+  return listenBacklog_.getBaseline();
+}
+
+std::chrono::milliseconds ThriftServerConfig::getIdleTimeout() const {
+  return timeout_.get();
+}
+
+std::optional<std::chrono::milliseconds>
+ThriftServerConfig::getBaselineIdleTimeout() const {
+  return timeout_.getBaseline();
+}
+
+size_t ThriftServerConfig::getNumIOWorkerThreads() const {
+  return nWorkers_.get();
+}
+
+std::optional<size_t> ThriftServerConfig::getBaselineNumIOWorkerThreads()
+    const {
+  return nWorkers_.getBaseline();
+}
+
+size_t ThriftServerConfig::getNumCPUWorkerThreads() const {
+  auto nCPUWorkers = nPoolThreads_.get();
+  return nCPUWorkers ? nCPUWorkers : T_ASYNC_DEFAULT_WORKER_THREADS;
+}
+
+std::optional<size_t> ThriftServerConfig::getBaselineNumCPUWorkerThreads()
+    const {
+  return nPoolThreads_.getBaseline();
+}
+
+const folly::sorted_vector_set<std::string>&
 ThriftServerConfig::getMethodsBypassMaxRequestsLimit() const {
-  return methodsBypassMaxRequestsLimit_;
+  return methodsBypassMaxRequestsLimit_.get();
 }
 
-const ServerAttributeStatic<uint32_t>&
-ThriftServerConfig::getMaxNumPendingConnectionsPerWorker() const {
-  return maxNumPendingConnectionsPerWorker_;
+uint32_t ThriftServerConfig::getMaxNumPendingConnectionsPerWorker() const {
+  return maxNumPendingConnectionsPerWorker_.get();
 }
 
-const ServerAttributeStatic<uint64_t>&
-ThriftServerConfig::getMaxDebugPayloadMemoryPerRequest() const {
-  return maxDebugPayloadMemoryPerRequest_;
+std::optional<uint32_t>
+ThriftServerConfig::getBaselineMaxNumPendingConnectionsPerWorker() const {
+  return maxNumPendingConnectionsPerWorker_.getBaseline();
 }
 
-const ServerAttributeStatic<uint64_t>&
-ThriftServerConfig::getMaxDebugPayloadMemoryPerWorker() const {
-  return maxDebugPayloadMemoryPerWorker_;
+uint64_t ThriftServerConfig::getMaxDebugPayloadMemoryPerRequest() const {
+  return maxDebugPayloadMemoryPerRequest_.get();
 }
 
-const ServerAttributeStatic<uint16_t>&
-ThriftServerConfig::getMaxFinishedDebugPayloadsPerWorker() const {
-  return maxFinishedDebugPayloadsPerWorker_;
+uint64_t ThriftServerConfig::getMaxDebugPayloadMemoryPerWorker() const {
+  return maxDebugPayloadMemoryPerWorker_.get();
 }
 
-const ServerAttributeStatic<std::chrono::milliseconds>&
-ThriftServerConfig::getConnectionAgeTimeout() const {
-  return connectionAgeTimeout_;
+uint16_t ThriftServerConfig::getMaxFinishedDebugPayloadsPerWorker() const {
+  return maxFinishedDebugPayloadsPerWorker_.get();
+}
+
+std::chrono::milliseconds ThriftServerConfig::getConnectionAgeTimeout() const {
+  return connectionAgeTimeout_.get();
 }
 
 const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxConnections()
@@ -104,14 +129,29 @@ const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxConnections()
   return maxConnections_;
 }
 
+const std::optional<uint32_t> ThriftServerConfig::getBaselineMaxConnections()
+    const {
+  return maxConnections_.getBaseline();
+}
+
 const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxRequests()
     const {
   return maxRequests_;
 }
 
+const std::optional<uint32_t> ThriftServerConfig::getBaselineMaxRequests()
+    const {
+  return maxRequests_.getBaseline();
+}
+
 const ServerAttributeDynamic<uint64_t>& ThriftServerConfig::getMaxResponseSize()
     const {
   return maxResponseSize_;
+}
+
+const std::optional<uint64_t> ThriftServerConfig::getBaselineMaxResponseSize()
+    const {
+  return maxResponseSize_.getBaseline();
 }
 
 const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxQps() const {
@@ -121,6 +161,11 @@ const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxQps() const {
 const ServerAttributeDynamic<bool>& ThriftServerConfig::getUseClientTimeout()
     const {
   return useClientTimeout_;
+}
+
+const std::optional<bool> ThriftServerConfig::getBaselineUseClientTimeout()
+    const {
+  return useClientTimeout_.getBaseline();
 }
 
 const ServerAttributeDynamic<std::chrono::milliseconds>&
@@ -147,9 +192,19 @@ ThriftServerConfig::getTaskExpireTime() const {
   return taskExpireTime_;
 }
 
+const std::optional<std::chrono::milliseconds>
+ThriftServerConfig::getBaselineTaskExpireTime() const {
+  return taskExpireTime_.getBaseline();
+}
+
 const ServerAttributeDynamic<std::chrono::milliseconds>&
 ThriftServerConfig::getStreamExpireTime() const {
   return streamExpireTime_;
+}
+
+const std::optional<std::chrono::milliseconds>
+ThriftServerConfig::getBaselineStreamExpireTime() const {
+  return streamExpireTime_.getBaseline();
 }
 
 const ServerAttributeDynamic<std::chrono::milliseconds>&
@@ -157,9 +212,19 @@ ThriftServerConfig::getQueueTimeout() const {
   return queueTimeout_;
 }
 
+const std::optional<std::chrono::milliseconds>
+ThriftServerConfig::getBaselineQueueTimeout() const {
+  return queueTimeout_.getBaseline();
+}
+
 const ServerAttributeDynamic<std::chrono::nanoseconds>&
 ThriftServerConfig::getSocketQueueTimeout() const {
   return socketQueueTimeout_;
+}
+
+const std::optional<std::chrono::nanoseconds>
+ThriftServerConfig::getBaselineSocketQueueTimeout() const {
+  return socketQueueTimeout_.getBaseline();
 }
 
 const ServerAttributeDynamic<std::chrono::milliseconds>&

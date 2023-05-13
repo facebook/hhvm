@@ -187,7 +187,7 @@ rocket::Payload packWithFds(
   auto ret = apache::thrift::rocket::detail::makePayload(
       *metadata, std::move(serializedPayload));
   if (numFds) {
-    ret.fds = std::move(fds.dcheckToSend());
+    ret.fds = std::move(fds.dcheckToSendOrEmpty());
   }
   return ret;
 }

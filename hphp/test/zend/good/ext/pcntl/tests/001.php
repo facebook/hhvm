@@ -1,66 +1,99 @@
 <?hh
-function test_exit_waits(){
-    print "\n\nTesting pcntl_wifexited and wexitstatus....";
 
-    $pid=pcntl_fork();
-    if ($pid==0) {
-        sleep(1);
-        exit(-1);
-    } else {
-        $options=0;
-        $status = null;
-        pcntl_waitpid($pid, inout $status, $options);
-        if ( pcntl_wifexited($status) ) print "\nExited With: ". pcntl_wexitstatus($status);
+function test_exit_waits(){
+  print "\n\nTesting pcntl_wifexited and wexitstatus....";
+
+  $pid=pcntl_fork();
+  if ($pid==0) {
+    sleep(1);
+    exit(100);
+  } else if ($pid < 0) {
+    print "\nUnable to fork";
+    exit(-1);
+  } else {
+    $options=0;
+    $status = null;
+    if (pcntl_waitpid($pid, inout $status, $options) !== $pid) {
+      print "\nUnable to wait on " . $pid;
+      exit(-1);
     }
+    if (pcntl_wifexited($status)) {
+      print "\nExited With: ". pcntl_wexitstatus($status);
+    } else {
+      print "\nProcess did not exit";
+    }
+  }
 }
 
 function test_exit_signal(){
-    print "\n\nTesting pcntl_wifsignaled....";
+  print "\n\nTesting pcntl_wifsignaled....";
 
-    $pid=pcntl_fork();
-
-    if ($pid==0) {
-        sleep(10);
-        exit;
-    } else {
-        $options=0;
-        posix_kill($pid, SIGTERM);
-        $status = null;
-        pcntl_waitpid($pid, inout $status, $options);
-        if ( pcntl_wifsignaled($status) ) {
-            $signal_print=pcntl_wtermsig($status);
-            if ($signal_print==SIGTERM) $signal_print="SIGTERM";
-            print "\nProcess was terminated by signal : ". $signal_print;
-        }
-
+  $pid=pcntl_fork();
+  if ($pid==0) {
+    sleep(60);
+    exit(101);
+  } else if ($pid < 0) {
+    print "\nUnable to fork";
+    exit(-1);
+  } else {
+    $options=0;
+    if (!posix_kill($pid, SIGTERM)) {
+      print "\nUnable to send SIGTERM to " . $pid;
+      exit(-1);
     }
+    $status = null;
+    if (pcntl_waitpid($pid, inout $status, $options) !== $pid) {
+      print "\nUnable to wait on " . $pid;
+      exit(-1);
+    }
+    if (pcntl_wifsignaled($status)) {
+      $signal_print=pcntl_wtermsig($status);
+      if ($signal_print==SIGTERM) $signal_print="SIGTERM";
+      print "\nProcess was terminated by signal : ". $signal_print;
+    } else if (pcntl_wifexited($status)) {
+      print "\nProcess exited with: " . pcntl_wexitstatus($status);
+    } else {
+      print "\nProcess was not terminated";
+    }
+  }
 }
-
 
 function test_stop_signal(){
-    print "\n\nTesting pcntl_wifstopped and pcntl_wstopsig....";
+  print "\n\nTesting pcntl_wifstopped and pcntl_wstopsig....";
 
-    $pid=pcntl_fork();
-
-    if ($pid==0) {
-        sleep(1);
-        exit;
-    } else {
-        $options=WUNTRACED;
-        posix_kill($pid, SIGSTOP);
-        $status = null;
-        pcntl_waitpid($pid, inout $status, $options);
-        if ( pcntl_wifstopped($status) ) {
-            $signal_print=pcntl_wstopsig($status);
-            if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
-            print "\nProcess was stoped by signal : ". $signal_print;
-        }
-        posix_kill($pid, SIGCONT);
+  $pid=pcntl_fork();
+  if ($pid==0) {
+    sleep(60);
+    exit(102);
+  } else if ($pid < 0) {
+    print "\nUnable to fork";
+    exit(-1);
+  } else {
+    $options=WUNTRACED;
+    if (!posix_kill($pid, SIGSTOP)) {
+      print "\nUnable to send SIGSTOP to " . $pid;
+      exit(-1);
     }
+    $status = null;
+    if (pcntl_waitpid($pid, inout $status, $options) !== $pid) {
+      print "\nUnable to wait on " . $pid;
+    }
+    if (pcntl_wifstopped($status)) {
+      $signal_print=pcntl_wstopsig($status);
+      if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
+      print "\nProcess was stopped by signal : ". $signal_print;
+    } else if (pcntl_wifexited($status)) {
+      print "\nProcess exited with: " . pcntl_wexitstatus($status);
+    } else {
+      print "\nProcess was not stopped";
+    }
+    posix_kill($pid, SIGCONT);
+  }
 }
+
 <<__EntryPoint>> function main(): void {
-print "Staring wait.h tests....";
-test_exit_waits();
-test_exit_signal();
-test_stop_signal();
+  print "Starting tests....";
+  test_exit_waits();
+  test_exit_signal();
+  test_stop_signal();
 }

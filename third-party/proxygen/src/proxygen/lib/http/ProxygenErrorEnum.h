@@ -84,6 +84,7 @@ namespace proxygen {
     x(ClientTransactionGone),                   \
     x(NetworkSwitch),                           \
     x(Forbidden),                               \
+    x(InternalError),                           \
     x(Max)
 // clang-format on
 

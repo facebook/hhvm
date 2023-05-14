@@ -30,7 +30,7 @@ function test_exit_signal(){
 
   $pid=pcntl_fork();
   if ($pid==0) {
-    sleep(60);
+    sleep(300);
     exit(101);
   } else if ($pid < 0) {
     print "\nUnable to fork";
@@ -63,7 +63,7 @@ function test_stop_signal(){
 
   $pid=pcntl_fork();
   if ($pid==0) {
-    sleep(60);
+    sleep(300);
     exit(102);
   } else if ($pid < 0) {
     print "\nUnable to fork";

@@ -1,0 +1,4 @@
+File "call_through_union.php", line 16, characters 10-11:
+This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "call_through_union.php", line 11, characters 39-69:
+  The function call is defined here.

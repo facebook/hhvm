@@ -16,9 +16,8 @@ module Reason = Typing_reason
 let rec get_fty ty =
   let open Typing_defs in
   match get_node ty with
-  | Tnewtype (name, [ty1], _ty2) when String.equal name SN.Classes.cSupportDyn
-    ->
-    get_fty ty1
+  | Tnewtype (name, _, ty2) when String.equal name SN.Classes.cSupportDyn ->
+    get_fty ty2
   | Tfun fty -> Some fty
   | _ -> None
 
@@ -202,23 +201,27 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
     not (Typing_subtype.is_type_disjoint env ty union)
 
 (* Check that function calls which return readonly are wrapped in readonly *)
-let check_readonly_return_call pos caller_ty is_readonly =
+let rec check_readonly_return_call pos caller_ty is_readonly =
   if is_readonly then
     ()
   else
     let open Typing_defs in
-    match get_fty caller_ty with
-    | Some fty when get_ft_returns_readonly fty ->
-      Typing_error_utils.add_typing_error
-        Typing_error.(
-          readonly
-          @@ Primary.Readonly.Explicit_readonly_cast
-               {
-                 pos;
-                 kind = `fn_call;
-                 decl_pos = Typing_defs.get_pos caller_ty;
-               })
-    | _ -> ()
+    match get_node caller_ty with
+    | Tunion tyl ->
+      List.iter tyl ~f:(fun ty -> check_readonly_return_call pos ty is_readonly)
+    | _ ->
+      (match get_fty caller_ty with
+      | Some fty when get_ft_returns_readonly fty ->
+        Typing_error_utils.add_typing_error
+          Typing_error.(
+            readonly
+            @@ Primary.Readonly.Explicit_readonly_cast
+                 {
+                   pos;
+                   kind = `fn_call;
+                   decl_pos = Typing_defs.get_pos caller_ty;
+                 })
+      | _ -> ())
 
 let check_readonly_property env obj get obj_ro =
   let open Typing_defs in

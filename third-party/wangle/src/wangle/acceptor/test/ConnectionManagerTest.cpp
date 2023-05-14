@@ -222,6 +222,32 @@ TEST_F(ConnectionManagerTest, testDropEstablishedFilterDropAll) {
       1, [](ManagedConnection* /*mangedConn*/) { return true; });
 }
 
+TEST_F(ConnectionManagerTest, testDropEstablishedVerifyOrder) {
+  std::vector<int> identifiers;
+  for (const auto& conn : conns_) {
+    EXPECT_CALL(*conn, dropConnection(_))
+        .WillOnce(Invoke([&](const std::string&) {
+          identifiers.push_back(conn.get()->identifier_);
+          cm_->removeConnection(conn.get());
+        }));
+  }
+
+  // We want to drop 100% of the connections and filter returns true all the
+  // time as a result we should drop all the requests
+  cm_->dropEstablishedConnections(
+      1, [](ManagedConnection* /*mangedConn*/) { return true; });
+
+  // Initially connection will be added in decreasing order highest to lowest,
+  // it will be N, N - 1, N - 2, ..., 1, 0, thats because we loop from (0, N)
+  // and push items at the begining of the loop. During drop connections we
+  // start from last item which will be lowest and we push them back to
+  // identifiers vector, meaning everything will be sorted in increasing order
+  ASSERT_TRUE(identifiers.size() >= 2);
+  for (int i = 1; i < identifiers.size(); i++) {
+    ASSERT_TRUE(identifiers[i] > identifiers[i - 1]);
+  }
+}
+
 TEST_F(ConnectionManagerTest, testDropFilterDropNone) {
   for (const auto& conn : conns_) {
     EXPECT_CALL(*conn, dropConnection(_)).Times(0);

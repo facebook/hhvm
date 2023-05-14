@@ -332,14 +332,22 @@ void ConnectionManager::dropEstablishedConnections(
   const size_t N = conns_.size();
   const size_t numToDrop = N * folly::constexpr_clamp(pct, 0., 1.);
   size_t droppedConns = 0;
-  auto it = conns_.iterator_to(conns_.front());
-  for (size_t i = 0; i < N && !conns_.empty() && it != idleIterator_ &&
-       droppedConns < numToDrop;
-       i++) {
-    ManagedConnection& conn = *(it++);
+  auto it = --idleIterator_;
+  auto front = conns_.iterator_to(conns_.front());
+  bool last{false};
+  while (!conns_.empty() && droppedConns < numToDrop) {
+    // We are traversing linked list from middle to the left towards front
+    // we want to know when we reach the begining of the list.
+    last = it == front;
+
+    ManagedConnection& conn = *(it--);
     if (filter(&conn)) {
       conn.dropConnection();
       droppedConns++;
+    }
+
+    if (last) {
+      return;
     }
   }
 }

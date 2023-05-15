@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\annotation\rust;
+namespace facebook\thrift\annotation\rust;
 
 /**
  * Original thrift struct:-
@@ -86,15 +86,15 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -224,7 +224,7 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -348,11 +348,11 @@ class ServiceExn implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\TFunction' => \thrift\annotation\TFunction::fromShape(
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Service' => \thrift\annotation\Service::fromShape(
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
           shape(
           )
         ),

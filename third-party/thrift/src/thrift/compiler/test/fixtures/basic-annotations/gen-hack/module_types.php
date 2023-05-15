@@ -220,7 +220,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::StaticCast",
           )
@@ -304,7 +304,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::StaticCast",
           )
@@ -666,7 +666,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::StaticCast",
           )
@@ -676,7 +676,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'my_union' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::StaticCast",
               )
@@ -686,7 +686,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'my_id' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\StrongType' => \thrift\annotation\cpp\StrongType::fromShape(
+            '\facebook\thrift\annotation\cpp\StrongType' => \facebook\thrift\annotation\cpp\StrongType::fromShape(
               shape(
               )
             ),

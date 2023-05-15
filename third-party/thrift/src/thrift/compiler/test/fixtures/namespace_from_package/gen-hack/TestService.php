@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace namespace_from_package\module;
+namespace test\namespace_from_package\module;
 
 /**
  * Original thrift service:-
@@ -81,12 +81,12 @@ class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsy
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \namespace_from_package\module\TestService_init_args::fromShape(shape(
+    $args = \test\namespace_from_package\module\TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
     await $this->asyncHandler_->genBefore("TestService", "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false);
-    return await $this->genAwaitResponse(\namespace_from_package\module\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\namespace_from_package\module\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -105,23 +105,23 @@ class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \namespace_from_package\module\TestService_init_args::fromShape(shape(
+    $args = \test\namespace_from_package\module\TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
     await $this->asyncHandler_->genBefore("TestService", "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false);
-    return await $this->genAwaitResponse(\namespace_from_package\module\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\namespace_from_package\module\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_init(int $int1): int {
-    $args = \namespace_from_package\module\TestService_init_args::fromShape(shape(
+    $args = \test\namespace_from_package\module\TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
     return $this->sendImplHelper($args, "init", false);
   }
   public function recv_init(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(\namespace_from_package\module\TestService_init_result::class, "init", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\namespace_from_package\module\TestService_init_result::class, "init", false, $expectedsequenceid);
   }
 }
 
@@ -137,18 +137,18 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'init', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\namespace_from_package\module\TestService_init_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\namespace_from_package\module\TestService_init_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\namespace_from_package\module\TestService_init_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\namespace_from_package\module\TestService_init_args');
     } else {
-      $args = \namespace_from_package\module\TestService_init_args::withDefaultValues();
+      $args = \test\namespace_from_package\module\TestService_init_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'init', $args);
-    $result = \namespace_from_package\module\TestService_init_result::withDefaultValues();
+    $result = \test\namespace_from_package\module\TestService_init_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\namespace_from_package\module\TestService', 'init', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package\module\TestService', 'init', $args);
       $result->success = await $this->handler->init($args->int1);
       $this->eventHandler_->postExec($handler_ctx, 'init', $result);
     } catch (\Exception $ex) {
@@ -226,18 +226,18 @@ abstract class TestServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'init', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\namespace_from_package\module\TestService_init_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\namespace_from_package\module\TestService_init_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\namespace_from_package\module\TestService_init_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\namespace_from_package\module\TestService_init_args');
     } else {
-      $args = \namespace_from_package\module\TestService_init_args::withDefaultValues();
+      $args = \test\namespace_from_package\module\TestService_init_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'init', $args);
-    $result = \namespace_from_package\module\TestService_init_result::withDefaultValues();
+    $result = \test\namespace_from_package\module\TestService_init_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\namespace_from_package\module\TestService', 'init', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package\module\TestService', 'init', $args);
       $result->success = $this->handler->init($args->int1);
       $this->eventHandler_->postExec($handler_ctx, 'init', $result);
     } catch (\Exception $ex) {

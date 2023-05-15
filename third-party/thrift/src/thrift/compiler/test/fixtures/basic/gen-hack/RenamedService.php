@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic;
+namespace test\fixtures\basic;
 
 module hack.module.test;
 /**
@@ -82,10 +82,10 @@ class RenamedServiceAsyncClient extends \ThriftClientBase implements RenamedServ
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+    $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooService", "simple_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "simple_rpc", false);
-    await $this->genAwaitResponse(\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -104,19 +104,19 @@ class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+    $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooService", "simple_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "simple_rpc", false);
-    await $this->genAwaitResponse(\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_simple_rpc(): int {
-    $args = \fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+    $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
     return $this->sendImplHelper($args, "simple_rpc", false);
   }
   public function recv_simple_rpc(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $expectedsequenceid);
+    $this->recvImplHelper(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $expectedsequenceid);
   }
 }
 
@@ -132,18 +132,18 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'simple_rpc', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\RenamedService_simple_rpc_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\RenamedService_simple_rpc_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\RenamedService_simple_rpc_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\RenamedService_simple_rpc_args');
     } else {
-      $args = \fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+      $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'simple_rpc', $args);
-    $result = \fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
+    $result = \test\fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\RenamedService', 'simple_rpc', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\RenamedService', 'simple_rpc', $args);
       await $this->handler->simple_rpc();
       $this->eventHandler_->postExec($handler_ctx, 'simple_rpc', $result);
     } catch (\Exception $ex) {
@@ -221,18 +221,18 @@ abstract class RenamedServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'simple_rpc', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\RenamedService_simple_rpc_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\RenamedService_simple_rpc_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\RenamedService_simple_rpc_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\RenamedService_simple_rpc_args');
     } else {
-      $args = \fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+      $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'simple_rpc', $args);
-    $result = \fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
+    $result = \test\fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\RenamedService', 'simple_rpc', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\RenamedService', 'simple_rpc', $args);
       $this->handler->simple_rpc();
       $this->eventHandler_->postExec($handler_ctx, 'simple_rpc', $result);
     } catch (\Exception $ex) {
@@ -495,7 +495,7 @@ class RenamedServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
       'service' => dict[
-        '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
           shape(
             "name" => "RenamedService",
           )

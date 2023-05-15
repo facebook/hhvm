@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\test;
+namespace facebook\thrift\test;
 
 /**
  * Original thrift enum:-
@@ -78,15 +78,15 @@ class ThriftAdaptedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadat
 
 type SetWithAdapter = \Adapter2::THackType;
 type StringWithAdapter = \Adapter1::THackType;
-type ListWithElemAdapter = Vector<\thrift\test\StringWithAdapter>;
+type ListWithElemAdapter = Vector<\facebook\thrift\test\StringWithAdapter>;
 type ListWithElemAdapter_withAdapter = \Adapter2::THackType;
 type MyI64 = int;
-type DoubleTypedefI64 = \thrift\test\MyI64;
+type DoubleTypedefI64 = \facebook\thrift\test\MyI64;
 type MyI32 = \Adapter1::THackType;
 type FooWithAdapter = \Adapter1::THackType;
 type StructWithAdapter = \Adapter2::THackType;
 type UnionWithAdapter = \Adapter2::THackType;
-type AdaptedA = \thrift\test\A;
+type AdaptedA = \facebook\thrift\test\A;
 type DurationMs = int;
 type AdaptedBool = bool;
 type AdaptedByte = int;
@@ -95,13 +95,13 @@ type AdaptedInteger = int;
 type AdaptedLong = int;
 type AdaptedDouble = float;
 type AdaptedString = string;
-type DoubleTypedefBool = \thrift\test\AdaptedBool;
+type DoubleTypedefBool = \facebook\thrift\test\AdaptedBool;
 type CustomProtocolType = string;
 type IndirectionString = string;
-type AdaptedEnum = \thrift\test\ThriftAdaptedEnum;
-type AdaptedTypedef = \thrift\test\AdaptedStruct;
-type TypedefOfDirect = \thrift\test\DirectlyAdaptedStruct;
-type AdaptedCircularAdaptee = \thrift\test\CircularAdaptee;
+type AdaptedEnum = \facebook\thrift\test\ThriftAdaptedEnum;
+type AdaptedTypedef = \facebook\thrift\test\AdaptedStruct;
+type TypedefOfDirect = \facebook\thrift\test\DirectlyAdaptedStruct;
+type AdaptedCircularAdaptee = \facebook\thrift\test\CircularAdaptee;
 type CountingInt = int;
 /**
  * Original thrift struct:-
@@ -119,7 +119,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     2 => shape(
       'var' => 'color',
       'type' => \TType::I32,
-      'enum' => \thrift\test\Color::class,
+      'enum' => \facebook\thrift\test\Color::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -129,12 +129,12 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   const type TConstructorShape = shape(
     ?'signature' => ?string,
-    ?'color' => ?\thrift\test\Color,
+    ?'color' => ?\facebook\thrift\test\Color,
   );
 
   const type TShape = shape(
     'signature' => string,
-    ?'color' => ?\thrift\test\Color,
+    ?'color' => ?\facebook\thrift\test\Color,
   );
   const int STRUCTURAL_ID = 4648320388473985046;
   /**
@@ -146,11 +146,11 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
    * Original thrift field:-
    * 2: module.Color color
    */
-  public ?\thrift\test\Color $color;
+  public ?\facebook\thrift\test\Color $color;
 
-  public function __construct(?string $signature = null, ?\thrift\test\Color $color = null)[] {
+  public function __construct(?string $signature = null, ?\facebook\thrift\test\Color $color = null)[] {
     $this->signature = $signature ?? '';
-    $this->color = $color ?? \thrift\test\Color::RED;
+    $this->color = $color ?? \facebook\thrift\test\Color::RED;
   }
 
   public static function withDefaultValues()[]: this {
@@ -211,13 +211,13 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+        '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
           shape(
             "name" => "my.module.Adapter2",
             "typeHint" => "my.another.module.AdaptedType2[]",
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
@@ -255,7 +255,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
       $this->signature = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['signature']);
     }
     if (idx($parsed, 'color') !== null) {
-      $this->color = \thrift\test\Color::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Color>($parsed['color']));
+      $this->color = \facebook\thrift\test\Color::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Color>($parsed['color']));
     }
   }
 
@@ -384,28 +384,28 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'intField' => ?\Adapter1::THackType,
     ?'optionalIntField' => ?\Adapter1::THackType,
     ?'intFieldWithDefault' => ?\Adapter1::THackType,
-    ?'setField' => ?\thrift\test\SetWithAdapter,
-    ?'optionalSetField' => ?\thrift\test\SetWithAdapter,
+    ?'setField' => ?\facebook\thrift\test\SetWithAdapter,
+    ?'optionalSetField' => ?\facebook\thrift\test\SetWithAdapter,
     ?'mapField' => ?\Adapter3::THackType,
     ?'optionalMapField' => ?\Adapter3::THackType,
     ?'binaryField' => ?\Adapter1::THackType,
-    ?'longField' => ?\thrift\test\MyI64,
-    ?'adaptedLongField' => ?\thrift\test\MyI64,
-    ?'doubleAdaptedField' => ?\thrift\test\DoubleTypedefI64,
+    ?'longField' => ?\facebook\thrift\test\MyI64,
+    ?'adaptedLongField' => ?\facebook\thrift\test\MyI64,
+    ?'doubleAdaptedField' => ?\facebook\thrift\test\DoubleTypedefI64,
   );
 
   const type TShape = shape(
     'intField' => \Adapter1::THackType,
     ?'optionalIntField' => ?\Adapter1::THackType,
     'intFieldWithDefault' => \Adapter1::THackType,
-    'setField' => \thrift\test\SetWithAdapter,
-    ?'optionalSetField' => ?\thrift\test\SetWithAdapter,
+    'setField' => \facebook\thrift\test\SetWithAdapter,
+    ?'optionalSetField' => ?\facebook\thrift\test\SetWithAdapter,
     'mapField' => \Adapter3::THackType,
     ?'optionalMapField' => ?\Adapter3::THackType,
     'binaryField' => \Adapter1::THackType,
-    'longField' => \thrift\test\MyI64,
-    'adaptedLongField' => \thrift\test\MyI64,
-    'doubleAdaptedField' => \thrift\test\DoubleTypedefI64,
+    'longField' => \facebook\thrift\test\MyI64,
+    'adaptedLongField' => \facebook\thrift\test\MyI64,
+    'doubleAdaptedField' => \facebook\thrift\test\DoubleTypedefI64,
   );
   const int STRUCTURAL_ID = 5127579417322622320;
   /**
@@ -427,12 +427,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * Original thrift field:-
    * 4: module.SetWithAdapter setField
    */
-  public \thrift\test\SetWithAdapter $setField;
+  public \facebook\thrift\test\SetWithAdapter $setField;
   /**
    * Original thrift field:-
    * 5: module.SetWithAdapter optionalSetField
    */
-  public ?\thrift\test\SetWithAdapter $optionalSetField;
+  public ?\facebook\thrift\test\SetWithAdapter $optionalSetField;
   /**
    * Original thrift field:-
    * 6: map<string, module.ListWithElemAdapter_withAdapter> mapField
@@ -452,19 +452,19 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * Original thrift field:-
    * 9: module.MyI64 longField
    */
-  public \thrift\test\MyI64 $longField;
+  public \facebook\thrift\test\MyI64 $longField;
   /**
    * Original thrift field:-
    * 10: module.MyI64 adaptedLongField
    */
-  public \thrift\test\MyI64 $adaptedLongField;
+  public \facebook\thrift\test\MyI64 $adaptedLongField;
   /**
    * Original thrift field:-
    * 11: module.DoubleTypedefI64 doubleAdaptedField
    */
-  public \thrift\test\DoubleTypedefI64 $doubleAdaptedField;
+  public \facebook\thrift\test\DoubleTypedefI64 $doubleAdaptedField;
 
-  public function __construct(?\Adapter1::THackType $intField = null, ?\Adapter1::THackType $optionalIntField = null, ?\Adapter1::THackType $intFieldWithDefault = null, ?\thrift\test\SetWithAdapter $setField = null, ?\thrift\test\SetWithAdapter $optionalSetField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter3::THackType $optionalMapField = null, ?\Adapter1::THackType $binaryField = null, ?\thrift\test\MyI64 $longField = null, ?\thrift\test\MyI64 $adaptedLongField = null, ?\thrift\test\DoubleTypedefI64 $doubleAdaptedField = null)[] {
+  public function __construct(?\Adapter1::THackType $intField = null, ?\Adapter1::THackType $optionalIntField = null, ?\Adapter1::THackType $intFieldWithDefault = null, ?\facebook\thrift\test\SetWithAdapter $setField = null, ?\facebook\thrift\test\SetWithAdapter $optionalSetField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter3::THackType $optionalMapField = null, ?\Adapter1::THackType $binaryField = null, ?\facebook\thrift\test\MyI64 $longField = null, ?\facebook\thrift\test\MyI64 $adaptedLongField = null, ?\facebook\thrift\test\DoubleTypedefI64 $doubleAdaptedField = null)[] {
     $this->intField = $intField ?? \Adapter1::fromThrift(0);
     $this->optionalIntField = $optionalIntField;
     $this->intFieldWithDefault = $intFieldWithDefault ?? \Adapter1::fromThrift(13);
@@ -830,17 +830,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'fields' => dict[
         'intField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -850,17 +850,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'optionalIntField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -870,17 +870,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'intFieldWithDefault' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -891,17 +891,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         'setField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
@@ -911,17 +911,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         'optionalSetField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
@@ -930,17 +930,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'mapField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter3",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
@@ -950,17 +950,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'optionalMapField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter3",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
@@ -970,17 +970,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'binaryField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
@@ -991,58 +991,58 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         'longField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
+            '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
-                "color" => \thrift\test\Color::GREEN,
+                "color" => \facebook\thrift\test\Color::GREEN,
               )
             ),
           ],
         ),
         'adaptedLongField' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
               shape(
                 "name" => "my.Adapter3",
                 "typeHint" => "my.AdaptedType3[]",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
           ],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
+            '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
-                "color" => \thrift\test\Color::GREEN,
+                "color" => \facebook\thrift\test\Color::GREEN,
               )
             ),
           ],
@@ -1118,7 +1118,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       }
     }
     if (idx($parsed, 'setField') !== null) {
-      $_json6 = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\SetWithAdapter>($parsed['setField']);
+      $_json6 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\SetWithAdapter>($parsed['setField']);
       $_container7 = Set {};
       foreach($_json6 as $_key4 => $_value5) {
         $_elem8 = '';
@@ -1128,7 +1128,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->setField = $_container7;
     }
     if (idx($parsed, 'optionalSetField') !== null) {
-      $_json12 = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\SetWithAdapter>($parsed['optionalSetField']);
+      $_json12 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\SetWithAdapter>($parsed['optionalSetField']);
       $_container13 = Set {};
       foreach($_json12 as $_key10 => $_value11) {
         $_elem14 = '';
@@ -1138,7 +1138,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->optionalSetField = $_container13;
     }
     if (idx($parsed, 'mapField') !== null) {
-      $_json18 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>($parsed['mapField']);
+      $_json18 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \facebook\thrift\test\ListWithElemAdapter_withAdapter>>($parsed['mapField']);
       $_container19 = Map {};
       foreach($_json18 as $_key16 => $_value17) {
         $_value20 = Vector {};
@@ -1155,7 +1155,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->mapField = $_container19;
     }
     if (idx($parsed, 'optionalMapField') !== null) {
-      $_json30 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>($parsed['optionalMapField']);
+      $_json30 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \facebook\thrift\test\ListWithElemAdapter_withAdapter>>($parsed['optionalMapField']);
       $_container31 = Map {};
       foreach($_json30 as $_key28 => $_value29) {
         $_value32 = Vector {};
@@ -1175,13 +1175,13 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->binaryField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binaryField']);
     }
     if (idx($parsed, 'longField') !== null) {
-      $this->longField = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\MyI64>($parsed['longField']);
+      $this->longField = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI64>($parsed['longField']);
     }
     if (idx($parsed, 'adaptedLongField') !== null) {
-      $this->adaptedLongField = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\MyI64>($parsed['adaptedLongField']);
+      $this->adaptedLongField = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI64>($parsed['adaptedLongField']);
     }
     if (idx($parsed, 'doubleAdaptedField') !== null) {
-      $this->doubleAdaptedField = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DoubleTypedefI64>($parsed['doubleAdaptedField']);
+      $this->doubleAdaptedField = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DoubleTypedefI64>($parsed['doubleAdaptedField']);
     }
   }
 
@@ -1189,8 +1189,8 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, string>();
     \ThriftUtil::requireSameType<\Adapter2::TThriftType, Set<string>>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\thrift\test\StringWithAdapter>>();
-    \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\facebook\thrift\test\StringWithAdapter>>();
+    \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \facebook\thrift\test\ListWithElemAdapter_withAdapter>>();
   }
 
 }
@@ -1209,7 +1209,7 @@ enum BazEnum: int {
  * Baz
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Baz'))>>
-class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\thrift\test\BazEnum>, \IThriftShapishSyncStruct {
+class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\facebook\thrift\test\BazEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1275,18 +1275,18 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   const type TConstructorShape = shape(
     ?'intField' => ?\Adapter1::THackType,
-    ?'setField' => ?\thrift\test\SetWithAdapter,
+    ?'setField' => ?\facebook\thrift\test\SetWithAdapter,
     ?'mapField' => ?\Adapter3::THackType,
     ?'binaryField' => ?\Adapter1::THackType,
-    ?'longField' => ?\thrift\test\MyI64,
+    ?'longField' => ?\facebook\thrift\test\MyI64,
   );
 
   const type TShape = shape(
     ?'intField' => ?\Adapter1::THackType,
-    ?'setField' => ?\thrift\test\SetWithAdapter,
+    ?'setField' => ?\facebook\thrift\test\SetWithAdapter,
     ?'mapField' => ?\Adapter3::THackType,
     ?'binaryField' => ?\Adapter1::THackType,
-    ?'longField' => ?\thrift\test\MyI64,
+    ?'longField' => ?\facebook\thrift\test\MyI64,
   );
   const int STRUCTURAL_ID = 8924052603013047554;
   /**
@@ -1298,7 +1298,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
    * Original thrift field:-
    * 4: module.SetWithAdapter setField
    */
-  public ?\thrift\test\SetWithAdapter $setField;
+  public ?\facebook\thrift\test\SetWithAdapter $setField;
   /**
    * Original thrift field:-
    * 6: map<string, module.ListWithElemAdapter_withAdapter> mapField
@@ -1313,30 +1313,30 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
    * Original thrift field:-
    * 9: module.MyI64 longField
    */
-  public ?\thrift\test\MyI64 $longField;
-  protected \thrift\test\BazEnum $_type = \thrift\test\BazEnum::_EMPTY_;
+  public ?\facebook\thrift\test\MyI64 $longField;
+  protected \facebook\thrift\test\BazEnum $_type = \facebook\thrift\test\BazEnum::_EMPTY_;
 
-  public function __construct(?\Adapter1::THackType $intField = null, ?\thrift\test\SetWithAdapter $setField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter1::THackType $binaryField = null, ?\thrift\test\MyI64 $longField = null)[] {
-    $this->_type = \thrift\test\BazEnum::_EMPTY_;
+  public function __construct(?\Adapter1::THackType $intField = null, ?\facebook\thrift\test\SetWithAdapter $setField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter1::THackType $binaryField = null, ?\facebook\thrift\test\MyI64 $longField = null)[] {
+    $this->_type = \facebook\thrift\test\BazEnum::_EMPTY_;
     if ($intField !== null) {
       $this->intField = $intField;
-      $this->_type = \thrift\test\BazEnum::intField;
+      $this->_type = \facebook\thrift\test\BazEnum::intField;
     }
     if ($setField !== null) {
       $this->setField = $setField;
-      $this->_type = \thrift\test\BazEnum::setField;
+      $this->_type = \facebook\thrift\test\BazEnum::setField;
     }
     if ($mapField !== null) {
       $this->mapField = $mapField;
-      $this->_type = \thrift\test\BazEnum::mapField;
+      $this->_type = \facebook\thrift\test\BazEnum::mapField;
     }
     if ($binaryField !== null) {
       $this->binaryField = $binaryField;
-      $this->_type = \thrift\test\BazEnum::binaryField;
+      $this->_type = \facebook\thrift\test\BazEnum::binaryField;
     }
     if ($longField !== null) {
       $this->longField = $longField;
-      $this->_type = \thrift\test\BazEnum::longField;
+      $this->_type = \facebook\thrift\test\BazEnum::longField;
     }
   }
 
@@ -1358,36 +1358,36 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     return 'Baz';
   }
 
-  public function getType()[]: \thrift\test\BazEnum {
+  public function getType()[]: \facebook\thrift\test\BazEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \thrift\test\BazEnum::intField:
+      case \facebook\thrift\test\BazEnum::intField:
         $this->intField = null;
         break;
-      case \thrift\test\BazEnum::setField:
+      case \facebook\thrift\test\BazEnum::setField:
         $this->setField = null;
         break;
-      case \thrift\test\BazEnum::mapField:
+      case \facebook\thrift\test\BazEnum::mapField:
         $this->mapField = null;
         break;
-      case \thrift\test\BazEnum::binaryField:
+      case \facebook\thrift\test\BazEnum::binaryField:
         $this->binaryField = null;
         break;
-      case \thrift\test\BazEnum::longField:
+      case \facebook\thrift\test\BazEnum::longField:
         $this->longField = null;
         break;
-      case \thrift\test\BazEnum::_EMPTY_:
+      case \facebook\thrift\test\BazEnum::_EMPTY_:
         break;
     }
-    $this->_type = \thrift\test\BazEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\BazEnum::_EMPTY_;
   }
 
   public function set_intField(\Adapter1::THackType $intField)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\BazEnum::intField;
+    $this->_type = \facebook\thrift\test\BazEnum::intField;
     $this->intField = $intField;
     return $this;
   }
@@ -1398,27 +1398,27 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function getx_intField()[]: \Adapter1::THackType {
     invariant(
-      $this->_type === \thrift\test\BazEnum::intField,
+      $this->_type === \facebook\thrift\test\BazEnum::intField,
       'get_intField called on an instance of Baz whose current type is %s',
       (string)$this->_type,
     );
     return $this->intField as nonnull;
   }
 
-  public function set_setField(\thrift\test\SetWithAdapter $setField)[write_props]: this {
+  public function set_setField(\facebook\thrift\test\SetWithAdapter $setField)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\BazEnum::setField;
+    $this->_type = \facebook\thrift\test\BazEnum::setField;
     $this->setField = $setField;
     return $this;
   }
 
-  public function get_setField()[]: ?\thrift\test\SetWithAdapter {
+  public function get_setField()[]: ?\facebook\thrift\test\SetWithAdapter {
     return $this->setField;
   }
 
-  public function getx_setField()[]: \thrift\test\SetWithAdapter {
+  public function getx_setField()[]: \facebook\thrift\test\SetWithAdapter {
     invariant(
-      $this->_type === \thrift\test\BazEnum::setField,
+      $this->_type === \facebook\thrift\test\BazEnum::setField,
       'get_setField called on an instance of Baz whose current type is %s',
       (string)$this->_type,
     );
@@ -1427,7 +1427,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function set_mapField(\Adapter3::THackType $mapField)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\BazEnum::mapField;
+    $this->_type = \facebook\thrift\test\BazEnum::mapField;
     $this->mapField = $mapField;
     return $this;
   }
@@ -1438,7 +1438,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function getx_mapField()[]: \Adapter3::THackType {
     invariant(
-      $this->_type === \thrift\test\BazEnum::mapField,
+      $this->_type === \facebook\thrift\test\BazEnum::mapField,
       'get_mapField called on an instance of Baz whose current type is %s',
       (string)$this->_type,
     );
@@ -1447,7 +1447,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function set_binaryField(\Adapter1::THackType $binaryField)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\BazEnum::binaryField;
+    $this->_type = \facebook\thrift\test\BazEnum::binaryField;
     $this->binaryField = $binaryField;
     return $this;
   }
@@ -1458,27 +1458,27 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function getx_binaryField()[]: \Adapter1::THackType {
     invariant(
-      $this->_type === \thrift\test\BazEnum::binaryField,
+      $this->_type === \facebook\thrift\test\BazEnum::binaryField,
       'get_binaryField called on an instance of Baz whose current type is %s',
       (string)$this->_type,
     );
     return $this->binaryField as nonnull;
   }
 
-  public function set_longField(\thrift\test\MyI64 $longField)[write_props]: this {
+  public function set_longField(\facebook\thrift\test\MyI64 $longField)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\BazEnum::longField;
+    $this->_type = \facebook\thrift\test\BazEnum::longField;
     $this->longField = $longField;
     return $this;
   }
 
-  public function get_longField()[]: ?\thrift\test\MyI64 {
+  public function get_longField()[]: ?\facebook\thrift\test\MyI64 {
     return $this->longField;
   }
 
-  public function getx_longField()[]: \thrift\test\MyI64 {
+  public function getx_longField()[]: \facebook\thrift\test\MyI64 {
     invariant(
-      $this->_type === \thrift\test\BazEnum::longField,
+      $this->_type === \facebook\thrift\test\BazEnum::longField,
       'get_longField called on an instance of Baz whose current type is %s',
       (string)$this->_type,
     );
@@ -1643,17 +1643,17 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
       'fields' => dict[
         'intField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -1664,17 +1664,17 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         'setField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
@@ -1683,17 +1683,17 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         ),
         'mapField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter3",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
               )
@@ -1703,17 +1703,17 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         ),
         'binaryField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -1724,20 +1724,20 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         'longField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
+            '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
-                "color" => \thrift\test\Color::GREEN,
+                "color" => \facebook\thrift\test\Color::GREEN,
               )
             ),
           ],
@@ -1770,7 +1770,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \thrift\test\BazEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\BazEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -1784,10 +1784,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
       } else {
         $this->intField = (int)$_tmp0;
       }
-      $this->_type = \thrift\test\BazEnum::intField;
+      $this->_type = \facebook\thrift\test\BazEnum::intField;
     }
     if (idx($parsed, 'setField') !== null) {
-      $_json4 = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\SetWithAdapter>($parsed['setField']);
+      $_json4 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\SetWithAdapter>($parsed['setField']);
       $_container5 = Set {};
       foreach($_json4 as $_key2 => $_value3) {
         $_elem6 = '';
@@ -1795,10 +1795,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         $_container5->add($_elem6);
       }
       $this->setField = $_container5;
-      $this->_type = \thrift\test\BazEnum::setField;
+      $this->_type = \facebook\thrift\test\BazEnum::setField;
     }
     if (idx($parsed, 'mapField') !== null) {
-      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>($parsed['mapField']);
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \facebook\thrift\test\ListWithElemAdapter_withAdapter>>($parsed['mapField']);
       $_container11 = Map {};
       foreach($_json10 as $_key8 => $_value9) {
         $_value12 = Vector {};
@@ -1813,15 +1813,15 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
         $_container11[$_key8] = $_value12;
       }
       $this->mapField = $_container11;
-      $this->_type = \thrift\test\BazEnum::mapField;
+      $this->_type = \facebook\thrift\test\BazEnum::mapField;
     }
     if (idx($parsed, 'binaryField') !== null) {
       $this->binaryField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binaryField']);
-      $this->_type = \thrift\test\BazEnum::binaryField;
+      $this->_type = \facebook\thrift\test\BazEnum::binaryField;
     }
     if (idx($parsed, 'longField') !== null) {
-      $this->longField = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\MyI64>($parsed['longField']);
-      $this->_type = \thrift\test\BazEnum::longField;
+      $this->longField = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI64>($parsed['longField']);
+      $this->_type = \facebook\thrift\test\BazEnum::longField;
     }
   }
 
@@ -1829,8 +1829,8 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, string>();
     \ThriftUtil::requireSameType<\Adapter2::TThriftType, Set<string>>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\thrift\test\StringWithAdapter>>();
-    \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\facebook\thrift\test\StringWithAdapter>>();
+    \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \facebook\thrift\test\ListWithElemAdapter_withAdapter>>();
   }
 
 }
@@ -1848,13 +1848,13 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'var' => 'structField',
       'adapter' => \Adapter1::class,
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\Foo::class,
+      'class' => \facebook\thrift\test\Foo::class,
     ),
     2 => shape(
       'var' => 'optionalStructField',
       'adapter' => \Adapter1::class,
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\Foo::class,
+      'class' => \facebook\thrift\test\Foo::class,
     ),
     3 => shape(
       'var' => 'structListField',
@@ -1863,7 +1863,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'elem' => shape(
         'adapter' => \Adapter1::class,
         'type' => \TType::STRUCT,
-        'class' => \thrift\test\Foo::class,
+        'class' => \facebook\thrift\test\Foo::class,
       ),
       'format' => 'collection',
     ),
@@ -1874,7 +1874,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'elem' => shape(
         'adapter' => \Adapter1::class,
         'type' => \TType::STRUCT,
-        'class' => \thrift\test\Foo::class,
+        'class' => \facebook\thrift\test\Foo::class,
       ),
       'format' => 'collection',
     ),
@@ -1882,18 +1882,18 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'var' => 'unionField',
       'adapter' => \Adapter1::class,
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\Baz::class,
+      'class' => \facebook\thrift\test\Baz::class,
     ),
     6 => shape(
       'var' => 'optionalUnionField',
       'adapter' => \Adapter1::class,
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\Baz::class,
+      'class' => \facebook\thrift\test\Baz::class,
     ),
     7 => shape(
       'var' => 'adaptedStructField',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\DirectlyAdapted::class,
+      'class' => \facebook\thrift\test\DirectlyAdapted::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1909,21 +1909,21 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TConstructorShape = shape(
     ?'structField' => ?\Adapter1::THackType,
     ?'optionalStructField' => ?\Adapter1::THackType,
-    ?'structListField' => ?Vector<\thrift\test\FooWithAdapter>,
-    ?'optionalStructListField' => ?Vector<\thrift\test\FooWithAdapter>,
+    ?'structListField' => ?Vector<\facebook\thrift\test\FooWithAdapter>,
+    ?'optionalStructListField' => ?Vector<\facebook\thrift\test\FooWithAdapter>,
     ?'unionField' => ?\Adapter1::THackType,
     ?'optionalUnionField' => ?\Adapter1::THackType,
-    ?'adaptedStructField' => ?\thrift\test\DirectlyAdapted,
+    ?'adaptedStructField' => ?\facebook\thrift\test\DirectlyAdapted,
   );
 
   const type TShape = shape(
     ?'structField' => ?\Adapter1::THackType,
     ?'optionalStructField' => ?\Adapter1::THackType,
-    'structListField' => vec<\thrift\test\FooWithAdapter>,
-    ?'optionalStructListField' => ?vec<\thrift\test\FooWithAdapter>,
+    'structListField' => vec<\facebook\thrift\test\FooWithAdapter>,
+    ?'optionalStructListField' => ?vec<\facebook\thrift\test\FooWithAdapter>,
     ?'unionField' => ?\Adapter1::THackType,
     ?'optionalUnionField' => ?\Adapter1::THackType,
-    ?'adaptedStructField' => ?\thrift\test\DirectlyAdapted::TShape,
+    ?'adaptedStructField' => ?\facebook\thrift\test\DirectlyAdapted::TShape,
   );
   const int STRUCTURAL_ID = 7938871189708910014;
   /**
@@ -1940,12 +1940,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * Original thrift field:-
    * 3: list<module.FooWithAdapter> structListField
    */
-  public Vector<\thrift\test\FooWithAdapter> $structListField;
+  public Vector<\facebook\thrift\test\FooWithAdapter> $structListField;
   /**
    * Original thrift field:-
    * 4: list<module.FooWithAdapter> optionalStructListField
    */
-  public ?Vector<\thrift\test\FooWithAdapter> $optionalStructListField;
+  public ?Vector<\facebook\thrift\test\FooWithAdapter> $optionalStructListField;
   /**
    * Original thrift field:-
    * 5: module.Baz unionField
@@ -1960,9 +1960,9 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * Original thrift field:-
    * 7: module.DirectlyAdapted adaptedStructField
    */
-  public ?\thrift\test\DirectlyAdapted $adaptedStructField;
+  public ?\facebook\thrift\test\DirectlyAdapted $adaptedStructField;
 
-  public function __construct(?\Adapter1::THackType $structField = null, ?\Adapter1::THackType $optionalStructField = null, ?Vector<\thrift\test\FooWithAdapter> $structListField = null, ?Vector<\thrift\test\FooWithAdapter> $optionalStructListField = null, ?\Adapter1::THackType $unionField = null, ?\Adapter1::THackType $optionalUnionField = null, ?\thrift\test\DirectlyAdapted $adaptedStructField = null)[] {
+  public function __construct(?\Adapter1::THackType $structField = null, ?\Adapter1::THackType $optionalStructField = null, ?Vector<\facebook\thrift\test\FooWithAdapter> $structListField = null, ?Vector<\facebook\thrift\test\FooWithAdapter> $optionalStructListField = null, ?\Adapter1::THackType $unionField = null, ?\Adapter1::THackType $optionalUnionField = null, ?\facebook\thrift\test\DirectlyAdapted $adaptedStructField = null)[] {
     $this->structField = $structField;
     $this->optionalStructField = $optionalStructField;
     $this->structListField = $structListField ?? Vector {};
@@ -2217,12 +2217,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'fields' => dict[
         'structField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
                 "adaptedType" => "::my::Cpp::Type1",
@@ -2233,12 +2233,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'optionalStructField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -2248,12 +2248,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'unionField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -2263,12 +2263,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ),
         'optionalUnionField' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -2279,12 +2279,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         'adaptedStructField' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
               shape(
                 "name" => "my.module.Adapter",
                 "typeHint" => "my.another.module.AdaptedType",
@@ -2301,14 +2301,14 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       Shapes::idx($shape, 'structField'),
       Shapes::idx($shape, 'optionalStructField'),
       (new Vector($shape['structListField']))->map(
-        $val0 ==> \thrift\test\Foo::__fromShape($val0),
+        $val0 ==> \facebook\thrift\test\Foo::__fromShape($val0),
       ),
       Shapes::idx($shape, 'optionalStructListField') === null ? null : ((new Vector($shape['optionalStructListField']))->map(
-        $val1 ==> \thrift\test\Foo::__fromShape($val1),
+        $val1 ==> \facebook\thrift\test\Foo::__fromShape($val1),
       )),
       Shapes::idx($shape, 'unionField'),
       Shapes::idx($shape, 'optionalUnionField'),
-      Shapes::idx($shape, 'adaptedStructField') === null ? null : (\thrift\test\DirectlyAdapted::__fromShape($shape['adaptedStructField'])),
+      Shapes::idx($shape, 'adaptedStructField') === null ? null : (\facebook\thrift\test\DirectlyAdapted::__fromShape($shape['adaptedStructField'])),
     );
   }
 
@@ -2341,24 +2341,24 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     }
 
     if (idx($parsed, 'structField') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Foo>($parsed['structField']));
-      $_tmp1 = \thrift\test\Foo::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Foo>($parsed['structField']));
+      $_tmp1 = \facebook\thrift\test\Foo::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->structField = $_tmp1;
     }
     if (idx($parsed, 'optionalStructField') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Foo>($parsed['optionalStructField']));
-      $_tmp3 = \thrift\test\Foo::withDefaultValues();
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Foo>($parsed['optionalStructField']));
+      $_tmp3 = \facebook\thrift\test\Foo::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->optionalStructField = $_tmp3;
     }
     if (idx($parsed, 'structListField') !== null) {
-      $_json7 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\test\FooWithAdapter>>($parsed['structListField']);
+      $_json7 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\facebook\thrift\test\FooWithAdapter>>($parsed['structListField']);
       $_container8 = Vector {};
       foreach($_json7 as $_key5 => $_value6) {
-        $_elem9 = \thrift\test\Foo::withDefaultValues();
+        $_elem9 = \facebook\thrift\test\Foo::withDefaultValues();
         $_tmp10 = \json_encode($_value6);
-        $_tmp11 = \thrift\test\Foo::withDefaultValues();
+        $_tmp11 = \facebook\thrift\test\Foo::withDefaultValues();
         $_tmp11->readFromJson($_tmp10);
         $_elem9 = $_tmp11;
         $_container8 []= $_elem9;
@@ -2366,12 +2366,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->structListField = $_container8;
     }
     if (idx($parsed, 'optionalStructListField') !== null) {
-      $_json15 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\test\FooWithAdapter>>($parsed['optionalStructListField']);
+      $_json15 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\facebook\thrift\test\FooWithAdapter>>($parsed['optionalStructListField']);
       $_container16 = Vector {};
       foreach($_json15 as $_key13 => $_value14) {
-        $_elem17 = \thrift\test\Foo::withDefaultValues();
+        $_elem17 = \facebook\thrift\test\Foo::withDefaultValues();
         $_tmp18 = \json_encode($_value14);
-        $_tmp19 = \thrift\test\Foo::withDefaultValues();
+        $_tmp19 = \facebook\thrift\test\Foo::withDefaultValues();
         $_tmp19->readFromJson($_tmp18);
         $_elem17 = $_tmp19;
         $_container16 []= $_elem17;
@@ -2379,28 +2379,28 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->optionalStructListField = $_container16;
     }
     if (idx($parsed, 'unionField') !== null) {
-      $_tmp20 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Baz>($parsed['unionField']));
-      $_tmp21 = \thrift\test\Baz::withDefaultValues();
+      $_tmp20 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Baz>($parsed['unionField']));
+      $_tmp21 = \facebook\thrift\test\Baz::withDefaultValues();
       $_tmp21->readFromJson($_tmp20);
       $this->unionField = $_tmp21;
     }
     if (idx($parsed, 'optionalUnionField') !== null) {
-      $_tmp22 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Baz>($parsed['optionalUnionField']));
-      $_tmp23 = \thrift\test\Baz::withDefaultValues();
+      $_tmp22 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Baz>($parsed['optionalUnionField']));
+      $_tmp23 = \facebook\thrift\test\Baz::withDefaultValues();
       $_tmp23->readFromJson($_tmp22);
       $this->optionalUnionField = $_tmp23;
     }
     if (idx($parsed, 'adaptedStructField') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DirectlyAdapted>($parsed['adaptedStructField']));
-      $_tmp25 = \thrift\test\DirectlyAdapted::withDefaultValues();
+      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DirectlyAdapted>($parsed['adaptedStructField']));
+      $_tmp25 = \facebook\thrift\test\DirectlyAdapted::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->adaptedStructField = $_tmp25;
     }
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\Baz>();
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\Foo>();
+    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \facebook\thrift\test\Baz>();
+    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \facebook\thrift\test\Foo>();
   }
 
 }
@@ -2483,12 +2483,12 @@ class DirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::my::Adapter",
           )
         ),
-        '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+        '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
           shape(
             "name" => "my.module.Adapter",
             "typeHint" => "my.another.module.AdaptedType",
@@ -2612,7 +2612,7 @@ class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMe
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::my::Adapter",
             "adaptedType" => "::my::Type",
@@ -2816,18 +2816,18 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
       'fields' => dict[
         'field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
               shape(
                 "name" => "my.Adapter1",
                 "typeHint" => "my.AdaptedType1",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1<>",
               )
@@ -2837,14 +2837,14 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
         ),
         'shared_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::Shared,
+                "type" => \facebook\thrift\annotation\cpp\RefType::Shared,
               )
             ),
           ],
@@ -2852,17 +2852,17 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
         ),
         'opt_shared_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::Shared,
+                "type" => \facebook\thrift\annotation\cpp\RefType::Shared,
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1<>",
               )
@@ -2872,12 +2872,12 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
         ),
         'opt_boxed_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
               shape(
               )
             ),
@@ -3102,12 +3102,12 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, 
       'fields' => dict[
         'int_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
               shape(
               )
             ),
@@ -3116,12 +3116,12 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, 
         ),
         'string_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
               shape(
               )
             ),
@@ -3130,12 +3130,12 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, 
         ),
         'set_field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
             ),
-            '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
               shape(
               )
             ),
@@ -3214,7 +3214,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     1 => shape(
       'var' => 'a',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\A::class,
+      'class' => \facebook\thrift\test\A::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -3222,20 +3222,20 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?\thrift\test\AdaptedA,
+    ?'a' => ?\facebook\thrift\test\AdaptedA,
   );
 
   const type TShape = shape(
-    ?'a' => ?\thrift\test\A::TShape,
+    ?'a' => ?\facebook\thrift\test\A::TShape,
   );
   const int STRUCTURAL_ID = 1135805466744601735;
   /**
    * Original thrift field:-
    * 1: module.AdaptedA a
    */
-  public ?\thrift\test\AdaptedA $a;
+  public ?\facebook\thrift\test\AdaptedA $a;
 
-  public function __construct(?\thrift\test\AdaptedA $a = null)[] {
+  public function __construct(?\facebook\thrift\test\AdaptedA $a = null)[] {
     $this->a = $a;
   }
 
@@ -3316,7 +3316,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
         'a' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
               )
@@ -3329,7 +3329,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'a') === null ? null : (\thrift\test\A::__fromShape($shape['a'])),
+      Shapes::idx($shape, 'a') === null ? null : (\facebook\thrift\test\A::__fromShape($shape['a'])),
     );
   }
 
@@ -3350,8 +3350,8 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     }
 
     if (idx($parsed, 'a') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedA>($parsed['a']));
-      $_tmp1 = \thrift\test\A::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedA>($parsed['a']));
+      $_tmp1 = \facebook\thrift\test\A::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->a = $_tmp1;
     }
@@ -3517,22 +3517,22 @@ class Config implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "MyVarAdapter",
           )
         ),
-        '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+        '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
           shape(
             "name" => "my.ConfigAdapter",
             "typeHint" => "my.ConfiguredVar[]",
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),
@@ -3602,12 +3602,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   const type TConstructorShape = shape(
     ?'field' => ?int,
-    ?'set_string' => ?\thrift\test\SetWithAdapter,
+    ?'set_string' => ?\facebook\thrift\test\SetWithAdapter,
   );
 
   const type TShape = shape(
     'field' => int,
-    'set_string' => \thrift\test\SetWithAdapter,
+    'set_string' => \facebook\thrift\test\SetWithAdapter,
   );
   const int STRUCTURAL_ID = 5903652997290634247;
   /**
@@ -3619,9 +3619,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    * Original thrift field:-
    * 2: module.SetWithAdapter set_string
    */
-  public \thrift\test\SetWithAdapter $set_string;
+  public \facebook\thrift\test\SetWithAdapter $set_string;
 
-  public function __construct(?int $field = null, ?\thrift\test\SetWithAdapter $set_string = null)[] {
+  public function __construct(?int $field = null, ?\facebook\thrift\test\SetWithAdapter $set_string = null)[] {
     $this->field = $field ?? 0;
     $this->set_string = $set_string ?? \Adapter2::fromThrift(Set {});
   }
@@ -3701,17 +3701,17 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'set_string' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
               )
             ),
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
@@ -3755,7 +3755,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       }
     }
     if (idx($parsed, 'set_string') !== null) {
-      $_json4 = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\SetWithAdapter>($parsed['set_string']);
+      $_json4 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\SetWithAdapter>($parsed['set_string']);
       $_container5 = Set {};
       foreach($_json4 as $_key2 => $_value3) {
         $_elem6 = '';
@@ -3838,28 +3838,28 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   ];
 
   const type TConstructorShape = shape(
-    ?'delay' => ?\thrift\test\DurationMs,
-    ?'custom' => ?\thrift\test\CustomProtocolType,
+    ?'delay' => ?\facebook\thrift\test\DurationMs,
+    ?'custom' => ?\facebook\thrift\test\CustomProtocolType,
     ?'timeout' => ?int,
     ?'data' => ?int,
     ?'meta' => ?string,
-    ?'indirectionString' => ?\thrift\test\IndirectionString,
+    ?'indirectionString' => ?\facebook\thrift\test\IndirectionString,
     ?'string_data' => ?string,
-    ?'double_wrapped_bool' => ?\thrift\test\AdaptedBool,
-    ?'double_wrapped_integer' => ?\thrift\test\AdaptedInteger,
+    ?'double_wrapped_bool' => ?\facebook\thrift\test\AdaptedBool,
+    ?'double_wrapped_integer' => ?\facebook\thrift\test\AdaptedInteger,
     ?'binary_data' => ?string,
   );
 
   const type TShape = shape(
-    'delay' => \thrift\test\DurationMs,
-    'custom' => \thrift\test\CustomProtocolType,
+    'delay' => \facebook\thrift\test\DurationMs,
+    'custom' => \facebook\thrift\test\CustomProtocolType,
     'timeout' => int,
     'data' => int,
     'meta' => string,
-    'indirectionString' => \thrift\test\IndirectionString,
+    'indirectionString' => \facebook\thrift\test\IndirectionString,
     'string_data' => string,
-    'double_wrapped_bool' => \thrift\test\AdaptedBool,
-    'double_wrapped_integer' => \thrift\test\AdaptedInteger,
+    'double_wrapped_bool' => \facebook\thrift\test\AdaptedBool,
+    'double_wrapped_integer' => \facebook\thrift\test\AdaptedInteger,
     'binary_data' => string,
   );
   const int STRUCTURAL_ID = 9217156058896773800;
@@ -3867,12 +3867,12 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
    * Original thrift field:-
    * 1: module.DurationMs delay
    */
-  public \thrift\test\DurationMs $delay;
+  public \facebook\thrift\test\DurationMs $delay;
   /**
    * Original thrift field:-
    * 2: module.CustomProtocolType custom
    */
-  public \thrift\test\CustomProtocolType $custom;
+  public \facebook\thrift\test\CustomProtocolType $custom;
   /**
    * Original thrift field:-
    * 3: i64 timeout
@@ -3892,7 +3892,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
    * Original thrift field:-
    * 6: module.IndirectionString indirectionString
    */
-  public \thrift\test\IndirectionString $indirectionString;
+  public \facebook\thrift\test\IndirectionString $indirectionString;
   /**
    * Original thrift field:-
    * 7: string string_data
@@ -3902,19 +3902,19 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
    * Original thrift field:-
    * 8: module.AdaptedBool double_wrapped_bool
    */
-  public \thrift\test\AdaptedBool $double_wrapped_bool;
+  public \facebook\thrift\test\AdaptedBool $double_wrapped_bool;
   /**
    * Original thrift field:-
    * 9: module.AdaptedInteger double_wrapped_integer
    */
-  public \thrift\test\AdaptedInteger $double_wrapped_integer;
+  public \facebook\thrift\test\AdaptedInteger $double_wrapped_integer;
   /**
    * Original thrift field:-
    * 10: binary binary_data
    */
   public string $binary_data;
 
-  public function __construct(?\thrift\test\DurationMs $delay = null, ?\thrift\test\CustomProtocolType $custom = null, ?int $timeout = null, ?int $data = null, ?string $meta = null, ?\thrift\test\IndirectionString $indirectionString = null, ?string $string_data = null, ?\thrift\test\AdaptedBool $double_wrapped_bool = null, ?\thrift\test\AdaptedInteger $double_wrapped_integer = null, ?string $binary_data = null)[] {
+  public function __construct(?\facebook\thrift\test\DurationMs $delay = null, ?\facebook\thrift\test\CustomProtocolType $custom = null, ?int $timeout = null, ?int $data = null, ?string $meta = null, ?\facebook\thrift\test\IndirectionString $indirectionString = null, ?string $string_data = null, ?\facebook\thrift\test\AdaptedBool $double_wrapped_bool = null, ?\facebook\thrift\test\AdaptedInteger $double_wrapped_integer = null, ?string $binary_data = null)[] {
     $this->delay = $delay ?? 0;
     $this->custom = $custom ?? '';
     $this->timeout = $timeout ?? 0;
@@ -4126,7 +4126,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'delay' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdaptTestMsAdapter",
               )
@@ -4136,7 +4136,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'custom' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CustomProtocolAdapter",
               )
@@ -4145,7 +4145,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'timeout' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdaptTestMsAdapter",
               )
@@ -4155,7 +4155,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'data' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdapterWithContext",
               )
@@ -4166,7 +4166,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'indirectionString' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>",
               )
@@ -4175,7 +4175,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'string_data' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdapterWithContext",
               )
@@ -4185,14 +4185,14 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'double_wrapped_bool' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
           ],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -4201,14 +4201,14 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'double_wrapped_integer' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdapterWithContext",
               )
             ),
           ],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -4217,7 +4217,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         ),
         'binary_data' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdapterWithContext",
               )
@@ -4270,10 +4270,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     }
 
     if (idx($parsed, 'delay') !== null) {
-      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DurationMs>($parsed['delay']);
+      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DurationMs>($parsed['delay']);
     }
     if (idx($parsed, 'custom') !== null) {
-      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CustomProtocolType>($parsed['custom']);
+      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\CustomProtocolType>($parsed['custom']);
     }
     if (idx($parsed, 'timeout') !== null) {
       $this->timeout = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['timeout']);
@@ -4285,16 +4285,16 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
       $this->meta = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['meta']);
     }
     if (idx($parsed, 'indirectionString') !== null) {
-      $this->indirectionString = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\IndirectionString>($parsed['indirectionString']);
+      $this->indirectionString = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\IndirectionString>($parsed['indirectionString']);
     }
     if (idx($parsed, 'string_data') !== null) {
       $this->string_data = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['string_data']);
     }
     if (idx($parsed, 'double_wrapped_bool') !== null) {
-      $this->double_wrapped_bool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['double_wrapped_bool']);
+      $this->double_wrapped_bool = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedBool>($parsed['double_wrapped_bool']);
     }
     if (idx($parsed, 'double_wrapped_integer') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['double_wrapped_integer']);
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedInteger>($parsed['double_wrapped_integer']);
       if ($_tmp0 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -4407,7 +4407,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
     18 => shape(
       'var' => 'adaptedEnum',
       'type' => \TType::I32,
-      'enum' => \thrift\test\ThriftAdaptedEnum::class,
+      'enum' => \facebook\thrift\test\ThriftAdaptedEnum::class,
     ),
     19 => shape(
       'var' => 'adaptedListDefault',
@@ -4471,90 +4471,90 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   ];
 
   const type TConstructorShape = shape(
-    ?'adaptedBool' => ?\thrift\test\AdaptedBool,
-    ?'adaptedByte' => ?\thrift\test\AdaptedByte,
-    ?'adaptedShort' => ?\thrift\test\AdaptedShort,
-    ?'adaptedInteger' => ?\thrift\test\AdaptedInteger,
-    ?'adaptedLong' => ?\thrift\test\AdaptedLong,
-    ?'adaptedDouble' => ?\thrift\test\AdaptedDouble,
-    ?'adaptedString' => ?\thrift\test\AdaptedString,
+    ?'adaptedBool' => ?\facebook\thrift\test\AdaptedBool,
+    ?'adaptedByte' => ?\facebook\thrift\test\AdaptedByte,
+    ?'adaptedShort' => ?\facebook\thrift\test\AdaptedShort,
+    ?'adaptedInteger' => ?\facebook\thrift\test\AdaptedInteger,
+    ?'adaptedLong' => ?\facebook\thrift\test\AdaptedLong,
+    ?'adaptedDouble' => ?\facebook\thrift\test\AdaptedDouble,
+    ?'adaptedString' => ?\facebook\thrift\test\AdaptedString,
     ?'adaptedList' => ?Vector<int>,
     ?'adaptedSet' => ?Set<int>,
     ?'adaptedMap' => ?Map<int, int>,
-    ?'adaptedBoolDefault' => ?\thrift\test\AdaptedBool,
-    ?'adaptedByteDefault' => ?\thrift\test\AdaptedByte,
-    ?'adaptedShortDefault' => ?\thrift\test\AdaptedShort,
-    ?'adaptedIntegerDefault' => ?\thrift\test\AdaptedInteger,
-    ?'adaptedLongDefault' => ?\thrift\test\AdaptedLong,
-    ?'adaptedDoubleDefault' => ?\thrift\test\AdaptedDouble,
-    ?'adaptedStringDefault' => ?\thrift\test\AdaptedString,
-    ?'adaptedEnum' => ?\thrift\test\AdaptedEnum,
+    ?'adaptedBoolDefault' => ?\facebook\thrift\test\AdaptedBool,
+    ?'adaptedByteDefault' => ?\facebook\thrift\test\AdaptedByte,
+    ?'adaptedShortDefault' => ?\facebook\thrift\test\AdaptedShort,
+    ?'adaptedIntegerDefault' => ?\facebook\thrift\test\AdaptedInteger,
+    ?'adaptedLongDefault' => ?\facebook\thrift\test\AdaptedLong,
+    ?'adaptedDoubleDefault' => ?\facebook\thrift\test\AdaptedDouble,
+    ?'adaptedStringDefault' => ?\facebook\thrift\test\AdaptedString,
+    ?'adaptedEnum' => ?\facebook\thrift\test\AdaptedEnum,
     ?'adaptedListDefault' => ?Vector<int>,
     ?'adaptedSetDefault' => ?Set<int>,
     ?'adaptedMapDefault' => ?Map<int, int>,
-    ?'doubleTypedefBool' => ?\thrift\test\DoubleTypedefBool,
+    ?'doubleTypedefBool' => ?\facebook\thrift\test\DoubleTypedefBool,
   );
 
   const type TShape = shape(
-    'adaptedBool' => \thrift\test\AdaptedBool,
-    'adaptedByte' => \thrift\test\AdaptedByte,
-    'adaptedShort' => \thrift\test\AdaptedShort,
-    'adaptedInteger' => \thrift\test\AdaptedInteger,
-    'adaptedLong' => \thrift\test\AdaptedLong,
-    'adaptedDouble' => \thrift\test\AdaptedDouble,
-    'adaptedString' => \thrift\test\AdaptedString,
+    'adaptedBool' => \facebook\thrift\test\AdaptedBool,
+    'adaptedByte' => \facebook\thrift\test\AdaptedByte,
+    'adaptedShort' => \facebook\thrift\test\AdaptedShort,
+    'adaptedInteger' => \facebook\thrift\test\AdaptedInteger,
+    'adaptedLong' => \facebook\thrift\test\AdaptedLong,
+    'adaptedDouble' => \facebook\thrift\test\AdaptedDouble,
+    'adaptedString' => \facebook\thrift\test\AdaptedString,
     'adaptedList' => vec<int>,
     'adaptedSet' => dict<int, bool>,
     'adaptedMap' => dict<int, int>,
-    'adaptedBoolDefault' => \thrift\test\AdaptedBool,
-    'adaptedByteDefault' => \thrift\test\AdaptedByte,
-    'adaptedShortDefault' => \thrift\test\AdaptedShort,
-    'adaptedIntegerDefault' => \thrift\test\AdaptedInteger,
-    'adaptedLongDefault' => \thrift\test\AdaptedLong,
-    'adaptedDoubleDefault' => \thrift\test\AdaptedDouble,
-    'adaptedStringDefault' => \thrift\test\AdaptedString,
-    ?'adaptedEnum' => ?\thrift\test\AdaptedEnum,
+    'adaptedBoolDefault' => \facebook\thrift\test\AdaptedBool,
+    'adaptedByteDefault' => \facebook\thrift\test\AdaptedByte,
+    'adaptedShortDefault' => \facebook\thrift\test\AdaptedShort,
+    'adaptedIntegerDefault' => \facebook\thrift\test\AdaptedInteger,
+    'adaptedLongDefault' => \facebook\thrift\test\AdaptedLong,
+    'adaptedDoubleDefault' => \facebook\thrift\test\AdaptedDouble,
+    'adaptedStringDefault' => \facebook\thrift\test\AdaptedString,
+    ?'adaptedEnum' => ?\facebook\thrift\test\AdaptedEnum,
     'adaptedListDefault' => vec<int>,
     'adaptedSetDefault' => dict<int, bool>,
     'adaptedMapDefault' => dict<int, int>,
-    'doubleTypedefBool' => \thrift\test\DoubleTypedefBool,
+    'doubleTypedefBool' => \facebook\thrift\test\DoubleTypedefBool,
   );
   const int STRUCTURAL_ID = 1552800196824590900;
   /**
    * Original thrift field:-
    * 1: module.AdaptedBool adaptedBool
    */
-  public \thrift\test\AdaptedBool $adaptedBool;
+  public \facebook\thrift\test\AdaptedBool $adaptedBool;
   /**
    * Original thrift field:-
    * 2: module.AdaptedByte adaptedByte
    */
-  public \thrift\test\AdaptedByte $adaptedByte;
+  public \facebook\thrift\test\AdaptedByte $adaptedByte;
   /**
    * Original thrift field:-
    * 3: module.AdaptedShort adaptedShort
    */
-  public \thrift\test\AdaptedShort $adaptedShort;
+  public \facebook\thrift\test\AdaptedShort $adaptedShort;
   /**
    * Original thrift field:-
    * 4: module.AdaptedInteger adaptedInteger
    */
-  public \thrift\test\AdaptedInteger $adaptedInteger;
+  public \facebook\thrift\test\AdaptedInteger $adaptedInteger;
   /**
    * Original thrift field:-
    * 5: module.AdaptedLong adaptedLong
    */
-  public \thrift\test\AdaptedLong $adaptedLong;
+  public \facebook\thrift\test\AdaptedLong $adaptedLong;
   /**
    * Original thrift field:-
    * 6: module.AdaptedDouble adaptedDouble
    */
-  public \thrift\test\AdaptedDouble $adaptedDouble;
+  public \facebook\thrift\test\AdaptedDouble $adaptedDouble;
   /**
    * Original thrift field:-
    * 7: module.AdaptedString adaptedString
    */
-  public \thrift\test\AdaptedString $adaptedString;
+  public \facebook\thrift\test\AdaptedString $adaptedString;
   /**
    * Original thrift field:-
    * 8: list<i64> adaptedList
@@ -4574,42 +4574,42 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 11: module.AdaptedBool adaptedBoolDefault
    */
-  public \thrift\test\AdaptedBool $adaptedBoolDefault;
+  public \facebook\thrift\test\AdaptedBool $adaptedBoolDefault;
   /**
    * Original thrift field:-
    * 12: module.AdaptedByte adaptedByteDefault
    */
-  public \thrift\test\AdaptedByte $adaptedByteDefault;
+  public \facebook\thrift\test\AdaptedByte $adaptedByteDefault;
   /**
    * Original thrift field:-
    * 13: module.AdaptedShort adaptedShortDefault
    */
-  public \thrift\test\AdaptedShort $adaptedShortDefault;
+  public \facebook\thrift\test\AdaptedShort $adaptedShortDefault;
   /**
    * Original thrift field:-
    * 14: module.AdaptedInteger adaptedIntegerDefault
    */
-  public \thrift\test\AdaptedInteger $adaptedIntegerDefault;
+  public \facebook\thrift\test\AdaptedInteger $adaptedIntegerDefault;
   /**
    * Original thrift field:-
    * 15: module.AdaptedLong adaptedLongDefault
    */
-  public \thrift\test\AdaptedLong $adaptedLongDefault;
+  public \facebook\thrift\test\AdaptedLong $adaptedLongDefault;
   /**
    * Original thrift field:-
    * 16: module.AdaptedDouble adaptedDoubleDefault
    */
-  public \thrift\test\AdaptedDouble $adaptedDoubleDefault;
+  public \facebook\thrift\test\AdaptedDouble $adaptedDoubleDefault;
   /**
    * Original thrift field:-
    * 17: module.AdaptedString adaptedStringDefault
    */
-  public \thrift\test\AdaptedString $adaptedStringDefault;
+  public \facebook\thrift\test\AdaptedString $adaptedStringDefault;
   /**
    * Original thrift field:-
    * 18: module.AdaptedEnum adaptedEnum
    */
-  public ?\thrift\test\AdaptedEnum $adaptedEnum;
+  public ?\facebook\thrift\test\AdaptedEnum $adaptedEnum;
   /**
    * Original thrift field:-
    * 19: list<i64> adaptedListDefault
@@ -4629,9 +4629,9 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 22: module.DoubleTypedefBool doubleTypedefBool
    */
-  public \thrift\test\DoubleTypedefBool $doubleTypedefBool;
+  public \facebook\thrift\test\DoubleTypedefBool $doubleTypedefBool;
 
-  public function __construct(?\thrift\test\AdaptedBool $adaptedBool = null, ?\thrift\test\AdaptedByte $adaptedByte = null, ?\thrift\test\AdaptedShort $adaptedShort = null, ?\thrift\test\AdaptedInteger $adaptedInteger = null, ?\thrift\test\AdaptedLong $adaptedLong = null, ?\thrift\test\AdaptedDouble $adaptedDouble = null, ?\thrift\test\AdaptedString $adaptedString = null, ?Vector<int> $adaptedList = null, ?Set<int> $adaptedSet = null, ?Map<int, int> $adaptedMap = null, ?\thrift\test\AdaptedBool $adaptedBoolDefault = null, ?\thrift\test\AdaptedByte $adaptedByteDefault = null, ?\thrift\test\AdaptedShort $adaptedShortDefault = null, ?\thrift\test\AdaptedInteger $adaptedIntegerDefault = null, ?\thrift\test\AdaptedLong $adaptedLongDefault = null, ?\thrift\test\AdaptedDouble $adaptedDoubleDefault = null, ?\thrift\test\AdaptedString $adaptedStringDefault = null, ?\thrift\test\AdaptedEnum $adaptedEnum = null, ?Vector<int> $adaptedListDefault = null, ?Set<int> $adaptedSetDefault = null, ?Map<int, int> $adaptedMapDefault = null, ?\thrift\test\DoubleTypedefBool $doubleTypedefBool = null)[] {
+  public function __construct(?\facebook\thrift\test\AdaptedBool $adaptedBool = null, ?\facebook\thrift\test\AdaptedByte $adaptedByte = null, ?\facebook\thrift\test\AdaptedShort $adaptedShort = null, ?\facebook\thrift\test\AdaptedInteger $adaptedInteger = null, ?\facebook\thrift\test\AdaptedLong $adaptedLong = null, ?\facebook\thrift\test\AdaptedDouble $adaptedDouble = null, ?\facebook\thrift\test\AdaptedString $adaptedString = null, ?Vector<int> $adaptedList = null, ?Set<int> $adaptedSet = null, ?Map<int, int> $adaptedMap = null, ?\facebook\thrift\test\AdaptedBool $adaptedBoolDefault = null, ?\facebook\thrift\test\AdaptedByte $adaptedByteDefault = null, ?\facebook\thrift\test\AdaptedShort $adaptedShortDefault = null, ?\facebook\thrift\test\AdaptedInteger $adaptedIntegerDefault = null, ?\facebook\thrift\test\AdaptedLong $adaptedLongDefault = null, ?\facebook\thrift\test\AdaptedDouble $adaptedDoubleDefault = null, ?\facebook\thrift\test\AdaptedString $adaptedStringDefault = null, ?\facebook\thrift\test\AdaptedEnum $adaptedEnum = null, ?Vector<int> $adaptedListDefault = null, ?Set<int> $adaptedSetDefault = null, ?Map<int, int> $adaptedMapDefault = null, ?\facebook\thrift\test\DoubleTypedefBool $doubleTypedefBool = null)[] {
     $this->adaptedBool = $adaptedBool ?? false;
     $this->adaptedByte = $adaptedByte ?? 0;
     $this->adaptedShort = $adaptedShort ?? 0;
@@ -4649,7 +4649,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
     $this->adaptedLongDefault = $adaptedLongDefault ?? 4;
     $this->adaptedDoubleDefault = $adaptedDoubleDefault ?? 5.0;
     $this->adaptedStringDefault = $adaptedStringDefault ?? "6";
-    $this->adaptedEnum = $adaptedEnum ?? \thrift\test\ThriftAdaptedEnum::One;
+    $this->adaptedEnum = $adaptedEnum ?? \facebook\thrift\test\ThriftAdaptedEnum::One;
     $this->adaptedListDefault = $adaptedListDefault ?? Vector {
       1,
     };
@@ -5175,7 +5175,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedBool' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5185,7 +5185,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedByte' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5195,7 +5195,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedShort' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5205,7 +5205,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedInteger' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5215,7 +5215,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedLong' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5225,7 +5225,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedDouble' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5235,7 +5235,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedString' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5244,7 +5244,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedList' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5254,7 +5254,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedSet' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5264,7 +5264,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedMap' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5275,7 +5275,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedBoolDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5285,7 +5285,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedByteDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5295,7 +5295,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedShortDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5305,7 +5305,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedIntegerDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5315,7 +5315,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedLongDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5325,7 +5325,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedDoubleDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5335,7 +5335,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedStringDefault' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -5345,7 +5345,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedEnum' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>",
               )
@@ -5354,12 +5354,12 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedListDefault' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::fbthrift_adapters::test::TestAdapter",
               )
@@ -5369,12 +5369,12 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedSetDefault' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::fbthrift_adapters::test::TestAdapter",
               )
@@ -5384,12 +5384,12 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         ),
         'adaptedMapDefault' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
-            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+            '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::fbthrift_adapters::test::TestAdapter",
               )
@@ -5466,10 +5466,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
     }
 
     if (idx($parsed, 'adaptedBool') !== null) {
-      $this->adaptedBool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['adaptedBool']);
+      $this->adaptedBool = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedBool>($parsed['adaptedBool']);
     }
     if (idx($parsed, 'adaptedByte') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedByte>($parsed['adaptedByte']);
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedByte>($parsed['adaptedByte']);
       if ($_tmp0 > 0x7f) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5477,7 +5477,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedShort') !== null) {
-      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedShort>($parsed['adaptedShort']);
+      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedShort>($parsed['adaptedShort']);
       if ($_tmp1 > 0x7fff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5485,7 +5485,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedInteger') !== null) {
-      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['adaptedInteger']);
+      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedInteger>($parsed['adaptedInteger']);
       if ($_tmp2 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5493,13 +5493,13 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedLong') !== null) {
-      $this->adaptedLong = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedLong>($parsed['adaptedLong']);
+      $this->adaptedLong = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedLong>($parsed['adaptedLong']);
     }
     if (idx($parsed, 'adaptedDouble') !== null) {
-      $this->adaptedDouble = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedDouble>($parsed['adaptedDouble']);
+      $this->adaptedDouble = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedDouble>($parsed['adaptedDouble']);
     }
     if (idx($parsed, 'adaptedString') !== null) {
-      $this->adaptedString = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedString>($parsed['adaptedString']);
+      $this->adaptedString = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedString>($parsed['adaptedString']);
     }
     if (idx($parsed, 'adaptedList') !== null) {
       $_json6 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['adaptedList']);
@@ -5532,10 +5532,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       $this->adaptedMap = $_container19;
     }
     if (idx($parsed, 'adaptedBoolDefault') !== null) {
-      $this->adaptedBoolDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['adaptedBoolDefault']);
+      $this->adaptedBoolDefault = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedBool>($parsed['adaptedBoolDefault']);
     }
     if (idx($parsed, 'adaptedByteDefault') !== null) {
-      $_tmp21 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedByte>($parsed['adaptedByteDefault']);
+      $_tmp21 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedByte>($parsed['adaptedByteDefault']);
       if ($_tmp21 > 0x7f) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5543,7 +5543,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedShortDefault') !== null) {
-      $_tmp22 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedShort>($parsed['adaptedShortDefault']);
+      $_tmp22 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedShort>($parsed['adaptedShortDefault']);
       if ($_tmp22 > 0x7fff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5551,7 +5551,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedIntegerDefault') !== null) {
-      $_tmp23 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['adaptedIntegerDefault']);
+      $_tmp23 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedInteger>($parsed['adaptedIntegerDefault']);
       if ($_tmp23 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -5559,16 +5559,16 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'adaptedLongDefault') !== null) {
-      $this->adaptedLongDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedLong>($parsed['adaptedLongDefault']);
+      $this->adaptedLongDefault = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedLong>($parsed['adaptedLongDefault']);
     }
     if (idx($parsed, 'adaptedDoubleDefault') !== null) {
-      $this->adaptedDoubleDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedDouble>($parsed['adaptedDoubleDefault']);
+      $this->adaptedDoubleDefault = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedDouble>($parsed['adaptedDoubleDefault']);
     }
     if (idx($parsed, 'adaptedStringDefault') !== null) {
-      $this->adaptedStringDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedString>($parsed['adaptedStringDefault']);
+      $this->adaptedStringDefault = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedString>($parsed['adaptedStringDefault']);
     }
     if (idx($parsed, 'adaptedEnum') !== null) {
-      $this->adaptedEnum = \thrift\test\ThriftAdaptedEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedEnum>($parsed['adaptedEnum']));
+      $this->adaptedEnum = \facebook\thrift\test\ThriftAdaptedEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedEnum>($parsed['adaptedEnum']));
     }
     if (idx($parsed, 'adaptedListDefault') !== null) {
       $_json27 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['adaptedListDefault']);
@@ -5601,7 +5601,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       $this->adaptedMapDefault = $_container40;
     }
     if (idx($parsed, 'doubleTypedefBool') !== null) {
-      $this->doubleTypedefBool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DoubleTypedefBool>($parsed['doubleTypedefBool']);
+      $this->doubleTypedefBool = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DoubleTypedefBool>($parsed['doubleTypedefBool']);
     }
   }
 
@@ -5619,7 +5619,7 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
     1 => shape(
       'var' => 'adaptedStruct',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\AdaptTemplatedTestStruct::class,
+      'class' => \facebook\thrift\test\AdaptTemplatedTestStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -5627,20 +5627,20 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
   ];
 
   const type TConstructorShape = shape(
-    ?'adaptedStruct' => ?\thrift\test\AdaptTemplatedTestStruct,
+    ?'adaptedStruct' => ?\facebook\thrift\test\AdaptTemplatedTestStruct,
   );
 
   const type TShape = shape(
-    ?'adaptedStruct' => ?\thrift\test\AdaptTemplatedTestStruct::TShape,
+    ?'adaptedStruct' => ?\facebook\thrift\test\AdaptTemplatedTestStruct::TShape,
   );
   const int STRUCTURAL_ID = 7684145159661226586;
   /**
    * Original thrift field:-
    * 1: module.AdaptTemplatedTestStruct adaptedStruct
    */
-  public ?\thrift\test\AdaptTemplatedTestStruct $adaptedStruct;
+  public ?\facebook\thrift\test\AdaptTemplatedTestStruct $adaptedStruct;
 
-  public function __construct(?\thrift\test\AdaptTemplatedTestStruct $adaptedStruct = null)[] {
+  public function __construct(?\facebook\thrift\test\AdaptTemplatedTestStruct $adaptedStruct = null)[] {
     $this->adaptedStruct = $adaptedStruct;
   }
 
@@ -5697,7 +5697,7 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\thrift\test\AdaptTemplatedTestStruct::__fromShape($shape['adaptedStruct'])),
+      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\facebook\thrift\test\AdaptTemplatedTestStruct::__fromShape($shape['adaptedStruct'])),
     );
   }
 
@@ -5718,8 +5718,8 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
     }
 
     if (idx($parsed, 'adaptedStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptTemplatedTestStruct>($parsed['adaptedStruct']));
-      $_tmp1 = \thrift\test\AdaptTemplatedTestStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptTemplatedTestStruct>($parsed['adaptedStruct']));
+      $_tmp1 = \facebook\thrift\test\AdaptTemplatedTestStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->adaptedStruct = $_tmp1;
     }
@@ -5738,7 +5738,7 @@ enum AdaptTestUnionEnum: int {
  * AdaptTestUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestUnion'))>>
-class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\thrift\test\AdaptTestUnionEnum>, \IThriftShapishSyncStruct {
+class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\facebook\thrift\test\AdaptTestUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -5760,36 +5760,36 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   ];
 
   const type TConstructorShape = shape(
-    ?'delay' => ?\thrift\test\DurationMs,
-    ?'custom' => ?\thrift\test\CustomProtocolType,
+    ?'delay' => ?\facebook\thrift\test\DurationMs,
+    ?'custom' => ?\facebook\thrift\test\CustomProtocolType,
   );
 
   const type TShape = shape(
-    ?'delay' => ?\thrift\test\DurationMs,
-    ?'custom' => ?\thrift\test\CustomProtocolType,
+    ?'delay' => ?\facebook\thrift\test\DurationMs,
+    ?'custom' => ?\facebook\thrift\test\CustomProtocolType,
   );
   const int STRUCTURAL_ID = 7327808847999377042;
   /**
    * Original thrift field:-
    * 1: module.DurationMs delay
    */
-  public ?\thrift\test\DurationMs $delay;
+  public ?\facebook\thrift\test\DurationMs $delay;
   /**
    * Original thrift field:-
    * 2: module.CustomProtocolType custom
    */
-  public ?\thrift\test\CustomProtocolType $custom;
-  protected \thrift\test\AdaptTestUnionEnum $_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+  public ?\facebook\thrift\test\CustomProtocolType $custom;
+  protected \facebook\thrift\test\AdaptTestUnionEnum $_type = \facebook\thrift\test\AdaptTestUnionEnum::_EMPTY_;
 
-  public function __construct(?\thrift\test\DurationMs $delay = null, ?\thrift\test\CustomProtocolType $custom = null)[] {
-    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+  public function __construct(?\facebook\thrift\test\DurationMs $delay = null, ?\facebook\thrift\test\CustomProtocolType $custom = null)[] {
+    $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::_EMPTY_;
     if ($delay !== null) {
       $this->delay = $delay;
-      $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+      $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::delay;
     }
     if ($custom !== null) {
       $this->custom = $custom;
-      $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+      $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::custom;
     }
   }
 
@@ -5808,58 +5808,58 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     return 'AdaptTestUnion';
   }
 
-  public function getType()[]: \thrift\test\AdaptTestUnionEnum {
+  public function getType()[]: \facebook\thrift\test\AdaptTestUnionEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \thrift\test\AdaptTestUnionEnum::delay:
+      case \facebook\thrift\test\AdaptTestUnionEnum::delay:
         $this->delay = null;
         break;
-      case \thrift\test\AdaptTestUnionEnum::custom:
+      case \facebook\thrift\test\AdaptTestUnionEnum::custom:
         $this->custom = null;
         break;
-      case \thrift\test\AdaptTestUnionEnum::_EMPTY_:
+      case \facebook\thrift\test\AdaptTestUnionEnum::_EMPTY_:
         break;
     }
-    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::_EMPTY_;
   }
 
-  public function set_delay(\thrift\test\DurationMs $delay)[write_props]: this {
+  public function set_delay(\facebook\thrift\test\DurationMs $delay)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+    $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::delay;
     $this->delay = $delay;
     return $this;
   }
 
-  public function get_delay()[]: ?\thrift\test\DurationMs {
+  public function get_delay()[]: ?\facebook\thrift\test\DurationMs {
     return $this->delay;
   }
 
-  public function getx_delay()[]: \thrift\test\DurationMs {
+  public function getx_delay()[]: \facebook\thrift\test\DurationMs {
     invariant(
-      $this->_type === \thrift\test\AdaptTestUnionEnum::delay,
+      $this->_type === \facebook\thrift\test\AdaptTestUnionEnum::delay,
       'get_delay called on an instance of AdaptTestUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->delay as nonnull;
   }
 
-  public function set_custom(\thrift\test\CustomProtocolType $custom)[write_props]: this {
+  public function set_custom(\facebook\thrift\test\CustomProtocolType $custom)[write_props]: this {
     $this->reset();
-    $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+    $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::custom;
     $this->custom = $custom;
     return $this;
   }
 
-  public function get_custom()[]: ?\thrift\test\CustomProtocolType {
+  public function get_custom()[]: ?\facebook\thrift\test\CustomProtocolType {
     return $this->custom;
   }
 
-  public function getx_custom()[]: \thrift\test\CustomProtocolType {
+  public function getx_custom()[]: \facebook\thrift\test\CustomProtocolType {
     invariant(
-      $this->_type === \thrift\test\AdaptTestUnionEnum::custom,
+      $this->_type === \facebook\thrift\test\AdaptTestUnionEnum::custom,
       'get_custom called on an instance of AdaptTestUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -5927,7 +5927,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'delay' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdaptTestMsAdapter",
               )
@@ -5937,7 +5937,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'custom' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CustomProtocolAdapter",
               )
@@ -5966,7 +5966,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -5974,12 +5974,12 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     }
 
     if (idx($parsed, 'delay') !== null) {
-      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DurationMs>($parsed['delay']);
-      $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DurationMs>($parsed['delay']);
+      $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::delay;
     }
     if (idx($parsed, 'custom') !== null) {
-      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CustomProtocolType>($parsed['custom']);
-      $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\CustomProtocolType>($parsed['custom']);
+      $this->_type = \facebook\thrift\test\AdaptTestUnionEnum::custom;
     }
   }
 
@@ -6175,7 +6175,7 @@ class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::TemplatedTestAdapter",
           )
@@ -6227,22 +6227,22 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
     1 => shape(
       'var' => 'adaptedStruct',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\AdaptedStruct::class,
+      'class' => \facebook\thrift\test\AdaptedStruct::class,
     ),
     2 => shape(
       'var' => 'adaptedTypedef',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\AdaptedStruct::class,
+      'class' => \facebook\thrift\test\AdaptedStruct::class,
     ),
     3 => shape(
       'var' => 'directlyAdapted',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\DirectlyAdaptedStruct::class,
+      'class' => \facebook\thrift\test\DirectlyAdaptedStruct::class,
     ),
     4 => shape(
       'var' => 'typedefOfAdapted',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\DirectlyAdaptedStruct::class,
+      'class' => \facebook\thrift\test\DirectlyAdaptedStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -6253,41 +6253,41 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   ];
 
   const type TConstructorShape = shape(
-    ?'adaptedStruct' => ?\thrift\test\AdaptedStruct,
-    ?'adaptedTypedef' => ?\thrift\test\AdaptedTypedef,
-    ?'directlyAdapted' => ?\thrift\test\DirectlyAdaptedStruct,
-    ?'typedefOfAdapted' => ?\thrift\test\TypedefOfDirect,
+    ?'adaptedStruct' => ?\facebook\thrift\test\AdaptedStruct,
+    ?'adaptedTypedef' => ?\facebook\thrift\test\AdaptedTypedef,
+    ?'directlyAdapted' => ?\facebook\thrift\test\DirectlyAdaptedStruct,
+    ?'typedefOfAdapted' => ?\facebook\thrift\test\TypedefOfDirect,
   );
 
   const type TShape = shape(
-    ?'adaptedStruct' => ?\thrift\test\AdaptedStruct::TShape,
-    ?'adaptedTypedef' => ?\thrift\test\AdaptedStruct::TShape,
-    ?'directlyAdapted' => ?\thrift\test\DirectlyAdaptedStruct::TShape,
-    ?'typedefOfAdapted' => ?\thrift\test\DirectlyAdaptedStruct::TShape,
+    ?'adaptedStruct' => ?\facebook\thrift\test\AdaptedStruct::TShape,
+    ?'adaptedTypedef' => ?\facebook\thrift\test\AdaptedStruct::TShape,
+    ?'directlyAdapted' => ?\facebook\thrift\test\DirectlyAdaptedStruct::TShape,
+    ?'typedefOfAdapted' => ?\facebook\thrift\test\DirectlyAdaptedStruct::TShape,
   );
   const int STRUCTURAL_ID = 3653783318222631819;
   /**
    * Original thrift field:-
    * 1: module.AdaptedStruct adaptedStruct
    */
-  public ?\thrift\test\AdaptedStruct $adaptedStruct;
+  public ?\facebook\thrift\test\AdaptedStruct $adaptedStruct;
   /**
    * Original thrift field:-
    * 2: module.AdaptedTypedef adaptedTypedef
    */
-  public ?\thrift\test\AdaptedTypedef $adaptedTypedef;
+  public ?\facebook\thrift\test\AdaptedTypedef $adaptedTypedef;
   /**
    * Original thrift field:-
    * 3: module.DirectlyAdaptedStruct directlyAdapted
    */
-  public ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted;
+  public ?\facebook\thrift\test\DirectlyAdaptedStruct $directlyAdapted;
   /**
    * Original thrift field:-
    * 4: module.TypedefOfDirect typedefOfAdapted
    */
-  public ?\thrift\test\TypedefOfDirect $typedefOfAdapted;
+  public ?\facebook\thrift\test\TypedefOfDirect $typedefOfAdapted;
 
-  public function __construct(?\thrift\test\AdaptedStruct $adaptedStruct = null, ?\thrift\test\AdaptedTypedef $adaptedTypedef = null, ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted = null, ?\thrift\test\TypedefOfDirect $typedefOfAdapted = null)[] {
+  public function __construct(?\facebook\thrift\test\AdaptedStruct $adaptedStruct = null, ?\facebook\thrift\test\AdaptedTypedef $adaptedTypedef = null, ?\facebook\thrift\test\DirectlyAdaptedStruct $directlyAdapted = null, ?\facebook\thrift\test\TypedefOfDirect $typedefOfAdapted = null)[] {
     $this->adaptedStruct = $adaptedStruct;
     $this->adaptedTypedef = $adaptedTypedef;
     $this->directlyAdapted = $directlyAdapted;
@@ -6409,7 +6409,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
       'fields' => dict[
         'adaptedStruct' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -6420,7 +6420,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedTypedef' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -6430,7 +6430,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'directlyAdapted' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
@@ -6443,10 +6443,10 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\thrift\test\AdaptedStruct::__fromShape($shape['adaptedStruct'])),
-      Shapes::idx($shape, 'adaptedTypedef') === null ? null : (\thrift\test\AdaptedStruct::__fromShape($shape['adaptedTypedef'])),
-      Shapes::idx($shape, 'directlyAdapted') === null ? null : (\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['directlyAdapted'])),
-      Shapes::idx($shape, 'typedefOfAdapted') === null ? null : (\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['typedefOfAdapted'])),
+      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($shape['adaptedStruct'])),
+      Shapes::idx($shape, 'adaptedTypedef') === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($shape['adaptedTypedef'])),
+      Shapes::idx($shape, 'directlyAdapted') === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['directlyAdapted'])),
+      Shapes::idx($shape, 'typedefOfAdapted') === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['typedefOfAdapted'])),
     );
   }
 
@@ -6470,26 +6470,26 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
     }
 
     if (idx($parsed, 'adaptedStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedStruct>($parsed['adaptedStruct']));
-      $_tmp1 = \thrift\test\AdaptedStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedStruct>($parsed['adaptedStruct']));
+      $_tmp1 = \facebook\thrift\test\AdaptedStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->adaptedStruct = $_tmp1;
     }
     if (idx($parsed, 'adaptedTypedef') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedTypedef>($parsed['adaptedTypedef']));
-      $_tmp3 = \thrift\test\AdaptedStruct::withDefaultValues();
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedTypedef>($parsed['adaptedTypedef']));
+      $_tmp3 = \facebook\thrift\test\AdaptedStruct::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->adaptedTypedef = $_tmp3;
     }
     if (idx($parsed, 'directlyAdapted') !== null) {
-      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DirectlyAdaptedStruct>($parsed['directlyAdapted']));
-      $_tmp5 = \thrift\test\DirectlyAdaptedStruct::withDefaultValues();
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DirectlyAdaptedStruct>($parsed['directlyAdapted']));
+      $_tmp5 = \facebook\thrift\test\DirectlyAdaptedStruct::withDefaultValues();
       $_tmp5->readFromJson($_tmp4);
       $this->directlyAdapted = $_tmp5;
     }
     if (idx($parsed, 'typedefOfAdapted') !== null) {
-      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\TypedefOfDirect>($parsed['typedefOfAdapted']));
-      $_tmp7 = \thrift\test\DirectlyAdaptedStruct::withDefaultValues();
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\TypedefOfDirect>($parsed['typedefOfAdapted']));
+      $_tmp7 = \facebook\thrift\test\DirectlyAdaptedStruct::withDefaultValues();
       $_tmp7->readFromJson($_tmp6);
       $this->typedefOfAdapted = $_tmp7;
     }
@@ -6509,7 +6509,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     1 => shape(
       'var' => 'field',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\CircularStruct::class,
+      'class' => \facebook\thrift\test\CircularStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -6517,20 +6517,20 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?\thrift\test\CircularStruct,
+    ?'field' => ?\facebook\thrift\test\CircularStruct,
   );
 
   const type TShape = shape(
-    ?'field' => ?\thrift\test\CircularStruct::TShape,
+    ?'field' => ?\facebook\thrift\test\CircularStruct::TShape,
   );
   const int STRUCTURAL_ID = 6453901709117171539;
   /**
    * Original thrift field:-
    * 1: module.CircularStruct field
    */
-  public ?\thrift\test\CircularStruct $field;
+  public ?\facebook\thrift\test\CircularStruct $field;
 
-  public function __construct(?\thrift\test\CircularStruct $field = null)[] {
+  public function __construct(?\facebook\thrift\test\CircularStruct $field = null)[] {
     $this->field = $field;
   }
 
@@ -6596,7 +6596,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') === null ? null : (\thrift\test\CircularStruct::__fromShape($shape['field'])),
+      Shapes::idx($shape, 'field') === null ? null : (\facebook\thrift\test\CircularStruct::__fromShape($shape['field'])),
     );
   }
 
@@ -6617,8 +6617,8 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CircularStruct>($parsed['field']));
-      $_tmp1 = \thrift\test\CircularStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\CircularStruct>($parsed['field']));
+      $_tmp1 = \facebook\thrift\test\CircularStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
     }
@@ -6638,7 +6638,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     1 => shape(
       'var' => 'field',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\CircularAdaptee::class,
+      'class' => \facebook\thrift\test\CircularAdaptee::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -6646,20 +6646,20 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?\thrift\test\AdaptedCircularAdaptee,
+    ?'field' => ?\facebook\thrift\test\AdaptedCircularAdaptee,
   );
 
   const type TShape = shape(
-    ?'field' => ?\thrift\test\CircularAdaptee::TShape,
+    ?'field' => ?\facebook\thrift\test\CircularAdaptee::TShape,
   );
   const int STRUCTURAL_ID = 7977518433842367675;
   /**
    * Original thrift field:-
    * 1: module.AdaptedCircularAdaptee field
    */
-  public ?\thrift\test\AdaptedCircularAdaptee $field;
+  public ?\facebook\thrift\test\AdaptedCircularAdaptee $field;
 
-  public function __construct(?\thrift\test\AdaptedCircularAdaptee $field = null)[] {
+  public function __construct(?\facebook\thrift\test\AdaptedCircularAdaptee $field = null)[] {
     $this->field = $field;
   }
 
@@ -6731,14 +6731,14 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
       'fields' => dict[
         'field' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::Unique,
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
               )
             ),
           ],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::MemberAccessAdapter",
                 "adaptedType" => "::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>",
@@ -6752,7 +6752,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') === null ? null : (\thrift\test\CircularAdaptee::__fromShape($shape['field'])),
+      Shapes::idx($shape, 'field') === null ? null : (\facebook\thrift\test\CircularAdaptee::__fromShape($shape['field'])),
     );
   }
 
@@ -6773,8 +6773,8 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedCircularAdaptee>($parsed['field']));
-      $_tmp1 = \thrift\test\CircularAdaptee::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\AdaptedCircularAdaptee>($parsed['field']));
+      $_tmp1 = \facebook\thrift\test\CircularAdaptee::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
     }
@@ -6794,7 +6794,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     1 => shape(
       'var' => 'reordered_dependent_adapted',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\DeclaredAfterStruct::class,
+      'class' => \facebook\thrift\test\DeclaredAfterStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -6802,20 +6802,20 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   ];
 
   const type TConstructorShape = shape(
-    ?'reordered_dependent_adapted' => ?\thrift\test\DeclaredAfterStruct,
+    ?'reordered_dependent_adapted' => ?\facebook\thrift\test\DeclaredAfterStruct,
   );
 
   const type TShape = shape(
-    ?'reordered_dependent_adapted' => ?\thrift\test\DeclaredAfterStruct::TShape,
+    ?'reordered_dependent_adapted' => ?\facebook\thrift\test\DeclaredAfterStruct::TShape,
   );
   const int STRUCTURAL_ID = 2416271555865439268;
   /**
    * Original thrift field:-
    * 1: module.DeclaredAfterStruct reordered_dependent_adapted
    */
-  public ?\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted;
+  public ?\facebook\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted;
 
-  public function __construct(?\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted = null)[] {
+  public function __construct(?\facebook\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted = null)[] {
     $this->reordered_dependent_adapted = $reordered_dependent_adapted;
   }
 
@@ -6877,14 +6877,14 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
       'fields' => dict[
         'reordered_dependent_adapted' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::Unique,
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
               )
             ),
           ],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>",
               )
@@ -6897,7 +6897,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'reordered_dependent_adapted') === null ? null : (\thrift\test\DeclaredAfterStruct::__fromShape($shape['reordered_dependent_adapted'])),
+      Shapes::idx($shape, 'reordered_dependent_adapted') === null ? null : (\facebook\thrift\test\DeclaredAfterStruct::__fromShape($shape['reordered_dependent_adapted'])),
     );
   }
 
@@ -6918,8 +6918,8 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     }
 
     if (idx($parsed, 'reordered_dependent_adapted') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DeclaredAfterStruct>($parsed['reordered_dependent_adapted']));
-      $_tmp1 = \thrift\test\DeclaredAfterStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DeclaredAfterStruct>($parsed['reordered_dependent_adapted']));
+      $_tmp1 = \facebook\thrift\test\DeclaredAfterStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->reordered_dependent_adapted = $_tmp1;
     }
@@ -6978,7 +6978,7 @@ class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftStructMetadata,
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>",
           )
@@ -7091,7 +7091,7 @@ class RenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::TemplatedTestAdapter",
             "underlyingName" => "UnderlyingRenamedStruct",
@@ -7210,7 +7210,7 @@ class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftStructMetadata,
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::TemplatedTestAdapter",
             "underlyingName" => "UnderlyingSameNamespaceStruct",
@@ -7303,7 +7303,7 @@ class HeapAllocated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::MoveOnlyAdapter",
             "moveOnly" => true,
@@ -7351,7 +7351,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     1 => shape(
       'var' => 'ptr',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\HeapAllocated::class,
+      'class' => \facebook\thrift\test\HeapAllocated::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -7359,20 +7359,20 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   ];
 
   const type TConstructorShape = shape(
-    ?'ptr' => ?\thrift\test\HeapAllocated,
+    ?'ptr' => ?\facebook\thrift\test\HeapAllocated,
   );
 
   const type TShape = shape(
-    ?'ptr' => ?\thrift\test\HeapAllocated::TShape,
+    ?'ptr' => ?\facebook\thrift\test\HeapAllocated::TShape,
   );
   const int STRUCTURAL_ID = 1105592653371346642;
   /**
    * Original thrift field:-
    * 1: module.HeapAllocated ptr
    */
-  public ?\thrift\test\HeapAllocated $ptr;
+  public ?\facebook\thrift\test\HeapAllocated $ptr;
 
-  public function __construct(?\thrift\test\HeapAllocated $ptr = null)[] {
+  public function __construct(?\facebook\thrift\test\HeapAllocated $ptr = null)[] {
     $this->ptr = $ptr;
   }
 
@@ -7426,7 +7426,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'ptr' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::MoveOnlyAdapter",
                 "moveOnly" => true,
@@ -7440,7 +7440,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'ptr') === null ? null : (\thrift\test\HeapAllocated::__fromShape($shape['ptr'])),
+      Shapes::idx($shape, 'ptr') === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($shape['ptr'])),
     );
   }
 
@@ -7461,8 +7461,8 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     }
 
     if (idx($parsed, 'ptr') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\HeapAllocated>($parsed['ptr']));
-      $_tmp1 = \thrift\test\HeapAllocated::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\HeapAllocated>($parsed['ptr']));
+      $_tmp1 = \facebook\thrift\test\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->ptr = $_tmp1;
     }
@@ -7551,7 +7551,7 @@ class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
       'fields' => dict[
         'ptr' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::MoveOnlyAdapter",
                 "moveOnly" => true,
@@ -7644,12 +7644,12 @@ class ApplyAdapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::TemplatedTestAdapter",
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
@@ -7734,7 +7734,7 @@ class TransitiveAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\test\ApplyAdapter' => \thrift\test\ApplyAdapter::fromShape(
+        '\facebook\thrift\test\ApplyAdapter' => \facebook\thrift\test\ApplyAdapter::fromShape(
           shape(
           )
         ),
@@ -7798,13 +7798,13 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   const type TConstructorShape = shape(
     ?'regularInt' => ?int,
-    ?'countingInt' => ?\thrift\test\CountingInt,
+    ?'countingInt' => ?\facebook\thrift\test\CountingInt,
     ?'regularString' => ?string,
   );
 
   const type TShape = shape(
     ?'regularInt' => ?int,
-    ?'countingInt' => ?\thrift\test\CountingInt,
+    ?'countingInt' => ?\facebook\thrift\test\CountingInt,
     ?'regularString' => ?string,
   );
   const int STRUCTURAL_ID = 1297891124769241261;
@@ -7817,14 +7817,14 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
    * Original thrift field:-
    * 2: module.CountingInt countingInt
    */
-  public ?\thrift\test\CountingInt $countingInt;
+  public ?\facebook\thrift\test\CountingInt $countingInt;
   /**
    * Original thrift field:-
    * 3: string regularString
    */
   public ?string $regularString;
 
-  public function __construct(?int $regularInt = null, ?\thrift\test\CountingInt $countingInt = null, ?string $regularString = null)[] {
+  public function __construct(?int $regularInt = null, ?\facebook\thrift\test\CountingInt $countingInt = null, ?string $regularString = null)[] {
     $this->regularInt = $regularInt;
     $this->countingInt = $countingInt;
     $this->regularString = $regularString;
@@ -7911,7 +7911,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
       'fields' => dict[
         'regularInt' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CountingAdapter<false, int>",
               )
@@ -7922,7 +7922,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'countingInt' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CountingAdapter<true, int>",
               )
@@ -7931,7 +7931,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         ),
         'regularString' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CountingAdapter<false, std::string>",
               )
@@ -7973,7 +7973,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
       $this->regularInt = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['regularInt']);
     }
     if (idx($parsed, 'countingInt') !== null) {
-      $this->countingInt = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CountingInt>($parsed['countingInt']);
+      $this->countingInt = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\CountingInt>($parsed['countingInt']);
     }
     if (idx($parsed, 'regularString') !== null) {
       $this->regularString = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['regularString']);
@@ -8060,12 +8060,12 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::test::VariableAdapter",
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),

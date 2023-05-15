@@ -880,6 +880,12 @@ class t_hack_generator : public t_concat_generator {
 
   std::string package_namespace(const t_program* p) const {
     auto pkg_path = p->package().path();
+    if (!p->package().domain().empty()) {
+      pkg_path.insert(
+          pkg_path.begin(),
+          p->package().domain().begin(),
+          p->package().domain().end() - 1);
+    }
     if (!pkg_path.empty()) {
       std::string pkg_ns = boost::algorithm::join(pkg_path, "\\");
       return pkg_ns;

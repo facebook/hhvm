@@ -396,7 +396,7 @@ class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\Attributes' => \thrift\annotation\hack\Attributes::fromShape(
+        '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
           shape(
             "attributes" => vec[
               "ApiEnum",
@@ -408,7 +408,7 @@ class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata 
       'fields' => dict[
         'foo' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Attributes' => \thrift\annotation\hack\Attributes::fromShape(
+            '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
               shape(
                 "attributes" => vec[
                   "FieldAttribute",
@@ -785,7 +785,7 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\UnionEnumAttributes' => \thrift\annotation\hack\UnionEnumAttributes::fromShape(
+        '\facebook\thrift\annotation\hack\UnionEnumAttributes' => \facebook\thrift\annotation\hack\UnionEnumAttributes::fromShape(
           shape(
             "attributes" => vec[
               "EnumAttributes",

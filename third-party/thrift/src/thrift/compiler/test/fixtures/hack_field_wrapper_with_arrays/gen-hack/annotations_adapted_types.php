@@ -94,7 +94,7 @@ class StructWithWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \
     public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
       return shape(
         'struct' => dict[
-          '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
+          '\facebook\thrift\annotation\hack\Wrapper' => \facebook\thrift\annotation\hack\Wrapper::fromShape(
             shape(
               "name" => "\\MyStructWrapper",
             )

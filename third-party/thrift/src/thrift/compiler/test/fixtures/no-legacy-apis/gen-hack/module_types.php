@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\no-legacy-apis;
+namespace test\fixtures\no-legacy-apis;
 
 /**
  * Original thrift enum:-
@@ -194,7 +194,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/no-legacy-apis/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\no-legacy-apis\MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\no-legacy-apis\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -202,13 +202,13 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       'var' => 'myEnum',
       'union' => true,
       'type' => \TType::I32,
-      'enum' => \fixtures\no-legacy-apis\MyEnum::class,
+      'enum' => \test\fixtures\no-legacy-apis\MyEnum::class,
     ),
     2 => shape(
       'var' => 'myDataItem',
       'union' => true,
       'type' => \TType::STRUCT,
-      'class' => \fixtures\no-legacy-apis\MyStruct::class,
+      'class' => \test\fixtures\no-legacy-apis\MyStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -217,13 +217,13 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   ];
 
   const type TConstructorShape = shape(
-    ?'myEnum' => ?\fixtures\no-legacy-apis\MyEnum,
-    ?'myDataItem' => ?\fixtures\no-legacy-apis\MyStruct,
+    ?'myEnum' => ?\test\fixtures\no-legacy-apis\MyEnum,
+    ?'myDataItem' => ?\test\fixtures\no-legacy-apis\MyStruct,
   );
 
   const type TShape = shape(
-    ?'myEnum' => ?\fixtures\no-legacy-apis\MyEnum,
-    ?'myDataItem' => ?\fixtures\no-legacy-apis\MyStruct::TShape,
+    ?'myEnum' => ?\test\fixtures\no-legacy-apis\MyEnum,
+    ?'myDataItem' => ?\test\fixtures\no-legacy-apis\MyStruct::TShape,
     ...
   );
   const int STRUCTURAL_ID = 7590509256672853308;
@@ -231,23 +231,23 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
    * Original thrift field:-
    * 1: module.MyEnum myEnum
    */
-  public ?\fixtures\no-legacy-apis\MyEnum $myEnum;
+  public ?\test\fixtures\no-legacy-apis\MyEnum $myEnum;
   /**
    * Original thrift field:-
    * 2: module.MyStruct myDataItem
    */
-  public ?\fixtures\no-legacy-apis\MyStruct $myDataItem;
-  protected \fixtures\no-legacy-apis\MyUnionEnum $_type = \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
+  public ?\test\fixtures\no-legacy-apis\MyStruct $myDataItem;
+  protected \test\fixtures\no-legacy-apis\MyUnionEnum $_type = \test\fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
 
-  public function __construct(?\fixtures\no-legacy-apis\MyEnum $myEnum = null, ?\fixtures\no-legacy-apis\MyStruct $myDataItem = null)[] {
-    $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
+  public function __construct(?\test\fixtures\no-legacy-apis\MyEnum $myEnum = null, ?\test\fixtures\no-legacy-apis\MyStruct $myDataItem = null)[] {
+    $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
     if ($myEnum !== null) {
       $this->myEnum = $myEnum;
-      $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myEnum;
+      $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myEnum;
     }
     if ($myDataItem !== null) {
       $this->myDataItem = $myDataItem;
-      $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
+      $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
     }
   }
 
@@ -266,58 +266,58 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return 'MyUnion';
   }
 
-  public function getType()[]: \fixtures\no-legacy-apis\MyUnionEnum {
+  public function getType()[]: \test\fixtures\no-legacy-apis\MyUnionEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \fixtures\no-legacy-apis\MyUnionEnum::myEnum:
+      case \test\fixtures\no-legacy-apis\MyUnionEnum::myEnum:
         $this->myEnum = null;
         break;
-      case \fixtures\no-legacy-apis\MyUnionEnum::myDataItem:
+      case \test\fixtures\no-legacy-apis\MyUnionEnum::myDataItem:
         $this->myDataItem = null;
         break;
-      case \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_:
+      case \test\fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_:
         break;
     }
-    $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
   }
 
-  public function set_myEnum(\fixtures\no-legacy-apis\MyEnum $myEnum)[write_props]: this {
+  public function set_myEnum(\test\fixtures\no-legacy-apis\MyEnum $myEnum)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myEnum;
+    $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myEnum;
     $this->myEnum = $myEnum;
     return $this;
   }
 
-  public function get_myEnum()[]: ?\fixtures\no-legacy-apis\MyEnum {
+  public function get_myEnum()[]: ?\test\fixtures\no-legacy-apis\MyEnum {
     return $this->myEnum;
   }
 
-  public function getx_myEnum()[]: \fixtures\no-legacy-apis\MyEnum {
+  public function getx_myEnum()[]: \test\fixtures\no-legacy-apis\MyEnum {
     invariant(
-      $this->_type === \fixtures\no-legacy-apis\MyUnionEnum::myEnum,
+      $this->_type === \test\fixtures\no-legacy-apis\MyUnionEnum::myEnum,
       'get_myEnum called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->myEnum as nonnull;
   }
 
-  public function set_myDataItem(\fixtures\no-legacy-apis\MyStruct $myDataItem)[write_props]: this {
+  public function set_myDataItem(\test\fixtures\no-legacy-apis\MyStruct $myDataItem)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
+    $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
     $this->myDataItem = $myDataItem;
     return $this;
   }
 
-  public function get_myDataItem()[]: ?\fixtures\no-legacy-apis\MyStruct {
+  public function get_myDataItem()[]: ?\test\fixtures\no-legacy-apis\MyStruct {
     return $this->myDataItem;
   }
 
-  public function getx_myDataItem()[]: \fixtures\no-legacy-apis\MyStruct {
+  public function getx_myDataItem()[]: \test\fixtures\no-legacy-apis\MyStruct {
     invariant(
-      $this->_type === \fixtures\no-legacy-apis\MyUnionEnum::myDataItem,
+      $this->_type === \test\fixtures\no-legacy-apis\MyUnionEnum::myDataItem,
       'get_myDataItem called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -379,7 +379,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'myEnum'),
-      Shapes::idx($shape, 'myDataItem') === null ? null : (\fixtures\no-legacy-apis\MyStruct::__fromShape($shape['myDataItem'])),
+      Shapes::idx($shape, 'myDataItem') === null ? null : (\test\fixtures\no-legacy-apis\MyStruct::__fromShape($shape['myDataItem'])),
     );
   }
 
@@ -394,7 +394,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -402,15 +402,15 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     }
 
     if (idx($parsed, 'myEnum') !== null) {
-      $this->myEnum = \fixtures\no-legacy-apis\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\no-legacy-apis\MyEnum>($parsed['myEnum']));
-      $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myEnum;
+      $this->myEnum = \test\fixtures\no-legacy-apis\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\no-legacy-apis\MyEnum>($parsed['myEnum']));
+      $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myEnum;
     }
     if (idx($parsed, 'myDataItem') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\no-legacy-apis\MyStruct>($parsed['myDataItem']));
-      $_tmp1 = \fixtures\no-legacy-apis\MyStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\no-legacy-apis\MyStruct>($parsed['myDataItem']));
+      $_tmp1 = \test\fixtures\no-legacy-apis\MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->myDataItem = $_tmp1;
-      $this->_type = \fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
+      $this->_type = \test\fixtures\no-legacy-apis\MyUnionEnum::myDataItem;
     }
   }
 

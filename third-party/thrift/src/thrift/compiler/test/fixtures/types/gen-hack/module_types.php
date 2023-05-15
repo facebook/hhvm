@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\fixtures\types;
+namespace apache\thrift\fixtures\types;
 
 /**
  * Original thrift enum:-
@@ -654,7 +654,7 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'fieldB' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Type' => \thrift\annotation\cpp\Type::fromShape(
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "template" => "std::list",
               )
@@ -1024,12 +1024,12 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
     1 => shape(
       'var' => 'a',
       'type' => \TType::I32,
-      'enum' => \thrift\fixtures\types\MyForwardRefEnum::class,
+      'enum' => \apache\thrift\fixtures\types\MyForwardRefEnum::class,
     ),
     2 => shape(
       'var' => 'b',
       'type' => \TType::I32,
-      'enum' => \thrift\fixtures\types\MyForwardRefEnum::class,
+      'enum' => \apache\thrift\fixtures\types\MyForwardRefEnum::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1038,8 +1038,8 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?\thrift\fixtures\types\MyForwardRefEnum,
-    ?'b' => ?\thrift\fixtures\types\MyForwardRefEnum,
+    ?'a' => ?\apache\thrift\fixtures\types\MyForwardRefEnum,
+    ?'b' => ?\apache\thrift\fixtures\types\MyForwardRefEnum,
   );
 
   const int STRUCTURAL_ID = 6098225215594902198;
@@ -1047,16 +1047,16 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
    * Original thrift field:-
    * 1: module.MyForwardRefEnum a
    */
-  public ?\thrift\fixtures\types\MyForwardRefEnum $a;
+  public ?\apache\thrift\fixtures\types\MyForwardRefEnum $a;
   /**
    * Original thrift field:-
    * 2: module.MyForwardRefEnum b
    */
-  public ?\thrift\fixtures\types\MyForwardRefEnum $b;
+  public ?\apache\thrift\fixtures\types\MyForwardRefEnum $b;
 
-  public function __construct(?\thrift\fixtures\types\MyForwardRefEnum $a = null, ?\thrift\fixtures\types\MyForwardRefEnum $b = null)[] {
-    $this->a = $a ?? \thrift\fixtures\types\MyForwardRefEnum::NONZERO;
-    $this->b = $b ?? \thrift\fixtures\types\MyForwardRefEnum::NONZERO;
+  public function __construct(?\apache\thrift\fixtures\types\MyForwardRefEnum $a = null, ?\apache\thrift\fixtures\types\MyForwardRefEnum $b = null)[] {
+    $this->a = $a ?? \apache\thrift\fixtures\types\MyForwardRefEnum::NONZERO;
+    $this->b = $b ?? \apache\thrift\fixtures\types\MyForwardRefEnum::NONZERO;
   }
 
   public static function withDefaultValues()[]: this {
@@ -1156,10 +1156,10 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
     }
 
     if (idx($parsed, 'a') !== null) {
-      $this->a = \thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyForwardRefEnum>($parsed['a']));
+      $this->a = \apache\thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\MyForwardRefEnum>($parsed['a']));
     }
     if (idx($parsed, 'b') !== null) {
-      $this->b = \thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyForwardRefEnum>($parsed['b']));
+      $this->b = \apache\thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\MyForwardRefEnum>($parsed['b']));
     }
   }
 
@@ -1311,7 +1311,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     2 => shape(
       'var' => 'n',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\TrivialNumeric::class,
+      'class' => \apache\thrift\fixtures\types\TrivialNumeric::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1321,7 +1321,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
 
   const type TConstructorShape = shape(
     ?'z' => ?int,
-    ?'n' => ?\thrift\fixtures\types\TrivialNumeric,
+    ?'n' => ?\apache\thrift\fixtures\types\TrivialNumeric,
   );
 
   const int STRUCTURAL_ID = 5012136746274172257;
@@ -1334,9 +1334,9 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 2: module.TrivialNumeric n
    */
-  public ?\thrift\fixtures\types\TrivialNumeric $n;
+  public ?\apache\thrift\fixtures\types\TrivialNumeric $n;
 
-  public function __construct(?int $z = null, ?\thrift\fixtures\types\TrivialNumeric $n = null)[] {
+  public function __construct(?int $z = null, ?\apache\thrift\fixtures\types\TrivialNumeric $n = null)[] {
     $this->z = $z ?? 4;
     $this->n = $n;
   }
@@ -1424,8 +1424,8 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp1 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\TrivialNumeric>($parsed['n']));
-      $_tmp2 = \thrift\fixtures\types\TrivialNumeric::withDefaultValues();
+      $_tmp1 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\TrivialNumeric>($parsed['n']));
+      $_tmp2 = \apache\thrift\fixtures\types\TrivialNumeric::withDefaultValues();
       $_tmp2->readFromJson($_tmp1);
       $this->n = $_tmp2;
     }
@@ -1608,7 +1608,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     2 => shape(
       'var' => 'n',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\ComplexString::class,
+      'class' => \apache\thrift\fixtures\types\ComplexString::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1618,7 +1618,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
 
   const type TConstructorShape = shape(
     ?'z' => ?string,
-    ?'n' => ?\thrift\fixtures\types\ComplexString,
+    ?'n' => ?\apache\thrift\fixtures\types\ComplexString,
   );
 
   const int STRUCTURAL_ID = 2913723608362321564;
@@ -1631,9 +1631,9 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 2: module.ComplexString n
    */
-  public ?\thrift\fixtures\types\ComplexString $n;
+  public ?\apache\thrift\fixtures\types\ComplexString $n;
 
-  public function __construct(?string $z = null, ?\thrift\fixtures\types\ComplexString $n = null)[] {
+  public function __construct(?string $z = null, ?\apache\thrift\fixtures\types\ComplexString $n = null)[] {
     $this->z = $z ?? "4";
     $this->n = $n;
   }
@@ -1716,8 +1716,8 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       $this->z = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['z']);
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ComplexString>($parsed['n']));
-      $_tmp1 = \thrift\fixtures\types\ComplexString::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ComplexString>($parsed['n']));
+      $_tmp1 = \apache\thrift\fixtures\types\ComplexString::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->n = $_tmp1;
     }
@@ -1896,7 +1896,7 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\MinimizePadding' => \thrift\annotation\cpp\MinimizePadding::fromShape(
+        '\facebook\thrift\annotation\cpp\MinimizePadding' => \facebook\thrift\annotation\cpp\MinimizePadding::fromShape(
           shape(
           )
         ),
@@ -2147,15 +2147,15 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\cpp\MinimizePadding' => \thrift\annotation\cpp\MinimizePadding::fromShape(
+        '\facebook\thrift\annotation\cpp\MinimizePadding' => \facebook\thrift\annotation\cpp\MinimizePadding::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
           shape(
           )
         ),
@@ -2163,7 +2163,7 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
       'fields' => dict[
         'medium' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
               )
@@ -2249,7 +2249,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     4 => shape(
       'var' => 'data',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\MyDataItem::class,
+      'class' => \apache\thrift\fixtures\types\MyDataItem::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2263,7 +2263,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'MyIntField' => ?int,
     ?'MyStringField' => ?string,
     ?'majorVer' => ?int,
-    ?'data' => ?\thrift\fixtures\types\MyDataItem,
+    ?'data' => ?\apache\thrift\fixtures\types\MyDataItem,
   );
 
   const int STRUCTURAL_ID = 2472338421128341558;
@@ -2286,9 +2286,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 4: module.MyDataItem data
    */
-  public ?\thrift\fixtures\types\MyDataItem $data;
+  public ?\apache\thrift\fixtures\types\MyDataItem $data;
 
-  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?int $majorVer = null, ?\thrift\fixtures\types\MyDataItem $data = null)[] {
+  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?int $majorVer = null, ?\apache\thrift\fixtures\types\MyDataItem $data = null)[] {
     $this->MyIntField = $MyIntField ?? 0;
     $this->MyStringField = $MyStringField ?? '';
     $this->majorVer = $majorVer ?? 0;
@@ -2412,8 +2412,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->majorVer = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['majorVer']);
     }
     if (idx($parsed, 'data') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyDataItem>($parsed['data']));
-      $_tmp1 = \thrift\fixtures\types\MyDataItem::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\MyDataItem>($parsed['data']));
+      $_tmp1 = \apache\thrift\fixtures\types\MyDataItem::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->data = $_tmp1;
     }
@@ -2820,12 +2820,12 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'ForwardUsageStruct',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\ForwardUsageStruct::class,
+      'class' => \apache\thrift\fixtures\types\ForwardUsageStruct::class,
     ),
     2 => shape(
       'var' => 'ForwardUsageByRef',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\ForwardUsageByRef::class,
+      'class' => \apache\thrift\fixtures\types\ForwardUsageByRef::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2834,8 +2834,8 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'ForwardUsageStruct' => ?\thrift\fixtures\types\ForwardUsageStruct,
-    ?'ForwardUsageByRef' => ?\thrift\fixtures\types\ForwardUsageByRef,
+    ?'ForwardUsageStruct' => ?\apache\thrift\fixtures\types\ForwardUsageStruct,
+    ?'ForwardUsageByRef' => ?\apache\thrift\fixtures\types\ForwardUsageByRef,
   );
 
   const int STRUCTURAL_ID = 839155360071855827;
@@ -2843,14 +2843,14 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: module.ForwardUsageStruct ForwardUsageStruct
    */
-  public ?\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct;
+  public ?\apache\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct;
   /**
    * Original thrift field:-
    * 2: module.ForwardUsageByRef ForwardUsageByRef
    */
-  public ?\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef;
+  public ?\apache\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef;
 
-  public function __construct(?\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct = null, ?\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef = null)[] {
+  public function __construct(?\apache\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct = null, ?\apache\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef = null)[] {
     $this->ForwardUsageStruct = $ForwardUsageStruct;
     $this->ForwardUsageByRef = $ForwardUsageByRef;
   }
@@ -2954,14 +2954,14 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'ForwardUsageStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageStruct>($parsed['ForwardUsageStruct']));
-      $_tmp1 = \thrift\fixtures\types\ForwardUsageStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageStruct>($parsed['ForwardUsageStruct']));
+      $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->ForwardUsageStruct = $_tmp1;
     }
     if (idx($parsed, 'ForwardUsageByRef') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageByRef>($parsed['ForwardUsageByRef']));
-      $_tmp3 = \thrift\fixtures\types\ForwardUsageByRef::withDefaultValues();
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageByRef>($parsed['ForwardUsageByRef']));
+      $_tmp3 = \apache\thrift\fixtures\types\ForwardUsageByRef::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->ForwardUsageByRef = $_tmp3;
     }
@@ -2981,7 +2981,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\ForwardUsageRoot::class,
+      'class' => \apache\thrift\fixtures\types\ForwardUsageRoot::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2989,7 +2989,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'foo' => ?\thrift\fixtures\types\ForwardUsageRoot,
+    ?'foo' => ?\apache\thrift\fixtures\types\ForwardUsageRoot,
   );
 
   const int STRUCTURAL_ID = 7148256645166217470;
@@ -2997,9 +2997,9 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: module.ForwardUsageRoot foo
    */
-  public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
+  public ?\apache\thrift\fixtures\types\ForwardUsageRoot $foo;
 
-  public function __construct(?\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
+  public function __construct(?\apache\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
     $this->foo = $foo;
   }
 
@@ -3067,8 +3067,8 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
-      $_tmp1 = \thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
     }
@@ -3088,7 +3088,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\ForwardUsageRoot::class,
+      'class' => \apache\thrift\fixtures\types\ForwardUsageRoot::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -3096,7 +3096,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'foo' => ?\thrift\fixtures\types\ForwardUsageRoot,
+    ?'foo' => ?\apache\thrift\fixtures\types\ForwardUsageRoot,
   );
 
   const int STRUCTURAL_ID = 7148256645166217470;
@@ -3104,9 +3104,9 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: module.ForwardUsageRoot foo
    */
-  public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
+  public ?\apache\thrift\fixtures\types\ForwardUsageRoot $foo;
 
-  public function __construct(?\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
+  public function __construct(?\apache\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
     $this->foo = $foo;
   }
 
@@ -3174,8 +3174,8 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
-      $_tmp1 = \thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
     }
@@ -3202,7 +3202,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       ),
       'val' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\IncompleteMapDep::class,
+        'class' => \apache\thrift\fixtures\types\IncompleteMapDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3212,7 +3212,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Map<int, \thrift\fixtures\types\IncompleteMapDep>,
+    ?'field' => ?Map<int, \apache\thrift\fixtures\types\IncompleteMapDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3220,9 +3220,9 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: map<i32, module.IncompleteMapDep> field
    */
-  public ?Map<int, \thrift\fixtures\types\IncompleteMapDep> $field;
+  public ?Map<int, \apache\thrift\fixtures\types\IncompleteMapDep> $field;
 
-  public function __construct(?Map<int, \thrift\fixtures\types\IncompleteMapDep> $field = null)[] {
+  public function __construct(?Map<int, \apache\thrift\fixtures\types\IncompleteMapDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3312,12 +3312,12 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \thrift\fixtures\types\IncompleteMapDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \apache\thrift\fixtures\types\IncompleteMapDep>>($parsed['field']);
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_value5 = \thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
+        $_value5 = \apache\thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
         $_container4[$_key1] = $_value5;
@@ -3416,7 +3416,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       ),
       'val' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\CompleteMapDep::class,
+        'class' => \apache\thrift\fixtures\types\CompleteMapDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3426,7 +3426,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Map<int, \thrift\fixtures\types\CompleteMapDep>,
+    ?'field' => ?Map<int, \apache\thrift\fixtures\types\CompleteMapDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3434,9 +3434,9 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: map<i32, module.CompleteMapDep> field
    */
-  public ?Map<int, \thrift\fixtures\types\CompleteMapDep> $field;
+  public ?Map<int, \apache\thrift\fixtures\types\CompleteMapDep> $field;
 
-  public function __construct(?Map<int, \thrift\fixtures\types\CompleteMapDep> $field = null)[] {
+  public function __construct(?Map<int, \apache\thrift\fixtures\types\CompleteMapDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3526,12 +3526,12 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \thrift\fixtures\types\CompleteMapDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \apache\thrift\fixtures\types\CompleteMapDep>>($parsed['field']);
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_value5 = \thrift\fixtures\types\CompleteMapDep::withDefaultValues();
+        $_value5 = \apache\thrift\fixtures\types\CompleteMapDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\CompleteMapDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\CompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
         $_container4[$_key1] = $_value5;
@@ -3626,7 +3626,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\IncompleteListDep::class,
+        'class' => \apache\thrift\fixtures\types\IncompleteListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3636,7 +3636,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<\thrift\fixtures\types\IncompleteListDep>,
+    ?'field' => ?Vector<\apache\thrift\fixtures\types\IncompleteListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3644,9 +3644,9 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<module.IncompleteListDep> field
    */
-  public ?Vector<\thrift\fixtures\types\IncompleteListDep> $field;
+  public ?Vector<\apache\thrift\fixtures\types\IncompleteListDep> $field;
 
-  public function __construct(?Vector<\thrift\fixtures\types\IncompleteListDep> $field = null)[] {
+  public function __construct(?Vector<\apache\thrift\fixtures\types\IncompleteListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3731,12 +3731,12 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\IncompleteListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\apache\thrift\fixtures\types\IncompleteListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = \thrift\fixtures\types\IncompleteListDep::withDefaultValues();
+        $_elem5 = \apache\thrift\fixtures\types\IncompleteListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\IncompleteListDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\IncompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -3831,7 +3831,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\CompleteListDep::class,
+        'class' => \apache\thrift\fixtures\types\CompleteListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3841,7 +3841,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<\thrift\fixtures\types\CompleteListDep>,
+    ?'field' => ?Vector<\apache\thrift\fixtures\types\CompleteListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3849,9 +3849,9 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<module.CompleteListDep> field
    */
-  public ?Vector<\thrift\fixtures\types\CompleteListDep> $field;
+  public ?Vector<\apache\thrift\fixtures\types\CompleteListDep> $field;
 
-  public function __construct(?Vector<\thrift\fixtures\types\CompleteListDep> $field = null)[] {
+  public function __construct(?Vector<\apache\thrift\fixtures\types\CompleteListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3936,12 +3936,12 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\CompleteListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\apache\thrift\fixtures\types\CompleteListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = \thrift\fixtures\types\CompleteListDep::withDefaultValues();
+        $_elem5 = \apache\thrift\fixtures\types\CompleteListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\CompleteListDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\CompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -4036,7 +4036,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\AdaptedListDep::class,
+        'class' => \apache\thrift\fixtures\types\AdaptedListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -4046,7 +4046,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<\thrift\fixtures\types\AdaptedListDep>,
+    ?'field' => ?Vector<\apache\thrift\fixtures\types\AdaptedListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -4054,9 +4054,9 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<module.AdaptedListDep> field
    */
-  public ?Vector<\thrift\fixtures\types\AdaptedListDep> $field;
+  public ?Vector<\apache\thrift\fixtures\types\AdaptedListDep> $field;
 
-  public function __construct(?Vector<\thrift\fixtures\types\AdaptedListDep> $field = null)[] {
+  public function __construct(?Vector<\apache\thrift\fixtures\types\AdaptedListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -4141,12 +4141,12 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\AdaptedListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\apache\thrift\fixtures\types\AdaptedListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = \thrift\fixtures\types\AdaptedListDep::withDefaultValues();
+        $_elem5 = \apache\thrift\fixtures\types\AdaptedListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\AdaptedListDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\AdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -4169,7 +4169,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'field',
       'type' => \TType::STRUCT,
-      'class' => \thrift\fixtures\types\AdaptedList::class,
+      'class' => \apache\thrift\fixtures\types\AdaptedList::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -4177,7 +4177,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?\thrift\fixtures\types\AdaptedList,
+    ?'field' => ?\apache\thrift\fixtures\types\AdaptedList,
   );
 
   const int STRUCTURAL_ID = 4190573964717330521;
@@ -4185,9 +4185,9 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: module.AdaptedList field
    */
-  public ?\thrift\fixtures\types\AdaptedList $field;
+  public ?\apache\thrift\fixtures\types\AdaptedList $field;
 
-  public function __construct(?\thrift\fixtures\types\AdaptedList $field = null)[] {
+  public function __construct(?\apache\thrift\fixtures\types\AdaptedList $field = null)[] {
     $this->field = $field;
   }
 
@@ -4237,7 +4237,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "IdentityAdapter<detail::AdaptedListDep>",
             "adaptedType" => "detail::AdaptedListDep",
@@ -4261,8 +4261,8 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\AdaptedList>($parsed['field']));
-      $_tmp1 = \thrift\fixtures\types\AdaptedList::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\AdaptedList>($parsed['field']));
+      $_tmp1 = \apache\thrift\fixtures\types\AdaptedList::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
     }
@@ -4285,7 +4285,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => \thrift\fixtures\types\DependentAdaptedListDep::class,
+        'class' => \apache\thrift\fixtures\types\DependentAdaptedListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -4295,7 +4295,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<\thrift\fixtures\types\DependentAdaptedListDep>,
+    ?'field' => ?Vector<\apache\thrift\fixtures\types\DependentAdaptedListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -4303,9 +4303,9 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
    * Original thrift field:-
    * 1: list<module.DependentAdaptedListDep> field
    */
-  public ?Vector<\thrift\fixtures\types\DependentAdaptedListDep> $field;
+  public ?Vector<\apache\thrift\fixtures\types\DependentAdaptedListDep> $field;
 
-  public function __construct(?Vector<\thrift\fixtures\types\DependentAdaptedListDep> $field = null)[] {
+  public function __construct(?Vector<\apache\thrift\fixtures\types\DependentAdaptedListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -4390,12 +4390,12 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\DependentAdaptedListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\apache\thrift\fixtures\types\DependentAdaptedListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = \thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
+        $_elem5 = \apache\thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = \thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
+        $_tmp7 = \apache\thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -4482,7 +4482,7 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "IdentityAdapter<detail::DependentAdaptedListDep>",
           )
@@ -4491,7 +4491,7 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
       'fields' => dict[
         'field' => shape(
           'field' => dict[
-            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
               shape(
               )
             ),
@@ -4795,9 +4795,9 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'aa_unique' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::Unique,
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
               )
             ),
           ],
@@ -4805,9 +4805,9 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
         'aa_shared' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
-                "type" => \thrift\annotation\cpp\RefType::SharedMutable,
+                "type" => \facebook\thrift\annotation\cpp\RefType::SharedMutable,
               )
             ),
           ],
@@ -5007,7 +5007,7 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'box_field' => shape(
           'field' => dict[
-            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
               shape(
               )
             ),
@@ -5212,7 +5212,7 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
         'UintTypedef_field' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Type' => \thrift\annotation\cpp\Type::fromShape(
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "std::uint32_t",
               )

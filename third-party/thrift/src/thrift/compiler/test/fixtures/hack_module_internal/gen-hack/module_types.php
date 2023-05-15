@@ -28,7 +28,7 @@ class FooEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\hack\ModuleInternal' => \thrift\annotation\hack\ModuleInternal::fromShape(
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
           shape(
           )
         ),
@@ -137,7 +137,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\ModuleInternal' => \thrift\annotation\hack\ModuleInternal::fromShape(
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
           shape(
           )
         ),
@@ -145,7 +145,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'str_field' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\ModuleInternal' => \thrift\annotation\hack\ModuleInternal::fromShape(
+            '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
               shape(
               )
             ),
@@ -334,7 +334,7 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\ModuleInternal' => \thrift\annotation\hack\ModuleInternal::fromShape(
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
           shape(
           )
         ),

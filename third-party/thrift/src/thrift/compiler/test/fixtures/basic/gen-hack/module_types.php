@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic;
+namespace test\fixtures\basic;
 
 module hack.module.test;
 /**
@@ -67,7 +67,7 @@ class RenamedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
           shape(
             "name" => "RenamedEnum",
           )
@@ -75,7 +75,7 @@ class RenamedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
       ],
       'constants' => dict[
         'Value2' => dict[
-          '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+          '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
             shape(
               "name" => "renamedValue",
             )
@@ -106,12 +106,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     3 => shape(
       'var' => 'MyDataField',
       'type' => \TType::STRUCT,
-      'class' => \fixtures\basic\MyDataItem::class,
+      'class' => \test\fixtures\basic\MyDataItem::class,
     ),
     4 => shape(
       'var' => 'myEnum',
       'type' => \TType::I32,
-      'enum' => \fixtures\basic\MyEnum::class,
+      'enum' => \test\fixtures\basic\MyEnum::class,
     ),
     5 => shape(
       'var' => 'oneway',
@@ -139,8 +139,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TConstructorShape = shape(
     ?'MyIntField' => ?int,
     ?'MyStringField' => ?string,
-    ?'MyDataField' => ?\fixtures\basic\MyDataItem,
-    ?'myEnum' => ?\fixtures\basic\MyEnum,
+    ?'MyDataField' => ?\test\fixtures\basic\MyDataItem,
+    ?'myEnum' => ?\test\fixtures\basic\MyEnum,
     ?'oneway' => ?bool,
     ?'readonly' => ?bool,
     ?'idempotent' => ?bool,
@@ -149,8 +149,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     'MyIntField' => int,
     'MyStringField' => string,
-    ?'MyDataField' => ?\fixtures\basic\MyDataItem::TShape,
-    ?'myEnum' => ?\fixtures\basic\MyEnum,
+    ?'MyDataField' => ?\test\fixtures\basic\MyDataItem::TShape,
+    ?'myEnum' => ?\test\fixtures\basic\MyEnum,
     'oneway' => bool,
     'readonly' => bool,
     'idempotent' => bool,
@@ -171,12 +171,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    * Original thrift field:-
    * 3: module.MyDataItem MyDataField
    */
-  public ?\fixtures\basic\MyDataItem $MyDataField;
+  public ?\test\fixtures\basic\MyDataItem $MyDataField;
   /**
    * Original thrift field:-
    * 4: module.MyEnum myEnum
    */
-  public ?\fixtures\basic\MyEnum $myEnum;
+  public ?\test\fixtures\basic\MyEnum $myEnum;
   /**
    * Original thrift field:-
    * 5: bool oneway
@@ -193,7 +193,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    */
   public bool $idempotent;
 
-  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?\fixtures\basic\MyDataItem $MyDataField = null, ?\fixtures\basic\MyEnum $myEnum = null, ?bool $oneway = null, ?bool $readonly = null, ?bool $idempotent = null)[] {
+  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?\test\fixtures\basic\MyDataItem $MyDataField = null, ?\test\fixtures\basic\MyEnum $myEnum = null, ?bool $oneway = null, ?bool $readonly = null, ?bool $idempotent = null)[] {
     $this->MyIntField = $MyIntField ?? 0;
     $this->MyStringField = $MyStringField ?? '';
     $this->MyDataField = $MyDataField;
@@ -343,7 +343,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     return new static(
       $shape['MyIntField'],
       $shape['MyStringField'],
-      Shapes::idx($shape, 'MyDataField') === null ? null : (\fixtures\basic\MyDataItem::__fromShape($shape['MyDataField'])),
+      Shapes::idx($shape, 'MyDataField') === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($shape['MyDataField'])),
       Shapes::idx($shape, 'myEnum'),
       $shape['oneway'],
       $shape['readonly'],
@@ -380,13 +380,13 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
     }
     if (idx($parsed, 'MyDataField') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyDataItem>($parsed['MyDataField']));
-      $_tmp1 = \fixtures\basic\MyDataItem::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['MyDataField']));
+      $_tmp1 = \test\fixtures\basic\MyDataItem::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->MyDataField = $_tmp1;
     }
     if (idx($parsed, 'myEnum') !== null) {
-      $this->myEnum = \fixtures\basic\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyEnum>($parsed['myEnum']));
+      $this->myEnum = \test\fixtures\basic\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyEnum>($parsed['myEnum']));
     }
     if (idx($parsed, 'oneway') !== null) {
       $this->oneway = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['oneway']);
@@ -494,7 +494,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\basic\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -502,19 +502,19 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       'var' => 'myEnum',
       'union' => true,
       'type' => \TType::I32,
-      'enum' => \fixtures\basic\MyEnum::class,
+      'enum' => \test\fixtures\basic\MyEnum::class,
     ),
     2 => shape(
       'var' => 'myStruct',
       'union' => true,
       'type' => \TType::STRUCT,
-      'class' => \fixtures\basic\MyStruct::class,
+      'class' => \test\fixtures\basic\MyStruct::class,
     ),
     3 => shape(
       'var' => 'myDataItem',
       'union' => true,
       'type' => \TType::STRUCT,
-      'class' => \fixtures\basic\MyDataItem::class,
+      'class' => \test\fixtures\basic\MyDataItem::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -524,15 +524,15 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   ];
 
   const type TConstructorShape = shape(
-    ?'myEnum' => ?\fixtures\basic\MyEnum,
-    ?'myStruct' => ?\fixtures\basic\MyStruct,
-    ?'myDataItem' => ?\fixtures\basic\MyDataItem,
+    ?'myEnum' => ?\test\fixtures\basic\MyEnum,
+    ?'myStruct' => ?\test\fixtures\basic\MyStruct,
+    ?'myDataItem' => ?\test\fixtures\basic\MyDataItem,
   );
 
   const type TShape = shape(
-    ?'myEnum' => ?\fixtures\basic\MyEnum,
-    ?'myStruct' => ?\fixtures\basic\MyStruct::TShape,
-    ?'myDataItem' => ?\fixtures\basic\MyDataItem::TShape,
+    ?'myEnum' => ?\test\fixtures\basic\MyEnum,
+    ?'myStruct' => ?\test\fixtures\basic\MyStruct::TShape,
+    ?'myDataItem' => ?\test\fixtures\basic\MyDataItem::TShape,
     ...
   );
   const int STRUCTURAL_ID = 4641160414833587430;
@@ -540,32 +540,32 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
    * Original thrift field:-
    * 1: module.MyEnum myEnum
    */
-  public ?\fixtures\basic\MyEnum $myEnum;
+  public ?\test\fixtures\basic\MyEnum $myEnum;
   /**
    * Original thrift field:-
    * 2: module.MyStruct myStruct
    */
-  public ?\fixtures\basic\MyStruct $myStruct;
+  public ?\test\fixtures\basic\MyStruct $myStruct;
   /**
    * Original thrift field:-
    * 3: module.MyDataItem myDataItem
    */
-  public ?\fixtures\basic\MyDataItem $myDataItem;
-  protected \fixtures\basic\MyUnionEnum $_type = \fixtures\basic\MyUnionEnum::_EMPTY_;
+  public ?\test\fixtures\basic\MyDataItem $myDataItem;
+  protected \test\fixtures\basic\MyUnionEnum $_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
 
-  public function __construct(?\fixtures\basic\MyEnum $myEnum = null, ?\fixtures\basic\MyStruct $myStruct = null, ?\fixtures\basic\MyDataItem $myDataItem = null)[] {
-    $this->_type = \fixtures\basic\MyUnionEnum::_EMPTY_;
+  public function __construct(?\test\fixtures\basic\MyEnum $myEnum = null, ?\test\fixtures\basic\MyStruct $myStruct = null, ?\test\fixtures\basic\MyDataItem $myDataItem = null)[] {
+    $this->_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
     if ($myEnum !== null) {
       $this->myEnum = $myEnum;
-      $this->_type = \fixtures\basic\MyUnionEnum::myEnum;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myEnum;
     }
     if ($myStruct !== null) {
       $this->myStruct = $myStruct;
-      $this->_type = \fixtures\basic\MyUnionEnum::myStruct;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myStruct;
     }
     if ($myDataItem !== null) {
       $this->myDataItem = $myDataItem;
-      $this->_type = \fixtures\basic\MyUnionEnum::myDataItem;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myDataItem;
     }
   }
 
@@ -585,81 +585,81 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return 'MyUnion';
   }
 
-  public function getType()[]: \fixtures\basic\MyUnionEnum {
+  public function getType()[]: \test\fixtures\basic\MyUnionEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \fixtures\basic\MyUnionEnum::myEnum:
+      case \test\fixtures\basic\MyUnionEnum::myEnum:
         $this->myEnum = null;
         break;
-      case \fixtures\basic\MyUnionEnum::myStruct:
+      case \test\fixtures\basic\MyUnionEnum::myStruct:
         $this->myStruct = null;
         break;
-      case \fixtures\basic\MyUnionEnum::myDataItem:
+      case \test\fixtures\basic\MyUnionEnum::myDataItem:
         $this->myDataItem = null;
         break;
-      case \fixtures\basic\MyUnionEnum::_EMPTY_:
+      case \test\fixtures\basic\MyUnionEnum::_EMPTY_:
         break;
     }
-    $this->_type = \fixtures\basic\MyUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
   }
 
-  public function set_myEnum(\fixtures\basic\MyEnum $myEnum)[write_props]: this {
+  public function set_myEnum(\test\fixtures\basic\MyEnum $myEnum)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\basic\MyUnionEnum::myEnum;
+    $this->_type = \test\fixtures\basic\MyUnionEnum::myEnum;
     $this->myEnum = $myEnum;
     return $this;
   }
 
-  public function get_myEnum()[]: ?\fixtures\basic\MyEnum {
+  public function get_myEnum()[]: ?\test\fixtures\basic\MyEnum {
     return $this->myEnum;
   }
 
-  public function getx_myEnum()[]: \fixtures\basic\MyEnum {
+  public function getx_myEnum()[]: \test\fixtures\basic\MyEnum {
     invariant(
-      $this->_type === \fixtures\basic\MyUnionEnum::myEnum,
+      $this->_type === \test\fixtures\basic\MyUnionEnum::myEnum,
       'get_myEnum called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->myEnum as nonnull;
   }
 
-  public function set_myStruct(\fixtures\basic\MyStruct $myStruct)[write_props]: this {
+  public function set_myStruct(\test\fixtures\basic\MyStruct $myStruct)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\basic\MyUnionEnum::myStruct;
+    $this->_type = \test\fixtures\basic\MyUnionEnum::myStruct;
     $this->myStruct = $myStruct;
     return $this;
   }
 
-  public function get_myStruct()[]: ?\fixtures\basic\MyStruct {
+  public function get_myStruct()[]: ?\test\fixtures\basic\MyStruct {
     return $this->myStruct;
   }
 
-  public function getx_myStruct()[]: \fixtures\basic\MyStruct {
+  public function getx_myStruct()[]: \test\fixtures\basic\MyStruct {
     invariant(
-      $this->_type === \fixtures\basic\MyUnionEnum::myStruct,
+      $this->_type === \test\fixtures\basic\MyUnionEnum::myStruct,
       'get_myStruct called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->myStruct as nonnull;
   }
 
-  public function set_myDataItem(\fixtures\basic\MyDataItem $myDataItem)[write_props]: this {
+  public function set_myDataItem(\test\fixtures\basic\MyDataItem $myDataItem)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\basic\MyUnionEnum::myDataItem;
+    $this->_type = \test\fixtures\basic\MyUnionEnum::myDataItem;
     $this->myDataItem = $myDataItem;
     return $this;
   }
 
-  public function get_myDataItem()[]: ?\fixtures\basic\MyDataItem {
+  public function get_myDataItem()[]: ?\test\fixtures\basic\MyDataItem {
     return $this->myDataItem;
   }
 
-  public function getx_myDataItem()[]: \fixtures\basic\MyDataItem {
+  public function getx_myDataItem()[]: \test\fixtures\basic\MyDataItem {
     invariant(
-      $this->_type === \fixtures\basic\MyUnionEnum::myDataItem,
+      $this->_type === \test\fixtures\basic\MyUnionEnum::myDataItem,
       'get_myDataItem called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -736,8 +736,8 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'myEnum'),
-      Shapes::idx($shape, 'myStruct') === null ? null : (\fixtures\basic\MyStruct::__fromShape($shape['myStruct'])),
-      Shapes::idx($shape, 'myDataItem') === null ? null : (\fixtures\basic\MyDataItem::__fromShape($shape['myDataItem'])),
+      Shapes::idx($shape, 'myStruct') === null ? null : (\test\fixtures\basic\MyStruct::__fromShape($shape['myStruct'])),
+      Shapes::idx($shape, 'myDataItem') === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($shape['myDataItem'])),
     );
   }
 
@@ -753,7 +753,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \fixtures\basic\MyUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -761,22 +761,22 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     }
 
     if (idx($parsed, 'myEnum') !== null) {
-      $this->myEnum = \fixtures\basic\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyEnum>($parsed['myEnum']));
-      $this->_type = \fixtures\basic\MyUnionEnum::myEnum;
+      $this->myEnum = \test\fixtures\basic\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyEnum>($parsed['myEnum']));
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myEnum;
     }
     if (idx($parsed, 'myStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyStruct>($parsed['myStruct']));
-      $_tmp1 = \fixtures\basic\MyStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
+      $_tmp1 = \test\fixtures\basic\MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->myStruct = $_tmp1;
-      $this->_type = \fixtures\basic\MyUnionEnum::myStruct;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myStruct;
     }
     if (idx($parsed, 'myDataItem') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyDataItem>($parsed['myDataItem']));
-      $_tmp3 = \fixtures\basic\MyDataItem::withDefaultValues();
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['myDataItem']));
+      $_tmp3 = \test\fixtures\basic\MyDataItem::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->myDataItem = $_tmp3;
-      $this->_type = \fixtures\basic\MyUnionEnum::myDataItem;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::myDataItem;
     }
   }
 
@@ -861,7 +861,7 @@ class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
           shape(
             "name" => "MyRenamedStruct",
           )
@@ -870,7 +870,7 @@ class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
       'fields' => dict[
         'reserved_field' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
               shape(
                 "name" => "renamed_field",
               )
@@ -926,7 +926,7 @@ enum MyRenamedUnionEnum: int {
  * UnionToBeRenamed
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/UnionToBeRenamed'))>>
-class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyRenamedUnionEnum>, \IThriftShapishSyncStruct {
+class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\basic\MyRenamedUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -954,13 +954,13 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
    * 1: i32 reserved_field
    */
   public ?int $reserved_field;
-  protected \fixtures\basic\MyRenamedUnionEnum $_type = \fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
+  protected \test\fixtures\basic\MyRenamedUnionEnum $_type = \test\fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
 
   public function __construct(?int $reserved_field = null)[] {
-    $this->_type = \fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
     if ($reserved_field !== null) {
       $this->reserved_field = $reserved_field;
-      $this->_type = \fixtures\basic\MyRenamedUnionEnum::reserved_field;
+      $this->_type = \test\fixtures\basic\MyRenamedUnionEnum::reserved_field;
     }
   }
 
@@ -978,24 +978,24 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     return 'MyRenamedUnion';
   }
 
-  public function getType()[]: \fixtures\basic\MyRenamedUnionEnum {
+  public function getType()[]: \test\fixtures\basic\MyRenamedUnionEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \fixtures\basic\MyRenamedUnionEnum::reserved_field:
+      case \test\fixtures\basic\MyRenamedUnionEnum::reserved_field:
         $this->reserved_field = null;
         break;
-      case \fixtures\basic\MyRenamedUnionEnum::_EMPTY_:
+      case \test\fixtures\basic\MyRenamedUnionEnum::_EMPTY_:
         break;
     }
-    $this->_type = \fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
+    $this->_type = \test\fixtures\basic\MyRenamedUnionEnum::_EMPTY_;
   }
 
   public function set_reserved_field(int $reserved_field)[write_props]: this {
     $this->reset();
-    $this->_type = \fixtures\basic\MyRenamedUnionEnum::reserved_field;
+    $this->_type = \test\fixtures\basic\MyRenamedUnionEnum::reserved_field;
     $this->reserved_field = $reserved_field;
     return $this;
   }
@@ -1006,7 +1006,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public function getx_reserved_field()[]: int {
     invariant(
-      $this->_type === \fixtures\basic\MyRenamedUnionEnum::reserved_field,
+      $this->_type === \test\fixtures\basic\MyRenamedUnionEnum::reserved_field,
       'get_reserved_field called on an instance of UnionToBeRenamed whose current type is %s',
       (string)$this->_type,
     );
@@ -1041,7 +1041,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
           shape(
             "name" => "MyRenamedUnion",
           )
@@ -1050,7 +1050,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
       'fields' => dict[
         'reserved_field' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
               shape(
                 "name" => "renamed_field",
               )
@@ -1078,7 +1078,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \fixtures\basic\UnionToBeRenamedEnum::_EMPTY_;
+    $this->_type = \test\fixtures\basic\UnionToBeRenamedEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -1092,7 +1092,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
       } else {
         $this->reserved_field = (int)$_tmp0;
       }
-      $this->_type = \fixtures\basic\UnionToBeRenamedEnum::reserved_field;
+      $this->_type = \test\fixtures\basic\UnionToBeRenamedEnum::reserved_field;
     }
   }
 

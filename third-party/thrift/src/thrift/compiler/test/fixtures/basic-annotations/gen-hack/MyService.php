@@ -1358,7 +1358,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
         'myExcept' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::StaticCast",
               )

@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\annotation;
+namespace facebook\thrift\annotation;
 
 /**
  * Original thrift struct:-
@@ -83,11 +83,11 @@ class InjectMetadataFields implements \IThriftSyncStruct, \IThriftStructMetadata
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),

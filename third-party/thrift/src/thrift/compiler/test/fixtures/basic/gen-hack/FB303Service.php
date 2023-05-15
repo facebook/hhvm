@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic;
+namespace test\fixtures\basic;
 
 module hack.module.test;
 /**
@@ -20,7 +20,7 @@ interface FB303ServiceAsyncIf extends \IThriftAsyncIf {
    * ReservedKeyword
    *   renamed_rpc(1: i32 int_parameter);
    */
-  public function renamed_rpc(int $renamed_parameter): Awaitable<\fixtures\basic\MyRenamedStruct>;
+  public function renamed_rpc(int $renamed_parameter): Awaitable<\test\fixtures\basic\MyRenamedStruct>;
 }
 
 /**
@@ -34,7 +34,7 @@ interface FB303ServiceIf extends \IThriftSyncIf {
    * ReservedKeyword
    *   renamed_rpc(1: i32 int_parameter);
    */
-  public function renamed_rpc(int $renamed_parameter): \fixtures\basic\MyRenamedStruct;
+  public function renamed_rpc(int $renamed_parameter): \test\fixtures\basic\MyRenamedStruct;
 }
 
 /**
@@ -56,7 +56,7 @@ interface FB303ServiceClientIf extends \IThriftSyncIf {
    * ReservedKeyword
    *   renamed_rpc(1: i32 int_parameter);
    */
-  public function renamed_rpc(int $renamed_parameter): Awaitable<\fixtures\basic\MyRenamedStruct>;
+  public function renamed_rpc(int $renamed_parameter): Awaitable<\test\fixtures\basic\MyRenamedStruct>;
 }
 
 /**
@@ -76,18 +76,18 @@ class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceA
    * ReservedKeyword
    *   renamed_rpc(1: i32 int_parameter);
    */
-  public async function renamed_rpc(int $renamed_parameter): Awaitable<\fixtures\basic\MyRenamedStruct> {
+  public async function renamed_rpc(int $renamed_parameter): Awaitable<\test\fixtures\basic\MyRenamedStruct> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
+    $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
     await $this->asyncHandler_->genBefore("FB303Service", "renamed_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false);
-    return await $this->genAwaitResponse(\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -100,29 +100,29 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
    * ReservedKeyword
    *   renamed_rpc(1: i32 int_parameter);
    */
-  public async function renamed_rpc(int $renamed_parameter): Awaitable<\fixtures\basic\MyRenamedStruct> {
+  public async function renamed_rpc(int $renamed_parameter): Awaitable<\test\fixtures\basic\MyRenamedStruct> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
+    $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
     await $this->asyncHandler_->genBefore("FB303Service", "renamed_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false);
-    return await $this->genAwaitResponse(\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_renamed_rpc(int $renamed_parameter): int {
-    $args = \fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
+    $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
     return $this->sendImplHelper($args, "renamed_rpc", false);
   }
-  public function recv_renamed_rpc(?int $expectedsequenceid = null): \fixtures\basic\MyRenamedStruct {
-    return $this->recvImplHelper(\fixtures\basic\FB303Service_renamed_rpc_result::class, "renamed_rpc", false, $expectedsequenceid);
+  public function recv_renamed_rpc(?int $expectedsequenceid = null): \test\fixtures\basic\MyRenamedStruct {
+    return $this->recvImplHelper(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "renamed_rpc", false, $expectedsequenceid);
   }
 }
 
@@ -138,18 +138,18 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'renamed_rpc', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\FB303Service_renamed_rpc_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\FB303Service_renamed_rpc_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
     } else {
-      $args = \fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
+      $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'renamed_rpc', $args);
-    $result = \fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
+    $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\FB303Service', 'renamed_rpc', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = await $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
     } catch (\Exception $ex) {
@@ -227,18 +227,18 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'renamed_rpc', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\FB303Service_renamed_rpc_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\FB303Service_renamed_rpc_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
     } else {
-      $args = \fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
+      $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'renamed_rpc', $args);
-    $result = \fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
+    $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\FB303Service', 'renamed_rpc', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
     } catch (\Exception $ex) {
@@ -381,7 +381,7 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMeta
       'fields' => dict[
         'int_parameter' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
               shape(
                 "name" => "renamed_parameter",
               )
@@ -430,13 +430,13 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMeta
 class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \fixtures\basic\MyRenamedStruct;
+  const type TResult = \test\fixtures\basic\MyRenamedStruct;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
-      'class' => \fixtures\basic\MyRenamedStruct::class,
+      'class' => \test\fixtures\basic\MyRenamedStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -504,7 +504,7 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
         'success' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
               shape(
                 "name" => "MyRenamedStruct",
               )
@@ -527,8 +527,8 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\basic\MyRenamedStruct>($parsed['success']));
-      $_tmp1 = \fixtures\basic\MyRenamedStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyRenamedStruct>($parsed['success']));
+      $_tmp1 = \test\fixtures\basic\MyRenamedStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
     }
@@ -592,7 +592,7 @@ class FB303ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'enums' => dict[
             ],
             'structs' => dict[
-              'module.ReservedKeyword' => \fixtures\basic\MyRenamedStruct::getStructMetadata(),
+              'module.ReservedKeyword' => \test\fixtures\basic\MyRenamedStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],
@@ -609,7 +609,7 @@ class FB303ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       'service' => dict[],
       'functions' => dict[
         'renamed_rpc' => dict[
-          '\thrift\annotation\hack\Name' => \thrift\annotation\hack\Name::fromShape(
+          '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
             shape(
               "name" => "renamed_rpc",
             )

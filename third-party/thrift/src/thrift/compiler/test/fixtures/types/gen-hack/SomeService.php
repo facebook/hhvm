@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\fixtures\types;
+namespace apache\thrift\fixtures\types;
 
 /**
  * Original thrift service:-
@@ -102,12 +102,12 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
     $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
-    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -121,12 +121,12 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
     $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
-    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -145,12 +145,12 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
     $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
-    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -164,32 +164,32 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
     $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
-    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_bounce_map(Map<int, string> $m): int {
-    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     return $this->sendImplHelper($args, "bounce_map", false);
   }
   public function recv_bounce_map(?int $expectedsequenceid = null): Map<int, string> {
-    return $this->recvImplHelper(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
+    return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
   }
   public function send_binary_keyed_map(KeyedContainer<int, int> $r): int {
-    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     return $this->sendImplHelper($args, "binary_keyed_map", false);
   }
   public function recv_binary_keyed_map(?int $expectedsequenceid = null): Map<string, int> {
-    return $this->recvImplHelper(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);
+    return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);
   }
 }
 

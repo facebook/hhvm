@@ -283,7 +283,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         'uri' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+            '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
               shape(
               )
             ),
@@ -292,7 +292,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         'typeHashPrefixSha2_256' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
                 "typeClassName" => "io.netty.buffer.ByteBuf",

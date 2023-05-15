@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\test;
+namespace facebook\thrift\test;
 
 /**
  * Original thrift service:-
@@ -21,7 +21,7 @@ interface ServiceAsyncIf extends \IThriftAsyncIf {
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): Awaitable<\thrift\test\MyI32>;
+  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32>;
 }
 
 /**
@@ -37,7 +37,7 @@ interface ServiceIf extends \IThriftSyncIf {
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): \thrift\test\MyI32;
+  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32;
 }
 
 /**
@@ -61,7 +61,7 @@ interface ServiceClientIf extends \IThriftSyncIf {
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): Awaitable<\thrift\test\MyI32>;
+  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32>;
 }
 
 /**
@@ -83,20 +83,20 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public async function func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): Awaitable<\thrift\test\MyI32> {
+  public async function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\test\Service_func_args::fromShape(shape(
+    $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,
       'arg2' => $arg2,
       'arg3' => $arg3,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
     $currentseqid = $this->sendImplHelper($args, "func", false);
-    return await $this->genAwaitResponse(\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -111,33 +111,33 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public async function func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): Awaitable<\thrift\test\MyI32> {
+  public async function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \thrift\test\Service_func_args::fromShape(shape(
+    $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,
       'arg2' => $arg2,
       'arg3' => $arg3,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
     $currentseqid = $this->sendImplHelper($args, "func", false);
-    return await $this->genAwaitResponse(\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
-  public function send_func(\thrift\test\StringWithAdapter $arg1, string $arg2, ?\thrift\test\Foo $arg3): int {
-    $args = \thrift\test\Service_func_args::fromShape(shape(
+  public function send_func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): int {
+    $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,
       'arg2' => $arg2,
       'arg3' => $arg3,
     ));
     return $this->sendImplHelper($args, "func", false);
   }
-  public function recv_func(?int $expectedsequenceid = null): \thrift\test\MyI32 {
-    return $this->recvImplHelper(\thrift\test\Service_func_result::class, "func", false, $expectedsequenceid);
+  public function recv_func(?int $expectedsequenceid = null): \facebook\thrift\test\MyI32 {
+    return $this->recvImplHelper(\facebook\thrift\test\Service_func_result::class, "func", false, $expectedsequenceid);
   }
 }
 
@@ -159,7 +159,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     3 => shape(
       'var' => 'arg3',
       'type' => \TType::STRUCT,
-      'class' => \thrift\test\Foo::class,
+      'class' => \facebook\thrift\test\Foo::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -169,22 +169,22 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
   ];
 
   const type TConstructorShape = shape(
-    ?'arg1' => ?\thrift\test\StringWithAdapter,
+    ?'arg1' => ?\facebook\thrift\test\StringWithAdapter,
     ?'arg2' => ?string,
-    ?'arg3' => ?\thrift\test\Foo,
+    ?'arg3' => ?\facebook\thrift\test\Foo,
   );
 
   const type TShape = shape(
-    'arg1' => \thrift\test\StringWithAdapter,
+    'arg1' => \facebook\thrift\test\StringWithAdapter,
     'arg2' => string,
-    ?'arg3' => ?\thrift\test\Foo::TShape,
+    ?'arg3' => ?\facebook\thrift\test\Foo::TShape,
   );
   const int STRUCTURAL_ID = 4977133747708930688;
-  public \thrift\test\StringWithAdapter $arg1;
+  public \facebook\thrift\test\StringWithAdapter $arg1;
   public string $arg2;
-  public ?\thrift\test\Foo $arg3;
+  public ?\facebook\thrift\test\Foo $arg3;
 
-  public function __construct(?\thrift\test\StringWithAdapter $arg1 = null, ?string $arg2 = null, ?\thrift\test\Foo $arg3 = null)[] {
+  public function __construct(?\facebook\thrift\test\StringWithAdapter $arg1 = null, ?string $arg2 = null, ?\facebook\thrift\test\Foo $arg3 = null)[] {
     $this->arg1 = $arg1 ?? \Adapter1::fromThrift('');
     $this->arg2 = $arg2 ?? '';
     $this->arg3 = $arg3;
@@ -281,7 +281,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
       'fields' => dict[
         'arg2' => shape(
           'field' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
@@ -297,7 +297,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     return new static(
       $shape['arg1'],
       $shape['arg2'],
-      Shapes::idx($shape, 'arg3') === null ? null : (\thrift\test\Foo::__fromShape($shape['arg3'])),
+      Shapes::idx($shape, 'arg3') === null ? null : (\facebook\thrift\test\Foo::__fromShape($shape['arg3'])),
     );
   }
 
@@ -320,14 +320,14 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     }
 
     if (idx($parsed, 'arg1') !== null) {
-      $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\StringWithAdapter>($parsed['arg1']);
+      $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\StringWithAdapter>($parsed['arg1']);
     }
     if (idx($parsed, 'arg2') !== null) {
       $this->arg2 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['arg2']);
     }
     if (idx($parsed, 'arg3') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Foo>($parsed['arg3']));
-      $_tmp1 = \thrift\test\Foo::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Foo>($parsed['arg3']));
+      $_tmp1 = \facebook\thrift\test\Foo::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg3 = $_tmp1;
     }
@@ -342,7 +342,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
 class Service_func_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \thrift\test\MyI32;
+  const type TResult = \facebook\thrift\test\MyI32;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
@@ -443,7 +443,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\MyI32>($parsed['success']);
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI32>($parsed['success']);
       if ($_tmp0 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -572,7 +572,7 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'enums' => dict[
             ],
             'structs' => dict[
-              'module.Foo' => \thrift\test\Foo::getStructMetadata(),
+              'module.Foo' => \facebook\thrift\test\Foo::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

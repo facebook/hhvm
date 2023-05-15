@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\annotation;
+namespace facebook\thrift\annotation;
 
 /**
  * Indicates that the scope of sibling annotations is transitive.
@@ -952,19 +952,19 @@ class Structured implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Union' => \thrift\annotation\Union::fromShape(
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Exception' => \thrift\annotation\Exception::fromShape(
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
@@ -1031,15 +1031,15 @@ class TInterface implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Service' => \thrift\annotation\Service::fromShape(
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Interaction' => \thrift\annotation\Interaction::fromShape(
+        '\facebook\thrift\annotation\Interaction' => \facebook\thrift\annotation\Interaction::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
@@ -1106,27 +1106,27 @@ class RootDefinition implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\TInterface' => \thrift\annotation\TInterface::fromShape(
+        '\facebook\thrift\annotation\TInterface' => \facebook\thrift\annotation\TInterface::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\TConst' => \thrift\annotation\TConst::fromShape(
+        '\facebook\thrift\annotation\TConst' => \facebook\thrift\annotation\TConst::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),
@@ -1193,23 +1193,23 @@ class Definition implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\RootDefinition' => \thrift\annotation\RootDefinition::fromShape(
+        '\facebook\thrift\annotation\RootDefinition' => \facebook\thrift\annotation\RootDefinition::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\TFunction' => \thrift\annotation\TFunction::fromShape(
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\EnumValue' => \thrift\annotation\EnumValue::fromShape(
+        '\facebook\thrift\annotation\EnumValue' => \facebook\thrift\annotation\EnumValue::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),

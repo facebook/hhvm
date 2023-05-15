@@ -337,7 +337,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
         'intern_id' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
+            '\facebook\thrift\annotation\hack\Wrapper' => \facebook\thrift\annotation\hack\Wrapper::fromShape(
               shape(
                 "name" => "\\MyTypeIntWrapper",
                 "extraNamespace" => "detail",

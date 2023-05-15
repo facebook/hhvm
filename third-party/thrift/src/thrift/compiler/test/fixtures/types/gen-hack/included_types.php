@@ -6,5 +6,5 @@
  *  @generated
  */
 
-namespace thrift\fixtures\types;
+namespace apache\thrift\fixtures\types;
 

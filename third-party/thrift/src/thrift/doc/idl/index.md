@@ -292,7 +292,7 @@ This gives the following default namespaces:
 | ----------- | --------------- | ----------------------- |
 | C++         | `cpp2`          | `meta.search.query`     |
 | Python      | `python`, `py3` | `meta.search`           |
-| Hack        | `hack`          | `search.query`          |
+| Hack        | `hack`          | `meta.search.query`          |
 | Java        | `java.swift`    | `com.meta.search.query` |
 
 Here is an example with the package name not containing the file name component:
@@ -305,7 +305,7 @@ package "meta.com/search"
 | ----------- | --------------- | ----------------- |
 | C++         | `cpp2`          | `meta.search`     |
 | Python      | `python`, `py3` | `meta.search`     |
-| Hack        | `hack`          | `search`          |
+| Hack        | `hack`          | `meta.search`          |
 | Java        | `java.swift`    | `com.meta.search` |
 
 In both cases the Python namespaces don't include the file name component.

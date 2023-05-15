@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace namespace_from_package\module;
+namespace test\namespace_from_package\module;
 
 /**
  * Original thrift struct:-

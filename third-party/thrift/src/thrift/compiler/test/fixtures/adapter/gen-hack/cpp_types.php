@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\annotation\cpp;
+namespace facebook\thrift\annotation\cpp;
 
 /**
  * Original thrift enum:-
@@ -204,11 +204,11 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
@@ -264,7 +264,7 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     1 => shape(
       'var' => 'type',
       'type' => \TType::I32,
-      'enum' => \thrift\annotation\cpp\RefType::class,
+      'enum' => \facebook\thrift\annotation\cpp\RefType::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -272,20 +272,20 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   ];
 
   const type TConstructorShape = shape(
-    ?'type' => ?\thrift\annotation\cpp\RefType,
+    ?'type' => ?\facebook\thrift\annotation\cpp\RefType,
   );
 
   const type TShape = shape(
-    ?'type' => ?\thrift\annotation\cpp\RefType,
+    ?'type' => ?\facebook\thrift\annotation\cpp\RefType,
   );
   const int STRUCTURAL_ID = 8496209332976516665;
   /**
    * Original thrift field:-
    * 1: cpp.RefType type
    */
-  public ?\thrift\annotation\cpp\RefType $type;
+  public ?\facebook\thrift\annotation\cpp\RefType $type;
 
-  public function __construct(?\thrift\annotation\cpp\RefType $type = null)[] {
+  public function __construct(?\facebook\thrift\annotation\cpp\RefType $type = null)[] {
     $this->type = $type;
   }
 
@@ -335,7 +335,7 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
@@ -368,7 +368,7 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     }
 
     if (idx($parsed, 'type') !== null) {
-      $this->type = \thrift\annotation\cpp\RefType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\annotation\cpp\RefType>($parsed['type']));
+      $this->type = \facebook\thrift\annotation\cpp\RefType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\annotation\cpp\RefType>($parsed['type']));
     }
   }
 
@@ -452,7 +452,7 @@ class Lazy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
@@ -542,7 +542,7 @@ class DisableLazyChecksum implements \IThriftSyncStruct, \IThriftStructMetadata,
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -808,19 +808,19 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\TConst' => \thrift\annotation\TConst::fromShape(
+        '\facebook\thrift\annotation\TConst' => \facebook\thrift\annotation\TConst::fromShape(
           shape(
           )
         ),
@@ -957,7 +957,7 @@ class PackIsset implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -1047,7 +1047,7 @@ class MinimizePadding implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -1132,7 +1132,7 @@ class TriviallyRelocatable implements \IThriftSyncStruct, \IThriftStructMetadata
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )
         ),
@@ -1217,7 +1217,7 @@ class ScopedEnumAsUnionType implements \IThriftSyncStruct, \IThriftStructMetadat
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Union' => \thrift\annotation\Union::fromShape(
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
           shape(
           )
         ),
@@ -1315,11 +1315,11 @@ class StrongType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
@@ -1485,11 +1485,11 @@ class FieldInterceptor implements \IThriftSyncStruct, \IThriftStructMetadata, \I
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),
@@ -1584,11 +1584,11 @@ class UseOpEncode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Program' => \thrift\annotation\Program::fromShape(
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
@@ -1650,7 +1650,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     1 => shape(
       'var' => 'type',
       'type' => \TType::I32,
-      'enum' => \thrift\annotation\cpp\EnumUnderlyingType::class,
+      'enum' => \facebook\thrift\annotation\cpp\EnumUnderlyingType::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1658,20 +1658,20 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   ];
 
   const type TConstructorShape = shape(
-    ?'type' => ?\thrift\annotation\cpp\EnumUnderlyingType,
+    ?'type' => ?\facebook\thrift\annotation\cpp\EnumUnderlyingType,
   );
 
   const type TShape = shape(
-    ?'type' => ?\thrift\annotation\cpp\EnumUnderlyingType,
+    ?'type' => ?\facebook\thrift\annotation\cpp\EnumUnderlyingType,
   );
   const int STRUCTURAL_ID = 1724537317047809370;
   /**
    * Original thrift field:-
    * 1: cpp.EnumUnderlyingType type
    */
-  public ?\thrift\annotation\cpp\EnumUnderlyingType $type;
+  public ?\facebook\thrift\annotation\cpp\EnumUnderlyingType $type;
 
-  public function __construct(?\thrift\annotation\cpp\EnumUnderlyingType $type = null)[] {
+  public function __construct(?\facebook\thrift\annotation\cpp\EnumUnderlyingType $type = null)[] {
     $this->type = $type;
   }
 
@@ -1721,7 +1721,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -1754,7 +1754,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     }
 
     if (idx($parsed, 'type') !== null) {
-      $this->type = \thrift\annotation\cpp\EnumUnderlyingType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\annotation\cpp\EnumUnderlyingType>($parsed['type']));
+      $this->type = \facebook\thrift\annotation\cpp\EnumUnderlyingType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\annotation\cpp\EnumUnderlyingType>($parsed['type']));
     }
   }
 
@@ -1813,7 +1813,7 @@ class Frozen2Exclude implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
@@ -1901,7 +1901,7 @@ class Frozen2RequiresCompleteContainerParams implements \IThriftSyncStruct, \ITh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),

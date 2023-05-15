@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\op;
+namespace facebook\thrift\op;
 
 /**
  * The meaning of the patch op field ids, in all properly formulated patch
@@ -113,7 +113,7 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
           shape(
           )
         ),
@@ -179,11 +179,11 @@ class GeneratePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Program' => \thrift\annotation\Program::fromShape(
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
@@ -269,11 +269,11 @@ class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
@@ -453,7 +453,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>",
             "underlyingName" => "BoolPatchStruct",
@@ -650,7 +650,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>",
             "underlyingName" => "BytePatchStruct",
@@ -857,7 +857,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>",
             "underlyingName" => "I16PatchStruct",
@@ -1064,7 +1064,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
             "underlyingName" => "I32PatchStruct",
@@ -1271,7 +1271,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>",
             "underlyingName" => "I64PatchStruct",
@@ -1468,7 +1468,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>",
             "underlyingName" => "FloatPatchStruct",
@@ -1665,7 +1665,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>",
             "underlyingName" => "DoublePatchStruct",
@@ -1891,7 +1891,7 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
             "underlyingName" => "StringPatchStruct",
@@ -2152,7 +2152,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
             "underlyingName" => "BinaryPatchStruct",
@@ -2163,7 +2163,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'assign' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
                 "typeClassName" => "io.netty.buffer.ByteBuf",
@@ -2174,7 +2174,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'prepend' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
                 "typeClassName" => "io.netty.buffer.ByteBuf",
@@ -2185,7 +2185,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'append' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
                 "typeClassName" => "io.netty.buffer.ByteBuf",

@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace thrift\annotation\python;
+namespace facebook\thrift\annotation\python;
 
 /**
  * Original thrift struct:-
@@ -59,7 +59,7 @@ class Hidden implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Definition' => \thrift\annotation\Definition::fromShape(
+        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
           shape(
           )
         ),
@@ -144,7 +144,7 @@ class Flags implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -256,7 +256,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Definition' => \thrift\annotation\Definition::fromShape(
+        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
           shape(
           )
         ),
@@ -346,11 +346,11 @@ class IOBuf implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
@@ -487,15 +487,15 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),
-        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),

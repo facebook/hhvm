@@ -498,7 +498,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
       'fields' => dict[
         'recurse' => shape(
           'field' => dict[
-            '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
+            '\facebook\thrift\annotation\hack\FieldWrapper' => \facebook\thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
                 "name" => "MyFieldWrapper",
               )
@@ -509,7 +509,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
         'int_field' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
+            '\facebook\thrift\annotation\hack\Wrapper' => \facebook\thrift\annotation\hack\Wrapper::fromShape(
               shape(
                 "name" => "\\MyTypeIntWrapper",
               )

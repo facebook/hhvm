@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\enums;
+namespace test\fixtures\enums;
 
 /**
  * Original thrift enum:-
@@ -80,7 +80,7 @@ class MyEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
           shape(
             "name" => "ME1_0",
           )
@@ -120,7 +120,7 @@ class MyEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
           shape(
           )
         ),
@@ -273,7 +273,7 @@ class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\thrift\annotation\BitmaskEnum' => \thrift\annotation\BitmaskEnum::fromShape(
+        '\facebook\thrift\annotation\BitmaskEnum' => \facebook\thrift\annotation\BitmaskEnum::fromShape(
           shape(
           )
         ),
@@ -296,17 +296,17 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     1 => shape(
       'var' => 'reasonable',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\Metasyntactic::class,
+      'enum' => \test\fixtures\enums\Metasyntactic::class,
     ),
     2 => shape(
       'var' => 'fine',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\Metasyntactic::class,
+      'enum' => \test\fixtures\enums\Metasyntactic::class,
     ),
     3 => shape(
       'var' => 'questionable',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\Metasyntactic::class,
+      'enum' => \test\fixtures\enums\Metasyntactic::class,
     ),
     4 => shape(
       'var' => 'tags',
@@ -326,16 +326,16 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   ];
 
   const type TConstructorShape = shape(
-    ?'reasonable' => ?\fixtures\enums\Metasyntactic,
-    ?'fine' => ?\fixtures\enums\Metasyntactic,
-    ?'questionable' => ?\fixtures\enums\Metasyntactic,
+    ?'reasonable' => ?\test\fixtures\enums\Metasyntactic,
+    ?'fine' => ?\test\fixtures\enums\Metasyntactic,
+    ?'questionable' => ?\test\fixtures\enums\Metasyntactic,
     ?'tags' => ?Set<int>,
   );
 
   const type TShape = shape(
-    ?'reasonable' => ?\fixtures\enums\Metasyntactic,
-    ?'fine' => ?\fixtures\enums\Metasyntactic,
-    ?'questionable' => ?\fixtures\enums\Metasyntactic,
+    ?'reasonable' => ?\test\fixtures\enums\Metasyntactic,
+    ?'fine' => ?\test\fixtures\enums\Metasyntactic,
+    ?'questionable' => ?\test\fixtures\enums\Metasyntactic,
     'tags' => dict<int, bool>,
     ...
   );
@@ -344,27 +344,27 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * Original thrift field:-
    * 1: module.Metasyntactic reasonable
    */
-  public ?\fixtures\enums\Metasyntactic $reasonable;
+  public ?\test\fixtures\enums\Metasyntactic $reasonable;
   /**
    * Original thrift field:-
    * 2: module.Metasyntactic fine
    */
-  public ?\fixtures\enums\Metasyntactic $fine;
+  public ?\test\fixtures\enums\Metasyntactic $fine;
   /**
    * Original thrift field:-
    * 3: module.Metasyntactic questionable
    */
-  public ?\fixtures\enums\Metasyntactic $questionable;
+  public ?\test\fixtures\enums\Metasyntactic $questionable;
   /**
    * Original thrift field:-
    * 4: set<i32> tags
    */
   public Set<int> $tags;
 
-  public function __construct(?\fixtures\enums\Metasyntactic $reasonable = null, ?\fixtures\enums\Metasyntactic $fine = null, ?\fixtures\enums\Metasyntactic $questionable = null, ?Set<int> $tags = null)[] {
-    $this->reasonable = $reasonable ?? \fixtures\enums\Metasyntactic::FOO;
-    $this->fine = $fine ?? \fixtures\enums\Metasyntactic::BAR;
-    $this->questionable = $questionable ?? \fixtures\enums\Metasyntactic::coerce(-1);
+  public function __construct(?\test\fixtures\enums\Metasyntactic $reasonable = null, ?\test\fixtures\enums\Metasyntactic $fine = null, ?\test\fixtures\enums\Metasyntactic $questionable = null, ?Set<int> $tags = null)[] {
+    $this->reasonable = $reasonable ?? \test\fixtures\enums\Metasyntactic::FOO;
+    $this->fine = $fine ?? \test\fixtures\enums\Metasyntactic::BAR;
+    $this->questionable = $questionable ?? \test\fixtures\enums\Metasyntactic::coerce(-1);
     $this->tags = $tags ?? Set {
     };
   }
@@ -501,13 +501,13 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     }
 
     if (idx($parsed, 'reasonable') !== null) {
-      $this->reasonable = \fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\Metasyntactic>($parsed['reasonable']));
+      $this->reasonable = \test\fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\Metasyntactic>($parsed['reasonable']));
     }
     if (idx($parsed, 'fine') !== null) {
-      $this->fine = \fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\Metasyntactic>($parsed['fine']));
+      $this->fine = \test\fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\Metasyntactic>($parsed['fine']));
     }
     if (idx($parsed, 'questionable') !== null) {
-      $this->questionable = \fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\Metasyntactic>($parsed['questionable']));
+      $this->questionable = \test\fixtures\enums\Metasyntactic::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\Metasyntactic>($parsed['questionable']));
     }
     if (idx($parsed, 'tags') !== null) {
       $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['tags']);
@@ -540,22 +540,22 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     1 => shape(
       'var' => 'me2_3',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\MyEnum2::class,
+      'enum' => \test\fixtures\enums\MyEnum2::class,
     ),
     2 => shape(
       'var' => 'me3_n3',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\MyEnum3::class,
+      'enum' => \test\fixtures\enums\MyEnum3::class,
     ),
     4 => shape(
       'var' => 'me1_t1',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\MyEnum1::class,
+      'enum' => \test\fixtures\enums\MyEnum1::class,
     ),
     6 => shape(
       'var' => 'me1_t2',
       'type' => \TType::I32,
-      'enum' => \fixtures\enums\MyEnum1::class,
+      'enum' => \test\fixtures\enums\MyEnum1::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -566,17 +566,17 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   ];
 
   const type TConstructorShape = shape(
-    ?'me2_3' => ?\fixtures\enums\MyEnum2,
-    ?'me3_n3' => ?\fixtures\enums\MyEnum3,
-    ?'me1_t1' => ?\fixtures\enums\MyEnum1,
-    ?'me1_t2' => ?\fixtures\enums\MyEnum1,
+    ?'me2_3' => ?\test\fixtures\enums\MyEnum2,
+    ?'me3_n3' => ?\test\fixtures\enums\MyEnum3,
+    ?'me1_t1' => ?\test\fixtures\enums\MyEnum1,
+    ?'me1_t2' => ?\test\fixtures\enums\MyEnum1,
   );
 
   const type TShape = shape(
-    ?'me2_3' => ?\fixtures\enums\MyEnum2,
-    ?'me3_n3' => ?\fixtures\enums\MyEnum3,
-    ?'me1_t1' => ?\fixtures\enums\MyEnum1,
-    ?'me1_t2' => ?\fixtures\enums\MyEnum1,
+    ?'me2_3' => ?\test\fixtures\enums\MyEnum2,
+    ?'me3_n3' => ?\test\fixtures\enums\MyEnum3,
+    ?'me1_t1' => ?\test\fixtures\enums\MyEnum1,
+    ?'me1_t2' => ?\test\fixtures\enums\MyEnum1,
     ...
   );
   const int STRUCTURAL_ID = 8234221749727407461;
@@ -584,28 +584,28 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    * Original thrift field:-
    * 1: module.MyEnum2 me2_3
    */
-  public ?\fixtures\enums\MyEnum2 $me2_3;
+  public ?\test\fixtures\enums\MyEnum2 $me2_3;
   /**
    * Original thrift field:-
    * 2: module.MyEnum3 me3_n3
    */
-  public ?\fixtures\enums\MyEnum3 $me3_n3;
+  public ?\test\fixtures\enums\MyEnum3 $me3_n3;
   /**
    * Original thrift field:-
    * 4: module.MyEnum1 me1_t1
    */
-  public ?\fixtures\enums\MyEnum1 $me1_t1;
+  public ?\test\fixtures\enums\MyEnum1 $me1_t1;
   /**
    * Original thrift field:-
    * 6: module.MyEnum1 me1_t2
    */
-  public ?\fixtures\enums\MyEnum1 $me1_t2;
+  public ?\test\fixtures\enums\MyEnum1 $me1_t2;
 
-  public function __construct(?\fixtures\enums\MyEnum2 $me2_3 = null, ?\fixtures\enums\MyEnum3 $me3_n3 = null, ?\fixtures\enums\MyEnum1 $me1_t1 = null, ?\fixtures\enums\MyEnum1 $me1_t2 = null)[] {
-    $this->me2_3 = $me2_3 ?? \fixtures\enums\MyEnum2::coerce(3);
-    $this->me3_n3 = $me3_n3 ?? \fixtures\enums\MyEnum3::coerce(-3);
-    $this->me1_t1 = $me1_t1 ?? \fixtures\enums\MyEnum1::ME1_1;
-    $this->me1_t2 = $me1_t2 ?? \fixtures\enums\MyEnum1::ME1_1;
+  public function __construct(?\test\fixtures\enums\MyEnum2 $me2_3 = null, ?\test\fixtures\enums\MyEnum3 $me3_n3 = null, ?\test\fixtures\enums\MyEnum1 $me1_t1 = null, ?\test\fixtures\enums\MyEnum1 $me1_t2 = null)[] {
+    $this->me2_3 = $me2_3 ?? \test\fixtures\enums\MyEnum2::coerce(3);
+    $this->me3_n3 = $me3_n3 ?? \test\fixtures\enums\MyEnum3::coerce(-3);
+    $this->me1_t1 = $me1_t1 ?? \test\fixtures\enums\MyEnum1::ME1_1;
+    $this->me1_t2 = $me1_t2 ?? \test\fixtures\enums\MyEnum1::ME1_1;
   }
 
   public static function withDefaultValues()[]: this {
@@ -706,7 +706,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'me2_3' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
               shape(
               )
             ),
@@ -715,7 +715,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'me1_t1' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
               shape(
                 "name" => "ME1_0",
               )
@@ -725,7 +725,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'me1_t2' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
               shape(
                 "name" => "ME1_0",
               )
@@ -765,16 +765,16 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     }
 
     if (idx($parsed, 'me2_3') !== null) {
-      $this->me2_3 = \fixtures\enums\MyEnum2::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\MyEnum2>($parsed['me2_3']));
+      $this->me2_3 = \test\fixtures\enums\MyEnum2::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\MyEnum2>($parsed['me2_3']));
     }
     if (idx($parsed, 'me3_n3') !== null) {
-      $this->me3_n3 = \fixtures\enums\MyEnum3::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\MyEnum3>($parsed['me3_n3']));
+      $this->me3_n3 = \test\fixtures\enums\MyEnum3::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\MyEnum3>($parsed['me3_n3']));
     }
     if (idx($parsed, 'me1_t1') !== null) {
-      $this->me1_t1 = \fixtures\enums\MyEnum1::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\MyEnum1>($parsed['me1_t1']));
+      $this->me1_t1 = \test\fixtures\enums\MyEnum1::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\MyEnum1>($parsed['me1_t1']));
     }
     if (idx($parsed, 'me1_t2') !== null) {
-      $this->me1_t2 = \fixtures\enums\MyEnum1::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\enums\MyEnum1>($parsed['me1_t2']));
+      $this->me1_t2 = \test\fixtures\enums\MyEnum1::coerce(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\enums\MyEnum1>($parsed['me1_t2']));
     }
   }
 

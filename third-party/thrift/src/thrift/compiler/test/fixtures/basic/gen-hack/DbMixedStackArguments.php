@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic;
+namespace test\fixtures\basic;
 
 module hack.module.test;
 /**
@@ -103,12 +103,12 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false);
-    return await $this->genAwaitResponse(\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -122,12 +122,12 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false);
-    return await $this->genAwaitResponse(\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -146,12 +146,12 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false);
-    return await $this->genAwaitResponse(\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -165,32 +165,32 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false);
-    return await $this->genAwaitResponse(\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_getDataByKey0(string $key): int {
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
     ));
     return $this->sendImplHelper($args, "getDataByKey0", false);
   }
   public function recv_getDataByKey0(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $expectedsequenceid);
   }
   public function send_getDataByKey1(string $key): int {
-    $args = \fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,
     ));
     return $this->sendImplHelper($args, "getDataByKey1", false);
   }
   public function recv_getDataByKey1(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $expectedsequenceid);
   }
 }
 
@@ -206,18 +206,18 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     $this->eventHandler_->preRead($handler_ctx, 'getDataByKey0', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
     } else {
-      $args = \fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
+      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataByKey0', $args);
-    $result = \fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
+    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = await $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
     } catch (\Exception $ex) {
@@ -250,18 +250,18 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     $this->eventHandler_->preRead($handler_ctx, 'getDataByKey1', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
     } else {
-      $args = \fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
+      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataByKey1', $args);
-    $result = \fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
+    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = await $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
     } catch (\Exception $ex) {
@@ -339,18 +339,18 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
     $this->eventHandler_->preRead($handler_ctx, 'getDataByKey0', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
     } else {
-      $args = \fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
+      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataByKey0', $args);
-    $result = \fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
+    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
     } catch (\Exception $ex) {
@@ -383,18 +383,18 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
     $this->eventHandler_->preRead($handler_ctx, 'getDataByKey1', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
     } else {
-      $args = \fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
+      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataByKey1', $args);
-    $result = \fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
+    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
     } catch (\Exception $ex) {

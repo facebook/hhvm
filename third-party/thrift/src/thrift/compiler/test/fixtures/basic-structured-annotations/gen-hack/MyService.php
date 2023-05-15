@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic-structured-annotations;
+namespace test\fixtures\basic-structured-annotations;
 
 /**
  * Original thrift service:-
@@ -102,10 +102,10 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
+    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "first", $args);
     $currentseqid = $this->sendImplHelper($args, "first", false);
-    return await $this->genAwaitResponse(\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -119,12 +119,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
+    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
     $currentseqid = $this->sendImplHelper($args, "second", false);
-    return await $this->genAwaitResponse(\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -143,10 +143,10 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
+    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "first", $args);
     $currentseqid = $this->sendImplHelper($args, "first", false);
-    return await $this->genAwaitResponse(\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -160,30 +160,30 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
+    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
     $currentseqid = $this->sendImplHelper($args, "second", false);
-    return await $this->genAwaitResponse(\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_first(): int {
-    $args = \fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
+    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     return $this->sendImplHelper($args, "first", false);
   }
   public function recv_first(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $expectedsequenceid);
   }
   public function send_second(int $count): int {
-    $args = \fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
+    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
     return $this->sendImplHelper($args, "second", false);
   }
   public function recv_second(?int $expectedsequenceid = null): bool {
-    return $this->recvImplHelper(\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $expectedsequenceid);
   }
 }
 
@@ -325,12 +325,12 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
         'success' => shape(
           'field' => dict[],
           'type' => dict[
-            '\fixtures\basic-structured-annotations\structured_annotation_inline' => \fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
+            '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 1,
               )
             ),
-            '\fixtures\basic-structured-annotations\structured_annotation_with_default' => \fixtures\basic-structured-annotations\structured_annotation_with_default::fromShape(
+            '\test\fixtures\basic-structured-annotations\structured_annotation_with_default' => \test\fixtures\basic-structured-annotations\structured_annotation_with_default::fromShape(
               shape(
                 "name" => "abc",
               )
@@ -416,7 +416,7 @@ class MyService_second_args implements \IThriftSyncStruct, \IThriftStructMetadat
       'fields' => dict[
         'count' => shape(
           'field' => dict[
-            '\fixtures\basic-structured-annotations\structured_annotation_inline' => \fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
+            '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 4,
               )
@@ -598,7 +598,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
       'service' => dict[
-        '\fixtures\basic-structured-annotations\structured_annotation_inline' => \fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
+        '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
           shape(
             "count" => 3,
           )
@@ -606,13 +606,13 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       ],
       'functions' => dict[
         'first' => dict[
-          '\fixtures\basic-structured-annotations\structured_annotation_with_default' => \fixtures\basic-structured-annotations\structured_annotation_with_default::fromShape(
+          '\test\fixtures\basic-structured-annotations\structured_annotation_with_default' => \test\fixtures\basic-structured-annotations\structured_annotation_with_default::fromShape(
             shape(
             )
           ),
         ],
         'second' => dict[
-          '\fixtures\basic-structured-annotations\structured_annotation_inline' => \fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
+          '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
             shape(
               "count" => 2,
             )

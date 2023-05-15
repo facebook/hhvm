@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace fixtures\basic;
+namespace test\fixtures\basic;
 
 module hack.module.test;
 /**
@@ -235,10 +235,10 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_ping_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -252,10 +252,10 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
     $currentseqid = $this->sendImplHelper($args, "getRandomData", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -269,12 +269,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_sink_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
       'sink' => $sink,
     ));
     await $this->asyncHandler_->genBefore("MyService", "sink", $args);
     $currentseqid = $this->sendImplHelper($args, "sink", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -289,13 +289,13 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_putDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
     await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "putDataById", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -309,12 +309,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_hasDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "hasDataById", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -328,12 +328,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_getDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataById", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -347,12 +347,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "deleteDataById", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -367,7 +367,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_lobDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
@@ -392,10 +392,10 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_ping_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -409,10 +409,10 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
     $currentseqid = $this->sendImplHelper($args, "getRandomData", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -426,12 +426,12 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_sink_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
       'sink' => $sink,
     ));
     await $this->asyncHandler_->genBefore("MyService", "sink", $args);
     $currentseqid = $this->sendImplHelper($args, "sink", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -446,13 +446,13 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_putDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
     await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "putDataById", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -466,12 +466,12 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_hasDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "hasDataById", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -485,12 +485,12 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_getDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataById", false);
-    return await $this->genAwaitResponse(\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -504,12 +504,12 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "deleteDataById", false);
-    await $this->genAwaitResponse(\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -524,7 +524,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \fixtures\basic\MyService_lobDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
@@ -535,67 +535,67 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 
   /* send and recv functions */
   public function send_ping(): int {
-    $args = \fixtures\basic\MyService_ping_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
     return $this->sendImplHelper($args, "ping", false);
   }
   public function recv_ping(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\fixtures\basic\MyService_ping_result::class, "ping", true, $expectedsequenceid);
+    $this->recvImplHelper(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $expectedsequenceid);
   }
   public function send_getRandomData(): int {
-    $args = \fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
     return $this->sendImplHelper($args, "getRandomData", false);
   }
   public function recv_getRandomData(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $expectedsequenceid);
   }
   public function send_sink(int $sink): int {
-    $args = \fixtures\basic\MyService_sink_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
       'sink' => $sink,
     ));
     return $this->sendImplHelper($args, "sink", false);
   }
   public function recv_sink(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\fixtures\basic\MyService_sink_result::class, "sink", true, $expectedsequenceid);
+    $this->recvImplHelper(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $expectedsequenceid);
   }
   public function send_putDataById(int $id, string $data): int {
-    $args = \fixtures\basic\MyService_putDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
     return $this->sendImplHelper($args, "putDataById", false);
   }
   public function recv_putDataById(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $expectedsequenceid);
+    $this->recvImplHelper(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $expectedsequenceid);
   }
   public function send_hasDataById(int $id): int {
-    $args = \fixtures\basic\MyService_hasDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
     ));
     return $this->sendImplHelper($args, "hasDataById", false);
   }
   public function recv_hasDataById(?int $expectedsequenceid = null): bool {
-    return $this->recvImplHelper(\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $expectedsequenceid);
   }
   public function send_getDataById(int $id): int {
-    $args = \fixtures\basic\MyService_getDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
       'id' => $id,
     ));
     return $this->sendImplHelper($args, "getDataById", false);
   }
   public function recv_getDataById(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $expectedsequenceid);
+    return $this->recvImplHelper(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $expectedsequenceid);
   }
   public function send_deleteDataById(int $id): int {
-    $args = \fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
     ));
     return $this->sendImplHelper($args, "deleteDataById", false);
   }
   public function recv_deleteDataById(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $expectedsequenceid);
+    $this->recvImplHelper(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $expectedsequenceid);
   }
   public function send_lobDataById(int $id, string $data): int {
-    $args = \fixtures\basic\MyService_lobDataById_args::fromShape(shape(
+    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
@@ -615,18 +615,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_ping_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_ping_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_ping_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_ping_args');
     } else {
-      $args = \fixtures\basic\MyService_ping_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
-    $result = \fixtures\basic\MyService_ping_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_ping_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -659,18 +659,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'getRandomData', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_getRandomData_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_getRandomData_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_getRandomData_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_getRandomData_args');
     } else {
-      $args = \fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getRandomData', $args);
-    $result = \fixtures\basic\MyService_getRandomData_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_getRandomData_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'getRandomData', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
     } catch (\Exception $ex) {
@@ -703,18 +703,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'sink', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_sink_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_sink_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_sink_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_sink_args');
     } else {
-      $args = \fixtures\basic\MyService_sink_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_sink_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'sink', $args);
-    $result = \fixtures\basic\MyService_sink_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_sink_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'sink', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       await $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
     } catch (\Exception $ex) {
@@ -747,18 +747,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'putDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_putDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_putDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_putDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_putDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_putDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_putDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'putDataById', $args);
-    $result = \fixtures\basic\MyService_putDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_putDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'putDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
     } catch (\Exception $ex) {
@@ -791,18 +791,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'hasDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_hasDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_hasDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_hasDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_hasDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_hasDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_hasDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'hasDataById', $args);
-    $result = \fixtures\basic\MyService_hasDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_hasDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'hasDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
     } catch (\Exception $ex) {
@@ -835,18 +835,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'getDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_getDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_getDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_getDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_getDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_getDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_getDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataById', $args);
-    $result = \fixtures\basic\MyService_getDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_getDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'getDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
     } catch (\Exception $ex) {
@@ -879,18 +879,18 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'deleteDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_deleteDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_deleteDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_deleteDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_deleteDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_deleteDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_deleteDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'deleteDataById', $args);
-    $result = \fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'deleteDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       await $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
     } catch (\Exception $ex) {
@@ -923,17 +923,17 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'lobDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_lobDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_lobDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_lobDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_lobDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_lobDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_lobDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'lobDataById', $args);
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'lobDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -994,18 +994,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_ping_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_ping_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_ping_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_ping_args');
     } else {
-      $args = \fixtures\basic\MyService_ping_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
-    $result = \fixtures\basic\MyService_ping_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_ping_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -1038,18 +1038,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'getRandomData', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_getRandomData_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_getRandomData_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_getRandomData_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_getRandomData_args');
     } else {
-      $args = \fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getRandomData', $args);
-    $result = \fixtures\basic\MyService_getRandomData_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_getRandomData_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'getRandomData', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
     } catch (\Exception $ex) {
@@ -1082,18 +1082,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'sink', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_sink_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_sink_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_sink_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_sink_args');
     } else {
-      $args = \fixtures\basic\MyService_sink_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_sink_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'sink', $args);
-    $result = \fixtures\basic\MyService_sink_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_sink_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'sink', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
     } catch (\Exception $ex) {
@@ -1126,18 +1126,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'putDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_putDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_putDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_putDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_putDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_putDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_putDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'putDataById', $args);
-    $result = \fixtures\basic\MyService_putDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_putDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'putDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
     } catch (\Exception $ex) {
@@ -1170,18 +1170,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'hasDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_hasDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_hasDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_hasDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_hasDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_hasDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_hasDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'hasDataById', $args);
-    $result = \fixtures\basic\MyService_hasDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_hasDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'hasDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
     } catch (\Exception $ex) {
@@ -1214,18 +1214,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'getDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_getDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_getDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_getDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_getDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_getDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_getDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'getDataById', $args);
-    $result = \fixtures\basic\MyService_getDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_getDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'getDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
     } catch (\Exception $ex) {
@@ -1258,18 +1258,18 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'deleteDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_deleteDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_deleteDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_deleteDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_deleteDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_deleteDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_deleteDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'deleteDataById', $args);
-    $result = \fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
+    $result = \test\fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'deleteDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
     } catch (\Exception $ex) {
@@ -1302,17 +1302,17 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->preRead($handler_ctx, 'lobDataById', dict[]);
 
     if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\fixtures\basic\MyService_lobDataById_args');
+      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\MyService_lobDataById_args');
     } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\fixtures\basic\MyService_lobDataById_args');
+      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\MyService_lobDataById_args');
     } else {
-      $args = \fixtures\basic\MyService_lobDataById_args::withDefaultValues();
+      $args = \test\fixtures\basic\MyService_lobDataById_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $this->eventHandler_->postRead($handler_ctx, 'lobDataById', $args);
     try {
-      $this->eventHandler_->preExec($handler_ctx, '\fixtures\basic\MyService', 'lobDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -2948,14 +2948,14 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       'service' => dict[],
       'functions' => dict[
         'invalid_return_for_hack' => dict[
-          '\thrift\annotation\hack\SkipCodegen' => \thrift\annotation\hack\SkipCodegen::fromShape(
+          '\facebook\thrift\annotation\hack\SkipCodegen' => \facebook\thrift\annotation\hack\SkipCodegen::fromShape(
             shape(
               "reason" => "Invalid key type",
             )
           ),
         ],
         'rpc_skipped_codegen' => dict[
-          '\thrift\annotation\hack\SkipCodegen' => \thrift\annotation\hack\SkipCodegen::fromShape(
+          '\facebook\thrift\annotation\hack\SkipCodegen' => \facebook\thrift\annotation\hack\SkipCodegen::fromShape(
             shape(
               "reason" => "Skip function deprecation",
             )

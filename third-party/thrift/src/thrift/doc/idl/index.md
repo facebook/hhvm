@@ -378,6 +378,10 @@ type_definition ::=
   | typedef
 ```
 
+```grammar
+interface_definition ::=  service | interaction
+```
+
 ### Structs
 
 A struct declaration introduces a named struct type into your program and has the following form:
@@ -389,13 +393,15 @@ struct ::=
     (field delimiter)*
   "}"
 
-field    ::=  field_id ":" [qualifier] type identifier [default_value]
+field ::=
+  field_id ":" [field_qualifier] type identifier [default_value]
+
 field_id ::=  integer
 ```
 
 *The struct type is the centerpiece of the Thrift language. It is the basic unit of serialization and versioning in the language.*
 
-This section defines the primary aspects of structs. Separate sections define qualifiers and default values for fields, constraints on serialization of structs, and compatibility between different versions of struct types.
+This section defines the primary aspects of structs. Separate sections define [qualifiers](#field-qualifiers) and [default values](#default-values) for fields, constraints on serialization of structs, and compatibility between different versions of struct types.
 
 Structs in Thrift look similar to structs in C++ though fields in Thrift have a field id and optionally a qualifier. They are significantly different in that the order of appearance of fields is not important and there is no expectations on the memory layout of the objects in the corresponding programming language code.
 
@@ -407,15 +413,15 @@ struct PersonMetadata {
 }
 ```
 
-Every field has a type and a name (an identifier) that can be used to denote the field just as in C++. In addition every field also has an integer id that can be used to denote the field. Field ids and field names must be unique within a struct. While the Thrift language does not impose restrictions on how the id and name are used, the *primary usage* has the id denoting the field in the serialized data and the name denoting the field in the generated code. This primary usage is key to the value provided by Thrift in terms of versioning support and compact serialized data size.
+Every field has a type and a name (an identifier) that can be used to denote the field. In addition every field also has an integer id that can be used to denote the field. Field ids and field names must be unique within a struct. While the Thrift language does not impose restrictions on how the id and name are used, the *primary usage* has the id denoting the field in the serialized data and the name denoting the field in the generated code. This primary usage is key to the value provided by Thrift in terms of versioning support and compact serialized data size.
 
-NOTE: The *primary usage* described above can be assumed for the large majority of Thrift usage at Facebook. The exception to this is that Thrift does offer a JSON serialization strategy where the name is used to denote the field in the serialized data and the id is not used. This strategy is used in Configerator and Tupperware specs and should not be mixed with other usage where the id is used instead.
+The *primary usage* described above can be assumed for the large majority of Thrift usage. The exception to this is that Thrift does offer a JSON serialization strategy where the name is used to denote the field in the serialized data and the id is not used. This strategy is used to define config schemas (e.g. in [Configerator](https://sigops.org/s/conferences/sosp/2015/current/2015-Monterey/printable/008-tang.pdf) and should not be mixed with other usage where the id is used instead.
 
-The field ids should be in the range of 1 through 65535, and they do not have to appear in order.
+The field ids should be in the range of 1 through 32767, and they do not have to appear in order. They normally start with 1 although this is not required.
 
-Thrift does not support structure inheritance (though it is possible to use composition to achieve a similar goal).
+Thrift does not support structure inheritance but it is possible to use composition to achieve a similar goal.
 
-As a consequence of the above rules, `PersonMetadata1` below defines the same type as `PersonMetadata` above:
+As a consequence of the above rules, `PersonMetadata1` below defines a type equivalent to `PersonMetadata` above:
 
 ```thrift
 // Just a different ordering of fields.
@@ -426,7 +432,7 @@ struct PersonMetadata1 {
 }
 ```
 
-But the following two types are both legal, but different from `PersonMetadata`:
+However, the following two types are both legal but different from `PersonMetadata`:
 
 ```thrift
 // Some ids are different.
@@ -443,8 +449,6 @@ struct PersonMetadata3 {
   3: list<i64> friends;
 }
 ```
-
-NOTE: Field ids do not have to start at 1.
 
 :::caution
 Do not reuse ids. If a field is removed, it's a good practice to comment it out as a reminder to not to reuse it.
@@ -463,18 +467,18 @@ union ::=
 Union types are identical to struct types in all ways, except for the following differences:
 
 * Union types use the reserved word `union` instead of `struct`.
-* All fields must be unqualified, but they are equivalent to struct fields with the qualifier `optional`.
+* All fields must be unqualified, but they are equivalent to [optional struct fields](#optional-fields).
 * At most one field can be *present*.
 
-NOTE: The concepts "optional" and "present" are described in more detail below.
+The concepts "optional" and "present" are described in [Optional Fields](#optional-fields).
 
-The serialized representation of union types are identical to that of struct types that have a single field present. When deserializing into an union type, the serialized data may not provide a value to more than one of the fields of the union type.
+The serialized representation of union types are identical to that of struct types that have a single field present. When deserializing into an union type, the serialized data may not provide a value to more than one of the fields of the union type. In other words, it is possible to serialize from an union type and deserialize into a compatible struct type, and vice versa.
 
-The generated code for union types can be different from that of struct types - for example, implementations may choose to use programming language union types in generated code for better space efficiency.
+The generated code for union types can be different from that of struct types - for example, implementations may choose to use programming language union types in generated code for better memory efficiency.
 
-NOTE: It is okay for none of the fields to be present in an union type.
-
-NOTE: It is possible to serialize from an union type and deserialize into a compatible struct type, and vice versa.
+:::note
+It is possible for none of the fields to be present in an union type.
+:::
 
 ### Exceptions
 
@@ -548,12 +552,13 @@ typedef map<string, string> StringMap
 ### Services
 
 ```
-interface_definition ::=
-  ("service" | "interaction") identifier ["extends" maybe_qualified_id] "{"
-    ( FunctionSpecification )*
+service ::=
+  [annotations]
+  "service" identifier ["extends" maybe_qualified_id] "{"
+    function*
   "}"
 
-FunctionSpecification ::=
+function ::=
   ResultType identifier
   "("
   ( ParameterSpecification )*
@@ -631,6 +636,16 @@ Please refer [Automatic Retries, RPC idempotency and Error Classification](/feat
 #### Streaming
 
 Please refer [Thrift Streaming](/fb/features/streaming/index.md) for more information on Streaming.
+
+### Interactions
+
+```grammar
+interaction ::=
+  [annotations]
+  "interaction" identifier ["extends" maybe_qualified_id] "{"
+    function*
+  "}"
+```
 
 ### Constants
 
@@ -821,11 +836,10 @@ Avoid using default values on optional fields. It is not possible to tell if the
 Do not change default values after setting them. It is hard to know what code may be relying on the previous default values.
 :::
 
-## Qualifiers
+## Field Qualifiers
 
-```
-Qualifier ::=
-  "required" | "optional"
+```grammar
+field_qualifier ::=  "required" | "optional"
 ```
 
 The fields of a Thrift object may assume any value of their types. In addition the field may also be "uninitialized" (formally "not present"). I.e., the *state* of a field is either *not present*, or *present* with a particular value of their type.

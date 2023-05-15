@@ -17,8 +17,6 @@ module Env = struct
   let supportdynamic_type_hint_enabled
       Naming_phase_env.{ supportdynamic_type_hint_enabled; _ } =
     supportdynamic_type_hint_enabled
-
-  let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
 let on_hint_ on_error hint_ ~ctx =
@@ -27,7 +25,6 @@ let on_hint_ on_error hint_ ~ctx =
       Env.is_hhi ctx
       || Env.is_systemlib ctx
       || Env.supportdynamic_type_hint_enabled ctx
-      || Env.everything_sdt ctx
     then
       None
     else

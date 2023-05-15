@@ -839,7 +839,8 @@ let make_result env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
   let env = Env.set_tyvar_variance env ty in
-  (env, Tast.make_typed_expr p ty te, ty)
+  let (env, te) = Typing_utils.make_simplify_typed_expr env p ty te in
+  (env, te, ty)
 
 let localize_targ env ta =
   let pos = fst ta in
@@ -2483,17 +2484,17 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
      * generate a new expression id
      *)
     let env = Env.set_local_expr_id env (snd lvar) (Ident.tmp ()) in
-    ( env,
-      ( Tast.make_typed_expr
-          pos
-          ty
-          (Aast.Binop
-             {
-               bop = Ast_defs.Eq None;
-               lhs = Tast.make_typed_expr lvar_pos ty (Aast.Lvar lvar);
-               rhs = te;
-             }),
-        [snd lvar] ) )
+    let (env, inner_tast) =
+      Typing_utils.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
+    in
+    let (env, tast) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        pos
+        ty
+        (Aast.Binop { bop = Ast_defs.Eq None; lhs = inner_tast; rhs = te })
+    in
+    (env, (tast, [snd lvar]))
   (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
     let (env, typed_using_clause, ty) =
@@ -3127,20 +3128,24 @@ and bind_as_expr env p ty1 ty2 aexpr =
   | As_kv ((_, p, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
-    let tk = Tast.make_typed_expr p ty1 (Aast.Lvar id) in
+    let (env, tk) =
+      Typing_utils.make_simplify_typed_expr env p ty1 (Aast.Lvar id)
+    in
     (env, Aast.As_kv (tk, te))
   | As_kv ((_, p, (Lplaceholder _ as k)), ev) ->
     let (env, te, _, _) = assign p env ev p ty2 in
-    let tk = Tast.make_typed_expr p ty1 k in
+    let (env, tk) = Typing_utils.make_simplify_typed_expr env p ty1 k in
     (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
-    let tk = Tast.make_typed_expr p1 ty1 (Aast.Lvar id) in
+    let (env, tk) =
+      Typing_utils.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id)
+    in
     (env, Aast.Await_as_kv (p, tk, te))
   | Await_as_kv (p, (_, p1, (Lplaceholder _ as k)), ev) ->
     let (env, te, _, _) = assign p env ev p ty2 in
-    let tk = Tast.make_typed_expr p1 ty1 k in
+    let (env, tk) = Typing_utils.make_simplify_typed_expr env p1 ty1 k in
     (env, Aast.Await_as_kv (p, tk, te))
   | _ ->
     (* TODO Probably impossible, should check that *)
@@ -4580,7 +4585,7 @@ and expr_
     in
     let (_, pos, tm) = tm in
     let env = might_throw env in
-    let tm = Tast.make_typed_expr pos ty tm in
+    let (env, tm) = Typing_utils.make_simplify_typed_expr env pos ty tm in
     make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
@@ -4593,7 +4598,9 @@ and expr_
     let (env, _, ty) = expr env local in
     let env = xhp_check_get_attribute p env e y nf in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
-    let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
+    let (env, t_rhs) =
+      Typing_utils.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
+    in
     make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
   (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (_, pm, Id m), nullflavor, prop_or_method) ->
@@ -4659,12 +4666,15 @@ and expr_
       Env.FakeMembers.check_instance_invalid env e1 (snd m) result_ty
     in
     Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+    let (env, inner_te) =
+      Typing_utils.make_simplify_typed_expr env pm result_ty (Aast.Id m)
+    in
     make_result
       env
       p
       (Aast.Obj_get
          ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
-           Tast.make_typed_expr pm result_ty (Aast.Id m),
+           inner_te,
            nullflavor,
            prop_or_method ))
       result_ty
@@ -4680,7 +4690,7 @@ and expr_
     in
     let (_, pos, te2) = te2 in
     let env = might_throw env in
-    let te2 = Tast.make_typed_expr pos ty te2 in
+    let (env, te2) = Typing_utils.make_simplify_typed_expr env pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
@@ -5955,8 +5965,9 @@ and closure_make
     }
   in
   let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
-  let te =
-    Tast.make_typed_expr
+  let (env, te) =
+    Typing_utils.make_simplify_typed_expr
+      env
       lambda_pos
       ty
       (if is_anon then
@@ -6637,13 +6648,17 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           obj_ty
       in
       Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
-      let te1 =
-        Tast.make_typed_expr
+      let (env, inner_te) =
+        Typing_utils.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
+      in
+      let (env, te1) =
+        Typing_utils.make_simplify_typed_expr
+          env
           pobj
           declared_ty
           (Aast.Obj_get
              ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt tobj,
-               Tast.make_typed_expr pm declared_ty (Aast.Id m),
+               inner_te,
                nullflavor,
                prop_or_method ))
       in
@@ -7024,7 +7039,10 @@ and dispatch_call
       | Tfun ft -> ft.ft_ret.et_type
       | _ -> ty_ (Reason.Rwitness p)
     in
-    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel None ty
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr env fpos fty (Aast.Id id)
+    in
+    make_call env te tal tel None ty
   in
   let overload_function = overload_function make_call fpos in
   (* Require [get_idisposable_value()] function calls to be inside a [using]
@@ -7041,15 +7059,10 @@ and dispatch_call
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected ~expr_pos:p ~recv_pos:(fst id) env fty el unpacked_element
     in
-    let result =
-      make_call
-        env
-        (Tast.make_typed_expr fpos fty (Aast.Id id))
-        tal
-        tel
-        typed_unpack_element
-        ty
+    let (env, inner_te) =
+      Typing_utils.make_simplify_typed_expr env fpos fty (Aast.Id id)
     in
+    let result = make_call env inner_te tal tel typed_unpack_element ty in
     (result, should_forget_fakes)
   in
   (* The optional transform_fty parameter is used to transform function
@@ -7107,15 +7120,14 @@ and dispatch_call
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
-    let result =
-      make_call
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr
         env
-        (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
-        tal
-        tel
-        typed_unpack_element
-        ty
+        fpos
+        fty
+        (Aast.Class_const (tcid, m))
     in
+    let result = make_call env te tal tel typed_unpack_element ty in
     (result, should_forget_fakes)
   in
   match fun_expr with
@@ -7423,13 +7435,17 @@ and dispatch_call
         =
       call_parent_construct p pos env el unpacked_element
     in
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        fpos
+        ctor_fty
+        (Aast.Class_const ((pty, pos, Aast.CIparent), id))
+    in
     let result =
       make_call
         env
-        (Tast.make_typed_expr
-           fpos
-           ctor_fty
-           (Aast.Class_const ((pty, pos, Aast.CIparent), id)))
+        te
         [] (* tal: no type arguments to constructor *)
         tel
         typed_unpack_element
@@ -7459,8 +7475,12 @@ and dispatch_call
     | (ty, _, Call (caller, tal, tel, c)) ->
       let (caller_ty, caller_pos, _) = caller in
       (* Rewrap the caller in the readonly expression after we're done *)
-      let wrapped_caller =
-        Tast.make_typed_expr caller_pos caller_ty (Aast.ReadonlyExpr caller)
+      let (env, wrapped_caller) =
+        Typing_utils.make_simplify_typed_expr
+          env
+          caller_pos
+          caller_ty
+          (Aast.ReadonlyExpr caller)
       in
       let result = make_call env wrapped_caller tal tel c ty in
       (result, s)
@@ -7506,22 +7526,21 @@ and dispatch_call
         el
         unpacked_element
     in
-    let result =
-      make_call
-        env
-        (Tast.make_typed_expr
-           fpos
-           tfty
-           (Aast.Obj_get
-              ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt te1,
-                Tast.make_typed_expr pos_id tfty (Aast.Id m),
-                nullflavor,
-                Is_method )))
-        tal
-        tel
-        typed_unpack_element
-        ty
+    let (env, inner_te) =
+      Typing_utils.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
     in
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        fpos
+        tfty
+        (Aast.Obj_get
+           ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt te1,
+             inner_te,
+             nullflavor,
+             Is_method ))
+    in
+    let result = make_call env te tal tel typed_unpack_element ty in
     (result, should_forget_fakes)
   (* Call instance method using new method call inference *)
   | Obj_get (receiver, (_, pos_id, Id meth), nullflavor, Is_method) ->
@@ -7631,17 +7650,24 @@ and dispatch_call
       else
         (env, ret_ty)
     in
+    let (env, inner_te1) =
+      Typing_utils.make_simplify_typed_expr env pos_id method_ty (Aast.Id meth)
+    in
+    let (env, inner_te2) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        fpos
+        method_ty
+        (Aast.Obj_get
+           ( hole_on_ty_mismatch ~ty_mismatch_opt typed_receiver,
+             inner_te1,
+             nullflavor,
+             Is_method ))
+    in
     let result =
       make_call
         env
-        (Tast.make_typed_expr
-           fpos
-           method_ty
-           (Aast.Obj_get
-              ( hole_on_ty_mismatch ~ty_mismatch_opt typed_receiver,
-                Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
-                nullflavor,
-                Is_method )))
+        inner_te2
         typed_targs
         typed_params
         typed_unpack_element
@@ -9942,7 +9968,13 @@ and overload_function
         | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced ty }
         | ty -> ty)
   in
-  let te = Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id)) in
+  let (env, te) =
+    Typing_utils.make_simplify_typed_expr
+      env
+      fpos
+      fty
+      (Aast.Class_const (tcid, method_id))
+  in
   (make_call env te tal tel typed_unpack_element ty, should_forget_fakes)
 
 and update_array_type ?lhs_of_null_coalesce p env e1 valkind =

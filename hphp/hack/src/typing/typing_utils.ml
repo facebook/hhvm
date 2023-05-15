@@ -878,3 +878,56 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn_mixed r)
+
+let is_inter_dyn env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tintersection [ty1; ty2]
+    when Typing_defs.is_dynamic ty1 || Typing_defs.is_dynamic ty2 ->
+    (env, Some (ty1, ty2))
+  | _ -> (env, None)
+
+let rec find_inter_dyn env acc tyl =
+  match tyl with
+  | [] -> (env, None)
+  | ty :: tyl ->
+    (match is_inter_dyn env ty with
+    | (env, None) -> find_inter_dyn env (ty :: acc) tyl
+    | (env, Some ty_inter) -> (env, Some (ty_inter, acc @ tyl)))
+
+(* Detect types that look like (t1 & dynamic) | t2 and convert to
+   ~t2 & (t1 | t2). Also in function returns.
+*)
+let rec recompose_like_type env orig_ty =
+  let (env, ty) = Env.expand_type env orig_ty in
+  match get_node ty with
+  | Tunion tys ->
+    (match find_inter_dyn env [] tys with
+    | (env, Some ((ty1, ty2), [ty_sub])) ->
+      let (env, ty_union1) = union env ty1 ty_sub in
+      let (env, ty_union2) = union env ty2 ty_sub in
+      (env, Typing_make_type.intersection (get_reason ty) [ty_union1; ty_union2])
+    | (env, _) ->
+      (match try_strip_dynamic env ty with
+      | None -> (env, ty)
+      | Some ty1 ->
+        let (env, ty2) = recompose_like_type env ty1 in
+        (env, Typing_make_type.locl_like (get_reason ty) ty2)))
+  | Tfun ft ->
+    let (env, et_type) = recompose_like_type env ft.ft_ret.et_type in
+    let ft_ret = { ft.ft_ret with et_type } in
+    (env, mk (get_reason ty, Tfun { ft with ft_ret }))
+  | Tnewtype (n, _, ty1)
+    when String.equal n Naming_special_names.Classes.cSupportDyn ->
+    let (env, ty1) = recompose_like_type env ty1 in
+    simple_make_supportdyn (get_reason ty) env ty1
+  | _ -> (env, orig_ty)
+
+let make_simplify_typed_expr env p ty te =
+  let (env, ty) =
+    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+      recompose_like_type env ty
+    else
+      (env, ty)
+  in
+  (env, Tast.make_typed_expr p ty te)

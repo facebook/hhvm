@@ -174,9 +174,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         (env, ty)
     in
     let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
-    ( env,
-      Tast.make_typed_expr p ty Aast.(Binop { bop; lhs = hte1; rhs = hte2 }),
-      ty )
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        p
+        ty
+        Aast.(Binop { bop; lhs = hte1; rhs = hte2 })
+    in
+    (env, te, ty)
   in
   let int_no_reason = MakeType.int Reason.none in
   let num_no_reason = MakeType.num Reason.none in
@@ -591,7 +596,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
 let unop p env uop te ty =
   let make_result env te err_opt result_ty =
     let hte = hole_on_err te err_opt in
-    (env, Tast.make_typed_expr p result_ty (Aast.Unop (uop, hte)), result_ty)
+    let (env, te) =
+      Typing_utils.make_simplify_typed_expr
+        env
+        p
+        result_ty
+        (Aast.Unop (uop, hte))
+    in
+    (env, te, result_ty)
   in
   let is_any = Typing_utils.is_any env in
   match uop with

@@ -12,4 +12,4 @@
  (modules nuclide_rpc_message_printer)
  (preprocess
   (pps ppx_deriving.std))
- (libraries coverage_level pos symbol utils_core))
+ (libraries ide_rpc_api_types pos symbol utils_core))

@@ -70,7 +70,6 @@
  (name typing_defs)
  (wrapped false)
  (modules
-  coverage_level_defs
   type_visitor
   class_refinement
   typing_defs)
@@ -455,14 +454,6 @@
   typechecker_options)
  (preprocess
   (pps ppx_deriving.std ppx_hash)))
-
-(library
- (name coverage_level)
- (wrapped false)
- (modules coverage_level)
- (libraries core_kernel ide_rpc_api_types tast_env typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
 
 (library
  (name typing_check_job)

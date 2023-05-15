@@ -71,10 +71,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)
-  | COVERAGE_LEVELS (path, file_input) ->
-    let path = Relative_path.create_detect_prefix path in
-    let (ctx, entry) = single_ctx env path file_input in
-    (env, ServerColorFile.go_quarantined ~ctx ~entry)
   | INFER_TYPE (file_input, line, column) ->
     let path =
       match file_input with
@@ -386,7 +382,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     let lst = env.ServerEnv.local_symbol_table in
     (env, ServerSearch.go ctx query ~kind_filter:type_ lst)
-  | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.go genv ctx fnl)

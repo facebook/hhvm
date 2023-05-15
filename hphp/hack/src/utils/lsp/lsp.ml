@@ -510,7 +510,6 @@ module Initialize = struct
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
     (* Nuclide-specific features below *)
-    typeCoverageProviderFB: bool;
     rageProviderFB: bool;
   }
 
@@ -987,25 +986,6 @@ module DocumentHighlight = struct
   }
 end
 
-(* Type Coverage request, method="textDocument/typeCoverage" *)
-(* THIS IS A NUCLIDE-SPECIFIC EXTENSION TO LSP.              *)
-module TypeCoverageFB = struct
-  type params = typeCoverageParams
-
-  and result = {
-    coveredPercent: int;
-    uncoveredRanges: uncoveredRange list;
-    defaultMessage: string;
-  }
-
-  and typeCoverageParams = { textDocument: TextDocumentIdentifier.t }
-
-  and uncoveredRange = {
-    range: range;
-    message: string option;
-  }
-end
-
 (* Document Formatting request, method="textDocument/formatting" *)
 module DocumentFormatting = struct
   type params = documentFormattingParams
@@ -1167,13 +1147,6 @@ module ConnectionStatusFB = struct
   and connectionStatusParams = { isConnected: bool }
 end
 
-(* ToggleTypeCoverage notification, method="workspace/toggleTypeCoverage" *)
-module ToggleTypeCoverageFB = struct
-  type params = toggleTypeCoverageParams
-
-  and toggleTypeCoverageParams = { toggle: bool }
-end
-
 (* ErrorResponse *)
 module Error = struct
   type code =
@@ -1250,7 +1223,6 @@ type lsp_request =
   | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
   | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
-  | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
   | DocumentRangeFormattingRequest of DocumentRangeFormatting.params
   | DocumentOnTypeFormattingRequest of DocumentOnTypeFormatting.params
@@ -1284,7 +1256,6 @@ type lsp_result =
   | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
   | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
-  | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
   | DocumentRangeFormattingResult of DocumentRangeFormatting.result
   | DocumentOnTypeFormattingResult of DocumentOnTypeFormatting.result
@@ -1318,7 +1289,6 @@ type lsp_notification =
   | InitializedNotification
   | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
-  | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =
@@ -1375,7 +1345,6 @@ let lsp_result_to_log_string = function
   | CallHierarchyIncomingCallsResult _ -> "CallHierarchyIncomingCallsResult"
   | CallHierarchyOutgoingCallsResult _ -> "CallHierarchyOutgoingCallsResult"
   | DocumentHighlightResult _ -> "DocumentHighlightResult"
-  | TypeCoverageResultFB _ -> "TypeCoverageResultFB"
   | DocumentFormattingResult _ -> "DocumentFormattingResult"
   | DocumentRangeFormattingResult _ -> "DocumentRangeFormattingResult"
   | DocumentOnTypeFormattingResult _ -> "DocumentOnTypeFormattingResult"

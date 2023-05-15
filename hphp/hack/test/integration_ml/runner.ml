@@ -39,11 +39,6 @@ let tests =
     ("added_parent", run Test_added_parent.test);
     ("capitalization", run Test_capitalization.test);
     ("coeffects", run Test_coeffects.test);
-    ("coverage_counts", run Test_coverage_counts.test);
-    ("coverage_levels_checked", run Test_coverage_levels_checked.test);
-    ("coverage_levels_multi", run Test_coverage_levels_multi.test);
-    ("coverage_levels_partial", run Test_coverage_levels_partial.test);
-    ("coverage_levels_unchecked", run Test_coverage_levels_unchecked.test);
     ("decl_decl", run Test_decl_decl.test);
     ("delete_file", run Test_delete_file.test);
     ("duplicated_file", run Test_duplicated_file.test);

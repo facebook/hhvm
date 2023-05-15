@@ -154,13 +154,6 @@ val parse_documentHighlight :
 
 val print_documentHighlight : Lsp.DocumentHighlight.result -> Hh_json.json
 
-val parse_typeCoverage : Hh_json.json option -> Lsp.TypeCoverageFB.params
-
-val print_typeCoverage : Lsp.TypeCoverageFB.result -> Hh_json.json
-
-val parse_toggleTypeCoverage :
-  Hh_json.json option -> Lsp.ToggleTypeCoverageFB.params
-
 val parse_documentFormatting :
   Hh_json.json option -> Lsp.DocumentFormatting.params
 

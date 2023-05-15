@@ -38,16 +38,6 @@ type text_edit = {
 }
 [@@deriving show]
 
-type coverage_level =
-  | Unchecked (* Completely unchecked code, i.e. Tanys *)
-  | Partial
-    (* Partially checked code, e.g. array, Awaitable<_> with no
-         concrete type parameters *)
-  | Checked
-[@@deriving ord]
-
-(* Completely checked code *)
-
 let ide_pos_to_fc (x : position) : File_content.position =
   let (line, column) = (x.line, x.column) in
   { File_content.line; column }

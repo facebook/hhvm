@@ -257,27 +257,6 @@ let main_internal
     let%lwt (infol, telemetry) = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS in
     List.iter infol ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_COLORING file ->
-    let file_input =
-      match file with
-      | "-" ->
-        let content = Sys_utils.read_stdin_to_string () in
-        ServerCommandTypes.FileContent content
-      | _ ->
-        let file = expand_path file in
-        ServerCommandTypes.FileName file
-    in
-    let%lwt (pos_level_l, telemetry) =
-      rpc args @@ Rpc.COVERAGE_LEVELS (file, file_input)
-    in
-    ClientColorFile.go file_input args.output_json pos_level_l;
-    Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_COVERAGE file ->
-    let%lwt (counts_opt, telemetry) =
-      rpc args @@ Rpc.COVERAGE_COUNTS (expand_path file)
-    in
-    ClientCoverageMetric.go ~json:args.output_json counts_opt;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FIND_CLASS_REFS name ->
     let%lwt results =
       rpc_with_retry args

@@ -3579,68 +3579,6 @@ let do_highlight_local
   in
   Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
 
-let format_typeCoverage_result ~(equal : 'a -> 'a -> bool) results counts =
-  TypeCoverageFB.(
-    let coveredPercent = Coverage_level.get_percent counts in
-    let hack_coverage_to_lsp (pos, level) =
-      let range = Lsp_helpers.hack_pos_to_lsp_range ~equal pos in
-      match level with
-      (* We only show diagnostics for completely untypechecked code. *)
-      | Ide_api_types.Checked
-      | Ide_api_types.Partial ->
-        None
-      | Ide_api_types.Unchecked -> Some { range; message = None }
-    in
-    {
-      coveredPercent;
-      uncoveredRanges = List.filter_map results ~f:hack_coverage_to_lsp;
-      defaultMessage = "Un-type checked code. Consider adding type annotations.";
-    })
-
-let do_typeCoverageFB
-    (conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
-  TypeCoverageFB.(
-    let filename =
-      Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
-    in
-    let command =
-      ServerCommandTypes.COVERAGE_LEVELS
-        (filename, ServerCommandTypes.FileName filename)
-    in
-    let%lwt (results, counts) : Coverage_level_defs.result =
-      rpc conn ref_unblocked_time ~desc:"coverage" command
-    in
-    let formatted =
-      format_typeCoverage_result ~equal:String.equal results counts
-    in
-    Lwt.return formatted)
-
-let do_typeCoverage_localFB
-    (ide_service : ClientIdeService.t ref)
-    (env : env)
-    (tracking_id : string)
-    (ref_unblocked_time : float ref)
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
-    (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
-  let open TypeCoverageFB in
-  let text_document =
-    get_text_document_item
-      editor_open_files
-      params.textDocument.TextDocumentIdentifier.uri
-  in
-  let document = lsp_document_to_ide text_document in
-  let request = ClientIdeMessage.Type_coverage document in
-  let%lwt result =
-    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
-  in
-  let (results, counts) = result in
-  let formatted =
-    format_typeCoverage_result ~equal:String.equal results counts
-  in
-  Lwt.return formatted
-
 let do_formatting_common
     (uri : Lsp.documentUri)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -4882,7 +4820,6 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           executeCommandProvider = None;
           implementationProvider =
             local_config.ServerLocalConfig.go_to_implementation;
-          typeCoverageProviderFB = true;
           rageProviderFB = true;
         };
     }
@@ -5637,28 +5574,6 @@ let handle_client_message
         (DocumentHighlightResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
-    (* Type coverage in serverless IDE *)
-    | (_, Some ide_service, RequestMessage (id, TypeCoverageRequestFB params))
-      ->
-      let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
-        do_typeCoverage_localFB
-          ide_service
-          env
-          tracking_id
-          ref_unblocked_time
-          editor_open_files
-          params
-      in
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        id
-        (TypeCoverageResultFB result);
-      Lwt.return_some
-        {
-          result_count = List.length result.TypeCoverageFB.uncoveredRanges;
-          result_extra_telemetry = None;
-        }
     (* Hover docblocks in serverless IDE *)
     | (_, Some ide_service, RequestMessage (id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -6086,15 +6001,6 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Hh_server id (DocumentHighlightResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
-    (* textDocument/typeCoverage *)
-    | (Main_loop menv, _, RequestMessage (id, TypeCoverageRequestFB params)) ->
-      let%lwt result = do_typeCoverageFB menv.conn ref_unblocked_time params in
-      respond_jsonrpc ~powered_by:Hh_server id (TypeCoverageResultFB result);
-      Lwt.return_some
-        {
-          result_count = List.length result.TypeCoverageFB.uncoveredRanges;
-          result_extra_telemetry = None;
-        }
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, _, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in

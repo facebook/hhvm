@@ -137,19 +137,6 @@ let rec definition_to_json def =
 and outline_response_to_json x =
   Hh_json.JSON_Array (List.map x ~f:definition_to_json)
 
-let coverage_levels_response_to_json spans =
-  let opt_coverage_level_to_string =
-    Option.value_map ~f:Coverage_level.string_of_level ~default:"default"
-  in
-  let span_to_json (color, text) =
-    JSON_Object
-      [
-        ("color", JSON_String (opt_coverage_level_to_string color));
-        ("text", JSON_String text);
-      ]
-  in
-  JSON_Array (List.map spans ~f:span_to_json)
-
 let symbol_by_id_response_to_json = function
   | Some def -> definition_to_json def
   | None -> JSON_Null

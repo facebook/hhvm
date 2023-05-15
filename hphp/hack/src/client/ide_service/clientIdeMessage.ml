@@ -137,7 +137,6 @@ type _ t =
       document * location
       -> ServerCommandTypes.Go_to_type_definition.result t
       (** Handles "textDocument/typeDefinition" LSP messages *)
-  | Type_coverage : document -> Coverage_level_defs.result t
   | Signature_help : document * location -> Lsp.SignatureHelp.result t
       (** Handles "textDocument/signatureHelp" LSP messages *)
   | Code_action :
@@ -201,8 +200,6 @@ let t_to_string : type a. a t -> string = function
   | Workspace_symbol query -> Printf.sprintf "Workspace_symbol(%s)" query
   | Type_definition ({ file_path; _ }, _) ->
     Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
-  | Type_coverage { file_path; _ } ->
-    Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
   | Signature_help ({ file_path; _ }, _) ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
   | Code_action ({ file_path; _ }, _) ->

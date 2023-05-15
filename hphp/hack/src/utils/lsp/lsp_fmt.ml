@@ -896,35 +896,6 @@ let print_documentHighlight (r : DocumentHighlight.result) : json =
 
 (************************************************************************)
 
-let parse_typeCoverage (params : json option) : TypeCoverageFB.params =
-  {
-    TypeCoverageFB.textDocument =
-      Jget.obj_exn params "textDocument" |> parse_textDocumentIdentifier;
-  }
-
-let print_typeCoverage (r : TypeCoverageFB.result) : json =
-  TypeCoverageFB.(
-    let print_uncov (uncov : uncoveredRange) : json =
-      Jprint.object_opt
-        [
-          ("range", Some (print_range uncov.range));
-          ("message", Option.map uncov.message ~f:string_);
-        ]
-    in
-    JSON_Object
-      [
-        ("coveredPercent", int_ r.coveredPercent);
-        ( "uncoveredRanges",
-          JSON_Array (List.map r.uncoveredRanges ~f:print_uncov) );
-        ("defaultMessage", JSON_String r.defaultMessage);
-      ])
-
-let parse_toggleTypeCoverage (params : json option) :
-    ToggleTypeCoverageFB.params =
-  { ToggleTypeCoverageFB.toggle = Jget.bool_d params "toggle" ~default:false }
-
-(************************************************************************)
-
 let parse_documentFormatting (params : json option) : DocumentFormatting.params
     =
   {
@@ -1179,8 +1150,6 @@ let print_initialize (r : Initialize.result) : json =
               );
               ( "implementationProvider",
                 Some (JSON_Bool cap.implementationProvider) );
-              ( "typeCoverageProvider",
-                Some (JSON_Bool cap.typeCoverageProviderFB) );
               ("rageProvider", Some (JSON_Bool cap.rageProviderFB));
             ] );
       ])
@@ -1310,8 +1279,6 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentHighlightRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
-  | RequestMessage (_, TypeCoverageRequestFB p) ->
-    Some p.TypeCoverageFB.textDocument.uri
   | RequestMessage (_, DocumentFormattingRequest p) ->
     Some p.DocumentFormatting.textDocument.uri
   | RequestMessage (_, DocumentRangeFormattingRequest p) ->
@@ -1359,7 +1326,6 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | NotificationMessage InitializedNotification
   | NotificationMessage (SetTraceNotification _)
   | NotificationMessage LogTraceNotification
-  | NotificationMessage (ToggleTypeCoverageNotificationFB _)
   | NotificationMessage (UnknownNotification _)
   | ResponseMessage _ ->
     None
@@ -1386,7 +1352,6 @@ let request_name_to_string (request : lsp_request) : string =
   | CallHierarchyIncomingCallsRequest _ -> "callHierarchy/incomingCalls"
   | CallHierarchyOutgoingCallsRequest _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightRequest _ -> "textDocument/documentHighlight"
-  | TypeCoverageRequestFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingRequest _ -> "textDocument/formatting"
   | DocumentRangeFormattingRequest _ -> "textDocument/rangeFormatting"
   | DocumentOnTypeFormattingRequest _ -> "textDocument/onTypeFormatting"
@@ -1421,7 +1386,6 @@ let result_name_to_string (result : lsp_result) : string =
   | CallHierarchyIncomingCallsResult _ -> "callHierarchy/incomingCalls"
   | CallHierarchyOutgoingCallsResult _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightResult _ -> "textDocument/documentHighlight"
-  | TypeCoverageResultFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingResult _ -> "textDocument/formatting"
   | DocumentRangeFormattingResult _ -> "textDocument/rangeFormatting"
   | DocumentOnTypeFormattingResult _ -> "textDocument/onTypeFormatting"
@@ -1453,7 +1417,6 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | InitializedNotification -> "initialized"
   | SetTraceNotification _ -> "$/setTraceNotification"
   | LogTraceNotification -> "$/logTraceNotification"
-  | ToggleTypeCoverageNotificationFB _ -> "workspace/toggleTypeCoverage"
   | UnknownNotification (method_, _params) -> method_
 
 let message_name_to_string (message : lsp_message) : string =
@@ -1517,8 +1480,6 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/rename" -> RenameRequest (parse_documentRename params)
   | "textDocument/documentHighlight" ->
     DocumentHighlightRequest (parse_documentHighlight params)
-  | "textDocument/typeCoverage" ->
-    TypeCoverageRequestFB (parse_typeCoverage params)
   | "textDocument/formatting" ->
     DocumentFormattingRequest (parse_documentFormatting params)
   | "textDocument/rangeFormatting" ->
@@ -1555,8 +1516,6 @@ let parse_lsp_notification (method_ : string) (params : json option) :
   | "textDocument/didChange" -> DidChangeNotification (parse_didChange params)
   | "workspace/didChangeWatchedFiles" ->
     DidChangeWatchedFilesNotification (parse_didChangeWatchedFiles params)
-  | "workspace/toggleTypeCoverage" ->
-    ToggleTypeCoverageNotificationFB (parse_toggleTypeCoverage params)
   | "textDocument/publishDiagnostics"
   | "window/logMessage"
   | "window/showMessage"
@@ -1590,7 +1549,6 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | CallHierarchyIncomingCallsRequest _
   | CallHierarchyOutgoingCallsRequest _
   | DocumentHighlightRequest _
-  | TypeCoverageRequestFB _
   | DocumentFormattingRequest _
   | DocumentRangeFormattingRequest _
   | DocumentOnTypeFormattingRequest _
@@ -1663,7 +1621,6 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | CallHierarchyIncomingCallsRequest _
     | CallHierarchyOutgoingCallsRequest _
     | DocumentHighlightRequest _
-    | TypeCoverageRequestFB _
     | DocumentFormattingRequest _
     | DocumentRangeFormattingRequest _
     | DocumentOnTypeFormattingRequest _
@@ -1709,7 +1666,6 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | CallHierarchyOutgoingCallsResult r ->
       print_CallHierarchyOutgoingCallsResult r
     | DocumentHighlightResult r -> print_documentHighlight r
-    | TypeCoverageResultFB r -> print_typeCoverage r
     | DocumentFormattingResult r -> print_documentFormatting r
     | DocumentRangeFormattingResult r -> print_documentRangeFormatting r
     | DocumentOnTypeFormattingResult r -> print_documentOnTypeFormatting r
@@ -1756,7 +1712,6 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | DidSaveNotification _
     | DidChangeNotification _
     | DidChangeWatchedFilesNotification _
-    | ToggleTypeCoverageNotificationFB _
     | UnknownNotification _ ->
       failwith ("Don't know how to print notification " ^ method_)
   in

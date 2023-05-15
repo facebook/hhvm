@@ -347,7 +347,6 @@ module Initialize : sig
     documentLinkProvider: documentLinkOptions option;
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
-    typeCoverageProviderFB: bool;
     rageProviderFB: bool;
   }
 
@@ -744,29 +743,6 @@ module DocumentHighlight : sig
   }
 end
 
-module TypeCoverageFB : sig
-  type params = typeCoverageParams
-
-  and result = {
-    coveredPercent: int;
-    uncoveredRanges: uncoveredRange list;
-    defaultMessage: string;
-  }
-
-  and typeCoverageParams = { textDocument: TextDocumentIdentifier.t }
-
-  and uncoveredRange = {
-    range: range;
-    message: string option;
-  }
-end
-
-module ToggleTypeCoverageFB : sig
-  type params = toggleTypeCoverageParams
-
-  and toggleTypeCoverageParams = { toggle: bool }
-end
-
 module DocumentFormatting : sig
   type params = documentFormattingParams
 
@@ -976,7 +952,6 @@ type lsp_request =
   | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
   | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
-  | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
   | DocumentRangeFormattingRequest of DocumentRangeFormatting.params
   | DocumentOnTypeFormattingRequest of DocumentOnTypeFormatting.params
@@ -1010,7 +985,6 @@ type lsp_result =
   | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
   | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
-  | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
   | DocumentRangeFormattingResult of DocumentRangeFormatting.result
   | DocumentOnTypeFormattingResult of DocumentOnTypeFormatting.result
@@ -1044,7 +1018,6 @@ type lsp_notification =
   | InitializedNotification
   | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
-  | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =

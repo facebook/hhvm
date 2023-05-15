@@ -83,16 +83,6 @@ val close_file :
 
 val wait : ServerEnv.env -> ServerEnv.env
 
-val coverage_levels :
-  ServerEnv.env ->
-  string ->
-  ServerEnv.env * ('a, Coverage_level_defs.result) loop_outputs
-
-val coverage_counts :
-  ServerEnv.env ->
-  string ->
-  ServerEnv.env * ('a, ServerCoverageMetricTypes.result) loop_outputs
-
 val autocomplete :
   ServerEnv.env ->
   string ->
@@ -151,12 +141,6 @@ val assert_diagnostics_in :
 
 val get_diagnostics :
   ('a, 'b) loop_outputs -> Errors.finalized_error list SMap.t
-
-val assert_coverage_levels :
-  ('a, Coverage_level_defs.result) loop_outputs -> string list -> unit
-
-val assert_coverage_counts :
-  ('a, ServerCoverageMetricTypes.result) loop_outputs -> string list -> unit
 
 val assert_autocomplete :
   ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit

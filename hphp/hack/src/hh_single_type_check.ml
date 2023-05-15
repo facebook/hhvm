@@ -38,8 +38,6 @@ let standard_deviation mean samples =
 
 type mode =
   | Ifc of string * string
-  | Color
-  | Coverage
   | Cst_search
   | Dump_symbol_info
   | Glean_index of string
@@ -374,9 +372,6 @@ let parse_options () =
       ( "--no-strict-contexts",
         Arg.Unit (fun () -> strict_contexts := false),
         " Do not enforce contexts to be defined within Contexts namespace" );
-      ("--colour", Arg.Unit (set_mode Color), " Produce colour output");
-      ("--color", Arg.Unit (set_mode Color), " Produce color output");
-      ("--coverage", Arg.Unit (set_mode Coverage), " Produce coverage output");
       ( "--cst-search",
         Arg.Unit (set_mode Cst_search),
         " Search the concrete syntax tree of the given file using the pattern"
@@ -1111,26 +1106,6 @@ let parse_options () =
     else
       !sharedmem_config),
     !packages_config_path )
-
-(* Make readable test output *)
-let replace_color input =
-  Ide_api_types.(
-    match input with
-    | (Some Unchecked, str) -> "<unchecked>" ^ str ^ "</unchecked>"
-    | (Some Checked, str) -> "<checked>" ^ str ^ "</checked>"
-    | (Some Partial, str) -> "<partial>" ^ str ^ "</partial>"
-    | (None, str) -> str)
-
-let print_colored fn type_acc =
-  let content = cat (Relative_path.to_absolute fn) in
-  let results = ColorFile.go content type_acc in
-  if Unix.isatty Unix.stdout then
-    Tty.cprint (ClientColorFile.replace_colors results)
-  else
-    print_string (List.map ~f:replace_color results |> String.concat ~sep:"")
-
-let print_coverage type_acc =
-  ClientCoverageMetric.go ~json:false (Some (Coverage_level_defs.Leaf type_acc))
 
 let print_global_inference_envs ctx ~verbosity gienvs =
   let gienvs =
@@ -2062,28 +2037,6 @@ let handle_mode
     iter_over_files (fun filename ->
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             process_file filename))
-  | Color ->
-    Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-        if Relative_path.Map.mem builtins fn then
-          ()
-        else
-          let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
-          let result = Coverage_level.get_levels ctx tast fn in
-          match result with
-          | Ok result -> print_colored fn result
-          | Error () ->
-            failwith
-              ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute fn))
-  | Coverage ->
-    Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-        if Relative_path.Map.mem builtins fn then
-          ()
-        else
-          let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
-          let type_acc =
-            ServerCoverageMetricUtils.accumulate_types ctx tast fn
-          in
-          print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

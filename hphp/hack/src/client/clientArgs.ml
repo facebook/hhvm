@@ -245,16 +245,7 @@ let parse_check_args cmd ~from_default =
                       });
            ]),
         "apply codemod for adding <<__NoAutoDynamic>>" );
-      ( "--color",
-        Arg.String (fun x -> set_mode (MODE_COLORING x)),
-        " (mode) pretty prints the file content showing what is checked (give '-' for stdin)"
-      );
-      ("--colour", Arg.String (fun x -> set_mode (MODE_COLORING x)), " ");
       Common_argspecs.config config;
-      ( "--coverage",
-        Arg.String (fun x -> set_mode (MODE_COVERAGE x)),
-        " (mode) calculates the extent of typing of a given file or directory"
-      );
       ( "--create-checkpoint",
         Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x)),
         (* Create a checkpoint which can be used to retrieve changed files later *)

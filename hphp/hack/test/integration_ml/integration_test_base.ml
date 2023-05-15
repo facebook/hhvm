@@ -13,8 +13,6 @@ open Integration_test_base_types
 open Reordered_argument_collections
 open ServerCommandTypes
 open SearchServiceRunner
-open Coverage_level
-open Coverage_level_defs
 open Int.Replace_polymorphic_compare
 
 exception Integration_test_failure
@@ -389,24 +387,6 @@ let wait env =
    * last_command_time. Will not work on timers that compare against other
    * counters. *)
   ServerEnv.{ env with last_command_time = env.last_command_time -. 60.0 }
-
-let coverage_levels env filename =
-  let file_input = ServerCommandTypes.FileName filename in
-  run_loop_once
-    env
-    {
-      default_loop_input with
-      persistent_client_request =
-        Some (Request (COVERAGE_LEVELS (filename, file_input)));
-    }
-
-let coverage_counts env contents =
-  run_loop_once
-    env
-    {
-      default_loop_input with
-      persistent_client_request = Some (Request (COVERAGE_COUNTS contents));
-    }
 
 let autocomplete env contents =
   run_loop_once
@@ -796,33 +776,6 @@ let list_to_string l =
   List.iter l ~f:(Printf.bprintf buf "%s ");
   Buffer.contents buf
 
-let coverage_levels_to_str_helper (pos, cl) =
-  let cl_str = string_of_level cl in
-  let interval = Pos.string pos in
-  interval ^ " " ^ cl_str
-
-let assert_coverage_levels loop_output expected =
-  let (results, counts) =
-    match loop_output.persistent_client_response with
-    | Some res -> res
-    | _ -> fail "Expected coverage levels response"
-  in
-  let strings_of_stats =
-    [
-      "checked: " ^ string_of_int counts.checked;
-      "partial: " ^ string_of_int counts.partial;
-      "unchecked: " ^ string_of_int counts.unchecked;
-    ]
-  in
-  let results_as_string =
-    List.map results ~f:coverage_levels_to_str_helper
-    |> List.sort ~compare:String.compare
-    |> List.append strings_of_stats
-    |> list_to_string
-  in
-  let expected_as_string = list_to_string expected in
-  assertEqual expected_as_string results_as_string
-
 let assert_autocomplete loop_output expected =
   let results =
     match loop_output.persistent_client_response with
@@ -871,49 +824,6 @@ let assert_ide_autocomplete loop_output expected =
         x.AutocompleteTypes.res_label)
   in
   let results_as_string = list_to_string results in
-  let expected_as_string = list_to_string expected in
-  assertEqual expected_as_string results_as_string
-
-let smap_to_str_list (f : 'a -> string) (m : 'a SMap.t) =
-  (m |> SMap.ordered_keys |> List.map) ~f:(fun s ->
-      s ^ "< " ^ (SMap.find m s |> f) ^ ">")
-
-let level_stats_to_str (ls : level_stats) =
-  let lvls =
-    [Ide_api_types.Checked; Ide_api_types.Partial; Ide_api_types.Unchecked]
-  in
-  let str_list =
-    List.map lvls ~f:(fun lvl ->
-        string_of_level lvl ^ "=" ^ string_of_int (CLMap.find lvl ls).count)
-  in
-  list_to_string str_list
-
-let rec trie_to_string (base : string) (f : 'a -> string) (t : 'a trie) =
-  match t with
-  | Leaf a -> base ^ "( " ^ f a ^ ")"
-  | Node (_, smap_of_tr) ->
-    (*TODO: figure out why the first of the pair is duplicated*)
-    List.map (SMap.ordered_keys smap_of_tr) ~f:(fun k ->
-        trie_to_string (base ^ "/" ^ k) f (SMap.find smap_of_tr k))
-    |> list_to_string
-
-let assert_coverage_counts loop_output expected =
-  let resOpt =
-    match loop_output.persistent_client_response with
-    | Some res -> res
-    | None -> fail "Expected coverage count response"
-  in
-  let results =
-    match resOpt with
-    | Some res -> res
-    | None -> fail "Expected some coverage count response"
-  in
-  let results_as_string =
-    trie_to_string
-      ""
-      (fun x -> x |> smap_to_str_list level_stats_to_str |> list_to_string)
-      results
-  in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 

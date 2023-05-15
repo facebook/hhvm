@@ -1448,14 +1448,6 @@ let handle_request
           ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (Initialized istate, Ok result)
-  (* Type Coverage *)
-  | (Initialized istate, Type_coverage document) ->
-    let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let result =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerColorFile.go_quarantined ~ctx ~entry)
-    in
-    Lwt.return (Initialized istate, Ok result)
   (* Workspace Symbol *)
   | (Initialized istate, Workspace_symbol query) ->
     (* Note: needs reverse-naming-table, hence only works in initialized

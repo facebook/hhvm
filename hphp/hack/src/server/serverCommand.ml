@@ -36,9 +36,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_NAMING _ -> false
   | SAVE_STATE _ -> true
-  (* COVERAGE_COUNTS (unnecessarily) uses GlobalStorage, so it cannot safely run
-   * during interruptions *)
-  | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true
   | RENAME_CHECK_SD _ -> true
@@ -64,7 +61,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DOCBLOCK_AT _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false
   | IDE_SIGNATURE_HELP _ -> false
-  | COVERAGE_LEVELS _ -> false
   | COMMANDLINE_AUTOCOMPLETE _ -> false
   | IDENTIFY_FUNCTION _ -> false
   | IDENTIFY_SYMBOL _ -> false

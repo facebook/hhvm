@@ -52,7 +52,6 @@
         },
         "renameProvider": true,
         "implementationProvider": true,
-        "typeCoverageProvider": true,
         "rageProvider": true
       }
     }

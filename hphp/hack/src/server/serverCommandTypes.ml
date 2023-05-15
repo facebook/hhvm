@@ -467,7 +467,6 @@ type _ t =
       (string * SearchUtils.si_kind)
       -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (string * int * int) -> Lsp.SignatureHelp.result t
-  | COVERAGE_LEVELS : string * file_input -> Coverage_level_defs.result t
   | COMMANDLINE_AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
@@ -521,7 +520,6 @@ type _ t =
       (string * bool)
       -> (SaveStateServiceTypes.save_state_result, string) Stdlib.result t
   | SEARCH : string * string -> SearchUtils.result t
-  | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t

@@ -105,14 +105,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_color_file)
- (wrapped false)
- (modules colorFile)
- (libraries typing_defs ide_rpc_api_types utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_file_outline)
  (wrapped false)
  (modules fileOutline)
@@ -261,7 +253,6 @@
   saveStateServiceTypes
   serverCommandTypes
   serverCommandTypesUtils
-  serverCoverageMetricTypes
   serverFormatTypes
   serverGlobalInferenceTypes
   serverHighlightRefsTypes
@@ -419,14 +410,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_coverage_metric_utils)
- (wrapped false)
- (modules serverCoverageMetricUtils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std))
- (libraries utils_core typing_defs coverage_level pos collections))
-
-(library
  (name server_search)
  (wrapped false)
  (modules serverSearch)
@@ -516,8 +499,6 @@
   serverBusyStatus
   serverCheckUtils
   serverCheckpoint
-  serverColorFile
-  serverCoverageMetric
   serverConcatenateAll
   serverError
   serverExtractStandalone
@@ -549,7 +530,6 @@
   base64
   buffered_line_reader
   cgroupprofiler
-  coverage_level
   decl_redecl_service
   direct_decl_service
   dfind
@@ -572,7 +552,6 @@
   server_api
   server_codemod_type_printer
   server_code_actions_services
-  server_coverage_metric_utils
   server_docblock_at
   server_env
   server_find_refs

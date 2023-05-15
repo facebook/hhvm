@@ -21,8 +21,6 @@ type client_mode =
       csdt_log_remotely: bool;
       csdt_tag: string;
     }
-  | MODE_COLORING of string
-  | MODE_COVERAGE of string
   | MODE_CREATE_CHECKPOINT of string
   | MODE_CST_SEARCH of string list option
   | MODE_DELETE_CHECKPOINT of string

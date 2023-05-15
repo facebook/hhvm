@@ -280,14 +280,15 @@ class parser {
     return actions_.on_structured_annotation(range, std::move(value));
   }
 
-  // annotations: "(" annotation_list? ")"
+  // deprecated_annotations: "(" deprecated_annotation_list? ")"
   //
-  // annotation_list:
-  //   (annotation comma_or_semicolon)* annotation comma_or_semicolon?
+  // deprecated_annotation_list:
+  //   (deprecated_annotation comma_or_semicolon)*
+  //    deprecated_annotation comma_or_semicolon?
   //
-  // annotation: identifier ["=" annotation_value]
-  // annotation_value: bool_literal | integer | string_literal
-  std::unique_ptr<deprecated_annotations> try_parse_annotations() {
+  // deprecated_annotation:
+  //   identifier ["=" (bool_literal | integer | string_literal)]
+  std::unique_ptr<deprecated_annotations> try_parse_deprecated_annotations() {
     auto loc = token_.range.begin;
     if (!try_consume_token('(')) {
       return {};
@@ -321,8 +322,8 @@ class parser {
     return annotations;
   }
 
-  void try_parse_annotations(std::unique_ptr<attributes>& attrs) {
-    if (auto deprecated_annotations = try_parse_annotations()) {
+  void try_parse_deprecated_annotations(std::unique_ptr<attributes>& attrs) {
+    if (auto deprecated_annotations = try_parse_deprecated_annotations()) {
       if (!attrs) {
         attrs = std::make_unique<attributes>();
       }
@@ -332,7 +333,8 @@ class parser {
 
   // service:
   //   attributes
-  //   "service" identifier extends? "{" function_or_performs* "}" [annotations]
+  //   "service" identifier extends? "{" function_or_performs* "}"
+  //   [deprecated_annotations]
   //
   // extends: "extends" identifier
   void parse_service(source_location loc, std::unique_ptr<attributes> attrs) {
@@ -344,21 +346,22 @@ class parser {
       base = parse_identifier();
     }
     auto functions = parse_braced_function_list();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_service(
         range, std::move(attrs), name, base, std::move(functions));
   }
 
   // interaction:
   //   attributes
-  //   "interaction" identifier "{" function_or_performs* "}" [annotations]
+  //   "interaction" identifier "{" function_or_performs* "}"
+  //   [deprecated_annotations]
   void parse_interaction(
       source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_interaction);
     auto name = parse_identifier();
     auto functions = parse_braced_function_list();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_interaction(
         range, std::move(attrs), name, std::move(functions));
   }
@@ -390,7 +393,7 @@ class parser {
 
   // function:
   //   attributes function_qualifier?
-  //     return_type identifier? "(" field* ")" throws? annotations
+  //     return_type identifier "(" field* ")" throws? annotations
   //
   // function_qualifier: "oneway" | "idempotent" | "readonly"
   std::unique_ptr<t_function> parse_function() {
@@ -425,7 +428,7 @@ class parser {
     expect_and_consume(')');
 
     auto throws = try_parse_throws();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     return actions_.on_function(
         range,
         std::move(attrs),
@@ -498,40 +501,42 @@ class parser {
   }
 
   // typedef:
-  //   attributes "typedef" type identifier [annotations] [";"]
+  //   attributes "typedef" type identifier [deprecated_annotations] [";"]
   void parse_typedef(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_typedef);
     auto type = parse_type();
     auto name = parse_identifier();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     try_consume_token(';');
     actions_.on_typedef(range, std::move(attrs), std::move(type), name);
   }
 
-  // struct: attributes "struct" identifier "{" field* "}" [annotations]
+  // struct:
+  //   attributes "struct" identifier "{" field* "}" [deprecated_annotations]
   void parse_struct(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_struct);
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_struct(range, std::move(attrs), name, std::move(fields));
   }
 
-  // union: attributes "union" identifier "{" field* "}" [annotations]
+  // union:
+  //   attributes "union" identifier "{" field* "}" [deprecated_annotations]
   void parse_union(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_union);
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_union(range, std::move(attrs), name, std::move(fields));
   }
 
   // exception:
   //   attributes error_safety? error_kind? error_blame?
-  //   "exception" identifier "{" field* "}" [annotations]
+  //   "exception" identifier "{" field* "}" [deprecated_annotations]
   //
   // error_safety: "safe"
   // error_kind: "transient" | "stateful" | "permanent"
@@ -566,7 +571,7 @@ class parser {
     expect_and_consume(tok::kw_exception);
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_exception(
         range, std::move(attrs), safety, kind, blame, name, std::move(fields));
   }
@@ -621,7 +626,7 @@ class parser {
       value = parse_const_value();
     }
 
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     try_parse_comma_or_semicolon();
     auto doc = try_parse_inline_doc();
     return actions_.on_field(
@@ -652,12 +657,12 @@ class parser {
   t_type_ref parse_type() {
     auto range = track_range();
     if (const t_base_type* type = try_parse_base_type()) {
-      return actions_.on_type(*type, try_parse_annotations());
+      return actions_.on_type(*type, try_parse_deprecated_annotations());
     }
     switch (token_.kind) {
       case tok::identifier: {
         auto name = consume_token().string_value();
-        auto annotations = try_parse_annotations();
+        auto annotations = try_parse_deprecated_annotations();
         return actions_.on_type(range, name, std::move(annotations));
       }
       case tok::kw_list: {
@@ -666,7 +671,7 @@ class parser {
         auto element_type = parse_type();
         expect_and_consume('>');
         return actions_.on_list_type(
-            range, std::move(element_type), try_parse_annotations());
+            range, std::move(element_type), try_parse_deprecated_annotations());
       }
       case tok::kw_set: {
         consume_token();
@@ -674,7 +679,7 @@ class parser {
         auto key_type = parse_type();
         expect_and_consume('>');
         return actions_.on_set_type(
-            range, std::move(key_type), try_parse_annotations());
+            range, std::move(key_type), try_parse_deprecated_annotations());
       }
       case tok::kw_map: {
         consume_token();
@@ -687,7 +692,7 @@ class parser {
             range,
             std::move(key_type),
             std::move(value_type),
-            try_parse_annotations());
+            try_parse_deprecated_annotations());
       }
       default:
         report_expected("type");
@@ -728,7 +733,8 @@ class parser {
     return base_type;
   }
 
-  // enum: attributes "enum" identifier "{" enum_value* "}" [annotations]
+  // enum:
+  //   attributes "enum" identifier "{" enum_value* "}" [deprecated_annotations]
   void parse_enum(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_enum);
@@ -739,13 +745,14 @@ class parser {
       values.emplace_back(parse_enum_value());
     }
     expect_and_consume('}');
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     actions_.on_enum(range, std::move(attrs), name, std::move(values));
   }
 
   // enum_value:
   //   attributes
-  //   identifier ["=" integer] [annotations] [comma_or_semicolon] [inline_doc]
+  //   identifier ["=" integer] [deprecated_annotations] [comma_or_semicolon]
+  //   [inline_doc]
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
     auto attrs = parse_attributes();
@@ -753,7 +760,7 @@ class parser {
     auto value = try_consume_token('=')
         ? boost::optional<int64_t>(parse_integer())
         : boost::none;
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     try_parse_comma_or_semicolon();
     auto doc = try_parse_inline_doc();
     return actions_.on_enum_value(
@@ -761,7 +768,8 @@ class parser {
   }
 
   // const:
-  //   attributes "const" type identifier "=" const_value [annotations] [";"]
+  //   attributes "const" type identifier "=" const_value
+  //   [deprecated_annotations] [";"]
   void parse_const(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_const);
@@ -769,7 +777,7 @@ class parser {
     auto name = parse_identifier();
     expect_and_consume('=');
     auto value = parse_const_value();
-    try_parse_annotations(attrs);
+    try_parse_deprecated_annotations(attrs);
     try_consume_token(';');
     actions_.on_const(range, std::move(attrs), type, name, std::move(value));
   }

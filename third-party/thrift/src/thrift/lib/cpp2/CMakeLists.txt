@@ -268,6 +268,7 @@ add_library(
   server/ThriftProcessor.cpp
   server/ThriftServer.cpp
   server/ThriftServerConfig.cpp
+  server/TMConcurrencyController.cpp
   server/peeking/TLSHelper.cpp
   transport/core/RpcMetadataUtil.cpp
   transport/core/RpcMetadataPlugins.cpp

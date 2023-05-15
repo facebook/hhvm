@@ -135,7 +135,7 @@ def Enum(enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget) ->
 
     Arguments:
         enum_name: name of the enumeration
-        elem: name or index of the enumerator element 
+        elem: name or index of the enumerator element
 
     Returns:
         SBTypeEnumMember wrapping the enumerator element
@@ -234,7 +234,7 @@ def template_type(t: lldb.SBType) -> str:
 
     Return:
         The unparameterized name
-    
+
     For example:
         HPHP::VMFixedVector<ObjectProps::quick_index> -> 'HPHP::VMFixedVector'
     """
@@ -264,10 +264,10 @@ def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
 
 def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """Fully strip a smart pointer to a raw pointer. References are re-cast as pointers.
-    
+
         Arguments:
             val: A smart pointer
-        
+
         Returns:
             The stripped pointer, or None if it's not yet supported
     """
@@ -324,7 +324,7 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
             The fully dereferenced value.
     """
     p = rawptr(val)
- 
+
     if p is None:
         return val.Cast(rawtype(val.type))
     else:

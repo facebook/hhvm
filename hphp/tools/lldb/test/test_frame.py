@@ -5,7 +5,7 @@ import hhvm_lldb.utils as utils
 
 class FrameTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp(file="slow/reified-generics/reified-parent.php")
+        super().setUp(test_file="slow/reified-generics/reified-parent.php")
 
     def test_create_native_frame(self):
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")

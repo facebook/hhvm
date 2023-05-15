@@ -59,9 +59,9 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
         self.assertEqual(template, "HPHP::FixedVector")
 
 
-class UtilsGivenFrameTestCase(base.LLDBTestBase):
+class UtilsGivenFrameTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp(file = "quick/method2.php", interp = True)
+        super().setUp(test_file="quick/method2.php", interp = True)
 
     def test_nameof_func(self):
         self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])

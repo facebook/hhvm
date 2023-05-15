@@ -101,6 +101,7 @@ class TestHHVMBinary(LLDBTestBase):
     def setUp(self, test_file=None, interp=False):
         self.test_file = test_file
         self.interp = interp
+        super().setUp()
 
     def getTargetPath(self) -> str:
         return hhvm_path.as_posix()

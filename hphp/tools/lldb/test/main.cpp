@@ -22,6 +22,9 @@
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
+
+using LowStrPtr = LowPtr<const StringData>;
+
 namespace lldb_test {
 
 Object TestObject;
@@ -137,8 +140,6 @@ void buildTypedValues() {
 }
 
 // Other values
-
-using LowStrPtr = LowPtr<const StringData>;
 
 void takeStringData(StringData* UNUSED v) { return; }
 void takeString(String UNUSED v) { return; }

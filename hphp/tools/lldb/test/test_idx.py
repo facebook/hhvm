@@ -7,7 +7,7 @@ import hhvm_lldb.idx as idx
 class IdxCommandTestCase(base.TestHHVMBinary):
 
     def setUp(self):
-        super().setUp(file = "slow/reified-generics/reified-parent.php")
+        super().setUp(test_file="slow/reified-generics/reified-parent.php")
 
     def test_idx_command_on_fixed_vector(self):
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")

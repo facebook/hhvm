@@ -153,6 +153,32 @@ function fcall_class_meth(): void {
   $x(1, 2, 3);
 }
 
+// TEST-CHECK-BAL: define $root.fcall_func_invoke
+// CHECK: define $root.fcall_func_invoke($this: *void) : *void {
+// CHECK: local $x: *void, $0: *void
+// CHECK: #b0:
+// CHECK:   n0 = __sil_allocate_curry("<$root>", "f", null)
+// CHECK:   store &$x <- n0: *HackMixed
+// CHECK:   jmp b1
+// CHECK: #b1:
+// CHECK:   n1: *HackMixed = load &$x
+// CHECK:   store &$0 <- n1: *HackMixed
+// CHECK:   n2: *HackMixed = load &$0
+// CHECK:   n3 = n2.HackMixed.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   jmp b3
+// CHECK:   .handlers b2
+// CHECK: #b2(n4: *HackMixed):
+// CHECK:   store &$0 <- null: *HackMixed
+// CHECK:   n5 = $builtins.hhbc_throw(n4)
+// CHECK:   unreachable
+// CHECK: #b3:
+// CHECK:   ret null
+// CHECK: }
+function fcall_func_invoke(): void {
+  $x = f<>;
+  $x(1, 2, 3);
+}
+
 // TEST-CHECK-BAL: define $root.fcall_splat
 // CHECK: define $root.fcall_splat($this: *void) : *void {
 // CHECK: local $x: *void

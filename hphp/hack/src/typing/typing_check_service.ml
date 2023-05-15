@@ -308,6 +308,14 @@ let get_stats ~include_slightly_costly_stats tally :
 
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
+type process_workitem_result = {
+  progress: typing_progress;
+  errors: Errors.t;
+  tally: ProcessFilesTally.t;
+  stats: HackEventLogger.ProfileTypeCheck.stats;
+  workitem_ends_under_cap: bool;
+}
+
 let process_one_workitem
     ~ctx
     ~(check_info : check_info)
@@ -318,7 +326,7 @@ let process_one_workitem
     ~progress
     ~errors
     ~stats
-    ~tally =
+    ~tally : process_workitem_result =
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
       memory_cap
@@ -438,7 +446,7 @@ let process_one_workitem
     }
   in
 
-  (progress, errors, tally, final_stats, workitem_ends_under_cap)
+  { progress; errors; tally; stats = final_stats; workitem_ends_under_cap }
 
 let process_workitems
     (ctx : Provider_context.t)
@@ -484,10 +492,10 @@ let process_workitems
     match progress.remaining with
     | [] -> (progress, errors)
     | _ ->
-      let (progress, errors, tally, stats, file_ends_under_cap) =
+      let { progress; errors; tally; stats; workitem_ends_under_cap } =
         process_one_workitem ~progress ~errors ~stats ~tally
       in
-      if file_ends_under_cap then
+      if workitem_ends_under_cap then
         process_workitems_loop ~progress ~errors ~stats ~tally
       else
         (progress, errors)

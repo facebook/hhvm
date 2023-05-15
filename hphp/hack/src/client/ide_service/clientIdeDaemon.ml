@@ -13,7 +13,9 @@ open Hh_prelude
 In the error case, [stopped_reason] is a human-facing response,
 and [Lsp.Error.t] contains structured telemetry data. *)
 type prepare_naming_table_result =
-  ( Naming_table.t * Saved_state_loader.changed_files,
+  ( Naming_table.t
+    * Saved_state_loader.changed_files
+    * (Relative_path.t * SearchUtils.si_addendum list) list,
     ClientIdeMessage.stopped_reason * Lsp.Error.t )
   result
 
@@ -231,7 +233,9 @@ let write_message
   | Unix.Unix_error (Unix.EPIPE, fn, param) ->
     raise @@ Outfd_write_error (fn, param)
 
-(** Load the naming table specified by [naming_table_load_info], or download one based on [root]. *)
+(** Load the naming table specified by [naming_table_load_info], or download one based on [root].
+
+Note: no symbol index addenda are generated from this load. *)
 let load_naming_table
     (ctx : Provider_context.t)
     ~(root : Path.t)
@@ -352,7 +356,7 @@ let load_naming_table
           ~local_file_count:(List.length changed_files);
         HackEventLogger.serverless_ide_load_naming_table ~start_time;
 
-        Lwt.return_ok (naming_table, changed_files)
+        Lwt.return_ok (naming_table, changed_files, [])
       | Error load_error ->
         (* We'll turn that load_error into a user-facing [reason], and a
            programmatic error [e] for future telemetry *)
@@ -426,7 +430,8 @@ let build_naming_table
       poll_build_until_complete_exn ()
   in
   try%lwt
-    let%lwt Naming_table_builder_ffi_externs.{ exit_status; time_taken_secs } =
+    let%lwt Naming_table_builder_ffi_externs.
+              { exit_status; time_taken_secs; si_addenda } =
       poll_build_until_complete_exn ()
     in
     if exit_status = 0 then begin
@@ -438,7 +443,7 @@ let build_naming_table
         Naming_table.load_from_sqlite ctx (Path.to_string output)
       in
       log "[full-index] Loaded naming-table. %s" (Path.to_string output);
-      Lwt.return_ok (naming_table, [])
+      Lwt.return_ok (naming_table, [], si_addenda)
     end else begin
       log
         "[full-index] Naming table build failed with nonzero exit status: %d in %f seconds"
@@ -710,7 +715,7 @@ let initialize2
   let (_ : float) = log_startup_time "saved_state" dstate.start_time in
   log_debug "initialize2";
   match prepare_table_result with
-  | Ok (naming_table, changed_files) ->
+  | Ok (naming_table, changed_files, si_addenda) ->
     let changed_files_to_process =
       Relative_path.Set.union
         dstate.dfiles.changed_files_to_process
@@ -718,6 +723,13 @@ let initialize2
     in
     let changed_files_denominator =
       Relative_path.Set.cardinal changed_files_to_process
+    in
+    let sienv =
+      SymbolIndexCore.update_from_addenda
+        ~sienv:dstate.dcommon.sienv
+        ~paths:
+          (List.map si_addenda ~f:(fun (path, addenda) ->
+               (path, addenda, SearchUtils.TypeChecker)))
     in
     let istate =
       if dstate.dcommon.batch_process_changes then
@@ -732,7 +744,7 @@ let initialize2
           batch_update_naming_table_and_invalidate_caches
             ~ctx:(make_empty_ctx dstate.dcommon)
             ~naming_table
-            ~sienv:dstate.dcommon.sienv
+            ~sienv
             ~local_memory:dstate.dcommon.local_memory
             ~open_files:dstate.dfiles.open_files
             changed_files_to_process
@@ -752,7 +764,7 @@ let initialize2
       else
         {
           naming_table;
-          icommon = dstate.dcommon;
+          icommon = { dstate.dcommon with sienv };
           ifiles =
             {
               open_files = dstate.dfiles.open_files;

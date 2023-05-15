@@ -21,4 +21,6 @@
  (modules naming_table_builder_ffi_externs)
  (libraries
   naming_table_builder_ffi
+  relative_path
+  search_utils
   sys_utils))

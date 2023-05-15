@@ -3374,6 +3374,7 @@ dependencies = [
  "oxidized_by_ref",
  "rayon",
  "relative_path",
+ "si_addendum",
  "slog",
  "tempdir",
 ]
@@ -3382,9 +3383,12 @@ dependencies = [
 name = "naming_table_builder_ffi"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "naming_table_builder",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",
+ "oxidized",
+ "relative_path",
  "unwrap_ocaml",
 ]
 

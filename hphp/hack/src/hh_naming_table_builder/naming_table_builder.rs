@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use files_to_ignore::FilesToIgnore;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::parser_options::ParserOptions;
+use oxidized::search_types::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
 use relative_path::RelativePath;
@@ -129,6 +130,51 @@ pub fn build_naming_table(args: Args) -> anyhow::Result<ExitStatus> {
     Ok(ExitStatus::NoError)
 }
 
+/// Functionally similar to `build_naming_table` with certain args set. The main differences are:
+/// - `unsorted` set to true, `allow_collisions` set to false.
+/// - Symbol index addenda are derived from decl parsing and returned.
+pub fn build_naming_table_ide(
+    www: &Path,
+    hhi_path: &Path,
+    output: &Path,
+) -> anyhow::Result<(ExitStatus, Vec<(RelativePath, Vec<SiAddendum>)>)> {
+    let hhconfig = hh_config::HhConfig::from_root(www, &Default::default())?;
+
+    let files_to_ignore = FilesToIgnore::new(&hhconfig.ignored_paths)?;
+    let walk = |root, prefix| -> anyhow::Result<Vec<_>> {
+        find_utils::find_hack_files(&files_to_ignore, root, prefix).collect()
+    };
+    let mut filenames = walk(www, relative_path::Prefix::Root)?;
+    filenames.extend(walk(hhi_path, relative_path::Prefix::Hhi)?);
+
+    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts);
+
+    // Parse each file in parallel to get the file summary and a list of symbol
+    // index addenda. The addenda are used to update the symbol index DB (e.g.
+    // autocomplete, workspace symbol).
+    let parse_results: Vec<(
+        (RelativePath, names::FileSummary),
+        (RelativePath, Vec<SiAddendum>),
+    )> = filenames
+        .into_par_iter()
+        .map(|path| {
+            let (path, summary, addenda) =
+                parse_file_with_addenda(&hhconfig.opts, decl_opts, www, hhi_path, path)?;
+            Ok(((path.clone(), summary), (path, addenda)))
+        })
+        .collect::<anyhow::Result<_>>()?;
+    let (summaries, addenda): (Vec<_>, Vec<_>) = parse_results.into_iter().unzip();
+
+    let save_result = names::Names::build_from_iterator(output, summaries.into_iter())?;
+
+    if !save_result.collisions.is_empty() {
+        // TODO(toyang): should we allow collisions at this point? I'm not sure if a duplicate naming error should be reported here vs. somewhere else.
+        return Ok((ExitStatus::SqlAssertionFailure, addenda));
+    }
+
+    Ok((ExitStatus::NoError, addenda))
+}
+
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 pub enum ExitStatus {
@@ -143,6 +189,21 @@ impl ExitStatus {
     }
 }
 
+fn parse_file_with_hashes<'a>(
+    text: &'a [u8],
+    arena: &'a bumpalo::Bump,
+    opts: &ParserOptions,
+    decl_opts: &DeclParserOptions,
+    path: RelativePath,
+) -> anyhow::Result<ParsedFileWithHashes<'a>> {
+    let prefix = path.prefix();
+    let parsed_file =
+        direct_decl_parser::parse_decls_for_typechecking(decl_opts, path, text, arena);
+    let with_hashes =
+        ParsedFileWithHashes::new(parsed_file, opts.po_deregister_php_stdlib, prefix, arena);
+    Ok(with_hashes)
+}
+
 fn parse_file(
     opts: &ParserOptions,
     decl_opts: &DeclParserOptions,
@@ -155,13 +216,27 @@ fn parse_file(
         relative_path::Prefix::Hhi => hhi_path.join(path.path()),
         prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
     })?;
-    let deregister_php_stdlib_if_hhi = opts.po_deregister_php_stdlib;
-    let prefix = path.prefix();
     let arena = bumpalo::Bump::new();
-    let parsed_file =
-        direct_decl_parser::parse_decls_for_typechecking(decl_opts, path.clone(), &text, &arena);
-    let with_hashes =
-        ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, &arena);
+    let with_hashes = parse_file_with_hashes(&text, &arena, opts, decl_opts, path.clone())?;
     let summary = names::FileSummary::new(&with_hashes);
     Ok((path, summary))
+}
+
+fn parse_file_with_addenda(
+    opts: &ParserOptions,
+    decl_opts: &DeclParserOptions,
+    root: &Path,
+    hhi_path: &Path,
+    path: RelativePath,
+) -> anyhow::Result<(RelativePath, names::FileSummary, Vec<SiAddendum>)> {
+    let text = std::fs::read(match path.prefix() {
+        relative_path::Prefix::Root => root.join(path.path()),
+        relative_path::Prefix::Hhi => hhi_path.join(path.path()),
+        prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
+    })?;
+    let arena = bumpalo::Bump::new();
+    let with_hashes = parse_file_with_hashes(&text, &arena, opts, decl_opts, path.clone())?;
+    let summary = names::FileSummary::new(&with_hashes);
+    let addenda = si_addendum::get_si_addenda(&with_hashes);
+    Ok((path, summary, addenda))
 }

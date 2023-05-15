@@ -12,7 +12,10 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+anyhow = "1.0.65"
 naming_table_builder = { version = "0.0.0", path = "../.." }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
+oxidized = { version = "0.0.0", path = "../../../oxidized" }
+relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
 unwrap_ocaml = { version = "0.0.0", path = "../../../utils/unwrap_ocaml" }

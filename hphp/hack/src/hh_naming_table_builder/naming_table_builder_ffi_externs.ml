@@ -12,6 +12,7 @@ type build_progress
 
 type build_result = {
   exit_status: int;
+  si_addenda: (Relative_path.t * SearchUtils.si_addendum list) list;
   time_taken_secs: float;
 }
 
@@ -24,7 +25,9 @@ external build :
    stack), or by returning a non-zero exit status. The exit statuses are
    described by `naming_table_builder::ExitStatus`. All other failures are
    represented by exceptions. *)
-external poll_exn : build_progress -> (int * float) option
+external poll_exn :
+  build_progress ->
+  (int * (Relative_path.t * SearchUtils.si_addendum list) list * float) option
   = "naming_table_builder_ffi_poll"
 
 let build ~(www : Path.t) ~(custom_hhi_path : Path.t) ~(output : Path.t) :
@@ -36,5 +39,5 @@ let build ~(www : Path.t) ~(custom_hhi_path : Path.t) ~(output : Path.t) :
 
 let poll_exn (progress : build_progress) : build_result option =
   poll_exn progress
-  |> Option.map ~f:(fun (exit_status, time_taken_secs) ->
-         { exit_status; time_taken_secs })
+  |> Option.map ~f:(fun (exit_status, si_addenda, time_taken_secs) ->
+         { exit_status; si_addenda; time_taken_secs })

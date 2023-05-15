@@ -27,5 +27,6 @@ oxidized = { version = "0.0.0", path = "../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../oxidized_by_ref" }
 rayon = "1.2"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
+si_addendum = { version = "0.0.0", path = "../utils/cargo/si_addendum" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 tempdir = "0.3"

@@ -247,9 +247,11 @@ private:
 
   RepoOptionsFlags m_flags;
 
+  // Path to .hhvmconfg.hdf
   std::filesystem::path m_path;
   RepoOptionStats m_stat;
 
+  // Canonical path of repo root directory that contains .hhvmconfig.hdf
   std::filesystem::path m_repo;
 
   static bool s_init;
@@ -562,7 +564,6 @@ struct RuntimeOption {
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;
-  static std::vector<std::string> AutoloadExcludedRepos;
   static bool AutoloadLoggingAllowPropagation;
   static bool AutoloadRethrowExceptions;
 

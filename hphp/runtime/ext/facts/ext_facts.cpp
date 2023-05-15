@@ -529,17 +529,6 @@ struct Facts final : Extension {
     m_data->m_watchmanWatcherOpts = WatchmanWatcherOpts{
         .m_retries = Config::GetInt32(
             ini, config, "Autoload.WatchmanRetries", kDefaultWatchmanRetries)};
-
-    for (auto const& repo : RuntimeOption::AutoloadExcludedRepos) {
-      try {
-        m_data->m_excludedRepos.insert(fs::canonical(repo).native());
-      } catch (const fs::filesystem_error& e) {
-        Logger::Info(
-            "Could not disable native autoloader for %s: %s\n",
-            repo.c_str(),
-            e.what());
-      }
-    }
   }
 
   void moduleInit() override;
@@ -563,7 +552,6 @@ struct Facts final : Extension {
   // your new member is destroyed at the right time.
   struct FactsData {
     std::chrono::seconds m_expirationTime{30 * 60};
-    hphp_hash_set<std::string> m_excludedRepos;
     std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
     WatchmanWatcherOpts m_watchmanWatcherOpts;
   };

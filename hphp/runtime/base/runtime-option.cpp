@@ -819,7 +819,6 @@ std::string RuntimeOption::AutoloadUpdateSuppressionPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
-std::vector<std::string> RuntimeOption::AutoloadExcludedRepos;
 bool RuntimeOption::AutoloadLoggingAllowPropagation;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
@@ -2440,7 +2439,6 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
     Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",
       "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm");
-    Config::Bind(AutoloadExcludedRepos, ini, config, "Autoload.ExcludedRepos");
     Config::Bind(AutoloadLoggingAllowPropagation, ini, config,
                  "Autoload.AllowLoggingPropagation", false);
     Config::Bind(AutoloadRethrowExceptions, ini, config,

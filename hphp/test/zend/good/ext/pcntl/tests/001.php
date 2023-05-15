@@ -30,7 +30,7 @@ function test_exit_signal(){
 
   $pid=pcntl_fork();
   if ($pid==0) {
-    sleep(300);
+    sleep(15);
     exit(101);
   } else if ($pid < 0) {
     print "\nUnable to fork";
@@ -63,7 +63,7 @@ function test_stop_signal(){
 
   $pid=pcntl_fork();
   if ($pid==0) {
-    sleep(300);
+    sleep(15);
     exit(102);
   } else if ($pid < 0) {
     print "\nUnable to fork";
@@ -82,12 +82,14 @@ function test_stop_signal(){
       $signal_print=pcntl_wstopsig($status);
       if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
       print "\nProcess was stopped by signal : ". $signal_print;
+      posix_kill($pid, SIGCONT);
+      posix_kill($pid, SIGTERM);
     } else if (pcntl_wifexited($status)) {
       print "\nProcess exited with: " . pcntl_wexitstatus($status);
     } else {
       print "\nProcess was not stopped";
+      posix_kill($pid, SIGTERM);
     }
-    posix_kill($pid, SIGCONT);
   }
 }
 

@@ -65,7 +65,7 @@ struct SyncSignals {
     // FIXME: gracefully shut down the m_handlerThread
   }
 
-  pthread_t m_handlerThread{};
+  std::atomic<pthread_t> m_handlerThread{};
   std::atomic_bool m_handlerThreadStarted{false};
 
   // "Synchronous" signal handlers.  This must be initialized before the handler
@@ -91,7 +91,7 @@ void block_and_raise(int signo) {
   pthread_sigmask(SIG_BLOCK, &g_state.m_syncSignals, nullptr);
   // Send the signal to the dedicated handling thread.
   if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
-    pthread_kill(g_state.m_handlerThread, signo);
+    pthread_kill(g_state.m_handlerThread.load(), signo);
   }
 }
 
@@ -105,6 +105,8 @@ void* handle_signals(void*) {
                   "after the handler thread starts");
     return nullptr;
   }
+  g_state.m_handlerThreadStarted.notify_all();
+
   SCOPE_EXIT {
     g_state.m_handlerThreadStarted.store(false, std::memory_order_release);
   };
@@ -140,7 +142,7 @@ void* handle_signals(void*) {
 void postfork_clear() {
   reset_sync_signals();
   g_state.m_handlerThreadStarted.store(false, std::memory_order_release);
-  g_state.m_handlerThread = pthread_t{};
+  g_state.m_handlerThread.store(pthread_t{});
 }
 
 // Block `m_syncSignals` and point handlers to block_and_raise().
@@ -192,14 +194,22 @@ void ignore_sync_signals() {
 
 void block_sync_signals_and_start_handler_thread() {
   if (g_state.m_syncHandlers.empty()) return;
-  block_sync_signals();
   if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
     Logger::Error("sync signal handler already started");
+    // Thread is already running, just block signals.
+    block_sync_signals();
     return;
   }
+  // Otherwise start up the thread. Do this before blocking signals so
+  // that block_and_raise has a thread to forward the signal to.
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-  pthread_create(&g_state.m_handlerThread, &attr, &handle_signals, nullptr);
+  pthread_t tid;
+  pthread_create(&tid, &attr, &handle_signals, nullptr);
+  g_state.m_handlerThread.store(tid);
+  // Wait for thread to actually start before blocking signals.
+  g_state.m_handlerThreadStarted.wait(false);
+  block_sync_signals();
 }
 
 void postfork_restart_handler_thread() {

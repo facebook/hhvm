@@ -39,8 +39,6 @@ struct AutoloadMap {
   enum class Result {
     Failure,
     Success,
-    StopAutoloading,
-    RetryAutoloading
   };
 
   /**
@@ -103,19 +101,11 @@ struct AutoloadMap {
   virtual void ensureUpdated() = 0;
 
   /**
-   * True iff this AutoloadMap knows which files contain which symbols without
-   * needing to query userland Hack code. If we're using a native AutoloadMap,
-   * we'll be able to use any symbol when the very first line of Hack code is
-   * run.
-   */
-  virtual bool isNative() const noexcept = 0;
-
-  /**
    * Returns a Holder object which wraps a native AutoloadMap in a manner which
    * is safe to be shared across threads. For non-native or non-shareable maps
    * returns an empty holder.
    */
-  virtual Holder getNativeHolder() noexcept { return Holder(); }
+  virtual Holder getNativeHolder() noexcept = 0;
 
   /**
    * Given a symbol and the kind we're looking for, return the absolute path
@@ -168,13 +158,6 @@ struct AutoloadMap {
   }
 
   /**
-   * Get all filepaths known to the autoloader at this point in time.
-   *
-   * Each path must be an absolute path with all symlinks dereferenced.
-   */
-  virtual Array getAllFiles() const = 0;
-
-  /**
    * Map symbols to files
    */
   virtual Optional<FileResult> getTypeOrTypeAliasFile(const String& typeName) = 0;
@@ -199,10 +182,6 @@ struct AutoloadMap {
   virtual Array getFileConstants(const String& path) = 0;
   virtual Array getFileTypeAliases(const String& path) = 0;
   virtual Array getFileModules(const String& path) = 0;
-
-  virtual bool canHandleFailure() const = 0;
-  virtual Result handleFailure(KindOf kind, const String& className,
-                               const Variant& err) const = 0;
 };
 
 /**

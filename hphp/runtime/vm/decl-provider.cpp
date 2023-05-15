@@ -36,9 +36,8 @@ HhvmDeclProvider::create(AutoloadMap* map,
   if (!RuntimeOption::EvalEnableDecl) {
     return {nullptr};
   }
-  if (!map || !map->isNative()) {
-    // Either compiling systemlib.php with no autoload map initialized yet,
-    // or AutoloadHandler was not configured with a native AutoloadMap.
+  if (!map) {
+    // Compiling systemlib.php with no autoload map initialized yet.
     return {nullptr};
   }
 

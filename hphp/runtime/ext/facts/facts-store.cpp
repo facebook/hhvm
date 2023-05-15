@@ -545,13 +545,6 @@ struct FactsStoreImpl final
     m_updateExec = {};
   }
 
-  /**
-   * This AutoloadMap is capable of building itself.
-   */
-  bool isNative() const noexcept override {
-    return true;
-  }
-
   Holder getNativeHolder() noexcept override {
     return Holder{
         this, [sptr = shared_from_this()]() mutable { sptr.reset(); }};
@@ -580,19 +573,6 @@ struct FactsStoreImpl final
     if (res.hasException()) {
       res.throwUnlessValue();
     }
-  }
-
-  Array getAllFiles() const override {
-    return logPerformance(__func__, [&]() {
-      auto allPaths = m_map.getAllPaths();
-      auto ret = VecInit{allPaths.size()};
-      for (auto const& path : std::move(allPaths)) {
-        fs::path p{path.get()->toCppString()};
-        assertx(p.is_relative());
-        ret.append(VarNR{String{(m_root / p).native()}}.tv());
-      }
-      return ret.toArray();
-    });
   }
 
   Variant getTypeName(const String& type) override {
@@ -914,17 +894,6 @@ struct FactsStoreImpl final
     return logPerformance(__func__, [&]() {
       return makeDictOfStringToString(m_map.getAllTypeAliases());
     });
-  }
-
-  bool canHandleFailure() const override {
-    return false;
-  }
-
-  AutoloadMap::Result handleFailure(
-      KindOf UNUSED kind,
-      const String& UNUSED className,
-      const Variant& UNUSED err) const override {
-    return AutoloadMap::Result::Failure;
   }
 
   /**

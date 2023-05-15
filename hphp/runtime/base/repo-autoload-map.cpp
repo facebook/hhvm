@@ -192,17 +192,6 @@ Array RepoAutoloadMap::getFileModules(const String& path) {
   return getSymbolFromPath(path, RepoSymbolType::MODULE);
 }
 
-AutoloadMap::Result RepoAutoloadMap::handleFailure(
-  KindOf kind, const String& className, const Variant& err) const {
-  return AutoloadMap::Result::Failure;
-}
-
-Array RepoAutoloadMap::getAllFiles() const {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Repo Autoload Map does not support getAllFiles"
-  );
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 } // HPHP

@@ -96,35 +96,12 @@ private:
                                       Variant& err);
 
   /**
-   * loadFromMap() will call the failure callback if the specified name is not
-   * present in the specified map, or if there is an entry in the map but there
-   * was an error during the include operation. loadFromMap() will also retry
-   * loading the specified name from the map if the failure callback returned
-   * boolean true. Note that calling this method may throw if the failure
-   * callback throws an exception or raises a fatal error.
-   *
-   * This method may return Success, Failure, or StopAutoloading. If the
-   * failure callback was called, this method will not return Failure.
+   * This method attempts to load the unit containing the given symbol,
+   * and will return Success or Failure.
    */
   template <class T>
   AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
                                   const T &checkExists);
-
-  /**
-   * loadFromMapPartial() will call the failure callback if there is an error
-   * during the include operation, but otherwise it will not call the failure
-   * callback.
-   *
-   * This method may return Success, Failure, StopAutoloading, or
-   * RetryAutoloading. If the failure callback was called, this method will not
-   * return Failure.
-   */
-  template <class T>
-  AutoloadMap::Result loadFromMapPartial(const String& className,
-                                         AutoloadMap::KindOf kind,
-                                         const T &checkExists, Variant& err);
-
-  static String getSignature(const Variant& handler);
 
   /**
    * Invoke `m_onPostAutoloadFunc` after autoloading a class.

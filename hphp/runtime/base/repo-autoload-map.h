@@ -64,24 +64,11 @@ struct RepoAutoloadMap final : AutoloadMap {
   Array getFileTypeAliases(const String& path) override;
   Array getFileModules(const String& path) override;
 
-  bool canHandleFailure() const override {
-    return false;
-  }
-
   void ensureUpdated() override {}
-
-  bool isNative() const noexcept override {
-    return true;
-  }
 
   Holder getNativeHolder() noexcept override {
     return Holder{this, nullptr};
   }
-
-  AutoloadMap::Result handleFailure(KindOf kind, const String& className,
-      const Variant& err) const override;
-
-  Array getAllFiles() const override;
 
 private:
   Blob::CaseInsensitiveHashMapIndex m_types;

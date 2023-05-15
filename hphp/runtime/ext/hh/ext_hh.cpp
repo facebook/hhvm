@@ -73,7 +73,7 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_is_native) {
   auto const* autoloadMap = AutoloadHandler::s_instance->getAutoloadMap();
-  return autoloadMap && autoloadMap->isNative();
+  return autoloadMap != nullptr;
 }
 
 namespace {

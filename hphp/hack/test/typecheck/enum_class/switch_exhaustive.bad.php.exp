@@ -1,21 +1,21 @@
 File "switch_exhaustive.bad.php", line 14, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `A` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `A` (Typing[4019])
   File "switch_exhaustive.bad.php", line 4, characters 12-12:
   Enum class declared here
 File "switch_exhaustive.bad.php", line 20, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `A` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `A` (Typing[4019])
   File "switch_exhaustive.bad.php", line 9, characters 12-12:
   Enum class declared here
 File "switch_exhaustive.bad.php", line 27, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `C` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `C` (Typing[4019])
   File "switch_exhaustive.bad.php", line 9, characters 12-12:
   Enum class declared here
 File "switch_exhaustive.bad.php", line 34, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `B` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `B` (Typing[4019])
   File "switch_exhaustive.bad.php", line 4, characters 12-12:
   Enum class declared here
 File "switch_exhaustive.bad.php", line 41, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `B` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `B` (Typing[4019])
   File "switch_exhaustive.bad.php", line 9, characters 12-12:
   Enum class declared here
 File "switch_exhaustive.bad.php", line 36, characters 8-11:

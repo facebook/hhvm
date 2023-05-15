@@ -693,7 +693,7 @@ module Primary = struct
       let claim =
         lazy
           ( pos,
-            "`switch` statement nonexhaustive; the following cases are missing: "
+            "`switch` statement nonexhaustive; at least the following cases are missing: "
             ^ (List.map ~f:Markdown_lite.md_codify missing
               |> String.concat ~sep:", ") )
       and reason = lazy [(decl_pos, kind ^ " declared here")] in

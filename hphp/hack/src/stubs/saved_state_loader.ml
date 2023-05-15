@@ -117,3 +117,5 @@ module LoadError = struct
 end
 
 let get_project_name _ = ""
+
+let ignore_saved_state_version_mismatch ~ignore_hh_version = ignore_hh_version

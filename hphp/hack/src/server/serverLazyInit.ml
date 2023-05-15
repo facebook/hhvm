@@ -42,7 +42,11 @@ let lock_and_load_deptable
   match deptable with
   | CustomDeptable fn ->
     let () =
-      if not ignore_hh_version then
+      if
+        not
+          (Saved_state_loader.ignore_saved_state_version_mismatch
+             ~ignore_hh_version)
+      then
         let build_revision =
           SaveStateService.saved_state_build_revision_read ~base_file_name
         in

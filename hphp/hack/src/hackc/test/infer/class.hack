@@ -379,6 +379,16 @@ class C {
 // CHECK:   ret null
 // CHECK: }
 
+abstract class AbstractClass {
+  // TEST-CHECK-BAL: declare AbstractClass$static.abs_static_func
+  // CHECK: declare AbstractClass$static.abs_static_func(*AbstractClass$static, *HackInt, *HackFloat): *HackString
+  public static abstract function abs_static_func(int $a, float $b): string;
+
+  // TEST-CHECK-BAL: declare AbstractClass.abs_func
+  // CHECK: declare AbstractClass.abs_func(*AbstractClass, *HackInt, *HackFloat): *HackString
+  public abstract function abs_func(int $a, float $b): string;
+}
+
 trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
   // CHECK: define T0.trait_parent_caller($this: *T0) : *void {

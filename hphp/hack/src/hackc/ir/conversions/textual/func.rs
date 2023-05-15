@@ -300,6 +300,42 @@ fn write_func(
     Ok(())
 }
 
+pub(crate) fn write_func_decl(
+    txf: &mut TextualFile<'_>,
+    unit_state: &mut UnitState,
+    this_ty: textual::Ty,
+    mut func: ir::Func<'_>,
+    func_info: Arc<FuncInfo<'_>>,
+) -> Result {
+    let params = std::mem::take(&mut func.params);
+    let (_, param_tys, _) = compute_func_params(&params, unit_state, this_ty)?;
+
+    let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
+
+    // See if we need a temp var for use by member_ops.
+    if member_op::func_needs_base_var(&func) {}
+
+    let name = match *func_info {
+        FuncInfo::Method(ref mi) => match mi.name {
+            name if name.is_86cinit(&unit_state.strings) => {
+                FunctionName::Intrinsic(Intrinsic::ConstInit(mi.class.name))
+            }
+            name if name.is_86pinit(&unit_state.strings) => {
+                FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
+            }
+            name if name.is_86sinit(&unit_state.strings) => {
+                FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
+            }
+            _ => FunctionName::method(mi.class.name, mi.is_static, mi.name),
+        },
+        FuncInfo::Function(ref fi) => FunctionName::Function(fi.name),
+    };
+
+    txf.declare_function(&name, &param_tys, &ret_ty)?;
+
+    Ok(())
+}
+
 /// For each static method we also write a non-static version of the method so
 /// that callers of 'self::foo()' don't have to know if foo is static or
 /// non-static.

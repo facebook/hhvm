@@ -283,7 +283,17 @@ impl ClassState<'_, '_, '_> {
             flags: method.flags,
         });
 
-        func::lower_and_write_func(self.txf, self.unit_state, this_ty, method.func, func_info)?;
+        if method.attrs.is_abstract() {
+            func::write_func_decl(
+                self.txf,
+                self.unit_state,
+                this_ty,
+                method.func,
+                Arc::new(func_info),
+            )?;
+        } else {
+            func::lower_and_write_func(self.txf, self.unit_state, this_ty, method.func, func_info)?;
+        }
 
         Ok(())
     }

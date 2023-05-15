@@ -308,11 +308,15 @@ let get_stats ~include_slightly_costly_stats tally :
 
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
-type process_workitem_result = {
+type workitem_accumulator = {
   progress: typing_progress;
   errors: Errors.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
+}
+
+type process_workitem_result = {
+  acc: workitem_accumulator;
   workitem_ends_under_cap: bool;
 }
 
@@ -323,10 +327,8 @@ let process_one_workitem
     ~memory_cap
     ~longlived_workers
     ~error_count_at_start_of_batch
-    ~progress
-    ~errors
-    ~stats
-    ~tally : process_workitem_result =
+    ~(acc : workitem_accumulator) : process_workitem_result =
+  let { progress; errors; tally; stats } = acc in
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
       memory_cap
@@ -446,7 +448,10 @@ let process_one_workitem
     }
   in
 
-  { progress; errors; tally; stats = final_stats; workitem_ends_under_cap }
+  {
+    acc = { progress; errors; tally; stats = final_stats };
+    workitem_ends_under_cap;
+  }
 
 let process_workitems
     (ctx : Provider_context.t)
@@ -477,38 +482,41 @@ let process_workitems
   if not longlived_workers then SharedMem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
-  (* Let's curry up the function now so it's easier to invoke later in the loop. *)
-  let process_one_workitem =
-    process_one_workitem
-      ~ctx
-      ~check_info
-      ~batch_info
-      ~error_count_at_start_of_batch
-      ~memory_cap
-      ~longlived_workers
-  in
 
-  let rec process_workitems_loop ~progress ~errors ~stats ~tally =
-    match progress.remaining with
-    | [] -> (progress, errors)
+  let rec process_workitems_loop ~(acc : workitem_accumulator) :
+      workitem_accumulator =
+    match acc.progress.remaining with
+    | [] -> acc
     | _ ->
-      let { progress; errors; tally; stats; workitem_ends_under_cap } =
-        process_one_workitem ~progress ~errors ~stats ~tally
+      let { acc; workitem_ends_under_cap } =
+        process_one_workitem
+          ~ctx
+          ~check_info
+          ~batch_info
+          ~error_count_at_start_of_batch
+          ~memory_cap
+          ~longlived_workers
+          ~acc
       in
       if workitem_ends_under_cap then
-        process_workitems_loop ~progress ~errors ~stats ~tally
+        process_workitems_loop ~acc
       else
-        (progress, errors)
+        acc
   in
 
   (* Process as many files as we can, and merge in their errors *)
-  let (progress, errors) =
+  let { progress; errors; tally = _; stats = _ } =
     process_workitems_loop
-      ~progress
-      ~errors
-      ~tally:ProcessFilesTally.empty
-      ~stats:
-        (get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty)
+      ~acc:
+        {
+          progress;
+          errors;
+          tally = ProcessFilesTally.empty;
+          stats =
+            get_stats
+              ~include_slightly_costly_stats:true
+              ProcessFilesTally.empty;
+        }
   in
 
   (* Update edges *)

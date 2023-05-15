@@ -329,6 +329,14 @@ let process_one_workitem
     ~error_count_at_start_of_batch
     ~(acc : workitem_accumulator) : process_workitem_result =
   let { progress; errors; tally; stats } = acc in
+
+  let { remaining; completed; deferred } = progress in
+  let (fn, remaining) =
+    match remaining with
+    | [] -> failwith "progress.remaining wasn't expected to be empty"
+    | fn :: remaining -> (fn, remaining)
+  in
+
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
       memory_cap
@@ -340,9 +348,8 @@ let process_one_workitem
     check_info.per_file_profiling
       .HackEventLogger.PerFileProfilingConfig.profile_type_check_twice
   in
-  let fn = List.hd_exn progress.remaining in
 
-  let (file, decl, mid_stats, file_errors, deferred, tally) =
+  let (file, decl, mid_stats, file_errors, new_deferred, tally) =
     match fn with
     | Check file ->
       (* We'll show at least the first five errors in the project. Maybe more,
@@ -406,8 +413,6 @@ let process_one_workitem
     | Some mid_stats -> (mid_stats, Some final_stats)
   in
 
-  let (fns, check_fns, errors) = (List.tl_exn progress.remaining, [], errors) in
-
   (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
      by flushing the parser cache and doing a major GC; (2) if this fails, we decline to typecheck
      the remaining files.
@@ -442,9 +447,9 @@ let process_one_workitem
 
   let progress =
     {
-      completed = (fn :: check_fns) @ progress.completed;
-      remaining = fns;
-      deferred = List.concat [deferred; progress.deferred];
+      completed = fn :: completed;
+      remaining;
+      deferred = List.concat [new_deferred; deferred];
     }
   in
 

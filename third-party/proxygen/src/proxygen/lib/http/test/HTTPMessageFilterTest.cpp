@@ -38,6 +38,16 @@ TEST(HTTPMessageFilter, TestFilterPauseResumePropagatedToFilter) {
 
   EXPECT_CALL(mockFilter, resume(10));
   testFilter2.resume(10);
+
+  // Pause the chain
+  EXPECT_CALL(mockFilter, pause());
+  testFilter2.pause();
+
+  MockHTTPMessageFilter mockFilter2;
+
+  // Switch to a new handler, should get pauseIngress
+  EXPECT_CALL(mockFilter2, pause());
+  testFilter1.setPrevFilter(&mockFilter2);
 }
 
 TEST(HTTPMessageFilter, TestFilterPauseResumePropagatedToTxn) {
@@ -59,6 +69,17 @@ TEST(HTTPMessageFilter, TestFilterPauseResumePropagatedToTxn) {
 
   EXPECT_CALL(mockTxn, resumeIngress());
   testFilter2.resume(10);
+
+  // Pause the chain
+  EXPECT_CALL(mockTxn, pauseIngress());
+  testFilter2.pause();
+
+  MockHTTPTransaction mockTxn2(TransportDirection::UPSTREAM, 2, 0, q);
+  auto sink2 = std::make_unique<HTTPTransactionSink>(&mockTxn2);
+
+  // Switch to a new handler, should get pauseIngress
+  EXPECT_CALL(mockTxn2, pauseIngress());
+  testFilter1.setPrevSink(sink2.get());
 }
 
 TEST(HTTPMessageFilter, TestFilterOnBodyDataTracking) {

@@ -1589,6 +1589,11 @@ void HTTPTransaction::updateHandlerPauseState() {
 
   if (handler_ && handlerShouldBePaused != handlerEgressPaused_) {
     if (handlerShouldBePaused) {
+      if (canSendHeaders()) {
+        VLOG(4) << "txn hasn't egressed headers, not updating pause state "
+                << *this;
+        return;
+      }
       handlerEgressPaused_ = true;
       VLOG(4) << "egress paused txn=" << *this;
       handler_->onEgressPaused();

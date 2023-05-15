@@ -598,3 +598,17 @@ TEST_F(DownstreamTransactionTest, IngressStateViolationWithByteEvents) {
   txn.decrementPendingByteEvents();
   eventBase_.loop();
 }
+
+TEST_F(DownstreamTransactionTest, SetHandlerWhenPaused) {
+  auto& txn = makeTxn(true, 10, 10);
+
+  EXPECT_CALL(handler_, _setTransaction(&txn));
+  txn.setHandler(&handler_);
+  txn.sendHeaders(getResponse(200));
+  EXPECT_CALL(handler_, _onEgressPaused());
+  txn.sendBody(makeBuf(20));
+  StrictMock<MockHTTPHandler> handler2;
+  EXPECT_CALL(handler2, _setTransaction(&txn));
+  EXPECT_CALL(handler2, _onEgressPaused());
+  txn.setHandler(&handler2);
+}

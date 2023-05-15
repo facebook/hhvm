@@ -26,9 +26,17 @@ class HTTPMessageFilter
     nextTransactionHandler_ = CHECK_NOTNULL(next);
   }
   virtual void setPrevFilter(HTTPMessageFilter* prev) noexcept {
+    if (prev_.which() == 0 && boost::get<HTTPMessageFilter*>(prev_) != prev &&
+        prev && nextElementIsPaused_) {
+      prev->pause();
+    }
     prev_ = CHECK_NOTNULL(prev);
   }
   virtual void setPrevSink(HTTPSink* prev) noexcept {
+    if (prev_.which() == 1 && boost::get<HTTPSink*>(prev_) != prev && prev &&
+        nextElementIsPaused_) {
+      prev->pauseIngress();
+    }
     prev_ = CHECK_NOTNULL(prev);
   }
   HTTPTransaction::Handler* getNextTransactionHandler() {

@@ -678,9 +678,14 @@ class HTTPTransaction
   }
 
   virtual void setHandler(Handler* handler) {
+    if (handler_ != handler) {
+      handlerEgressPaused_ = false;
+    }
     handler_ = handler;
     if (handler_) {
+      DestructorGuard dg(this);
       handler_->setTransaction(this);
+      updateHandlerPauseState();
     }
   }
 
@@ -1043,16 +1048,17 @@ class HTTPTransaction
    * @return true if we can send headers on this transaction
    *
    * Here's the logic:
-   *  1) state machine says sendHeaders is OK AND
-   *   2a) this is an upstream (allows for mid-stream headers) OR
-   *   2b) this downstream has not sent a response
-   *   2c) this downstream has only sent 1xx responses
+   *  1) In start state (TODO: egress sm needs final/non-final)
+   *  2) This is downstream AND state machine says sendHeaders is OK AND
+   *   2a) this downstream has not sent a response
+   *   2b) this downstream has only sent 1xx responses
    */
   virtual bool canSendHeaders() const {
-    return HTTPTransactionEgressSM::canTransit(
-               egressState_, HTTPTransactionEgressSM::Event::sendHeaders) &&
-           (isUpstream() || lastResponseStatus_ == 0 ||
-            extraResponseExpected());
+    return (egressState_ == HTTPTransactionEgressSM::State::Start) ||
+           (isDownstream() &&
+            HTTPTransactionEgressSM::canTransit(
+                egressState_, HTTPTransactionEgressSM::Event::sendHeaders) &&
+            (lastResponseStatus_ == 0 || extraResponseExpected()));
   }
 
   /**

@@ -53,7 +53,9 @@ void maybeLogTlsPeerCertEvent(
           allowedIPs.begin(),
           allowedIPs.end(),
           [&peerIP, peerLocal](const folly::IPAddress& allowedIP) {
+            // Host ipv6 subnet
             return peerIP == allowedIP ||
+                (allowedIP.isV6() && peerIP.inSubnet(allowedIP, 64)) ||
                 (peerLocal && detail::isLocalIP(allowedIP));
           })) {
     THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);

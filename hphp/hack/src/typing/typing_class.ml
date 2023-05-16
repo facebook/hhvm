@@ -1744,47 +1744,46 @@ let class_def_ env c tc =
           typed_vars,
           typed_static_vars,
           typed_methods ),
-        global_inference_envs ) =
+        _global_inference_envs ) =
     check_class_members env c tc
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in
   check_SupportDynamicType env c tc;
   Option.iter ~f:Typing_error_utils.add_typing_error e1;
-  ( {
-      Aast.c_span = c.c_span;
-      Aast.c_annotation = Env.save (Env.get_tpenv env) env;
-      Aast.c_mode = c.c_mode;
-      Aast.c_final = c.c_final;
-      Aast.c_is_xhp = c.c_is_xhp;
-      Aast.c_has_xhp_keyword = c.c_has_xhp_keyword;
-      Aast.c_kind = c.c_kind;
-      Aast.c_name = c.c_name;
-      Aast.c_tparams = tparams;
-      Aast.c_extends = c.c_extends;
-      Aast.c_uses = c.c_uses;
-      Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
-      Aast.c_xhp_category = c.c_xhp_category;
-      Aast.c_reqs = c.c_reqs;
-      Aast.c_implements = c.c_implements;
-      Aast.c_where_constraints = c.c_where_constraints;
-      Aast.c_consts = typed_consts;
-      Aast.c_typeconsts = typed_typeconsts;
-      Aast.c_vars = typed_static_vars @ typed_vars;
-      Aast.c_methods = typed_methods;
-      Aast.c_file_attributes = file_attrs;
-      Aast.c_user_attributes = user_attributes;
-      Aast.c_namespace = c.c_namespace;
-      Aast.c_enum = c.c_enum;
-      Aast.c_doc_comment = c.c_doc_comment;
-      Aast.c_xhp_children = c.c_xhp_children;
-      Aast.c_xhp_attrs = [];
-      Aast.c_emit_id = c.c_emit_id;
-      Aast.c_internal = c.c_internal;
-      Aast.c_module = c.c_module;
-      Aast.c_docs_url = c.c_docs_url;
-    },
-    global_inference_envs )
+  {
+    Aast.c_span = c.c_span;
+    Aast.c_annotation = Env.save (Env.get_tpenv env) env;
+    Aast.c_mode = c.c_mode;
+    Aast.c_final = c.c_final;
+    Aast.c_is_xhp = c.c_is_xhp;
+    Aast.c_has_xhp_keyword = c.c_has_xhp_keyword;
+    Aast.c_kind = c.c_kind;
+    Aast.c_name = c.c_name;
+    Aast.c_tparams = tparams;
+    Aast.c_extends = c.c_extends;
+    Aast.c_uses = c.c_uses;
+    Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
+    Aast.c_xhp_category = c.c_xhp_category;
+    Aast.c_reqs = c.c_reqs;
+    Aast.c_implements = c.c_implements;
+    Aast.c_where_constraints = c.c_where_constraints;
+    Aast.c_consts = typed_consts;
+    Aast.c_typeconsts = typed_typeconsts;
+    Aast.c_vars = typed_static_vars @ typed_vars;
+    Aast.c_methods = typed_methods;
+    Aast.c_file_attributes = file_attrs;
+    Aast.c_user_attributes = user_attributes;
+    Aast.c_namespace = c.c_namespace;
+    Aast.c_enum = c.c_enum;
+    Aast.c_doc_comment = c.c_doc_comment;
+    Aast.c_xhp_children = c.c_xhp_children;
+    Aast.c_xhp_attrs = [];
+    Aast.c_emit_id = c.c_emit_id;
+    Aast.c_internal = c.c_internal;
+    Aast.c_module = c.c_module;
+    Aast.c_docs_url = c.c_docs_url;
+  }
 
 let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in

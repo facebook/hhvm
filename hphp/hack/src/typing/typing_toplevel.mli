@@ -7,23 +7,11 @@
  *
  *)
 
-val class_def :
-  Provider_context.t ->
-  Nast.class_ ->
-  (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
+val class_def : Provider_context.t -> Nast.class_ -> Tast.class_ option
 
-val fun_def :
-  Provider_context.t ->
-  Nast.fun_def ->
-  (Tast.fun_def list * Typing_inference_env.t_global_with_pos) option
+val fun_def : Provider_context.t -> Nast.fun_def -> Tast.fun_def list option
 
 val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
-
-val nast_to_tast_gienv :
-  do_tast_checks:bool ->
-  Provider_context.t ->
-  Nast.program ->
-  Tast.program * Typing_inference_env.t_global_with_pos list
 
 (** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
 

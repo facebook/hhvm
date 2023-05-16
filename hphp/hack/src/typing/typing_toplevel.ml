@@ -46,8 +46,7 @@ let get_decl_function_header env function_id =
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
-let fun_def ctx fd :
-    (Tast.fun_def list * Typing_inference_env.t_global_with_pos) option =
+let fun_def ctx fd : Tast.fun_def list option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
@@ -240,7 +239,7 @@ let fun_def ctx fd :
       Aast.fd_where_constraints = fd.fd_where_constraints;
     }
   in
-  let (env, fundefs) =
+  let fundefs =
     let fundef_of_dynamic
         (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
       let open Aast in
@@ -281,14 +280,13 @@ let fun_def ctx fd :
         else
           []
       in
-      (env, fundef :: fundefs)
+      fundef :: fundefs
     else
-      (env, [fundef])
+      [fundef]
   in
-  let (_env, global_inference_env) = Env.extract_global_inference_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
-  (fundefs, (pos, global_inference_env))
+  fundefs
 
 let class_def = Typing_class.class_def
 
@@ -378,22 +376,21 @@ let module_def ctx md =
     Aast.md_file_attributes = file_attributes;
   }
 
-let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
-    _ * Typing_inference_env.t_global_with_pos list =
+let nast_to_tast ~(do_tast_checks : bool) ctx nast : Tast.program =
   let convert_def = function
     (* Sometimes typing will just return `None` but that should only be the case
      * if an error had already been registered e.g. in naming
      *)
     | Fun f -> begin
       match fun_def ctx f with
-      | Some (fs, env) -> Some (List.map ~f:(fun f -> Aast.Fun f) fs, [env])
+      | Some fs -> Some (List.map ~f:(fun f -> Aast.Fun f) fs)
       | None -> None
     end
-    | Constant gc -> Some ([Aast.Constant (gconst_def ctx gc)], [])
-    | Typedef td -> Some ([Aast.Typedef (Typing_typedef.typedef_def ctx td)], [])
+    | Constant gc -> Some [Aast.Constant (gconst_def ctx gc)]
+    | Typedef td -> Some [Aast.Typedef (Typing_typedef.typedef_def ctx td)]
     | Class c -> begin
       match class_def ctx c with
-      | Some (c, envs) -> Some ([Aast.Class c], envs)
+      | Some c -> Some [Aast.Class c]
       | None -> None
     end
     (* We don't typecheck top level statements:
@@ -402,9 +399,9 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
      *)
     | Stmt s ->
       let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-      Some ([Aast.Stmt (snd (Typing.stmt env s))], [])
-    | Module md -> Some ([Aast.Module (module_def ctx md)], [])
-    | SetModule sm -> Some ([Aast.SetModule sm], [])
+      Some [Aast.Stmt (snd (Typing.stmt env s))]
+    | Module md -> Some [Aast.Module (module_def ctx md)]
+    | SetModule sm -> Some [Aast.SetModule sm]
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -413,12 +410,6 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   if do_tast_checks then Nast_check.program ctx nast;
-  let (tast, envs) = List.unzip @@ List.filter_map nast ~f:convert_def in
-  let tast = List.concat tast in
-  let envs = List.concat envs in
+  let tast = List.filter_map nast ~f:convert_def |> List.concat in
   if do_tast_checks then Tast_check.program ctx tast;
-  (tast, envs)
-
-let nast_to_tast ~do_tast_checks ctx nast =
-  let (tast, _gienvs) = nast_to_tast_gienv ~do_tast_checks ctx nast in
   tast

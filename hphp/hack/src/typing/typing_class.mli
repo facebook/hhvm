@@ -22,7 +22,4 @@ val method_def_standalone :
   string ->
   (Tast.method_ list * Typing_inference_env.t_global_with_pos) option
 
-val class_def :
-  Provider_context.t ->
-  Nast.class_ ->
-  (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
+val class_def : Provider_context.t -> Nast.class_ -> Tast.class_ option

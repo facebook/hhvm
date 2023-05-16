@@ -228,6 +228,10 @@ CarbonRouterInstance<RouterInfo>::setupProxy(
 template <class RouterInfo>
 folly::Expected<folly::Unit, std::string>
 CarbonRouterInstance<RouterInfo>::spinUp() {
+  if (opts_.force_same_thread && opts_.thread_affinity) {
+    return folly::makeUnexpected(std::string(
+        "force_same_thread and thread_affinity may not both be true"));
+  }
   // Must init compression before creating proxies.
   if (opts_.enable_compression) {
     initCompression(*this);

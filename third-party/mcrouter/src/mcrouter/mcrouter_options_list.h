@@ -840,6 +840,13 @@ MCROUTER_OPTION_TOGGLE(
     "Prefer AES-OCB cipher for TLSv1.3 connections if available")
 
 MCROUTER_OPTION_TOGGLE(
+    force_same_thread,
+    false,
+    "force-same-thread",
+    no_short,
+    "Route requests in the same thread as the caller.")
+
+MCROUTER_OPTION_TOGGLE(
     thread_affinity,
     false,
     "thread-affinity",

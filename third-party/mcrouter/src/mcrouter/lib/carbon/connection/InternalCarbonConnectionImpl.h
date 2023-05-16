@@ -23,6 +23,7 @@ struct InternalCarbonConnectionOptions {
   InternalCarbonConnectionOptions() = default;
   size_t maxOutstanding{1024};
   size_t maxOutstandingError{false};
+  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreads{nullptr};
 };
 
 template <class If>
@@ -50,8 +51,9 @@ class InternalCarbonConnectionImpl {
       RecreateFunc recreateFunc = nullptr)
       : recreateFunc_(std::move(recreateFunc)) {
     init(
-        facebook::memcache::mcrouter::CarbonRouterInstance<
-            typename If::RouterInfo>::init(persistenceId, mcrouterOptions),
+        facebook::memcache::mcrouter::
+            CarbonRouterInstance<typename If::RouterInfo>::init(
+                persistenceId, mcrouterOptions, options.ioThreads),
         options);
   }
 
@@ -130,8 +132,12 @@ class InternalCarbonConnectionImpl {
       throw CarbonConnectionException("Failed to initialize router");
     }
     try {
-      client_ = router_->createClient(
-          options.maxOutstanding, options.maxOutstandingError);
+      if (router_->opts().force_same_thread) {
+        client_ = router_->createSameThreadClient(options.maxOutstanding);
+      } else {
+        client_ = router_->createClient(
+            options.maxOutstanding, options.maxOutstandingError);
+      }
     } catch (const std::runtime_error& e) {
       throw CarbonConnectionException(
           std::string("Failed to initialize router client: ") + e.what());

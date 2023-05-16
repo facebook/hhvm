@@ -8,16 +8,10 @@
  *)
 
 val type_fun :
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  (Tast.def list * Typing_inference_env.t_global_with_pos) option
+  Provider_context.t -> Relative_path.t -> string -> Tast.def list option
 
 val type_class :
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  (Tast.def * Typing_inference_env.t_global_with_pos list) option
+  Provider_context.t -> Relative_path.t -> string -> Tast.def option
 
 val check_typedef :
   Provider_context.t -> Relative_path.t -> string -> Tast.def option

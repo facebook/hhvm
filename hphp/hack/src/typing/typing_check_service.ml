@@ -158,15 +158,6 @@ let process_file
     let opts = Provider_context.get_tcopt ctx in
     let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
-    let ignore_check_typedef opts fn name =
-      ignore (Typing_check_job.check_typedef opts fn name)
-    in
-    let ignore_check_const opts fn name =
-      ignore (Typing_check_job.check_const opts fn name)
-    in
-    let ignore_check_module opts fn name =
-      ignore (Typing_check_job.check_module opts fn name)
-    in
     try
       let result =
         Deferred_decl.with_deferred_decls
@@ -176,22 +167,26 @@ let process_file
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
         Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
-        let (_fun_tasts, _tvenvs) =
+        let _fun_tasts =
           List.map funs ~f:FileInfo.id_name
           |> List.filter_map ~f:(Typing_check_job.type_fun ctx fn)
-          |> List.unzip
         in
-        let (_class_tasts, _tvenvs) =
+        let _class_tasts =
           List.map classes ~f:FileInfo.id_name
           |> List.filter_map ~f:(Typing_check_job.type_class ctx fn)
-          |> List.unzip
         in
-        List.map typedefs ~f:FileInfo.id_name
-        |> List.iter ~f:(ignore_check_typedef ctx fn);
-        List.map gconsts ~f:FileInfo.id_name
-        |> List.iter ~f:(ignore_check_const ctx fn);
-        List.map modules ~f:FileInfo.id_name
-        |> List.iter ~f:(ignore_check_module ctx fn);
+        let _typedef_asts =
+          List.map typedefs ~f:FileInfo.id_name
+          |> List.filter_map ~f:(Typing_check_job.check_typedef ctx fn)
+        in
+        let _const_asts =
+          List.map gconsts ~f:FileInfo.id_name
+          |> List.filter_map ~f:(Typing_check_job.check_const ctx fn)
+        in
+        let _module_asts =
+          List.map modules ~f:FileInfo.id_name
+          |> List.filter_map ~f:(Typing_check_job.check_module ctx fn)
+        in
         ()
       in
       match result with

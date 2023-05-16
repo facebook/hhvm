@@ -946,7 +946,7 @@ impl<T> Serializable for T where
 {
 }
 
-/// Serialize a Thrift value using the compact protocol.
+/// Serialize a Thrift value using the simple JSON protocol.
 pub fn serialize<T>(v: T) -> Bytes
 where
     T: Serializable,

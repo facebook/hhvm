@@ -195,7 +195,7 @@ std::ostream& operator<<(std::ostream& os, const PoolOptions& options) {
             << ",pool per instance:" << options.poolPerMysqlInstance() << "}";
 }
 
-std::ostream& operator<<(std::ostream& os, PoolKey key) {
+std::ostream& operator<<(std::ostream& os, const PoolKey& key) {
   return os << "{key:" << key.connKey.getDisplayString()
             << ",options:" << key.connOptions.getDisplayString() << "}";
 }

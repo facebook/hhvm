@@ -41,15 +41,17 @@ QueryArgument::QueryArgument(folly::fbstring&& val) : value_(std::move(val)) {}
 
 QueryArgument::QueryArgument(double double_val) : value_(double_val) {}
 
-QueryArgument::QueryArgument(std::initializer_list<QueryArgument> list)
+QueryArgument::QueryArgument(const std::initializer_list<QueryArgument>& list)
     : value_(std::vector<QueryArgument>(list.begin(), list.end())) {}
 
 QueryArgument::QueryArgument(std::vector<QueryArgument> arg_list)
-    : value_(std::vector<QueryArgument>(arg_list.begin(), arg_list.end())) {}
+    : value_(std::move(arg_list)) {}
 
 QueryArgument::QueryArgument() : value_(std::vector<ArgPair>()) {}
 
-QueryArgument::QueryArgument(folly::StringPiece param1, QueryArgument param2)
+QueryArgument::QueryArgument(
+    folly::StringPiece param1,
+    const QueryArgument& param2)
     : value_(std::vector<ArgPair>()) {
   getPairs().emplace_back(ArgPair(param1.str(), param2));
 }
@@ -223,7 +225,9 @@ std::vector<ArgPair>& QueryArgument::getPairs() {
 Query::Query(
     const folly::StringPiece query_text,
     std::vector<QueryArgument> params)
-    : query_text_(query_text), unsafe_query_(false), params_(params) {}
+    : query_text_(query_text),
+      unsafe_query_(false),
+      params_(std::move(params)) {}
 
 Query::~Query() {}
 

@@ -423,7 +423,8 @@ class QueryArgument {
       : value_(static_cast<int64_t>(enum_val)) {}
   /* implicit */ QueryArgument(double double_val);
 
-  /* implicit */ QueryArgument(std::initializer_list<QueryArgument> list);
+  /* implicit */ QueryArgument(
+      const std::initializer_list<QueryArgument>& list);
   /* implicit */ QueryArgument(std::vector<QueryArgument> arg_list);
   /* implicit */ QueryArgument(std::tuple<folly::fbstring, folly::fbstring> tup)
       : value_(tup) {}
@@ -488,7 +489,7 @@ class QueryArgument {
 
   // Pair constructors
   QueryArgument();
-  QueryArgument(folly::StringPiece param1, QueryArgument param2);
+  QueryArgument(folly::StringPiece param1, const QueryArgument& param2);
 
   // Since we already have callsites that use dynamic, we are keeping the
   // support, but internally we unpack them.

@@ -206,7 +206,7 @@ void StreamedQueryResult::setResult(
 }
 
 void StreamedQueryResult::setException(folly::exception_wrapper ex) {
-  exception_wrapper_ = ex;
+  exception_wrapper_ = std::move(ex);
 }
 
 void StreamedQueryResult::freeHandler() {
@@ -215,7 +215,7 @@ void StreamedQueryResult::freeHandler() {
 
 MultiQueryStreamHandler::MultiQueryStreamHandler(
     std::shared_ptr<MultiQueryStreamOperation> op)
-    : operation_(op) {}
+    : operation_(std::move(op)) {}
 
 folly::Optional<StreamedQueryResult> MultiQueryStreamHandler::nextQuery() {
   if (state_ == State::RunQuery) {

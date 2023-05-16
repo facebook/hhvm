@@ -25,7 +25,8 @@ std::shared_ptr<SyncMysqlClient> SyncMysqlClient::defaultClient() {
 std::unique_ptr<Connection> SyncMysqlClient::createConnection(
     ConnectionKey conn_key,
     MYSQL* mysql_conn) {
-  return std::make_unique<SyncConnection>(this, conn_key, mysql_conn);
+  return std::make_unique<SyncConnection>(
+      this, std::move(conn_key), mysql_conn);
 }
 
 SyncConnection::~SyncConnection() {

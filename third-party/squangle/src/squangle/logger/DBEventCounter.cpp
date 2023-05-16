@@ -16,7 +16,7 @@ namespace facebook {
 namespace db {
 
 void ConnectionContextBase::collectNormalValues(
-    AddNormalValueFunction add) const {
+    const AddNormalValueFunction& add) const {
   add("is_ssl", folly::to<std::string>(isSslConnection));
   add("is_ssl_session_reused", folly::to<std::string>(sslSessionReused));
   if (!sslVersion.empty()) {
@@ -37,7 +37,8 @@ void ConnectionContextBase::collectNormalValues(
   }
 }
 
-void ConnectionContextBase::collectIntValues(AddIntValueFunction add) const {
+void ConnectionContextBase::collectIntValues(
+    const AddIntValueFunction& add) const {
   add("ssl_server_cert_validated", isServerCertValidated ? 1 : 0);
   add("ssl_client_identity_cert", isIdentityClientCert ? 1 : 0);
   if (certCacheSize.has_value()) {

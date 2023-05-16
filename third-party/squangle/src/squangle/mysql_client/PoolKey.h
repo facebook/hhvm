@@ -70,7 +70,7 @@ struct PoolKeyStats {
   size_t connection_limit;
 };
 
-std::ostream& operator<<(std::ostream& os, PoolKey key);
+std::ostream& operator<<(std::ostream& os, const PoolKey& key);
 
 class PoolKeyHash {
  public:

@@ -16,11 +16,14 @@
 
 package thrift
 
-// Server transport. Object which provides client transports.
+import "net"
+
+// ServerTransport is an interface for server transports.
 type ServerTransport interface {
 	Listen() error
 	Accept() (Transport, error)
 	Close() error
+	Addr() net.Addr
 
 	// Optional method implementation. This signals to the server transport
 	// that it should break out of any accept() or listen() that it is currently

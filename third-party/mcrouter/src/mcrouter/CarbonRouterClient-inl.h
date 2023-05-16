@@ -325,6 +325,23 @@ CarbonRouterClient<RouterInfo>::CarbonRouterClient(
       mode_(mode),
       proxies_(router->getProxies()),
       proxiesToNotify_(proxies_.size(), false) {
+  // If the mode is SameThread, make sure to match the current EventBase with
+  // the corresponding Proxy EventBase. This has the requirement that create
+  // is called from an EventBase that's currently a Proxy EventBase.
+  if (mode == ThreadMode::SameThread) {
+    const auto& proxies = router->getProxies();
+    auto evb = folly::EventBaseManager::get()->getExistingEventBase();
+    for (size_t i = 0; i < proxies.size(); i++) {
+      if (evb == &(proxies[i]->eventBase().getEventBase())) {
+        proxyIdx_ = i;
+        return;
+      }
+    }
+    LOG(ERROR)
+        << "Could not find a matching same-thread EVB when creating CarbonRouterClient";
+    // We fall back to setting the proxy index with the next index if we
+    // couldn't find a match.
+  }
   proxyIdx_ = router->nextProxyIndex();
 }
 

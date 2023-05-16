@@ -247,6 +247,8 @@ type reqMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePing{}
 
+type MyServicePingArgs = reqMyServicePing
+
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
@@ -495,6 +497,8 @@ type reqMyServiceGetRandomData struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetRandomData{}
 
+type MyServiceGetRandomDataArgs = reqMyServiceGetRandomData
+
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
@@ -717,6 +721,8 @@ type reqMyServiceHasDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasDataById{}
+
+type MyServiceHasDataByIdArgs = reqMyServiceHasDataById
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{}).
@@ -998,6 +1004,8 @@ type reqMyServiceGetDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetDataById{}
+
+type MyServiceGetDataByIdArgs = reqMyServiceGetDataById
 
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{}).
@@ -1281,6 +1289,8 @@ type reqMyServicePutDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePutDataById{}
 
+type MyServicePutDataByIdArgs = reqMyServicePutDataById
+
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{}).
         SetIdNonCompat(0).
@@ -1562,6 +1572,8 @@ type reqMyServiceLobDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceLobDataById{}
 
+type MyServiceLobDataByIdArgs = reqMyServiceLobDataById
+
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{}).
         SetIdNonCompat(0).
@@ -1840,6 +1852,8 @@ type reqMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGoDoNothing{}
+
+type MyServiceGoDoNothingArgs = reqMyServiceGoDoNothing
 
 func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
     return (&reqMyServiceGoDoNothing{})
@@ -2556,6 +2570,8 @@ type reqMyServicePrioParentPing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioParentPing{}
 
+type MyServicePrioParentPingArgs = reqMyServicePrioParentPing
+
 func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
     return (&reqMyServicePrioParentPing{})
 }
@@ -2718,6 +2734,8 @@ type reqMyServicePrioParentPong struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioParentPong{}
+
+type MyServicePrioParentPongArgs = reqMyServicePrioParentPong
 
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
     return (&reqMyServicePrioParentPong{})
@@ -3150,6 +3168,8 @@ type reqMyServicePrioChildPang struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePrioChildPang{}
 
+type MyServicePrioChildPangArgs = reqMyServicePrioChildPang
+
 func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
     return (&reqMyServicePrioChildPang{})
 }
@@ -3494,6 +3514,8 @@ type reqBadServiceBar struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqBadServiceBar{}
+
+type BadServiceBarArgs = reqBadServiceBar
 
 func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{})

@@ -29,4 +29,8 @@ type {{struct:go_name}} struct {
 var _ thrift.Struct = &{{struct:go_name}}{}
 {{#struct:resp?}}
 var _ thrift.WritableResult = &{{struct:go_name}}{}
-{{/struct:resp?}}
+{{/struct:resp?}}{{!
+}}{{#struct:req?}}
+
+type {{struct:go_public_req_name}} = {{struct:go_name}}
+{{/struct:req?}}

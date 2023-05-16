@@ -162,6 +162,8 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
+type MyServiceQueryArgs = reqMyServiceQuery
+
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
         SetSNonCompat(*module.NewMyStruct()).
@@ -490,6 +492,8 @@ type reqMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasArgDocs{}
+
+type MyServiceHasArgDocsArgs = reqMyServiceHasArgDocs
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{}).

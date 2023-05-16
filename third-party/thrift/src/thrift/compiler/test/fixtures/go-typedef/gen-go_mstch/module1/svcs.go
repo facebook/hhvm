@@ -176,6 +176,8 @@ type reqFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderByPlate{}
 
+type FinderByPlateArgs = reqFinderByPlate
+
 func newReqFinderByPlate() *reqFinderByPlate {
     return (&reqFinderByPlate{}).
         SetPlateNonCompat(NewPlate())
@@ -482,6 +484,8 @@ type reqFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderAliasByPlate{}
 
+type FinderAliasByPlateArgs = reqFinderAliasByPlate
+
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
     return (&reqFinderAliasByPlate{}).
         SetPlateNonCompat(NewPlate())
@@ -787,6 +791,8 @@ type reqFinderPreviousPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderPreviousPlate{}
+
+type FinderPreviousPlateArgs = reqFinderPreviousPlate
 
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
     return (&reqFinderPreviousPlate{}).

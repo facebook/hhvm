@@ -134,6 +134,8 @@ type reqMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceFoo{}
 
+type MyServiceFooArgs = reqMyServiceFoo
+
 func newReqMyServiceFoo() *reqMyServiceFoo {
     return (&reqMyServiceFoo{})
 }

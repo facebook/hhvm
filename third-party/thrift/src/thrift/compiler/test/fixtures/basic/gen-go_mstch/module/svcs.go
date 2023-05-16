@@ -136,6 +136,8 @@ type reqFooServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFooServiceSimpleRPC{}
 
+type FooServiceSimpleRPCArgs = reqFooServiceSimpleRPC
+
 func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
     return (&reqFooServiceSimpleRPC{})
 }
@@ -507,6 +509,8 @@ type reqFB303ServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
+
+type FB303ServiceSimpleRPCArgs = reqFB303ServiceSimpleRPC
 
 func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{}).
@@ -1186,6 +1190,8 @@ type reqMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePing{}
 
+type MyServicePingArgs = reqMyServicePing
+
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
@@ -1348,6 +1354,8 @@ type reqMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetRandomData{}
+
+type MyServiceGetRandomDataArgs = reqMyServiceGetRandomData
 
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
@@ -1572,6 +1580,8 @@ type reqMyServiceSink struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceSink{}
 
+type MyServiceSinkArgs = reqMyServiceSink
+
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{}).
         SetSinkNonCompat(0)
@@ -1794,6 +1804,8 @@ type reqMyServicePutDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePutDataById{}
+
+type MyServicePutDataByIdArgs = reqMyServicePutDataById
 
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{}).
@@ -2074,6 +2086,8 @@ type reqMyServiceHasDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasDataById{}
+
+type MyServiceHasDataByIdArgs = reqMyServiceHasDataById
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{}).
@@ -2356,6 +2370,8 @@ type reqMyServiceGetDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetDataById{}
 
+type MyServiceGetDataByIdArgs = reqMyServiceGetDataById
+
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{}).
         SetIdNonCompat(0)
@@ -2637,6 +2653,8 @@ type reqMyServiceDeleteDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceDeleteDataById{}
 
+type MyServiceDeleteDataByIdArgs = reqMyServiceDeleteDataById
+
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{}).
         SetIdNonCompat(0)
@@ -2859,6 +2877,8 @@ type reqMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceLobDataById{}
+
+type MyServiceLobDataByIdArgs = reqMyServiceLobDataById
 
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{}).
@@ -3139,6 +3159,8 @@ type reqMyServiceInvalidReturnForHack struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
 
+type MyServiceInvalidReturnForHackArgs = reqMyServiceInvalidReturnForHack
+
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{})
 }
@@ -3401,6 +3423,8 @@ type reqMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceRpcSkippedCodegen{}
+
+type MyServiceRpcSkippedCodegenArgs = reqMyServiceRpcSkippedCodegen
 
 func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
     return (&reqMyServiceRpcSkippedCodegen{})
@@ -4270,6 +4294,8 @@ type reqDbMixedStackArgumentsGetDataByKey0 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
 
+type DbMixedStackArgumentsGetDataByKey0Args = reqDbMixedStackArgumentsGetDataByKey0
+
 func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
     return (&reqDbMixedStackArgumentsGetDataByKey0{}).
         SetKeyNonCompat("")
@@ -4562,6 +4588,8 @@ type reqDbMixedStackArgumentsGetDataByKey1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
+
+type DbMixedStackArgumentsGetDataByKey1Args = reqDbMixedStackArgumentsGetDataByKey1
 
 func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
     return (&reqDbMixedStackArgumentsGetDataByKey1{}).

@@ -202,6 +202,8 @@ type reqRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoBland{}
 
+type RaiserDoBlandArgs = reqRaiserDoBland
+
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
@@ -364,6 +366,8 @@ type reqRaiserDoRaise struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoRaise{}
+
+type RaiserDoRaiseArgs = reqRaiserDoRaise
 
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
@@ -783,6 +787,8 @@ type reqRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet200{}
 
+type RaiserGet200Args = reqRaiserGet200
+
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
 }
@@ -1004,6 +1010,8 @@ type reqRaiserGet500 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet500{}
+
+type RaiserGet500Args = reqRaiserGet500
 
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})

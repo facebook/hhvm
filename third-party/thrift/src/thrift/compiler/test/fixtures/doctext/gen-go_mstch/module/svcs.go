@@ -157,6 +157,8 @@ type reqCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCF{}
 
+type CFArgs = reqCF
+
 func newReqCF() *reqCF {
     return (&reqCF{})
 }
@@ -322,6 +324,8 @@ type reqCThing struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCThing{}
+
+type CThingArgs = reqCThing
 
 func newReqCThing() *reqCThing {
     return (&reqCThing{}).

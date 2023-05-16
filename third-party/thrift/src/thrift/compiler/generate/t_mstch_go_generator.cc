@@ -445,7 +445,10 @@ class mstch_go_struct : public mstch_struct {
             {"struct:go_qualified_name", &mstch_go_struct::go_qualified_name},
             {"struct:go_qualified_new_func",
              &mstch_go_struct::go_qualified_new_func},
+            {"struct:go_public_req_name", &mstch_go_struct::go_public_req_name},
+            {"struct:req_resp?", &mstch_go_struct::is_req_resp_struct},
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
+            {"struct:req?", &mstch_go_struct::is_req_struct},
         });
   }
 
@@ -458,10 +461,22 @@ class mstch_go_struct : public mstch_struct {
     auto prefix = go_package_alias_prefix(struct_->program(), data_);
     return prefix + go_new_func_();
   }
+  mstch::node is_req_resp_struct() {
+    // Whether this is a helper request or response struct.
+    return is_req_resp_struct_();
+  }
   mstch::node is_resp_struct() {
     // Whether this is a helper response struct.
-    return is_req_resp_struct() &&
+    return is_req_resp_struct_() &&
         boost::algorithm::starts_with(struct_->name(), "resp");
+  }
+  mstch::node is_req_struct() {
+    // Whether this is a helper request struct.
+    return is_req_resp_struct_() &&
+        boost::algorithm::starts_with(struct_->name(), "req");
+  }
+  mstch::node go_public_req_name() {
+    return boost::algorithm::erase_first_copy(struct_->name(), "req") + "Args";
   }
 
  private:
@@ -469,7 +484,7 @@ class mstch_go_struct : public mstch_struct {
 
   std::string go_name_() {
     auto name = struct_->name();
-    if (is_req_resp_struct()) {
+    if (is_req_resp_struct_()) {
       // Unexported/lowercase
       return go::munge_ident(name, false);
     } else {
@@ -481,7 +496,7 @@ class mstch_go_struct : public mstch_struct {
   std::string go_new_func_() {
     auto name = struct_->name();
     auto go_name = go::munge_ident(struct_->name(), true);
-    if (is_req_resp_struct()) {
+    if (is_req_resp_struct_()) {
       // Unexported/lowercase
       return "new" + go_name;
     } else {
@@ -490,7 +505,7 @@ class mstch_go_struct : public mstch_struct {
     }
   }
 
-  bool is_req_resp_struct() {
+  bool is_req_resp_struct_() {
     return (data_.req_resp_struct_names.count(struct_->name()) > 0);
   }
 };

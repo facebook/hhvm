@@ -212,6 +212,8 @@ type reqNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapList{}
 
+type NestedContainersMapListArgs = reqNestedContainersMapList
+
 func newReqNestedContainersMapList() *reqNestedContainersMapList {
     return (&reqNestedContainersMapList{}).
         SetFooNonCompat(make(map[int32][]int32))
@@ -520,6 +522,8 @@ type reqNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapSet{}
+
+type NestedContainersMapSetArgs = reqNestedContainersMapSet
 
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
     return (&reqNestedContainersMapSet{}).
@@ -830,6 +834,8 @@ type reqNestedContainersListMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListMap{}
 
+type NestedContainersListMapArgs = reqNestedContainersListMap
+
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
     return (&reqNestedContainersListMap{}).
         SetFooNonCompat(make([]map[int32]int32, 0))
@@ -1139,6 +1145,8 @@ type reqNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListSet{}
 
+type NestedContainersListSetArgs = reqNestedContainersListSet
+
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
     return (&reqNestedContainersListSet{}).
         SetFooNonCompat(make([][]int32, 0))
@@ -1430,6 +1438,8 @@ type reqNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersTurtles{}
+
+type NestedContainersTurtlesArgs = reqNestedContainersTurtles
 
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{}).

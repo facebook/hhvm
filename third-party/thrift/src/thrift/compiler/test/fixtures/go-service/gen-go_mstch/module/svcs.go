@@ -355,6 +355,8 @@ type reqGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetEntity{}
 
+type GetEntityGetEntityArgs = reqGetEntityGetEntity
+
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{}).
         SetRNonCompat(*NewGetEntityRequest())
@@ -683,6 +685,8 @@ type reqGetEntityGetBool struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBool{}
 
+type GetEntityGetBoolArgs = reqGetEntityGetBool
+
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
 }
@@ -904,6 +908,8 @@ type reqGetEntityGetByte struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetByte{}
+
+type GetEntityGetByteArgs = reqGetEntityGetByte
 
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
@@ -1128,6 +1134,8 @@ type reqGetEntityGetI16 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI16{}
 
+type GetEntityGetI16Args = reqGetEntityGetI16
+
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
 }
@@ -1349,6 +1357,8 @@ type reqGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI32{}
+
+type GetEntityGetI32Args = reqGetEntityGetI32
 
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
@@ -1572,6 +1582,8 @@ type reqGetEntityGetI64 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI64{}
 
+type GetEntityGetI64Args = reqGetEntityGetI64
+
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
 }
@@ -1793,6 +1805,8 @@ type reqGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetDouble{}
+
+type GetEntityGetDoubleArgs = reqGetEntityGetDouble
 
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
@@ -2016,6 +2030,8 @@ type reqGetEntityGetString struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetString{}
 
+type GetEntityGetStringArgs = reqGetEntityGetString
+
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
 }
@@ -2237,6 +2253,8 @@ type reqGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBinary{}
+
+type GetEntityGetBinaryArgs = reqGetEntityGetBinary
 
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
@@ -2471,6 +2489,8 @@ type reqGetEntityGetMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetMap{}
+
+type GetEntityGetMapArgs = reqGetEntityGetMap
 
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
@@ -2752,6 +2772,8 @@ type reqGetEntityGetSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetSet{}
 
+type GetEntityGetSetArgs = reqGetEntityGetSet
+
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
 }
@@ -3014,6 +3036,8 @@ type reqGetEntityGetList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetList{}
+
+type GetEntityGetListArgs = reqGetEntityGetList
 
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
@@ -3280,6 +3304,8 @@ type reqGetEntityGetLegacyStuff struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
+
+type GetEntityGetLegacyStuffArgs = reqGetEntityGetLegacyStuff
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{}).

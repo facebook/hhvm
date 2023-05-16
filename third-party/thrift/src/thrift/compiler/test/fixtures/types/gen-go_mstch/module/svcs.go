@@ -161,6 +161,8 @@ type reqSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBounceMap{}
 
+type SomeServiceBounceMapArgs = reqSomeServiceBounceMap
+
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{}).
         SetMNonCompat(included.NewSomeMap())
@@ -467,6 +469,8 @@ type reqSomeServiceBinaryKeyedMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
+
+type SomeServiceBinaryKeyedMapArgs = reqSomeServiceBinaryKeyedMap
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).

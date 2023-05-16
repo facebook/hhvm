@@ -152,6 +152,8 @@ type reqServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqServiceFunc{}
 
+type ServiceFuncArgs = reqServiceFunc
+
 func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{}).
         SetArg1NonCompat(NewStringWithAdapter()).
@@ -802,6 +804,8 @@ type reqAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceCount{}
 
+type AdapterServiceCountArgs = reqAdapterServiceCount
+
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
@@ -1048,6 +1052,8 @@ type reqAdapterServiceAdaptedTypes struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
+
+type AdapterServiceAdaptedTypesArgs = reqAdapterServiceAdaptedTypes
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).

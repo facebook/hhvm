@@ -138,6 +138,8 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
+type MyServiceQueryArgs = reqMyServiceQuery
+
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
         SetUNonCompat(*NewMyUnion())

@@ -136,6 +136,8 @@ type reqTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqTestServiceInit{}
 
+type TestServiceInitArgs = reqTestServiceInit
+
 func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{}).
         SetInt1NonCompat(0)

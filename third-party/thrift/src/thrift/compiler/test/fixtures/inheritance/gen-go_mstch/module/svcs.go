@@ -134,6 +134,8 @@ type reqMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyRootDoRoot{}
 
+type MyRootDoRootArgs = reqMyRootDoRoot
+
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
 }
@@ -513,6 +515,8 @@ type reqMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyNodeDoMid{}
 
+type MyNodeDoMidArgs = reqMyNodeDoMid
+
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
 }
@@ -866,6 +870,8 @@ type reqMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyLeafDoLeaf{}
+
+type MyLeafDoLeafArgs = reqMyLeafDoLeaf
 
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})

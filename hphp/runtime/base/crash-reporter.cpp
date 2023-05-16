@@ -88,7 +88,7 @@ static uintptr_t s_stacktrace_end;
 static const char* s_newBlacklist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafe",
-  "_ZN4HPHPL10bt_handlerEi",
+  "_ZN4HPHP10bt_handlerEi",
   "_ZN5folly6fibers12_GLOBAL__N_120sigsegvSignalHandlerEiP9siginfo_tPv",
   "killpg"
 };

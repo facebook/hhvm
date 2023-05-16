@@ -397,6 +397,8 @@ let load_config config options =
     ?tco_tast_under_dynamic:(bool_opt "tast_under_dynamic" config)
     ?tco_ide_should_use_hack_64_distc:
       (bool_opt "ide_should_use_hack_64_distc" config)
+    ?tco_ide_load_naming_table_on_disk:
+      (bool_opt "ide_load_naming_table_on_disk" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =
@@ -511,6 +513,8 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
         ~tco_global_access_check_enabled:
           (ServerArgs.enable_global_access_check options)
+        ~tco_ide_load_naming_table_on_disk:
+          local_config.ide_load_naming_table_on_disk
         GlobalOptions.default
     in
     load_config config local_config_opts

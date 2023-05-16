@@ -346,6 +346,8 @@ type t = {
   tco_tast_under_dynamic: bool;
   (* Use the Rust implementation of naming elaboration and NAST checks. *)
   tco_rust_elab: bool;
+  tco_ide_load_naming_table_on_disk: bool;
+      (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
 }
 [@@deriving eq, show]
 
@@ -480,6 +482,7 @@ val set :
   ?tco_ide_should_use_hack_64_distc:bool ->
   ?tco_tast_under_dynamic:bool ->
   ?tco_rust_elab:bool ->
+  ?tco_ide_load_naming_table_on_disk:bool ->
   t ->
   t
 

@@ -164,6 +164,7 @@ impl Default for GlobalOptions {
             tco_ide_should_use_hack_64_distc: false,
             tco_tast_under_dynamic: false,
             tco_rust_elab: false,
+            tco_ide_load_naming_table_on_disk: false,
         }
     }
 }

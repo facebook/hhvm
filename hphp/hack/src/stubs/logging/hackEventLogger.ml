@@ -66,6 +66,7 @@ type rollout_flags = {
   consume_streaming_errors: bool;
   hh_distc_fanout_threshold: int;
   rust_elab: bool;
+  ide_load_naming_table_on_disk: bool;
 }
 
 let flush () = ()

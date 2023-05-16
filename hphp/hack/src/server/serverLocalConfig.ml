@@ -508,6 +508,8 @@ type t = {
       (** use hh_distc instead of hulk for remote typechecking *)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
+  ide_load_naming_table_on_disk: bool;
+      (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
 }
 
 let default =
@@ -615,6 +617,7 @@ let default =
     use_hh_distc_instead_of_hulk = false;
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
+    ide_load_naming_table_on_disk = false;
   }
 
 let system_config_path =
@@ -1382,6 +1385,13 @@ let load_
       ~default:default.hh_distc_fanout_threshold
       config
   in
+  let ide_load_naming_table_on_disk =
+    bool_if_min_version
+      "ide_load_naming_table_on_disk"
+      ~default:default.ide_load_naming_table_on_disk
+      ~current_version
+      config
+  in
   {
     saved_state =
       {
@@ -1503,6 +1513,7 @@ let load_
     ide_should_use_hack_64_distc;
     use_hh_distc_instead_of_hulk;
     hh_distc_fanout_threshold;
+    ide_load_naming_table_on_disk;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1551,4 +1562,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       rust_elab = options.rust_elab;
+      ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
     }

@@ -312,3 +312,6 @@ let rust_elab t = t.GlobalOptions.tco_rust_elab
 let locl_cache_capacity t = t.GlobalOptions.tco_locl_cache_capacity
 
 let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold
+
+let ide_load_naming_table_on_disk t =
+  t.GlobalOptions.tco_ide_load_naming_table_on_disk

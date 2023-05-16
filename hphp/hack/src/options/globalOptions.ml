@@ -195,6 +195,7 @@ type t = {
   tco_ide_should_use_hack_64_distc: bool;
   tco_tast_under_dynamic: bool;
   tco_rust_elab: bool;
+  tco_ide_load_naming_table_on_disk: bool;
 }
 [@@deriving eq, show]
 
@@ -330,6 +331,7 @@ let default =
     tco_ide_should_use_hack_64_distc = false;
     tco_tast_under_dynamic = false;
     tco_rust_elab = false;
+    tco_ide_load_naming_table_on_disk = false;
   }
 
 let set
@@ -463,6 +465,7 @@ let set
     ?tco_ide_should_use_hack_64_distc
     ?tco_tast_under_dynamic
     ?tco_rust_elab
+    ?tco_ide_load_naming_table_on_disk
     options =
   let setting setting option =
     match setting with
@@ -813,6 +816,10 @@ let set
     tco_tast_under_dynamic =
       setting tco_tast_under_dynamic options.tco_tast_under_dynamic;
     tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
+    tco_ide_load_naming_table_on_disk =
+      setting
+        tco_ide_load_naming_table_on_disk
+        options.tco_ide_load_naming_table_on_disk;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

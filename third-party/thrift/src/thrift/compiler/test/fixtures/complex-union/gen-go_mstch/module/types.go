@@ -539,6 +539,10 @@ func (x *ComplexUnion) countSetFields() int {
     return count
 }
 
+func (x *ComplexUnion) CountSetFieldsComplexUnion() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use ComplexUnion.Set* methods instead or set the fields directly.
 type ComplexUnionBuilder struct {
@@ -885,6 +889,10 @@ func (x *ListUnion) countSetFields() int {
     return count
 }
 
+func (x *ListUnion) CountSetFieldsListUnion() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use ListUnion.Set* methods instead or set the fields directly.
 type ListUnionBuilder struct {
@@ -1122,6 +1130,10 @@ func (x *DataUnion) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *DataUnion) CountSetFieldsDataUnion() int {
+    return x.countSetFields()
 }
 
 
@@ -1638,6 +1650,10 @@ func (x *ValUnion) countSetFields() int {
     return count
 }
 
+func (x *ValUnion) CountSetFieldsValUnion() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use ValUnion.Set* methods instead or set the fields directly.
 type ValUnionBuilder struct {
@@ -1878,6 +1894,10 @@ func (x *VirtualComplexUnion) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *VirtualComplexUnion) CountSetFieldsVirtualComplexUnion() int {
+    return x.countSetFields()
 }
 
 
@@ -2196,6 +2216,10 @@ func (x *NonCopyableUnion) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *NonCopyableUnion) CountSetFieldsNonCopyableUnion() int {
+    return x.countSetFields()
 }
 
 

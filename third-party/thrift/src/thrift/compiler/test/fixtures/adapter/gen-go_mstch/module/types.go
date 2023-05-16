@@ -2399,6 +2399,10 @@ func (x *Baz) countSetFields() int {
     return count
 }
 
+func (x *Baz) CountSetFieldsBaz() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use Baz.Set* methods instead or set the fields directly.
 type BazBuilder struct {
@@ -7378,6 +7382,10 @@ func (x *AdaptTestUnion) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *AdaptTestUnion) CountSetFieldsAdaptTestUnion() int {
+    return x.countSetFields()
 }
 
 

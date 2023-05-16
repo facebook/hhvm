@@ -1179,6 +1179,10 @@ func (x *MyUnion) countSetFields() int {
     return count
 }
 
+func (x *MyUnion) CountSetFieldsMyUnion() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
 type MyUnionBuilder struct {
@@ -1520,6 +1524,10 @@ func (x *UnionToBeRenamed) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *UnionToBeRenamed) CountSetFieldsUnionToBeRenamed() int {
+    return x.countSetFields()
 }
 
 

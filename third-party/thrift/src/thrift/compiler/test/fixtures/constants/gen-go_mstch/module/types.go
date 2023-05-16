@@ -2233,6 +2233,10 @@ func (x *Union1) countSetFields() int {
     return count
 }
 
+func (x *Union1) CountSetFieldsUnion1() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use Union1.Set* methods instead or set the fields directly.
 type Union1Builder struct {
@@ -2603,6 +2607,10 @@ func (x *Union2) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *Union2) CountSetFieldsUnion2() int {
+    return x.countSetFields()
 }
 
 

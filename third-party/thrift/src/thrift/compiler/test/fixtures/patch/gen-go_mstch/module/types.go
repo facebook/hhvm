@@ -546,6 +546,10 @@ func (x *InnerUnion) countSetFields() int {
     return count
 }
 
+func (x *InnerUnion) CountSetFieldsInnerUnion() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use InnerUnion.Set* methods instead or set the fields directly.
 type InnerUnionBuilder struct {
@@ -838,6 +842,10 @@ func (x *MyUnion) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *MyUnion) CountSetFieldsMyUnion() int {
+    return x.countSetFields()
 }
 
 

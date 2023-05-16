@@ -113,6 +113,10 @@ func (x *Nada) countSetFields() int {
     return count
 }
 
+func (x *Nada) CountSetFieldsNada() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use Nada.Set* methods instead or set the fields directly.
 type NadaBuilder struct {

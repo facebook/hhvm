@@ -362,6 +362,10 @@ func (x *TypeUri) countSetFields() int {
     return count
 }
 
+func (x *TypeUri) CountSetFieldsTypeUri() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use TypeUri.Set* methods instead or set the fields directly.
 type TypeUriBuilder struct {
@@ -1579,6 +1583,10 @@ func (x *TypeName) countSetFields() int {
         count++
     }
     return count
+}
+
+func (x *TypeName) CountSetFieldsTypeName() int {
+    return x.countSetFields()
 }
 
 

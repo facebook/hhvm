@@ -89,4 +89,8 @@ func (x *{{struct:go_name}}) countSetFields() int {
     return count
 }
 
+func (x *{{struct:go_name}}) CountSetFields{{struct:go_name}}() int {
+    return x.countSetFields()
+}
+
 {{/struct:union?}}

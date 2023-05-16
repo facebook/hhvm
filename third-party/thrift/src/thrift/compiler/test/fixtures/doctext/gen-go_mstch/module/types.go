@@ -402,6 +402,10 @@ func (x *U) countSetFields() int {
     return count
 }
 
+func (x *U) CountSetFieldsU() int {
+    return x.countSetFields()
+}
+
 
 // Deprecated: Use U.Set* methods instead or set the fields directly.
 type UBuilder struct {

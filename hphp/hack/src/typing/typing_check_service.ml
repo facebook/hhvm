@@ -176,33 +176,26 @@ let process_file
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
         Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
-        let (fun_tasts, fun_global_tvenvs) =
+        let (_fun_tasts, _tvenvs) =
           List.map funs ~f:FileInfo.id_name
           |> List.filter_map ~f:(Typing_check_job.type_fun ctx fn)
           |> List.unzip
         in
-        let fun_tasts = List.concat fun_tasts in
-        let (class_tasts, class_global_tvenvs) =
+        let (_class_tasts, _tvenvs) =
           List.map classes ~f:FileInfo.id_name
           |> List.filter_map ~f:(Typing_check_job.type_class ctx fn)
           |> List.unzip
         in
-        let class_global_tvenvs = List.concat class_global_tvenvs in
         List.map typedefs ~f:FileInfo.id_name
         |> List.iter ~f:(ignore_check_typedef ctx fn);
         List.map gconsts ~f:FileInfo.id_name
         |> List.iter ~f:(ignore_check_const ctx fn);
         List.map modules ~f:FileInfo.id_name
         |> List.iter ~f:(ignore_check_module ctx fn);
-        (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
+        ()
       in
       match result with
-      | Ok (file_errors, (tasts, global_tvenvs)) ->
-        if TypecheckerOptions.global_inference opts then
-          Typing_global_inference.StateSubConstraintGraphs.build_and_save
-            ctx
-            tasts
-            global_tvenvs;
+      | Ok (file_errors, ()) ->
         if log_errors then
           List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
               let { User_error.claim; code; _ } = error in

@@ -469,7 +469,11 @@ let build_naming_table
     let e = ClientIdeUtils.make_bug_error "full_index_exn" ~exn in
     Lwt.return_error (reason, e)
 
-(** Prepare the naming table as part of the daemon's initialization. First attempt to load the naming table. If loading the naming table fails, fall back to building one if [dstate.dcommon.fall_back_to_full_index] is [true]. *)
+(** Prepare the naming table as part of the daemon's initialization.
+  First, attempt to find a naming table on disk from a previously downloaded saved state. If there is one, load it.
+  If no naming table on disk, attempt to load the naming table via Watchman and Manifold.
+  If loading the naming table fails, fall back to building one if [dstate.dcommon.fall_back_to_full_index] is [true].
+*)
 let prepare_naming_table
     (param : ClientIdeMessage.Initialize_from_saved_state.t)
     (dstate : dstate)
@@ -483,40 +487,74 @@ let prepare_naming_table
       ~package_info:Package.Info.empty
   in
   let open ClientIdeMessage.Initialize_from_saved_state in
-  (* following method never throws *)
-  let%lwt load_result =
-    load_naming_table
-      ctx
-      ~root:param.root
-      ~naming_table_load_info:param.naming_table_load_info
-      ~ignore_hh_version:param.ignore_hh_version
+  (* First, attempt to see if ANY naming table is on disk - avoid the Watchman
+     query to find the closest saved state and instead prefer a naive grep.
+
+     If fails, fall back to Watchman for a precise download.
+  *)
+  let ide_should_use_hack_64_distc =
+    TypecheckerOptions.ide_should_use_hack_64_distc dstate.dcommon.tcopt
   in
-  match load_result with
-  | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index ->
-    let message =
-      Printf.sprintf
-        "Falling back to full index naming table build because naming table load failed: %s"
-        e.Lsp.Error.message
+  let ide_load_naming_table_on_disk =
+    TypecheckerOptions.ide_load_naming_table_on_disk dstate.dcommon.tcopt
+  in
+  let saved_state_type =
+    if ide_should_use_hack_64_distc then
+      Saved_state_loader.Naming_and_dep_table_distc
+    else
+      Saved_state_loader.Naming_and_dep_table
+  in
+  let%lwt naming_table_load_from_disk_result =
+    if ide_load_naming_table_on_disk then
+      let () = log "Attempting to load a naming table from disk..." in
+      State_loader_lwt.load_naming_table_from_disk
+        ~saved_state_type
+        ~root:param.root
+    else
+      Lwt.return_error
+        "Skipping attempt to naively load naming table from disk..."
+  in
+  match naming_table_load_from_disk_result with
+  | Ok (naming_table_path, changed_files) ->
+    let naming_table =
+      Naming_table.load_from_sqlite ctx (Path.to_string naming_table_path)
     in
-    ClientIdeUtils.log_bug message ~data:e.Lsp.Error.data ~telemetry:true;
-    let%lwt () =
-      write_message
-        ~out_fd
-        ~message:
-          (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
-    in
-    let%lwt full_index_result =
-      build_naming_table
+    Lwt.return @@ Ok (naming_table, changed_files, [])
+  | Error err ->
+    log "%s" err;
+    let%lwt load_result =
+      load_naming_table
         ctx
         ~root:param.root
-        ~hhi_root:dstate.dcommon.hhi_root
-        ~output:(Path.make @@ ServerFiles.client_ide_naming_table param.root)
+        ~naming_table_load_info:param.naming_table_load_info
+        ~ignore_hh_version:param.ignore_hh_version
     in
-    log "Completed index";
-    Lwt.return full_index_result
-  | Error _
-  | Ok _ ->
-    Lwt.return load_result
+    (match load_result with
+    | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index ->
+      let message =
+        Printf.sprintf
+          "Falling back to full index naming table build because naming table load failed: %s"
+          e.Lsp.Error.message
+      in
+      ClientIdeUtils.log_bug message ~data:e.Lsp.Error.data ~telemetry:true;
+      let%lwt () =
+        write_message
+          ~out_fd
+          ~message:
+            (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
+      in
+      let%lwt full_index_result =
+        build_naming_table
+          ctx
+          ~root:param.root
+          ~hhi_root:dstate.dcommon.hhi_root
+          ~output:(Path.make @@ ServerFiles.client_ide_naming_table param.root)
+      in
+      log "Completed index";
+      Lwt.return full_index_result
+    | Error _
+    | Ok _ ->
+      Lwt.return load_result)
 
 let log_startup_time (component : string) (start_time : float) : float =
   let now = Unix.gettimeofday () in

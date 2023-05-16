@@ -1,5 +1,0 @@
---allowed-fixme-codes-strict 4101
---allowed-decl-fixme-codes 4101
---tast
---global-inference
---reinfer-types=mixed,dynamic,UNSAFE_TYPE_HH_FIXME,HH_FIXME::MISSING_TYPE

@@ -1,5 +1,0 @@
---allowed-fixme-codes-strict 2071,4101
---allowed-decl-fixme-codes 2071,4101
---rewrite
---global-inference
---reinfer-types=mixed,dynamic,UNSAFE_TYPE_HH_FIXME,HH_FIXME::MISSING_TYPE,HH_FIXME::TEMPORARY_MISSING_TYPE_MARKER,PHPism_FIXME_Array

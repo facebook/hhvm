@@ -1,4 +1,0 @@
---allowed-fixme-codes-strict 4101,2071,4030,4032,2001
---allowed-decl-fixme-codes 4101,2071,4030,4032,2001
---rewrite
---global-inference

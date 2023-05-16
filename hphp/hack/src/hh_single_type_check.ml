@@ -9,8 +9,6 @@
 
 open Hh_prelude
 open Sys_utils
-open Typing_env_types
-module Inf = Typing_inference_env
 module Cls = Decl_provider.Class
 
 (*****************************************************************************)
@@ -58,7 +56,6 @@ type mode =
   | Dump_stripped_tast
   | Dump_tast
   | Check_tast
-  | RewriteGlobalInference
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -451,13 +448,6 @@ let parse_options () =
         Arg.Unit (set_mode Dump_stripped_tast),
         " Print out the typed AST, stripped of type information."
         ^ " This can be compared against the named AST to look for holes." );
-      ( "--rewrite",
-        Arg.Unit (set_mode RewriteGlobalInference),
-        " Rewrite the file after inferring types using global inference"
-        ^ " (requires --global-inference)." );
-      ( "--global-inference",
-        Arg.Set global_inference,
-        " Global type inference to infer missing type annotations." );
       ( "--ordered-solving",
         Arg.Set ordered_solving,
         " Optimized solver for type variables. Experimental." );
@@ -1107,110 +1097,6 @@ let parse_options () =
       !sharedmem_config),
     !packages_config_path )
 
-let print_global_inference_envs ctx ~verbosity gienvs =
-  let gienvs =
-    Typing_global_inference.StateSubConstraintGraphs.global_tvenvs gienvs
-  in
-  let tco_global_inference =
-    TypecheckerOptions.global_inference (Provider_context.get_tcopt ctx)
-  in
-  if verbosity >= 2 && tco_global_inference then
-    let should_log (pos, gienv) =
-      let file_relevant =
-        match verbosity with
-        | 1
-          when Filename.check_suffix
-                 (Relative_path.suffix (Pos.filename pos))
-                 ".hhi" ->
-          false
-        | _ -> true
-      in
-      file_relevant && (not @@ List.is_empty @@ Inf.get_vars_g gienv)
-    in
-    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-
-    List.filter gienvs ~f:should_log
-    |> List.iter ~f:(fun (pos, gienv) ->
-           Typing_log.log_global_inference_env pos env gienv)
-
-let merge_global_inference_envs_opt ctx gienvs :
-    Typing_global_inference.StateConstraintGraph.t option =
-  if TypecheckerOptions.global_inference (Provider_context.get_tcopt ctx) then
-    let open Typing_global_inference in
-    let (type_map, env, state_errors) =
-      StateConstraintGraph.merge_subgraphs ctx [gienvs]
-    in
-    (* we are not going to print type variables without any bounds *)
-    let env = { env with inference_env = Inf.compress env.inference_env } in
-    Some (type_map, env, state_errors)
-  else
-    None
-
-let print_global_inference_env
-    env ~step_name state_errors error_format max_errors =
-  let print_header s =
-    print_endline "";
-    print_endline (String.map s ~f:(const '='));
-    print_endline s;
-    print_endline (String.map s ~f:(const '='))
-  in
-  print_header (Printf.sprintf "%sd environment" step_name);
-  Typing_log.hh_show_full_env Pos.none env;
-
-  print_header (Printf.sprintf "%s errors" step_name);
-  List.iter
-    (Typing_global_inference.StateErrors.elements state_errors)
-    ~f:(fun (var, errl) ->
-      Printf.fprintf stderr "#%d\n" var;
-      print_error_list error_format errl max_errors);
-  Out_channel.flush stderr
-
-let print_merged_global_inference_env
-    ~verbosity
-    (gienv : Typing_global_inference.StateConstraintGraph.t option)
-    error_format
-    max_errors =
-  if verbosity >= 1 then
-    match gienv with
-    | None -> ()
-    | Some (_type_map, gienv, state_errors) ->
-      print_global_inference_env
-        gienv
-        ~step_name:"Merge"
-        state_errors
-        error_format
-        max_errors
-
-let print_solved_global_inference_env
-    ~verbosity
-    (gienv : Typing_global_inference.StateSolvedGraph.t option)
-    error_format
-    max_errors =
-  if verbosity >= 1 then
-    match gienv with
-    | None -> ()
-    | Some (gienv, state_errors, _type_map) ->
-      print_global_inference_env
-        gienv
-        ~step_name:"Solve"
-        state_errors
-        error_format
-        max_errors
-
-let solve_global_inference_env
-    (gienv : Typing_global_inference.StateConstraintGraph.t) :
-    Typing_global_inference.StateSolvedGraph.t =
-  Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
-
-let global_inference_merge_and_solve
-    ~verbosity ?(error_format = Errors.Plain) ?max_errors ctx gienvs =
-  print_global_inference_envs ctx ~verbosity gienvs;
-  let gienv = merge_global_inference_envs_opt ctx gienvs in
-  print_merged_global_inference_env ~verbosity gienv error_format max_errors;
-  let gienv = Option.map gienv ~f:solve_global_inference_env in
-  print_solved_global_inference_env ~verbosity gienv error_format max_errors;
-  gienv
-
 let print_elapsed fn desc ~start_time =
   let elapsed_ms = Float.(Unix.gettimeofday () - start_time) *. 1000. in
   Printf.printf
@@ -1520,9 +1406,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
 
 (* Returns a list of Tast defs, along with associated type environments. *)
 let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
-    Errors.t
-    * (Tast.program Relative_path.Map.t
-      * Typing_inference_env.t_global_with_pos list) =
+    Errors.t * Tast.program Relative_path.Map.t =
   let _f _k nast x =
     match (nast, x) with
     | (Some nast, Some _) -> Some nast
@@ -1538,35 +1422,12 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
             | _ -> None)
       in
       let nasts = filter_non_interesting nasts in
-      let tasts_envs =
+      let tasts =
         Relative_path.Map.map
           nasts
-          ~f:(Typing_toplevel.nast_to_tast_gienv ~do_tast_checks:true ctx)
+          ~f:(Typing_toplevel.nast_to_tast ~do_tast_checks:true ctx)
       in
-      let tasts = Relative_path.Map.map tasts_envs ~f:fst in
-      let genvs =
-        List.concat
-        @@ Relative_path.Map.values
-        @@ Relative_path.Map.map tasts_envs ~f:snd
-      in
-      (tasts, genvs))
-
-let merge_global_inference_env_in_tast gienv tast =
-  let env_merger =
-    object
-      inherit Tast_visitor.endo
-
-      method! on_'en _ env =
-        {
-          env with
-          Tast.inference_env =
-            Typing_inference_env.simple_merge
-              env.Tast.inference_env
-              gienv.inference_env;
-        }
-    end
-  in
-  env_merger#go tast
+      tasts)
 
 (* Given source code containing the string "^ hover-at-caret", return
    the line and column of the position indicated. *)
@@ -1623,35 +1484,16 @@ let find_ide_range src : Ide_api_types.range =
 (**
  * Compute TASTs for some files, then expand all type variables.
  *)
-let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
-  let (errors, (tasts, gienvs)) =
-    compute_tasts ctx files_info interesting_files
-  in
-  let subconstraints =
-    Typing_global_inference.StateSubConstraintGraphs.build
-      ctx
-      (List.concat (Relative_path.Map.values tasts))
-      gienvs
-  in
-  let (tasts, gi_solved) =
-    match global_inference_merge_and_solve ctx ~verbosity subconstraints with
-    | None -> (tasts, None)
-    | Some ((gienv, _, _) as gi_solved) ->
-      let tasts =
-        Relative_path.Map.map
-          tasts
-          ~f:(merge_global_inference_env_in_tast gienv ctx)
-      in
-      (tasts, Some gi_solved)
-  in
+let compute_tasts_expand_types ctx files_info interesting_files =
+  let (errors, tasts) = compute_tasts ctx files_info interesting_files in
   let tasts = Relative_path.Map.map tasts ~f:(Tast_expand.expand_program ctx) in
-  (errors, tasts, gi_solved)
+  (errors, tasts)
 
-let decl_parse_typecheck_and_then ~verbosity ctx files_contents f =
+let decl_parse_typecheck_and_then ctx files_contents f =
   let (parse_errors, files_info) = parse_name_and_decl ctx files_contents in
   let parse_errors = Errors.get_sorted_error_list parse_errors in
-  let (errors, _tasts, _gi_solved) =
-    compute_tasts_expand_types ctx ~verbosity files_info files_contents
+  let (errors, _tasts) =
+    compute_tasts_expand_types ctx files_info files_contents
   in
   let errors = parse_errors @ Errors.get_sorted_error_list errors in
   if List.is_empty errors then
@@ -1850,25 +1692,15 @@ let traverse_file_dependencies ctx (files : Relative_path.t list) ~(depth : int)
     Relative_path.Set.empty
     Relative_path.Set.empty
 
-let apply_patches files_contents patches =
-  if List.length patches <= 0 then
-    print_endline "No patches"
-  else
-    ServerRenameTypes.apply_patches_to_file_contents files_contents patches
-    |> Multifile.print_files_as_multifile
-
 (** Used for testing code that generates patches. *)
 let codemod
-    ~verbosity
     ~files_info
     ~files_contents
     ctx
     (get_patches :
       files_info:FileInfo.t Relative_path.Map.t -> ServerRenameTypes.patch list)
     =
-  let decl_parse_typecheck_and_then =
-    decl_parse_typecheck_and_then ~verbosity ctx
-  in
+  let decl_parse_typecheck_and_then = decl_parse_typecheck_and_then ctx in
   let backend = Provider_context.get_backend ctx in
   (* Because we repeatedly apply the codemod, positions change. So we need to
      re-parse, decl, and typecheck the file to generated accurate patches as
@@ -2251,8 +2083,8 @@ let handle_mode
       nasts
       (Relative_path.Map.keys files_contents)
   | Dump_tast ->
-    let (errors, tasts, _gi_solved) =
-      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    let (errors, tasts) =
+      compute_tasts_expand_types ctx files_info files_contents
     in
     print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
     print_tasts ~should_print_position tasts ctx
@@ -2262,8 +2094,8 @@ let handle_mode
           Relative_path.Map.filter files_contents ~f:(fun k _v ->
               Relative_path.equal k filename)
         in
-        let (errors, tasts, _gi_solved) =
-          compute_tasts_expand_types ctx ~verbosity files_info files_contents
+        let (errors, tasts) =
+          compute_tasts_expand_types ctx files_info files_contents
         in
         print_tasts ~should_print_position tasts ctx;
         if not @@ Errors.is_empty errors then (
@@ -2280,26 +2112,10 @@ let handle_mode
           Relative_path.Map.filter files_contents ~f:(fun k _v ->
               Relative_path.equal k filename)
         in
-        let (_, (tasts, _gienvs)) =
-          compute_tasts ctx files_info files_contents
-        in
+        let (_, tasts) = compute_tasts ctx files_info files_contents in
         let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
         Printf.printf "%s\n" (Nast.show_program nast))
-  | RewriteGlobalInference ->
-    let (errors, _tasts, gi_solved) =
-      compute_tasts_expand_types ctx ~verbosity files_info files_contents
-    in
-    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
-    (match gi_solved with
-    | None ->
-      prerr_endline
-        ("error: no patches generated as global"
-        ^ " inference is turend off (use --global-inference)");
-      exit 1
-    | Some gi_solved ->
-      ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
-      |> apply_patches files_contents)
   | RemoveDeadUnsafeCasts ->
     let ctx =
       Provider_context.map_tcopt ctx ~f:(fun tcopt ->
@@ -2311,7 +2127,7 @@ let handle_mode
         ~files_info
         ~fold:Relative_path.Map.fold
     in
-    codemod ~verbosity ~files_info ~files_contents ctx get_patches
+    codemod ~files_info ~files_contents ctx get_patches
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in
@@ -2635,8 +2451,8 @@ let handle_mode
     (* Print the source code after applying all these quickfixes. *)
     Printf.printf "\n%s" (Quickfix.apply_all src classish_starts quickfixes)
   | CountImpreciseTypes ->
-    let (errors, tasts, _gi_solved) =
-      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    let (errors, tasts) =
+      compute_tasts_expand_types ctx files_info files_contents
     in
     if not @@ Errors.is_empty errors then (
       print_errors error_format errors max_errors;

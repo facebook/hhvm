@@ -180,6 +180,15 @@ bool typeStructureIsType(
   assertx(input && type);
   if (input == type) return true; // shortcut
   if (!strict && isWildCard(input)) return true;
+
+  // Case types compare by witness, only allowing exact same case type
+  // to be equal to it.
+  auto const inputCaseType = get_ts_case_type_opt(input);
+  auto const typeCaseType = get_ts_case_type_opt(type);
+  if (inputCaseType || typeCaseType) {
+    return inputCaseType && typeCaseType && inputCaseType->isame(typeCaseType);
+  }
+
   auto tsKind = get_ts_kind(type);
   switch (tsKind) {
     case TypeStructure::Kind::T_int:
@@ -334,6 +343,8 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_reifiedtype:
     case TypeStructure::Kind::T_unresolved:
       raise_error("Invalid generics for type structure");
+    case TypeStructure::Kind::T_union:
+      always_assert(false && "should be caught by above earlier check");
   }
   not_reached();
 }
@@ -768,6 +779,22 @@ bool checkTypeStructureMatchesTVImpl(
       return !warn;
     }
 
+    case TypeStructure::Kind::T_union: {
+      bool match = false;
+      IterateV(
+        get_ts_union_types(ts.get()),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          match |= checkTypeStructureMatchesTVImpl<false>(
+            Array{ty.m_data.parr}, c1, givenType, expectedType, errorKey, warn,
+            isOrAsOp
+          );
+          return match;
+        }
+      );
+      return match;
+    }
+
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_unresolved:
@@ -901,6 +928,20 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
         errorOnIsAsExpressionInvalidTypesList(tv.val().parr, dryrun, true) :
         false;
     }
+    case TypeStructure::Kind::T_union: {
+      bool error = false;
+      IterateV(
+        get_ts_union_types(ts.get()),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          error |= errorOnIsAsExpressionInvalidTypes(
+            Array{ty.m_data.parr}, dryrun, allowWildcard
+          );
+          return error;
+        }
+      );
+      return error;
+    }
     case TypeStructure::Kind::T_fun:
       return err("a function");
     case TypeStructure::Kind::T_typevar:
@@ -967,6 +1008,18 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
         );
       }
       return genericsCouldBeNonStatic;
+    }
+    case TypeStructure::Kind::T_union: {
+      bool match = false;
+      IterateV(
+        get_ts_union_types(ts),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          match |= typeStructureCouldBeNonStatic(ty.m_data.parr);
+          return match;
+        }
+      );
+      return match;
     }
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:

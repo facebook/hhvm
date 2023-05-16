@@ -1218,6 +1218,7 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
       alias.value,
       alias.type,
       alias.nullable,
+      alias.caseType,
       alias.typeStructure,
       alias.resolvedTypeStructure
   );

@@ -195,6 +195,7 @@ Array getReifiedClasses(const ActRec* ar) {
       clist.append(String{xhpNameFromTS(ArrNR{val(ts).parr})});
       break;
 
+    case K::T_union:
     case K::T_void:
     case K::T_int:
     case K::T_bool:

@@ -674,7 +674,8 @@ struct TypeAlias {
   LSString value;
   Attr attrs;
   AnnotType type;
-  bool nullable;  // null is allowed; for ?Foo aliases
+  bool nullable : 1;  // null is allowed; for ?Foo aliases
+  bool caseType : 1;
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
   Array resolvedTypeStructure;

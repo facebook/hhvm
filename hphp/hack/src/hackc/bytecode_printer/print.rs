@@ -1170,11 +1170,10 @@ fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
                     .as_bstr()
             )
         )?;
-        let flags = ti.type_constraint.flags & TypeConstraintFlags::Nullable;
+        let flags = ti.type_constraint.flags
+            & (TypeConstraintFlags::Nullable | TypeConstraintFlags::CaseType);
         if !flags.is_empty() {
-            wrap_by(w, " ", |w| {
-                print_type_flags(w, ti.type_constraint.flags & TypeConstraintFlags::Nullable)
-            })?;
+            wrap_by(w, " ", |w| print_type_flags(w, flags))?;
         }
         Ok(())
     })

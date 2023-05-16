@@ -85,6 +85,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
 
   #define HHAS_TYPE_FLAGS                                   \
   X(Nullable,        "nullable");                           \
+  X(CaseType,        "case_type");                          \
   X(ExtendedHint,    "extended_hint");                      \
   X(TypeVar,         "type_var");                           \
   X(Soft,            "soft");                               \

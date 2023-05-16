@@ -1,0 +1,144 @@
+>>>> Basic <<<<
+
+dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 1,
+    ],
+    dict [
+      'kind' => 4,
+    ],
+    dict [
+      'kind' => 3,
+    ],
+    dict [
+      'kind' => 28,
+    ],
+  ],
+  'case_type' => 'C1',
+]
+
+HH\int | HH\string | HH\float | HH\null
+
+>>>> Class <<<<
+
+dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 2,
+    ],
+    dict [
+      'kind' => 15,
+      'classname' => 'A',
+    ],
+  ],
+  'case_type' => 'C2',
+]
+
+HH\bool | A
+
+>>>> Nested <<<<
+
+dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 15,
+      'classname' => 'B',
+    ],
+    dict [
+      'kind' => 31,
+      'union_types' => 
+      vec [
+        dict [
+          'kind' => 2,
+        ],
+        dict [
+          'kind' => 15,
+          'classname' => 'A',
+        ],
+      ],
+      'case_type' => 'C2',
+    ],
+  ],
+  'case_type' => 'C3',
+]
+
+B | C2
+
+>>>> Very nested <<<<
+
+dict [
+  'kind' => 10,
+  'elem_types' => 
+  vec [
+    dict [
+      'kind' => 31,
+      'union_types' => 
+      vec [
+        dict [
+          'kind' => 2,
+        ],
+        dict [
+          'kind' => 15,
+          'classname' => 'A',
+        ],
+      ],
+      'case_type' => 'C2',
+    ],
+    dict [
+      'kind' => 10,
+      'elem_types' => 
+      vec [
+        dict [
+          'kind' => 31,
+          'union_types' => 
+          vec [
+            dict [
+              'kind' => 2,
+            ],
+            dict [
+              'kind' => 15,
+              'classname' => 'A',
+            ],
+          ],
+          'case_type' => 'C2',
+        ],
+        dict [
+          'kind' => 31,
+          'union_types' => 
+          vec [
+            dict [
+              'kind' => 15,
+              'classname' => 'B',
+            ],
+            dict [
+              'kind' => 31,
+              'union_types' => 
+              vec [
+                dict [
+                  'kind' => 2,
+                ],
+                dict [
+                  'kind' => 15,
+                  'classname' => 'A',
+                ],
+              ],
+              'case_type' => 'C2',
+            ],
+          ],
+          'case_type' => 'C3',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C4',
+]
+
+(C2, (C2, C3))
+

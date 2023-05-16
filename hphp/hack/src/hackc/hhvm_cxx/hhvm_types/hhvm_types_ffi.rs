@@ -83,6 +83,7 @@ pub mod ffi {
     enum TypeConstraintFlags {
         NoFlags = 0x0,
         Nullable = 0x1,
+        CaseType = 0x2,
         ExtendedHint = 0x4,
         TypeVar = 0x8,
         Soft = 0x10,
@@ -132,6 +133,7 @@ pub mod ffi {
         T_null = 28,
         T_nothing = 29,
         T_dynamic = 30,
+        T_union = 31,
 
         // The following kinds needs class/alias resolution, and
         // are generally not exposed to the users.

@@ -55,6 +55,7 @@ struct PreTypeAlias {
   int line0;
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
+  bool case_type;
   UserAttributeMap userAttrs;
   Array typeStructure;
   // If !isNull(), contains m_typeStructure in post-resolved form from

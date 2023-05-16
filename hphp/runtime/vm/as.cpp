@@ -3141,6 +3141,7 @@ void parse_alias(AsmState& as) {
     typeName,
     typeName->empty() ? AnnotType::Mixed : ty.type(),
     (ty.flags() & TypeConstraintFlags::Nullable) != 0,
+    (ty.flags() & TypeConstraintFlags::CaseType) != 0,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}
   );

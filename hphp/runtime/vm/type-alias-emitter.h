@@ -42,7 +42,7 @@ struct TypeAliasEmitter {
 
   void init(int line0, int line1, Attr attrs,
             const StringData* value, AnnotType type, bool nullable,
-            Array typeStructure, Array resolvedTypeStructure);
+            bool case_type, Array typeStructure, Array resolvedTypeStructure);
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
@@ -51,6 +51,7 @@ struct TypeAliasEmitter {
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   AnnotType type() const { return m_type; }
   bool nullable() const { return m_nullable; }
+  bool case_type() const { return m_case_type; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
   void setUserAttributes(UserAttributeMap map) {
     m_userAttributes = std::move(map);
@@ -77,6 +78,7 @@ private:
   int m_line0;
   int m_line1;
   bool m_nullable;  // null is allowed; for ?Foo aliases
+  bool m_case_type;
   UserAttributeMap m_userAttributes;
   Array m_typeStructure{ArrayData::CreateDict()};
   // If !isNull(), contains m_typeStructure in post-resolved form from

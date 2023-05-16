@@ -234,6 +234,20 @@ fn get_generic_types<'arena>(
     })
 }
 
+fn get_union_types<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    opts: &Options,
+    tparams: &[&str],
+    targ_map: &BTreeMap<&str, i64>,
+    type_refinement_in_hint: TypeRefinementInHint,
+    hints: &[Hint],
+) -> Result<bumpalo::collections::vec::Vec<'arena, DictEntry<'arena>>> {
+    Ok(bumpalo::vec![in alloc; encode_entry(
+        "union_types",
+         hints_to_type_constant(alloc, opts, tparams, targ_map, type_refinement_in_hint, hints)?,
+    )])
+}
+
 fn encode_entry<'a>(key: &'a str, value: TypedValue<'a>) -> DictEntry<'a> {
     DictEntry {
         key: TypedValue::string(key),
@@ -443,6 +457,19 @@ fn hint_to_type_constant_list<'arena>(
             r.push(encode_kind(TypeStructureKind::T_mixed));
             r
         }
+        Hint_::Hunion(hints) => {
+            let mut r = bumpalo::vec![in alloc];
+            r.push(encode_kind(TypeStructureKind::T_union));
+            r.append(&mut get_union_types(
+                alloc,
+                opts,
+                tparams,
+                targ_map,
+                type_refinement_in_hint,
+                hints,
+            )?);
+            r
+        }
         Hint_::Hrefinement(h, _) => {
             match type_refinement_in_hint {
                 TypeRefinementInHint::Disallowed => {
@@ -488,11 +515,14 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
     if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
         tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
     };
-    if !typedef.vis.is_case_type() {
-        let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
-        let name = ffi::Str::new_str(alloc, hhbc_string_utils::strip_global_ns(&mangled_name));
-        tconsts.push(encode_entry("alias", TypedValue::string(name)));
-    }
+    let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
+    let name = ffi::Str::new_str(alloc, hhbc_string_utils::strip_global_ns(&mangled_name));
+    let key = if typedef.vis.is_case_type() {
+        "case_type"
+    } else {
+        "alias"
+    };
+    tconsts.push(encode_entry(key, TypedValue::string(name)));
     Ok(TypedValue::dict(tconsts.into_bump_slice()))
 }
 

@@ -82,6 +82,7 @@ bool kind_is_resolved(TS::Kind kind) {
     case TS::Kind::T_typeaccess:
     case TS::Kind::T_fun:
     case TS::Kind::T_reifiedtype:
+    case TS::Kind::T_union:
       return false;
   }
   always_assert(false);
@@ -443,6 +444,7 @@ Resolution resolve_fun(ResolveCtx& ctx, SArray ts) {
     .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolveBespoke)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
+    .optCopy(s_case_type, ts)
     .finish();
 }
 
@@ -451,6 +453,7 @@ Resolution resolve_tuple(ResolveCtx& ctx, SArray ts) {
     .resolve(s_elem_types, get_ts_elem_types(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
+    .optCopy(s_case_type, ts)
     .finish();
 }
 
@@ -459,6 +462,7 @@ Resolution resolve_arraylike(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
     .resolve(s_generic_types, get_ts_generic_types_opt(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
+    .optCopy(s_case_type, ts)
     .finish();
 }
 
@@ -559,6 +563,7 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
     .set(s_fields, b.finish())
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
+    .optCopy(s_case_type, ts)
     .finishTS();
 }
 
@@ -646,6 +651,7 @@ Resolution resolve_type_access(ResolveCtx& ctx, SArray ts) {
     resolve_type_access_list(ctx, clsType, get_ts_access_list(ts), 0)
   ).copyModifiers(ts)
    .optCopy(s_alias, ts)
+   .optCopy(s_case_type, ts)
    .finish();
 }
 
@@ -664,6 +670,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     return setKindAndName(TS::Kind::T_class, clsName)
       .optCopy(s_typevars, ts)
       .optCopy(s_alias, ts)
+      .optCopy(s_case_type, ts)
       .finish();
   }
 
@@ -683,6 +690,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
                 ctx, resolve_list)
         .optCopy(s_typevars, ts)
         .optCopy(s_alias, ts)
+        .optCopy(s_case_type, ts)
         .finish();
   };
 
@@ -757,7 +765,8 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       }();
 
       return Builder::attach(resolve(newCtx, toResolve))
-        .set(s_alias, make_tv<KindOfPersistentString>(clsName));
+        .set(typeAlias->caseType ? s_case_type : s_alias,
+             make_tv<KindOfPersistentString>(clsName));
     }();
 
     if (typevarTypes) {
@@ -806,6 +815,12 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   return resolveTA();
 }
 
+Resolution resolve_union(ResolveCtx& ctx, SArray ts) {
+  return Builder::copy(ts, TS::Kind::T_union)
+    .resolve(s_union_types, get_ts_union_types(ts), ctx, resolve_list)
+    .finish();
+}
+
 Resolution resolve_impl(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
   assertx(ts->isStatic());
   assertx(ts->isDictType());
@@ -834,6 +849,8 @@ Resolution resolve_impl(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
       return resolve_type_access(ctx, ts);
     case TS::Kind::T_reifiedtype:
       return Resolution{ TDictN, false };
+    case TS::Kind::T_union:
+      return resolve_union(ctx, ts);
     case TS::Kind::T_int:
     case TS::Kind::T_bool:
     case TS::Kind::T_float:
@@ -927,7 +944,8 @@ Resolution resolve_type_structure(const Index& index,
   ResolveCtx ctx{Context{}, &index, &cache};
   ctx.collect = collect;
   return Builder::attach(resolve(ctx, typeAlias.typeStructure.get()))
-    .set(s_alias, make_tv<KindOfPersistentString>(typeAlias.name))
+    .set(typeAlias.caseType ? s_case_type : s_alias,
+         make_tv<KindOfPersistentString>(typeAlias.name))
     .finishTS();
 }
 

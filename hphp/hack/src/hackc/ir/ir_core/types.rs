@@ -173,6 +173,7 @@ impl EnforceableType {
             };
 
             check(TypeConstraintFlags::Nullable, "nullable")?;
+            check(TypeConstraintFlags::Nullable, "case_type")?;
             check(TypeConstraintFlags::ExtendedHint, "extended_hint")?;
             check(TypeConstraintFlags::TypeVar, "type_var")?;
             check(TypeConstraintFlags::Soft, "soft")?;

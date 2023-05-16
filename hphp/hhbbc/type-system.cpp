@@ -4222,6 +4222,17 @@ Optional<Type> type_of_type_structure(const Index& index,
         if (map.empty()) return std::nullopt;
         return dict_map(map);
       }
+      case TypeStructure::Kind::T_union: {
+        auto const tsTypes = get_ts_union_types(ts);
+        auto ret = TBottom;
+        for (auto i = 0; i < tsTypes->size(); i++) {
+          auto t = type_of_type_structure(
+            index, ctx, tsTypes->getValue(i).getArrayData());
+          if (!t) return std::nullopt;
+          ret |= *t;
+        }
+        return ret;
+      }
       case TypeStructure::Kind::T_vec_or_dict: return union_of(TVec, TDict);
       case TypeStructure::Kind::T_any_array:   return TArrLike;
       case TypeStructure::Kind::T_nothing:

@@ -1088,6 +1088,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     te.attrs() | AttrUnique | AttrPersistent,
     te.type(),
     te.nullable(),
+    te.case_type(),
     te.userAttributes(),
     ts,
     Array{}

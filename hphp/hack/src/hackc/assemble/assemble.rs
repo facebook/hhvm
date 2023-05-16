@@ -1388,6 +1388,7 @@ fn assemble_type_constraint(
         b"type_var" => Ok(TypeConstraintFlags::TypeVar),
         b"extended_hint" => Ok(TypeConstraintFlags::ExtendedHint),
         b"nullable" => Ok(TypeConstraintFlags::Nullable),
+        b"case_type" => Ok(TypeConstraintFlags::CaseType),
         _ => Err(tok.error("Unknown type constraint flag")),
     }
 }

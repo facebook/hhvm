@@ -39,6 +39,7 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
                             const StringData* value,
                             AnnotType type,
                             bool nullable,
+                            bool case_type,
                             Array typeStructure,
                             Array resolvedTypeStructure) {
   assertx(typeStructure.isDict() &&
@@ -54,6 +55,7 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
   m_value = value;
   m_type = type;
   m_nullable = nullable;
+  m_case_type = case_type;
   m_typeStructure = std::move(typeStructure);
   m_resolvedTypeStructure = std::move(resolvedTypeStructure);
 }
@@ -61,7 +63,8 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
     &unit, m_name, m_value, m_attrs, m_type, m_line0, m_line1,
-    m_nullable, m_userAttributes, m_typeStructure, m_resolvedTypeStructure
+    m_nullable, m_case_type, m_userAttributes,
+    m_typeStructure, m_resolvedTypeStructure
   };
 }
 
@@ -73,6 +76,7 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
     (m_value)
     (m_type)
     (m_nullable)
+    (m_case_type)
     (m_userAttributes)
     (m_typeStructure)
     (m_resolvedTypeStructure)

@@ -59,6 +59,7 @@ enum class TypeStructureKind : uint8_t {
   T_null = 28,
   T_nothing = 29,
   T_dynamic = 30,
+  T_union = 31,
   // Make sure to update kMaxResolvedKind below if you add a new kind here
 
   // The following kinds needs class/alias resolution, and
@@ -71,7 +72,7 @@ enum class TypeStructureKind : uint8_t {
 };
 
 namespace TypeStructure {
-constexpr uint8_t kMaxResolvedKind = 30;
+constexpr uint8_t kMaxResolvedKind = 31;
 using Kind = HPHP::TypeStructureKind;
 }
 

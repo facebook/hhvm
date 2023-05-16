@@ -41,10 +41,12 @@ const StaticString s_is_cls_cns("is_cls_cns");
 const StaticString s_access_list("access_list");
 const StaticString s_root_name("root_name");
 const StaticString s_alias("alias");
+const StaticString s_case_type("case_type");
 const StaticString s_callable("callable");
 const StaticString s_exact("exact");
 const StaticString s_typevars("typevars");
 const StaticString s_typevar_types("typevar_types");
+const StaticString s_union_types("union_types");
 const StaticString s_hh_this("HH\\this");
 const StaticString s_type_structure_non_existant_class(
   "HH\\__internal\\type_structure_non_existant_class");
@@ -99,6 +101,14 @@ ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
 ALWAYS_INLINE const StringData* get_ts_string(const ArrayData* ts,
                                               const String& s) {
   auto const field = ts->get(s.get());
+  assertx(isStringType(field.type()));
+  return field.val().pstr;
+}
+
+ALWAYS_INLINE const StringData* get_ts_string_opt(const ArrayData* ts,
+                                                  const String& s) {
+  auto const field = ts->get(s.get());
+  if (!field.is_init()) return nullptr;
   assertx(isStringType(field.type()));
   return field.val().pstr;
 }
@@ -163,6 +173,14 @@ ALWAYS_INLINE const ArrayData* get_ts_generic_types_opt(const ArrayData* ts) {
   return detail::get_ts_varray_opt(ts, s_generic_types);
 }
 
+ALWAYS_INLINE const ArrayData* get_ts_union_types(const ArrayData* ts) {
+  return detail::get_ts_varray(ts, s_union_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_union_types_opt(const ArrayData* ts) {
+  return detail::get_ts_varray_opt(ts, s_union_types);
+}
+
 ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {
   return detail::get_ts_string(ts, s_classname);
 }
@@ -177,6 +195,14 @@ ALWAYS_INLINE const StringData* get_ts_root_name(const ArrayData* ts) {
 
 ALWAYS_INLINE const StringData* get_ts_alias(const ArrayData* ts) {
   return detail::get_ts_string(ts, s_alias);
+}
+
+ALWAYS_INLINE const StringData* get_ts_case_type(const ArrayData* ts) {
+  return detail::get_ts_string(ts, s_case_type);
+}
+
+ALWAYS_INLINE const StringData* get_ts_case_type_opt(const ArrayData* ts) {
+  return detail::get_ts_string_opt(ts, s_case_type);
 }
 
 ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {

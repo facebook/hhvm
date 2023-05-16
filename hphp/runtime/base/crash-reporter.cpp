@@ -85,7 +85,7 @@ static uintptr_t s_jitprof_end;
 static uintptr_t s_stacktrace_start;
 static uintptr_t s_stacktrace_end;
 
-static const char* s_newBlacklist[] = {
+static const char* s_newIgnorelist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafe",
   "_ZN4HPHP10bt_handlerEi",
@@ -170,8 +170,8 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       // Turn on stack traces for coredumps
       StackTrace::Enabled = true;
-      StackTrace::FunctionBlacklist = s_newBlacklist;
-      StackTrace::FunctionBlacklistCount = 5;
+      StackTrace::FunctionIgnorelist = s_newIgnorelist;
+      StackTrace::FunctionIgnorelistCount = 5;
       st.emplace();
       // fall through
     case CrashReportStage::ReportHeader:

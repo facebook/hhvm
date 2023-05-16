@@ -64,8 +64,8 @@ struct StackTraceBase {
   static constexpr unsigned kMaxFrame = 175;
 
   static bool Enabled;
-  static const char* const* FunctionBlacklist;
-  static unsigned FunctionBlacklistCount;
+  static const char* const* FunctionIgnorelist;
+  static unsigned FunctionIgnorelistCount;
 
  protected:
   StackTraceBase();

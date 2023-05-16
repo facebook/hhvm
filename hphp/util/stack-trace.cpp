@@ -54,15 +54,15 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
-const char* const s_defaultBlacklist[] = {
+const char* const s_defaultIgnorelist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafeEPmm",
 };
 
 bool StackTraceBase::Enabled = true;
 
-const char* const* StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
-unsigned StackTraceBase::FunctionBlacklistCount = 2;
+const char* const* StackTraceBase::FunctionIgnorelist = s_defaultIgnorelist;
+unsigned StackTraceBase::FunctionIgnorelistCount = 2;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -122,9 +122,9 @@ void write_path(int fd, folly::StringPiece path) {
   }
 }
 
-bool isBlacklisted(const char* funcname) {
-  for (int i = 0; i < StackTraceBase::FunctionBlacklistCount; i++) {
-    auto ignoreFunc = StackTraceBase::FunctionBlacklist[i];
+bool isIgnorelisted(const char* funcname) {
+  for (int i = 0; i < StackTraceBase::FunctionIgnorelistCount; i++) {
+    auto ignoreFunc = StackTraceBase::FunctionIgnorelist[i];
     if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
       return true;
     }
@@ -452,7 +452,7 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
     auto const& frame = frames[i];
     if (!frame.name ||
         !frame.name[0] ||
-        isBlacklisted(frame.name)) {
+        isIgnorelisted(frame.name)) {
       continue;
     }
     printFrameHdr(fd, fr);
@@ -763,7 +763,7 @@ bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
   if (funcname == nullptr) funcname = "??";
 
   // Ignore some frames that are always present.
-  if (isBlacklisted(funcname)) return false;
+  if (isIgnorelisted(funcname)) return false;
 
   printFrameHdr(fd, frame_num);
   demangle(fd, funcname);

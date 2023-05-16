@@ -504,12 +504,30 @@ let prepare_naming_table
     else
       Saved_state_loader.Naming_and_dep_table
   in
+  let ssopt = TypecheckerOptions.saved_state dstate.dcommon.tcopt in
   let%lwt naming_table_load_from_disk_result =
     if ide_load_naming_table_on_disk then
       let () = log "Attempting to load a naming table from disk..." in
-      State_loader_lwt.load_naming_table_from_disk
-        ~saved_state_type
-        ~root:param.root
+      let%lwt result =
+        State_loader_lwt.get_project_metadata
+          ~opts:ssopt
+          ~progress_callback:(fun _ -> ())
+          ~repo:param.root
+          ~ignore_hh_version:param.ignore_hh_version
+          ~saved_state_type
+      in
+      match result with
+      | Ok (project_metadata, _telemetry) ->
+        State_loader_lwt.load_naming_table_from_disk
+          ~saved_state_type
+          ~project_metadata
+          ~root:param.root
+      | Error (load_err, _telemetry) ->
+        let err =
+          Saved_state_loader.LoadError.medium_user_message_of_error load_err
+        in
+        let str = Printf.sprintf "Failed to get project_metadata: %s" err in
+        Lwt.return_error str
     else
       Lwt.return_error
         "Skipping attempt to naively load naming table from disk..."

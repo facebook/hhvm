@@ -3,7 +3,7 @@
 function main_entry(): void {
   $dirname = dirname(__FILE__) . '/';
   include $dirname . 'utils.inc';
-  $file = __SystemLib\hphp_test_tmppath('__tmp_oo_rename.zip');
+  $file = sys_get_temp_dir().'/'.'__tmp_oo_rename.zip';
 
   @unlink($file);
 

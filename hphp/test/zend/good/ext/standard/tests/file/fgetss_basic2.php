@@ -21,7 +21,7 @@ is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
 <html> html </html> <?hh echo "php"; ?>
 EOT;
 
-$filename = __SystemLib\hphp_test_tmppath('fgetss_basic2.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetss_basic2.tmp';
 
 /* try reading the file opened in different modes of reading */
 $file_modes = varray["w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t"];

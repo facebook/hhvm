@@ -38,7 +38,7 @@ $args_array = varray[
 ];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation9.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_variation9.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

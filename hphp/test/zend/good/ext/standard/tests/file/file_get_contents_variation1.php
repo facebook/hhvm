@@ -27,7 +27,7 @@ echo "*** Testing file_get_contents() : variation ***\n";
 // this doesn't create the include dirs in this directory
 // we change to this to ensure we are not part of the
 // include paths.
-$thisTestDir = __SystemLib\hphp_test_tmppath('fileGetContentsVar1.dir');
+$thisTestDir = sys_get_temp_dir().'/'.'fileGetContentsVar1.dir';
 mkdir($thisTestDir);
 chdir($thisTestDir);
 

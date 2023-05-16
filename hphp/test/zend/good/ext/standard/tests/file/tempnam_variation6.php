@@ -5,7 +5,7 @@
 
 /* Trying to create unique files by passing previously created unique file name as prefix */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmppath('sandbox');
+$file_path = sys_get_temp_dir().'/'.'sandbox';
 mkdir($file_path);
 
 echo "\n*** Test tempnam(): by passing previously created filenames ***\n";

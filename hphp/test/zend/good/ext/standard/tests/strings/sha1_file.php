@@ -7,11 +7,11 @@
 echo "*** Testing sha1_file() : basic functionality ***\n";
 
 /* Creating an empty file */
-$empty_file = __SystemLib\hphp_test_tmppath('sha1_EmptyFile.txt');
+$empty_file = sys_get_temp_dir().'/'.'sha1_EmptyFile.txt';
 fclose(fopen($empty_file, 'w+'));
 
 /* Creating a data file */
-$data_file = __SystemLib\hphp_test_tmppath('sha1_DataFile.txt');
+$data_file = sys_get_temp_dir().'/'.'sha1_DataFile.txt';
 file_put_contents($data_file, "Add this to the file\n");
 
 /* Testing error conditions */

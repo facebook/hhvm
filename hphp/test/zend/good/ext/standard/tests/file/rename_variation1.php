@@ -2,7 +2,7 @@
 
 /* creating directory */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
 $src_dirs = varray [

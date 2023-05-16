@@ -6,10 +6,10 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
-$filename = __SystemLib\hphp_test_tmppath('fileGetContentsVar9.tmp');
-$softlink = __SystemLib\hphp_test_tmppath('fileGetContentsVar9.SoftLink');
-$hardlink = __SystemLib\hphp_test_tmppath('fileGetContentsVar9.HardLink');
-$chainlink = __SystemLib\hphp_test_tmppath('fileGetContentsVar9.ChainLink');
+$filename = sys_get_temp_dir().'/'.'fileGetContentsVar9.tmp';
+$softlink = sys_get_temp_dir().'/'.'fileGetContentsVar9.SoftLink';
+$hardlink = sys_get_temp_dir().'/'.'fileGetContentsVar9.HardLink';
+$chainlink = sys_get_temp_dir().'/'.'fileGetContentsVar9.ChainLink';
 
 // create file
 $h = fopen($filename,"w");

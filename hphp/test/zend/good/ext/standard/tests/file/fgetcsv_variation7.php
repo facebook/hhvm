@@ -23,7 +23,7 @@ $csv_lists = varray [
   varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation7.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation7.tmp';
 
 
 $file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",

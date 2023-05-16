@@ -30,7 +30,7 @@ set_error_handler(test_error_handler<>);
 
 // Initialise function arguments not being substituted (if any)
 
-$filename = __SystemLib\hphp_test_tmppath('fwriteVar5.tmp');
+$filename = sys_get_temp_dir().'/'.'fwriteVar5.tmp';
 
 
 

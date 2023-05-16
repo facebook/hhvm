@@ -1,7 +1,7 @@
 <?hh
 // fopen with interesting windows paths.
 <<__EntryPoint>> function main(): void {
-$testdir = __SystemLib\hphp_test_tmppath('bug47177.tmpdir');
+$testdir = sys_get_temp_dir().'/'.'bug47177.tmpdir';
 mkdir($testdir);
 $t = time() - 3600;
 touch($testdir, $t);

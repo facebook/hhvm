@@ -12,7 +12,7 @@
    Description: Gets information about a link
 */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 
 // temp dir created in present working directory
 $dirname = "symlink_link_linkinfo_is_link_basic1";

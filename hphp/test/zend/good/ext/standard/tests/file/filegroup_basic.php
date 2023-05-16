@@ -12,7 +12,7 @@ var_dump( filegroup(".") );
 var_dump( filegroup("./..") );
 
 /* Newly created files and dirs */
-$file_name = __SystemLib\hphp_test_tmppath('filegroup_basic.tmp');
+$file_name = sys_get_temp_dir().'/'.'filegroup_basic.tmp';
 $file_handle = fopen($file_name, "w");
 
 $string = "Hello, world\n1234\n123Hello";
@@ -20,7 +20,7 @@ fwrite($file_handle, $string);
 var_dump( filegroup($file_name) );
 fclose($file_handle);
 
-$dir_name = __SystemLib\hphp_test_tmppath('filegroup_basic');
+$dir_name = sys_get_temp_dir().'/'.'filegroup_basic';
 mkdir($dir_name);
 var_dump( filegroup($dir_name) );
 

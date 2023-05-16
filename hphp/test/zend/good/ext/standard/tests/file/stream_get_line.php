@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$path = __SystemLib\hphp_test_tmppath('test.html');
+$path = sys_get_temp_dir().'/'.'test.html';
 
 file_put_contents($path, b"foo<br>bar<br>foo");
 $fp = fopen($path, "r");

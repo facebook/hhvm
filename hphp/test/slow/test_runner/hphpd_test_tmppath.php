@@ -2,10 +2,9 @@
 
 <<__EntryPoint>>
 function main(): void {
-  $root = __SystemLib\hphp_test_tmproot();
-  $path = __SystemLib\hphp_test_tmppath('foo.txt');
-
-  var_dump('root ends with /', strrpos($root, '/') === strlen($root) - 1);
+  $root = sys_get_temp_dir();
+  $path = sys_get_temp_dir().'/'.'foo.txt';
+  var_dump('root does not end with /', strrpos($root, '/') !== strlen($root) - 1);
   var_dump('path starts with root', strpos($path, $root) === 0);
   var_dump(
     'requested path is leaf',

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('concur_rw.txt');
+$filename = sys_get_temp_dir().'/'.'concur_rw.txt';
 
 @unlink($filename);
 $writer = fopen($filename, "wt");

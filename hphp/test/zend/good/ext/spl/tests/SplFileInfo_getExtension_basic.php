@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $file = md5('SplFileInfo::getExtension');
 $exts = varray['.txt', '.extension', '..', '.', ''];
 foreach ($exts as $ext) {

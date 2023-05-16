@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing glob() : usage variations ***\n";
 
-$dirname = __SystemLib\hphp_test_tmppath('glob_variation');
+$dirname = sys_get_temp_dir().'/'.'glob_variation';
 
 // temp dir created
 mkdir($dirname);

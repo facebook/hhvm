@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('bug47667.zip');
+$filename = sys_get_temp_dir().'/'.'bug47667.zip';
 
 $zip = new ZipArchive();
 if ($zip->open($filename, ZipArchive::CREATE) !== true) {

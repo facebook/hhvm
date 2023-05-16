@@ -42,7 +42,7 @@ $args_array = varray[
 // and with int values from the above $args_array array
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation3.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_variation3.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

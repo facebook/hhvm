@@ -7,7 +7,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
-$name_prefix = __SystemLib\hphp_test_tmproot();
+$name_prefix = sys_get_temp_dir();
 // create temp dir
 mkdir("$name_prefix/readlink_realpath_variation2/home/tests/link/", 0777, true);
 // create the file

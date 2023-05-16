@@ -8,7 +8,7 @@
 echo "*** Testing hash_file() : basic functionality ***\n";
 
 // Set up file
-$filename = __SystemLib\hphp_test_tmppath('hash_file_basic_example.txt');
+$filename = sys_get_temp_dir().'/'.'hash_file_basic_example.txt';
 file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 
 var_dump( hash_file( 'md5', $filename ) );

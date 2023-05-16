@@ -7,7 +7,7 @@ function main(): void {
   // Supported number of 'X's varies by platform; only exactly 6 is portable.
   // Builtin will error if an invalid pattern is given; leave enforcing
   // portability (or not) up to the HSL.
-  $pattern = __SystemLib\hphp_test_tmproot().'ext_hsl-test-XXXXXX';
+  $pattern = sys_get_temp_dir().'/ext_hsl-test-XXXXXX';
   $tmpdir = _OS\mkdtemp($pattern);
   // All of these should be true
   var_dump($tmpdir !== $pattern);

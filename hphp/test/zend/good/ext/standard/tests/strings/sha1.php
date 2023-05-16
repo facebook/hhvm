@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('sha1.dat');
+$filename = sys_get_temp_dir().'/'.'sha1.dat';
 $a = varray[
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",

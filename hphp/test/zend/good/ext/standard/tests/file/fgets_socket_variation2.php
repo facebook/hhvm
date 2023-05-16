@@ -3,7 +3,7 @@ const LINE_OF_DATA = "12345678\n";
 
 // create a file
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('fgets_socket_variation2.tmp');
+$filename = sys_get_temp_dir().'/'.'fgets_socket_variation2.tmp';
 $fd = fopen($filename, "w+");
 
 // populate the file with lines of data

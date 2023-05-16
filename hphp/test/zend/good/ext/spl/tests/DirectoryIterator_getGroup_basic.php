@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$dirname = __SystemLib\hphp_test_tmppath('DirectoryIterator_getGroup_basic');
+$dirname = sys_get_temp_dir().'/'.'DirectoryIterator_getGroup_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);
 $expected = filegroup($dirname);

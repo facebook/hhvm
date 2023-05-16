@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('touch_variation1.dat');
+$filename = sys_get_temp_dir().'/'.'touch_variation1.dat';
 
 
 var_dump(touch($filename, 101));

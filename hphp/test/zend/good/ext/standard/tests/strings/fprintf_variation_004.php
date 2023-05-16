@@ -3,7 +3,7 @@
 $char_variation = varray[ 'a', "a", 67, -67, 99 ];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('fprintf_variation_004.phpt.txt');
+$data_file = sys_get_temp_dir().'/'.'fprintf_variation_004.phpt.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

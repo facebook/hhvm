@@ -9,7 +9,7 @@
 
 
 echo "*** Testing fileowner() with different notations of file names ***\n";
-$dir_name = __SystemLib\hphp_test_tmppath('fileowner_variation3');
+$dir_name = sys_get_temp_dir().'/'.'fileowner_variation3';
 mkdir($dir_name);
 $file_handle = fopen($dir_name."/fileowner_variation3.tmp", "w");
 fclose($file_handle);
@@ -35,7 +35,7 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileowner(__SystemLib\hphp_test_tmppath($file)) );
+  var_dump( fileowner(sys_get_temp_dir().'/'.$file)) ;
   clearstatcache();
   $count++;
 }

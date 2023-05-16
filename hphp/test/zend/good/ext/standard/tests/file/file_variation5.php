@@ -1,10 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $test_dirname = 'testdir';
 mkdir($test_dirname);
 
-$filepath = __SystemLib\hphp_test_tmppath('file_variation5.php.tmp');
+$filepath = sys_get_temp_dir().'/'.'file_variation5.php.tmp';
 $filename = basename($filepath);
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\nLine 2\nLine 3");
@@ -26,6 +26,6 @@ echo "\nfile() on a relative path from a different working directory\n";
 chdir($test_dirname);
 var_dump(file("../$filename"));
 
-rmdir(__SystemLib\hphp_test_tmppath($test_dirname));
+rmdir(sys_get_temp_dir().'/'.$test_dirname);
 unlink($filepath);
 }

@@ -6,10 +6,10 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $mainDir = "fileGetContentsVar7.dir";
 $subDir = "fileGetContentsVar7Sub";
-$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
+$absMainDir = sys_get_temp_dir().'/'.$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);

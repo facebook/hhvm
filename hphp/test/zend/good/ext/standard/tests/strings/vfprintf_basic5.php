@@ -16,7 +16,7 @@ $arg2 = varray[65,66];
 $arg3 = varray[65,66,67];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic5.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_basic5.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
    

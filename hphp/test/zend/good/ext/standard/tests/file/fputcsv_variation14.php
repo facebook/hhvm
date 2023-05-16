@@ -25,7 +25,7 @@ $csv_lists = varray [
   varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
 
 ];
-$filename = __SystemLib\hphp_test_tmppath('fputcsv_variation14.tmp');
+$filename = sys_get_temp_dir().'/'.'fputcsv_variation14.tmp';
 
 $file_modes = varray ["r", "rb", "rt"];
 

@@ -15,10 +15,10 @@ function main_entry(): void {
   $depth0 = "depth01";
   $depth1 = 'depth1';
   $depth2 = 'depth2';
-  $targetDir = __SystemLib\hphp_test_tmppath($depth0 . DIRECTORY_SEPARATOR . $depth1 . DIRECTORY_SEPARATOR . $depth2);
+  $targetDir = sys_get_temp_dir().'/'.$depth0 . DIRECTORY_SEPARATOR . $depth1 . DIRECTORY_SEPARATOR . $depth2;
   mkdir($targetDir, 0777, true);
   touch($targetDir . DIRECTORY_SEPARATOR . 'getSubPath_test.tmp');
-  $iterator = new RecursiveDirectoryIterator(__SystemLib\hphp_test_tmppath($depth0));
+  $iterator = new RecursiveDirectoryIterator(sys_get_temp_dir().'/'.$depth0);
   $it = new RecursiveIteratorIterator($iterator);
 
   $list = varray[];
@@ -31,5 +31,5 @@ function main_entry(): void {
   	echo (string)($item) . "\n";
   }
 
-  rrmdir(__SystemLib\hphp_test_tmppath($depth0));
+  rrmdir(sys_get_temp_dir().'/'.$depth0);
 }

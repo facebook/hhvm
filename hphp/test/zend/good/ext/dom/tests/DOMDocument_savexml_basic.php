@@ -16,7 +16,7 @@ $dom = new DOMDocument();
 $dom->loadXML($xml);
 $root = $dom->documentElement;
 
-$filename = __SystemLib\hphp_test_tmppath('tmp_dom_savexml');
+$filename = sys_get_temp_dir().'/'.'tmp_dom_savexml';
 var_dump($dom->save($filename));
 $result = file_get_contents($filename);
 var_dump($result == $dom->saveXML());

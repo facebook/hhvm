@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('iptcembed_001.data');
+$file = sys_get_temp_dir().'/'.'iptcembed_001.data';
 $fp = fopen($file, "w");
 fwrite($fp, "-1-1");
 fclose($fp);

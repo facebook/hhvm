@@ -3,7 +3,7 @@
 function main_entry(): void {
   include dirname(__FILE__) . '/utils.inc';
   $file = dirname(__FILE__) . '/test_with_comment.zip';
-  $dirname = __SystemLib\hphp_test_tmproot() . '/';
+  $dirname = sys_get_temp_dir() . '/';
   $zip = new ZipArchive;
   if ($zip->open($file) !== TRUE) {
   	echo "open failed.\n";

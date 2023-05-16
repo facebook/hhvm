@@ -12,14 +12,14 @@ var_dump( fileowner(".") );
 var_dump( fileowner("./..") );
 
 /* Newly created files and dirs */
-$file_name = __SystemLib\hphp_test_tmppath('fileowner_basic.tmp');
+$file_name = sys_get_temp_dir().'/'.'fileowner_basic.tmp';
 $file_handle = fopen($file_name, "w");
 $string = "Hello, world\n1234\n123Hello";
 fwrite($file_handle, $string);
 var_dump( fileowner($file_name) );
 fclose($file_handle);
 
-$dir_name = __SystemLib\hphp_test_tmppath('fileowner_basic');
+$dir_name = sys_get_temp_dir().'/'.'fileowner_basic';
 mkdir($dir_name);
 var_dump( fileowner($dir_name) );
 

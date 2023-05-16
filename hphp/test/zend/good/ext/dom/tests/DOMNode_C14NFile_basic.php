@@ -13,7 +13,7 @@ $xml = <<< XML
 </books>
 XML;
 
-$output = __SystemLib\hphp_test_tmppath('DOMNode_C14NFile_basic.tmp');
+$output = sys_get_temp_dir().'/'.'DOMNode_C14NFile_basic.tmp';
 $doc = new DOMDocument();
 $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);

@@ -10,8 +10,8 @@ function custom_readfunction($oCurl, $hReadHandle, $iMaxOut)
 }
 
 <<__EntryPoint>> function main(): void {
-$sReadFile  = __SystemLib\hphp_test_tmppath('in.tmp');
-$sWriteFile = __SystemLib\hphp_test_tmppath('out.tmp');
+$sReadFile  = sys_get_temp_dir().'/'.'in.tmp';
+$sWriteFile = sys_get_temp_dir().'/'.'out.tmp';
 $sWriteUrl  = 'file://'.$sWriteFile;
 
 file_put_contents($sReadFile,'contents of tempfile');

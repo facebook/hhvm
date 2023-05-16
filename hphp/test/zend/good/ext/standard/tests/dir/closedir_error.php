@@ -15,7 +15,7 @@ echo "*** Testing closedir() : error conditions ***\n";
 //Test closedir with one more than the expected number of arguments
 echo "\n-- Testing closedir() function with more than expected no. of arguments --\n";
 
-$dir_path = __SystemLib\hphp_test_tmppath('closedir_error');
+$dir_path = sys_get_temp_dir().'/'.'closedir_error';
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 

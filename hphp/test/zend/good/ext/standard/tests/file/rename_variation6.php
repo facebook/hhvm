@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$tmp_file = __SystemLib\hphp_test_tmppath('rename_variation6.php.tmp');
-$tmp_link = __SystemLib\hphp_test_tmppath('rename_variation6.php.tmp.link');
-$tmp_link2 = __SystemLib\hphp_test_tmppath('rename_variation6.php.tmp.link2');
+$tmp_file = sys_get_temp_dir().'/'.'rename_variation6.php.tmp';
+$tmp_link = sys_get_temp_dir().'/'.'rename_variation6.php.tmp.link';
+$tmp_link2 = sys_get_temp_dir().'/'.'rename_variation6.php.tmp.link2';
 
 touch($tmp_file);
 symlink($tmp_file, $tmp_link);

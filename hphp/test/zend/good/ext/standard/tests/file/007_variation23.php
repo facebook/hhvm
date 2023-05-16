@@ -19,7 +19,7 @@
 <<__EntryPoint>> function main(): void {
 
 $string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
-$file = __SystemLib\hphp_test_tmppath('007_variation23.tmp');
+$file = sys_get_temp_dir().'/'.'007_variation23.tmp';
 
 echo "*** Test fopen() & fclose() functions:  with 'xb' mode ***\n";
 $file_handle = fopen($file, "xb");  //opening the non-existing file in "xb" mode, file will be created

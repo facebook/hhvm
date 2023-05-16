@@ -9,7 +9,7 @@ $no_arg_filters = varray[
     "IMG_FILTER_MEAN_REMOVAL"
 ];
 
-$SAVE_DIR = __SystemLib\hphp_test_tmproot();
+$SAVE_DIR = sys_get_temp_dir();
 $SOURCE_IMG = __DIR__ . "/test.png";
 
     foreach ($no_arg_filters as $filt) {

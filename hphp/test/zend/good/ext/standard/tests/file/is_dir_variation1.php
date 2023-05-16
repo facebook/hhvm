@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 
 echo "-- Testing is_dir() with an empty dir --\n";
-$dirname = __SystemLib\hphp_test_tmppath('is_dir_variation1');
+$dirname = sys_get_temp_dir().'/'.'is_dir_variation1';
 mkdir($dirname);
 var_dump( is_dir($dirname) );
 clearstatcache();

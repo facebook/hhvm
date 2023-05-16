@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : usage variations ***\n";
 
-$base_dir_path = __SystemLib\hphp_test_tmproot();
+$base_dir_path = sys_get_temp_dir();
 
 $level2_one_dir_name = "level2_one";
 $level2_one_dir_path = "$base_dir_path/$level2_one_dir_name";

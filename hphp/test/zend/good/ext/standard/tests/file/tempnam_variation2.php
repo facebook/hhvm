@@ -6,12 +6,12 @@
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing tempnam() with absolute and relative paths ***\n";
-$dir_name = __SystemLib\hphp_test_tmppath('tempnam_variation2');
+$dir_name = sys_get_temp_dir().'/'.'tempnam_variation2';
 mkdir($dir_name);
 $dir_path = $dir_name."/tempnam_variation2_sub";
 mkdir($dir_path);
 
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 
 $dir_paths = varray[
   // absolute paths

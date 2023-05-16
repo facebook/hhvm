@@ -11,7 +11,7 @@
 echo "*** Testing getcwd() : basic functionality ***\n";
 
 //create temporary directory for test, removed in CLEAN section
-$directory = __SystemLib\hphp_test_tmppath('getcwd_basic');
+$directory = sys_get_temp_dir().'/'.'getcwd_basic';
 mkdir($directory);
 
 var_dump(getcwd());

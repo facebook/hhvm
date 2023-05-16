@@ -4,7 +4,7 @@ hello world
 is a very common test
 for all languages
 EOT;
-$dirname = __SystemLib\hphp_test_tmppath('gzfile_temp');
+$dirname = sys_get_temp_dir().'/'.'gzfile_temp';
 $filename = $dirname.'/gzfile_basic2.txt';
 mkdir($dirname);
 $h = fopen($filename, 'w');

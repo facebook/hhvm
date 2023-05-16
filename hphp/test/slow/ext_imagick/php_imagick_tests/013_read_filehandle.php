@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main(): void {
-$file = __SystemLib\hphp_test_tmppath('__tmp_rose.jpg');
+$file = sys_get_temp_dir().'/'.'__tmp_rose.jpg';
 
 $imagick = new Imagick('magick:rose');
 $imagick->setImageFormat('jpg');

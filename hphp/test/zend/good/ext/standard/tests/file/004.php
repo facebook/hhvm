@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 
 echo "String Test: ";
 echo file_put_contents("TEST1", file_get_contents(__FILE__)) !== FALSE ? 'OK' : 'FAIL';

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fseek() : variation - beyond file boundaries ***\n";
 
-$outputfile = __SystemLib\hphp_test_tmppath('fseek_variation3.tmp');
+$outputfile = sys_get_temp_dir().'/'.'fseek_variation3.tmp';
 
 $h = fopen($outputfile, "wb+");
 for ($i = 1; $i < 10; $i++) {

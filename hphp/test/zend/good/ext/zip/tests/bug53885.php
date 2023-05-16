@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$fname = __SystemLib\hphp_test_tmppath('test53885.zip');
+$fname = sys_get_temp_dir().'/'.'test53885.zip';
 if(file_exists($fname)) unlink($fname);
 touch($fname);
 $nx=new ZipArchive();

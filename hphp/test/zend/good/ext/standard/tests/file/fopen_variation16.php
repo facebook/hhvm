@@ -43,7 +43,7 @@ function runtest() {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
-$thisTestDir = __SystemLib\hphp_test_tmppath('fopenVariation16.dir');
+$thisTestDir = sys_get_temp_dir().'/'.'fopenVariation16.dir';
 
 mkdir($thisTestDir);
 $oldDirPath = getcwd();

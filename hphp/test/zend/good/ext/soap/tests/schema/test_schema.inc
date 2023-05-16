@@ -66,7 +66,7 @@ $wsdl  = <<<EOF
 </definitions>
 EOF;
 
-  $filename = __SystemLib\hphp_test_tmppath('wsdl');
+  $filename = sys_get_temp_dir().'/'.'wsdl';
   $f = fopen($filename, 'w');
   fwrite($f, $wsdl);
   fclose($f);

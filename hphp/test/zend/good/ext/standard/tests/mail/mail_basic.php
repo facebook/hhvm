@@ -13,7 +13,7 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = 'KHeaders';
-$outFile = __SystemLib\hphp_test_tmppath('mailBasic.out');
+$outFile = sys_get_temp_dir().'/'.'mailBasic.out';
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers

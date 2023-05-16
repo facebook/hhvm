@@ -38,7 +38,7 @@ $modes = varray[
 for( $i=0; $i<count($modes); $i++ ) {
   echo "\n-- Iteration with mode '$modes[$i]' --\n";
 
-  $filename = __SystemLib\hphp_test_tmppath('007_basic.tmp');
+  $filename = sys_get_temp_dir().'/'.'007_basic.tmp';
   // check fopen()
   $handle = fopen($filename, $modes[$i]);
   var_dump($handle );

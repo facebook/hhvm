@@ -27,7 +27,7 @@ function main(): void {
 
   // create the temporary directory
 
-  $dir_path = __SystemLib\hphp_test_tmppath('chdir_basic');
+  $dir_path = sys_get_temp_dir().'/'.'chdir_basic';
   @mkdir($dir_path);
 
 

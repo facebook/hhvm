@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 
 $fp = fopen("bz_open_002.txt", "w");
 var_dump(bzopen($fp, "w"));

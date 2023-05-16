@@ -18,9 +18,9 @@
 echo "\n*** Create hard link in different directory with same filename ***\n";
 // temp file used
 
-$filename = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation8.tmp');
+$filename = sys_get_temp_dir().'/'.'symlink_link_linkinfo_is_link_variation8.tmp';
 // temp link name used
-$dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link1_variation8');
+$dirname = sys_get_temp_dir().'/'.'symlink_link_linkinfo_is_link1_variation8';
 mkdir($dirname);
 $linkname = "symlink_link_linkinfo_is_link_variation8.tmp";
 // create temp file
@@ -38,9 +38,9 @@ unlink($filename);
 rmdir($dirname);
 
 echo "\n*** Create soft link in different directory with same filename ***\n";
-$filename = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation8.tmp');
+$filename = sys_get_temp_dir().'/'.'symlink_link_linkinfo_is_link_variation8.tmp';
 // temp link name used
-$dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link1_variation8');
+$dirname = sys_get_temp_dir().'/'.'symlink_link_linkinfo_is_link1_variation8';
 mkdir($dirname);
 $linkname = "symlink_link_linkinfo_is_link_variation8.tmp";
 // create temp file

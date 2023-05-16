@@ -10,7 +10,7 @@ $str2 = ob_get_clean();
 var_dump(imagecreatefromstring($str2));
 
 /* file */
-$file = __SystemLib\hphp_test_tmppath('bug41442.gd2');
+$file = sys_get_temp_dir().'/'.'bug41442.gd2';
 imagegd2($res, $file);
 $str2 = file_get_contents($file);
 var_dump(imagecreatefromstring($str2));

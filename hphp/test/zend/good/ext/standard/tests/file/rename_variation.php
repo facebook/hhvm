@@ -1,7 +1,7 @@
 <?hh
 /* creating directory */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 mkdir("$file_path/rename_variation");
 
 /* rename files across directories */

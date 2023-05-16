@@ -89,19 +89,19 @@ abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
 	}
 
 	public static function dir1() {
-		return __SystemLib\hphp_test_tmppath('dir1');
+		return sys_get_temp_dir().'/'.'dir1';
 	}
 
 	public static function dir2() {
-		return __SystemLib\hphp_test_tmppath('dir2');
+		return sys_get_temp_dir().'/'.'dir2';
 	}
 
 	public static function dir3() {
-		return __SystemLib\hphp_test_tmppath('dir3');
+		return sys_get_temp_dir().'/'.'dir3';
 	}
 
 	//invalid directory
     public static function dir4() {
-		return __SystemLib\hphp_test_tmppath('dir4');
+		return sys_get_temp_dir().'/'.'dir4';
 	}
 }

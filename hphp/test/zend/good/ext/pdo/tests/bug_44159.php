@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$pdo = new PDO('sqlite:' . __SystemLib\hphp_test_tmppath('foo.db'));
+$pdo = new PDO('sqlite:' . sys_get_temp_dir().'/'.'foo.db');
 
 $attrs = varray[PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES, PDO::NULL_TO_STRING];
 
@@ -9,5 +9,5 @@ foreach ($attrs as $attr) {
     var_dump($pdo->setAttribute($attr, 'nonsense'));
 }
 
-unlink(__SystemLib\hphp_test_tmppath('foo.db'));
+unlink(sys_get_temp_dir().'/'.'foo.db');
 }

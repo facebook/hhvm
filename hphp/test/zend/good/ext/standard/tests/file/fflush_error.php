@@ -14,7 +14,7 @@ try { var_dump( fflush() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 // more than expected no. of args
 echo "-- Testing fflush(): with more than expected number of arguments --\n";
 
-$filename = __SystemLib\hphp_test_tmppath('fflush_error.tmp');
+$filename = sys_get_temp_dir().'/'.'fflush_error.tmp';
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");

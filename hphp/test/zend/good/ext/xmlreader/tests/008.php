@@ -18,7 +18,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$file = __SystemLib\hphp_test_tmppath('_008.xml');
+$file = sys_get_temp_dir().'/'.'_008.xml';
 file_put_contents($file, $xmlstring);
 
 

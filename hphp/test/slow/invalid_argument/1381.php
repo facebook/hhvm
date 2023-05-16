@@ -38,10 +38,10 @@ try { var_dump(stream_get_contents('', -1)); } catch (Exception $e) { echo "\n".
 $fp = fopen(__DIR__.'/../../sample_dir/file', 'r');
 var_dump(fgets($fp, -1));
 fclose($fp);
-$tmpfname = tempnam(__SystemLib\hphp_test_tmproot(), str_repeat('a', 128));
+$tmpfname = tempnam(sys_get_temp_dir(), str_repeat('a', 128));
 var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
-$tmpfname = tempnam(__SystemLib\hphp_test_tmproot(), '/var/www' . str_repeat('a', 128));
+$tmpfname = tempnam(sys_get_temp_dir(), '/var/www' . str_repeat('a', 128));
 var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
 $ar1 = varray[10, 100, 100, 0];

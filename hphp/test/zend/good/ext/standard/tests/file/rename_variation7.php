@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$tmp_link = __SystemLib\hphp_test_tmppath('tmp.link');
-$tmp_link2 = __SystemLib\hphp_test_tmppath('tmp.link2');
+$tmp_link = sys_get_temp_dir().'/'.'tmp.link';
+$tmp_link2 = sys_get_temp_dir().'/'.'tmp.link2';
 
-symlink(__SystemLib\hphp_test_tmppath('there_is_no_such_file'), $tmp_link);
+symlink(sys_get_temp_dir().'/there_is_no_such_file', $tmp_link);
 rename($tmp_link, $tmp_link2);
 
 clearstatcache();

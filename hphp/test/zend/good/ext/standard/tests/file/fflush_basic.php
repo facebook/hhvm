@@ -10,7 +10,7 @@ second line of string
 third line of string
 EOD;
 
-$filename = __SystemLib\hphp_test_tmppath('fflush_basic.tmp');
+$filename = sys_get_temp_dir().'/'.'fflush_basic.tmp';
 
 // opening a file
 $file_handle = fopen($filename, "w");

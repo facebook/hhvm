@@ -6,7 +6,7 @@
  *               filesystem or disk partition
  */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 
 echo "*** Testing with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") ); 

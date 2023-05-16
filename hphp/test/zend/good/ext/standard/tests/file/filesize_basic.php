@@ -14,7 +14,7 @@ var_dump( filesize(__FILE__) );
 var_dump( filesize(".") );
 
 /* Empty file */
-$file_name = __SystemLib\hphp_test_tmppath('filesize_basic.tmp');
+$file_name = sys_get_temp_dir().'/'.'filesize_basic.tmp';
 $file_handle = fopen($file_name, "w");
 fclose($file_handle);
 var_dump( filesize($file_name) );

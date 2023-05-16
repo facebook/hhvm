@@ -11,7 +11,7 @@
 echo "*** Testing fscanf(): for its return type without third argument ***\n";
 
 // create a file
-$filename = __SystemLib\hphp_test_tmppath('fscanf_variation1.tmp');
+$filename = sys_get_temp_dir().'/'.'fscanf_variation1.tmp';
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");

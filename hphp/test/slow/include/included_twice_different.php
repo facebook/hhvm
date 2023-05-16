@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $file = __SystemLib\hphp_test_tmppath('included_twice_different1.out');
+  $file = sys_get_temp_dir().'/'.'included_twice_different1.out';
 
   // If we write a file multiple times really fast then we can modify the file
   // during the same time tick as last time and the change won't be
@@ -23,7 +23,7 @@ function main_entry(): void {
     echo count(array_filter(get_included_files(), $x ==> $x == $file)) . "\n";
   }
 
-  $file = __SystemLib\hphp_test_tmppath('included_twice_different2.out');
+  $file = sys_get_temp_dir().'/'.'included_twice_different2.out';
 
   // Ensure that if we write the file multiple times that the file is actually
   // re-read and not cached.

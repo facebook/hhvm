@@ -6,7 +6,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file() : variation ***\n";
-$testfile = __SystemLib\hphp_test_tmppath('fileVar9.txt');
+$testfile = sys_get_temp_dir().'/'.'fileVar9.txt';
 
 $contents = varray[
    "File ends on a single character\na",

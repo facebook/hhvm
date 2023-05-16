@@ -5,7 +5,7 @@ is a very common test
 for all languages
 
 EOT;
-$dirname = __SystemLib\hphp_test_tmppath('readgzfile_temp');
+$dirname = sys_get_temp_dir().'/'.'readgzfile_temp';
 $filename = $dirname.'/readgzfile_basic2.txt';
 mkdir($dirname);
 $h = fopen($filename, 'w');

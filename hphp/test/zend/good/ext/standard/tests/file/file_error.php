@@ -4,7 +4,7 @@
    Description: Reads entire file into an array
                 Returns the  file in an array */
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('file.tmp');
+$filename = sys_get_temp_dir().'/'.'file.tmp';
 fclose(fopen($filename, "w"));
 echo "\n*** Testing error conditions ***";
 try { var_dump( file() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero No. of args

@@ -64,7 +64,7 @@ $obj_string = new mystring;
 var_dump(lcfirst("$obj_string"));
 
 echo "\n--- Testing Resources ---\n";
-$filename1 = __SystemLib\hphp_test_tmppath("dummy-lcfirst.txt");
+$filename1 = sys_get_temp_dir().'/'."dummy-lcfirst.txt";
 $file1 = fopen($filename1, "w");                // creating new file
 /* getting resource type for file handle */
 $string1 = get_resource_type($file1);

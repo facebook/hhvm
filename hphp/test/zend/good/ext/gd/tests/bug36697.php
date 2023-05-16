@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dest = __SystemLib\hphp_test_tmppath('36697.gif');
+$dest = sys_get_temp_dir().'/'.'36697.gif';
 
 $im = imagecreatetruecolor(192, 36);
 $trans_color = imagecolorallocate($im, 255, 0, 0);

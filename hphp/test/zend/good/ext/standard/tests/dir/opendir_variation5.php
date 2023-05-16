@@ -18,7 +18,7 @@ echo "*** Testing opendir() : usage variations ***\n";
  *      |-> child_dir  ( child dir)
  */
 
-$parent_dir_path = __SystemLib\hphp_test_tmppath('opendir_variation5');
+$parent_dir_path = sys_get_temp_dir().'/'.'opendir_variation5';
 mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 

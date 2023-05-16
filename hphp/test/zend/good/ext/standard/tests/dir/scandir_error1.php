@@ -16,7 +16,7 @@ try { var_dump( scandir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->
 
 //Test scandir with one more than the expected number of arguments
 echo "\n-- Testing scandir() function with more than expected no. of arguments --\n";
-$dir = __SystemLib\hphp_test_tmppath('scandir_error');
+$dir = sys_get_temp_dir().'/'.'scandir_error';
 mkdir($dir);
 $sorting_order = 10;
 $context = stream_context_create();

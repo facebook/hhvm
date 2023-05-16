@@ -25,7 +25,7 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
-$filename = __SystemLib\hphp_test_tmppath('fgetss_variation5.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetss_variation5.tmp';
 
 /* try reading the file opened in different modes of reading */
 $file_modes = varray["w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t"];

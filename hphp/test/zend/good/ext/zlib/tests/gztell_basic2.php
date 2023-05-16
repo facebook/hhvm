@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$f = __SystemLib\hphp_test_tmppath("temp2.txt.gz");
+$f = sys_get_temp_dir().'/'."temp2.txt.gz";
 $h = gzopen($f, 'w');
 $sizes = varray[7, 22, 54, 17, 27, 15, 1000];
 // tell should be 7, 29, 83, 100, 127, 142, 1142

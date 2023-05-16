@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 /* $id$ */
-$dest = __SystemLib\hphp_test_tmppath('bug27582.png');
+$dest = sys_get_temp_dir().'/'.'bug27582.png';
 @unlink($dest);
 $im = imagecreatetruecolor(10, 10);
 imagealphablending($im, true);

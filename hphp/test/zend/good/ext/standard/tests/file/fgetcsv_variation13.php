@@ -9,7 +9,7 @@
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
 
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation13.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation13.tmp';
 @unlink($filename);
 
 $file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_errmode() {
-$db = __SystemLib\hphp_test_tmppath('errmode.php.sq3');
+$db = sys_get_temp_dir().'/'.'errmode.php.sq3';
 
 $pdo = new PDO("sqlite:$db");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

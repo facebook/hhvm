@@ -5,7 +5,7 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-$file = __SystemLib\hphp_test_tmppath('simpletext.jpg');
+$file = sys_get_temp_dir().'/'.'simpletext.jpg';
 
 // Save the image as 'simpletext.jpg'
 imagejpeg($im, $file);

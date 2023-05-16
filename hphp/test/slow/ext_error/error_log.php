@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_error_log() {
 $log_string = 'hello world';
-$filename = __SystemLib\hphp_test_tmppath('errorlog_test');
+$filename = sys_get_temp_dir().'/'.'errorlog_test';
 
 error_log($log_string, 3, $filename);
 $f = fopen($filename, 'r');

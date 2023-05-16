@@ -4,7 +4,7 @@ use namespace HH\Lib\_Private\_OS;
 
 <<__EntryPoint>>
 function main(): void {
-  $temp = __SystemLib\hphp_test_tmppath('hsl_os_ftruncate');
+  $temp = sys_get_temp_dir().'/'.'hsl_os_ftruncate';
   touch($temp);
   $fd = _OS\open($temp, _OS\O_WRONLY);
 

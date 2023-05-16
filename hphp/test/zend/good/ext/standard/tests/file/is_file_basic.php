@@ -12,7 +12,7 @@ var_dump( is_file(__FILE__) );
 /* Checking with (current) dir */
 var_dump( is_file(dirname(__FILE__)) );
 
-$file_name = __SystemLib\hphp_test_tmppath('is_file_basic.tmp');
+$file_name = sys_get_temp_dir().'/'.'is_file_basic.tmp';
 /* With non-existing file */
 var_dump( is_file($file_name) );
 /* With existing file */

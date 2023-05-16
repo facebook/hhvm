@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $file = '__tmp14962.txt';
-$fullpath = __SystemLib\hphp_test_tmppath($file);
-$zipfile = __SystemLib\hphp_test_tmppath('__14962.zip');
+$fullpath = sys_get_temp_dir().'/'.$file;
+$zipfile = sys_get_temp_dir().'/'.'__14962.zip';
 $za = new ZipArchive;
 $za->open($zipfile, ZipArchive::CREATE);
 $za->addFromString($file, '1234');
@@ -13,7 +13,7 @@ if (!is_file($zipfile)) {
 }
 $za = new ZipArchive;
 $za->open($zipfile);
-$za->extractTo(__SystemLib\hphp_test_tmproot(), NULL);
+$za->extractTo(sys_get_temp_dir(), NULL);
 $za->close();
 
 if (is_file($fullpath)) {

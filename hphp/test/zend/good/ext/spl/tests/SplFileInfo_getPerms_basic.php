@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 touch ('SplFileInfo_getPerms_basic.txt');
 chmod('SplFileInfo_getPerms_basic.txt', 0557);
 $fileInfo = new SplFileInfo('SplFileInfo_getPerms_basic.txt');

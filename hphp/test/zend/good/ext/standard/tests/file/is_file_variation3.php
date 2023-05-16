@@ -7,7 +7,7 @@
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 <<__EntryPoint>> function main(): void {
 
-$file_handle = fopen(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'), "w");
+$file_handle = fopen(sys_get_temp_dir().'/'.'is_file_variation3.tmp', "w");
 
 echo "*** Testing Invalid file types ***\n";
 $filenames = varray[
@@ -19,12 +19,12 @@ $filenames = varray[
   FALSE,
   NULL,
   $file_handle,
-  
+
   /* scalars */
   1234,
   0
 ];
-   
+
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
   try { var_dump( is_file($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -34,5 +34,5 @@ fclose($file_handle);
 
 echo "\n*** Done ***";
 
-unlink(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'));
+unlink(sys_get_temp_dir().'/'.'is_file_variation3.tmp');
 }

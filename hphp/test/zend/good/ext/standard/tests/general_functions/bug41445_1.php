@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('bug41445_1.ini');
+$file = sys_get_temp_dir().'/'.'bug41445_1.ini';
 
 $data = <<<DATA
 [2454.33]

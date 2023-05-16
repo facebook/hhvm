@@ -19,7 +19,7 @@
 <<__EntryPoint>> function main(): void {
 
 $string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
-$file = __SystemLib\hphp_test_tmppath('007_variation24.tmp');
+$file = sys_get_temp_dir().'/'.'007_variation24.tmp';
 
 echo "*** Test fopen() & fclose() functions:  with 'x+b' mode ***\n";
 $file_handle = fopen($file, "x+b");  //opening the non-existing file in "x+b" mode, file will be created

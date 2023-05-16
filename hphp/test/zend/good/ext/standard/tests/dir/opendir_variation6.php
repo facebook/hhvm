@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing opendir() : usage variations ***\n";
 // create the temporary directories
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 $dir_path = $file_path . "/opendir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 

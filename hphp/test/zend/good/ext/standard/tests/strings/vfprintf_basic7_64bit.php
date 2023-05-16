@@ -16,7 +16,7 @@ $arg2 = varray[-1111,-1234567];
 $arg3 = varray[-1111,-1234567,-2345432];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic7_64bit.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_basic7_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
    

@@ -1,7 +1,7 @@
 <?hh
 
 function check_box($r,$g,$b, $error=0) {
-	$im2 = imagecreatefromgif(__SystemLib\hphp_test_tmppath('test_gif.gif'));
+	$im2 = imagecreatefromgif(sys_get_temp_dir().'/'.'test_gif.gif');
 
 	$c = imagecolorsforindex($im2, imagecolorat($im2, 8,8));
 
@@ -34,7 +34,7 @@ function main_entry(): void {
   $im = imagecreate(10,10);
   $c = imagecolorallocate($im, 255,255,255);
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   if (check_box(255,255,255)) {
   	echo "<4 cols: ok\n";
   }
@@ -44,7 +44,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<8 cols: ok\n";
@@ -56,7 +56,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<16 cols: ok\n";
@@ -68,7 +68,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<32 cols: ok\n";
@@ -80,7 +80,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<64 cols: ok\n";
@@ -91,7 +91,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<128 cols: ok\n";
@@ -102,7 +102,7 @@ function main_entry(): void {
   	$c = imagecolorallocate($im, $i,$i,$i);
   }
   imagefilledrectangle($im, 5,5, 10,10, $c);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
   $i--;
   if (check_box($i,$i,$i)) {
   		echo "<256 cols: ok\n";
@@ -111,13 +111,13 @@ function main_entry(): void {
 
   $im = imagecreatefromjpeg(__DIR__ . '/conv_test.jpeg');
   imagefilledrectangle($im, 5,5, 10,10, 0xffffff);
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif.gif'));
-  imagegif($im, __SystemLib\hphp_test_tmppath('test_gif_2.gif'));
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif.gif');
+  imagegif($im, sys_get_temp_dir().'/'.'test_gif_2.gif');
 
   if (check_box(255,255,255, 10)) {
   	echo ">256 cols: ok\n";
   }
 
-  unlink(__SystemLib\hphp_test_tmppath('test_gif.gif'));
-  unlink(__SystemLib\hphp_test_tmppath('test_gif_2.gif'));
+  unlink(sys_get_temp_dir().'/'.'test_gif.gif');
+  unlink(sys_get_temp_dir().'/'.'test_gif_2.gif');
 }

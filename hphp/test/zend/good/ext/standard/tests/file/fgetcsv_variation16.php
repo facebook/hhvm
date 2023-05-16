@@ -21,7 +21,7 @@ $csv_lists = varray [
   varray['\\', '"water"\\"fruit"\\"""'],
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation16.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation16.tmp';
 @unlink($filename);
 
 $file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",

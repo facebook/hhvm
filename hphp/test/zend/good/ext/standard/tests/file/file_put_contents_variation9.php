@@ -17,10 +17,10 @@ function run_test($file) {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
-$filename = __SystemLib\hphp_test_tmppath('filePutContentsVar9.tmp');
-$softlink = __SystemLib\hphp_test_tmppath('filePutContentsVar9.SoftLink');
-$hardlink = __SystemLib\hphp_test_tmppath('filePutContentsVar9.HardLink');
-$chainlink = __SystemLib\hphp_test_tmppath('filePutContentsVar9.ChainLink');
+$filename = sys_get_temp_dir().'/'.'filePutContentsVar9.tmp';
+$softlink = sys_get_temp_dir().'/'.'filePutContentsVar9.SoftLink';
+$hardlink = sys_get_temp_dir().'/'.'filePutContentsVar9.HardLink';
+$chainlink = sys_get_temp_dir().'/'.'filePutContentsVar9.ChainLink';
 
 
 // link files even though it original file doesn't exist yet

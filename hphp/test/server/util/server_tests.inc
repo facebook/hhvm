@@ -15,7 +15,7 @@ abstract final class ServerUtilServerTests {
 
   <<__Memoize>>
   public static function working_dir() {
-    return getenv('HPHP_TEST_TMPDIR') ?? sys_get_temp_dir();
+    return sys_get_temp_dir();
   }
 
   <<__Memoize>>
@@ -187,7 +187,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     ' -vServer.ExitOnBindFail=true' .
     ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .
-    ' -vPidFile=' . escapeshellarg(__SystemLib\hphp_test_tmppath('www.pid')) .
+    ' -vPidFile=' . escapeshellarg(sys_get_temp_dir().'/'.'www.pid') .
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $jitConfig . ' ' . $customArgs .

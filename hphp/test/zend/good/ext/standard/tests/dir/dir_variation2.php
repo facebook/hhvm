@@ -22,7 +22,7 @@ echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory
 
-$directory = __SystemLib\hphp_test_tmppath('dir_variation2');
+$directory = sys_get_temp_dir().'/'.'dir_variation2';
 @mkdir($directory);
 
 

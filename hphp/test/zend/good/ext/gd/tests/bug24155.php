@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dest = __SystemLib\hphp_test_tmppath('bug24155.png');
+$dest = sys_get_temp_dir().'/'.'bug24155.png';
 @unlink($dest);
 
 $im = imagecreatetruecolor(30, 50);

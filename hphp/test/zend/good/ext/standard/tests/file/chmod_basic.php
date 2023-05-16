@@ -2,7 +2,7 @@
 
 const MODE_MASK = 07777;
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('chmod_basic.tmp');
+$filename = sys_get_temp_dir().'/'.'chmod_basic.tmp';
 
 $fd = fopen($filename, "w+");
 fclose($fd);

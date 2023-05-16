@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  $file = __SystemLib\hphp_test_tmppath('getBasename_test.txt');
+  $file = sys_get_temp_dir().'/'.'getBasename_test.txt';
   touch($file);
-  $dir = new DirectoryIterator(__SystemLib\hphp_test_tmproot());
+  $dir = new DirectoryIterator(sys_get_temp_dir());
   while(!$dir->isFile()) {
     $dir->next();
   }

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv.csv');
+$file = sys_get_temp_dir().'/'.'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
 $list = darray [

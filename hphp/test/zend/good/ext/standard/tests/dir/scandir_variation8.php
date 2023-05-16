@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing scandir() : usage variations ***\n";
 
-$dir_path = __SystemLib\hphp_test_tmppath('scandir_variation8') . '/';
+$dir_path = sys_get_temp_dir().'/'.'scandir_variation8' . '/';
 mkdir($dir_path);
 
 // heredoc string

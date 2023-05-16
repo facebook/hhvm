@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $filename = "bug51997.bz2";
 $str = "This is a test string.\n";
 $bz = bzopen($filename, "w");

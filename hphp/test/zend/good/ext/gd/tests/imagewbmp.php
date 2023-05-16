@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('im.wbmp');
+$file = sys_get_temp_dir().'/'.'im.wbmp';
 
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);

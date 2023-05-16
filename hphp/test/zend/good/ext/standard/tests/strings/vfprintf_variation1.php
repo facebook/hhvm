@@ -40,7 +40,7 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : variation functionality ***\n";
 
 // Open handle
-$file = __SystemLib\hphp_test_tmppath('vfprintf_variation1.phpt.txt');
+$file = sys_get_temp_dir().'/'.'vfprintf_variation1.phpt.txt';
 $fp = fopen( $file, 'a+' );
 
 // Test vfprintf()

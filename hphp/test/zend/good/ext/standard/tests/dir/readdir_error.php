@@ -14,7 +14,7 @@ echo "*** Testing readdir() : error conditions ***\n";
 //Test readdir with one more than the expected number of arguments
 echo "\n-- Testing readdir() function with more than expected no. of arguments --\n";
 
-$path = __SystemLib\hphp_test_tmppath('readdir_error');
+$path = sys_get_temp_dir().'/'.'readdir_error';
 mkdir($path);
 $dir_handle = opendir($path);
 $extra_arg = 10;

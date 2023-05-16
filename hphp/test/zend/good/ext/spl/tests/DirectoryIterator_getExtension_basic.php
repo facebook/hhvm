@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$dir = __SystemLib\hphp_test_tmppath('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;
+$dir = sys_get_temp_dir().'/'.'DirectoryIterator::getExtension' . DIRECTORY_SEPARATOR;
 mkdir($dir);
 
 $files = varray['test.txt', 'test.extension', 'test..', 'test.', 'test'];

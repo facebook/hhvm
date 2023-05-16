@@ -11,7 +11,7 @@
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 
 
 // create a file
-$filename = __SystemLib\hphp_test_tmppath('fscanf_variation51.tmp');
+$filename = sys_get_temp_dir().'/'.'fscanf_variation51.tmp';
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");

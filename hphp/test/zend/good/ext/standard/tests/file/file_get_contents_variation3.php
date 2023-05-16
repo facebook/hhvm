@@ -30,7 +30,7 @@ set_error_handler(test_error_handler<>);
 
 // Initialise function arguments not being substituted (if any)
 
-$absFile = __SystemLib\hphp_test_tmppath('FileGetContentsVar3.tmp');
+$absFile = sys_get_temp_dir().'/'.'FileGetContentsVar3.tmp';
 $h = fopen($absFile,"w");
 fwrite($h, "contents read");
 fclose($h);

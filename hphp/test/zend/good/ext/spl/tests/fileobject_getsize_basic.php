@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('data.txt');
+$file = sys_get_temp_dir().'/'.'data.txt';
 file_put_contents($file, "foobar");
 
 $s = new SplFileObject( $file );

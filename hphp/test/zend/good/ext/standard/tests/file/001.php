@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$scratch = __SystemLib\hphp_test_tmppath('file');
+$scratch = sys_get_temp_dir().'/'.'file';
 mkdir($scratch);
 chdir($scratch);
 if (file_exists('test.file')) {

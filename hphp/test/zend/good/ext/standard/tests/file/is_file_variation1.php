@@ -9,7 +9,7 @@
 <<__EntryPoint>> function main(): void {
 
 echo "-- Testing is_file() with file containing data --\n";
-$filename = __SystemLib\hphp_test_tmppath('is_file_variation1.tmp');
+$filename = sys_get_temp_dir().'/'.'is_file_variation1.tmp';
 $file_handle = fopen($filename, "w" );
 fwrite( $file_handle, "Hello, world....." ); // exptected true
 fclose($file_handle);

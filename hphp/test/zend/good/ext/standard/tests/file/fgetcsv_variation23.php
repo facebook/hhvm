@@ -10,7 +10,7 @@ echo "*** Testing fgetcsv() : reading from file which is having zero content ***
 
 // try reading from file which is having zero content
 // create the file and then open in read mode and try reading 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation23.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation23.tmp';
 $fp = fopen ($filename, "w");
 fclose($fp);
 $fp = fopen ($filename, "r");

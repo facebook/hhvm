@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 
 echo "*** Testing filesize(): usage variations ***\n"; 
-$filename =  __SystemLib\hphp_test_tmppath('filesize_variation3.tmp');
+$filename =  sys_get_temp_dir().'/'.'filesize_variation3.tmp';
 $file_handle = fopen($filename, "w");
 fwrite($file_handle, str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
 fclose($file_handle);

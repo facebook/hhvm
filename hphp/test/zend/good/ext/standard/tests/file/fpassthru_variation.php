@@ -9,7 +9,7 @@ echo "*** Testing fpassthru() function with files ***\n\n";
 
 echo "--- Testing with different offsets ---\n";
 
-$file_name = __SystemLib\hphp_test_tmppath('passthru_variation.tmp');
+$file_name = sys_get_temp_dir().'/'.'passthru_variation.tmp';
 $file_write = fopen($file_name, "w");
 fwrite($file_write, "1234567890abcdefghijklmnopqrstuvwxyz");
 fclose($file_write);

@@ -11,7 +11,7 @@
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directory
-$dir_path = __SystemLib\hphp_test_tmppath('scandir_variation7');
+$dir_path = sys_get_temp_dir().'/'.'scandir_variation7';
 mkdir($dir_path);
 
 // different values for directory permissions

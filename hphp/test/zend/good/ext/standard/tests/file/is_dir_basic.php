@@ -5,12 +5,12 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_dir(): basic functionality ***\n";
-var_dump( is_dir(__SystemLib\hphp_test_tmproot()) );
+var_dump( is_dir(sys_get_temp_dir()) );
 clearstatcache();
 var_dump( is_dir(".") );
 var_dump( is_dir(__FILE__) );  // expected: bool(false)
 
-$dir_name = __SystemLib\hphp_test_tmppath('is_dir_basic');
+$dir_name = sys_get_temp_dir().'/'.'is_dir_basic';
 mkdir($dir_name);
 var_dump( is_dir($dir_name) );
 

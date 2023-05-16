@@ -23,7 +23,7 @@ $list = darray [
   19 => '"\\""",aaa',
 ];
 
-$file = __SystemLib\hphp_test_tmppath('fputcsv.csv');
+$file = sys_get_temp_dir().'/'.'fputcsv.csv';
 
 $fp = fopen($file, "w");
 foreach ($list as $v) {

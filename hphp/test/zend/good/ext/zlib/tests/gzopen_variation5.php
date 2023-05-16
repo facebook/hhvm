@@ -38,7 +38,7 @@ function main_entry(): void {
   require_once('gzopen_include_path.inc');
 
   echo "*** Testing gzopen() : variation ***\n";
-  $thisTestDir = __SystemLib\hphp_test_tmppath("gzopenVariation5.dir");
+  $thisTestDir = sys_get_temp_dir().'/'."gzopenVariation5.dir";
   mkdir($thisTestDir);
   chdir($thisTestDir);
 

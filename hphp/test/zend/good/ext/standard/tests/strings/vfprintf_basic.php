@@ -18,7 +18,7 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : basic functionality ***\n";
 
 // Open handle
-$file = __SystemLib\hphp_test_tmppath('vfprintf_basic.phpt.txt');
+$file = sys_get_temp_dir().'/'.'vfprintf_basic.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 // Test vfprintf()

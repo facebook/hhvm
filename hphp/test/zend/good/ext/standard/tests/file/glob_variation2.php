@@ -3,7 +3,7 @@
    Description: Find pathnames matching a pattern
 */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmppath('glob_variation2');
+$file_path = sys_get_temp_dir().'/'.'glob_variation2';
 mkdir($file_path);
 
 // temp dirname used here

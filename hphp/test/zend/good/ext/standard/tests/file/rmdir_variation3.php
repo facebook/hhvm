@@ -6,7 +6,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing rmdir() : variation ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $workDir = "rmdirVar3.tmp";
 $subDir = "aSubDir";
 mkdir($workDir);

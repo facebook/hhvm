@@ -6,8 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fopen() : variation ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
-$absfile = __SystemLib\hphp_test_tmppath('fopen_variation6.php.tmp');
+chdir(sys_get_temp_dir());
+$absfile = sys_get_temp_dir().'/'.'fopen_variation6.php.tmp';
 $relfile = "fopen_variation6.tmp";
 
 $h = fopen($absfile, "w");

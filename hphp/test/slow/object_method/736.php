@@ -199,7 +199,7 @@ echo "dynamic call \$g->'missing' ".ObjectMethod736::$trace.", Calling G object 
 echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_func_array('missing',varray[2]),"\n";
 
 // test mapping for system function names
-$ourFileName = __SystemLib\hphp_test_tmppath('testFile.txt');
+$ourFileName = sys_get_temp_dir().'/'.'testFile.txt';
 ($ourFileHandle = fopen($ourFileName, 'w')) || die("can't open file");
 fclose($ourFileHandle);
 unlink($ourFileName);

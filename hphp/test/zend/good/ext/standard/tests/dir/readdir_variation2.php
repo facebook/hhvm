@@ -13,7 +13,7 @@ function mysort($a,$b) {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = __SystemLib\hphp_test_tmppath('readdir_variation2');
+$path = sys_get_temp_dir().'/'.'readdir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 

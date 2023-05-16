@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath("gzread_variation1.txt.gz");
+$filename = sys_get_temp_dir().'/'."gzread_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 var_dump(gzread($h, 100));

@@ -20,7 +20,7 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
-$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
+$thisTestDir = sys_get_temp_dir().'/'.'dir';
 
 mkdir($thisTestDir);
 $oldDirPath = getcwd();

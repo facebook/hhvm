@@ -19,7 +19,7 @@ echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
          |-> child_dir  ( child dir)
 */
 
-$parent_dir_path = __SystemLib\hphp_test_tmppath('dir_variation7');
+$parent_dir_path = sys_get_temp_dir().'/'.'dir_variation7';
 @mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 

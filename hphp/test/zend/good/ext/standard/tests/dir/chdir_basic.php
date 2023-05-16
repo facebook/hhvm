@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 
@@ -9,8 +9,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : basic functionality ***\n";
-$base_dir_path = __SystemLib\hphp_test_tmproot();
-
+$base_dir_path = sys_get_temp_dir();
 $level1_one_dir_name = "level1_one";
 $level1_one_dir_path = "$base_dir_path/$level1_one_dir_name";
 

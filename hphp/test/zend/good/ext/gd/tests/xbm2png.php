@@ -4,9 +4,9 @@
 echo "XBM to PNG conversion: ";
 echo imagepng(
   imagecreatefromxbm(__DIR__ . '/conv_test.xbm'),
-  __SystemLib\hphp_test_tmppath('test_xbm.png')
+  sys_get_temp_dir().'/'.'test_xbm.png'
 ) ? 'ok' : 'failed';
 echo "\n";
 
-unlink(__SystemLib\hphp_test_tmppath('test_xbm.png'));
+unlink(sys_get_temp_dir().'/'.'test_xbm.png');
 }

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dest = __SystemLib\hphp_test_tmproot();
+$dest = sys_get_temp_dir();
 $arc_name = dirname(__FILE__) . "/bug40228.zip";
 $zip = new ZipArchive;
 $zip->open($arc_name, ZipArchive::CREATE);;

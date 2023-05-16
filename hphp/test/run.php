@@ -1073,10 +1073,8 @@ function hhvm_cmd(
     $env["TERM"] = "dumb";
   }
 
-  $env['HPHP_TEST_TMPDIR'] = Status::getTestTempDir($test);
   $env['TMPDIR'] = Status::getTestTempDir($test);
   $env['HPHP_TEST_SOCKETDIR'] = Status::getSocketDir();
-  $env['HPHP_TEST_SOURCE_FILE'] = $test;
   if ($options->log) {
     $env['TRACE'] = 'printir:2';
     $env['HPHP_TRACE_FILE'] = $test . '.log';
@@ -4074,7 +4072,6 @@ function start_servers(
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
-  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}/temp");
   putenv("TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}/temp");
   putenv("HPHP_TEST_SOCKETDIR=$socket_dir");
 }

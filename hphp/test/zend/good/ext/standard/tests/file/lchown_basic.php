@@ -6,8 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing lchown() : basic functionality ***\n";
-$filename = __SystemLib\hphp_test_tmppath('lchown_basic.txt');
-$symlink = __SystemLib\hphp_test_tmppath('lchown_basic_symlink.txt');
+$filename = sys_get_temp_dir().'/'.'lchown_basic.txt';
+$symlink = sys_get_temp_dir().'/'.'lchown_basic_symlink.txt';
 
 $uid = posix_getuid();
 

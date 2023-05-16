@@ -8,8 +8,8 @@ echo "\n*** Testing rename() by giving stream context as third argument ***\n";
 $context = stream_context_create();
 
 // on directory
-$dir_name = __SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9');
-$new_dir_name = __SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9_new');
+$dir_name = sys_get_temp_dir().'/'.'rename_variation9.phpt_dir9';
+$new_dir_name = sys_get_temp_dir().'/'.'rename_variation9.phpt_dir9_new';
 
 mkdir($dir_name);
 
@@ -18,8 +18,8 @@ var_dump( file_exists($dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) ); // expecting true
 
 //on file
-$src_name = __SystemLib\hphp_test_tmppath('rename_variation9.tmp');
-$dest_name = __SystemLib\hphp_test_tmppath('rename_variation9_new.tmp');
+$src_name = sys_get_temp_dir().'/'.'rename_variation9.tmp';
+$dest_name = sys_get_temp_dir().'/'.'rename_variation9_new.tmp';
 
 // create the file
 $fp = fopen($src_name, "w");
@@ -32,6 +32,6 @@ var_dump( file_exists($dest_name) );  // expecting true
 
 echo "Done\n";
 
-unlink(__SystemLib\hphp_test_tmppath('rename_variation9_new.tmp'));
-rmdir(__SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9_new'));
+unlink(sys_get_temp_dir().'/'.'rename_variation9_new.tmp');
+rmdir(sys_get_temp_dir().'/'.'rename_variation9.phpt_dir9_new');
 }

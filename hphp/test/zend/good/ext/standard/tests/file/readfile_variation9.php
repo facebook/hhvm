@@ -8,7 +8,7 @@
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = 'readfile_variation9';
 $subDir = 'readfile_variation9_sub';
-$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
+$absMainDir = sys_get_temp_dir().'/'.$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -23,7 +23,7 @@ fclose($h);
 
 
 
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 
 $allDirs = varray[
   // absolute paths

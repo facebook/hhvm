@@ -22,7 +22,7 @@ function sumlen_fini($a) {
 
 <<__EntryPoint>>
 function main_ext_sqlite3() {
-$db = new SQLite3(__SystemLib\hphp_test_tmppath(':memory:test'));
+$db = new SQLite3(sys_get_temp_dir().'/'.':memory:test');
 $db->exec("DROP TABLE IF EXISTS foo");
 $db->exec("CREATE TABLE foo (bar STRING)");
 
@@ -89,7 +89,7 @@ VS(SQLite3::version()['versionString'][0], "3");
 VERIFY((int)SQLite3::version()['versionNumber'] > (int)3000000);
 
 $db->close();
-unlink(__SystemLib\hphp_test_tmppath(':memory:test'));
+unlink(sys_get_temp_dir().'/'.':memory:test');
 
 // Check that a PHP Exception is thrown for nonexistant databases
 try {

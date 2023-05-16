@@ -7,8 +7,8 @@
 echo "*** Testing fileinode() with file, directory ***\n";
 
 /* Getting inode of created file */
-fopen(__SystemLib\hphp_test_tmppath('inode.tmp'), "w");
-print( fileinode(__SystemLib\hphp_test_tmppath('inode.tmp')) )."\n";
+fopen(sys_get_temp_dir().'/'.'inode.tmp', "w");
+print( fileinode(sys_get_temp_dir().'/'.'inode.tmp') ."\n");
 
 /* Getting inode of current file */
 print( fileinode(__FILE__) )."\n";
@@ -19,5 +19,5 @@ print( fileinode("./..") )."\n";
 
 echo "\n*** Done ***";
 
-unlink (__SystemLib\hphp_test_tmppath('inode.tmp'));
+unlink (sys_get_temp_dir().'/'.'inode.tmp');
 }

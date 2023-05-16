@@ -510,12 +510,6 @@ func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
         SetInjectedFieldNonCompat("")
 }
 
-// Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField() instead.
-var FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField()
-
-// Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField() instead.
-var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField()
-
 func (x *FieldsInjectedWithIncludedStruct) GetStringFieldNonCompat() string {
     return x.StringField
 }
@@ -715,6 +709,12 @@ if err != nil {
     x.SetInjectedUnstructuredAnnotationFieldNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField() instead.
+var FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField()
+
+// Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField() instead.
+var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField()
 
 func (x *FieldsInjectedWithIncludedStruct) String() string {
     return fmt.Sprintf("%+v", x)

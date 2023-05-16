@@ -159,9 +159,6 @@ func newReqServiceFunc() *reqServiceFunc {
         SetArg3NonCompat(*NewFoo())
 }
 
-// Deprecated: Use newReqServiceFunc().GetArg3() instead.
-var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().GetArg3()
-
 func (x *reqServiceFunc) GetArg1NonCompat() StringWithAdapter {
     return x.Arg1
 }
@@ -306,6 +303,17 @@ if err != nil {
 
     x.SetArg3NonCompat(result)
     return nil
+}
+
+// Deprecated: Use newReqServiceFunc().GetArg3() instead.
+var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().GetArg3()
+
+// Deprecated: Use newReqServiceFunc().GetArg3() instead.
+func (x *reqServiceFunc) DefaultGetArg3() *Foo {
+    if !x.IsSetArg3() {
+        return NewFoo()
+    }
+    return x.Arg3
 }
 
 func (x *reqServiceFunc) String() string {
@@ -880,9 +888,6 @@ func newRespAdapterServiceCount() *respAdapterServiceCount {
         SetValueNonCompat(*NewCountingStruct())
 }
 
-// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
-var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().GetValue()
-
 func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
     return x.Value
 }
@@ -938,6 +943,17 @@ if err != nil {
 
     x.SetValueNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
+var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().GetValue()
+
+// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
+func (x *respAdapterServiceCount) DefaultGetValue() *CountingStruct {
+    if !x.IsSetValue() {
+        return NewCountingStruct()
+    }
+    return x.Value
 }
 
 func (x *respAdapterServiceCount) String() string {
@@ -1038,9 +1054,6 @@ func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
         SetArgNonCompat(*NewHeapAllocated())
 }
 
-// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
-var reqAdapterServiceAdaptedTypes_Arg_DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg()
-
 func (x *reqAdapterServiceAdaptedTypes) GetArgNonCompat() *HeapAllocated {
     return x.Arg
 }
@@ -1096,6 +1109,17 @@ if err != nil {
 
     x.SetArgNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
+var reqAdapterServiceAdaptedTypes_Arg_DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg()
+
+// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
+func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
+    if !x.IsSetArg() {
+        return NewHeapAllocated()
+    }
+    return x.Arg
 }
 
 func (x *reqAdapterServiceAdaptedTypes) String() string {
@@ -1193,9 +1217,6 @@ func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
         SetValueNonCompat(*NewHeapAllocated())
 }
 
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
-var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().GetValue()
-
 func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
     return x.Value
 }
@@ -1251,6 +1272,17 @@ if err != nil {
 
     x.SetValueNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
+var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().GetValue()
+
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
+func (x *respAdapterServiceAdaptedTypes) DefaultGetValue() *HeapAllocated {
+    if !x.IsSetValue() {
+        return NewHeapAllocated()
+    }
+    return x.Value
 }
 
 func (x *respAdapterServiceAdaptedTypes) String() string {

@@ -447,9 +447,6 @@ func NewMyStruct() *MyStruct {
         SetMyIDNonCompat(NewMyId())
 }
 
-// Deprecated: Use NewMyStruct().GetMyUnion() instead.
-var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
-
 func (x *MyStruct) GetMajorVerNonCompat() int64 {
     return x.MajorVer
 }
@@ -944,6 +941,17 @@ if err != nil {
 
     x.SetMyIDNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewMyStruct().GetMyUnion() instead.
+var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
+
+// Deprecated: Use NewMyStruct().GetMyUnion() instead.
+func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
+    if !x.IsSetMyUnion() {
+        return NewMyUnion()
+    }
+    return x.MyUnion
 }
 
 func (x *MyStruct) String() string {

@@ -85,9 +85,6 @@ func NewIncluded() *Included {
           )
 }
 
-// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
-var Included_MyTransitiveField_DEFAULT = NewIncluded().GetMyTransitiveField()
-
 func (x *Included) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField
 }
@@ -187,6 +184,17 @@ if err != nil {
 
     x.SetMyTransitiveFieldNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
+var Included_MyTransitiveField_DEFAULT = NewIncluded().GetMyTransitiveField()
+
+// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
+func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
+    if !x.IsSetMyTransitiveField() {
+        return transitive.NewFoo()
+    }
+    return x.MyTransitiveField
 }
 
 func (x *Included) String() string {

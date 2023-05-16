@@ -269,12 +269,6 @@ func NewU() *U {
         SetSNonCompat("")
 }
 
-// Deprecated: Use NewU().GetI() instead.
-var U_I_DEFAULT = NewU().GetI()
-
-// Deprecated: Use NewU().GetS() instead.
-var U_S_DEFAULT = NewU().GetS()
-
 func (x *U) GetINonCompat() *int32 {
     return x.I
 }
@@ -386,6 +380,12 @@ if err != nil {
     x.SetSNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewU().GetI() instead.
+var U_I_DEFAULT = NewU().GetI()
+
+// Deprecated: Use NewU().GetS() instead.
+var U_S_DEFAULT = NewU().GetS()
 
 func (x *U) String() string {
     return fmt.Sprintf("%+v", x)

@@ -34,12 +34,6 @@ func NewMyStruct() *MyStruct {
         SetMyIncludedIntNonCompat(42)
 }
 
-// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
-var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().GetMyIncludedField()
-
-// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
-var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().GetMyOtherIncludedField()
-
 func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
     return x.MyIncludedField
 }
@@ -197,6 +191,28 @@ if err != nil {
 
     x.SetMyIncludedIntNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
+var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().GetMyIncludedField()
+
+// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
+func (x *MyStruct) DefaultGetMyIncludedField() *includes.Included {
+    if !x.IsSetMyIncludedField() {
+        return includes.NewIncluded()
+    }
+    return x.MyIncludedField
+}
+
+// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
+var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().GetMyOtherIncludedField()
+
+// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
+func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
+    if !x.IsSetMyOtherIncludedField() {
+        return includes.NewIncluded()
+    }
+    return x.MyOtherIncludedField
 }
 
 func (x *MyStruct) String() string {

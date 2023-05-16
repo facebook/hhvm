@@ -625,9 +625,6 @@ func newRespCThing() *respCThing {
         SetValueNonCompat("")
 }
 
-// Deprecated: Use newRespCThing().GetBang() instead.
-var respCThing_Bang_DEFAULT = newRespCThing().GetBang()
-
 func (x *respCThing) GetValueNonCompat() string {
     return x.Value
 }
@@ -727,6 +724,17 @@ if err != nil {
 
     x.SetBangNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespCThing().GetBang() instead.
+var respCThing_Bang_DEFAULT = newRespCThing().GetBang()
+
+// Deprecated: Use newRespCThing().GetBang() instead.
+func (x *respCThing) DefaultGetBang() *Bang {
+    if !x.IsSetBang() {
+        return NewBang()
+    }
+    return x.Bang
 }
 
 func (x *respCThing) String() string {

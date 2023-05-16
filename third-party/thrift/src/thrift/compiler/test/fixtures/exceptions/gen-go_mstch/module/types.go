@@ -170,9 +170,6 @@ func NewSerious() *Serious {
     return (&Serious{})
 }
 
-// Deprecated: Use NewSerious().GetSonnet() instead.
-var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
-
 func (x *Serious) GetSonnetNonCompat() *string {
     return x.Sonnet
 }
@@ -228,6 +225,9 @@ if err != nil {
     x.SetSonnetNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewSerious().GetSonnet() instead.
+var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
 
 func (x *Serious) String() string {
     return fmt.Sprintf("%+v", x)

@@ -332,9 +332,6 @@ func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
 
-// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
-var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().GetMyExcept()
-
 func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
     return x.MyExcept
 }
@@ -390,6 +387,17 @@ if err != nil {
 
     x.SetMyExceptNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
+var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().GetMyExcept()
+
+// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
+func (x *respMyServicePing) DefaultGetMyExcept() *MyException {
+    if !x.IsSetMyExcept() {
+        return NewMyException()
+    }
+    return x.MyExcept
 }
 
 func (x *respMyServicePing) String() string {

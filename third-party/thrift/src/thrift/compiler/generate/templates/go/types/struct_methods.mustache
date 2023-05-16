@@ -58,6 +58,15 @@
 
 {{/struct:fields}}{{!
 
+  DefaultGet method.
+
+}}{{#struct:fields}}
+{{#field:pointer?}}
+{{> types/field_method_default_get}}
+
+{{/field:pointer?}}
+{{/struct:fields}}{{!
+
   String method.
 
 }}

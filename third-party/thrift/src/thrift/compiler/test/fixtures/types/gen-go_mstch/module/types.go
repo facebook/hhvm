@@ -2106,9 +2106,6 @@ func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
           )
 }
 
-// Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
-var TrivialNestedWithDefault_N_DEFAULT = NewTrivialNestedWithDefault().GetN()
-
 func (x *TrivialNestedWithDefault) GetZNonCompat() int32 {
     return x.Z
 }
@@ -2208,6 +2205,17 @@ if err != nil {
 
     x.SetNNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
+var TrivialNestedWithDefault_N_DEFAULT = NewTrivialNestedWithDefault().GetN()
+
+// Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
+func (x *TrivialNestedWithDefault) DefaultGetN() *TrivialNumeric {
+    if !x.IsSetN() {
+        return NewTrivialNumeric()
+    }
+    return x.N
 }
 
 func (x *TrivialNestedWithDefault) String() string {
@@ -2584,9 +2592,6 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
           )
 }
 
-// Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
-var ComplexNestedWithDefault_N_DEFAULT = NewComplexNestedWithDefault().GetN()
-
 func (x *ComplexNestedWithDefault) GetZNonCompat() string {
     return x.Z
 }
@@ -2686,6 +2691,17 @@ if err != nil {
 
     x.SetNNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
+var ComplexNestedWithDefault_N_DEFAULT = NewComplexNestedWithDefault().GetN()
+
+// Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
+func (x *ComplexNestedWithDefault) DefaultGetN() *ComplexString {
+    if !x.IsSetN() {
+        return NewComplexString()
+    }
+    return x.N
 }
 
 func (x *ComplexNestedWithDefault) String() string {
@@ -3556,9 +3572,6 @@ func NewMyStruct() *MyStruct {
         SetDataNonCompat(*NewMyDataItem())
 }
 
-// Deprecated: Use NewMyStruct().GetData() instead.
-var MyStruct_Data_DEFAULT = NewMyStruct().GetData()
-
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField
 }
@@ -3746,6 +3759,17 @@ if err != nil {
 
     x.SetDataNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewMyStruct().GetData() instead.
+var MyStruct_Data_DEFAULT = NewMyStruct().GetData()
+
+// Deprecated: Use NewMyStruct().GetData() instead.
+func (x *MyStruct) DefaultGetData() *MyDataItem {
+    if !x.IsSetData() {
+        return NewMyDataItem()
+    }
+    return x.Data
 }
 
 func (x *MyStruct) String() string {
@@ -4325,12 +4349,6 @@ func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
 }
 
-// Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
-var ForwardUsageRoot_ForwardUsageStruct_DEFAULT = NewForwardUsageRoot().GetForwardUsageStruct()
-
-// Deprecated: Use NewForwardUsageRoot().GetForwardUsageByRef() instead.
-var ForwardUsageRoot_ForwardUsageByRef_DEFAULT = NewForwardUsageRoot().GetForwardUsageByRef()
-
 func (x *ForwardUsageRoot) GetForwardUsageStructNonCompat() *ForwardUsageStruct {
     return x.ForwardUsageStruct
 }
@@ -4445,6 +4463,28 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
+var ForwardUsageRoot_ForwardUsageStruct_DEFAULT = NewForwardUsageRoot().GetForwardUsageStruct()
+
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
+func (x *ForwardUsageRoot) DefaultGetForwardUsageStruct() *ForwardUsageStruct {
+    if !x.IsSetForwardUsageStruct() {
+        return NewForwardUsageStruct()
+    }
+    return x.ForwardUsageStruct
+}
+
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageByRef() instead.
+var ForwardUsageRoot_ForwardUsageByRef_DEFAULT = NewForwardUsageRoot().GetForwardUsageByRef()
+
+// Deprecated: Use NewForwardUsageRoot().GetForwardUsageByRef() instead.
+func (x *ForwardUsageRoot) DefaultGetForwardUsageByRef() *ForwardUsageByRef {
+    if !x.IsSetForwardUsageByRef() {
+        return NewForwardUsageByRef()
+    }
+    return x.ForwardUsageByRef
+}
+
 func (x *ForwardUsageRoot) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -4552,9 +4592,6 @@ func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
 
-// Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
-var ForwardUsageStruct_Foo_DEFAULT = NewForwardUsageStruct().GetFoo()
-
 func (x *ForwardUsageStruct) GetFooNonCompat() *ForwardUsageRoot {
     return x.Foo
 }
@@ -4610,6 +4647,17 @@ if err != nil {
 
     x.SetFooNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
+var ForwardUsageStruct_Foo_DEFAULT = NewForwardUsageStruct().GetFoo()
+
+// Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
+func (x *ForwardUsageStruct) DefaultGetFoo() *ForwardUsageRoot {
+    if !x.IsSetFoo() {
+        return NewForwardUsageRoot()
+    }
+    return x.Foo
 }
 
 func (x *ForwardUsageStruct) String() string {
@@ -4706,9 +4754,6 @@ func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
 }
 
-// Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
-var ForwardUsageByRef_Foo_DEFAULT = NewForwardUsageByRef().GetFoo()
-
 func (x *ForwardUsageByRef) GetFooNonCompat() *ForwardUsageRoot {
     return x.Foo
 }
@@ -4764,6 +4809,17 @@ if err != nil {
 
     x.SetFooNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
+var ForwardUsageByRef_Foo_DEFAULT = NewForwardUsageByRef().GetFoo()
+
+// Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
+func (x *ForwardUsageByRef) DefaultGetFoo() *ForwardUsageRoot {
+    if !x.IsSetFoo() {
+        return NewForwardUsageRoot()
+    }
+    return x.Foo
 }
 
 func (x *ForwardUsageByRef) String() string {
@@ -6115,9 +6171,6 @@ func NewAdaptedListDep() *AdaptedListDep {
         SetFieldNonCompat(*NewAdaptedList())
 }
 
-// Deprecated: Use NewAdaptedListDep().GetField() instead.
-var AdaptedListDep_Field_DEFAULT = NewAdaptedListDep().GetField()
-
 func (x *AdaptedListDep) GetFieldNonCompat() *AdaptedList {
     return x.Field
 }
@@ -6173,6 +6226,17 @@ if err != nil {
 
     x.SetFieldNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewAdaptedListDep().GetField() instead.
+var AdaptedListDep_Field_DEFAULT = NewAdaptedListDep().GetField()
+
+// Deprecated: Use NewAdaptedListDep().GetField() instead.
+func (x *AdaptedListDep) DefaultGetField() *AdaptedList {
+    if !x.IsSetField() {
+        return NewAdaptedList()
+    }
+    return x.Field
 }
 
 func (x *AdaptedListDep) String() string {
@@ -6449,9 +6513,6 @@ func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
 
-// Deprecated: Use NewDependentAdaptedListDep().GetField() instead.
-var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().GetField()
-
 func (x *DependentAdaptedListDep) GetFieldNonCompat() *int16 {
     return x.Field
 }
@@ -6507,6 +6568,9 @@ if err != nil {
     x.SetFieldNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewDependentAdaptedListDep().GetField() instead.
+var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().GetField()
 
 func (x *DependentAdaptedListDep) String() string {
     return fmt.Sprintf("%+v", x)
@@ -7237,9 +7301,6 @@ func NewAllocatorAware2() *AllocatorAware2 {
         SetNotAContainerNonCompat(0)
 }
 
-// Deprecated: Use NewAllocatorAware2().GetBoxField() instead.
-var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().GetBoxField()
-
 func (x *AllocatorAware2) GetNotAContainerNonCompat() int32 {
     return x.NotAContainer
 }
@@ -7339,6 +7400,9 @@ if err != nil {
     x.SetBoxFieldNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewAllocatorAware2().GetBoxField() instead.
+var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().GetBoxField()
 
 func (x *AllocatorAware2) String() string {
     return fmt.Sprintf("%+v", x)

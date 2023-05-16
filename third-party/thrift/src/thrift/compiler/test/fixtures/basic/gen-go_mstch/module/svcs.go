@@ -652,9 +652,6 @@ func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
         SetValueNonCompat(*NewReservedKeyword())
 }
 
-// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
-var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().GetValue()
-
 func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
     return x.Value
 }
@@ -710,6 +707,17 @@ if err != nil {
 
     x.SetValueNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
+var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().GetValue()
+
+// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
+func (x *respFB303ServiceSimpleRPC) DefaultGetValue() *ReservedKeyword {
+    if !x.IsSetValue() {
+        return NewReservedKeyword()
+    }
+    return x.Value
 }
 
 func (x *respFB303ServiceSimpleRPC) String() string {

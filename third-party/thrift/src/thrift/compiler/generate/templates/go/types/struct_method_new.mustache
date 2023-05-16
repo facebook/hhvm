@@ -16,7 +16,7 @@
 
 }}{{!
 
-  Creates Default function for structs.
+  This template creates a New method for Thrift structs.
 
 }}
 func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
@@ -48,10 +48,4 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
 
       }}{{/struct:fields}}
 }
-{{#struct:fields}}
-{{#field:pointer?}}
-
-// Deprecated: Use {{struct:go_qualified_new_func}}().Get{{field:go_name}}() instead.
-var {{struct:go_name}}_{{field:go_name}}_DEFAULT = {{struct:go_qualified_new_func}}().Get{{field:go_name}}()
-{{/field:pointer?}}
-{{/struct:fields}}
+{{!newline}}

@@ -283,12 +283,6 @@ func NewMyUnion() *MyUnion {
         SetMyDataItemNonCompat(*NewMyStruct())
 }
 
-// Deprecated: Use NewMyUnion().GetMyEnum() instead.
-var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
-
-// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
-var MyUnion_MyDataItem_DEFAULT = NewMyUnion().GetMyDataItem()
-
 func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
     return x.MyEnum
 }
@@ -401,6 +395,20 @@ if err != nil {
 
     x.SetMyDataItemNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewMyUnion().GetMyEnum() instead.
+var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
+
+// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
+var MyUnion_MyDataItem_DEFAULT = NewMyUnion().GetMyDataItem()
+
+// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
+func (x *MyUnion) DefaultGetMyDataItem() *MyStruct {
+    if !x.IsSetMyDataItem() {
+        return NewMyStruct()
+    }
+    return x.MyDataItem
 }
 
 func (x *MyUnion) String() string {

@@ -357,15 +357,6 @@ func NewInternship() *Internship {
         SetTitleNonCompat("")
 }
 
-// Deprecated: Use NewInternship().GetEmployer() instead.
-var Internship_Employer_DEFAULT = NewInternship().GetEmployer()
-
-// Deprecated: Use NewInternship().GetCompensation() instead.
-var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
-
-// Deprecated: Use NewInternship().GetSchool() instead.
-var Internship_School_DEFAULT = NewInternship().GetSchool()
-
 func (x *Internship) GetWeeksNonCompat() int32 {
     return x.Weeks
 }
@@ -622,6 +613,15 @@ if err != nil {
     x.SetSchoolNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewInternship().GetEmployer() instead.
+var Internship_Employer_DEFAULT = NewInternship().GetEmployer()
+
+// Deprecated: Use NewInternship().GetCompensation() instead.
+var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
+
+// Deprecated: Use NewInternship().GetSchool() instead.
+var Internship_School_DEFAULT = NewInternship().GetSchool()
 
 func (x *Internship) String() string {
     return fmt.Sprintf("%+v", x)
@@ -1172,9 +1172,6 @@ func NewStruct2() *Struct2 {
         SetDNonCompat(make([]int32, 0))
 }
 
-// Deprecated: Use NewStruct2().GetC() instead.
-var Struct2_C_DEFAULT = NewStruct2().GetC()
-
 func (x *Struct2) GetANonCompat() int32 {
     return x.A
 }
@@ -1405,6 +1402,17 @@ result := listResult
     return nil
 }
 
+// Deprecated: Use NewStruct2().GetC() instead.
+var Struct2_C_DEFAULT = NewStruct2().GetC()
+
+// Deprecated: Use NewStruct2().GetC() instead.
+func (x *Struct2) DefaultGetC() *Struct1 {
+    if !x.IsSetC() {
+        return NewStruct1()
+    }
+    return x.C
+}
+
 func (x *Struct2) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1542,9 +1550,6 @@ func NewStruct3() *Struct3 {
         SetBNonCompat(0).
         SetCNonCompat(*NewStruct2())
 }
-
-// Deprecated: Use NewStruct3().GetC() instead.
-var Struct3_C_DEFAULT = NewStruct3().GetC()
 
 func (x *Struct3) GetANonCompat() string {
     return x.A
@@ -1691,6 +1696,17 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewStruct3().GetC() instead.
+var Struct3_C_DEFAULT = NewStruct3().GetC()
+
+// Deprecated: Use NewStruct3().GetC() instead.
+func (x *Struct3) DefaultGetC() *Struct2 {
+    if !x.IsSetC() {
+        return NewStruct2()
+    }
+    return x.C
+}
+
 func (x *Struct3) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1813,12 +1829,6 @@ func NewStruct4() *Struct4 {
     return (&Struct4{}).
         SetANonCompat(0)
 }
-
-// Deprecated: Use NewStruct4().GetB() instead.
-var Struct4_B_DEFAULT = NewStruct4().GetB()
-
-// Deprecated: Use NewStruct4().GetC() instead.
-var Struct4_C_DEFAULT = NewStruct4().GetC()
 
 func (x *Struct4) GetANonCompat() int32 {
     return x.A
@@ -1977,6 +1987,12 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewStruct4().GetB() instead.
+var Struct4_B_DEFAULT = NewStruct4().GetB()
+
+// Deprecated: Use NewStruct4().GetC() instead.
+var Struct4_C_DEFAULT = NewStruct4().GetC()
+
 func (x *Struct4) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2100,12 +2116,6 @@ func NewUnion1() *Union1 {
         SetDNonCompat(0.0)
 }
 
-// Deprecated: Use NewUnion1().GetI() instead.
-var Union1_I_DEFAULT = NewUnion1().GetI()
-
-// Deprecated: Use NewUnion1().GetD() instead.
-var Union1_D_DEFAULT = NewUnion1().GetD()
-
 func (x *Union1) GetINonCompat() *int32 {
     return x.I
 }
@@ -2217,6 +2227,12 @@ if err != nil {
     x.SetDNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewUnion1().GetI() instead.
+var Union1_I_DEFAULT = NewUnion1().GetI()
+
+// Deprecated: Use NewUnion1().GetD() instead.
+var Union1_D_DEFAULT = NewUnion1().GetD()
 
 func (x *Union1) String() string {
     return fmt.Sprintf("%+v", x)
@@ -2349,18 +2365,6 @@ func NewUnion2() *Union2 {
         SetSNonCompat(*NewStruct1()).
         SetUNonCompat(*NewUnion1())
 }
-
-// Deprecated: Use NewUnion2().GetI() instead.
-var Union2_I_DEFAULT = NewUnion2().GetI()
-
-// Deprecated: Use NewUnion2().GetD() instead.
-var Union2_D_DEFAULT = NewUnion2().GetD()
-
-// Deprecated: Use NewUnion2().GetS() instead.
-var Union2_S_DEFAULT = NewUnion2().GetS()
-
-// Deprecated: Use NewUnion2().GetU() instead.
-var Union2_U_DEFAULT = NewUnion2().GetU()
 
 func (x *Union2) GetINonCompat() *int32 {
     return x.I
@@ -2586,6 +2590,34 @@ if err != nil {
 
     x.SetUNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewUnion2().GetI() instead.
+var Union2_I_DEFAULT = NewUnion2().GetI()
+
+// Deprecated: Use NewUnion2().GetD() instead.
+var Union2_D_DEFAULT = NewUnion2().GetD()
+
+// Deprecated: Use NewUnion2().GetS() instead.
+var Union2_S_DEFAULT = NewUnion2().GetS()
+
+// Deprecated: Use NewUnion2().GetS() instead.
+func (x *Union2) DefaultGetS() *Struct1 {
+    if !x.IsSetS() {
+        return NewStruct1()
+    }
+    return x.S
+}
+
+// Deprecated: Use NewUnion2().GetU() instead.
+var Union2_U_DEFAULT = NewUnion2().GetU()
+
+// Deprecated: Use NewUnion2().GetU() instead.
+func (x *Union2) DefaultGetU() *Union1 {
+    if !x.IsSetU() {
+        return NewUnion1()
+    }
+    return x.U
 }
 
 func (x *Union2) String() string {

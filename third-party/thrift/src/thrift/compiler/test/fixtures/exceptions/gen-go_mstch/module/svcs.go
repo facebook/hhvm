@@ -452,15 +452,6 @@ func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
 }
 
-// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
-var respRaiserDoRaise_B_DEFAULT = newRespRaiserDoRaise().GetB()
-
-// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
-var respRaiserDoRaise_F_DEFAULT = newRespRaiserDoRaise().GetF()
-
-// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
-var respRaiserDoRaise_S_DEFAULT = newRespRaiserDoRaise().GetS()
-
 func (x *respRaiserDoRaise) GetBNonCompat() *Banal {
     return x.B
 }
@@ -630,6 +621,39 @@ if err != nil {
 
     x.SetSNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
+var respRaiserDoRaise_B_DEFAULT = newRespRaiserDoRaise().GetB()
+
+// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
+func (x *respRaiserDoRaise) DefaultGetB() *Banal {
+    if !x.IsSetB() {
+        return NewBanal()
+    }
+    return x.B
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
+var respRaiserDoRaise_F_DEFAULT = newRespRaiserDoRaise().GetF()
+
+// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
+func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
+    if !x.IsSetF() {
+        return NewFiery()
+    }
+    return x.F
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
+var respRaiserDoRaise_S_DEFAULT = newRespRaiserDoRaise().GetS()
+
+// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
+func (x *respRaiserDoRaise) DefaultGetS() *Serious {
+    if !x.IsSetS() {
+        return NewSerious()
+    }
+    return x.S
 }
 
 func (x *respRaiserDoRaise) String() string {
@@ -1070,15 +1094,6 @@ func newRespRaiserGet500() *respRaiserGet500 {
         SetValueNonCompat("")
 }
 
-// Deprecated: Use newRespRaiserGet500().GetF() instead.
-var respRaiserGet500_F_DEFAULT = newRespRaiserGet500().GetF()
-
-// Deprecated: Use newRespRaiserGet500().GetB() instead.
-var respRaiserGet500_B_DEFAULT = newRespRaiserGet500().GetB()
-
-// Deprecated: Use newRespRaiserGet500().GetS() instead.
-var respRaiserGet500_S_DEFAULT = newRespRaiserGet500().GetS()
-
 func (x *respRaiserGet500) GetValueNonCompat() string {
     return x.Value
 }
@@ -1292,6 +1307,39 @@ if err != nil {
 
     x.SetSNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespRaiserGet500().GetF() instead.
+var respRaiserGet500_F_DEFAULT = newRespRaiserGet500().GetF()
+
+// Deprecated: Use newRespRaiserGet500().GetF() instead.
+func (x *respRaiserGet500) DefaultGetF() *Fiery {
+    if !x.IsSetF() {
+        return NewFiery()
+    }
+    return x.F
+}
+
+// Deprecated: Use newRespRaiserGet500().GetB() instead.
+var respRaiserGet500_B_DEFAULT = newRespRaiserGet500().GetB()
+
+// Deprecated: Use newRespRaiserGet500().GetB() instead.
+func (x *respRaiserGet500) DefaultGetB() *Banal {
+    if !x.IsSetB() {
+        return NewBanal()
+    }
+    return x.B
+}
+
+// Deprecated: Use newRespRaiserGet500().GetS() instead.
+var respRaiserGet500_S_DEFAULT = newRespRaiserGet500().GetS()
+
+// Deprecated: Use newRespRaiserGet500().GetS() instead.
+func (x *respRaiserGet500) DefaultGetS() *Serious {
+    if !x.IsSetS() {
+        return NewSerious()
+    }
+    return x.S
 }
 
 func (x *respRaiserGet500) String() string {

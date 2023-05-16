@@ -230,9 +230,6 @@ func NewTypeUri() *TypeUri {
         SetTypeHashPrefixSha2_256NonCompat(NewByteString())
 }
 
-// Deprecated: Use NewTypeUri().GetUri() instead.
-var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
-
 func (x *TypeUri) GetUriNonCompat() *Uri {
     return x.Uri
 }
@@ -346,6 +343,9 @@ if err != nil {
     x.SetTypeHashPrefixSha2_256NonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewTypeUri().GetUri() instead.
+var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
 
 func (x *TypeUri) String() string {
     return fmt.Sprintf("%+v", x)
@@ -504,57 +504,6 @@ func NewTypeName() *TypeName {
         SetSetTypeNonCompat(0).
         SetMapTypeNonCompat(0)
 }
-
-// Deprecated: Use NewTypeName().GetBoolType() instead.
-var TypeName_BoolType_DEFAULT = NewTypeName().GetBoolType()
-
-// Deprecated: Use NewTypeName().GetByteType() instead.
-var TypeName_ByteType_DEFAULT = NewTypeName().GetByteType()
-
-// Deprecated: Use NewTypeName().GetI16Type() instead.
-var TypeName_I16Type_DEFAULT = NewTypeName().GetI16Type()
-
-// Deprecated: Use NewTypeName().GetI32Type() instead.
-var TypeName_I32Type_DEFAULT = NewTypeName().GetI32Type()
-
-// Deprecated: Use NewTypeName().GetI64Type() instead.
-var TypeName_I64Type_DEFAULT = NewTypeName().GetI64Type()
-
-// Deprecated: Use NewTypeName().GetFloatType() instead.
-var TypeName_FloatType_DEFAULT = NewTypeName().GetFloatType()
-
-// Deprecated: Use NewTypeName().GetDoubleType() instead.
-var TypeName_DoubleType_DEFAULT = NewTypeName().GetDoubleType()
-
-// Deprecated: Use NewTypeName().GetStringType() instead.
-var TypeName_StringType_DEFAULT = NewTypeName().GetStringType()
-
-// Deprecated: Use NewTypeName().GetBinaryType() instead.
-var TypeName_BinaryType_DEFAULT = NewTypeName().GetBinaryType()
-
-// Deprecated: Use NewTypeName().GetEnumType() instead.
-var TypeName_EnumType_DEFAULT = NewTypeName().GetEnumType()
-
-// Deprecated: Use NewTypeName().GetTypedefType() instead.
-var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
-
-// Deprecated: Use NewTypeName().GetStructType() instead.
-var TypeName_StructType_DEFAULT = NewTypeName().GetStructType()
-
-// Deprecated: Use NewTypeName().GetUnionType() instead.
-var TypeName_UnionType_DEFAULT = NewTypeName().GetUnionType()
-
-// Deprecated: Use NewTypeName().GetExceptionType() instead.
-var TypeName_ExceptionType_DEFAULT = NewTypeName().GetExceptionType()
-
-// Deprecated: Use NewTypeName().GetListType() instead.
-var TypeName_ListType_DEFAULT = NewTypeName().GetListType()
-
-// Deprecated: Use NewTypeName().GetSetType() instead.
-var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
-
-// Deprecated: Use NewTypeName().GetMapType() instead.
-var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
 
 func (x *TypeName) GetBoolTypeNonCompat() *Void {
     return x.BoolType
@@ -1524,6 +1473,97 @@ result := Void(enumResult)
     x.SetMapTypeNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewTypeName().GetBoolType() instead.
+var TypeName_BoolType_DEFAULT = NewTypeName().GetBoolType()
+
+// Deprecated: Use NewTypeName().GetByteType() instead.
+var TypeName_ByteType_DEFAULT = NewTypeName().GetByteType()
+
+// Deprecated: Use NewTypeName().GetI16Type() instead.
+var TypeName_I16Type_DEFAULT = NewTypeName().GetI16Type()
+
+// Deprecated: Use NewTypeName().GetI32Type() instead.
+var TypeName_I32Type_DEFAULT = NewTypeName().GetI32Type()
+
+// Deprecated: Use NewTypeName().GetI64Type() instead.
+var TypeName_I64Type_DEFAULT = NewTypeName().GetI64Type()
+
+// Deprecated: Use NewTypeName().GetFloatType() instead.
+var TypeName_FloatType_DEFAULT = NewTypeName().GetFloatType()
+
+// Deprecated: Use NewTypeName().GetDoubleType() instead.
+var TypeName_DoubleType_DEFAULT = NewTypeName().GetDoubleType()
+
+// Deprecated: Use NewTypeName().GetStringType() instead.
+var TypeName_StringType_DEFAULT = NewTypeName().GetStringType()
+
+// Deprecated: Use NewTypeName().GetBinaryType() instead.
+var TypeName_BinaryType_DEFAULT = NewTypeName().GetBinaryType()
+
+// Deprecated: Use NewTypeName().GetEnumType() instead.
+var TypeName_EnumType_DEFAULT = NewTypeName().GetEnumType()
+
+// Deprecated: Use NewTypeName().GetEnumType() instead.
+func (x *TypeName) DefaultGetEnumType() *TypeUri {
+    if !x.IsSetEnumType() {
+        return NewTypeUri()
+    }
+    return x.EnumType
+}
+
+// Deprecated: Use NewTypeName().GetTypedefType() instead.
+var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
+
+// Deprecated: Use NewTypeName().GetTypedefType() instead.
+func (x *TypeName) DefaultGetTypedefType() *TypeUri {
+    if !x.IsSetTypedefType() {
+        return NewTypeUri()
+    }
+    return x.TypedefType
+}
+
+// Deprecated: Use NewTypeName().GetStructType() instead.
+var TypeName_StructType_DEFAULT = NewTypeName().GetStructType()
+
+// Deprecated: Use NewTypeName().GetStructType() instead.
+func (x *TypeName) DefaultGetStructType() *TypeUri {
+    if !x.IsSetStructType() {
+        return NewTypeUri()
+    }
+    return x.StructType
+}
+
+// Deprecated: Use NewTypeName().GetUnionType() instead.
+var TypeName_UnionType_DEFAULT = NewTypeName().GetUnionType()
+
+// Deprecated: Use NewTypeName().GetUnionType() instead.
+func (x *TypeName) DefaultGetUnionType() *TypeUri {
+    if !x.IsSetUnionType() {
+        return NewTypeUri()
+    }
+    return x.UnionType
+}
+
+// Deprecated: Use NewTypeName().GetExceptionType() instead.
+var TypeName_ExceptionType_DEFAULT = NewTypeName().GetExceptionType()
+
+// Deprecated: Use NewTypeName().GetExceptionType() instead.
+func (x *TypeName) DefaultGetExceptionType() *TypeUri {
+    if !x.IsSetExceptionType() {
+        return NewTypeUri()
+    }
+    return x.ExceptionType
+}
+
+// Deprecated: Use NewTypeName().GetListType() instead.
+var TypeName_ListType_DEFAULT = NewTypeName().GetListType()
+
+// Deprecated: Use NewTypeName().GetSetType() instead.
+var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
+
+// Deprecated: Use NewTypeName().GetMapType() instead.
+var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
 
 func (x *TypeName) String() string {
     return fmt.Sprintf("%+v", x)

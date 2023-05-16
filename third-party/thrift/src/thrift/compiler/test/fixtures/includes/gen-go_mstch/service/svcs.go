@@ -168,12 +168,6 @@ func newReqMyServiceQuery() *reqMyServiceQuery {
         SetINonCompat(*includes.NewIncluded())
 }
 
-// Deprecated: Use newReqMyServiceQuery().GetS() instead.
-var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().GetS()
-
-// Deprecated: Use newReqMyServiceQuery().GetI() instead.
-var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().GetI()
-
 func (x *reqMyServiceQuery) GetSNonCompat() *module.MyStruct {
     return x.S
 }
@@ -286,6 +280,28 @@ if err != nil {
 
     x.SetINonCompat(result)
     return nil
+}
+
+// Deprecated: Use newReqMyServiceQuery().GetS() instead.
+var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().GetS()
+
+// Deprecated: Use newReqMyServiceQuery().GetS() instead.
+func (x *reqMyServiceQuery) DefaultGetS() *module.MyStruct {
+    if !x.IsSetS() {
+        return module.NewMyStruct()
+    }
+    return x.S
+}
+
+// Deprecated: Use newReqMyServiceQuery().GetI() instead.
+var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().GetI()
+
+// Deprecated: Use newReqMyServiceQuery().GetI() instead.
+func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
+    if !x.IsSetI() {
+        return includes.NewIncluded()
+    }
+    return x.I
 }
 
 func (x *reqMyServiceQuery) String() string {
@@ -481,12 +497,6 @@ func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
         SetINonCompat(*includes.NewIncluded())
 }
 
-// Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
-var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().GetS()
-
-// Deprecated: Use newReqMyServiceHasArgDocs().GetI() instead.
-var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().GetI()
-
 func (x *reqMyServiceHasArgDocs) GetSNonCompat() *module.MyStruct {
     return x.S
 }
@@ -599,6 +609,28 @@ if err != nil {
 
     x.SetINonCompat(result)
     return nil
+}
+
+// Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
+var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().GetS()
+
+// Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
+func (x *reqMyServiceHasArgDocs) DefaultGetS() *module.MyStruct {
+    if !x.IsSetS() {
+        return module.NewMyStruct()
+    }
+    return x.S
+}
+
+// Deprecated: Use newReqMyServiceHasArgDocs().GetI() instead.
+var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().GetI()
+
+// Deprecated: Use newReqMyServiceHasArgDocs().GetI() instead.
+func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
+    if !x.IsSetI() {
+        return includes.NewIncluded()
+    }
+    return x.I
 }
 
 func (x *reqMyServiceHasArgDocs) String() string {

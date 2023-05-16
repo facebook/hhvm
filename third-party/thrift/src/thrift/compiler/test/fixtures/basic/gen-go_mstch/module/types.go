@@ -154,9 +154,6 @@ func NewMyStruct() *MyStruct {
         SetNoHackCodegenFieldNonCompat("")
 }
 
-// Deprecated: Use NewMyStruct().GetMyDataField() instead.
-var MyStruct_MyDataField_DEFAULT = NewMyStruct().GetMyDataField()
-
 func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
     return x.MyIntField
 }
@@ -608,6 +605,17 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewMyStruct().GetMyDataField() instead.
+var MyStruct_MyDataField_DEFAULT = NewMyStruct().GetMyDataField()
+
+// Deprecated: Use NewMyStruct().GetMyDataField() instead.
+func (x *MyStruct) DefaultGetMyDataField() *MyDataItem {
+    if !x.IsSetMyDataField() {
+        return NewMyDataItem()
+    }
+    return x.MyDataField
+}
+
 func (x *MyStruct) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -893,15 +901,6 @@ func NewMyUnion() *MyUnion {
         SetFloatSetNonCompat(make([]float32, 0))
 }
 
-// Deprecated: Use NewMyUnion().GetMyEnum() instead.
-var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
-
-// Deprecated: Use NewMyUnion().GetMyStruct() instead.
-var MyUnion_MyStruct_DEFAULT = NewMyUnion().GetMyStruct()
-
-// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
-var MyUnion_MyDataItem_DEFAULT = NewMyUnion().GetMyDataItem()
-
 func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
     return x.MyEnum
 }
@@ -1156,6 +1155,31 @@ result := setResult
 
     x.SetFloatSetNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewMyUnion().GetMyEnum() instead.
+var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
+
+// Deprecated: Use NewMyUnion().GetMyStruct() instead.
+var MyUnion_MyStruct_DEFAULT = NewMyUnion().GetMyStruct()
+
+// Deprecated: Use NewMyUnion().GetMyStruct() instead.
+func (x *MyUnion) DefaultGetMyStruct() *MyStruct {
+    if !x.IsSetMyStruct() {
+        return NewMyStruct()
+    }
+    return x.MyStruct
+}
+
+// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
+var MyUnion_MyDataItem_DEFAULT = NewMyUnion().GetMyDataItem()
+
+// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
+func (x *MyUnion) DefaultGetMyDataItem() *MyDataItem {
+    if !x.IsSetMyDataItem() {
+        return NewMyDataItem()
+    }
+    return x.MyDataItem
 }
 
 func (x *MyUnion) String() string {
@@ -1455,9 +1479,6 @@ func NewUnionToBeRenamed() *UnionToBeRenamed {
         SetReservedFieldNonCompat(0)
 }
 
-// Deprecated: Use NewUnionToBeRenamed().GetReservedField() instead.
-var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().GetReservedField()
-
 func (x *UnionToBeRenamed) GetReservedFieldNonCompat() *int32 {
     return x.ReservedField
 }
@@ -1513,6 +1534,9 @@ if err != nil {
     x.SetReservedFieldNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewUnionToBeRenamed().GetReservedField() instead.
+var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().GetReservedField()
 
 func (x *UnionToBeRenamed) String() string {
     return fmt.Sprintf("%+v", x)

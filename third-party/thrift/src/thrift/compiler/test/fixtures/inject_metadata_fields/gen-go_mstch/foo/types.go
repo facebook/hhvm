@@ -30,12 +30,6 @@ func NewFields() *Fields {
         SetInjectedFieldNonCompat("")
 }
 
-// Deprecated: Use NewFields().GetInjectedStructuredAnnotationField() instead.
-var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedStructuredAnnotationField()
-
-// Deprecated: Use NewFields().GetInjectedUnstructuredAnnotationField() instead.
-var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
-
 func (x *Fields) GetInjectedFieldNonCompat() string {
     return x.InjectedField
 }
@@ -191,6 +185,12 @@ if err != nil {
     x.SetInjectedUnstructuredAnnotationFieldNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewFields().GetInjectedStructuredAnnotationField() instead.
+var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedStructuredAnnotationField()
+
+// Deprecated: Use NewFields().GetInjectedUnstructuredAnnotationField() instead.
+var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
 
 func (x *Fields) String() string {
     return fmt.Sprintf("%+v", x)

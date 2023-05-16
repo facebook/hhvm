@@ -28,9 +28,6 @@ func NewIncludesAlso() *IncludesAlso {
         SetAlsoNonCompat(*includesAlso.NewAlso())
 }
 
-// Deprecated: Use NewIncludesAlso().GetAlso() instead.
-var IncludesAlso_Also_DEFAULT = NewIncludesAlso().GetAlso()
-
 func (x *IncludesAlso) GetAlsoNonCompat() *includesAlso.Also {
     return x.Also
 }
@@ -86,6 +83,17 @@ if err != nil {
 
     x.SetAlsoNonCompat(result)
     return nil
+}
+
+// Deprecated: Use NewIncludesAlso().GetAlso() instead.
+var IncludesAlso_Also_DEFAULT = NewIncludesAlso().GetAlso()
+
+// Deprecated: Use NewIncludesAlso().GetAlso() instead.
+func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
+    if !x.IsSetAlso() {
+        return includesAlso.NewAlso()
+    }
+    return x.Also
 }
 
 func (x *IncludesAlso) String() string {

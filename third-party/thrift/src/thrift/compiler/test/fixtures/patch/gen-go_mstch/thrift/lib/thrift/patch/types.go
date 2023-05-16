@@ -318,9 +318,6 @@ func NewBoolPatch() *BoolPatch {
         SetInvertNonCompat(false)
 }
 
-// Deprecated: Use NewBoolPatch().GetAssign() instead.
-var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
-
 func (x *BoolPatch) GetAssignNonCompat() *bool {
     return x.Assign
 }
@@ -465,6 +462,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewBoolPatch().GetAssign() instead.
+var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
+
 func (x *BoolPatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -588,9 +588,6 @@ func NewBytePatch() *BytePatch {
         SetClearNonCompat(false).
         SetAddNonCompat(0)
 }
-
-// Deprecated: Use NewBytePatch().GetAssign() instead.
-var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
 func (x *BytePatch) GetAssignNonCompat() *int8 {
     return x.Assign
@@ -738,6 +735,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewBytePatch().GetAssign() instead.
+var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
+
 func (x *BytePatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -861,9 +861,6 @@ func NewI16Patch() *I16Patch {
         SetClearNonCompat(false).
         SetAddNonCompat(0)
 }
-
-// Deprecated: Use NewI16Patch().GetAssign() instead.
-var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
 
 func (x *I16Patch) GetAssignNonCompat() *int16 {
     return x.Assign
@@ -1009,6 +1006,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewI16Patch().GetAssign() instead.
+var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
+
 func (x *I16Patch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1132,9 +1132,6 @@ func NewI32Patch() *I32Patch {
         SetClearNonCompat(false).
         SetAddNonCompat(0)
 }
-
-// Deprecated: Use NewI32Patch().GetAssign() instead.
-var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
 
 func (x *I32Patch) GetAssignNonCompat() *int32 {
     return x.Assign
@@ -1280,6 +1277,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewI32Patch().GetAssign() instead.
+var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
+
 func (x *I32Patch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1403,9 +1403,6 @@ func NewI64Patch() *I64Patch {
         SetClearNonCompat(false).
         SetAddNonCompat(0)
 }
-
-// Deprecated: Use NewI64Patch().GetAssign() instead.
-var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
 
 func (x *I64Patch) GetAssignNonCompat() *int64 {
     return x.Assign
@@ -1551,6 +1548,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewI64Patch().GetAssign() instead.
+var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
+
 func (x *I64Patch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1674,9 +1674,6 @@ func NewFloatPatch() *FloatPatch {
         SetClearNonCompat(false).
         SetAddNonCompat(0.0)
 }
-
-// Deprecated: Use NewFloatPatch().GetAssign() instead.
-var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
 
 func (x *FloatPatch) GetAssignNonCompat() *float32 {
     return x.Assign
@@ -1822,6 +1819,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewFloatPatch().GetAssign() instead.
+var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
+
 func (x *FloatPatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1945,9 +1945,6 @@ func NewDoublePatch() *DoublePatch {
         SetClearNonCompat(false).
         SetAddNonCompat(0.0)
 }
-
-// Deprecated: Use NewDoublePatch().GetAssign() instead.
-var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
 
 func (x *DoublePatch) GetAssignNonCompat() *float64 {
     return x.Assign
@@ -2093,6 +2090,9 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewDoublePatch().GetAssign() instead.
+var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
+
 func (x *DoublePatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2218,9 +2218,6 @@ func NewStringPatch() *StringPatch {
         SetPrependNonCompat("").
         SetAppendNonCompat("")
 }
-
-// Deprecated: Use NewStringPatch().GetAssign() instead.
-var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 func (x *StringPatch) GetAssignNonCompat() *string {
     return x.Assign
@@ -2409,6 +2406,9 @@ if err != nil {
     x.SetAppendNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewStringPatch().GetAssign() instead.
+var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 func (x *StringPatch) String() string {
     return fmt.Sprintf("%+v", x)

@@ -143,9 +143,6 @@ func newReqMyServiceQuery() *reqMyServiceQuery {
         SetUNonCompat(*NewMyUnion())
 }
 
-// Deprecated: Use newReqMyServiceQuery().GetU() instead.
-var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().GetU()
-
 func (x *reqMyServiceQuery) GetUNonCompat() *MyUnion {
     return x.U
 }
@@ -201,6 +198,17 @@ if err != nil {
 
     x.SetUNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newReqMyServiceQuery().GetU() instead.
+var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().GetU()
+
+// Deprecated: Use newReqMyServiceQuery().GetU() instead.
+func (x *reqMyServiceQuery) DefaultGetU() *MyUnion {
+    if !x.IsSetU() {
+        return NewMyUnion()
+    }
+    return x.U
 }
 
 func (x *reqMyServiceQuery) String() string {
@@ -298,9 +306,6 @@ func newRespMyServiceQuery() *respMyServiceQuery {
         SetValueNonCompat(*NewMyStruct())
 }
 
-// Deprecated: Use newRespMyServiceQuery().GetValue() instead.
-var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().GetValue()
-
 func (x *respMyServiceQuery) GetValueNonCompat() *MyStruct {
     return x.Value
 }
@@ -356,6 +361,17 @@ if err != nil {
 
     x.SetValueNonCompat(result)
     return nil
+}
+
+// Deprecated: Use newRespMyServiceQuery().GetValue() instead.
+var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().GetValue()
+
+// Deprecated: Use newRespMyServiceQuery().GetValue() instead.
+func (x *respMyServiceQuery) DefaultGetValue() *MyStruct {
+    if !x.IsSetValue() {
+        return NewMyStruct()
+    }
+    return x.Value
 }
 
 func (x *respMyServiceQuery) String() string {

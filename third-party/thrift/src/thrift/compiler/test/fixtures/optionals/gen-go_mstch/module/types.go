@@ -433,21 +433,6 @@ func NewVehicle() *Vehicle {
         SetHasACNonCompat(false)
 }
 
-// Deprecated: Use NewVehicle().GetColor() instead.
-var Vehicle_Color_DEFAULT = NewVehicle().GetColor()
-
-// Deprecated: Use NewVehicle().GetLicensePlate() instead.
-var Vehicle_LicensePlate_DEFAULT = NewVehicle().GetLicensePlate()
-
-// Deprecated: Use NewVehicle().GetDescription() instead.
-var Vehicle_Description_DEFAULT = NewVehicle().GetDescription()
-
-// Deprecated: Use NewVehicle().GetName() instead.
-var Vehicle_Name_DEFAULT = NewVehicle().GetName()
-
-// Deprecated: Use NewVehicle().GetHasAC() instead.
-var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
-
 func (x *Vehicle) GetColorNonCompat() *Color {
     return x.Color
 }
@@ -729,6 +714,29 @@ if err != nil {
     return nil
 }
 
+// Deprecated: Use NewVehicle().GetColor() instead.
+var Vehicle_Color_DEFAULT = NewVehicle().GetColor()
+
+// Deprecated: Use NewVehicle().GetColor() instead.
+func (x *Vehicle) DefaultGetColor() *Color {
+    if !x.IsSetColor() {
+        return NewColor()
+    }
+    return x.Color
+}
+
+// Deprecated: Use NewVehicle().GetLicensePlate() instead.
+var Vehicle_LicensePlate_DEFAULT = NewVehicle().GetLicensePlate()
+
+// Deprecated: Use NewVehicle().GetDescription() instead.
+var Vehicle_Description_DEFAULT = NewVehicle().GetDescription()
+
+// Deprecated: Use NewVehicle().GetName() instead.
+var Vehicle_Name_DEFAULT = NewVehicle().GetName()
+
+// Deprecated: Use NewVehicle().GetHasAC() instead.
+var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
+
 func (x *Vehicle) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -885,21 +893,6 @@ func NewPerson() *Person {
         SetIdNonCompat(NewPersonID()).
         SetNameNonCompat("")
 }
-
-// Deprecated: Use NewPerson().GetAge() instead.
-var Person_Age_DEFAULT = NewPerson().GetAge()
-
-// Deprecated: Use NewPerson().GetAddress() instead.
-var Person_Address_DEFAULT = NewPerson().GetAddress()
-
-// Deprecated: Use NewPerson().GetFavoriteColor() instead.
-var Person_FavoriteColor_DEFAULT = NewPerson().GetFavoriteColor()
-
-// Deprecated: Use NewPerson().GetBestFriend() instead.
-var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
-
-// Deprecated: Use NewPerson().GetAfraidOfAnimal() instead.
-var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 func (x *Person) GetIdNonCompat() PersonID {
     return x.Id
@@ -1547,6 +1540,29 @@ result := listResult
     x.SetVehiclesNonCompat(result)
     return nil
 }
+
+// Deprecated: Use NewPerson().GetAge() instead.
+var Person_Age_DEFAULT = NewPerson().GetAge()
+
+// Deprecated: Use NewPerson().GetAddress() instead.
+var Person_Address_DEFAULT = NewPerson().GetAddress()
+
+// Deprecated: Use NewPerson().GetFavoriteColor() instead.
+var Person_FavoriteColor_DEFAULT = NewPerson().GetFavoriteColor()
+
+// Deprecated: Use NewPerson().GetFavoriteColor() instead.
+func (x *Person) DefaultGetFavoriteColor() *Color {
+    if !x.IsSetFavoriteColor() {
+        return NewColor()
+    }
+    return x.FavoriteColor
+}
+
+// Deprecated: Use NewPerson().GetBestFriend() instead.
+var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
+
+// Deprecated: Use NewPerson().GetAfraidOfAnimal() instead.
+var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 func (x *Person) String() string {
     return fmt.Sprintf("%+v", x)

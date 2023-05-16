@@ -78,6 +78,39 @@ let option_or_thunk opt ~f =
 
 let visitor ~(cursor : Pos.t) ~source_text =
   let find_in_positions = find_candidate ~cursor ~source_text in
+  let find_in_positions_params params =
+    let is_easy_to_flip param =
+      Aast_defs.(
+        (not param.param_is_variadic)
+        && Option.is_none param.param_readonly
+        && Option.is_none param.param_visibility
+        && (match param.param_callconv with
+           | Ast_defs.Pnormal -> true
+           | Ast_defs.Pinout _ -> false)
+        && List.is_empty param.param_user_attributes)
+    in
+    let pos_of_expr_opt = function
+      | Some (_, pos, _) -> pos
+      | None -> Pos.none
+    in
+    if List.for_all params ~f:is_easy_to_flip then
+      params
+      |> List.map
+           ~f:
+             Aast_defs.(
+               fun param ->
+                 List.fold
+                   ~init:param.param_pos
+                   ~f:Pos.merge
+                   [
+                     pos_of_expr_opt param.param_expr;
+                     pos_of_type_hint param.param_type_hint;
+                   ])
+      |> find_in_positions
+    else
+      None
+  in
+
   object
     inherit [candidate option] Tast_visitor.reduce as super
 
@@ -87,14 +120,8 @@ let visitor ~(cursor : Pos.t) ~source_text =
 
     method! on_method_ env meth =
       if Pos.contains meth.Aast_defs.m_span cursor then
-        option_or_thunk
-          (super#on_method_ env meth)
-          ~f:
-            Aast_defs.(
-              fun () ->
-                meth.m_params
-                |> List.map ~f:(fun param -> param.param_pos)
-                |> find_in_positions)
+        option_or_thunk (super#on_method_ env meth) ~f:(fun () ->
+            find_in_positions_params meth.Aast_defs.m_params)
       else
         None
 
@@ -106,17 +133,8 @@ let visitor ~(cursor : Pos.t) ~source_text =
 
     method! on_fun_ env fun_ =
       if Pos.contains fun_.Aast_defs.f_span cursor then
-        option_or_thunk
-          (super#on_fun_ env fun_)
-          ~f:
-            Aast_defs.(
-              fun () ->
-                fun_.f_params
-                |> List.map ~f:(fun param ->
-                       Pos.merge
-                         (pos_of_type_hint param.param_type_hint)
-                         param.param_pos)
-                |> find_in_positions)
+        option_or_thunk (super#on_fun_ env fun_) ~f:(fun () ->
+            find_in_positions_params fun_.Aast_defs.f_params)
       else
         None
 

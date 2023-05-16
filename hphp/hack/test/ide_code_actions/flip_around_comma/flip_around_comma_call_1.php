@@ -1,7 +1,7 @@
 <?hh
 
 function foo(): void {
-  bar(1, 2);
+  bar(1, /*range-start*//*range-end*/2);
 }
 
-function bar(int $a, /*range-start*//*range-end*/int $b): void {}
+function bar(int $a, int $b): void {}

@@ -5,8 +5,8 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"$b, $a",
-            "range":{"end":{"character":65,"line":3},"start":{"character":26,"line":3}}
+            "newText":"int $b, Box<int> $a",
+            "range":{"end":{"character":69,"line":7},"start":{"character":22,"line":7}}
           }
         ]
       }

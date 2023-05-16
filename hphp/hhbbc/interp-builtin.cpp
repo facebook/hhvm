@@ -150,11 +150,23 @@ TypeOrReduced builtin_is_numeric(ISS& env, const php::Func* func,
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  if (!handle_function_exists(env, getArg(env, func, fca, 0))) {
-    return NoReduced{};
+
+  auto const name = getArg(env, func, fca, 0);
+  if (!name.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const v = tv(name);
+  if (!v) return NoReduced{};
+  auto const rfunc = env.index.resolve_func(v->m_data.pstr);
+  switch (rfunc.exists()) {
+    case TriBool::Yes:
+      constprop(env);
+      return TTrue;
+    case TriBool::No:
+      constprop(env);
+      return TFalse;
+    case TriBool::Maybe:
+      return NoReduced{};
   }
-  constprop(env);
-  return TTrue;
+  not_reached();
 }
 
 TypeOrReduced handle_oodecl_exists(ISS& env,
@@ -634,14 +646,6 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   }
 
   return handle_builtin(env, func, fca);
-}
-
-bool handle_function_exists(ISS& env, const Type& name) {
-  if (!name.strictSubtypeOf(BStr)) return false;
-  auto const v = tv(name);
-  if (!v) return false;
-  auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
-  return rfunc.exactFunc();
 }
 
 Optional<Type> const_fold(ISS& env,

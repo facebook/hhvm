@@ -596,6 +596,12 @@ struct Func {
   const php::Func* exactFunc() const;
 
   /*
+   * Whether this function definitely exists or definitely does not
+   * exist.
+   */
+  TriBool exists() const;
+
+  /*
    * Returns whether this resolved function is definitely safe to constant fold.
    */
   bool isFoldable() const;
@@ -636,10 +642,9 @@ struct Func {
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
-    FuncName(SString n, bool r) : name{n}, renamable{r} {}
+    explicit FuncName(SString n) : name{n} {}
     bool operator==(FuncName o) const { return name == o.name; }
     SString name;
-    bool renamable;
   };
   struct MethodName {
     bool operator==(MethodName o) const { return name == o.name; }
@@ -951,13 +956,12 @@ struct Index {
   res::Class builtin_class(SString name) const;
 
   /*
-   * Try to resolve a function named `name' from a given context.
+   * Try to resolve a function named `name'.
    *
-   * Note, the returned function may or may not be defined at the
-   * program point (it could require a function autoload that might
-   * fail).
+   * Returns std::nullopt if no such function with that name is known
+   * to exist.
    */
-  res::Func resolve_func(Context, SString name) const;
+  res::Func resolve_func(SString name) const;
 
   /*
    * Try to resolve a method named `name' with a this type of
@@ -1417,9 +1421,6 @@ private:
 
 private:
   friend struct PublicSPropMutations;
-
-  res::Func resolve_func_helper(const php::Func*, SString) const;
-  res::Func do_resolve(const php::Func*) const;
 
   template <typename F>
   bool visit_every_dcls_cls(const DCls&, const F&) const;

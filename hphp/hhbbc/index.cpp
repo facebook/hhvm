@@ -3163,6 +3163,20 @@ const php::Func* Func::exactFunc() const {
   );
 }
 
+TriBool Func::exists() const {
+  return match<TriBool>(
+    val,
+    [&](FuncName)                    { return TriBool::Maybe; },
+    [&](MethodName)                  { return TriBool::Maybe; },
+    [&](FuncInfo*)                   { return TriBool::Yes; },
+    [&](Method)                      { return TriBool::Yes; },
+    [&](MethodFamily)                { return TriBool::Maybe; },
+    [&](MethodOrMissing)             { return TriBool::Maybe; },
+    [&](Missing)                     { return TriBool::No; },
+    [&](const Isect&)                { return TriBool::Maybe; }
+  );
+}
+
 bool Func::isFoldable() const {
   return match<bool>(
     val,
@@ -3241,9 +3255,7 @@ bool Func::mightCareAboutDynCalls() const {
 bool Func::mightBeBuiltin() const {
   return match<bool>(
     val,
-    // Builtins are always uniquely resolvable unless renaming is
-    // involved.
-    [&](FuncName s) { return s.renamable; },
+    [&](FuncName s) { return true; },
     [&](MethodName) { return true; },
     [&](FuncInfo* fi) { return fi->func->attrs & AttrBuiltin; },
     [&](Method m) { return m.func->attrs & AttrBuiltin; },
@@ -3379,7 +3391,7 @@ std::string show(const Func& f) {
   auto ret = f.name()->toCppString();
   match<void>(
     f.val,
-    [&](Func::FuncName s)        { if (s.renamable) ret += '?'; },
+    [&](Func::FuncName s)        {},
     [&](Func::MethodName)        {},
     [&](FuncInfo*)               { ret += "*"; },
     [&](Func::Method)            { ret += "*"; },
@@ -14216,24 +14228,13 @@ res::Func Index::resolve_ctor(const Type& obj) const {
   );
 }
 
-res::Func
-Index::resolve_func_helper(const php::Func* func, SString name) const {
-  auto name_only = [&] (bool renamable) {
-    return res::Func { res::Func::FuncName { name, renamable } };
-  };
-
-  // no resolution
-  if (func == nullptr) return name_only(false);
-
-  // single resolution, in whole-program mode, that's it
-  assertx(func->attrs & AttrUnique);
-  return do_resolve(func);
-}
-
-res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
+res::Func Index::resolve_func(SString name) const {
   name = normalizeNS(name);
   auto const it = m_data->funcs.find(name);
-  return resolve_func_helper((it != end(m_data->funcs)) ? it->second : nullptr, name);
+  if (it == end(m_data->funcs)) return res::Func { res::Func::Missing {} };
+  auto const func = it->second;
+  assertx(func->attrs & AttrUnique);
+  return res::Func { func_info(*m_data, func) };
 }
 
 bool Index::could_have_reified_type(Context ctx,
@@ -14651,7 +14652,7 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   auto const func_name = Constant::funcNameFromName(cnsName);
   assertx(func_name && "func_name will never be nullptr");
 
-  auto rfunc = resolve_func(ctx, func_name);
+  auto rfunc = resolve_func(func_name);
   return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
 }
 
@@ -14932,11 +14933,7 @@ Optional<uint32_t> Index::lookup_num_inout_params(
   return match<Optional<uint32_t>>(
     rfunc.val,
     [&] (res::Func::FuncName s) -> Optional<uint32_t> {
-      if (s.renamable) return std::nullopt;
-      auto const it = m_data->funcs.find(s.name);
-      return it != end(m_data->funcs)
-       ? func_num_inout(it->second)
-       : 0;
+      return std::nullopt;
     },
     [&] (res::Func::MethodName s) -> Optional<uint32_t> {
       return std::nullopt;
@@ -14981,11 +14978,7 @@ PrepKind Index::lookup_param_prep(Context,
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
-      if (s.renamable) return PrepKind{TriBool::Maybe, TriBool::Maybe};
-      auto const it = m_data->funcs.find(s.name);
-      return it != end(m_data->funcs)
-        ? func_param_prep(it->second, paramId)
-        : PrepKind{TriBool::No, TriBool::Yes};
+      return PrepKind{TriBool::Maybe, TriBool::Maybe};
     },
     [&] (res::Func::MethodName s) {
       return PrepKind{TriBool::Maybe, TriBool::Maybe};
@@ -15035,13 +15028,7 @@ TriBool Index::lookup_return_readonly(
 ) const {
   return match<TriBool>(
     rfunc.val,
-    [&] (res::Func::FuncName s) {
-      if (s.renamable) return TriBool::Maybe;
-      auto const it = m_data->funcs.find(s.name);
-      return it != end(m_data->funcs)
-        ? yesOrNo(it->second->isReadonlyReturn)
-        : TriBool::No; // if the function doesnt exist, we will error anyway
-    },
+    [&] (res::Func::FuncName s) { return TriBool::Maybe; },
     [&] (res::Func::MethodName s) { return TriBool::Maybe; },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyReturn);
@@ -15076,13 +15063,7 @@ TriBool Index::lookup_readonly_this(
 ) const {
   return match<TriBool>(
     rfunc.val,
-    [&] (res::Func::FuncName s) {
-      if (s.renamable) return TriBool::Maybe;
-      auto const it = m_data->funcs.find(s.name);
-      return it != end(m_data->funcs)
-        ? yesOrNo(it->second->isReadonlyThis)
-        : TriBool::Yes; // if the function doesnt exist, we will error anyway
-    },
+    [&] (res::Func::FuncName s) { return TriBool::Maybe; },
     [&] (res::Func::MethodName s) { return TriBool::Maybe; },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyThis);
@@ -16080,10 +16061,6 @@ void Index::thaw() {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-res::Func Index::do_resolve(const php::Func* f) const {
-  return res::Func { func_info(*m_data, f) };
-};
 
 // Return true if we know for sure that one php::Class must derive
 // from another at runtime, in all possible instantiations.

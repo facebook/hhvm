@@ -1803,7 +1803,7 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
         memoize_impl_name(env.ctx.func)
       );
     }
-    return env.index.resolve_func(env.ctx, memoize_impl_name(env.ctx.func));
+    return env.index.resolve_func(memoize_impl_name(env.ctx.func));
   }();
 
   // Infer the return type of the wrapped function, taking into account the
@@ -3851,12 +3851,6 @@ void fcallKnownImpl(
     return;
   }
 
-  if (func.name()->isame(s_function_exists.get()) &&
-      (numArgs == 1 || numArgs == 2) &&
-      !fca.hasUnpack() && !fca.hasGenerics()) {
-    handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
-  }
-
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
@@ -3896,7 +3890,7 @@ void fcallUnknownImpl(ISS& env,
 }
 
 void in(ISS& env, const bc::FCallFuncD& op) {
-  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+  auto const rfunc = env.index.resolve_func(op.str2);
 
   if (op.fca.hasGenerics()) {
     auto const tsList = topC(env);
@@ -4135,7 +4129,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     return fcallFuncUnknown(env, op);
   }
 
-  auto const rfunc = env.index.resolve_func(env.ctx, funcName);
+  auto const rfunc = env.index.resolve_func(funcName);
   if (!rfunc.mightCareAboutDynCalls()) {
     return reduce(env, bc::PopC {}, bc::FCallFuncD { op.fca, funcName });
   }

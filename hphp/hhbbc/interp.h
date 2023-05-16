@@ -208,8 +208,6 @@ void default_dispatch(ISS&, const Bytecode&);
  */
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
-bool handle_function_exists(ISS& env, const Type& name);
-
 Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
            const php::Func& phpFunc, bool variadicsPacked);

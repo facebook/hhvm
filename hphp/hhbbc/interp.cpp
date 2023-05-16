@@ -5068,7 +5068,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
   auto [newTy, remove, effectFree] =
-    env.index.verify_param_type(env.ctx, op.loc1, topC(env));
+    verify_param_type(env.index, env.ctx, op.loc1, topC(env));
 
   if (remove) return reduce(env);
   if (newTy.subtypeOf(BBottom)) unreachable(env);
@@ -5146,7 +5146,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     stackT.couldBe(BInitNull) &&
     !stackT.subtypeOf(BInitNull);
   for (auto const& tc : tcs) {
-    auto const type = env.index.lookup_constraint(env.ctx, *tc, stackT);
+    auto const type = lookup_constraint(env.index, env.ctx, *tc, stackT);
     if (stackT.moreRefined(type.lower)) {
       refined = intersection_of(std::move(refined), stackT);
       continue;
@@ -5645,7 +5645,7 @@ void in(ISS& env, const bc::InitProp& op) {
       [&] (const TypeConstraint& tc) -> std::pair<Type, bool> {
       assertx(tc.validForProp());
       if (RO::EvalCheckPropTypeHints == 0) return { t, true };
-      auto const lookup = env.index.lookup_constraint(env.ctx, tc, t);
+      auto const lookup = lookup_constraint(env.index, env.ctx, tc, t);
       if (t.moreRefined(lookup.lower)) return { t, true };
       if (RO::EvalClassStringHintNotices) return { t, false };
       if (!t.couldBe(lookup.upper)) return { t, false };

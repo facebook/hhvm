@@ -106,7 +106,7 @@ Optional<State> entry_state(const Index& index, CollectedInfo& collect,
           ret.locals[locId] = vec(std::move(pack));
         } else {
           auto [ty, _, effectFree] =
-            index.verify_param_type(ctx, locId, unctx(knownArgs->args[locId]));
+            verify_param_type(index, ctx, locId, unctx(knownArgs->args[locId]));
 
           if (ty.subtypeOf(BBottom)) {
             ret.unreachable = true;
@@ -131,9 +131,7 @@ Optional<State> entry_state(const Index& index, CollectedInfo& collect,
 
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
-
-    auto [ty, _, effectFree] =
-      index.verify_param_type(ctx, locId, TInitCell);
+    auto [ty, _, effectFree] = verify_param_type(index, ctx, locId, TInitCell);
 
     if (ty.subtypeOf(BBottom)) {
       ret.unreachable = true;
@@ -1312,6 +1310,261 @@ State locally_propagated_bid_state(const Index& index,
   run(interp, originalState, propagate);
 
   ret.stack.compact();
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename Resolve, typename Self>
+ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
+                                         const Type& candidate,
+                                         const Resolve& resolve,
+                                         const Self& self) {
+  using C = ConstraintType;
+
+  assertx(IMPLIES(
+    !tc.isCheckable(),
+    tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
+  ));
+
+  auto ty = [&] {
+    auto const exact = [&] (const Type& t) {
+      return C{ t, t };
+    };
+
+    switch (getAnnotMetaType(tc.type())) {
+      case AnnotMetaType::Precise: {
+        switch (getAnnotDataType(tc.type())) {
+          case KindOfNull:         return exact(TInitNull);
+          case KindOfBoolean:      return exact(TBool);
+          case KindOfInt64:        return exact(TInt);
+          case KindOfDouble:       return exact(TDbl);
+          case KindOfPersistentVec:
+          case KindOfVec:          return exact(TVec);
+          case KindOfPersistentDict:
+          case KindOfDict:         return exact(TDict);
+          case KindOfPersistentKeyset:
+          case KindOfKeyset:       return exact(TKeyset);
+          case KindOfResource:     return exact(TRes);
+          case KindOfClsMeth:      return exact(TClsMeth);
+          case KindOfObject: {
+            auto const cls = resolve(tc.clsName());
+            auto lower = subObj(cls);
+            auto upper = lower;
+
+            // The "magic" interfaces cannot be represented with a single
+            // type. Obj=Foo|Str, for example, is not a valid type. It is
+            // safe to only provide a subset as the lower bound. We can
+            // use any provided candidate type to refine the lower bound
+            // and supply the subset which would allow us to optimize away
+            // the check.
+            if (interface_supports_arrlike(cls.name())) {
+              if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+              upper |= TArrLike;
+            }
+            if (interface_supports_int(cls.name())) {
+              if (candidate.subtypeOf(BInt)) lower = TInt;
+              upper |= TInt;
+            }
+            if (interface_supports_double(cls.name())) {
+              if (candidate.subtypeOf(BDbl)) lower = TDbl;
+              upper |= TDbl;
+            }
+
+            if (interface_supports_string(cls.name())) {
+              if (candidate.subtypeOf(BStr)) lower = TStr;
+              upper |= union_of(TStr, TCls, TLazyCls);
+              return C{
+                std::move(lower),
+                std::move(upper),
+                TriBool::Yes
+              };
+            }
+
+            return C{ std::move(lower), std::move(upper) };
+          }
+          case KindOfPersistentString:
+          case KindOfString:
+            return C{
+              TStr,
+              union_of(TStr, TCls, TLazyCls),
+              TriBool::Yes
+            };
+          case KindOfUninit:
+          case KindOfRFunc:
+          case KindOfFunc:
+          case KindOfRClsMeth:
+          case KindOfClass:
+          case KindOfLazyClass:    break;
+        }
+        always_assert(false);
+      }
+      case AnnotMetaType::Mixed:
+        return C{ TInitCell, TInitCell, TriBool::No, true };
+      case AnnotMetaType::Nothing:
+      case AnnotMetaType::NoReturn:   return exact(TBottom);
+      case AnnotMetaType::Nonnull:    return exact(TNonNull);
+      case AnnotMetaType::Number:     return exact(TNum);
+      case AnnotMetaType::VecOrDict:  return exact(TKVish);
+      case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+      case AnnotMetaType::Unresolved:
+        return C{ TBottom, TBottom };
+      case AnnotMetaType::This:
+        if (auto const s = self()) {
+          auto obj = subObj(*s);
+          if (!s->couldBeMocked()) return exact(setctx(obj));
+          return C{ setctx(obj), obj };
+        }
+        return C{ TBottom, TObj };
+      case AnnotMetaType::Callable:
+        return C{
+          TBottom,
+          union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
+        };
+      case AnnotMetaType::ArrayKey:
+        return C{
+          TArrKey,
+          union_of(TArrKey, TCls, TLazyCls),
+          TriBool::Yes
+        };
+      case AnnotMetaType::Classname:
+        return C{
+          RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+    }
+
+    always_assert(false);
+  }();
+
+  // Nullable constraint always includes TInitNull.
+  if (tc.isNullable()) {
+    ty.lower = opt(std::move(ty.lower));
+    ty.upper = opt(std::move(ty.upper));
+  }
+  // We cannot ever say an upper-bound check will succeed, so its
+  // lower-bound is always empty.
+  if (tc.isUpperBound()) ty.lower = TBottom;
+  // Soft type-constraints can potentially allow anything, so its
+  // upper-bound is maximal. We might still be able to optimize away
+  // the check if the lower bound is satisfied.
+  if (tc.isSoft() || (RO::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
+    ty.upper = TInitCell;
+    ty.maybeMixed = true;
+  }
+  return ty;
+}
+
+}
+
+ConstraintType type_from_constraint(
+  const TypeConstraint& tc,
+  const Type& candidate,
+  const std::function<res::Class(SString)>& resolve,
+  const std::function<Optional<res::Class>()>& self)
+{
+  return type_from_constraint_impl(tc, candidate, resolve, self);
+}
+
+ConstraintType
+lookup_constraint(const Index& index,
+                  const Context& ctx,
+                  const TypeConstraint& tc,
+                  const Type& candidate) {
+  return type_from_constraint_impl(
+    tc, candidate,
+    [&] (SString name) {
+      auto const cls = index.resolve_class(name);
+      // At this point we shouldn't have type constraints with
+      // non-existent classes.
+      assertx(cls.has_value());
+      return *cls;
+    },
+    [&] { return index.selfCls(ctx); }
+  );
+}
+
+std::tuple<Type, bool, bool> verify_param_type(const Index& index,
+                                               const Context& ctx,
+                                               uint32_t paramId,
+                                               const Type& t) {
+  // Builtins verify parameter types differently.
+  if (ctx.func->isNative) return { t, true, true };
+
+  assertx(paramId < ctx.func->params.size());
+  auto const& pinfo = ctx.func->params[paramId];
+
+  std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};
+  for (auto const& tc : pinfo.upperBounds) tcs.push_back(&tc);
+
+  auto refined = TInitCell;
+  auto noop = true;
+  auto effectFree = true;
+  for (auto const tc : tcs) {
+    auto const lookup = lookup_constraint(index, ctx, *tc, t);
+    if (t.moreRefined(lookup.lower)) {
+      refined = intersection_of(std::move(refined), t);
+      continue;
+    }
+
+    if (!t.couldBe(lookup.upper)) return { TBottom, false, false };
+
+    noop = false;
+
+    auto result = intersection_of(t, lookup.upper);
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+      assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+      if (result.couldBe(BCls | BLazyCls)) {
+        result = promote_classish(std::move(result));
+        if (effectFree && (RO::EvalClassStringHintNotices ||
+                           !promote_classish(t).moreRefined(lookup.lower))) {
+          effectFree = false;
+        }
+      } else {
+        effectFree = false;
+      }
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+      effectFree = false;
+    } else {
+      effectFree = false;
+    }
+
+    refined = intersection_of(std::move(refined), std::move(result));
+    if (refined.is(BBottom)) return { TBottom, false, false };
+  }
+
+  return { std::move(refined), noop, effectFree };
+}
+
+Type adjust_type_for_prop(const Index& index,
+                          const php::Class& propCls,
+                          const TypeConstraint* tc,
+                          const Type& ty) {
+  if (!tc) return ty;
+  assertx(tc->validForProp());
+  if (RO::EvalCheckPropTypeHints <= 2) return ty;
+  auto lookup = lookup_constraint(
+    index,
+    Context { nullptr, nullptr, &propCls },
+    *tc,
+    ty
+  );
+  auto upper = unctx(lookup.upper);
+  // A property with a mixed type-hint can be unset and therefore by
+  // Uninit. Any other type-hint forbids unsetting.
+  if (lookup.maybeMixed) upper |= TUninit;
+  auto ret = intersection_of(std::move(upper), ty);
+  if (lookup.coerceClassToString == TriBool::Yes) {
+    assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+    assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+    ret = promote_classish(std::move(ret));
+  } else if (lookup.coerceClassToString == TriBool::Maybe) {
+    if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
+  }
   return ret;
 }
 

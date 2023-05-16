@@ -1619,17 +1619,6 @@ bool compare_might_raise(const Type& t1, const Type& t2);
  */
 std::pair<Type, Promotion> promote_classlike_to_key(Type);
 
-/*
- * Given a type, adjust the type for the given type-constraint. If there's no
- * type-constraint, or if property type-hints aren't being enforced, then return
- * the type as is. This might return TBottom if the type is not compatible with
- * the type-hint.
- */
-Type adjust_type_for_prop(const Index& index,
-                          const php::Class& propCls,
-                          const TypeConstraint* tc,
-                          const Type& ty);
-
 //////////////////////////////////////////////////////////////////////
 
 }

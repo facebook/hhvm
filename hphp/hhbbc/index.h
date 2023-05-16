@@ -989,52 +989,10 @@ struct Index {
   res::Class wait_handle_class() const;
 
   /*
-   * Resolve a type-constraint into its equivalent set of HHBBC types.
-   *
-   * In general, a type-constraint cannot be represented exactly by a
-   * single HHBBC type, so a lower and upper bound is provided
-   * instead.
-   *
-   * A "candidate" type can be provided which will be applied to the
-   * type-constraint and can further constrain the output types. This
-   * is useful for the magic interfaces, whose lower-bound cannot be
-   * precisely represented by a single type.
-   */
-  struct ConstraintType {
-    // Lower bound of constraint. Any type which is a subtype of this
-    // is guaranteed to pass a type-check without any side-effects.
-    Type lower;
-    // Upper bound of constraint. Any type which does not intersect
-    // with this is guaranteed to always fail a type-check.
-    Type upper;
-    // If this type-constraint might promote a "classish" type to a
-    // static string as a side-effect.
-    TriBool coerceClassToString{TriBool::No};
-    // Whether this type-constraint might map to a mixed
-    // type-hint. The mixed type-hint has special semantics when it
-    // comes to properties.
-    bool maybeMixed{false};
-  };
-
-  ConstraintType
-  lookup_constraint(const Context&, const TypeConstraint&,
-                    const Type& candidate = TCell) const;
-
-  /*
    * Returns true if the type constraint can contain a reified type
    * Currently, only classes and interfaces are supported
    */
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
-
-  /*
-   * Returns a tuple containing a type after the parameter type
-   * verification, a flag indicating whether the verification is a
-   * no-op (because it always passes without any conversion), and a
-   * flag indicating whether the verification is effect free (the
-   * verification could convert a type without causing a side-effect).
-   */
-  std::tuple<Type, bool, bool>
-  verify_param_type(const Context& ctx, uint32_t paramId, const Type& t) const;
 
   /*
    * Lookup metadata about the constant access `cls'::`name', in the

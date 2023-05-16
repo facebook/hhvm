@@ -7578,35 +7578,6 @@ RepoAuthType make_repo_type(const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type adjust_type_for_prop(const Index& index,
-                          const php::Class& propCls,
-                          const TypeConstraint* tc,
-                          const Type& ty) {
-  if (!tc) return ty;
-  assertx(tc->validForProp());
-  if (RO::EvalCheckPropTypeHints <= 2) return ty;
-  auto lookup = index.lookup_constraint(
-    Context { nullptr, nullptr, &propCls },
-    *tc,
-    ty
-  );
-  auto upper = unctx(lookup.upper);
-  // A property with a mixed type-hint can be unset and therefore by
-  // Uninit. Any other type-hint forbids unsetting.
-  if (lookup.maybeMixed) upper |= TUninit;
-  auto ret = intersection_of(std::move(upper), ty);
-  if (lookup.coerceClassToString == TriBool::Yes) {
-    assertx(!lookup.lower.couldBe(BCls | BLazyCls));
-    assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
-    ret = promote_classish(std::move(ret));
-  } else if (lookup.coerceClassToString == TriBool::Maybe) {
-    if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
-  }
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 // Testing only functions used to construct Types which are hard to
 // construct using the normal interfaces.
 

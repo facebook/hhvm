@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
@@ -130,7 +131,7 @@ bool prop_might_have_bad_initial_value(const Index& index,
 
   auto const ctx = Context{ index.lookup_class_unit(cls), nullptr, &cls };
   if (!initial.moreRefined(
-        index.lookup_constraint(ctx, prop.typeConstraint, initial).lower
+        lookup_constraint(index, ctx, prop.typeConstraint, initial).lower
       )) {
     return true;
   }
@@ -140,7 +141,7 @@ bool prop_might_have_bad_initial_value(const Index& index,
     [&] (TypeConstraint ub) {
       applyFlagsToUB(ub, prop.typeConstraint);
       return !initial.moreRefined(
-        index.lookup_constraint(ctx, ub, initial).lower
+        lookup_constraint(index, ctx, ub, initial).lower
       );
     }
   );

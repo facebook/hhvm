@@ -36,8 +36,3 @@ let type_file
         fs @ cs @ ts @ gcs @ mds)
   in
   (tast, errors)
-
-(*****************************************************************************)
-(* Usually used when we want to run typing hooks *)
-(*****************************************************************************)
-let check_defs tcopt fn fi = snd (type_file tcopt fn fi)

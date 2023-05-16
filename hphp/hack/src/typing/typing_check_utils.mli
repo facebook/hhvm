@@ -11,5 +11,3 @@ val type_file :
   Relative_path.t ->
   FileInfo.t ->
   Tast.def list * Errors.t
-
-val check_defs : Provider_context.t -> Relative_path.t -> FileInfo.t -> Errors.t

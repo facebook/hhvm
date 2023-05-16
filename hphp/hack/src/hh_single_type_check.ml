@@ -1959,7 +1959,7 @@ let handle_mode
     exit 2
   | Dump_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-        ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
+        ignore @@ Typing_check_utils.type_file ctx fn fileinfo);
     if Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
   | Dump_dep_hashes ->
     iter_over_files (fun _ ->
@@ -1968,7 +1968,7 @@ let handle_mode
             Dep_hash_to_symbol.dump nast))
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-        ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
+        ignore @@ Typing_check_utils.type_file ctx fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps
   | Get_some_file_deps depth ->
     let file_deps = traverse_file_dependencies ctx filenames ~depth in

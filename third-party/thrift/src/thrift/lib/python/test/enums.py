@@ -275,6 +275,7 @@ class FlagTests(unittest.TestCase):
         self.assertFalse(x.permissions)
         self.assertIsInstance(x.permissions, Perm)
         self.assertEqual(f"{Perm.read}", "Perm.read")
+        self.assertTrue(Perm.read in Perm.read | Perm.execute)
 
     def test_flag_enum_serialization_roundtrip(self) -> None:
         x = File(name="/dev/null", type=Kind.CHAR, permissions=Perm.read | Perm.write)

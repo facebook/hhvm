@@ -29,13 +29,33 @@ TEST(ThriftServerInitialConfigTest, testSetOneConfigKnob) {
 }
 
 TEST(ThriftServerInitialConfigTest, testSetAllConfigKnobs) {
-  constexpr std::chrono::milliseconds queueTimeout{5};
+  using namespace std::chrono_literals;
   constexpr auto initialConfig =
-      ThriftServerInitialConfig().maxRequests(2048).queueTimeout(queueTimeout);
+      ThriftServerInitialConfig()
+          .maxRequests(1)
+          .maxConnections(2)
+          .maxResponseSize(3)
+          .useClientTimeout(false)
+          .taskExpireTimeout(4ms)
+          .streamExpireTimeout(5ms)
+          .queueTimeout(6ms)
+          .socketQueueTimeout(7ns)
+          .egressMemoryLimit(8)
+          .egressBufferBackpressureThreshold(9)
+          .ingressMemoryLimit(10)
+          .minPayloadSizeToEnforceIngressMemoryLimit(11);
   ThriftServer server(initialConfig);
   folly::observer_detail::ObserverManager::waitForAllUpdates();
-  EXPECT_EQ(detail::getThriftServerConfig(server).getMaxRequests().get(), 2048);
-  EXPECT_EQ(
-      detail::getThriftServerConfig(server).getQueueTimeout().get(),
-      queueTimeout);
+  EXPECT_EQ(server.getMaxRequests(), 1);
+  EXPECT_EQ(server.getMaxConnections(), 2);
+  EXPECT_EQ(server.getMaxResponseSize(), 3);
+  EXPECT_EQ(server.getUseClientTimeout(), false);
+  EXPECT_EQ(server.getTaskExpireTime().count(), 4);
+  EXPECT_EQ(server.getStreamExpireTime().count(), 5);
+  EXPECT_EQ(server.getQueueTimeout().count(), 6);
+  EXPECT_EQ((**server.getSocketQueueTimeout()).count(), 7);
+  EXPECT_EQ(server.getEgressMemoryLimit(), 8);
+  EXPECT_EQ(server.getEgressBufferBackpressureThreshold(), 9);
+  EXPECT_EQ(server.getIngressMemoryLimit(), 10);
+  EXPECT_EQ(server.getMinPayloadSizeToEnforceIngressMemoryLimit(), 11);
 }

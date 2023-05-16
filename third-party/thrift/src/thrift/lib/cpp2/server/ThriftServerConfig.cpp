@@ -35,8 +35,43 @@ ThriftServerConfig::ThriftServerConfig(
   if (auto& [value, isSet] = initialConfig.maxRequests_; isSet) {
     maxRequests_.setDefault(folly::observer::makeStaticObserver(value));
   }
+  if (auto& [value, isSet] = initialConfig.maxConnections_; isSet) {
+    maxConnections_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.maxResponseSize_; isSet) {
+    maxResponseSize_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.useClientTimeout_; isSet) {
+    useClientTimeout_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.taskExpireTimeout_; isSet) {
+    taskExpireTime_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.streamExpireTimeout_; isSet) {
+    streamExpireTime_.setDefault(folly::observer::makeStaticObserver(value));
+  }
   if (auto& [value, isSet] = initialConfig.queueTimeout_; isSet) {
     queueTimeout_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.socketQueueTimeout_; isSet) {
+    socketQueueTimeout_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.egressMemoryLimit_; isSet) {
+    egressMemoryLimit_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.egressBufferBackpressureThreshold_;
+      isSet) {
+    egressBufferBackpressureThreshold_.setDefault(
+        folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] = initialConfig.ingressMemoryLimit_; isSet) {
+    ingressMemoryLimit_.setDefault(folly::observer::makeStaticObserver(value));
+  }
+  if (auto& [value, isSet] =
+          initialConfig.minPayloadSizeToEnforceIngressMemoryLimit_;
+      isSet) {
+    minPayloadSizeToEnforceIngressMemoryLimit_.setDefault(
+        folly::observer::makeStaticObserver(value));
   }
 }
 

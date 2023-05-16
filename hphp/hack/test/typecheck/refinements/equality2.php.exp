@@ -1,0 +1,6 @@
+File "equality2.php", line 7, characters 15-16:
+Invalid argument (Typing[4110])
+  File "equality2.php", line 3, characters 20-22:
+  Expected `int`
+  File "equality2.php", line 5, characters 15-18:
+  But got `?int`

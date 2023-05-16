@@ -1,0 +1,12 @@
+File "equality1.php", line 10, characters 13-14:
+Invalid argument (Typing[4110])
+  File "equality1.php", line 3, characters 20-22:
+  Expected `int`
+  File "equality1.php", line 5, characters 15-17:
+  But got `num`
+File "equality1.php", line 11, characters 13-14:
+Invalid argument (Typing[4110])
+  File "equality1.php", line 3, characters 20-22:
+  Expected `int`
+  File "equality1.php", line 5, characters 23-30:
+  But got `arraykey`

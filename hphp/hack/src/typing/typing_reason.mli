@@ -117,6 +117,7 @@ type _ t_ =
   | Rpredicated : Pos.t * string -> locl_phase t_
   | Ris : Pos.t -> locl_phase t_
   | Ras : Pos.t -> locl_phase t_
+  | Requal : Pos.t -> locl_phase t_
   | Rvarray_or_darray_key : Pos_or_decl.t -> 'phase t_
   | Rvec_or_dict_key : Pos_or_decl.t -> 'phase t_
   | Rusing : Pos.t -> locl_phase t_

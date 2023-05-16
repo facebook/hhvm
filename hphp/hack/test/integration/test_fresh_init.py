@@ -162,11 +162,12 @@ class TestFreshInit(common_tests.CommonTests):
             f.write(
                 r"""<?hh
                 function takes_string(string $i): void {}
+                function id<T>(T $t): T { return $t; }
 
                 function foo(?string $s): ?string {
                   takes_string(\HH\FIXME\UNSAFE_CAST<?string, string>($s)); // Not redundant
                   \HH\FIXME\UNSAFE_CAST<mixed, ?string>($s); // Redundant
-                  if (\HH\FIXME\UNSAFE_CAST<mixed, ?string>($s) === 'test') { // Redundant
+                  if (\HH\FIXME\UNSAFE_CAST<mixed, ?string>(id($s)) === 'test') { // Redundant
                     print "hello";
                     return \HH\FIXME\UNSAFE_CAST<?string, string>($s); // Not redundant
                   } else {
@@ -190,11 +191,12 @@ class TestFreshInit(common_tests.CommonTests):
                 out,
                 r"""<?hh
                 function takes_string(string $i): void {}
+                function id<T>(T $t): T { return $t; }
 
                 function foo(?string $s): ?string {
                   takes_string(\HH\FIXME\UNSAFE_CAST<?string, string>($s)); // Not redundant
                   $s; // Redundant
-                  if ($s === 'test') { // Redundant
+                  if (id($s) === 'test') { // Redundant
                     print "hello";
                     return \HH\FIXME\UNSAFE_CAST<?string, string>($s); // Not redundant
                   } else {

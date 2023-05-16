@@ -74,6 +74,7 @@ impl<'a> Reason<'a> {
             | Rpredicated((p, _))
             | Ris(p)
             | Ras(p)
+            | Requal(p)
             | RvarrayOrDarrayKey(p)
             | RvecOrDictKey(p)
             | Rusing(p)

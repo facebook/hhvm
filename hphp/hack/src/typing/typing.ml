@@ -1936,6 +1936,25 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
     (set_local env locl_ivar refined_ty, Local_id.Set.singleton (snd locl_ivar))
   | None -> (env, lset)
 
+let refine_for_equality pos env te ty =
+  let (env, locl) =
+    make_a_local_of ~include_this:true env (Tast.to_nast_expr te)
+  in
+  match locl with
+  | Some locl_ivar ->
+    let (env, refined_ty) =
+      refine_and_simplify_intersection
+        ~hint_first:false
+        env
+        pos
+        (Reason.Requal pos)
+        (fst locl_ivar)
+        (fst3 te)
+        ty
+    in
+    (set_local env locl_ivar refined_ty, Local_id.Set.singleton (snd locl_ivar))
+  | None -> (env, Local_id.Set.empty)
+
 type legacy_arrays =
   | HackDictOrDArray
   | HackVecOrVArray
@@ -9734,6 +9753,17 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
         rhs = (_, _, Aast.Null);
       } ->
     let (env, lset) = condition_nullity ~nonnull:(not tparamet) env e in
+    (env, { lset; pkgs = SSet.empty })
+  | Aast.Binop
+      {
+        bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
+        lhs = (lhs_ty, _, _) as lhs;
+        rhs = (rhs_ty, _, _) as rhs;
+      }
+    when tparamet ->
+    let (env, lset_lhs) = refine_for_equality p env lhs rhs_ty in
+    let (env, lset_rhs) = refine_for_equality p env rhs lhs_ty in
+    let lset = Local_id.Set.union lset_lhs lset_rhs in
     (env, { lset; pkgs = SSet.empty })
   | Aast.Lvar _
   | Aast.Obj_get _

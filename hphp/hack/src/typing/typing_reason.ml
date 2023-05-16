@@ -119,6 +119,7 @@ type _ t_ =
   | Rpredicated : Pos.t * string -> locl_phase t_
   | Ris : Pos.t -> locl_phase t_
   | Ras : Pos.t -> locl_phase t_
+  | Requal : Pos.t -> locl_phase t_
   | Rvarray_or_darray_key : Pos_or_decl.t -> 'phase t_
   | Rvec_or_dict_key : Pos_or_decl.t -> 'phase t_
   | Rusing : Pos.t -> locl_phase t_
@@ -481,6 +482,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
   | Ris _ -> [(p, prefix ^ " from this `is` expression test")]
   | Ras _ -> [(p, prefix ^ " from this \"as\" assertion")]
+  | Requal _ -> [(p, prefix ^ " from this equality test")]
   | Rvarray_or_darray_key _ ->
     [
       ( p,
@@ -690,6 +692,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rpredicated (p, _)
   | Ris p
   | Ras p
+  | Requal p
   | Rusing p
   | Rdynamic_prop p
   | Rdynamic_call p
@@ -817,6 +820,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rpredicated _ -> "Rpredicated"
   | Ris _ -> "Ris"
   | Ras _ -> "Ras"
+  | Requal _ -> "Requal"
   | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
   | Rvec_or_dict_key _ -> "Rvec_or_dict_key"
   | Rusing _ -> "Rusing"

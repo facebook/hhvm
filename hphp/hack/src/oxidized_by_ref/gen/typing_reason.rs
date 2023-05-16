@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5ab7185c518c58b257550253a21125cd>>
+// @generated SignedSource<<c59b222ab92c6585073b55a856f3cd23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -286,6 +286,8 @@ pub enum T_<'a> {
     Ris(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Ras(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Requal(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rvarray_or_darray_key")]
     RvarrayOrDarrayKey(&'a pos_or_decl::PosOrDecl<'a>),

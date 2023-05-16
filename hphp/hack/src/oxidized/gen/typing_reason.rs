@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0316d651463cf84b594886696e44dd35>>
+// @generated SignedSource<<cd50ce77529d9827a81295443b403407>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -243,6 +243,7 @@ pub enum T_ {
     Rpredicated(pos::Pos, String),
     Ris(pos::Pos),
     Ras(pos::Pos),
+    Requal(pos::Pos),
     #[rust_to_ocaml(name = "Rvarray_or_darray_key")]
     RvarrayOrDarrayKey(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Rvec_or_dict_key")]

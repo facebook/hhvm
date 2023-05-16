@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a22085373c175ff45d75a962a7b9e913>>
+// @generated SignedSource<<8135d2dad7fab2c8755ab38de4c0c246>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1061,6 +1061,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rpredicated(ref __binding_0) => __binding_0.accept(v),
             T_::Ris(ref __binding_0) => __binding_0.accept(v),
             T_::Ras(ref __binding_0) => __binding_0.accept(v),
+            T_::Requal(ref __binding_0) => __binding_0.accept(v),
             T_::RvarrayOrDarrayKey(ref __binding_0) => __binding_0.accept(v),
             T_::RvecOrDictKey(ref __binding_0) => __binding_0.accept(v),
             T_::Rusing(ref __binding_0) => __binding_0.accept(v),

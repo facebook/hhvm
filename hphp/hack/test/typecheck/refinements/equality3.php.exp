@@ -1,0 +1,6 @@
+File "equality3.php", line 11, characters 18-19:
+Invalid argument (Typing[4110])
+  File "equality3.php", line 6, characters 23-28:
+  Expected `string`
+  File "equality3.php", line 9, characters 7-15:
+  But got `(<expr#1> as I & <expr#1> as J)` from this equality test

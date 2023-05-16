@@ -85,6 +85,7 @@ struct
     | Rpredicated (p, f) -> Rpredicated (pos p, f)
     | Ris p -> Ris (pos p)
     | Ras p -> Ras (pos p)
+    | Requal p -> Requal (pos p)
     | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos_or_decl p)
     | Rvec_or_dict_key p -> Rvec_or_dict_key (pos_or_decl p)
     | Rusing p -> Rusing (pos p)

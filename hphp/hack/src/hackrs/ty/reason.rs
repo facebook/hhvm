@@ -182,6 +182,7 @@ pub trait Reason:
                 OR::Rpredicated(&(pos, s)) => RI::Rpredicated(pos.into(), Symbol::new(s)),
                 OR::Ris(pos) => RI::Ris(pos.into()),
                 OR::Ras(pos) => RI::Ras(pos.into()),
+                OR::Requal(pos) => RI::Requal(pos.into()),
                 OR::RvarrayOrDarrayKey(pos) => RI::RvarrayOrDarrayKey(pos.into()),
                 OR::RvecOrDictKey(pos) => RI::RvecOrDictKey(pos.into()),
                 OR::Rusing(pos) => RI::Rusing(pos.into()),
@@ -352,6 +353,7 @@ pub enum ReasonImpl<R, P> {
     Rpredicated(P, Symbol),
     Ris(P),
     Ras(P),
+    Requal(P),
     RvarrayOrDarrayKey(P),
     RvecOrDictKey(P),
     Rusing(P),
@@ -557,6 +559,7 @@ impl<'a> ToOxidized<'a> for BReason {
             }
             RI::Ris(pos) => OR::Ris(pos.to_oxidized(arena)),
             RI::Ras(pos) => OR::Ras(pos.to_oxidized(arena)),
+            RI::Requal(pos) => OR::Requal(pos.to_oxidized(arena)),
             RI::RvarrayOrDarrayKey(pos) => OR::RvarrayOrDarrayKey(pos.to_oxidized(arena)),
             RI::RvecOrDictKey(pos) => OR::RvecOrDictKey(pos.to_oxidized(arena)),
             RI::Rusing(pos) => OR::Rusing(pos.to_oxidized(arena)),

@@ -1983,6 +1983,11 @@ void run_command_on_cli_server(const char* sock_path,
       }
     }
   }
+
+  // Send the return value (calling exit() will not run the guard)
+  guard.dismiss();
+  finish();
+
   hphp_process_exit();
   exit(ret);
 }

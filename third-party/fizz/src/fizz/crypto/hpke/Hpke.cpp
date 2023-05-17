@@ -157,5 +157,27 @@ std::unique_ptr<HpkeContext> setupWithDecap(
   return keySchedule(std::move(keyScheduleParams));
 }
 
+std::unique_ptr<folly::IOBuf> deserializePublicKey(
+    fizz::hpke::KEMId kemId,
+    const std::string& publicKey) {
+  switch (kemId) {
+    case fizz::hpke::KEMId::x25519:
+    case fizz::hpke::KEMId::x448: {
+      return folly::IOBuf::copyBuffer(folly::unhexlify(publicKey));
+    }
+    case fizz::hpke::KEMId::secp256r1:
+    case fizz::hpke::KEMId::secp384r1:
+    case fizz::hpke::KEMId::secp521r1: {
+      folly::ssl::BioUniquePtr bio(BIO_new(BIO_s_mem()));
+      BIO_write(bio.get(), publicKey.data(), publicKey.size());
+      folly::ssl::EvpPkeyUniquePtr pkey(
+          PEM_read_bio_PUBKEY(bio.get(), nullptr, nullptr, nullptr));
+      return fizz::detail::encodeECPublicKey(pkey);
+    }
+    default:
+      throw std::runtime_error("Unsupported KEM ID");
+  }
+}
+
 } // namespace hpke
 } // namespace fizz

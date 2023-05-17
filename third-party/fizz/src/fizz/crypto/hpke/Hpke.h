@@ -92,5 +92,17 @@ std::unique_ptr<HpkeContext> setupWithDecap(
     folly::Optional<PskInputs> pskInputs,
     SetupParam param);
 
+/**
+ * Deserialize a public key from a hex or DER encoded string.
+ * Note, Curve25519 based KEMs only support hex endoded strings.
+ * EC curves support DER encoded strings.
+ * @param kemId kem ID to deserialize
+ * @param publicKey hex or DER encoded string
+ * @return deserialized public key
+ **/
+std::unique_ptr<folly::IOBuf> deserializePublicKey(
+    fizz::hpke::KEMId kemId,
+    const std::string& publicKey);
+
 } // namespace hpke
 } // namespace fizz

@@ -38,5 +38,6 @@ class Hkdf {
   std::unique_ptr<folly::IOBuf> prefix_;
   std::unique_ptr<fizz::Hkdf> hkdf_;
 };
+
 } // namespace hpke
 } // namespace fizz

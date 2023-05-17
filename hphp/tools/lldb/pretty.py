@@ -146,29 +146,32 @@ def pretty_array_data(val_obj: lldb.SBValue) -> typing.Optional[str]:
     if val_obj.type.IsPointerType():
         return ''
 
-    array_kind = val_obj.target.FindFirstType("HPHP::ArrayData::ArrayKind")
-    array_kind_enums = array_kind.GetEnumMembers()
+    # array_kind = val_obj.target.FindFirstType("HPHP::ArrayData::ArrayKind")
+    # array_kind_enums = array_kind.GetEnumMembers()
     heap_obj = val_obj.children[0].children[0]  # HPHP::HeapObject
-    m_kind = heap_obj.GetChildMemberWithName("m_kind").Cast(array_kind)
+    m_kind = heap_obj.GetChildMemberWithName("m_kind")
 
     # TODO Try and just compare enums: left is lldb.SBValue, right is lldb.SBTypeEnumMember
-    if m_kind.unsigned != array_kind_enums['kVecKind'].unsigned:
-        return val_obj
-    # Just Vec kind right now
+    # if m_kind.unsigned != array_kind_enums['kVecKind'].unsigned:
+    #     return val_obj
 
     m_size = val_obj.GetChildMemberWithName("m_size").unsigned
     m_count = heap_obj.GetChildMemberWithName("m_count").unsigned
 
     # TODO show elements
+    elements = "{ (Showing elements not yet implemented) }"
 
-    return f"ArrayData[{m_kind.name}]: {m_size} element(s) refcount={m_count}"
+    return (
+        f"({val_obj.addr}) ArrayData[{m_kind.value}]: {m_size} element(s) refcount={m_count}"
+        + "\n\t" + elements
+    )
 
 
 @format("^HPHP::Array$", regex=True)
 def pp_Array(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     if val_obj.type.IsPointerType():
         return ''
-    val = utils.rawptr(utils.get(val_obj, "m_arr"))
+    val = utils.deref(utils.get(val_obj, "m_arr"))
     return pretty_array_data(val)
 
 

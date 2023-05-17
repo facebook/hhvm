@@ -152,9 +152,15 @@ void takeOptional(Optional<String> UNUSED v) { return; }
 void takeLowPtr(LowPtr<Class> UNUSED v) { return; }
 void takeLowStrPtr(LowStrPtr UNUSED v) { return; }
 void takeExtension(Extension UNUSED v) { return; }
+void takeArrayVec(Array UNUSED v) { return; }
+void takeArrayDict(Array UNUSED v) { return; }
+void takeArrayKeyset(Array UNUSED v) { return; }
 
 void buildOtherValues() {
   TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
+  Array vec = make_vec_array(1, 2, 3, 4);
+  Array dict = make_dict_array("key1", 1, "key2", 2.718, "key3", "Hello, world!");
+  Array keyset = make_keyset_array(1, 2, 3, 2, 3);
 
   takeStringData(StringData::MakeStatic("hello"));
   takeString(String("hello"));
@@ -162,12 +168,15 @@ void buildOtherValues() {
   takeStrNR(StrNR(StringData::MakeStatic("hello")));
   takeResource(Resource(req::make<DummyResource>()));
   takeObject(TestObject);
-  takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to its sole private member m_obj
+  takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to get its sole private member m_obj
   takeOptional(Optional<String>("hello"));
   takeOptional(Optional<String>());
   takeLowPtr(LowPtr(TestObject->getVMClass()));
   takeLowStrPtr(LowStrPtr(StringData::MakeStatic("hello")));
   takeExtension(Extension("test-extension", "0.5", "test-oncall"));
+  takeArrayVec(vec);
+  takeArrayDict(dict);
+  takeArrayKeyset(keyset);
 }
 
 } // namespace lldb_test

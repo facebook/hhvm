@@ -13,11 +13,6 @@ class PrettyPrinterTestCase(base.TestHHVMBinary):
         _, output = self.run_commands(["p *name"])
         self.assertEqual(output.strip(), "(const HPHP::StringData) C")
 
-    def test_pp_array_data(self):
-        self.run_until_breakpoint("checkReifiedGenericMismatchHelper<false>")
-        _, output = self.run_commands(["p *reified_generics"])
-        self.assertEqual(output.strip(), "(const HPHP::ArrayData) ArrayData[m_kind]: 2 element(s) refcount=3")
-
 class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
 
     def setUp(self):
@@ -150,3 +145,30 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             _, output = self.run_commands(["p v"])
             expected_output = r'\(HPHP::Extension\) test-extension \(version: 0.5, oncall: test-oncall\)'
             self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("HPHP::Array (Vec)"):
+            self.run_until_breakpoint("takeArrayVec")
+            _, output = self.run_commands(["p v"])
+            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Vec\]: 4 element\(s\) refcount=2'
+            expected_line2 = "{ (Showing elements not yet implemented) }"
+            actual_line1, actual_line2, _ = output.split("\n")
+            self.assertRegex(actual_line1.strip(), expected_line1)
+            self.assertEqual(actual_line2.strip(), expected_line2)
+
+        with self.subTest("HPHP::Array (Dict)"):
+            self.run_until_breakpoint("takeArrayDict")
+            _, output = self.run_commands(["p v"])
+            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Dict\]: 3 element\(s\) refcount=2'
+            expected_line2 = "{ (Showing elements not yet implemented) }"
+            actual_line1, actual_line2, _ = output.split("\n")
+            self.assertRegex(actual_line1.strip(), expected_line1)
+            self.assertEqual(actual_line2.strip(), expected_line2)
+
+        with self.subTest("HPHP::Array (Keyset)"):
+            self.run_until_breakpoint("takeArrayDict")
+            _, output = self.run_commands(["p v"])
+            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Dict\]: 3 element\(s\) refcount=2'
+            expected_line2 = "{ (Showing elements not yet implemented) }"
+            actual_line1, actual_line2, _ = output.split("\n")
+            self.assertRegex(actual_line1.strip(), expected_line1)
+            self.assertEqual(actual_line2.strip(), expected_line2)

@@ -363,24 +363,20 @@ Thrift supports three kinds of definitions: type definitions, interface definiti
 ```grammar
 definition ::=
   type_definition | interface_definition | constant_definition
+
+type_definition ::=
+    struct
+  | union
+  | exception
+  | enum
+  | typedef
+
+interface_definition ::=  service | interaction
 ```
 
 Definitions appear at the top level of a Thrift file. A common property of all definitions is that they introduce a name (an identifier) that can be used to denote the entity such as type.
 
 The name introduced by definitions can be used anywhere in the Thrift file (either before or after the location of the definition), and in other Thrift files that include this Thrift file.
-
-```grammar
-type_definition ::=
-    struct
-  | union
-  | exception
-  | enumeration
-  | typedef
-```
-
-```grammar
-interface_definition ::=  service | interaction
-```
 
 ### Structs
 
@@ -504,17 +500,21 @@ The generated code for exceptions can be different from that of structs. For exa
 It is possible to serialize from an exception and deserialize into a compatible struct, and vice versa.
 :::
 
-### Enumerations
+### Enums
 
+A enum declaration introduces a named enumeration type into your program and has the following form:
+
+```grammar
+enum ::=
+  [annotations]
+  "enum" identifier "{"
+    (enumerator [","])*
+  "}"
+
+enumerator ::=  identifier "=" integer
 ```
-enumeration ::=
-  "enum" identifier "{" ( Enumerator delimiter )* "}"
 
-Enumerator ::=
-  identifier "=" integer
-```
-
-Thrift supports C++ style enumeration types. The enumerators (the named constants) must be explicitly bound to an integer value. The identifier after the reserved word `enum` may be used to denote the enumeration type.
+The enumerators (the named constants) must be explicitly bound to an integer value. The identifier after the reserved word `enum` may be used to denote the enumeration type.
 
 ```thrift
 enum SearchKind {
@@ -526,11 +526,11 @@ enum SearchKind {
 ```
 
 :::note
-Because the default value for every enum is 0 (even if you do not define an enumerator for 0), it is recommended to include an `UNKNOWN` entry at 0 and use that value to indicate that the client or server didn't provide the value. The default constructor will initialize that value to `UNKNOWN` instead of some meaningful value.
+Because the default value for every enum is 0 (even if you do not define an enumerator for 0), it is recommended to include an `UNKNOWN` entry with the value 0 and use it to indicate that the client or server didn't provide the value. This way missing values will be represented as `UNKNOWN` instead of something meaningful that happens to be defined to zero in the IDL.
 :::
 
 :::caution
-Enums are treated like integer by Thrift, if you send a value which is not in the valid range, the receiver may not check or convert the value to the default (it will just have an out of range value) or it may throw an exception on access. This can happen when a new client is talking to an old server.
+Enums are treated like integers by Thrift, if you send a value which is not listed in the IDL, the receiver may not check or convert the value to the default (it will just have an out of range value) or it may throw an exception on access. This can happen when a new client is talking to an old server.
 :::
 
 :::caution
@@ -543,7 +543,7 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 typedef ::=  [annotations] "typedef" type identifier [";"]
 ```
 
-A typedef introduces a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
+A typedef introduces a name that denotes the type. It can be used to provide a simpler way to access complex types.
 
 ```thrift
 typedef map<string, string> StringMap

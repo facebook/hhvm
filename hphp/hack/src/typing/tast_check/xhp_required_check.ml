@@ -34,6 +34,7 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
   let tenv = Tast_env.tast_env_as_typing_env env in
+  let ty = Typing_utils.strip_dynamic tenv ty in
   match get_node ty with
   | Tunion tys ->
     (* Filter out dynamic, as we conservatively assume that anything dynamic

@@ -1428,6 +1428,8 @@ size_t HTTP2Codec::generateBody(folly::IOBufQueue& writeBuf,
             << " ingressGoawayAck_=" << ingressGoawayAck_;
     return 0;
   }
+  VLOG(4) << "generating DATA for stream=" << stream
+          << " size=" << (chain ? chain->computeChainDataLength() : 0);
   IOBufQueue queue(IOBufQueue::cacheChainLength());
   queue.append(std::move(chain));
   size_t maxFrameSize = maxSendFrameSize();

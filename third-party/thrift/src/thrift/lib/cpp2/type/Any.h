@@ -58,12 +58,12 @@ class AnyData : public detail::Wrap<AnyStruct> {
   const Protocol& protocol() const { return *data_.protocol(); }
   const folly::IOBuf& data() const { return *data_.data(); }
 
-  template <StandardProtocol protocol, typename Tag>
+  template <typename Tag, StandardProtocol protocol = StandardProtocol::Compact>
   static AnyData toAny(const native_type<Tag>&);
 
-  template <StandardProtocol protocol, typename T>
+  template <StandardProtocol protocol = StandardProtocol::Compact, typename T>
   static AnyData toAny(const T& v) {
-    return toAny<protocol, infer_tag<T>>(v);
+    return toAny<infer_tag<T>, protocol>(v);
   }
 
   template <typename Tag>
@@ -89,7 +89,7 @@ class AnyData : public detail::Wrap<AnyStruct> {
       const Type& want, const Type& actual);
 };
 
-template <StandardProtocol Protocol, typename Tag>
+template <typename Tag, StandardProtocol Protocol>
 AnyData AnyData::toAny(const native_type<Tag>& v) {
   static_assert(
       Protocol == StandardProtocol::Binary ||

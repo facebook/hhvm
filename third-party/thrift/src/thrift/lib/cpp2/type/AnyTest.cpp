@@ -97,10 +97,10 @@ TYPED_TEST(AnyTestFixture, ToAny) {
       !std::is_same_v<TypeParam, string_t> &&
       !std::is_same_v<TypeParam, binary_t>) {
     // Rely on infer_tag if TypeParam is not string_t or binary_t
-    any = AnyData::toAny<StandardProtocol::Compact>(value);
+    any = AnyData::toAny(value);
     std::as_const(any).get(v1);
   } else {
-    any = AnyData::toAny<StandardProtocol::Compact, TypeParam>(value);
+    any = AnyData::toAny<TypeParam>(value);
     std::as_const(any).get<TypeParam>(v1);
   }
   EXPECT_EQ(v1, value);
@@ -119,7 +119,7 @@ bool contains(std::string_view s, std::string_view pattern) {
 }
 
 TEST(AnyTest, GetTypeMismatch) {
-  auto any = AnyData::toAny<StandardProtocol::Compact>(tagToValue<i32_t>);
+  auto any = AnyData::toAny(tagToValue<i32_t>);
   int16_t i = 0;
   // We don't use EXPECT_THROW since we want to check the content
   try {
@@ -146,6 +146,26 @@ TEST(AnyTest, UnsupportedProtocol) {
   } catch (std::runtime_error& e) {
     EXPECT_TRUE(contains(e.what(), "Unsupported protocol"));
   }
+}
+
+TYPED_TEST(AnyTestFixture, BinaryProtocol) {
+  const auto& value = tagToValue<TypeParam>;
+  AnyData any;
+
+  if constexpr (
+      !std::is_same_v<TypeParam, string_t> &&
+      !std::is_same_v<TypeParam, binary_t>) {
+    // Rely on infer_tag if TypeParam is not string_t or binary_t
+    any = AnyData::toAny<StandardProtocol::Binary>(value);
+  } else {
+    any = AnyData::toAny<TypeParam, StandardProtocol::Binary>(value);
+  }
+  EXPECT_EQ(any.type(), Type{TypeParam{}});
+  EXPECT_EQ(any.protocol(), Protocol::get<StandardProtocol::Binary>());
+
+  native_type<TypeParam> v;
+  any.get<TypeParam>(v);
+  EXPECT_EQ(v, value);
 }
 } // namespace
 } // namespace apache::thrift::type

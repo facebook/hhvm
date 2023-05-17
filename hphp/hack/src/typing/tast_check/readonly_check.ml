@@ -143,6 +143,7 @@ let rec ty_expr env ((_, _, expr_) : Tast.expr) : rty =
 let is_value_collection_ty env ty =
   let mixed = MakeType.mixed Reason.none in
   let env = Tast_env.tast_env_as_typing_env env in
+  let ty = Typing_utils.strip_dynamic env ty in
   let hackarray = MakeType.any_array Reason.none mixed mixed in
   (* Subtype against an empty open shape (shape(...)) *)
   let shape = MakeType.open_shape Reason.none Typing_defs.TShapeMap.empty in

@@ -26,15 +26,6 @@ type candidate = {
   use_pos: Pos.t;
 }
 
-let source_slice ~source_text pos =
-  let offset =
-    let (first_line, first_col) = Pos.line_column pos in
-    Full_fidelity_source_text.position_to_offset
-      source_text
-      (first_line, first_col + 1)
-  in
-  Full_fidelity_source_text.sub source_text offset (Pos.length pos)
-
 let remove_leading_whitespace ~source_text pos : Pos.t =
   let rec calc_strip_amount offset =
     let ch = Full_fidelity_source_text.get source_text offset in
@@ -280,7 +271,9 @@ let command_or_action_of_candidate ~path ~source_text { name; def; use_pos } =
     Lsp.{ TextEdit.range; newText = "" }
   in
   let change_replace_use =
-    let text = source_slice ~source_text def.def_rhs_pos in
+    let text =
+      Full_fidelity_source_text.sub_of_pos source_text def.def_rhs_pos
+    in
     let text =
       if def.def_needs_grouping then
         Printf.sprintf "(%s)" text

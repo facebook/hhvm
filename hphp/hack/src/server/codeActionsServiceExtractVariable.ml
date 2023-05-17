@@ -17,15 +17,6 @@ type candidate = {
   placeholder_n: int;
 }
 
-let source_slice ~source_text ~start_pos ~length =
-  let offset =
-    let (first_line, first_col) = Pos.line_column start_pos in
-    Full_fidelity_source_text.position_to_offset
-      source_text
-      (first_line, first_col + 1)
-  in
-  Full_fidelity_source_text.sub source_text offset length
-
 (**
 We don't want to extract variables for lambdas like this: `() ==> 200`.
 The AST of such a lambda is indistinguishable from `() ==> { return 200; }`
@@ -35,7 +26,7 @@ let might_be_expression_lambda ~f_body:Aast.{ fb_ast } ~pos ~source_text =
   | [(stmt_pos, _)] ->
     let length = Pos.start_offset stmt_pos - Pos.start_offset pos in
     if length > 0 then
-      let src = source_slice ~source_text ~start_pos:pos ~length in
+      let src = Full_fidelity_source_text.sub_of_pos source_text pos ~length in
       not @@ String.is_substring ~substring:"{" src
     else
       (*  length can be negative to curlies in default params: `(($a = () ==> {}) ==> ...` *)
@@ -158,9 +149,7 @@ let top_visitor (selection : Pos.t) ~source_text =
 let command_or_action_of_candidate
     ~source_text ~path { stmt_pos; pos; placeholder_n } =
   let placeholder = Format.sprintf "%s%d" placeholder_base placeholder_n in
-  let exp_string =
-    source_slice ~source_text ~start_pos:pos ~length:(Pos.length pos)
-  in
+  let exp_string = Full_fidelity_source_text.sub_of_pos source_text pos in
   let change_expression =
     Lsp.TextEdit.
       {

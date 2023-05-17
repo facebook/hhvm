@@ -44,6 +44,9 @@ val line_text : t -> int -> string
 (** get a substring start at the ith char and continuing for length *)
 val sub : t -> int -> int -> string
 
+(** get a substring corresponding to a position. [length] defaults to the length of the position. *)
+val sub_of_pos : ?length:int -> t -> Pos.t -> string
+
 (** convert an absolute offset into a (line number, column) pair *)
 val offset_to_position : t -> int -> int * int
 

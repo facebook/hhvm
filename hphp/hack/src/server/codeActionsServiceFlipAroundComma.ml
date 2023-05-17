@@ -51,15 +51,6 @@ end = struct
       { insertion_index; positions; pos }
 end
 
-let source_slice ~source_text pos =
-  let offset =
-    let (first_line, first_col) = Pos.line_column pos in
-    Full_fidelity_source_text.position_to_offset
-      source_text
-      (first_line, first_col + 1)
-  in
-  Full_fidelity_source_text.sub source_text offset (Pos.length pos)
-
 let list_flip ~insertion_index l =
   let rec aux i = function
     | h1 :: h2 :: tail when i = insertion_index - 1 -> h2 :: h1 :: tail
@@ -198,7 +189,7 @@ let edit_of_candidate
     ~path ~source_text Candidate.{ insertion_index; positions; pos } =
   let text =
     positions
-    |> List.map ~f:(source_slice ~source_text)
+    |> List.map ~f:(Full_fidelity_source_text.sub_of_pos source_text)
     |> list_flip ~insertion_index
     |> String.concat ~sep:", "
   in

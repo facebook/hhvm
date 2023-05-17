@@ -120,3 +120,15 @@ let relative_pos pos_file source_text start_offset end_offset =
   let pos_start = offset_to_lnum_bol_offset start_offset in
   let pos_end = offset_to_lnum_bol_offset end_offset in
   Pos.make_from_lnum_bol_offset ~pos_file ~pos_start ~pos_end
+
+let sub_of_pos ?length source_text pos =
+  let offset =
+    let (first_line, first_col) = Pos.line_column pos in
+    position_to_offset source_text (first_line, first_col + 1)
+  in
+  let length =
+    match length with
+    | Some n -> n
+    | None -> Pos.length pos
+  in
+  sub source_text offset length

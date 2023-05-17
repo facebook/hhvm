@@ -151,6 +151,8 @@ class ThriftServerStopController final {
 class ThriftServer : public apache::thrift::BaseThriftServer,
                      public wangle::ServerBootstrap<Pipeline> {
  private:
+  void configureIOUring();
+
   //! SSL context
   std::optional<folly::observer::Observer<wangle::SSLContextConfig>>
       sslContextObserver_;
@@ -177,6 +179,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   bool allowCheckUnimplementedExtraInterfaces_ = true;
 
   bool preferIoUring_ = false;
+  bool useDefaultIoUringExecutor_ = false;
 
   std::weak_ptr<folly::ShutdownSocketSet> wShutdownSocketSet_;
 
@@ -643,6 +646,10 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setPreferIoUring(bool b) { preferIoUring_ = b; }
 
   bool preferIoUring() const { return preferIoUring_; }
+
+  void setUseDefaultIoUringExecutor(bool b) { useDefaultIoUringExecutor_ = b; }
+
+  bool useDefaultIoUringExecutor() const { return useDefaultIoUringExecutor_; }
 
   /**
    * Tells the thrift server to update ticket seeds with the contents of the

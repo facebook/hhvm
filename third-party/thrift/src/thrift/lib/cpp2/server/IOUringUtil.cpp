@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifdef __linux__
+#include <thrift/lib/cpp2/server/IOUringUtil.h>
+
+#ifdef HAS_IO_URING
 
 #include <folly/experimental/io/IoUringEventBaseLocal.h>
-#include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 namespace apache {
 namespace thrift {
@@ -63,9 +64,20 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getDefaultIOUringExecutor(
 
 bool validateExecutorSupportsIOUring(
     const std::shared_ptr<folly::IOThreadPoolExecutor>& executor) {
-  if (auto eventBase = executor->getEventBase()) {
-    return dynamic_cast<folly::IoUringBackend*>(eventBase->getBackend());
+  VLOG(1) << "checking to see if supports io_uring";
+  try {
+    if (auto eventBase = executor->getEventBase()) {
+      VLOG(1) << "checking found event base";
+      auto t = dynamic_cast<folly::IoUringBackend*>(eventBase->getBackend());
+      VLOG(1) << "event base supports io_uring " << t;
+      return t;
+    }
+  } catch (const std::exception& e) {
+    VLOG(1) << "error getting exector, configuring default: " << e.what();
+    return false;
   }
+
+  VLOG(1) << "doesn't support io_uring";
   return false;
 }
 

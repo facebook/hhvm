@@ -113,8 +113,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setInterface(std::move(handler));
   server->setPort(FLAGS_port);
   server->setPreferIoUring(FLAGS_io_uring);
-  server->setIOThreadPool(
-      getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
+  server->setUseDefaultIoUringExecutor(true);
   server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
 
   if (FLAGS_max_requests > -1) {

@@ -77,7 +77,9 @@ func (x *Fiery) String() string {
 }
 
 func (x *Fiery) Error() string {
-    return x.String()
+    type FieryAlias Fiery
+    valueAlias := (*FieryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -234,7 +236,9 @@ func (x *Serious) String() string {
 }
 
 func (x *Serious) Error() string {
-    return x.String()
+    type SeriousAlias Serious
+    valueAlias := (*SeriousAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -423,7 +427,9 @@ func (x *ComplexFieldNames) String() string {
 }
 
 func (x *ComplexFieldNames) Error() string {
-    return x.String()
+    type ComplexFieldNamesAlias ComplexFieldNames
+    valueAlias := (*ComplexFieldNamesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -625,7 +631,9 @@ func (x *CustomFieldNames) String() string {
 }
 
 func (x *CustomFieldNames) Error() string {
-    return x.String()
+    type CustomFieldNamesAlias CustomFieldNames
+    valueAlias := (*CustomFieldNamesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -827,7 +835,9 @@ func (x *ExceptionWithPrimitiveField) String() string {
 }
 
 func (x *ExceptionWithPrimitiveField) Error() string {
-    return x.String()
+    type ExceptionWithPrimitiveFieldAlias ExceptionWithPrimitiveField
+    valueAlias := (*ExceptionWithPrimitiveFieldAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1029,7 +1039,9 @@ func (x *ExceptionWithStructuredAnnotation) String() string {
 }
 
 func (x *ExceptionWithStructuredAnnotation) Error() string {
-    return x.String()
+    type ExceptionWithStructuredAnnotationAlias ExceptionWithStructuredAnnotation
+    valueAlias := (*ExceptionWithStructuredAnnotationAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1139,7 +1151,9 @@ func (x *Banal) String() string {
 }
 
 func (x *Banal) Error() string {
-    return x.String()
+    type BanalAlias Banal
+    valueAlias := (*BanalAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

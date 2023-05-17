@@ -560,7 +560,9 @@ func (x *Bang) String() string {
 }
 
 func (x *Bang) Error() string {
-    return x.String()
+    type BangAlias Bang
+    valueAlias := (*BangAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

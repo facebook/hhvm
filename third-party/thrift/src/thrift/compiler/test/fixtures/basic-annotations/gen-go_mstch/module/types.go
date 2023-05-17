@@ -348,7 +348,9 @@ func (x *MyException) String() string {
 }
 
 func (x *MyException) Error() string {
-    return x.String()
+    type MyExceptionAlias MyException
+    valueAlias := (*MyExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

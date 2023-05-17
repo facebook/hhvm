@@ -6557,7 +6557,9 @@ func (x *TerseException) String() string {
 }
 
 func (x *TerseException) Error() string {
-    return x.String()
+    type TerseExceptionAlias TerseException
+    valueAlias := (*TerseExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

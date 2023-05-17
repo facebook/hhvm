@@ -75,7 +75,9 @@ func (x *CustomException) String() string {
 }
 
 func (x *CustomException) Error() string {
-    return x.String()
+    type CustomExceptionAlias CustomException
+    valueAlias := (*CustomExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

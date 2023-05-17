@@ -78,9 +78,15 @@ func (x *{{struct:go_name}}) String() string {
 
   Error method.
 
+  Note: 'fmt' package calls Error() method when formatting objects which
+  implement error interface. This will result in infinite recursion and
+  stack overflow unless type aliasing is used (as done below).
+
 }}{{#struct:exception?}}
 func (x *{{struct:go_name}}) Error() string {
-    return x.String()
+    type {{struct:go_name}}Alias {{struct:go_name}}
+    valueAlias := (*{{struct:go_name}}Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 {{/struct:exception?}}{{!

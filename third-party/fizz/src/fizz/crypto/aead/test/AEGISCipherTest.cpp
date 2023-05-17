@@ -6,6 +6,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/fizz-config.h>
+
 #include <folly/portability/GTest.h>
 
 #include <fizz/crypto/aead/AEGISCipher.h>
@@ -20,6 +22,7 @@
 
 using namespace folly;
 
+#if FIZZ_HAS_AEGIS
 namespace fizz {
 namespace test {
 
@@ -119,3 +122,6 @@ INSTANTIATE_TEST_SUITE_P(
             false}));
 } // namespace test
 } // namespace fizz
+#else
+TEST(AegisCipherTest, AegisNotSupported) {}
+#endif

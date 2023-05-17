@@ -5,8 +5,11 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
 #pragma once
+
+#include <fizz/fizz-config.h>
+
+#if FIZZ_HAS_AEGIS
 
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
@@ -16,13 +19,11 @@
 #include <folly/String.h>
 #include <folly/lang/Bits.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
-#include <sodium.h>
-#include <sodium/crypto_aead_aegis256.h>
 
 namespace fizz {
 class AEGISCipher : public Aead {
  public:
-  static constexpr size_t kMaxIVLength = crypto_aead_aegis256_NPUBBYTES;
+  static constexpr size_t kMaxIVLength = 32;
 
   static std::unique_ptr<Aead> makeCipher();
 
@@ -89,3 +90,5 @@ class AEGISCipher : public Aead {
   size_t tagLength_;
 };
 } // namespace fizz
+
+#endif

@@ -157,6 +157,7 @@ set(FIZZ_SOURCES
   crypto/exchange/X25519.cpp
   crypto/aead/OpenSSLEVPCipher.cpp
   crypto/aead/IOBufUtil.cpp
+  crypto/aead/AEGISCipher.cpp
   crypto/signature/Signature.cpp
   crypto/Hkdf.cpp
   crypto/KeyDerivation.cpp
@@ -400,6 +401,7 @@ if(BUILD_TESTS)
   add_gtest(client/test/ClientProtocolTest.cpp ClientProtocolTest)
   add_gtest(client/test/FizzClientTest.cpp FizzClientTest)
   add_gtest(crypto/aead/test/OpenSSLEVPCipherTest.cpp OpenSSLEVPCipherTest)
+  add_gtest(crypto/aead/test/AEGISCipherTest.cpp AEGISCipherTest)
   add_gtest(crypto/aead/test/IOBufUtilTest.cpp IOBufUtilTest)
   add_gtest(crypto/exchange/test/X25519KeyExchangeTest.cpp X25519KeyExchangeTest)
   add_gtest(crypto/exchange/test/ECKeyExchangeTest.cpp ECKeyExchangeTest)

@@ -7,12 +7,20 @@
  */
 
 #include <fizz/crypto/aead/AEGISCipher.h>
+
+#if FIZZ_HAS_AEGIS
+
 #include <folly/lang/CheckedMath.h>
 #include <sodium.h>
 #include <sodium/crypto_aead_aegis128l.h>
+#include <sodium/crypto_aead_aegis256.h>
 #include <functional>
 
 namespace fizz {
+
+static_assert(
+    fizz::AEGISCipher::kMaxIVLength == crypto_aead_aegis256_NPUBBYTES,
+    "Invalid AEGISCipher::kMaxIVLength");
 
 namespace {
 
@@ -213,3 +221,5 @@ std::array<uint8_t, AEGISCipher::kMaxIVLength> AEGISCipher::createIV(
   return iv;
 }
 } // namespace fizz
+
+#endif

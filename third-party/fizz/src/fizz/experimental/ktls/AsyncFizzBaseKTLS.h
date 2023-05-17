@@ -143,8 +143,6 @@ tryConvertKTLS(FizzSocket& fizzSock) {
   auto rstate = (*state.readRecordLayer()).getRecordLayerState();
   auto wstate = (*state.writeRecordLayer()).getRecordLayerState();
 
-  auto evb = fizzSock.getEventBase();
-
   auto rx = KTLSDirectionalCryptoParams<TrafficDirection::Receive>(
       KTLSCryptoParams::fromRecordState(ciphersuite, rstate));
   auto tx = KTLSDirectionalCryptoParams<TrafficDirection::Transmit>(
@@ -165,14 +163,9 @@ tryConvertKTLS(FizzSocket& fizzSock) {
   auto readCb = fizzSock.getReadCallback();
   fizzSock.setReadCB(nullptr);
 
-  (void)sock->detachNetworkSocket();
   AsyncKTLSSocket::UniquePtr ret;
   ret.reset(new AsyncKTLSSocket(
-      evb,
-      result.value(),
-      std::move(callbackImpl),
-      std::move(selfCert),
-      std::move(peerCert)));
+      sock, std::move(callbackImpl), std::move(selfCert), std::move(peerCert)));
   ret->setReadCB(readCb);
   return ret;
 #else

@@ -197,10 +197,9 @@ class KTLSReadTest : public KTLSTest {
         clientToServer.toKTLSParams<fizz::TrafficDirection::Receive>(),
         serverToClient.toKTLSParams<fizz::TrafficDirection::Transmit>());
     ASSERT_TRUE(ktlsFDResult.hasValue());
-    serverSocket->detachNetworkSocket();
 
     serverConn_.reset(new fizz::AsyncKTLSSocket(
-        &evb_, ktlsFDResult.value(), std::move(tlsCb), nullptr, nullptr));
+        serverSocket.get(), std::move(tlsCb), nullptr, nullptr));
 
     clientWrite_ = clientToServer.write();
     clientRead_ = serverToClient.read();
@@ -343,15 +342,9 @@ TEST_F(KTLSReadTest, MultipleKTLSError) {
 // message if we don't have a tls callback installed, that we will get
 // a readErr.
 TEST_F(KTLSReadTest, NoTLSCallbackCausesReadErrOnHandshake) {
-  auto serverfd = serverConn_->detachNetworkSocket();
-
   fizz::AsyncKTLSSocket::UniquePtr conn;
-  conn.reset(new fizz::AsyncKTLSSocket(
-      &evb_,
-      fizz::KTLSNetworkSocket::unsafeFromExistingKTLSSocket(serverfd),
-      nullptr,
-      nullptr,
-      nullptr));
+  conn.reset(
+      new fizz::AsyncKTLSSocket(serverConn_.get(), nullptr, nullptr, nullptr));
 
   // Client writes a NewSessionTicket to server.
   {

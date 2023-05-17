@@ -91,22 +91,20 @@ class AsyncKTLSSocket final : public folly::AsyncSocket {
    *    AsyncKTLSSocket
    *  * You have established a ktls 1.3 connection out of band
    *
-   * @param evb         The eventbase that the AsyncKTLSSocket will initially
-   *                    be attached to.
-   * @param fd          The kTLS enabled file descriptor.
-   * @param tlsCallback An instance of `TLSCallback` which will be used to
-   *                    handle non-application data events.
-   * @param selfCert    The certificate used to authenticate *to* the peer.
-   * @param peerCert    The certificate that the *peer* presented and
+   * @param oldAsyncSocket The AsyncSocket, with kTLS enabled, from which we'll
+   *                       steal the file descriptor and EventBase.
+   * @param tlsCallback    An instance of `TLSCallback` which will be used to
+   *                       handle non-application data events.
+   * @param selfCert       The certificate used to authenticate *to* the peer.
+   * @param peerCert       The certificate that the *peer* presented and
    *                    *we* authenticated.
    */
   AsyncKTLSSocket(
-      folly::EventBase* evb,
-      KTLSNetworkSocket fd,
+      folly::AsyncSocket* oldAsyncSocket,
       std::unique_ptr<TLSCallback> tlsCallback,
       std::shared_ptr<const Cert> selfCert,
       std::shared_ptr<const Cert> peerCert)
-      : AsyncSocket(evb, fd),
+      : AsyncSocket(oldAsyncSocket),
         tlsCallback_(std::move(tlsCallback)),
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}

@@ -10,7 +10,7 @@
  */
 
 function test(): void {
-  $v = Vector {};
+  $v = Vector<nothing> {};
   $f = $v[0];
   $f = function($y) use ($f) {
     return $f($y);

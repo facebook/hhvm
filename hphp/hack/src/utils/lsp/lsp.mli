@@ -7,26 +7,61 @@
  *
  *)
 
+(**
+ * This file is an OCaml representation of the Language Server Protocol
+ * https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+ * based on the current v3.
+ *
+ * Changes to make it more natural in OCaml:
+ * - We don't represent the common base types of Requests/Errors/Notifications
+ *   because base types don't naturally mix with abstract data types, and
+ *   because code for these things is done more naturally at the JSON layer
+ * - We avoid option types where we can. The idea is to follow the internet
+ *   "robustness" rule of being liberal in what we accept, conservative in
+ *   what we emit: if we're parsing a message and it lacks a field, and if
+ *   the spec tells us how to interpret absence, then we do that interpretation
+ *   at the JSON->LSP parsing level (so long as the interpretation is lossless).
+ *   On the emitting side, we might as well emit all fields.
+ * - For every request, like Initialize or workspace/Symbol, we've invented
+ *   "Initialize.response = (Initialize.result, Initialize.error) Result"
+ *   or "Symbol.response = (Symbol.result, Error.error) Result" to show
+ *   the two possible return types from this request. Note that each different
+ *   request can have its own custom error type, although most don't.
+ * - Most datatypes go in modules since there are so many name-clashes in
+ *   the protocol and OCaml doesn't like name-clashes. Only exceptions are
+ *   the really primitive types like location and documentUri.
+ *   The few places where we still had to rename fields to avoid OCaml name
+ *   clashes I've noted in the comments with the word "wire" to indicate the
+ *   over-the-wire form of the name.
+ * - Names have been translated from jsonConvention into ocaml convention
+ *   only where necessary, e.g. because ocaml uses lowercase for types.
+ * - The spec has space for extra fields like "experimental". It obviously
+ *   doesn't make sense to encode them in a type system. I've omitted them
+ *   entirely.
+*)
+
 type lsp_id =
   | NumberId of int
   | StringId of string
 
-(* Note: this datatype provides no invariants that the string is well-formed. *)
+(** Note: this datatype provides no invariants that the string is well-formed. *)
 type documentUri = DocumentUri of string [@@deriving eq]
 
 val uri_of_string : string -> documentUri
 
 val string_of_uri : documentUri -> string
 
+(** A position is between two characters like an 'insert' cursor in a editor *)
 type position = {
-  line: int;
-  character: int;
+  line: int;  (** line position in a document [zero-based] *)
+  character: int;  (** character offset on a line in a document [zero-based] *)
 }
 [@@deriving eq]
 
+(** A range is comparable to a selection in an editor *)
 type range = {
-  start: position;
-  end_: position;
+  start: position;  (** the range's start position *)
+  end_: position;  (** the range's end position [exclusive] *)
 }
 [@@deriving eq]
 
@@ -36,6 +71,7 @@ type textDocumentSaveReason =
   | FocusOut [@value 3]
 [@@deriving enum]
 
+(** Represents a location inside a resource, such as a line inside a text file *)
 module Location : sig
   type t = {
     uri: documentUri;
@@ -44,6 +80,8 @@ module Location : sig
   [@@deriving eq]
 end
 
+(** Represents a location inside a resource which also wants to display a
+   friendly name to the user. *)
 module DefinitionLocation : sig
   type t = {
     location: Location.t;
@@ -51,32 +89,43 @@ module DefinitionLocation : sig
   }
 end
 
+(** markedString can be used to render human readable text. It is either a
+ * markdown string or a code-block that provides a language and a code snippet.
+ * Note that markdown strings will be sanitized by the client - including
+ * escaping html *)
 type markedString =
   | MarkedString of string
-  | MarkedCode of string * string
+  | MarkedCode of string * string  (** lang, value *)
 
+(* Represents a reference to a command. Provides a title which will be used to
+ * represent a command in the UI. Commands are identitifed using a string
+ * identifier and the protocol currently doesn't specify a set of well known
+ * commands. So executing a command requires some tool extension code. *)
 module Command : sig
   type t = {
-    (* title of the command, like `save` *)
-    title: string;
-    (* the identifier of the actual command handler *)
-    command: string;
-    (* wire: it can be omitted *)
-    arguments: Hh_json.json list;
+    title: string;  (** title of the command, like `save` *)
+    command: string;  (** the identifier of the actual command handler *)
+    arguments: Hh_json.json list;  (** wire: it can be omitted *)
   }
 end
 
+(** A textual edit applicable to a text document. If n textEdits are applied
+   to a text document all text edits describe changes to the initial document
+   version. Execution wise text edits should applied from the bottom to the
+   top of the text document. Overlapping text edits are not supported. *)
 module TextEdit : sig
   type t = {
-    range: range;
-    newText: string;
+    range: range;  (** to insert text, use a range where start = end *)
+    newText: string;  (** for delete operations, use an empty string *)
   }
 end
 
+(** Text documents are identified using a URI. *)
 module TextDocumentIdentifier : sig
   type t = { uri: documentUri }
 end
 
+(** An identifier to denote a specific version of a text document. *)
 module VersionedTextDocumentIdentifier : sig
   type t = {
     uri: documentUri;
@@ -84,6 +133,9 @@ module VersionedTextDocumentIdentifier : sig
   }
 end
 
+(** Describes textual changes on a single text document. The text document is
+   referred to as a VersionedTextDocumentIdentifier to allow clients to check
+   the text document version before an edit is applied. *)
 module TextDocumentEdit : sig
   type t = {
     textDocument: VersionedTextDocumentIdentifier.t;
@@ -91,12 +143,17 @@ module TextDocumentEdit : sig
   }
 end
 
+(** A workspace edit represents changes to many resources managed in the
+   workspace. A workspace edit consists of a mapping from a URI to an
+   array of TextEdits to be applied to the document with that URI. *)
 module WorkspaceEdit : sig
   type t = {
     changes: TextEdit.t list SMap.t; (* holds changes to existing docs *)
   }
 end
 
+(** An item to transfer a text document from the client to the server. The
+   version number strictly increases after each change, including undo/redo. *)
 module TextDocumentItem : sig
   type t = {
     uri: documentUri;
@@ -106,6 +163,13 @@ module TextDocumentItem : sig
   }
 end
 
+(**
+ * A code lens represents a command that should be shown along with
+ * source text, like the number of references, a way to run tests, etc.
+ *
+ * A code lens is _unresolved_ when no command is associated to it. For performance
+ * reasons the creation of a code lens and resolving should be done in two stages.
+ *)
 module CodeLens : sig
   type t = {
     range: range;
@@ -114,6 +178,8 @@ module CodeLens : sig
   }
 end
 
+(** A parameter literal used in requests to pass a text document and a position
+   inside that document. *)
 module TextDocumentPositionParams : sig
   type t = {
     textDocument: TextDocumentIdentifier.t;
@@ -121,19 +187,27 @@ module TextDocumentPositionParams : sig
   }
 end
 
+(** A document filter denotes a document through properties like language,
+   schema or pattern. E.g. language:"typescript",scheme:"file"
+   or language:"json",pattern:"**/package.json" *)
 module DocumentFilter : sig
   type t = {
-    language: string option;
-    scheme: string option;
-    pattern: string option;
+    language: string option;  (** a language id, like "typescript" *)
+    scheme: string option;  (** a uri scheme, like "file" or "untitled" *)
+    pattern: string option;  (** a glob pattern, like "*.{ts,js}" *)
   }
 end
 
+(** A document selector is the combination of one or many document filters. *)
 module DocumentSelector : sig
   type t = DocumentFilter.t list
 end
 
+(** Represents information about programming constructs like variables etc. *)
 module SymbolInformation : sig
+  (** These numbers should match
+   * https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#symbolKind
+   *)
   type symbolKind =
     | File [@value 1]
     | Module [@value 2]
@@ -166,11 +240,12 @@ module SymbolInformation : sig
   type t = {
     name: string;
     kind: symbolKind;
-    location: Location.t;
-    containerName: string option;
+    location: Location.t;  (** the span of the symbol including its contents *)
+    containerName: string option;  (** the symbol containing this symbol *)
   }
 end
 
+(** Represents an item in the Call Hieararchy *)
 module CallHierarchyItem : sig
   type t = {
     name: string;
@@ -182,10 +257,12 @@ module CallHierarchyItem : sig
   }
 end
 
+(** Represents a parameter for a CallHierarchyIncomingCallsRequest or CallHierarchyOutgoingCallsRequest *)
 module CallHierarchyCallsRequestParam : sig
   type t = { item: CallHierarchyItem.t }
 end
 
+(** For showing messages (not diagnostics) in the user interface. *)
 module MessageType : sig
   type t =
     | ErrorMessage [@value 1]
@@ -195,59 +272,83 @@ module MessageType : sig
   [@@deriving eq, enum]
 end
 
+(** Cancellation notification, method="$/cancelRequest" *)
 module CancelRequest : sig
   type params = cancelParams
 
-  and cancelParams = { id: lsp_id }
+  and cancelParams = { id: lsp_id  (** the request id to cancel *) }
 end
 
+(** SetTraceNotification, method="$/setTraceNotification" *)
 module SetTraceNotification : sig
   type params =
     | Verbose
     | Off
 end
 
+(**  The kind of a code action.
+  *  Kinds are a hierarchical list of identifiers separated by `.`, e.g.
+  * `"refactor.extract.function"`.
+  * The set of kinds is open and client needs to announce the kinds it supports
+  * to the server during initialization.
+  * Module CodeAction below also references this module as Kind.
+  *)
 module CodeActionKind : sig
   type t = string * string list
 
+  (** is x of kind k? *)
   val is_kind : t -> t -> bool
 
+  (** does `ks` contain kind `k` *)
   val contains_kind : t -> t list -> bool
 
+  (** does an optional list of kinds `ks` contain kind `k` *)
   val contains_kind_opt : default:bool -> t -> t list option -> bool
 
+  (** Create a kind from a string that follows the spec *)
   val kind_of_string : string -> t
 
+  (** Create the equivalent string that the spec would have required *)
   val string_of_kind : t -> string
 
+  (** Create a new sub-kind of an existing kind *)
   val sub_kind : t -> string -> t
 
+  (** A constant defined by the spec *)
   val quickfix : t
 
+  (** A constant defined by the spec *)
   val refactor : t
 
+  (** Document-wide code actions *)
   val source : t
 end
 
+(** Initialize request, method="initialize" *)
 module Initialize : sig
   type textDocumentSyncKind =
-    | NoSync [@value 0]
+    | NoSync [@value 0]  (** docs should not be synced at all. Wire "None" *)
     | FullSync [@value 1]
+        (** synced by always sending full content. Wire "Full" *)
     | IncrementalSync [@value 2]
   [@@deriving enum]
 
   type params = {
-    processId: int option;
-    rootPath: string option;
-    rootUri: documentUri option;
+    processId: int option;  (** pid of parent process *)
+    rootPath: string option;  (** deprecated *)
+    rootUri: documentUri option;  (** the root URI of the workspace *)
     initializationOptions: initializationOptions;
-    client_capabilities: client_capabilities;
-    trace: trace;
+    client_capabilities: client_capabilities;  (** "capabilities" over wire *)
+    trace: trace;  (** the initial trace setting, default="off" *)
   }
 
-  and result = { server_capabilities: server_capabilities }
+  and result = {
+    server_capabilities: server_capabilities;  (** "capabilities" over wire *)
+  }
 
-  and errorData = { retry: bool }
+  and errorData = {
+    retry: bool;  (** should client retry the initialize request *)
+  }
 
   and trace =
     | Off
@@ -259,37 +360,43 @@ module Initialize : sig
   and initializationOptions = {
     namingTableSavedStatePath: string option;
         (** used for test scenarios where we pass a naming-table sqlite file,
-        rather than leaving clientIdeDaemon to find and download one itself. *)
+    rather than leaving clientIdeDaemon to find and download one itself. *)
     namingTableSavedStateTestDelay: float;
         (** used for test scenarios where we've passed
-        a naming-sqlite file and so clientIdeDaemon completes instantly, but we still want
-        a little bit of a delay before it reports readiness so as to exercise race conditions.
-        This is the delay in seconds. *)
+    a naming-sqlite file and so clientIdeDaemon completes instantly, but we still want
+    a little bit of a delay before it reports readiness so as to exercise race conditions.
+    This is the delay in seconds. *)
     delayUntilDoneInit: bool;
         (** used for test scenarios where we want clientLsp to delay receiving any
-        further LSP requests until clientIdeDaemon has done its init. *)
+    further LSP requests until clientIdeDaemon has done its init. *)
   }
 
   and client_capabilities = {
     workspace: workspaceClientCapabilities;
     textDocument: textDocumentClientCapabilities;
     window: windowClientCapabilities;
-    telemetry: telemetryClientCapabilities;
+    telemetry: telemetryClientCapabilities;  (** omitted: experimental *)
   }
 
   and workspaceClientCapabilities = {
-    applyEdit: bool;
+    applyEdit: bool;  (** client supports appling batch edits *)
     workspaceEdit: workspaceEdit;
     didChangeWatchedFiles: dynamicRegistration;
+        (** omitted: other dynamic-registration fields *)
   }
 
-  and dynamicRegistration = { dynamicRegistration: bool }
+  and dynamicRegistration = {
+    dynamicRegistration: bool;
+        (** client supports dynamic registration for this capability *)
+  }
 
-  and workspaceEdit = { documentChanges: bool }
+  and workspaceEdit = {
+    documentChanges: bool;  (** client supports versioned doc changes *)
+  }
 
   and textDocumentClientCapabilities = {
     synchronization: synchronization;
-    completion: completion;
+    completion: completion;  (** textDocument/completion *)
     codeAction: codeAction;
     definition: definition;
     typeDefinition: typeDefinition;
@@ -297,22 +404,37 @@ module Initialize : sig
     implementation: implementation;
   }
 
+  (** synchronization capabilities say what messages the client is capable
+   * of sending, should be be so asked by the server.
+   * We use the "can_" prefix for OCaml naming reasons; it's absent in LSP *)
   and synchronization = {
-    can_willSave: bool;
-    can_willSaveWaitUntil: bool;
-    can_didSave: bool;
+    can_willSave: bool;  (** client can send textDocument/willSave *)
+    can_willSaveWaitUntil: bool;  (** textDoc.../willSaveWaitUntil *)
+    can_didSave: bool;  (** textDocument/didSave *)
   }
 
   and completion = { completionItem: completionItem }
 
-  and completionItem = { snippetSupport: bool }
+  and completionItem = {
+    snippetSupport: bool;  (** client can do snippets as insert text *)
+  }
 
   and codeAction = {
     codeAction_dynamicRegistration: bool;
+        (** wire: dynamicRegistraction
+     Whether code action supports dynamic registration. *)
     codeActionLiteralSupport: codeActionliteralSupport option;
+        (** The client support code action literals as a valid
+     * response of the `textDocument/codeAction` request. *)
   }
 
-  and codeActionliteralSupport = { codeAction_valueSet: CodeActionKind.t list }
+  (** The code action kind values the client supports. When this
+     * property exists the client also guarantees that it will
+     * handle values outside its set gracefully and falls back
+     * to a default value when unknown. *)
+  and codeActionliteralSupport = {
+    codeAction_valueSet: CodeActionKind.t list;  (** wire: valueSet *)
+  }
 
   and definition = { definitionLinkSupport: bool }
 
@@ -322,12 +444,19 @@ module Initialize : sig
 
   and implementation = { implementationLinkSupport: bool }
 
-  and windowClientCapabilities = { status: bool }
+  and windowClientCapabilities = {
+    status: bool;
+        (** Nuclide-specific: client supports window/showStatusRequest *)
+  }
 
-  and telemetryClientCapabilities = { connectionStatus: bool }
+  and telemetryClientCapabilities = {
+    connectionStatus: bool;
+        (** Nuclide-specific: client supports telemetry/connectionStatus *)
+  }
 
+  (** What capabilities the server provides *)
   and server_capabilities = {
-    textDocumentSync: textDocumentSyncOptions;
+    textDocumentSync: textDocumentSyncOptions;  (** how to sync *)
     hoverProvider: bool;
     completionProvider: completionOptions option;
     signatureHelpProvider: signatureHelpOptions option;
@@ -336,8 +465,8 @@ module Initialize : sig
     referencesProvider: bool;
     callHierarchyProvider: bool;
     documentHighlightProvider: bool;
-    documentSymbolProvider: bool;
-    workspaceSymbolProvider: bool;
+    documentSymbolProvider: bool;  (** ie. document outline *)
+    workspaceSymbolProvider: bool;  (** ie. find-symbol-in-project *)
     codeActionProvider: bool;
     codeLensProvider: codeLensOptions option;
     documentFormattingProvider: bool;
@@ -351,34 +480,49 @@ module Initialize : sig
   }
 
   and completionOptions = {
-    resolveProvider: bool;
-    completion_triggerCharacters: string list;
+    resolveProvider: bool;  (** server resolves extra info on demand *)
+    completion_triggerCharacters: string list;  (** wire "triggerCharacters" *)
   }
 
-  and signatureHelpOptions = { sighelp_triggerCharacters: string list }
+  and signatureHelpOptions = {
+    sighelp_triggerCharacters: string list;  (** wire "triggerCharacters" *)
+  }
 
-  and codeLensOptions = { codelens_resolveProvider: bool }
+  and codeLensOptions = {
+    codelens_resolveProvider: bool;  (** wire "resolveProvider" *)
+  }
 
   and documentOnTypeFormattingOptions = {
     firstTriggerCharacter: string;
-    moreTriggerCharacter: string list;
+    moreTriggerCharacter: string list;  (** e.g. "}" *)
   }
 
-  and documentLinkOptions = { doclink_resolveProvider: bool }
+  and documentLinkOptions = {
+    doclink_resolveProvider: bool;  (** wire "resolveProvider" *)
+  }
 
-  and executeCommandOptions = { commands: string list }
+  and executeCommandOptions = {
+    commands: string list;  (** the commands to be executed on the server *)
+  }
 
+  (** text document sync options say what messages the server requests the
+   * client to send. We use the "want_" prefix for OCaml naming reasons;
+   * this prefix is absent in LSP. *)
   and textDocumentSyncOptions = {
-    want_openClose: bool;
+    want_openClose: bool;  (** textDocument/didOpen+didClose *)
     want_change: textDocumentSyncKind;
-    want_willSave: bool;
-    want_willSaveWaitUntil: bool;
-    want_didSave: saveOptions option;
+    want_willSave: bool;  (** textDocument/willSave *)
+    want_willSaveWaitUntil: bool;  (** textDoc.../willSaveWaitUntil *)
+    want_didSave: saveOptions option;  (** textDocument/didSave *)
   }
 
-  and saveOptions = { includeText: bool }
+  (** full only on open. Wire "Incremental" *)
+  and saveOptions = {
+    includeText: bool;  (** the client should include content on save *)
+  }
 end
 
+(** Rage request, method="telemetry/rage" *)
 module RageFB : sig
   type result = rageItem list
 
@@ -388,23 +532,26 @@ module RageFB : sig
   }
 end
 
+(** Code Lens resolve request, method="codeLens/resolve" *)
 module CodeLensResolve : sig
   type params = CodeLens.t
 
   and result = CodeLens.t
 end
 
+(** Hover request, method="textDocument/hover" *)
 module Hover : sig
   type params = TextDocumentPositionParams.t
 
   and result = hoverResult option
 
   and hoverResult = {
-    contents: markedString list;
+    contents: markedString list;  (** wire: either a single one or an array *)
     range: range option;
   }
 end
 
+(** PublishDiagnostics notification, method="textDocument/PublishDiagnostics" *)
 module PublishDiagnostics : sig
   type diagnosticCode =
     | IntCode of int
@@ -429,46 +576,55 @@ module PublishDiagnostics : sig
   }
 
   and diagnostic = {
-    range: range;
-    severity: diagnosticSeverity option;
+    range: range;  (** the range at which the message applies *)
+    severity: diagnosticSeverity option;  (** if omitted, client decides *)
     code: diagnosticCode;
-    source: string option;
-    message: string;
+    source: string option;  (** human-readable string, eg. typescript/lint *)
+    message: string;  (** the diagnostic's message *)
     relatedInformation: diagnosticRelatedInformation list;
-    relatedLocations: relatedLocation list;
+    relatedLocations: relatedLocation list;  (** legacy FB extension *)
   }
   [@@deriving eq]
 
   and diagnosticRelatedInformation = {
-    relatedLocation: Location.t;
-    relatedMessage: string;
+    relatedLocation: Location.t;  (** wire: just "location" *)
+    relatedMessage: string;  (** wire: just "message" *)
   }
   [@@deriving eq]
 
+  (** legacy FB extension *)
   and relatedLocation = diagnosticRelatedInformation
 end
 
+(** DidOpenTextDocument notification, method="textDocument/didOpen" *)
 module DidOpen : sig
   type params = didOpenTextDocumentParams
 
-  and didOpenTextDocumentParams = { textDocument: TextDocumentItem.t }
+  and didOpenTextDocumentParams = {
+    textDocument: TextDocumentItem.t;  (** the document that was opened *)
+  }
 end
 
+(** DidCloseTextDocument notification, method="textDocument/didClose" *)
 module DidClose : sig
   type params = didCloseTextDocumentParams
 
-  and didCloseTextDocumentParams = { textDocument: TextDocumentIdentifier.t }
+  and didCloseTextDocumentParams = {
+    textDocument: TextDocumentIdentifier.t;  (** the doc that was closed *)
+  }
 end
 
+(** DidSaveTextDocument notification, method="textDocument/didSave" *)
 module DidSave : sig
   type params = didSaveTextDocumentParams
 
   and didSaveTextDocumentParams = {
-    textDocument: TextDocumentIdentifier.t;
-    text: string option;
+    textDocument: TextDocumentIdentifier.t;  (** the doc that was saved *)
+    text: string option;  (** content when saved; depends on includeText *)
   }
 end
 
+(** DidChangeTextDocument notification, method="textDocument/didChange" *)
 module DidChange : sig
   type params = didChangeTextDocumentParams
 
@@ -478,12 +634,13 @@ module DidChange : sig
   }
 
   and textDocumentContentChangeEvent = {
-    range: range option;
-    rangeLength: int option;
-    text: string;
+    range: range option;  (** the range of the document that changed *)
+    rangeLength: int option;  (** the length that got replaced *)
+    text: string;  (** the new text of the range/document *)
   }
 end
 
+(** WillSaveWaitUntilTextDocument request, method="textDocument/willSaveWaitUntil" *)
 module WillSaveWaitUntil : sig
   type params = willSaveWaitUntilTextDocumentParams
 
@@ -495,6 +652,7 @@ module WillSaveWaitUntil : sig
   and result = TextEdit.t list
 end
 
+(** Watched files changed notification, method="workspace/didChangeWatchedFiles" *)
 module DidChangeWatchedFiles : sig
   type registerOptions = { watchers: fileSystemWatcher list }
 
@@ -514,30 +672,40 @@ module DidChangeWatchedFiles : sig
   }
 end
 
+(** Goto Definition request, method="textDocument/definition" *)
 module Definition : sig
   type params = TextDocumentPositionParams.t
 
+  (** wire: either a single one or an array *)
   and result = DefinitionLocation.t list
 end
 
+(** Goto TypeDefinition request, method="textDocument/typeDefinition" *)
 module TypeDefinition : sig
   type params = TextDocumentPositionParams.t
 
   and result = DefinitionLocation.t list
 end
 
+(** Go To Implementation request, method="textDocument/implementation" *)
 module Implementation : sig
   type params = TextDocumentPositionParams.t
 
   and result = Location.t list
 end
 
+(** A code action represents a change that can be performed in code, e.g. to fix a problem or
+     to refactor code. *)
 module CodeAction : sig
   type t = {
-    title: string;
+    title: string;  (** A short, human-readable, title for this code action. *)
     kind: CodeActionKind.t;
+        (** The kind of the code action. Used to filter code actions. *)
     diagnostics: PublishDiagnostics.diagnostic list;
+        (** The diagnostics that this code action resolves. *)
     action: edit_and_or_command;
+        (** A CodeAction must set either `edit` and/or a `command`.
+       If both are supplied, the `edit` is applied first, then the `command` is executed. *)
   }
 
   and edit_and_or_command =
@@ -552,20 +720,28 @@ module CodeAction : sig
     | Action of t
 end
 
+(** Code Action Request, method="textDocument/codeAction" *)
 module CodeActionRequest : sig
   type params = {
     textDocument: TextDocumentIdentifier.t;
-    range: range;
-    context: codeActionContext;
+        (** The document in which the command was invoked. *)
+    range: range;  (** The range for which the command was invoked. *)
+    context: codeActionContext;  (** Context carrying additional information. *)
   }
 
+  (** Contains additional diagnostic information about the context in which
+     a code action is run. *)
   and codeActionContext = {
     diagnostics: PublishDiagnostics.diagnostic list;
     only: CodeActionKind.t list option;
   }
 end
 
+(** Completion request, method="textDocument/completion" *)
 module Completion : sig
+  (** These numbers should match
+   * https://microsoft.github.io/language-server-protocol/specification#textDocument_completion
+   *)
   type completionItemKind =
     | Text (* 1 *)
     | Method (* 2 *)
@@ -594,11 +770,12 @@ module Completion : sig
     | TypeParameter (* 25 *)
   [@@deriving enum]
 
+  (** These numbers should match
+   * https://microsoft.github.io/language-server-protocol/specification#textDocument_completion
+   *)
   type insertTextFormat =
-    | PlainText (* 1 *)
-    (* the insertText/textEdits are just plain strings *)
-    | SnippetFormat (* 2 *)
-  (* wire: just "Snippet" *)
+    | PlainText (* 1 *)  (** the insertText/textEdits are just plain strings *)
+    | SnippetFormat (* 2 *)  (** wire: just "Snippet" *)
   [@@deriving enum]
 
   type completionTriggerKind =
@@ -623,10 +800,9 @@ module Completion : sig
 
   and result = completionList
 
-  (* wire: can also be 'completionItem list' *)
+  (** wire: can also be 'completionItem list' *)
   and completionList = {
-    isIncomplete: bool;
-    (* further typing should result in recomputing *)
+    isIncomplete: bool;  (** further typing should result in recomputing *)
     items: completionItem list;
   }
 
@@ -635,36 +811,30 @@ module Completion : sig
     | UnparsedDocumentation of Hh_json.json
 
   and completionItem = {
-    label: string;
-    (* the label in the UI *)
-    kind: completionItemKind option;
-    (* tells editor which icon to use *)
-    detail: string option;
-    (* human-readable string like type/symbol info *)
+    label: string;  (** the label in the UI *)
+    kind: completionItemKind option;  (** tells editor which icon to use *)
+    detail: string option;  (** human-readable string like type/symbol info *)
     documentation: completionDocumentation option;
-    (* human-readable doc-comment *)
-    sortText: string option;
-    (* used for sorting; if absent, uses label *)
-    filterText: string option;
-    (* used for filtering; if absent, uses label *)
-    insertText: string option;
-    (* used for inserting; if absent, uses label *)
+        (** human-readable doc-comment *)
+    sortText: string option;  (** used for sorting; if absent, uses label *)
+    filterText: string option;  (** used for filtering; if absent, uses label *)
+    insertText: string option;  (** used for inserting; if absent, uses label *)
     insertTextFormat: insertTextFormat option;
     textEdit: TextEdit.t option;
-    additionalTextEdits: TextEdit.t list;
-    (* wire: split into hd and tl *)
-    command: Command.t option;
-    (* if present, is executed after completion *)
+    additionalTextEdits: TextEdit.t list;  (** wire: split into hd and tl *)
+    command: Command.t option;  (** if present, is executed after completion *)
     data: Hh_json.json option;
   }
 end
 
+(** Completion Item Resolve request, method="completionItem/resolve" *)
 module CompletionItemResolve : sig
   type params = Completion.completionItem
 
   and result = Completion.completionItem
 end
 
+(** Workspace Symbols request, method="workspace/symbol" *)
 module WorkspaceSymbol : sig
   type params = workspaceSymbolParams
 
@@ -673,6 +843,7 @@ module WorkspaceSymbol : sig
   and workspaceSymbolParams = { query: string }
 end
 
+(** Document Symbols request, method="textDocument/documentSymbol" *)
 module DocumentSymbol : sig
   type params = documentSymbolParams
 
@@ -681,6 +852,7 @@ module DocumentSymbol : sig
   and documentSymbolParams = { textDocument: TextDocumentIdentifier.t }
 end
 
+(** Find References request, method="textDocument/references" *)
 module FindReferences : sig
   type params = referenceParams
 
@@ -688,11 +860,12 @@ module FindReferences : sig
 
   and referenceParams = {
     loc: TextDocumentPositionParams.t;
+        (** wire: loc's members are part of referenceParams *)
     context: referenceContext;
   }
 
   and referenceContext = {
-    includeDeclaration: bool;
+    includeDeclaration: bool;  (** include declaration of current symbol *)
     includeIndirectReferences: bool;
   }
 end
@@ -720,29 +893,31 @@ module CallHierarchyOutgoingCalls : sig
   type result = callHierarchyOutgoingCall list option
 
   and callHierarchyOutgoingCall = {
-    (* The name should just be "to", but "to" is a reserved keyword in OCaml*)
     call_to: CallHierarchyItem.t;
+        (** The name should just be "to", but "to" is a reserved keyword in OCaml*)
     fromRanges: range list;
   }
 end
 
+(** Document Highlights request, method="textDocument/documentHighlight" *)
 module DocumentHighlight : sig
   type params = TextDocumentPositionParams.t
 
   type documentHighlightKind =
-    | Text [@value 1]
-    | Read [@value 2]
-    | Write [@value 3]
+    | Text [@value 1]  (** a textual occurrence *)
+    | Read [@value 2]  (** read-access of a symbol, like reading a variable *)
+    | Write [@value 3]  (** write-access of a symbol, like writing a variable *)
   [@@deriving enum]
 
   type result = documentHighlight list
 
   and documentHighlight = {
-    range: range;
+    range: range;  (** the range this highlight applies to *)
     kind: documentHighlightKind option;
   }
 end
 
+(** Document Formatting request, method="textDocument/formatting" *)
 module DocumentFormatting : sig
   type params = documentFormattingParams
 
@@ -754,11 +929,14 @@ module DocumentFormatting : sig
   }
 
   and formattingOptions = {
-    tabSize: int;
+    tabSize: int;  (** size of a tab in spaces *)
     insertSpaces: bool;
+        (** prefer spaces over tabs
+    omitted: signature for further properties *)
   }
 end
 
+(** Document Range Formatting request, method="textDocument/rangeFormatting" *)
 module DocumentRangeFormatting : sig
   type params = documentRangeFormattingParams
 
@@ -778,12 +956,13 @@ module DocumentOnTypeFormatting : sig
 
   and documentOnTypeFormattingParams = {
     textDocument: TextDocumentIdentifier.t;
-    position: position;
-    ch: string;
+    position: position;  (** the position at which this request was sent *)
+    ch: string;  (** the character that has been typed *)
     options: DocumentFormatting.formattingOptions;
   }
 end
 
+(** Document Signature Help request, method="textDocument/signatureHelp" *)
 module SignatureHelp : sig
   type params = TextDocumentPositionParams.t
 
@@ -807,6 +986,7 @@ module SignatureHelp : sig
   }
 end
 
+(** Workspace Rename request, method="textDocument/rename" *)
 module Rename : sig
   type params = renameParams
 
@@ -827,6 +1007,7 @@ module DocumentCodeLens : sig
   and codelensParams = { textDocument: TextDocumentIdentifier.t }
 end
 
+(** LogMessage notification, method="window/logMessage" *)
 module LogMessage : sig
   type params = logMessageParams
 
@@ -836,6 +1017,7 @@ module LogMessage : sig
   }
 end
 
+(** ShowMessage notification, method="window/showMessage" *)
 module ShowMessage : sig
   type params = showMessageParams
 
@@ -845,6 +1027,7 @@ module ShowMessage : sig
   }
 end
 
+(** ShowMessage request, method="window/showMessageRequest" *)
 module ShowMessageRequest : sig
   type t =
     | Present of { id: lsp_id }
@@ -863,16 +1046,12 @@ module ShowMessageRequest : sig
   and messageActionItem = { title: string }
 end
 
+(** ShowStatus request, method="window/showStatus" *)
 module ShowStatusFB : sig
   type params = showStatusParams
 
   and result = unit
 
-  (** the showStatus LSP request will be handled by our VSCode extension.
-  It's a facebook-specific extension to the LSP spec. How it's rendered
-  is currently [shortMessage] in the status-bar, and "[progress]/[total] [message]"
-  in the tooltip. The [telemetry] field isn't displayed to the user, but might
-  be useful to someone debugging an LSP transcript. *)
   and showStatusParams = {
     request: showStatusRequestParams;
     progress: int option;
@@ -887,12 +1066,14 @@ module ShowStatusFB : sig
   }
 end
 
+(** ConnectionStatus notification, method="telemetry/connectionStatus" *)
 module ConnectionStatusFB : sig
   type params = connectionStatusParams
 
   and connectionStatusParams = { isConnected: bool }
 end
 
+(** ErrorResponse *)
 module Error : sig
   type code =
     | ParseError [@value -32700]
@@ -914,6 +1095,8 @@ module Error : sig
     data: Hh_json.json option;
   }
 
+  (** For methods which want to return exceptions, and they also want to decide
+  how the exception gets serialized over LSP, they should throw this one. *)
   exception LspException of t
 end
 
@@ -921,11 +1104,14 @@ type lsp_registration_options =
   | DidChangeWatchedFilesRegistrationOptions of
       DidChangeWatchedFiles.registerOptions
 
+(** Register capability request, method="client/registerCapability" *)
 module RegisterCapability : sig
   type params = { registrations: registration list }
 
   and registration = {
     id: string;
+        (** The ID field is arbitrary but unique per type of capability (for future
+       deregistering, which we don't do). *)
     method_: string;
     registerOptions: lsp_registration_options;
   }

@@ -97,6 +97,7 @@ impl LowerInstrs<'_> {
             Hhbc::Add(..) => hack::Hhbc::Add,
             Hhbc::AddElemC(..) => hack::Hhbc::AddElemC,
             Hhbc::AddNewElemC(..) => hack::Hhbc::AddNewElemC,
+            Hhbc::Await(..) => hack::Hhbc::Await,
             Hhbc::AwaitAll(..) => hack::Hhbc::AwaitAll,
             Hhbc::CastKeyset(..) => hack::Hhbc::CastKeyset,
             Hhbc::CastVec(..) => hack::Hhbc::CastVec,

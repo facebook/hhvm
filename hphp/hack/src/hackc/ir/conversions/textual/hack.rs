@@ -46,6 +46,8 @@ pub(crate) enum Hhbc {
     AddElemC,
     #[decl(fn hhbc_add_new_elem_c(*HackMixed, *HackMixed) -> *HackMixed)]
     AddNewElemC,
+    #[decl(fn hhbc_await(*HackMixed) -> *HackMixed)]
+    Await,
     #[decl(fn hhbc_await_all(...) -> *HackMixed)]
     AwaitAll,
     #[decl(fn hhbc_cast_keyset(*HackMixed) -> *HackMixed)]
@@ -209,9 +211,6 @@ pub(crate) enum Builtin {
     /// pointer-sized value).
     #[decl(fn alloc_words(int) -> *void)]
     AllocWords,
-    /// Await for a value returned by an async function.
-    #[decl(fn await(*HackMixed) -> *HackMixed)]
-    Await,
     /// Get the superglobal as a base.
     #[decl(fn hack_base_get_superglobal(name: *HackMixed) -> **HackMixed)]
     BaseGetSuperglobal,

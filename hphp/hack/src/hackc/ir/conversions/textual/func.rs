@@ -968,7 +968,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     };
 
     if is_async {
-        output = state.call_builtin(hack::Builtin::Await, [output])?;
+        output = state.call_builtin(hack::Builtin::Hhbc(hack::Hhbc::Await), [output])?;
     }
 
     state.set_iid(iid, output);

@@ -292,7 +292,7 @@ This gives the following default namespaces:
 | ----------- | --------------- | ----------------------- |
 | C++         | `cpp2`          | `meta.search.query`     |
 | Python      | `python`, `py3` | `meta.search`           |
-| Hack        | `hack`          | `meta.search.query`          |
+| Hack        | `hack`          | `meta.search.query`     |
 | Java        | `java.swift`    | `com.meta.search.query` |
 
 Here is an example with the package name not containing the file name component:
@@ -305,7 +305,7 @@ package "meta.com/search"
 | ----------- | --------------- | ----------------- |
 | C++         | `cpp2`          | `meta.search`     |
 | Python      | `python`, `py3` | `meta.search`     |
-| Hack        | `hack`          | `meta.search`          |
+| Hack        | `hack`          | `meta.search`     |
 | Java        | `java.swift`    | `com.meta.search` |
 
 In both cases the Python namespaces don't include the file name component.
@@ -464,20 +464,20 @@ union ::=
   "}"
 ```
 
-Union types are identical to struct types in all ways, except for the following differences:
+Unions are identical to structs in all ways, except for the following differences:
 
-* Union types use the reserved word `union` instead of `struct`.
+* Unions use the reserved word `union` instead of `struct`.
 * All fields must be unqualified, but they are equivalent to [optional struct fields](#optional-fields).
 * At most one field can be *present*.
 
 The concepts "optional" and "present" are described in [Optional Fields](#optional-fields).
 
-The serialized representation of union types are identical to that of struct types that have a single field present. When deserializing into an union type, the serialized data may not provide a value to more than one of the fields of the union type. In other words, it is possible to serialize from an union type and deserialize into a compatible struct type, and vice versa.
+The serialized representation of unions is identical to that of structs that have a single field present. When deserializing into a union, the serialized data may not provide a value to more than one of the fields of the union. In other words, it is possible to serialize from a union and deserialize into a compatible struct, and vice versa.
 
-The generated code for union types can be different from that of struct types - for example, implementations may choose to use programming language union types in generated code for better memory efficiency.
+The generated code for unions can be different from that of structs - for example, implementations may choose to use programming language unions in generated code for better memory efficiency.
 
 :::note
-It is possible for none of the fields to be present in an union type.
+It is possible for none of the fields to be present in a union.
 :::
 
 ### Exceptions
@@ -494,14 +494,14 @@ error_kind   ::=  "transient" | "stateful" | "permanent"
 error_blame  ::=  "client" | "server"
 ```
 
-Exception types are identical to struct types in all ways, except that these types can only be used as types within the `throws` clause of functions in service definitions. (This isn't enforced, but you still shouldn't do it).
+Exceptions are identical to structs in all ways, except that these types should only be used as types within the `throws` clause of functions. This is not enforced at the moment.
 
-The serialized representation of exception types are identical to that of struct types.
+The serialized representation of exceptions is identical to that of structs.
 
-The generated code for exception types can be different from that of struct types - for example, programming language exception types can be used in generated code.
+The generated code for exceptions can be different from that of structs. For example, programming language exceptions can be used in generated code.
 
 :::note
-It is possible to serialize from an exception type and deserialize into a compatible struct type, and vice versa.
+It is possible to serialize from an exception and deserialize into a compatible struct, and vice versa.
 :::
 
 ### Enumerations
@@ -540,10 +540,10 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 ### Typedefs
 
 ```grammar
-typedef ::=  "typedef" type identifier [";"]
+typedef ::=  [annotations] "typedef" type identifier [";"]
 ```
 
-Typedefs introduce a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
+A typedef introduces a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
 
 ```thrift
 typedef map<string, string> StringMap
@@ -650,13 +650,14 @@ interaction ::=
 ### Constants
 
 ```grammar
-constant_definition ::=  "const" type identifier "=" Constant [";"]
+constant_definition ::=
+  [annotations] "const" type identifier "=" constant [";"]
 ```
 
 A constant definition introduces a name for a value. This name can be used instead of the value after the completion of constant definition, and in other Thrift files that include this Thrift file.
 
-```
-Constant ::=
+```grammar
+constant ::=
   integer
 | float
 | string_literal

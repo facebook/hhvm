@@ -4,10 +4,10 @@ No upcast
 Summary for \C::static_m:
 No upcast
 Summary for \simple_upcast1:
-Upcast exists at [11:8-31]
+Upcast exists at [12:8-31]
 Summary for \simple_upcast2:
-Upcast exists at [16:8-30]
+Upcast exists at [17:8-30]
 Summary for \simple_upcast3:
-Upcast exists at [21:8-30]
+Upcast exists at [22:8-30]
 Summary for \simple_upcast4:
-Upcast exists at [26:8-30]
+Upcast exists at [27:8-30]

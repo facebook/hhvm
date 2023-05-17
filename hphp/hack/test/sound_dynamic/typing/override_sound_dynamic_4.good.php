@@ -1,6 +1,8 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
+<<file:__EnableUnstableFeatures('upcast_expression')>>
+
 <<__SupportDynamicType>>
 interface I {
   public function bar():~Awaitable<dynamic>;

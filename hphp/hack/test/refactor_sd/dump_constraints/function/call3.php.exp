@@ -4,17 +4,17 @@ Constraints for \f:
 Constraints for \g:
 
 Constraints for \h:
-?2 ⊆ [12:3-7]
 ?2 ⊆ [13:3-7]
-Function call at [12:3-7]
+?2 ⊆ [14:3-7]
 Function call at [13:3-7]
-Introduction at [10:8-11]
+Function call at [14:3-7]
 Introduction at [11:8-11]
-Introduction at [14:8-11]
+Introduction at [12:8-11]
+Introduction at [15:8-11]
 Upcast at ?1
 Upcast at ?2
 Upcast at ?3
-[10:8-11] ⊆ ?1
-[11:8-11] ⊆ ?2
-[14:8-11] ⊆ ?3
+[11:8-11] ⊆ ?1
+[12:8-11] ⊆ ?2
+[15:8-11] ⊆ ?3
 

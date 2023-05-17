@@ -1,4 +1,4 @@
-File "enumbox.bad.php", line 9, characters 40-44:
+File "enumbox.bad.php", line 11, characters 40-44:
 Class `EBox` cannot support dynamic because property `item` does not have an enforceable type (Typing[4402])
-  File "enumbox.bad.php", line 9, characters 38-38:
+  File "enumbox.bad.php", line 11, characters 38-38:
   Property `item` has type `E`

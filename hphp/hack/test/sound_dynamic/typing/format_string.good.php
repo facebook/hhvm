@@ -1,6 +1,8 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
+<<file:__EnableUnstableFeatures('upcast_expression')>>
+
 <<__SupportDynamicType>>
 function getStrings():~vec<string> {
   return vec["ABC"];

@@ -1,6 +1,8 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
+<<file:__EnableUnstableFeatures('upcast_expression')>>
+
 class Box<T> {
   public function __construct(private T $x) {}
   public function get() : T { return $this->x; }

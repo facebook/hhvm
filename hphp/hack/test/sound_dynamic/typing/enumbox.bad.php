@@ -1,6 +1,8 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
+<<file:__EnableUnstableFeatures('upcast_expression')>>
+
 enum E : int as int { A = 3; }
 enum F : int as int { B = 5; }
 

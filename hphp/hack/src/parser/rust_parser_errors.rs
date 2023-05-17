@@ -5451,9 +5451,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 _ => {}
             },
             UpcastExpression(_) => {
-                if !self.env.parser_options.tco_enable_sound_dynamic {
-                    self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
-                }
+                self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
             }
             RequireClause(c) => {
                 if c.kind.is_class() {

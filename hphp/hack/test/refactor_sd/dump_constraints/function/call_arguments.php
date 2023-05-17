@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 function f(): int {
   return 1;

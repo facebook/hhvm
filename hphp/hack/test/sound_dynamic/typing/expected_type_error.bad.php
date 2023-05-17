@@ -1,6 +1,8 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+<<file:__EnableUnstableFeatures('upcast_expression')>>
+
 <<__NoAutoDynamic>>
 function expect_int(~int $_): void {}
 

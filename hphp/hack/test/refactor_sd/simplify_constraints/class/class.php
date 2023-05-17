@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
 class C {

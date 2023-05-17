@@ -6,10 +6,10 @@ No upcast
 Summary for \D::m:
 No upcast
 Summary for \if_test:
+Upcast exists at [47:4-21]
 Upcast exists at [46:4-21]
-Upcast exists at [45:4-21]
-Upcast exists at [34:8-30]
-Upcast exists at [42:8-31]
+Upcast exists at [35:8-30]
+Upcast exists at [43:8-31]
 Summary for \while_test:
-Upcast exists at [19:8-31]
-Upcast exists at [18:8-30]
+Upcast exists at [20:8-31]
+Upcast exists at [19:8-30]

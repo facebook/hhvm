@@ -4,32 +4,32 @@ Constraints for \C::m:
 Constraints for \C::static_m:
 
 Constraints for \simple_upcast1:
-?1 ⊆ [12:3-17]
-Function call at [12:3-17]
-Introduction at [11:8-16]
+?1 ⊆ [13:3-17]
+Function call at [13:3-17]
+Introduction at [12:8-16]
 Upcast at ?1
-[11:8-16] ⊆ ?1
+[12:8-16] ⊆ ?1
 
 Constraints for \simple_upcast2:
-?2 ⊆ [17:3-10]
-?2 ⊆ [17:3-8]
-Function call at [17:3-10]
-Function call at [17:3-8]
-Introduction at [16:8-15]
+?2 ⊆ [18:3-10]
+?2 ⊆ [18:3-8]
+Function call at [18:3-10]
+Function call at [18:3-8]
+Introduction at [17:8-15]
 Upcast at ?2
-[16:8-15] ⊆ ?2
+[17:8-15] ⊆ ?2
 
 Constraints for \simple_upcast3:
-?3 ⊆ [22:3-17]
-Function call at [22:3-17]
-Introduction at [21:8-15]
+?3 ⊆ [23:3-17]
+Function call at [23:3-17]
+Introduction at [22:8-15]
 Upcast at ?3
-[21:8-15] ⊆ ?3
+[22:8-15] ⊆ ?3
 
 Constraints for \simple_upcast4:
-?4 ⊆ [27:3-10]
-Function call at [27:3-10]
-Introduction at [26:8-15]
+?4 ⊆ [28:3-10]
+Function call at [28:3-10]
+Introduction at [27:8-15]
 Upcast at ?4
-[26:8-15] ⊆ ?4
+[27:8-15] ⊆ ?4
 

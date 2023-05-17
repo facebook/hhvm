@@ -9,7 +9,7 @@ Constraints for \g:
 ?1 ⊆ ?4
 ?2 ⊆ ?3
 ?3 ⊆ ?4
-Introduction at [8:8-11]
+Introduction at [9:8-11]
 Upcast at ?1
-[8:8-11] ⊆ ?1
+[9:8-11] ⊆ ?1
 

@@ -1,6 +1,6 @@
-File "expected_type_error.bad.php", line 24, characters 16-22:
+File "expected_type_error.bad.php", line 26, characters 16-22:
 Invalid argument (Typing[4110])
-  File "expected_type_error.bad.php", line 5, characters 22-24:
+  File "expected_type_error.bad.php", line 7, characters 22-24:
   Expected `int`
-  File "expected_type_error.bad.php", line 17, characters 27-32:
+  File "expected_type_error.bad.php", line 19, characters 27-32:
   But got `string`

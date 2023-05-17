@@ -1,6 +1,6 @@
 === Sound Dynamic analysis results for switch.php
 Summary for \d:
-Upcast exists at [64:4-21]
+Upcast exists at [65:4-21]
 Summary for \e:
 No upcast
 Summary for \f:
@@ -8,5 +8,5 @@ No upcast
 Summary for \g:
 No upcast
 Summary for \h:
-Upcast exists at [23:4-21]
-Upcast exists at [18:8-26]
+Upcast exists at [24:4-21]
+Upcast exists at [19:8-26]

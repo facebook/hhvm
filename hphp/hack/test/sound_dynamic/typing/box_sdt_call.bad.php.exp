@@ -1,6 +1,6 @@
-File "box_sdt_call.bad.php", line 25, characters 5-7:
+File "box_sdt_call.bad.php", line 27, characters 5-7:
 Typing error (Typing[4110])
-  File "box_sdt_call.bad.php", line 23, characters 13-15:
+  File "box_sdt_call.bad.php", line 25, characters 13-15:
   Expected `dynamic`
-  File "box_sdt_call.bad.php", line 23, characters 13-15:
+  File "box_sdt_call.bad.php", line 25, characters 13-15:
   Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -8,10 +8,10 @@ Constraints for \h:
 ?2 ⊆ ?1
 ?4 ⊆ ?6
 ?5 ⊆ ?6
-Introduction at [10:20-23]
-Introduction at [15:13-16]
+Introduction at [11:20-23]
+Introduction at [16:13-16]
 Upcast at ?3
 Upcast at ?6
-[10:20-23] ⊆ ?2
-[15:13-16] ⊆ ?5
+[11:20-23] ⊆ ?2
+[16:13-16] ⊆ ?5
 

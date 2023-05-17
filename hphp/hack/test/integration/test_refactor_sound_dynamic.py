@@ -48,6 +48,7 @@ enable_sound_dynamic_type = true
     def test_no_sd(self) -> None:
         self.write_and_test_one_file(
             """<?hh
+            <<file:__EnableUnstableFeatures('upcast_expression')>>
             <<__SupportDynamicType>>
             function h(shape(...) $m): int {
               $x = h<> upcast dynamic;
@@ -63,6 +64,7 @@ enable_sound_dynamic_type = true
 
         self.write_and_test_one_file(
             """<?hh
+            <<file:__EnableUnstableFeatures('upcast_expression')>>
             <<__SupportDynamicType>>
             function h(shape(...) $m): int {
               $x = h<> upcast dynamic;
@@ -71,7 +73,7 @@ enable_sound_dynamic_type = true
             "Function",
             "h",
             [
-                f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
+                f'File "{self.test_driver.repo_dir}/a.php", line 5, characters 20-37:',
             ],
         )
 
@@ -80,7 +82,7 @@ enable_sound_dynamic_type = true
         self.write_and_test_one_file(
             """
 <?hh
-
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 <<__SupportDynamicType>>
 class Counter {
   private int $i = 0;
@@ -103,6 +105,7 @@ function c(dynamic $d): void {
     def test_one_upcast_multiple_function(self) -> None:
         self.write_and_test_one_file(
             """<?hh
+            <<file:__EnableUnstableFeatures('upcast_expression')>>
             <<__SupportDynamicType>>
             function h(shape(...) $m): int {
               $x = h<> upcast dynamic;
@@ -115,7 +118,7 @@ function c(dynamic $d): void {
             "Function",
             "h",
             [
-                f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
+                f'File "{self.test_driver.repo_dir}/a.php", line 5, characters 20-37:',
             ],
         )
 
@@ -123,6 +126,7 @@ function c(dynamic $d): void {
         with open(os.path.join(self.test_driver.repo_dir, "a.php"), "w") as f:
             f.write(
                 """<?hh
+            <<file:__EnableUnstableFeatures('upcast_expression')>>
             <<__SupportDynamicType>>
             function h(shape(...) $m): int {
               $x = h<> upcast dynamic;
@@ -137,6 +141,8 @@ function c(dynamic $d): void {
         with open(os.path.join(self.test_driver.repo_dir, "b.php"), "w") as f:
             f.write(
                 """<?hh
+                <<file:__EnableUnstableFeatures('upcast_expression')>>
+                <<__SupportDynamicType>>
                 function b(dynamic $d): void {
                   $y = h<> upcast dynamic;
                   $d(3);
@@ -147,6 +153,8 @@ function c(dynamic $d): void {
         with open(os.path.join(self.test_driver.repo_dir, "c.php"), "w") as f:
             f.write(
                 """<?hh
+                <<file:__EnableUnstableFeatures('upcast_expression')>>
+                <<__SupportDynamicType>>
                 function c(int $i): void {
                   $z = h<> upcast dynamic;
                 }
@@ -161,8 +169,8 @@ function c(dynamic $d): void {
             "Function",
             "h",
             [
-                f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
-                f'File "{self.test_driver.repo_dir}/b.php", line 3, characters 24-41:',
-                f'File "{self.test_driver.repo_dir}/c.php", line 3, characters 24-41:',
+                f'File "{self.test_driver.repo_dir}/a.php", line 5, characters 20-37:',
+                f'File "{self.test_driver.repo_dir}/b.php", line 5, characters 24-41:',
+                f'File "{self.test_driver.repo_dir}/c.php", line 5, characters 24-41:',
             ],
         )

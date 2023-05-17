@@ -593,7 +593,7 @@ class ThriftServerConfig {
       std::chrono::milliseconds(60000);
 
   static constexpr std::chrono::seconds DEFAULT_WORKERS_JOIN_TIMEOUT =
-      std::chrono::seconds(30);
+      std::chrono::seconds(20);
 
   /// Listen backlog
   static constexpr int DEFAULT_LISTEN_BACKLOG = 1024;

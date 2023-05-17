@@ -92,7 +92,7 @@ int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
   return getRandomInt(min, max);
 }
 
-static struct RandomExtension final : public Extension {
+static struct RandomExtension final : Extension {
   RandomExtension() : Extension("random", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     HHVM_FE(random_bytes);

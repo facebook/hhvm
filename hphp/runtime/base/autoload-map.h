@@ -35,12 +35,6 @@ struct Variant;
 struct RepoUnitInfo;
 
 struct AutoloadMap {
-
-  enum class Result {
-    Failure,
-    Success,
-  };
-
   /**
    * Keep enum values in sync with `HH\Facts\SymbolKind` in `ext_facts.php`
    */

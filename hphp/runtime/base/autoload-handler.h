@@ -87,21 +87,19 @@ struct AutoloadHandler final : RequestEventHandler {
 
 private:
   /**
-   * This method may return Success or Failure.
+   * This method may return true on success or false on failure.
    */
   template <class T>
-  AutoloadMap::Result loadFromMapImpl(const String& name,
-                                      AutoloadMap::KindOf kind,
-                                      const T &checkExists,
-                                      Variant& err);
+  bool loadFromMapImpl(const String& name, AutoloadMap::KindOf kind,
+                       const T &checkExists, Variant& err);
 
   /**
    * This method attempts to load the unit containing the given symbol,
-   * and will return Success or Failure.
+   * and will return true on success.
    */
   template <class T>
-  AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
-                                  const T &checkExists);
+  bool loadFromMap(const String& name, AutoloadMap::KindOf kind,
+                   const T &checkExists);
 
   /**
    * Invoke `m_onPostAutoloadFunc` after autoloading a class.

@@ -489,8 +489,8 @@ struct WatchmanAutoloadMapFactory final : public FactsFactory {
       m_lastUsed;
 };
 
-struct Facts final : Extension {
-  Facts() : Extension("facts", "1.0", NO_ONCALL_YET) {}
+struct FactsExtension final : Extension {
+  FactsExtension() : Extension("facts", "1.0", NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     if (!RuntimeOption::AutoloadEnabled) {
@@ -1019,7 +1019,7 @@ Array HHVM_FUNCTION(
 
 namespace Facts {
 
-void Facts::moduleInit() {
+void FactsExtension::moduleInit() {
   // This, unfortunately, cannot be done in moduleLoad() due to the fact
   // that certain async loggers may create a new thread.  HHVM will throw
   // if any threads have been created during the moduleLoad() step.

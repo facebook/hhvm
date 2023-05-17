@@ -35,7 +35,7 @@ int32_t MaxUpdatePeriod;
 auto DampenTime = std::chrono::milliseconds{0};
 int32_t ProcStatusUpdateSeconds;
 
-struct HostHealthMonitorExtension final : public Extension {
+struct HostHealthMonitorExtension final : Extension {
   HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0", NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf globalConfig) override {

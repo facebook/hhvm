@@ -14,6 +14,10 @@ set(CMAKE_MODULE_PATH
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (WIN32)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32_LEAN_AND_MEAN -DNOMINMAX -DSTRICT")
+endif()
+
 # Tell CMake to also look in the directories where getdeps.py installs
 # our third-party dependencies.
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/install")

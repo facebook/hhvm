@@ -322,6 +322,8 @@ class mstch_go_field : public mstch_field {
             {"field:pointer?", &mstch_go_field::is_pointer},
             {"field:compat_setter_pointer?",
              &mstch_go_field::is_compat_setter_pointer},
+            {"field:compat_setter_value_op",
+             &mstch_go_field::compat_setter_value_op},
             {"field:nilable?", &mstch_go_field::is_nilable},
             {"field:dereference?", &mstch_go_field::should_dereference},
             {"field:key_str", &mstch_go_field::key_str},
@@ -372,17 +374,17 @@ class mstch_go_field : public mstch_field {
     auto real_type = field_->type()->get_true_type();
     return is_pointer_() && !go::is_type_go_struct(real_type);
   }
-  mstch::node is_compat_setter_pointer() {
-    // Whether this field's value should be a poitner in compat-setter.
-    // This is needed for a seamless migration from the legacy generator.
-    //
-    // Legacy generator would make optional fields with default values be
-    // impelemented as non-pointer fields. This is incorrect because such
-    // field cannot be unset (i.e set to nil) despite being optional.
-    // This ommision is fixed in the new generator, however, our compat
-    // setters must be backwards compatible to ensure graceful migration.
-    bool has_default_value = (field_->default_value() != nullptr);
-    return is_pointer_() && !(is_optional_() && has_default_value);
+  mstch::node is_compat_setter_pointer() { return is_compat_setter_pointer_(); }
+  mstch::node compat_setter_value_op() {
+    if (is_pointer_() && is_compat_setter_pointer_()) {
+      return std::string("");
+    } else if (is_pointer_() && !is_compat_setter_pointer_()) {
+      return std::string("&");
+    } else if (!is_pointer_() && !is_compat_setter_pointer_()) {
+      return std::string("");
+    } else { // if (!is_pointer_() && is_compat_setter_pointer_())
+      return std::string("*");
+    }
   }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.
@@ -421,6 +423,23 @@ class mstch_go_field : public mstch_field {
     return (go::is_type_go_struct(real_type) || is_inside_union_() ||
             is_optional_()) &&
         !go::is_type_nilable(real_type);
+  }
+
+  bool is_compat_setter_pointer_() {
+    // Whether this field's value should be a pointer in compat-setter.
+    // This is needed for a seamless migration from the legacy generator.
+    //
+    // Legacy generator treats optional fields with default values differently
+    // compared to the new generator (pointer vs non-pointer).
+    // This method helps with backwards compatibility.
+    bool has_default_value = (field_->default_value() != nullptr);
+    if (is_optional_() && has_default_value) {
+      auto real_type = field_->type()->get_true_type();
+      bool is_container =
+          (real_type->is_list() || real_type->is_map() || real_type->is_set());
+      return is_container;
+    }
+    return is_pointer_();
   }
 
   bool is_inside_union_() {

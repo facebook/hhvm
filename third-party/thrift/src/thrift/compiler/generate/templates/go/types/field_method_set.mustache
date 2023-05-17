@@ -26,7 +26,15 @@ func (x *{{struct:go_name}}) {{field:go_setter_name}}{{#program:compat_setters?}
 {{#program:compat_setters?}}
 
 func (x *{{struct:go_name}}) {{field:go_setter_name}}(value {{#field:compat_setter_pointer?}}*{{/field:compat_setter_pointer?}}{{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
-    x.{{field:go_name}} = {{^field:compat_setter_pointer?}}{{#field:pointer?}}&{{/field:pointer?}}{{/field:compat_setter_pointer?}}value
+    {{#field:compat_setter_pointer?}}
+    {{^field:pointer?}}
+    if (value == nil) {
+        x.{{field:go_name}} = nil
+        return x
+    }
+    {{/field:pointer?}}
+    {{/field:compat_setter_pointer?}}
+    x.{{field:go_name}} = {{field:compat_setter_value_op}}value
     return x
 }
 {{/program:compat_setters?}}

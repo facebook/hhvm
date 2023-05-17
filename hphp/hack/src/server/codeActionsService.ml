@@ -96,7 +96,7 @@ let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
 
 let fix_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.CodeAction.command_or_action =
+    Lsp.CodeAction.resolvable_command_or_action =
   let open Lsp in
   let changes = SMap.singleton path (text_edits classish_starts quickfix) in
   CodeAction.Action
@@ -112,7 +112,7 @@ let fix_action
 
 let refactor_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.CodeAction.command_or_action =
+    Lsp.CodeAction.resolvable_command_or_action =
   let open Lsp in
   let changes = SMap.singleton path (text_edits classish_starts quickfix) in
   CodeAction.Action
@@ -131,7 +131,7 @@ let actions_for_errors
     (path : string)
     (classish_starts : Pos.t SMap.t)
     ~(start_line : int)
-    ~(start_col : int) : Lsp.CodeAction.command_or_action list =
+    ~(start_col : int) : Lsp.CodeAction.resolvable_command_or_action list =
   let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
@@ -154,11 +154,12 @@ let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
       end_ = lsp_pos_of_ide_pos ide_range.I.ed;
     }
 
-let go
+let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(path : string)
-    ~(range : Ide_api_types.range) : Lsp.CodeAction.command_or_action list =
+    ~(range : Ide_api_types.range) :
+    Lsp.CodeAction.resolvable_command_or_action list =
   let open Ide_api_types in
   let start_line = range.st.line in
   let start_col = range.st.column in
@@ -199,3 +200,59 @@ let go
   @ override_method_commands_or_actions
   @ variable_actions
   @ CodeActionsServiceFlipAroundComma.find ~range:lsp_range ~path ~entry ctx
+
+let go
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(path : string)
+    ~(range : Ide_api_types.range) : Lsp.CodeAction.command_or_action list =
+  let open Lsp.CodeAction in
+  let strip : resolvable_command_or_action -> command_or_action = function
+    | Command _ as c -> c
+    | Action ({ action; _ } as a) ->
+      let action =
+        match action with
+        | UnresolvedEdit _ -> UnresolvedEdit ()
+        | EditOnly e -> EditOnly e
+        | CommandOnly c -> CommandOnly c
+        | BothEditThenCommand ca -> BothEditThenCommand ca
+      in
+      Action { a with action }
+  in
+
+  find ~ctx ~entry ~path ~range |> List.map ~f:strip
+
+let resolve
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(path : string)
+    ~(range : Ide_api_types.range)
+    ~(resolve_title : string) : Lsp.CodeAction.resolved_command_or_action =
+  let open Lsp.CodeAction in
+  let resolve_command_or_action :
+      resolvable_command_or_action -> resolved_command_or_action = function
+    | Command _ as c -> c
+    | Action ({ action; _ } as a) ->
+      let action =
+        match action with
+        | UnresolvedEdit lazy_edit -> EditOnly (Lazy.force lazy_edit)
+        | EditOnly e -> EditOnly e
+        | CommandOnly c -> CommandOnly c
+        | BothEditThenCommand ca -> BothEditThenCommand ca
+      in
+      Action { a with action }
+  in
+
+  find ~ctx ~entry ~path ~range
+  |> List.find ~f:(fun command_or_action ->
+         let title = Lsp_helpers.title_of_command_or_action command_or_action in
+         String.equal title resolve_title)
+  |> Option.value_exn
+       ~message:
+         {|Expected the code action requested with codeAction/resolve to be findable.
+Note: This error message may be caused by the source text changing between
+when the code action menu pops up and when the user selects the code action.
+In such cases we may not be able to find a code action at the same location with
+the same title, so cannot resolve the code action.
+|}
+  |> resolve_command_or_action

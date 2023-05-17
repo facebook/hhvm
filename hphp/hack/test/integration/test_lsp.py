@@ -6239,7 +6239,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "documentHighlightProvider": True,
                     "documentSymbolProvider": True,
                     "workspaceSymbolProvider": True,
-                    "codeActionProvider": True,
+                    "codeActionProvider": {"resolveProvider": True},
                     "documentFormattingProvider": True,
                     "documentRangeFormattingProvider": True,
                     "documentOnTypeFormattingProvider": {
@@ -7919,6 +7919,102 @@ function call_method(ClassWithFooBar $mc): void {
                         },
                     },
                 ],
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_code_action_flip_around_comma(self) -> None:
+        """This test is mainly for testing lazy code action resolution:
+        - The server returns a code action with neither 'edit' nor 'command' field
+        - The client must send `codeAction/resolve`
+        - The server then replies with a complete code action
+        """
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("code_action_flip_around_comma"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="get actions",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 3, "character": 10},
+                        "end": {"line": 3, "character": 10},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[
+                    {
+                        "title": "Flip around comma",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "data": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 3, "character": 10},
+                                "end": {"line": 3, "character": 10},
+                            },
+                            "context": {"diagnostics": []},
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="resolve code action",
+                method="codeAction/resolve",
+                params={
+                    "title": "Flip around comma",
+                    "data": {
+                        "textDocument": {"uri": "${php_file_uri}"},
+                        "range": {
+                            "start": {"line": 3, "character": 10},
+                            "end": {"line": 3, "character": 10},
+                        },
+                        "context": {"diagnostics": []},
+                    },
+                    "kind": "refactor",
+                    "diagnostics": [],
+                },
+                result={
+                    "title": "Flip around comma",
+                    "kind": "refactor",
+                    "diagnostics": [],
+                    "edit": {
+                        "changes": {
+                            "${root_path}/code_action_flip_around_comma.php": [
+                                {
+                                    "range": {
+                                        "start": {"line": 3, "character": 6},
+                                        "end": {"line": 3, "character": 19},
+                                    },
+                                    "newText": '"b", "a", "c"',
+                                }
+                            ]
+                        }
+                    },
+                },
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)

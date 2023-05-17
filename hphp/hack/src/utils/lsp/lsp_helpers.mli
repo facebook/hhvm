@@ -129,3 +129,5 @@ val showMessage_info : Jsonrpc.writer -> string -> unit
 val showMessage_warning : Jsonrpc.writer -> string -> unit
 
 val showMessage_error : Jsonrpc.writer -> string -> unit
+
+val title_of_command_or_action : 'a Lsp.CodeAction.command_or_action_ -> string

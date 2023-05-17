@@ -333,6 +333,17 @@ module Initialize : sig
     | IncrementalSync [@value 2]
   [@@deriving enum]
 
+  module CodeActionOptions : sig
+    type t = { resolveProvider: bool }
+  end
+
+  module CompletionOptions : sig
+    type t = {
+      resolveProvider: bool;  (** server resolves extra info on demand *)
+      completion_triggerCharacters: string list;  (** wire "triggerCharacters" *)
+    }
+  end
+
   type params = {
     processId: int option;  (** pid of parent process *)
     rootPath: string option;  (** deprecated *)
@@ -458,7 +469,7 @@ module Initialize : sig
   and server_capabilities = {
     textDocumentSync: textDocumentSyncOptions;  (** how to sync *)
     hoverProvider: bool;
-    completionProvider: completionOptions option;
+    completionProvider: CompletionOptions.t option;
     signatureHelpProvider: signatureHelpOptions option;
     definitionProvider: bool;
     typeDefinitionProvider: bool;
@@ -467,7 +478,7 @@ module Initialize : sig
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;  (** ie. document outline *)
     workspaceSymbolProvider: bool;  (** ie. find-symbol-in-project *)
-    codeActionProvider: bool;
+    codeActionProvider: CodeActionOptions.t option;
     codeLensProvider: codeLensOptions option;
     documentFormattingProvider: bool;
     documentRangeFormattingProvider: bool;
@@ -479,14 +490,7 @@ module Initialize : sig
     rageProviderFB: bool;
   }
 
-  and completionOptions = {
-    resolveProvider: bool;  (** server resolves extra info on demand *)
-    completion_triggerCharacters: string list;  (** wire "triggerCharacters" *)
-  }
-
-  and signatureHelpOptions = {
-    sighelp_triggerCharacters: string list;  (** wire "triggerCharacters" *)
-  }
+  and signatureHelpOptions = { sighelp_triggerCharacters: string list }
 
   and codeLensOptions = {
     codelens_resolveProvider: bool;  (** wire "resolveProvider" *)
@@ -697,27 +701,61 @@ end
 (** A code action represents a change that can be performed in code, e.g. to fix a problem or
      to refactor code. *)
 module CodeAction : sig
-  type t = {
+  (**
+  Note: For "textDocument/codeAction" requests we return a `data` field containing
+  the original request params, then when the client sends "codeAction/resolve"
+  we read the `data` param to re-calculate the requested code action. This
+  adding of the "data" field is done in our serialization step, to avoid passing
+  extra state around and enforce that `data` is all+only the original request params.
+  See [edit_or_command] for more information on the resolution flow.
+  *)
+  type 'resolution_phase t = {
     title: string;  (** A short, human-readable, title for this code action. *)
     kind: CodeActionKind.t;
         (** The kind of the code action. Used to filter code actions. *)
     diagnostics: PublishDiagnostics.diagnostic list;
         (** The diagnostics that this code action resolves. *)
-    action: edit_and_or_command;
-        (** A CodeAction must set either `edit` and/or a `command`.
-       If both are supplied, the `edit` is applied first, then the `command` is executed. *)
+    action: 'resolution_phase edit_and_or_command;
+        (* A CodeAction must set either `edit`, a `command` (or neither iff only resolved lazily)
+           If both are supplied, the `edit` is applied first, then the `command` is executed.
+           If neither is supplied, the client requests 'edit' be resolved using "codeAction/resolve"
+        *)
   }
 
-  and edit_and_or_command =
+  (**
+  'resolution_phase is used to follow the protocol in a type-safe and prescribed manner:
+  LSP protocol:
+  1. The client sends server "textDocument/codeAction"
+  2. The server can send back an unresolved code action (neither "edit" nor "command" fields)
+  3. If the code action is unresolved, the client sends "codeAction/resolve"
+
+  Our implementation flow:
+    - create a resolvable code action, which includes a lazy value
+      - if the request is "textDocument/codeAction" replace the lazy value with `()`
+      - if the request is "codeAction/resolve", we have access to the original
+      request params via the `data` field (see [t] comments above) and perform
+      the same calculation as for "textDocument/codeAction" but instead of
+      stripping out the lazy value we Lazy.force it to produce a resolved code action.
+  *)
+  and 'resolution_phase edit_and_or_command =
     | EditOnly of WorkspaceEdit.t
     | CommandOnly of Command.t
     | BothEditThenCommand of (WorkspaceEdit.t * Command.t)
+    | UnresolvedEdit of 'resolution_phase
+
+  type 'resolution_phase command_or_action_ =
+    | Command of Command.t
+    | Action of 'resolution_phase t
+
+  type resolved_marker = |
+
+  type resolved_command_or_action = resolved_marker command_or_action_
+
+  type resolvable_command_or_action = WorkspaceEdit.t Lazy.t command_or_action_
+
+  type command_or_action = unit command_or_action_
 
   type result = command_or_action list
-
-  and command_or_action =
-    | Command of Command.t
-    | Action of t
 end
 
 (** Code Action Request, method="textDocument/codeAction" *)
@@ -738,6 +776,26 @@ module CodeActionRequest : sig
 end
 
 (** Completion request, method="textDocument/completion" *)
+module CodeActionResolve : sig
+  type result = CodeAction.resolved_command_or_action
+end
+
+(** method="codeAction/resolve" *)
+module CodeActionResolveRequest : sig
+  (**
+    The client sends a partially-resolved [CodeAction] with an additional [data] field.
+    We don't bother parsing all the fields from the partially-resolved [CodeAction] because
+    [data] and [title] are all we need and so we don't have to duplicate the entire
+    [CodeAction.command_or_action] shape here *)
+  type params = {
+    data: CodeActionRequest.params;
+    title: string;
+        (** From LSP spec: "A data entry field that is preserved on a code action between
+          a `textDocument/codeAction` and a `codeAction/resolve` request"
+         We commit to a single representation for simplicity and type-safety *)
+  }
+end
+
 module Completion : sig
   (** These numbers should match
    * https://microsoft.github.io/language-server-protocol/specification#textDocument_completion
@@ -1129,6 +1187,7 @@ type lsp_request =
   | TypeDefinitionRequest of TypeDefinition.params
   | ImplementationRequest of Implementation.params
   | CodeActionRequest of CodeActionRequest.params
+  | CodeActionResolveRequest of CodeActionResolveRequest.params
   | CompletionRequest of Completion.params
   | CompletionItemResolveRequest of CompletionItemResolve.params
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
@@ -1161,7 +1220,8 @@ type lsp_result =
   | DefinitionResult of Definition.result
   | TypeDefinitionResult of TypeDefinition.result
   | ImplementationResult of Implementation.result
-  | CodeActionResult of CodeAction.result
+  | CodeActionResult of CodeAction.result * CodeActionRequest.params
+  | CodeActionResolveResult of CodeActionResolve.result
   | CompletionResult of Completion.result
   | CompletionItemResolveResult of CompletionItemResolve.result
   | WorkspaceSymbolResult of WorkspaceSymbol.result

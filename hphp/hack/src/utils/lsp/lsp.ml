@@ -250,6 +250,17 @@ module Initialize = struct
     | IncrementalSync [@value 2]
   [@@deriving enum]
 
+  module CodeActionOptions = struct
+    type t = { resolveProvider: bool }
+  end
+
+  module CompletionOptions = struct
+    type t = {
+      resolveProvider: bool;
+      completion_triggerCharacters: string list;
+    }
+  end
+
   type params = {
     processId: int option;
     rootPath: string option;
@@ -333,7 +344,7 @@ module Initialize = struct
   and server_capabilities = {
     textDocumentSync: textDocumentSyncOptions;
     hoverProvider: bool;
-    completionProvider: completionOptions option;
+    completionProvider: CompletionOptions.t option;
     signatureHelpProvider: signatureHelpOptions option;
     definitionProvider: bool;
     typeDefinitionProvider: bool;
@@ -342,7 +353,7 @@ module Initialize = struct
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;
     workspaceSymbolProvider: bool;
-    codeActionProvider: bool;
+    codeActionProvider: CodeActionOptions.t option;
     codeLensProvider: codeLensOptions option;
     documentFormattingProvider: bool;
     documentRangeFormattingProvider: bool;
@@ -352,11 +363,6 @@ module Initialize = struct
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
     rageProviderFB: bool;  (** Nuclide-specific feature *)
-  }
-
-  and completionOptions = {
-    resolveProvider: bool;
-    completion_triggerCharacters: string list;
   }
 
   and signatureHelpOptions = { sighelp_triggerCharacters: string list }
@@ -535,24 +541,38 @@ module Implementation = struct
   and result = Location.t list
 end
 
+(* textDocument/codeAction and codeAction/resolve *)
 module CodeAction = struct
-  type t = {
+  type 'a t = {
     title: string;
     kind: CodeActionKind.t;
     diagnostics: PublishDiagnostics.diagnostic list;
-    action: edit_and_or_command;
+    action: 'a edit_and_or_command;
   }
 
-  and edit_and_or_command =
+  and 'a edit_and_or_command =
     | EditOnly of WorkspaceEdit.t
     | CommandOnly of Command.t
     | BothEditThenCommand of (WorkspaceEdit.t * Command.t)
+    | UnresolvedEdit of 'a
+        (** UnresolvedEdit is for this flow:
+      client --textDocument/codeAction --> server --response_with_unresolved_fields-->
+      client --codeAction/resolve --> server --response_with_all_fields--> client
+    *)
+
+  type 'a command_or_action_ =
+    | Command of Command.t
+    | Action of 'a t
+
+  type resolved_marker = |
+
+  type resolved_command_or_action = resolved_marker command_or_action_
+
+  type resolvable_command_or_action = WorkspaceEdit.t Lazy.t command_or_action_
+
+  type command_or_action = unit command_or_action_
 
   type result = command_or_action list
-
-  and command_or_action =
-    | Command of Command.t
-    | Action of t
 end
 
 module CodeActionRequest = struct
@@ -568,6 +588,19 @@ module CodeActionRequest = struct
   }
 end
 
+module CodeActionResolve = struct
+  type result = CodeAction.resolved_command_or_action
+end
+
+(** method="codeAction/resolve" *)
+module CodeActionResolveRequest = struct
+  type params = {
+    data: CodeActionRequest.params;
+    title: string;
+  }
+end
+
+(* Completion request, method="textDocument/completion" *)
 module Completion = struct
   type completionItemKind =
     | Text [@value 1]
@@ -949,6 +982,7 @@ type lsp_request =
   | TypeDefinitionRequest of TypeDefinition.params
   | ImplementationRequest of Implementation.params
   | CodeActionRequest of CodeActionRequest.params
+  | CodeActionResolveRequest of CodeActionResolveRequest.params
   | CompletionRequest of Completion.params
   | CompletionItemResolveRequest of CompletionItemResolve.params
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
@@ -981,7 +1015,8 @@ type lsp_result =
   | DefinitionResult of Definition.result
   | TypeDefinitionResult of TypeDefinition.result
   | ImplementationResult of Implementation.result
-  | CodeActionResult of CodeAction.result
+  | CodeActionResult of CodeAction.result * CodeActionRequest.params
+  | CodeActionResolveResult of CodeActionResolve.result
   | CompletionResult of Completion.result
   | CompletionItemResolveResult of CompletionItemResolve.result
   | WorkspaceSymbolResult of WorkspaceSymbol.result
@@ -1070,6 +1105,7 @@ let lsp_result_to_log_string = function
   | TypeDefinitionResult _ -> "TypeDefinitionResult"
   | ImplementationResult _ -> "ImplementationResult"
   | CodeActionResult _ -> "CodeActionResult"
+  | CodeActionResolveResult _ -> "CodeActionResolveResult"
   | CompletionResult _ -> "CompletionResult"
   | CompletionItemResolveResult _ -> "CompletionItemResolveResult"
   | WorkspaceSymbolResult _ -> "WorkspaceSymbolResult"

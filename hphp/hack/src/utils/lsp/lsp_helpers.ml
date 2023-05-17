@@ -439,3 +439,9 @@ let showMessage_warning (writer : Jsonrpc.writer) =
 
 let showMessage_error (writer : Jsonrpc.writer) =
   showMessage writer MessageType.ErrorMessage
+
+let title_of_command_or_action =
+  Lsp.CodeAction.(
+    function
+    | Command Command.{ title; _ } -> title
+    | Action { title; _ } -> title)

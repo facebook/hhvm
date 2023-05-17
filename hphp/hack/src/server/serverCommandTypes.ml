@@ -535,7 +535,17 @@ type _ t =
   | IDE_AUTOCOMPLETE :
       string * position * bool
       -> AutocompleteTypes.ide_result t
-  | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
+  | CODE_ACTION : {
+      path: string;
+      range: range;
+    }
+      -> Lsp.CodeAction.command_or_action list t
+  | CODE_ACTION_RESOLVE : {
+      path: string;
+      range: range;
+      resolve_title: string;
+    }
+      -> Lsp.CodeAction.resolved_command_or_action t
   | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t

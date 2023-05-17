@@ -162,6 +162,12 @@ type _ t =
       because this is called so frequently by VSCode (when you switch tab, and every
       time the caret moves) in the hope that this will be a good balance of simple
       code and decent experience. *)
+  | Code_action_resolve : {
+      document: document;
+      range: Ide_api_types.range;
+      resolve_title: string;
+    }
+      -> Lsp.CodeActionResolve.result t
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -204,6 +210,11 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
   | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
+  | Code_action_resolve { document = { file_path; _ }; resolve_title; _ } ->
+    Printf.sprintf
+      "Code_action_resolve(%s, %s)"
+      (Path.to_string file_path)
+      resolve_title
   | Find_references ({ file_path; _ }, _, _) ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
   | Rename ({ file_path; _ }, _, _, _) ->

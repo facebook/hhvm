@@ -432,10 +432,16 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ~naming_table:env.naming_table)
     in
     (env, results)
-  | CODE_ACTIONS (path, range) ->
+  | CODE_ACTION { path; range } ->
     let (ctx, entry) = single_ctx_path env path in
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
     (env, actions)
+  | CODE_ACTION_RESOLVE { path; range; resolve_title } ->
+    let (ctx, entry) = single_ctx_path env path in
+    let action =
+      CodeActionsService.resolve ~ctx ~entry ~path ~range ~resolve_title
+    in
+    (env, action)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | OUTLINE path ->
     ( env,

@@ -514,30 +514,61 @@ let parse_kinds jsons : CodeActionKind.t list =
   List.map ~f:parse_kind jsons |> List.filter_opt
 
 let parse_codeActionRequest (j : json option) : CodeActionRequest.params =
-  CodeActionRequest.(
-    let parse_context c : CodeActionRequest.codeActionContext =
+  let parse_context c : CodeActionRequest.codeActionContext =
+    CodeActionRequest.
       {
         diagnostics =
           Jget.array_exn c "diagnostics" |> List.map ~f:parse_diagnostic;
         only = Jget.array_opt c "only" |> Option.map ~f:parse_kinds;
       }
-    in
+  in
+  CodeActionRequest.
     {
       textDocument =
         Jget.obj_exn j "textDocument" |> parse_textDocumentIdentifier;
       range = Jget.obj_exn j "range" |> parse_range_exn;
       context = Jget.obj_exn j "context" |> parse_context;
-    })
+    }
+
+let parse_codeActionResolveRequest (j : json option) :
+    CodeActionResolveRequest.params =
+  let data = Jget.obj_exn j "data" |> parse_codeActionRequest in
+  let title = Jget.string_exn j "title" in
+  CodeActionResolveRequest.{ data; title }
 
 (************************************************************************)
 
-let print_codeAction (c : CodeAction.t) : json =
+let print_codeAction
+    (c : 'a CodeAction.t)
+    ~(unresolved_to_code_action_request : 'a -> CodeActionRequest.params) : json
+    =
   CodeAction.(
-    let (edit, command) =
+    let (edit, command, data) =
       match c.action with
-      | EditOnly e -> (Some e, None)
-      | CommandOnly c -> (None, Some c)
-      | BothEditThenCommand (e, c) -> (Some e, Some c)
+      | EditOnly e -> (Some e, None, None)
+      | CommandOnly c -> (None, Some c, None)
+      | BothEditThenCommand (e, c) -> (Some e, Some c, None)
+      | UnresolvedEdit e ->
+        (None, None, Some (unresolved_to_code_action_request e))
+    in
+    let print_params CodeActionRequest.{ textDocument; range; context } =
+      Hh_json.JSON_Object
+        [
+          ( "textDocument",
+            Hh_json.JSON_Object
+              [
+                ( "uri",
+                  JSON_String
+                    (string_of_uri textDocument.TextDocumentIdentifier.uri) );
+              ] );
+          ("range", print_range range);
+          ( "context",
+            Hh_json.JSON_Object
+              [
+                ( "diagnostics",
+                  print_diagnostic_list context.CodeActionRequest.diagnostics );
+              ] );
+        ]
     in
     Jprint.object_opt
       [
@@ -546,15 +577,31 @@ let print_codeAction (c : CodeAction.t) : json =
         ("diagnostics", Some (print_diagnostic_list c.diagnostics));
         ("edit", Option.map edit ~f:print_documentRename);
         ("command", Option.map command ~f:print_command);
+        ("data", Option.map data ~f:print_params);
       ])
 
-let print_codeActionResult (c : CodeAction.result) : json =
+let print_codeActionResult
+    (c : CodeAction.result) (p : CodeActionRequest.params) : json =
   CodeAction.(
     let print_command_or_action = function
       | Command c -> print_command c
-      | Action c -> print_codeAction c
+      | Action c ->
+        print_codeAction c ~unresolved_to_code_action_request:(Fn.const p)
     in
     JSON_Array (List.map c ~f:print_command_or_action))
+
+let print_codeActionResolveResult (c : CodeActionResolve.result) : json =
+  let open CodeAction in
+  let print_command_or_action = function
+    | Command c -> print_command c
+    | Action c ->
+      let unresolved_to_code_action_request :
+          CodeAction.resolved_marker -> CodeActionRequest.params = function
+        | _ -> .
+      in
+      print_codeAction c ~unresolved_to_code_action_request
+  in
+  print_command_or_action c
 
 (************************************************************************)
 
@@ -1093,9 +1140,11 @@ let print_initialize (r : Initialize.result) : json =
                 Option.map cap.completionProvider ~f:(fun comp ->
                     JSON_Object
                       [
-                        ("resolveProvider", JSON_Bool comp.resolveProvider);
+                        ( "resolveProvider",
+                          JSON_Bool comp.CompletionOptions.resolveProvider );
                         ( "triggerCharacters",
-                          Jprint.string_array comp.completion_triggerCharacters
+                          Jprint.string_array
+                            comp.CompletionOptions.completion_triggerCharacters
                         );
                       ]) );
               ( "signatureHelpProvider",
@@ -1115,7 +1164,14 @@ let print_initialize (r : Initialize.result) : json =
                 Some (JSON_Bool cap.documentSymbolProvider) );
               ( "workspaceSymbolProvider",
                 Some (JSON_Bool cap.workspaceSymbolProvider) );
-              ("codeActionProvider", Some (JSON_Bool cap.codeActionProvider));
+              ( "codeActionProvider",
+                Option.map cap.codeActionProvider ~f:(fun provider ->
+                    JSON_Object
+                      [
+                        ( "resolveProvider",
+                          JSON_Bool provider.CodeActionOptions.resolveProvider
+                        );
+                      ]) );
               ( "codeLensProvider",
                 Option.map cap.codeLensProvider ~f:(fun codelens ->
                     JSON_Object
@@ -1262,6 +1318,8 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, CodeActionRequest p) ->
     Some p.CodeActionRequest.textDocument.uri
+  | RequestMessage (_, CodeActionResolveRequest p) ->
+    Some p.CodeActionResolveRequest.data.CodeActionRequest.textDocument.uri
   | RequestMessage (_, CompletionRequest p) ->
     Some p.Completion.loc.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentSymbolRequest p) ->
@@ -1340,6 +1398,7 @@ let request_name_to_string (request : lsp_request) : string =
   | CodeLensResolveRequest _ -> "codeLens/resolve"
   | HoverRequest _ -> "textDocument/hover"
   | CodeActionRequest _ -> "textDocument/codeAction"
+  | CodeActionResolveRequest _ -> "codeAction/resolve"
   | CompletionRequest _ -> "textDocument/completion"
   | CompletionItemResolveRequest _ -> "completionItem/resolve"
   | DefinitionRequest _ -> "textDocument/definition"
@@ -1374,6 +1433,7 @@ let result_name_to_string (result : lsp_result) : string =
   | CodeLensResolveResult _ -> "codeLens/resolve"
   | HoverResult _ -> "textDocument/hover"
   | CodeActionResult _ -> "textDocument/codeAction"
+  | CodeActionResolveResult _ -> "codeAction/resolve"
   | CompletionResult _ -> "textDocument/completion"
   | CompletionItemResolveResult _ -> "completionItem/resolve"
   | DefinitionResult _ -> "textDocument/definition"
@@ -1457,6 +1517,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/hover" -> HoverRequest (parse_hover params)
   | "textDocument/codeAction" ->
     CodeActionRequest (parse_codeActionRequest params)
+  | "codeAction/resolve" ->
+    CodeActionResolveRequest (parse_codeActionResolveRequest params)
   | "textDocument/completion" -> CompletionRequest (parse_completion params)
   | "completionItem/resolve" ->
     CompletionItemResolveRequest (parse_completionItem params)
@@ -1537,6 +1599,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | CodeLensResolveRequest _
   | HoverRequest _
   | CodeActionRequest _
+  | CodeActionResolveRequest _
   | CompletionRequest _
   | CompletionItemResolveRequest _
   | DefinitionRequest _
@@ -1608,6 +1671,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | ShutdownRequest
     | HoverRequest _
     | CodeActionRequest _
+    | CodeActionResolveRequest _
     | CodeLensResolveRequest _
     | CompletionRequest _
     | CompletionItemResolveRequest _
@@ -1651,7 +1715,8 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | ShutdownResult -> print_shutdown ()
     | CodeLensResolveResult r -> print_codeLensResolve r
     | HoverResult r -> print_hover r
-    | CodeActionResult r -> print_codeActionResult r
+    | CodeActionResult (r, p) -> print_codeActionResult r p
+    | CodeActionResolveResult r -> print_codeActionResolveResult r
     | CompletionResult r -> print_completion r
     | CompletionItemResolveResult r -> print_completionItem r
     | DefinitionResult r -> print_definition_locations r

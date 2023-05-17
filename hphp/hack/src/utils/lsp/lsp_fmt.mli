@@ -91,7 +91,10 @@ val print_documentRename : Lsp.Rename.result -> Hh_json.json
 
 val print_diagnostics : Lsp.PublishDiagnostics.params -> Hh_json.json
 
-val print_codeActionResult : Lsp.CodeAction.result -> Hh_json.json
+val print_codeActionResult :
+  Lsp.CodeAction.result -> Lsp.CodeActionRequest.params -> Hh_json.json
+
+val print_codeActionResolveResult : Lsp.CodeActionResolve.result -> Hh_json.json
 
 val print_logMessage : Lsp.MessageType.t -> string -> Hh_json.json
 

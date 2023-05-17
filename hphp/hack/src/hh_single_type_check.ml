@@ -2041,12 +2041,24 @@ let handle_mode
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range src in
+    let path = Relative_path.to_absolute path in
+    let resolve =
+      Lsp.CodeAction.(
+        function
+        | Action { title; _ } ->
+          (* Here (for simplicity) we are stressing CodeActionsService
+             more than a real client would: if the 'edit' field is provided
+             then the client should not request resolution but we always resolve.*)
+          CodeActionsService.resolve
+            ~ctx
+            ~entry
+            ~path
+            ~range
+            ~resolve_title:title
+        | Command _ as c -> c)
+    in
     let commands_or_actions =
-      CodeActionsService.go
-        ~ctx
-        ~entry
-        ~path:(Relative_path.to_absolute path)
-        ~range
+      CodeActionsService.go ~ctx ~entry ~path ~range |> List.map ~f:resolve
     in
     let hermeticize_paths =
       Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""
@@ -2055,7 +2067,8 @@ let handle_mode
       Format.printf "No commands or actions found\n"
     else
       commands_or_actions
-      |> Lsp_fmt.print_codeActionResult
+      |> List.map ~f:Lsp_fmt.print_codeActionResolveResult
+      |> Hh_json.array_ Fn.id
       |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
       |> hermeticize_paths
       |> Format.printf "%s\n"

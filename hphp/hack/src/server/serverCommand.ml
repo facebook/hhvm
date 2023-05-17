@@ -73,7 +73,8 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | IDE_AUTOCOMPLETE _ -> false
-  | CODE_ACTIONS _ -> false
+  | CODE_ACTION _ -> false
+  | CODE_ACTION_RESOLVE _ -> false
   | OUTLINE _ -> false
   | IDE_IDLE -> false
   | RAGE -> false

@@ -215,7 +215,8 @@ let edit_of_candidate
 
 let command_or_action_of_candidate ~path ~source_text candidate =
   let action =
-    Lsp.CodeAction.EditOnly (edit_of_candidate ~path ~source_text candidate)
+    Lsp.CodeAction.UnresolvedEdit
+      (lazy (edit_of_candidate ~path ~source_text candidate))
   in
   let code_action =
     {

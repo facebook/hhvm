@@ -10,4 +10,4 @@ val find :
   path:string ->
   entry:Provider_context.entry ->
   Provider_context.t ->
-  Lsp.CodeAction.command_or_action list
+  Lsp.CodeAction.resolvable_command_or_action list

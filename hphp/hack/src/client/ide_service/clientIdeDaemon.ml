@@ -1450,7 +1450,6 @@ let handle_request
     in
 
     let path = Path.to_string document.file_path in
-    (* TODO: should be using RelativePath.t, not string *)
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.go ~ctx ~entry ~path ~range)
@@ -1488,6 +1487,17 @@ let handle_request
         Some (Errors.sort_and_finalize errors)
     in
     Lwt.return (Initialized istate, Ok (results, errors_opt))
+  (* Code action resolve (refactorings, quickfixes) *)
+  | (Initialized istate, Code_action_resolve { document; range; resolve_title })
+    ->
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
+
+    let path = Path.to_string document.file_path in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          CodeActionsService.resolve ~ctx ~entry ~path ~range ~resolve_title)
+    in
+    Lwt.return (Initialized istate, Ok result)
   (* Go to definition *)
   | (Initialized istate, Definition (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in

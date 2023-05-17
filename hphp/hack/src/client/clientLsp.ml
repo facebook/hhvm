@@ -3719,17 +3719,41 @@ let do_codeAction_local
   in
   Lwt.return (actions, file_path, errors_opt)
 
-let do_codeAction
+let do_codeAction_resolve_local
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : CodeActionRequest.params)
+    ~(resolve_title : string) : CodeActionResolve.result Lwt.t =
+  let text_document =
+    get_text_document_item
+      editor_open_files
+      params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
+  in
+  let document = lsp_document_to_ide text_document in
+  let range = lsp_range_to_ide params.CodeActionRequest.range in
+  ide_rpc
+    ide_service
+    ~env
+    ~tracking_id
+    ~ref_unblocked_time
+    (ClientIdeMessage.Code_action_resolve { document; range; resolve_title })
+
+let do_codeAction_resolve
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (params : CodeActionRequest.params) :
-    CodeAction.command_or_action list Lwt.t =
-  let filename =
+    (params : CodeActionRequest.params)
+    ~(resolve_title : string) : CodeActionResolve.result Lwt.t =
+  let path =
     lsp_uri_to_path
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  let command = ServerCommandTypes.CODE_ACTIONS (filename, range) in
+  let command =
+    ServerCommandTypes.CODE_ACTION_RESOLVE { path; range; resolve_title }
+  in
   rpc conn ref_unblocked_time ~desc:"code_actions" command
 
 let do_signatureHelp
@@ -4795,11 +4819,12 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           hoverProvider = true;
           completionProvider =
             Some
-              {
-                resolveProvider = true;
-                completion_triggerCharacters =
-                  ["$"; ">"; "\\"; ":"; "<"; "["; "'"; "\""; "{"; "#"];
-              };
+              CompletionOptions.
+                {
+                  resolveProvider = true;
+                  completion_triggerCharacters =
+                    ["$"; ">"; "\\"; ":"; "<"; "["; "'"; "\""; "{"; "#"];
+                };
           signatureHelpProvider =
             Some { sighelp_triggerCharacters = ["("; ","] };
           definitionProvider = true;
@@ -4809,7 +4834,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           documentHighlightProvider = true;
           documentSymbolProvider = true;
           workspaceSymbolProvider = true;
-          codeActionProvider = true;
+          codeActionProvider = Some CodeActionOptions.{ resolveProvider = true };
           codeLensProvider = None;
           documentFormattingProvider = true;
           documentRangeFormattingProvider = true;
@@ -5737,7 +5762,10 @@ let handle_client_message
           editor_open_files
           params
       in
-      respond_jsonrpc ~powered_by:Serverless_ide id (CodeActionResult result);
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (CodeActionResult (result, params));
       begin
         match errors_opt with
         | None -> ()
@@ -5746,13 +5774,47 @@ let handle_client_message
       end;
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
-    (* textDocument/codeAction request, when not in serverless IDE mode *)
-    | (Main_loop menv, None, RequestMessage (id, CodeActionRequest params)) ->
+    (* codeAction/resolve request *)
+    | (_, Some ide_service, RequestMessage (id, CodeActionResolveRequest params))
+      ->
+      let CodeActionResolveRequest.{ data = code_action_request_params; title }
+          =
+        params
+      in
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result = do_codeAction menv.conn ref_unblocked_time params in
-      respond_jsonrpc ~powered_by:Hh_server id (CodeActionResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      let%lwt result =
+        do_codeAction_resolve_local
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          code_action_request_params
+          ~resolve_title:title
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (CodeActionResolveResult result);
+      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
+    (* codeAction/resolve request, when not in serverless IDE mode *)
+    | ( Main_loop menv,
+        None,
+        RequestMessage (id, CodeActionResolveRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let CodeActionResolveRequest.{ data = code_action_request_params; title }
+          =
+        params
+      in
+      let%lwt result =
+        do_codeAction_resolve
+          menv.conn
+          ref_unblocked_time
+          code_action_request_params
+          ~resolve_title:title
+      in
+      respond_jsonrpc ~powered_by:Hh_server id (CodeActionResolveResult result);
+      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
     (* textDocument/formatting *)
     | (_, _, RequestMessage (id, DocumentFormattingRequest params)) ->
       let result = do_documentFormatting editor_open_files params in

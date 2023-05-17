@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(_ $z): _ {\n    $x = $z->meth($z);\n    return $x;\n  }\n\n",
+            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"$x = self::method0($z);",
+            "range":{"end":{"character":22,"line":6},"start":{"character":4,"line":6}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(): void {\n    $x = 1;\n  }\n\n",
+            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"self::method0();",
+            "range":{"end":{"character":29,"line":6},"start":{"character":22,"line":6}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

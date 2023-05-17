@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(int $param1, _ $param2): void {\n    $param1 = $param1;\n    $z = $param2;\n  }\n\n",
+            "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
+          },
+          {
+            "newText":"self::method0($param1, $param2);",
+            "range":{"end":{"character":17,"line":14},"start":{"character":4,"line":13}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

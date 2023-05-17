@@ -378,6 +378,7 @@
   collections
   decl_provider
   errors
+  extract_method
   full_fidelity
   lsp
   pos

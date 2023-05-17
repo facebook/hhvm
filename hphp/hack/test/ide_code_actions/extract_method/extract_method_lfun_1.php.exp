@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(bool $referenced): void {\n    (\n      () ==> {\n        $shadowed = false || $referenced;\n      }\n    );\n  }\n\n",
+            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"self::method0($referenced);",
+            "range":{"end":{"character":7,"line":9},"start":{"character":4,"line":7}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

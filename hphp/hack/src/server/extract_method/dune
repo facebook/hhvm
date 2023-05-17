@@ -1,0 +1,13 @@
+(library
+ (name extract_method)
+ (wrapped true)
+ (libraries
+  annotated_ast
+  ast
+  full_fidelity
+  lsp
+  pos
+  provider_context
+  tast_env
+  tast_provider
+  utils_core))

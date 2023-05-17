@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(): (_, _) {\n  concurrent {\n          $x = await gen_int();\n          $y = await gen_int();\n      return tuple($x, $y);\n  }\n\n",
+            "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
+          },
+          {
+            "newText":"list($x, $y) = self::method0();",
+            "range":{"end":{"character":29,"line":11},"start":{"character":4,"line":9}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

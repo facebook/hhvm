@@ -2043,6 +2043,11 @@ let handle_mode
     let range = find_ide_range src in
     let path = Relative_path.to_absolute path in
     let resolve =
+      (* Simulate the resolution flow:
+         If server replies to textDocument/codeAction with neither 'edit' nor 'command',
+         and the user selects the code action
+         then the client sends codeAction/resolve to resolve the code action
+      *)
       Lsp.CodeAction.(
         function
         | Action { title; _ } ->

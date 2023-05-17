@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private function method0(): int {\n    $return = $this->one();\n    return $return;\n  }\n\n",
+            "range":{"end":{"character":0,"line":6},"start":{"character":0,"line":6}}
+          },
+          {
+            "newText":"$return = $this->method0();",
+            "range":{"end":{"character":27,"line":9},"start":{"character":4,"line":9}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

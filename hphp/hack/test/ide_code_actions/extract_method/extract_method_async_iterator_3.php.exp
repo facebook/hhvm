@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"    private static async function method0(int $x): AsyncKeyedIterator<_, _, _> {\n    foreach (async_keyed_it() await as $k => $v) {\n              $x++\n            }\n            await gen_void();\n    }\n\n",
+            "range":{"end":{"character":0,"line":10},"start":{"character":0,"line":10}}
+          },
+          {
+            "newText":"foreach (self::method0($x) await as $key__ => $value__) {\n            \n        }",
+            "range":{"end":{"character":25,"line":16},"start":{"character":8,"line":13}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

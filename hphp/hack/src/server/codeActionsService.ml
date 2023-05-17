@@ -199,6 +199,7 @@ let find
   actions_for_errors errors path classish_starts ~start_line ~start_col
   @ override_method_commands_or_actions
   @ variable_actions
+  @ Extract_method.find ~range:lsp_range ~path ~entry ctx
   @ CodeActionsServiceFlipAroundComma.find ~range:lsp_range ~path ~entry ctx
 
 let go

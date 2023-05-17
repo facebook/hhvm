@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static function method0(int $param1, int $param2, int $param3_and_ret1): (int, int) {\n    $param3_and_ret1 = $param3_and_ret1 + $param1;\n    $local = $param3_and_ret1 + $param2;\n    $param3_and_ret1 = $local;\n    $ret2 = 1;\n    return tuple($param3_and_ret1, $ret2);\n  }\n\n",
+            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"list($param3_and_ret1, $ret2) = self::method0($param1, $param2, $param3_and_ret1);",
+            "range":{"end":{"character":14,"line":12},"start":{"character":4,"line":9}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

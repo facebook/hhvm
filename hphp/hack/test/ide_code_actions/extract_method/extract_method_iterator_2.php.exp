@@ -5,12 +5,12 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"$placeholder0 = 1 * 2;\n    ",
-            "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
+            "newText":"$placeholder0 = yield 2 => \"\";\n    ",
+            "range":{"end":{"character":4,"line":5},"start":{"character":4,"line":5}}
           },
           {
             "newText":"$placeholder0",
-            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
+            "range":{"end":{"character":17,"line":5},"start":{"character":4,"line":5}}
           }
         ]
       }
@@ -24,12 +24,12 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(): int {\n    return 1 * 2;\n  }\n\n",
+            "newText":"  private static function method0(): KeyedIterator<_> {\n    yield 2 => \"\";\n  }\n\n",
             "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
           },
           {
-            "newText":"self::method0()",
-            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
+            "newText":"foreach (self::method0() as $key__ => $value__) {\n      \n    }",
+            "range":{"end":{"character":18,"line":5},"start":{"character":4,"line":5}}
           }
         ]
       }

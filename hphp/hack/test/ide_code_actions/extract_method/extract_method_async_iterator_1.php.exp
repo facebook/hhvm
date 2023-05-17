@@ -1,0 +1,21 @@
+[
+  {
+    "diagnostics":[],
+    "edit":{
+      "changes":{
+        "FILE.php":[
+          {
+            "newText":"  private static async function method0(int $x): AsyncIterator<_, _, _> {\n    await gen_void();\n    $y = $x;\n    yield 3;\n  }\n\n",
+            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+          },
+          {
+            "newText":"foreach (self::method0($x) await as $value__) {\n      /* TODO: assign to $y */\n      \n    }",
+            "range":{"end":{"character":12,"line":7},"start":{"character":4,"line":5}}
+          }
+        ]
+      }
+    },
+    "kind":"refactor",
+    "title":"Extract into method"
+  }
+]

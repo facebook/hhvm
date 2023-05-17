@@ -5,12 +5,12 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"$placeholder0 = 1 * 2;\n    ",
-            "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
+            "newText":"$placeholder0 = 3 + 2;\n        ",
+            "range":{"end":{"character":8,"line":10},"start":{"character":8,"line":10}}
           },
           {
             "newText":"$placeholder0",
-            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
+            "range":{"end":{"character":33,"line":10},"start":{"character":28,"line":10}}
           }
         ]
       }
@@ -24,12 +24,12 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(): int {\n    return 1 * 2;\n  }\n\n",
-            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+            "newText":"  private static function method0(): int {\n    return 3 + 2;\n  }\n\n",
+            "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
           },
           {
             "newText":"self::method0()",
-            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
+            "range":{"end":{"character":33,"line":10},"start":{"character":28,"line":10}}
           }
         ]
       }

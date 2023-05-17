@@ -276,9 +276,8 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
 
   if (FLAGS_use_ack_receive_timestamps) {
     hqParams.transportSettings.maybeAckReceiveTimestampsConfigSentToPeer.assign(
-        {.max_receive_timestamps_per_ack =
-             FLAGS_max_ack_receive_timestamps_to_send,
-         .receive_timestamps_exponent = kDefaultReceiveTimestampsExponent});
+        {.maxReceiveTimestampsPerAck = FLAGS_max_ack_receive_timestamps_to_send,
+         .receiveTimestampsExponent = kDefaultReceiveTimestampsExponent});
   }
 } // initializeTransportSettings
 

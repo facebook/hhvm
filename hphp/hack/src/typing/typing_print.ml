@@ -1418,6 +1418,11 @@ module Json = struct
     | "inout" -> Some FPinout
     | _ -> None
 
+  let is_like ty =
+    match get_node ty with
+    | Tunion tyl -> List.exists tyl ~f:is_dynamic
+    | _ -> false
+
   let rec from_type : env -> locl_ty -> json =
    fun env ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
@@ -1534,7 +1539,11 @@ module Json = struct
     end
     | (p, Tintersection []) -> obj @@ kind p "mixed"
     | (_, Tintersection [ty]) -> from_type env ty
-    | (p, Tintersection tyl) -> obj @@ kind p "intersection" @ args tyl
+    | (p, Tintersection tyl) -> begin
+      match List.find tyl ~f:is_like with
+      | None -> obj @@ kind p "intersection" @ args tyl
+      | Some ty -> from_type env ty
+    end
     | (p, Tfun ft) ->
       let fun_kind p = kind p "function" in
       let callconv cc =

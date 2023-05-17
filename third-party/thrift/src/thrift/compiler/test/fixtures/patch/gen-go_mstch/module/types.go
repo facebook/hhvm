@@ -474,8 +474,7 @@ type InnerUnion struct {
 var _ thrift.Struct = &InnerUnion{}
 
 func NewInnerUnion() *InnerUnion {
-    return (&InnerUnion{}).
-        SetInnerOptionNonCompat([]byte(""))
+    return (&InnerUnion{})
 }
 
 func (x *InnerUnion) GetInnerOptionNonCompat() []byte {
@@ -642,10 +641,7 @@ type MyUnion struct {
 var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{}).
-        SetOption1NonCompat("").
-        SetOption2NonCompat(0).
-        SetOption3NonCompat(*NewInnerUnion())
+    return (&MyUnion{})
 }
 
 func (x *MyUnion) GetOption1NonCompat() *string {

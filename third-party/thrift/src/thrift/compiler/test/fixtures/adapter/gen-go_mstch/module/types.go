@@ -2032,12 +2032,7 @@ type Baz struct {
 var _ thrift.Struct = &Baz{}
 
 func NewBaz() *Baz {
-    return (&Baz{}).
-        SetIntFieldNonCompat(0).
-        SetSetFieldNonCompat(NewSetWithAdapter()).
-        SetMapFieldNonCompat(make(map[string]ListWithElemAdapterWithAdapter)).
-        SetBinaryFieldNonCompat([]byte("")).
-        SetLongFieldNonCompat(NewMyI64())
+    return (&Baz{})
 }
 
 func (x *Baz) GetIntFieldNonCompat() *int32 {
@@ -7303,9 +7298,7 @@ type AdaptTestUnion struct {
 var _ thrift.Struct = &AdaptTestUnion{}
 
 func NewAdaptTestUnion() *AdaptTestUnion {
-    return (&AdaptTestUnion{}).
-        SetDelayNonCompat(NewDurationMs()).
-        SetCustomNonCompat(NewCustomProtocolType())
+    return (&AdaptTestUnion{})
 }
 
 func (x *AdaptTestUnion) GetDelayNonCompat() *DurationMs {

@@ -2111,9 +2111,7 @@ type Union1 struct {
 var _ thrift.Struct = &Union1{}
 
 func NewUnion1() *Union1 {
-    return (&Union1{}).
-        SetINonCompat(0).
-        SetDNonCompat(0.0)
+    return (&Union1{})
 }
 
 func (x *Union1) GetINonCompat() *int32 {
@@ -2359,11 +2357,7 @@ type Union2 struct {
 var _ thrift.Struct = &Union2{}
 
 func NewUnion2() *Union2 {
-    return (&Union2{}).
-        SetINonCompat(0).
-        SetDNonCompat(0.0).
-        SetSNonCompat(*NewStruct1()).
-        SetUNonCompat(*NewUnion1())
+    return (&Union2{})
 }
 
 func (x *Union2) GetINonCompat() *int32 {

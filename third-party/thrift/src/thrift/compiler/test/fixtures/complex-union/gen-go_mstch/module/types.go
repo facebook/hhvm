@@ -99,13 +99,7 @@ type ComplexUnion struct {
 var _ thrift.Struct = &ComplexUnion{}
 
 func NewComplexUnion() *ComplexUnion {
-    return (&ComplexUnion{}).
-        SetIntValueNonCompat(0).
-        SetStringValueNonCompat("").
-        SetIntListValueNonCompat(make([]int64, 0)).
-        SetStringListValueNonCompat(make([]string, 0)).
-        SetTypedefValueNonCompat(NewContainerTypedef()).
-        SetStringRefNonCompat("")
+    return (&ComplexUnion{})
 }
 
 func (x *ComplexUnion) GetIntValueNonCompat() *int64 {
@@ -699,9 +693,7 @@ type ListUnion struct {
 var _ thrift.Struct = &ListUnion{}
 
 func NewListUnion() *ListUnion {
-    return (&ListUnion{}).
-        SetIntListValueNonCompat(make([]int64, 0)).
-        SetStringListValueNonCompat(make([]string, 0))
+    return (&ListUnion{})
 }
 
 func (x *ListUnion) GetIntListValueNonCompat() []int64 {
@@ -997,9 +989,7 @@ type DataUnion struct {
 var _ thrift.Struct = &DataUnion{}
 
 func NewDataUnion() *DataUnion {
-    return (&DataUnion{}).
-        SetBinaryDataNonCompat([]byte("")).
-        SetStringDataNonCompat("")
+    return (&DataUnion{})
 }
 
 func (x *DataUnion) GetBinaryDataNonCompat() []byte {
@@ -1510,9 +1500,7 @@ type ValUnion struct {
 var _ thrift.Struct = &ValUnion{}
 
 func NewValUnion() *ValUnion {
-    return (&ValUnion{}).
-        SetV1NonCompat(*NewVal()).
-        SetV2NonCompat(*NewVal())
+    return (&ValUnion{})
 }
 
 func (x *ValUnion) GetV1NonCompat() *Val {
@@ -1774,9 +1762,7 @@ type VirtualComplexUnion struct {
 var _ thrift.Struct = &VirtualComplexUnion{}
 
 func NewVirtualComplexUnion() *VirtualComplexUnion {
-    return (&VirtualComplexUnion{}).
-        SetThingOneNonCompat("").
-        SetThingTwoNonCompat("")
+    return (&VirtualComplexUnion{})
 }
 
 func (x *VirtualComplexUnion) GetThingOneNonCompat() *string {
@@ -2158,8 +2144,7 @@ type NonCopyableUnion struct {
 var _ thrift.Struct = &NonCopyableUnion{}
 
 func NewNonCopyableUnion() *NonCopyableUnion {
-    return (&NonCopyableUnion{}).
-        SetSNonCompat(*NewNonCopyableStruct())
+    return (&NonCopyableUnion{})
 }
 
 func (x *NonCopyableUnion) GetSNonCompat() *NonCopyableStruct {

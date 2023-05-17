@@ -894,11 +894,7 @@ type MyUnion struct {
 var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{}).
-        SetMyEnumNonCompat(0).
-        SetMyStructNonCompat(*NewMyStruct()).
-        SetMyDataItemNonCompat(*NewMyDataItem()).
-        SetFloatSetNonCompat(make([]float32, 0))
+    return (&MyUnion{})
 }
 
 func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
@@ -1475,8 +1471,7 @@ type UnionToBeRenamed struct {
 var _ thrift.Struct = &UnionToBeRenamed{}
 
 func NewUnionToBeRenamed() *UnionToBeRenamed {
-    return (&UnionToBeRenamed{}).
-        SetReservedFieldNonCompat(0)
+    return (&UnionToBeRenamed{})
 }
 
 func (x *UnionToBeRenamed) GetReservedFieldNonCompat() *int32 {

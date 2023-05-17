@@ -278,9 +278,7 @@ type MyUnion struct {
 var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{}).
-        SetMyEnumNonCompat(0).
-        SetMyDataItemNonCompat(*NewMyStruct())
+    return (&MyUnion{})
 }
 
 func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {

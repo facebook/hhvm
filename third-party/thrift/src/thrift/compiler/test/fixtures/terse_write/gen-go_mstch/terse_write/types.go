@@ -202,21 +202,7 @@ type MyUnion struct {
 var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{}).
-        SetBoolFieldNonCompat(false).
-        SetByteFieldNonCompat(0).
-        SetShortFieldNonCompat(0).
-        SetIntFieldNonCompat(0).
-        SetLongFieldNonCompat(0).
-        SetFloatFieldNonCompat(0.0).
-        SetDoubleFieldNonCompat(0.0).
-        SetStringFieldNonCompat("").
-        SetBinaryFieldNonCompat([]byte("")).
-        SetEnumFieldNonCompat(0).
-        SetListFieldNonCompat(make([]int16, 0)).
-        SetSetFieldNonCompat(make([]int16, 0)).
-        SetMapFieldNonCompat(make(map[int16]int16)).
-        SetStructFieldNonCompat(*NewMyStruct())
+    return (&MyUnion{})
 }
 
 func (x *MyUnion) GetBoolFieldNonCompat() *bool {

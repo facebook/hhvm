@@ -225,9 +225,7 @@ type TypeUri struct {
 var _ thrift.Struct = &TypeUri{}
 
 func NewTypeUri() *TypeUri {
-    return (&TypeUri{}).
-        SetUriNonCompat(NewUri()).
-        SetTypeHashPrefixSha2_256NonCompat(NewByteString())
+    return (&TypeUri{})
 }
 
 func (x *TypeUri) GetUriNonCompat() *Uri {
@@ -485,24 +483,7 @@ type TypeName struct {
 var _ thrift.Struct = &TypeName{}
 
 func NewTypeName() *TypeName {
-    return (&TypeName{}).
-        SetBoolTypeNonCompat(0).
-        SetByteTypeNonCompat(0).
-        SetI16TypeNonCompat(0).
-        SetI32TypeNonCompat(0).
-        SetI64TypeNonCompat(0).
-        SetFloatTypeNonCompat(0).
-        SetDoubleTypeNonCompat(0).
-        SetStringTypeNonCompat(0).
-        SetBinaryTypeNonCompat(0).
-        SetEnumTypeNonCompat(*NewTypeUri()).
-        SetTypedefTypeNonCompat(*NewTypeUri()).
-        SetStructTypeNonCompat(*NewTypeUri()).
-        SetUnionTypeNonCompat(*NewTypeUri()).
-        SetExceptionTypeNonCompat(*NewTypeUri()).
-        SetListTypeNonCompat(0).
-        SetSetTypeNonCompat(0).
-        SetMapTypeNonCompat(0)
+    return (&TypeName{})
 }
 
 func (x *TypeName) GetBoolTypeNonCompat() *Void {

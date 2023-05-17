@@ -264,9 +264,7 @@ type U struct {
 var _ thrift.Struct = &U{}
 
 func NewU() *U {
-    return (&U{}).
-        SetINonCompat(0).
-        SetSNonCompat("")
+    return (&U{})
 }
 
 func (x *U) GetINonCompat() *int32 {

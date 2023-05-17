@@ -7,10 +7,49 @@
  *)
 open Hh_prelude
 
-type candidate = {
-  text: string;
-  pos: Pos.t;
-}
+module Candidate : sig
+  (**
+In `foo(param_a, param_b, param_c)`
+                         ^
+                         |
+                        selection
+
+  `positions` is the positions of each of the params
+  `insertion_index` is 2 (in bounds by construction)
+  `pos` is the span from the start of `param_a` to the end of `param_c`
+ *)
+  type t = private {
+    positions: Pos.t list;
+    insertion_index: int;
+    pos: Pos.t;
+  }
+
+  val create_exn : positions:Pos.t list -> insertion_index:int -> t
+end = struct
+  type t = {
+    positions: Pos.t list;
+    insertion_index: int;
+    pos: Pos.t;
+  }
+
+  let create_exn ~positions ~insertion_index =
+    if insertion_index >= List.length positions then begin
+      HackEventLogger.invariant_violation_bug
+        ~data:
+          (Printf.sprintf
+             "insertion index: %d positions length: %d"
+             insertion_index
+             (List.length positions))
+        "flip around comma: insertion index out of bounds";
+      failwith "flip around comma: insertion index out of bounds"
+    end else
+      let pos =
+        let first = List.hd_exn positions in
+        let last = List.last_exn positions in
+        Pos.merge first last
+      in
+      { insertion_index; positions; pos }
+end
 
 let source_slice ~source_text pos =
   let offset =
@@ -29,20 +68,6 @@ let list_flip ~insertion_index l =
   in
   aux 0 l
 
-let create_candidate ~insertion_index ~source_text (positions : Pos.t list) :
-    candidate option =
-  let open Option.Let_syntax in
-  let* first = List.hd positions in
-  let* last = List.last positions in
-  let text =
-    positions
-    |> List.map ~f:(source_slice ~source_text)
-    |> list_flip ~insertion_index
-    |> String.concat ~sep:", "
-  in
-  let pos = Pos.merge first last in
-  Some { pos; text }
-
 let find_insertion_index ~(cursor : Pos.t) (positions : Pos.t list) : int option
     =
   let is_after_cursor pos = Pos.start_offset pos > Pos.start_offset cursor in
@@ -52,11 +77,11 @@ let find_insertion_index ~(cursor : Pos.t) (positions : Pos.t list) : int option
   else
     None
 
-let find_candidate ~(cursor : Pos.t) ~source_text (positions : Pos.t list) :
-    candidate option =
+let find_candidate ~(cursor : Pos.t) (positions : Pos.t list) :
+    Candidate.t option =
   find_insertion_index ~cursor positions
-  |> Option.bind ~f:(fun insertion_index ->
-         create_candidate ~insertion_index ~source_text positions)
+  |> Option.map ~f:(fun insertion_index ->
+         Candidate.create_exn ~insertion_index ~positions)
 
 let pos_of_expr = Tuple3.get2
 
@@ -76,8 +101,8 @@ let option_or_thunk opt ~f =
   | Some _ -> opt
   | None -> f ()
 
-let visitor ~(cursor : Pos.t) ~source_text =
-  let find_in_positions = find_candidate ~cursor ~source_text in
+let visitor ~(cursor : Pos.t) =
+  let find_in_positions = find_candidate ~cursor in
   let find_in_positions_params params =
     let is_easy_to_flip param =
       Aast_defs.(
@@ -110,9 +135,8 @@ let visitor ~(cursor : Pos.t) ~source_text =
     else
       None
   in
-
   object
-    inherit [candidate option] Tast_visitor.reduce as super
+    inherit [Candidate.t option] Tast_visitor.reduce as super
 
     method zero = None
 
@@ -170,7 +194,14 @@ let visitor ~(cursor : Pos.t) ~source_text =
           | _ -> None)
   end
 
-let command_or_action_of_candidate ~path { pos; text } =
+let edit_of_candidate
+    ~path ~source_text Candidate.{ insertion_index; positions; pos } =
+  let text =
+    positions
+    |> List.map ~f:(source_slice ~source_text)
+    |> list_flip ~insertion_index
+    |> String.concat ~sep:", "
+  in
   let change =
     Lsp.
       {
@@ -180,12 +211,18 @@ let command_or_action_of_candidate ~path { pos; text } =
       }
   in
   let changes = SMap.singleton path [change] in
+  Lsp.WorkspaceEdit.{ changes }
+
+let command_or_action_of_candidate ~path ~source_text candidate =
+  let action =
+    Lsp.CodeAction.EditOnly (edit_of_candidate ~path ~source_text candidate)
+  in
   let code_action =
     {
       Lsp.CodeAction.title = "Flip around comma";
       kind = Lsp.CodeActionKind.refactor;
       diagnostics = [];
-      action = Lsp.CodeAction.EditOnly Lsp.WorkspaceEdit.{ changes };
+      action;
     }
   in
   Lsp.CodeAction.Action code_action
@@ -213,8 +250,8 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
           entry.Provider_context.path
           range
       in
-      (visitor ~cursor ~source_text)#go ctx tast
-      |> Option.map ~f:(command_or_action_of_candidate ~path)
+      (visitor ~cursor)#go ctx tast
+      |> Option.map ~f:(command_or_action_of_candidate ~path ~source_text)
       |> Option.to_list
     | _ -> []
   else

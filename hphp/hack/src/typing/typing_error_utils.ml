@@ -6066,6 +6066,17 @@ end = struct
         aux err st
       | With_reasons (err, reasons) ->
         aux err Error_state.{ st with reasons_opt = Some reasons }
+      | Add_quickfixes (err, qfxs) ->
+        aux
+          err
+          Error_state.
+            {
+              st with
+              quickfixes_opt =
+                Option.first_some
+                  (Option.map ~f:(List.append qfxs) st.quickfixes_opt)
+                  (Some qfxs);
+            }
       | Add_reason (err, op, reason) -> aux_reason_op op err reason st
       | Retain (t, comp) -> aux_retain t comp st
       | Incoming_reasons (err, op) ->

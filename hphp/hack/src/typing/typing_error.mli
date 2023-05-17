@@ -1714,6 +1714,7 @@ and Reasons_callback : sig
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
+    | Add_quickfixes of t * Pos.t Quickfix.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
     | From_on_error of
         ((?code:int ->
@@ -1766,6 +1767,11 @@ and Reasons_callback : sig
       `User_error.t` that is obtained when the callback is applied
   *)
   val with_reasons : t -> reasons:Pos_or_decl.t Message.t list Lazy.t -> t
+
+  (** Add a `quickfix` to the `User_error.t` generated when the callback is
+      applied
+  *)
+  val add_quickfixes : t -> Pos.t Quickfix.t list -> t
 
   (** Add the `reason` to the start of current list of reasons *)
   val prepend_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t

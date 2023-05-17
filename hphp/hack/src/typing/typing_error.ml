@@ -2216,6 +2216,7 @@ and Reasons_callback : sig
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
+    | Add_quickfixes of t * Pos.t Quickfix.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
     | From_on_error of
         ((?code:int ->
@@ -2253,6 +2254,8 @@ and Reasons_callback : sig
   val with_code : t -> code:Error_code.t -> t
 
   val with_reasons : t -> reasons:Pos_or_decl.t Message.t list Lazy.t -> t
+
+  val add_quickfixes : t -> Pos.t Quickfix.t list -> t
 
   val prepend_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t
 
@@ -2347,6 +2350,7 @@ end = struct
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
+    | Add_quickfixes of t * Pos.t Quickfix.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
     | From_on_error of
         ((?code:int ->
@@ -2371,6 +2375,7 @@ end = struct
       | Incoming_reasons (t, _)
       | With_code (t, _)
       | With_reasons (t, _)
+      | Add_quickfixes (t, _)
       | Add_reason (t, _, _)
       | Prepend_on_apply (t, _)
       | Drop_reasons_on_apply t ->
@@ -2395,6 +2400,8 @@ end = struct
   let with_code t ~code = With_code (t, code)
 
   let with_reasons t ~reasons = With_reasons (t, reasons)
+
+  let add_quickfixes t qfxs = Add_quickfixes (t, qfxs)
 
   let prepend_reason t ~reason = Add_reason (t, Prepend, reason)
 

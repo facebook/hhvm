@@ -8,75 +8,6 @@
 
 module Error_code = Error_codes.Typing
 
-module Eval_result : sig
-  (* The type representing the result of evaluating a `Typing_error.t` to
-     some atomic result type `'a` whilst retaining information about
-     intersections of errors *)
-  type 'a t
-
-  val to_string : 'a t -> ('a -> string) -> string
-
-  (* Given some predicate telling us whether an atomic error is suppressed,
-     filter the result to ensure that we don't report intersections of errors
-     where at least one error would not be reported (meaning that none should
-     be reported).
-
-     If there is some component of the  result which is suppressed, we will
-     get at most one atomic result back. If not, we may get back arbitrary
-     intersections of errors.
-
-     examples
-
-     1) suppress_intersection
-         (Intersect
-           [ Intersect
-               [ Intersect
-                  [ Single 2
-                  ; Single 3
-                  ]
-                ; Single 1
-                ]
-            ; Single 4
-            ]
-          ) ~is_suppressed:(fun x -> x = 2)
-          === Single 2
-
-      2) suppress_intersection (Single 2) ~is_suppressed:(fun x -> x = 2)
-         === Single 2
-
-
-      3) suppress_intersection
-          ( Intersect
-             [ Single 1
-             ; Intersect
-                [ Single 3
-                ; Intersect
-                   [ Single 4
-                   ; Single 5
-                   ]
-                ]
-             ]
-          )  ~is_suppressed:(fun x -> x = 2)
-          === Intersect
-                [ Single 1
-                ; Intersect
-                   [ Single 3
-                   ; Intersect
-                      [ Single 4
-                      ; Single 5
-                      ]
-                   ]
-                ]
-  *)
-  val suppress_intersection : 'a t -> is_suppressed:('a -> bool) -> 'a t
-
-  val iter : 'a t -> f:('a -> unit) -> unit
-end
-
-module Error : sig
-  type t
-end
-
 module Primary : sig
   module Shape : sig
     type t =
@@ -1380,11 +1311,21 @@ module Primary : sig
         kind: [ `meth | `prop ];
       }
   [@@deriving show]
-
-  val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
 end
 
-module Secondary : sig
+module rec Error : sig
+  type t =
+    | Primary of Primary.t
+    | Apply of Callback.t * t
+    | Apply_reasons of Reasons_callback.t * Secondary.t
+    | Assert_in_current_decl of Secondary.t * Pos_or_decl.ctx
+    | Multiple of t list
+    | Union of t list
+    | Intersection of t list
+    | With_code of t * Error_code.t
+end
+
+and Secondary : sig
   (** Specific error information which needs to be given a primary position from
        the AST being typed to be transformable into a user error.
        This can be done via applying a [Reasons_callback.t] using
@@ -1673,9 +1614,16 @@ module Secondary : sig
   [@@deriving show]
 end
 
-module Callback : sig
+and Callback : sig
   (** A mechanism to apply transformations to primary errors *)
-  type t [@@deriving show]
+  type t =
+    | Always of Primary.t
+    | Of_primary of Primary.t
+    | With_claim_as_reason of t * Primary.t
+    | With_code of Error_code.t * Pos.t Quickfix.t list
+    | Retain_code of t
+    | With_side_effect of t * (unit -> unit)
+  [@@deriving show]
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Ignore any arguments and always return the given base error *)
@@ -1745,29 +1693,41 @@ module Callback : sig
   val using_error : Pos.t -> has_await:bool -> t
 end
 
-module Reasons_callback : sig
+and Reasons_callback : sig
   (** A mechanism to apply transformations to secondary errors *)
-  type t [@@deriving show]
+  type op =
+    | Append
+    | Prepend
+  [@@deriving show]
 
-  (** Evaluate the `Reasons_callback.t` to a `(Pos.t,Pos_or_decl.t) User_error.t`
-      for use in error reporting.
+  type component =
+    | Code
+    | Reasons
+    | Quickfixes
+  [@@deriving show]
 
-      The optional code, claim, reasons, and quickfixes are the 'starting' values
-      of the user error and may be ignored or override the defaults specified in
-      the callback.
+  type t =
+    | Always of Error.t
+    | Of_error of Error.t
+    | Of_callback of Callback.t * Pos.t Message.t Lazy.t
+    | Retain of t * component
+    | Incoming_reasons of t * op
+    | With_code of t * Error_code.t
+    | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
+    | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
+    | From_on_error of
+        ((?code:int ->
+         ?quickfixes:Pos.t Quickfix.t list ->
+         Pos_or_decl.t Message.t list ->
+         unit)
+        [@show.opaque])
+        [@ocaml.deprecated
+          "This constructor will be removed. Please use the provided combinators for constructing error callbacks."]
+    | Prepend_on_apply of t * Secondary.t
+    | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
+    | Drop_reasons_on_apply of t
+  [@@deriving show]
 
-      We don't require any of these since a reasons callback has both a code
-      and claim by construction and we can use the empty list as the default for
-      both reasons and quickfixes.
-  *)
-  val apply :
-    ?code:Error_code.t ->
-    ?claim:Pos.t Message.t Lazy.t ->
-    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Pos.t Quickfix.t list ->
-    t ->
-    current_span:Pos.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Construct a `Reasons_callback.t` from a side-effecting function. This is
@@ -1931,17 +1891,16 @@ module Reasons_callback : sig
     Pos_or_decl.ctx -> t
 end
 
-type t = Error.t [@@deriving show]
+type t = Error.t
+
+val pp : Format.formatter -> t -> unit
+
+val show : t -> string
 
 (** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
      and `Secondary.t` error is encountered, respectively. *)
 val iter :
   t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
-
-(** Evaluate an error to a `User_error.t` for error reporting; we return an
-    option to model ignoring errors *)
-val to_user_error :
-  t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 
 (* -- Constructors -------------------------------------------------------- *)
 

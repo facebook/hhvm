@@ -14,6 +14,10 @@
     },
     {
       "local": "no",
+      "text_html": "unordered_map"
+    },
+    {
+      "local": "no",
       "text_html": "unordered_set"
     },
     {
@@ -29,12 +33,21 @@
       "text_html": "thrift/lib/cpp/util/VarintUtils.h"
     },
     {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/Adapter.h"
+    },
+    {
       "refid": "BasePatch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/BasePatch.h"
     }
   ],
   "innerclass": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::ListPatchIndex"
+    },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
       "prot": "public",

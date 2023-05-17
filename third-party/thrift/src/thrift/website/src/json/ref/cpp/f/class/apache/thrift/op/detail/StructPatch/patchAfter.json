@@ -4,44 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::patchAfter",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a967e0b9d0381e2b62e95a9ab524306d9",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchAfter",
-      "argsstring_html": "()",
-      "name_html": "patchAfter",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "383",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "383",
-        "bodyend": "385"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchAfter()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) patchAfter()",
-        "detailed_html": "template &lt;typename Id&gt; private inline decltype(auto) patchAfter()",
-        "detailed_raw": "template <typename Id> private inline decltype(auto) patchAfter()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchAfter",
-        "original_argsstring_html": "()"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/patchAfter",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/patchAfter",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
-      "compoundname_html": "apache::thrift::op::detail::StructPatch::patchAfter"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a9a55c7df4a252eb479825eca91ba1a3a",
       "prot": "protected",
       "static": "no",
@@ -60,11 +22,11 @@
       "name_html": "patchAfter",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "196",
+        "line": "252",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "196",
-        "bodyend": "198"
+        "bodystart": "252",
+        "bodyend": "254"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchAfter()",

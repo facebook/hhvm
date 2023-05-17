@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "position",
+  "compoundname_html": "apache::thrift::op::detail::ListPatchIndex::position",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex_1adfbaa7e06a8cfa4ad006b28696bf55ac",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "size_t",
+      "definition_html": "size_t apache::thrift::op::detail::ListPatchIndex::position",
+      "argsstring_html": "() const",
+      "name_html": "position",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "43",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "43",
+        "bodyend": "43"
+      },
+      "definition": {
+        "simple_html": "size_t position() const",
+        "simple_raw": "size_t position() const",
+        "detailed_html": "inline size_t position() const",
+        "detailed_raw": "inline size_t position() const",
+        "original_definition_html": "size_t apache::thrift::op::detail::ListPatchIndex::position",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/ListPatchIndex/position",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatchIndex/position",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex",
+      "compoundname_html": "apache::thrift::op::detail::ListPatchIndex::position"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/ListPatchIndex/position",
+  "minprot": "public",
+  "displayname_html": "position",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatchIndex/position",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatchIndex/position"
+}

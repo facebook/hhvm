@@ -34,11 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "191",
+        "line": "196",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "191",
-        "bodyend": "193"
+        "bodystart": "196",
+        "bodyend": "198"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename T&gt;\ndecltype(auto) constexpr operator()(Id, T&amp; obj) const",

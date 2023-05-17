@@ -17,11 +17,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "422",
+        "line": "391",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "422",
-        "bodyend": "422"
+        "bodystart": "391",
+        "bodyend": "391"
       },
       "definition": {
         "simple_html": "T&amp; ensure()",
@@ -59,11 +59,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "424",
+        "line": "393",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "424",
-        "bodyend": "424"
+        "bodystart": "393",
+        "bodyend": "393"
       },
       "definition": {
         "simple_html": "P&amp; ensure(const T&amp; val)",
@@ -101,11 +101,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "426",
+        "line": "395",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "426",
-        "bodyend": "426"
+        "bodystart": "395",
+        "bodyend": "395"
       },
       "definition": {
         "simple_html": "P&amp; ensure(T&amp;&amp; val)",
@@ -142,11 +142,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "412",
+        "line": "381",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "149",
-        "bodyend": "151"
+        "bodystart": "163",
+        "bodyend": "165"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
@@ -178,7 +178,7 @@
         },
         {
           "type_html": "typename U",
-          "defval_html": "F&lt;Id&gt;"
+          "defval_html": "FieldType&lt;Id&gt;"
         }
       ],
       "type_html": "decltype(auto)",
@@ -193,17 +193,17 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "412",
+        "line": "381",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "154",
-        "bodyend": "159"
+        "bodystart": "168",
+        "bodyend": "173"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "simple_raw": "template <typename Id, typename U = F<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-        "detailed_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "detailed_raw": "template <typename Id, typename U = F<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
+        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
+        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
         "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "(U &amp;&amp;defaultVal)"
       },
@@ -234,11 +234,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "149",
+        "line": "163",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "149",
-        "bodyend": "151"
+        "bodystart": "163",
+        "bodyend": "165"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
@@ -270,7 +270,7 @@
         },
         {
           "type_html": "typename U",
-          "defval_html": "F&lt;Id&gt;"
+          "defval_html": "FieldType&lt;Id&gt;"
         }
       ],
       "type_html": "decltype(auto)",
@@ -285,17 +285,17 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "154",
+        "line": "168",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "154",
-        "bodyend": "159"
+        "bodystart": "168",
+        "bodyend": "173"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "simple_raw": "template <typename Id, typename U = F<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-        "detailed_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "detailed_raw": "template <typename Id, typename U = F<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
+        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
+        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
         "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "(U &amp;&amp;defaultVal)"
       },

@@ -1,0 +1,1180 @@
+{
+  "refid": "Xxh64HasherTest_8cpp",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Xxh64HasherTest.cpp",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/hash/DeterministicHash.h"
+    },
+    {
+      "refid": "Xxh64Hasher_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Xxh64Hasher.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/rust/deterministic_hash/src/tests/gen-cpp2/test_structs_constants.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/rust/deterministic_hash/src/tests/gen-cpp2/test_structs_types.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/rust/deterministic_hash/src/tests/gen-cpp2/test_structs_types_custom_protocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "cstdint"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Range.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/io/IOBuf.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/portability/GTest.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+  "free_functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a56c8c7a29c404716ddb1e8c754b7b2e0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineBool)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineBool"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "35",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "35",
+        "bodyend": "43"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineBool)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineBool)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineBool)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineBool)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineBool)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a2daad312b6ff1b58637f45cf39ccfe0c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineInt8)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineInt8"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "45",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "45",
+        "bodyend": "57"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineInt8)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt8)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt8)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt8)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt8)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a6a140abec2ad2ec17433a4fffb152ae4",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineInt16)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineInt16"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "59",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "59",
+        "bodyend": "71"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineInt16)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt16)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt16)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt16)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt16)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ae684a7edb912ae5f921e3cfe8995a9cd",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineInt32)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineInt32"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "73",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "73",
+        "bodyend": "85"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineInt32)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt32)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt32)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt32)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt32)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a473840da287eb1c5d8e946e6806b5199",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineInt64)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineInt64"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "87",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "87",
+        "bodyend": "99"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineInt64)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt64)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt64)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt64)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt64)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a3a0630b52706d5aeef23487420ff0f5e",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineFloat)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineFloat"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "101",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "101",
+        "bodyend": "113"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineFloat)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineFloat)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineFloat)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineFloat)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineFloat)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a84fa6352236bb0a4ab1b8b6d35731734",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineDouble)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineDouble"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "115",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "115",
+        "bodyend": "127"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineDouble)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineDouble)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineDouble)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineDouble)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineDouble)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1abda085718f7edb4d04e8e2914d544305",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineIOBuf)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineIOBuf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "129",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "129",
+        "bodyend": "148"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineIOBuf)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a2e1131e298b42988ce4d12d7f1f417c9",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineChainedIOBuf)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineChainedIOBuf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "150",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "150",
+        "bodyend": "160"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineChainedIOBuf)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a120477d53cb353d9b18894804d0f7611",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineByteRange)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineByteRange"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "162",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "162",
+        "bodyend": "174"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineByteRange)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a4f7addd49e1c62f2936125490c83be80",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkCombineXxh64Hasher)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkCombineXxh64Hasher"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "176",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "176",
+        "bodyend": "188"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkCombineXxh64Hasher)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a778068987414bc189360f86a0514365b",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, checkLess)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "checkLess"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "190",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "190",
+        "bodyend": "202"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, checkLess)",
+        "simple_raw": "TEST(Xxh64HasherTest, checkLess)",
+        "detailed_html": "TEST(Xxh64HasherTest, checkLess)",
+        "detailed_raw": "TEST(Xxh64HasherTest, checkLess)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, checkLess)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a46e19dc7651ed5fd134603788779246a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, e2eSimpleStruct)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "e2eSimpleStruct"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "204",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "204",
+        "bodyend": "219"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+        "simple_raw": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+        "detailed_html": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+        "detailed_raw": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, e2eSimpleStruct)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a46e26fa977f3efbd04a4727f83da9788",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Xxh64HasherTest, e2eComplexStruct)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Xxh64HasherTest"
+        },
+        {
+          "type_html": "e2eComplexStruct"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "line": "221",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+        "bodystart": "221",
+        "bodyend": "248"
+      },
+      "definition": {
+        "simple_html": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+        "simple_raw": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+        "detailed_html": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+        "detailed_raw": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Xxh64HasherTest, e2eComplexStruct)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    }
+  ],
+  "free_overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "TEST",
+          "compoundname_html": "apache::thrift::op::TEST",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a56c8c7a29c404716ddb1e8c754b7b2e0",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineBool)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineBool"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "35",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "35",
+                "bodyend": "43"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineBool)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineBool)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineBool)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineBool)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineBool)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a2daad312b6ff1b58637f45cf39ccfe0c",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineInt8)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineInt8"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "45",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "45",
+                "bodyend": "57"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineInt8)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt8)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt8)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt8)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt8)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a6a140abec2ad2ec17433a4fffb152ae4",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineInt16)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineInt16"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "59",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "59",
+                "bodyend": "71"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineInt16)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt16)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt16)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt16)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt16)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1ae684a7edb912ae5f921e3cfe8995a9cd",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineInt32)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineInt32"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "73",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "73",
+                "bodyend": "85"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineInt32)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt32)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt32)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt32)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt32)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a473840da287eb1c5d8e946e6806b5199",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineInt64)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineInt64"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "87",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "87",
+                "bodyend": "99"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineInt64)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineInt64)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineInt64)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineInt64)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineInt64)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a3a0630b52706d5aeef23487420ff0f5e",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineFloat)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineFloat"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "101",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "101",
+                "bodyend": "113"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineFloat)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineFloat)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineFloat)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineFloat)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineFloat)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a84fa6352236bb0a4ab1b8b6d35731734",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineDouble)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineDouble"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "115",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "115",
+                "bodyend": "127"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineDouble)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineDouble)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineDouble)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineDouble)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineDouble)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1abda085718f7edb4d04e8e2914d544305",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineIOBuf)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineIOBuf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "129",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "129",
+                "bodyend": "148"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineIOBuf)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineIOBuf)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a2e1131e298b42988ce4d12d7f1f417c9",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineChainedIOBuf)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineChainedIOBuf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "150",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "150",
+                "bodyend": "160"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineChainedIOBuf)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineChainedIOBuf)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a120477d53cb353d9b18894804d0f7611",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineByteRange)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineByteRange"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "162",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "162",
+                "bodyend": "174"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineByteRange)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineByteRange)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a4f7addd49e1c62f2936125490c83be80",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkCombineXxh64Hasher)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkCombineXxh64Hasher"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "176",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "176",
+                "bodyend": "188"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkCombineXxh64Hasher)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkCombineXxh64Hasher)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a778068987414bc189360f86a0514365b",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, checkLess)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "checkLess"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "190",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "190",
+                "bodyend": "202"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, checkLess)",
+                "simple_raw": "TEST(Xxh64HasherTest, checkLess)",
+                "detailed_html": "TEST(Xxh64HasherTest, checkLess)",
+                "detailed_raw": "TEST(Xxh64HasherTest, checkLess)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, checkLess)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a46e19dc7651ed5fd134603788779246a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, e2eSimpleStruct)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "e2eSimpleStruct"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "204",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "204",
+                "bodyend": "219"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+                "simple_raw": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+                "detailed_html": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+                "detailed_raw": "TEST(Xxh64HasherTest, e2eSimpleStruct)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, e2eSimpleStruct)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a46e26fa977f3efbd04a4727f83da9788",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(Xxh64HasherTest, e2eComplexStruct)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "Xxh64HasherTest"
+                },
+                {
+                  "type_html": "e2eComplexStruct"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "line": "221",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64HasherTest.cpp",
+                "bodystart": "221",
+                "bodyend": "248"
+              },
+              "definition": {
+                "simple_html": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+                "simple_raw": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+                "detailed_html": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+                "detailed_raw": "TEST(Xxh64HasherTest, e2eComplexStruct)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(Xxh64HasherTest, e2eComplexStruct)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/op/Xxh64HasherTest.cpp/TEST",
+          "namespace_html": "apache::thrift::op",
+          "minprot": "public",
+          "displayname_html": "TEST",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Xxh64HasherTest.cpp/TEST",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Xxh64HasherTest.cpp/TEST"
+        }
+      ]
+    }
+  ]
+}

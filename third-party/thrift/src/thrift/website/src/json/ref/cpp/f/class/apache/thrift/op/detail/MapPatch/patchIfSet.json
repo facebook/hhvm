@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::MapPatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a4e20d18f1a4ba32fed16edc9d83d8b5a",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchIfSet",
+      "argsstring_html": "(const P &amp;patches)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "const P &amp;",
+          "declname_html": "patches"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "524",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "524",
+        "bodyend": "528"
+      },
+      "definition": {
+        "simple_html": "void patchIfSet(const P&amp; patches)",
+        "simple_raw": "void patchIfSet(const P& patches)",
+        "detailed_html": "private inline void patchIfSet(const P&amp; patches)",
+        "detailed_raw": "private inline void patchIfSet(const P& patches)",
+        "original_definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchIfSet",
+        "original_argsstring_html": "(const P &amp;patches)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+      "compoundname_html": "apache::thrift::op::detail::MapPatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MapPatch/patchIfSet",
+  "minprot": "private",
+  "displayname_html": "patchIfSet",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchIfSet"
+}

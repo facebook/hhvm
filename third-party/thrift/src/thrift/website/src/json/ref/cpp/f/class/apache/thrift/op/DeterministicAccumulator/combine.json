@@ -32,7 +32,7 @@
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "252",
-        "bodyend": "271"
+        "bodyend": "272"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid combine(const T&amp; val)",

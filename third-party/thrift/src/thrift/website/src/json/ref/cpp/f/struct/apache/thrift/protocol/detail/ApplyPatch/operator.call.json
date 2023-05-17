@@ -444,7 +444,7 @@
       "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a8ada7a410db73a74b60e870ce206c262",
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a96de33ab1dbe3db3d8dd5566d8626352",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -453,7 +453,7 @@
       "virtual": "non-virtual",
       "type_html": "void",
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
-      "argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const",
+      "argsstring_html": "(const Object &amp;patch, folly::F14FastMap&lt; Value, Value &gt; &amp;value) const",
       "name_html": "operator()",
       "param": [
         {
@@ -461,7 +461,7 @@
           "declname_html": "patch"
         },
         {
-          "type_html": "std::map&lt; Value, Value &gt; &amp;",
+          "type_html": "folly::F14FastMap&lt; Value, Value &gt; &amp;",
           "declname_html": "value"
         }
       ],
@@ -471,12 +471,12 @@
         "column": "1"
       },
       "definition": {
-        "simple_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
-        "simple_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
-        "detailed_html": "void operator()(const Object&amp; patch, std::map&lt;Value, Value&gt;&amp; value) const",
-        "detailed_raw": "void operator()(const Object& patch, std::map<Value, Value>& value) const",
+        "simple_html": "void operator()(\n    const Object&amp; patch, folly::F14FastMap&lt;Value, Value&gt;&amp; value) const",
+        "simple_raw": "void operator()(\n    const Object& patch, folly::F14FastMap<Value, Value>& value) const",
+        "detailed_html": "void operator()(\n    const Object&amp; patch, folly::F14FastMap&lt;Value, Value&gt;&amp; value) const",
+        "detailed_raw": "void operator()(\n    const Object& patch, folly::F14FastMap<Value, Value>& value) const",
         "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
-        "original_argsstring_html": "(const Object &amp;patch, std::map&lt; Value, Value &gt; &amp;value) const"
+        "original_argsstring_html": "(const Object &amp;patch, folly::F14FastMap&lt; Value, Value &gt; &amp;value) const"
       },
       "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
       "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
@@ -507,7 +507,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "43",
+        "line": "44",
         "column": "1"
       },
       "definition": {

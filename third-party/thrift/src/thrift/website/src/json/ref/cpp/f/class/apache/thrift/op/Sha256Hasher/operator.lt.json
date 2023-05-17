@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "64",
+        "line": "65",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "64",
-        "bodyend": "70"
+        "bodystart": "65",
+        "bodyend": "71"
       },
       "definition": {
         "simple_html": "bool operator&lt;(const Sha256Hasher&amp; other) const",

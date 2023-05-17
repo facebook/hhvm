@@ -1,0 +1,61 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::patchIfSet",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1a49fcd810b06deb53a401500c2b0493a7",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Id"
+        },
+        {
+          "type_html": "class <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a>"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::patchIfSet",
+      "argsstring_html": "(const FieldPatch &amp;patch)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "111",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "111",
+        "bodyend": "113"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Id, class FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; patch)",
+        "simple_raw": "template <class Id, class FieldPatch>\nvoid patchIfSet(const FieldPatch& patch)",
+        "detailed_html": "template &lt;class Id, class FieldPatch&gt;\ninline void patchIfSet(const FieldPatch&amp; patch)",
+        "detailed_raw": "template <class Id, class FieldPatch>\ninline void patchIfSet(const FieldPatch& patch)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::patchIfSet",
+        "original_argsstring_html": "(const FieldPatch &amp;patch)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::patchIfSet"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+  "minprot": "public",
+  "displayname_html": "patchIfSet",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet"
+}

@@ -43,11 +43,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "167",
+        "line": "172",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "167",
-        "bodyend": "169"
+        "bodystart": "172",
+        "bodyend": "174"
       },
       "definition": {
         "simple_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\nconstexpr T operator()() const",
@@ -63,11 +63,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "line": "163",
+    "line": "168",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "bodystart": "163",
-    "bodyend": "170"
+    "bodystart": "168",
+    "bodyend": "175"
   },
   "namespacednames_html": [
     "apache",
@@ -118,11 +118,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "167",
+                "line": "172",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "167",
-                "bodyend": "169"
+                "bodystart": "172",
+                "bodyend": "174"
               },
               "definition": {
                 "simple_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\nconstexpr T operator()() const",
@@ -157,11 +157,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "202",
+                "line": "207",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "202",
-                "bodyend": "207"
+                "bodystart": "207",
+                "bodyend": "212"
               },
               "definition": {
                 "simple_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\nconstexpr T operator()() const",
@@ -201,11 +201,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "224",
+                "line": "229",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "224",
-                "bodyend": "226"
+                "bodystart": "229",
+                "bodyend": "231"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp;) const",
@@ -246,11 +246,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "231",
+                "line": "236",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "231",
-                "bodyend": "236"
+                "bodystart": "236",
+                "bodyend": "241"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",

@@ -320,6 +320,45 @@
       "namespace_html": "apache::thrift::op"
     },
     {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a113b780e68cfa100810137a530fe465d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(StdHasherDeprecatedTest, checkCombineIOBuf)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "StdHasherDeprecatedTest"
+        },
+        {
+          "type_html": "checkCombineIOBuf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
+        "line": "117",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
+        "bodystart": "117",
+        "bodyend": "132"
+      },
+      "definition": {
+        "simple_html": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+        "simple_raw": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+        "detailed_html": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+        "detailed_raw": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(StdHasherDeprecatedTest, checkCombineIOBuf)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
       "refid": "namespaceapache_1_1thrift_1_1op_1adf4e616a90cde5fd86911718dfeaae03",
       "prot": "public",
       "static": "no",
@@ -341,11 +380,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "line": "117",
+        "line": "134",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "bodystart": "117",
-        "bodyend": "132"
+        "bodystart": "134",
+        "bodyend": "142"
       },
       "definition": {
         "simple_html": "TEST(StdHasherTest, checkCombineIOBuf)",
@@ -380,11 +419,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "line": "134",
+        "line": "144",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "bodystart": "134",
-        "bodyend": "142"
+        "bodystart": "144",
+        "bodyend": "152"
       },
       "definition": {
         "simple_html": "TEST(StdHasherTest, checkCombineByteRange)",
@@ -419,11 +458,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "line": "144",
+        "line": "154",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "bodystart": "144",
-        "bodyend": "154"
+        "bodystart": "154",
+        "bodyend": "164"
       },
       "definition": {
         "simple_html": "TEST(StdHasherTest, checkCombineStdHasher)",
@@ -458,11 +497,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "line": "156",
+        "line": "166",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "bodystart": "156",
-        "bodyend": "164"
+        "bodystart": "166",
+        "bodyend": "174"
       },
       "definition": {
         "simple_html": "TEST(StdHasherTest, checkLess)",
@@ -497,11 +536,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "line": "166",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-        "bodystart": "166",
-        "bodyend": "172"
+        "bodystart": "176",
+        "bodyend": "182"
       },
       "definition": {
         "simple_html": "TEST(StdHasherTest, checkFinalize)",
@@ -798,6 +837,45 @@
               "namespace_html": "apache::thrift::op"
             },
             {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a113b780e68cfa100810137a530fe465d",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::op::TEST",
+              "argsstring_html": "(StdHasherDeprecatedTest, checkCombineIOBuf)",
+              "name_html": "TEST",
+              "param": [
+                {
+                  "type_html": "StdHasherDeprecatedTest"
+                },
+                {
+                  "type_html": "checkCombineIOBuf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
+                "line": "117",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
+                "bodystart": "117",
+                "bodyend": "132"
+              },
+              "definition": {
+                "simple_html": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+                "simple_raw": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+                "detailed_html": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+                "detailed_raw": "TEST(StdHasherDeprecatedTest, checkCombineIOBuf)",
+                "original_definition_html": "apache::thrift::op::TEST",
+                "original_argsstring_html": "(StdHasherDeprecatedTest, checkCombineIOBuf)"
+              },
+              "compoundname_html": "apache::thrift::op::TEST",
+              "namespace_html": "apache::thrift::op"
+            },
+            {
               "refid": "namespaceapache_1_1thrift_1_1op_1adf4e616a90cde5fd86911718dfeaae03",
               "prot": "public",
               "static": "no",
@@ -819,11 +897,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "line": "117",
+                "line": "134",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "bodystart": "117",
-                "bodyend": "132"
+                "bodystart": "134",
+                "bodyend": "142"
               },
               "definition": {
                 "simple_html": "TEST(StdHasherTest, checkCombineIOBuf)",
@@ -858,11 +936,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "line": "134",
+                "line": "144",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "bodystart": "134",
-                "bodyend": "142"
+                "bodystart": "144",
+                "bodyend": "152"
               },
               "definition": {
                 "simple_html": "TEST(StdHasherTest, checkCombineByteRange)",
@@ -897,11 +975,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "line": "144",
+                "line": "154",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "bodystart": "144",
-                "bodyend": "154"
+                "bodystart": "154",
+                "bodyend": "164"
               },
               "definition": {
                 "simple_html": "TEST(StdHasherTest, checkCombineStdHasher)",
@@ -936,11 +1014,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "line": "156",
+                "line": "166",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "bodystart": "156",
-                "bodyend": "164"
+                "bodystart": "166",
+                "bodyend": "174"
               },
               "definition": {
                 "simple_html": "TEST(StdHasherTest, checkLess)",
@@ -975,11 +1053,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "line": "166",
+                "line": "176",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasherTest.cpp",
-                "bodystart": "166",
-                "bodyend": "172"
+                "bodystart": "176",
+                "bodyend": "182"
               },
               "definition": {
                 "simple_html": "TEST(StdHasherTest, checkFinalize)",

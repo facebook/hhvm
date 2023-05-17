@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "finalized",
+  "compoundname_html": "apache::thrift::op::Sha256Hasher::finalized",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a6954e7a23247f0116017b8179681c313",
+      "prot": "private",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+      "argsstring_html": "() const",
+      "name_html": "finalized",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+        "line": "74",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+        "bodystart": "74",
+        "bodyend": "74"
+      },
+      "definition": {
+        "simple_html": "bool finalized() const",
+        "simple_raw": "bool finalized() const",
+        "detailed_html": "private inline bool finalized() const",
+        "detailed_raw": "private inline bool finalized() const",
+        "original_definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/Sha256Hasher/finalized",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Sha256Hasher/finalized",
+      "parentid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher",
+      "compoundname_html": "apache::thrift::op::Sha256Hasher::finalized"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/Sha256Hasher/finalized",
+  "minprot": "private",
+  "displayname_html": "finalized",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized"
+}

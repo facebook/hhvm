@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "clear",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::clear",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1ab4a0dc01d2538bc503485a64da661ef0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::clear",
+      "argsstring_html": "()",
+      "name_html": "clear",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "108",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "108",
+        "bodyend": "108"
+      },
+      "definition": {
+        "simple_html": "void clear()",
+        "simple_raw": "void clear()",
+        "detailed_html": "inline void clear()",
+        "detailed_raw": "inline void clear()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::clear",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::clear"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
+  "minprot": "public",
+  "displayname_html": "clear",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear"
+}

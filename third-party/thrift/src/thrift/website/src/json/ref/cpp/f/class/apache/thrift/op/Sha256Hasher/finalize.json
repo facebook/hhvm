@@ -17,11 +17,11 @@
       "name_html": "finalize",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "58",
+        "line": "59",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "58",
-        "bodyend": "62"
+        "bodystart": "59",
+        "bodyend": "63"
       },
       "definition": {
         "simple_html": "void finalize()",

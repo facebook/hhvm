@@ -34,7 +34,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "73",
+        "line": "80",
         "column": "1"
       },
       "definition": {

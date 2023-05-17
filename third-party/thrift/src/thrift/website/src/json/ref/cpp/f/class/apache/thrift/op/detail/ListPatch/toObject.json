@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "toObject",
+  "compoundname_html": "apache::thrift::op::detail::ListPatch::toObject",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a1e7cad73b5ea4365b33d7096aa99e507",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "protocol::Object",
+      "definition_html": "protocol::Object apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toObject",
+      "argsstring_html": "() const",
+      "name_html": "toObject",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "110",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "110",
+        "bodyend": "113"
+      },
+      "definition": {
+        "simple_html": "protocol::Object toObject() const",
+        "simple_raw": "protocol::Object toObject() const",
+        "detailed_html": "inline protocol::Object toObject() const",
+        "detailed_raw": "inline protocol::Object toObject() const",
+        "original_definition_html": "protocol::Object apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toObject",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BasePatch/toObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BasePatch/toObject",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch",
+      "compoundname_html": "apache::thrift::op::detail::ListPatch::toObject"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/ListPatch/toObject",
+  "minprot": "public",
+  "displayname_html": "toObject",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toObject",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toObject"
+}

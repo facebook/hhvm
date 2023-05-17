@@ -4,44 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::patchPrior",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1af4f80ba34f24a671e613a3cb264bba39",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchPrior",
-      "argsstring_html": "()",
-      "name_html": "patchPrior",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "368",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "368",
-        "bodyend": "370"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) patchPrior()",
-        "detailed_html": "template &lt;typename Id&gt; private inline decltype(auto) patchPrior()",
-        "detailed_raw": "template <typename Id> private inline decltype(auto) patchPrior()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchPrior",
-        "original_argsstring_html": "()"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/patchPrior",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/patchPrior",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
-      "compoundname_html": "apache::thrift::op::detail::StructPatch::patchPrior"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a3b8a78f25ba5ac317cc748854f0d3bc2",
       "prot": "protected",
       "static": "no",
@@ -60,11 +22,11 @@
       "name_html": "patchPrior",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "191",
+        "line": "247",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "191",
-        "bodyend": "193"
+        "bodystart": "247",
+        "bodyend": "249"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",

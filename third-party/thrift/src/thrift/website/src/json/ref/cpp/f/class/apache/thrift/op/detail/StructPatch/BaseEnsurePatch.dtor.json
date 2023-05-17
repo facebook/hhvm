@@ -17,7 +17,7 @@
       "name_html": "~BaseEnsurePatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "170",
+        "line": "226",
         "column": "1"
       },
       "definition": {

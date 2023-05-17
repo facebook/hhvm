@@ -316,6 +316,45 @@
       "namespace_html": "apache::thrift::op"
     },
     {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ad1098439f5f70db551511c68bd8e5f88",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::TEST",
+      "argsstring_html": "(Sha256HasherTest, checkCombineChainedIOBuf)",
+      "name_html": "TEST",
+      "param": [
+        {
+          "type_html": "Sha256HasherTest"
+        },
+        {
+          "type_html": "checkCombineChainedIOBuf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
+        "line": "150",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
+        "bodystart": "150",
+        "bodyend": "160"
+      },
+      "definition": {
+        "simple_html": "TEST(Sha256HasherTest, checkCombineChainedIOBuf)",
+        "simple_raw": "TEST(Sha256HasherTest, checkCombineChainedIOBuf)",
+        "detailed_html": "TEST(Sha256HasherTest, checkCombineChainedIOBuf)",
+        "detailed_raw": "TEST(Sha256HasherTest, checkCombineChainedIOBuf)",
+        "original_definition_html": "apache::thrift::op::TEST",
+        "original_argsstring_html": "(Sha256HasherTest, checkCombineChainedIOBuf)"
+      },
+      "compoundname_html": "apache::thrift::op::TEST",
+      "namespace_html": "apache::thrift::op"
+    },
+    {
       "refid": "namespaceapache_1_1thrift_1_1op_1a638db51ba0570a0099f7043fefc7a6aa",
       "prot": "public",
       "static": "no",
@@ -337,11 +376,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "line": "150",
+        "line": "162",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "bodystart": "150",
-        "bodyend": "162"
+        "bodystart": "162",
+        "bodyend": "174"
       },
       "definition": {
         "simple_html": "TEST(Sha256HasherTest, checkCombineByteRange)",
@@ -376,11 +415,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "line": "164",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "bodystart": "164",
-        "bodyend": "176"
+        "bodystart": "176",
+        "bodyend": "188"
       },
       "definition": {
         "simple_html": "TEST(Sha256HasherTest, checkCombineSha256Hasher)",
@@ -415,11 +454,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "line": "178",
+        "line": "190",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "bodystart": "178",
-        "bodyend": "190"
+        "bodystart": "190",
+        "bodyend": "202"
       },
       "definition": {
         "simple_html": "TEST(Sha256HasherTest, checkLess)",
@@ -454,11 +493,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "line": "192",
+        "line": "204",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "bodystart": "192",
-        "bodyend": "213"
+        "bodystart": "204",
+        "bodyend": "225"
       },
       "definition": {
         "simple_html": "TEST(Sha256HasherTest, e2eSimpleStruct)",
@@ -493,11 +532,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "line": "215",
+        "line": "227",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256HasherTest.cpp",
-        "bodystart": "215",
-        "bodyend": "248"
+        "bodystart": "227",
+        "bodyend": "260"
       },
       "definition": {
         "simple_html": "TEST(Sha256HasherTest, e2eComplexStruct)",

@@ -21,6 +21,10 @@
       "text_html": "thrift/lib/cpp2/Adapt.h"
     },
     {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/Adapter.h"
+    },
+    {
       "refid": "BasePatch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/BasePatch.h"

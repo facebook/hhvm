@@ -17,11 +17,11 @@
       "name_html": "Sha256Hasher",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "33",
+        "line": "34",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "33",
-        "bodyend": "33"
+        "bodystart": "34",
+        "bodyend": "34"
       },
       "definition": {
         "simple_html": "Sha256Hasher()",

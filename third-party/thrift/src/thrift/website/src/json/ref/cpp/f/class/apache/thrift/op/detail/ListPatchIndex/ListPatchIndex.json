@@ -1,0 +1,85 @@
+{
+  "kind": "overloadset",
+  "name_html": "ListPatchIndex",
+  "compoundname_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex_1a26569dc47722fbf244c353c2f31711d0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex",
+      "argsstring_html": "()=default",
+      "name_html": "ListPatchIndex",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "41",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "ListPatchIndex()",
+        "simple_raw": "ListPatchIndex()",
+        "detailed_html": "ListPatchIndex() = default",
+        "detailed_raw": "ListPatchIndex() = default",
+        "original_definition_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex",
+        "original_argsstring_html": "()=default"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex_1a6b3b3eaac01a4309ce5af3a7b60eda61",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "yes",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex",
+      "argsstring_html": "(size_t pos)",
+      "name_html": "ListPatchIndex",
+      "param": [
+        {
+          "type_html": "size_t",
+          "declname_html": "pos"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "42",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "42",
+        "bodyend": "42"
+      },
+      "definition": {
+        "simple_html": "ListPatchIndex(size_t pos)",
+        "simple_raw": "ListPatchIndex(size_t pos)",
+        "detailed_html": "explicit inline ListPatchIndex(size_t pos)",
+        "detailed_raw": "explicit inline ListPatchIndex(size_t pos)",
+        "original_definition_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex",
+        "original_argsstring_html": "(size_t pos)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::op::detail::ListPatchIndex::ListPatchIndex"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+  "minprot": "public",
+  "displayname_html": "(constructor)",
+  "brief_html": "Constructs the ListPatchIndex.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatchIndex/ListPatchIndex"
+}

@@ -1,0 +1,61 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensure",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1ae1706d3f926f9fbb8cd386d9925eb363",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Id"
+        },
+        {
+          "type_html": "class Field"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
+      "argsstring_html": "(const Field &amp;def)",
+      "name_html": "ensure",
+      "param": [
+        {
+          "type_html": "const Field &amp;",
+          "declname_html": "def"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "116",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "116",
+        "bodyend": "120"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Id, class Field&gt;\nvoid ensure(const Field&amp; def)",
+        "simple_raw": "template <class Id, class Field>\nvoid ensure(const Field& def)",
+        "detailed_html": "template &lt;class Id, class Field&gt;\ninline void ensure(const Field&amp; def)",
+        "detailed_raw": "template <class Id, class Field>\ninline void ensure(const Field& def)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
+        "original_argsstring_html": "(const Field &amp;def)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+  "minprot": "public",
+  "displayname_html": "ensure",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure"
+}

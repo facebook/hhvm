@@ -1,0 +1,86 @@
+{
+  "kind": "overloadset",
+  "name_html": "extractMaskViewFromPatch",
+  "compoundname_html": "apache::thrift::protocol::extractMaskViewFromPatch",
+  "functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a034090e8588c353fc5498bd96ff2a7ff",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+      "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskViewFromPatch",
+      "argsstring_html": "(const protocol::Object &amp;patch)",
+      "name_html": "extractMaskViewFromPatch",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "68",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "ExtractedMasks extractMaskViewFromPatch(const protocol::Object&amp; patch)",
+        "simple_raw": "ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch)",
+        "detailed_html": "ExtractedMasks extractMaskViewFromPatch(const protocol::Object&amp; patch)",
+        "detailed_raw": "ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch)",
+        "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskViewFromPatch",
+        "original_argsstring_html": "(const protocol::Object &amp;patch)"
+      },
+      "description": {
+        "detailed_html": "<p>Constructs read and write Thrift Mask that only contain fields that are modified by the Patch. It will construct nested Mask for map and object patches. For map, it uses the address of Value key as the key for the integer map mask. Note that Mask contains pointer to <code>protocol::Value</code> in patch, so caller needs to make sure Patch has longer lifetime than the mask. </p>"
+      },
+      "compoundname_html": "apache::thrift::protocol::extractMaskViewFromPatch",
+      "namespace_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a8025bca26bf471092c4d63b6ebc374a6",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+      "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskViewFromPatch",
+      "argsstring_html": "(Object &amp;&amp;patch)=delete",
+      "name_html": "extractMaskViewFromPatch",
+      "param": [
+        {
+          "type_html": "Object &amp;&amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "71",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "ExtractedMasks extractMaskViewFromPatch(Object&amp;&amp; patch)",
+        "simple_raw": "ExtractedMasks extractMaskViewFromPatch(Object&& patch)",
+        "detailed_html": "ExtractedMasks extractMaskViewFromPatch(Object&amp;&amp; patch) = delete",
+        "detailed_raw": "ExtractedMasks extractMaskViewFromPatch(Object&& patch) = delete",
+        "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskViewFromPatch",
+        "original_argsstring_html": "(Object &amp;&amp;patch)=delete"
+      },
+      "compoundname_html": "apache::thrift::protocol::extractMaskViewFromPatch",
+      "namespace_html": "apache::thrift::protocol"
+    }
+  ],
+  "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/extractMaskViewFromPatch",
+  "namespace_html": "apache::thrift::protocol",
+  "minprot": "public",
+  "displayname_html": "extractMaskViewFromPatch",
+  "brief_html": "<p>Constructs read and write Thrift Mask that only contain fields that are modified by the Patch. It will construct nested Mask for map and object patches. For map, it uses the address of Value key as the key for the integer map mask. Note that Mask contains pointer to <code>protocol::Value</code> in patch, so caller needs to make sure Patch has longer lifetime than the mask. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/extractMaskViewFromPatch",
+  "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/extractMaskViewFromPatch"
+}

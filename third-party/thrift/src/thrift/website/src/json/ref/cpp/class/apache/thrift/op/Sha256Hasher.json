@@ -24,11 +24,11 @@
       "name_html": "Sha256Hasher",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "33",
+        "line": "34",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "33",
-        "bodyend": "33"
+        "bodystart": "34",
+        "bodyend": "34"
       },
       "definition": {
         "simple_html": "Sha256Hasher()",
@@ -55,11 +55,11 @@
       "name_html": "getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "34",
+        "line": "35",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "34",
-        "bodyend": "38"
+        "bodystart": "35",
+        "bodyend": "39"
       },
       "definition": {
         "simple_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; getResult() const",
@@ -97,11 +97,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "41",
+        "line": "42",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "41",
-        "bodyend": "45"
+        "bodystart": "42",
+        "bodyend": "46"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
@@ -134,11 +134,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "46",
+        "line": "47",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "46",
-        "bodyend": "50"
+        "bodystart": "47",
+        "bodyend": "51"
       },
       "definition": {
         "simple_html": "void combine(const folly::IOBuf&amp; value)",
@@ -171,11 +171,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "51",
+        "line": "52",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "51",
-        "bodyend": "51"
+        "bodystart": "52",
+        "bodyend": "52"
       },
       "definition": {
         "simple_html": "void combine(folly::ByteRange value)",
@@ -208,11 +208,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "52",
+        "line": "53",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "52",
-        "bodyend": "56"
+        "bodystart": "53",
+        "bodyend": "57"
       },
       "definition": {
         "simple_html": "void combine(const Sha256Hasher&amp; other)",
@@ -239,11 +239,11 @@
       "name_html": "finalize",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "58",
+        "line": "59",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "58",
-        "bodyend": "62"
+        "bodystart": "59",
+        "bodyend": "63"
       },
       "definition": {
         "simple_html": "void finalize()",
@@ -276,11 +276,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "64",
+        "line": "65",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "64",
-        "bodyend": "70"
+        "bodystart": "65",
+        "bodyend": "71"
       },
       "definition": {
         "simple_html": "bool operator&lt;(const Sha256Hasher&amp; other) const",
@@ -292,15 +292,46 @@
       },
       "filepath": "fns/class/apache/thrift/op/Sha256Hasher/operator.lt",
       "href": "/ref/cpp/fns/class/apache/thrift/op/Sha256Hasher/operator.lt"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a6954e7a23247f0116017b8179681c313",
+      "prot": "private",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+      "argsstring_html": "() const",
+      "name_html": "finalized",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+        "line": "74",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+        "bodystart": "74",
+        "bodyend": "74"
+      },
+      "definition": {
+        "simple_html": "bool finalized() const",
+        "simple_raw": "bool finalized() const",
+        "detailed_html": "private inline bool finalized() const",
+        "detailed_raw": "private inline bool finalized() const",
+        "original_definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/Sha256Hasher/finalized",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Sha256Hasher/finalized"
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-    "line": "31",
+    "line": "32",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-    "bodystart": "31",
-    "bodyend": "76"
+    "bodystart": "32",
+    "bodyend": "78"
   },
   "namespacednames_html": [
     "apache",
@@ -312,20 +343,20 @@
   "types": [],
   "members": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1ad25f00662a8cfa45aebd442e50af1dd4",
+      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a689ff85113238fbff45a4d18c43b3e7f",
       "prot": "private",
       "static": "no",
       "mutable": "no",
-      "type_html": "std::array&lt; uint8_t, SHA256_DIGEST_LENGTH &gt;",
-      "definition_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; apache::thrift::op::Sha256Hasher::result_",
+      "type_html": "folly::Optional&lt; std::array&lt; uint8_t, SHA256_DIGEST_LENGTH &gt; &gt;",
+      "definition_html": "folly::Optional&lt;std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; &gt; apache::thrift::op::Sha256Hasher::result_",
       "argsstring_html": "",
       "name_html": "result_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "73",
+        "line": "76",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "73",
+        "bodystart": "76",
         "bodyend": "-1"
       }
     },
@@ -340,29 +371,10 @@
       "name_html": "hash_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "74",
+        "line": "77",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "74",
-        "bodyend": "-1"
-      }
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1af24458fdf29266e11af45b558888d50f",
-      "prot": "private",
-      "static": "no",
-      "mutable": "no",
-      "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
-      "argsstring_html": "",
-      "name_html": "finalized",
-      "initializer_html": "= false",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "75",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "75",
+        "bodystart": "77",
         "bodyend": "-1"
       }
     }
@@ -395,11 +407,11 @@
               "name_html": "Sha256Hasher",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "33",
+                "line": "34",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "33",
-                "bodyend": "33"
+                "bodystart": "34",
+                "bodyend": "34"
               },
               "definition": {
                 "simple_html": "Sha256Hasher()",
@@ -443,11 +455,11 @@
               "name_html": "getResult",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "34",
+                "line": "35",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "34",
-                "bodyend": "38"
+                "bodystart": "35",
+                "bodyend": "39"
               },
               "definition": {
                 "simple_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; getResult() const",
@@ -501,11 +513,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "41",
+                "line": "42",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "41",
-                "bodyend": "45"
+                "bodystart": "42",
+                "bodyend": "46"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
@@ -540,11 +552,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "46",
+                "line": "47",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "46",
-                "bodyend": "50"
+                "bodystart": "47",
+                "bodyend": "51"
               },
               "definition": {
                 "simple_html": "void combine(const folly::IOBuf&amp; value)",
@@ -579,11 +591,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "51",
+                "line": "52",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "51",
-                "bodyend": "51"
+                "bodystart": "52",
+                "bodyend": "52"
               },
               "definition": {
                 "simple_html": "void combine(folly::ByteRange value)",
@@ -618,11 +630,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "52",
+                "line": "53",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "52",
-                "bodyend": "56"
+                "bodystart": "53",
+                "bodyend": "57"
               },
               "definition": {
                 "simple_html": "void combine(const Sha256Hasher&amp; other)",
@@ -665,11 +677,11 @@
               "name_html": "finalize",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "58",
+                "line": "59",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "58",
-                "bodyend": "62"
+                "bodystart": "59",
+                "bodyend": "63"
               },
               "definition": {
                 "simple_html": "void finalize()",
@@ -718,11 +730,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "line": "64",
+                "line": "65",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-                "bodystart": "64",
-                "bodyend": "70"
+                "bodystart": "65",
+                "bodyend": "71"
               },
               "definition": {
                 "simple_html": "bool operator&lt;(const Sha256Hasher&amp; other) const",
@@ -745,6 +757,53 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/operator.lt",
           "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/operator.lt"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "finalized",
+          "compoundname_html": "apache::thrift::op::Sha256Hasher::finalized",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a6954e7a23247f0116017b8179681c313",
+              "prot": "private",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+              "argsstring_html": "() const",
+              "name_html": "finalized",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+                "line": "74",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
+                "bodystart": "74",
+                "bodyend": "74"
+              },
+              "definition": {
+                "simple_html": "bool finalized() const",
+                "simple_raw": "bool finalized() const",
+                "detailed_html": "private inline bool finalized() const",
+                "detailed_raw": "private inline bool finalized() const",
+                "original_definition_html": "bool apache::thrift::op::Sha256Hasher::finalized",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/op/Sha256Hasher/finalized",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/Sha256Hasher/finalized",
+              "parentid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher",
+              "compoundname_html": "apache::thrift::op::Sha256Hasher::finalized"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/Sha256Hasher/finalized",
+          "minprot": "private",
+          "displayname_html": "finalized",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized"
         }
       ]
     }

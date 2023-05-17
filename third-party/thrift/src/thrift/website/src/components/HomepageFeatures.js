@@ -9,22 +9,11 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Extensive',
-    imageUrl: 'img/toolgear.png',
-    imageWidth: '250px',
-    description: (
-      <>
-        Contains over 750 C++ libraries, from data structures to logging to concurrency.
-      </>
-    ),
-  },
-  {
-    title: 'Performance',
-    imageUrl: 'img/server.jpeg',
+    imageUrl: 'img/book.jpg',
     imageWidth: '300px',
     description: (
       <>
-        Designed for and executed on Meta&#39;s enormous fleet, folly focuses on
-        server performance.
+        Contains over 750 C++ libraries, from data structures to logging to concurrency.
       </>
     ),
   },
@@ -35,6 +24,17 @@ const FeatureList = [
     description: (
       <>
         Check out folly on <a href="https://github.com/facebook/folly">GitHub</a>.
+      </>
+    ),
+  },
+  {
+    title: 'Performant',
+    imageUrl: 'img/row.jpg',
+    imageWidth: '300px',
+    description: (
+      <>
+        Designed for and executed on Meta&#39;s enormous fleet, folly focuses on
+        server performance.
       </>
     ),
   },

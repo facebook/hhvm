@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "getResult",
+  "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::getResult",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a9c6b3bf67ea1e0ed398fc01480ff8323",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "size_t",
+      "definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+      "argsstring_html": "() const",
+      "name_html": "getResult",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "32",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "32",
+        "bodyend": "32"
+      },
+      "definition": {
+        "simple_html": "size_t getResult() const",
+        "simple_raw": "size_t getResult() const",
+        "detailed_html": "inline size_t getResult() const",
+        "detailed_raw": "inline size_t getResult() const",
+        "original_definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+      "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+      "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::getResult"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+  "minprot": "public",
+  "displayname_html": "getResult",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/getResult"
+}

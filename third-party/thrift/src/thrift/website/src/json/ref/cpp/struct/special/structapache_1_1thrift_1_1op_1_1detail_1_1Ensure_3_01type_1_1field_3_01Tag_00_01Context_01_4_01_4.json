@@ -27,10 +27,10 @@
       "name_html": "field_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "242",
+        "line": "247",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "242",
+        "bodystart": "247",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4"
@@ -68,11 +68,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "245",
+        "line": "250",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "245",
-        "bodyend": "247"
+        "bodystart": "250",
+        "bodyend": "252"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\ndecltype(auto) operator()(T&amp;&amp; val, Struct&amp;) const",
@@ -88,11 +88,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "line": "241",
+    "line": "246",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "bodystart": "241",
-    "bodyend": "248"
+    "bodystart": "246",
+    "bodyend": "253"
   },
   "namespacednames_html": [
     "apache",
@@ -149,11 +149,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "245",
+                "line": "250",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "245",
-                "bodyend": "247"
+                "bodystart": "250",
+                "bodyend": "252"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Struct&gt;\ndecltype(auto) operator()(T&amp;&amp; val, Struct&amp;) const",

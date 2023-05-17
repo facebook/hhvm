@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisit",
+  "compoundname_html": "apache::thrift::op::detail::BoolPatch::customVisit",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1ad7d11c8074d5541b7f8df5984c20741f",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Visitor"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::customVisit",
+      "argsstring_html": "(Visitor &amp;&amp;v) const",
+      "name_html": "customVisit",
+      "param": [
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "90",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "90",
+        "bodyend": "100"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
+        "simple_raw": "template <typename Visitor>\nvoid customVisit(Visitor&& v) const",
+        "detailed_html": "template &lt;typename Visitor&gt;\ninline void customVisit(Visitor&amp;&amp; v) const",
+        "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
+        "original_definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::customVisit",
+        "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch",
+      "compoundname_html": "apache::thrift::op::detail::BoolPatch::customVisit"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BoolPatch/customVisit",
+  "minprot": "public",
+  "displayname_html": "customVisit",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit"
+}

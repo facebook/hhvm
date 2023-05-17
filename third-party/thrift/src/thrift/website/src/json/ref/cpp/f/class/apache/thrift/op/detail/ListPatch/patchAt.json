@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "153",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "153",
-        "bodyend": "159"
+        "bodystart": "176",
+        "bodyend": "182"
       },
       "definition": {
         "simple_html": "FOLLY_NODISCARD VP&amp; patchAt(size_t pos)",

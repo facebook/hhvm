@@ -17,11 +17,11 @@
       "name_html": "getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "line": "34",
+        "line": "35",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
-        "bodystart": "34",
-        "bodyend": "38"
+        "bodystart": "35",
+        "bodyend": "39"
       },
       "definition": {
         "simple_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; getResult() const",

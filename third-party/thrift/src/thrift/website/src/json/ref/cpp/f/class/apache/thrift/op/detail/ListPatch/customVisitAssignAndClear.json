@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisitAssignAndClear",
+  "compoundname_html": "apache::thrift::op::detail::ListPatch::customVisitAssignAndClear",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1afe99d1d5830219b92d090603736ee375",
+      "prot": "protected",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Visitor"
+        }
+      ],
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::customVisitAssignAndClear",
+      "argsstring_html": "(Visitor &amp;&amp;v) const",
+      "name_html": "customVisitAssignAndClear",
+      "param": [
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "237",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "237",
+        "bodyend": "246"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Visitor&gt;\nbool customVisitAssignAndClear(Visitor&amp;&amp; v) const",
+        "simple_raw": "template <typename Visitor>\nbool customVisitAssignAndClear(Visitor&& v) const",
+        "detailed_html": "template &lt;typename Visitor&gt;\nprotected inline bool customVisitAssignAndClear(Visitor&amp;&amp; v) const",
+        "detailed_raw": "template <typename Visitor>\nprotected inline bool customVisitAssignAndClear(Visitor&& v) const",
+        "original_definition_html": "bool apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::customVisitAssignAndClear",
+        "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/customVisitAssignAndClear",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/customVisitAssignAndClear",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+      "compoundname_html": "apache::thrift::op::detail::ListPatch::customVisitAssignAndClear"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear",
+  "minprot": "protected",
+  "displayname_html": "customVisitAssignAndClear",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear"
+}

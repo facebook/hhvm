@@ -80,8 +80,8 @@
         "line": "42",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "159",
-        "bodyend": "159"
+        "bodystart": "171",
+        "bodyend": "171"
       },
       "definition": {
         "simple_html": "Derived&amp; operator=(const value_type&amp; val)",
@@ -113,8 +113,8 @@
         "line": "42",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "160",
-        "bodyend": "163"
+        "bodystart": "172",
+        "bodyend": "175"
       },
       "definition": {
         "simple_html": "Derived&amp; operator=(value_type&amp;&amp; val)",
@@ -148,7 +148,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "130",
+        "line": "142",
         "column": "1"
       },
       "definition": {
@@ -183,7 +183,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "131",
+        "line": "143",
         "column": "1"
       },
       "definition": {
@@ -219,11 +219,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "159",
+        "line": "171",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "159",
-        "bodyend": "159"
+        "bodystart": "171",
+        "bodyend": "171"
       },
       "definition": {
         "simple_html": "Derived&amp; operator=(const value_type&amp; val)",
@@ -258,11 +258,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "160",
+        "line": "172",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "160",
-        "bodyend": "163"
+        "bodystart": "172",
+        "bodyend": "175"
       },
       "definition": {
         "simple_html": "Derived&amp; operator=(value_type&amp;&amp; val)",
@@ -296,7 +296,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "66",
+        "line": "54",
         "column": "1"
       },
       "definition": {
@@ -331,7 +331,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "67",
+        "line": "55",
         "column": "1"
       },
       "definition": {
@@ -372,11 +372,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "92",
+        "line": "85",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "92",
-        "bodyend": "95"
+        "bodystart": "85",
+        "bodyend": "88"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator=(field_ref&lt;U&gt; field)",
@@ -419,11 +419,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "98",
+        "line": "91",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "98",
-        "bodyend": "101"
+        "bodystart": "91",
+        "bodyend": "94"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator=(terse_field_ref&lt;U&gt; field)",

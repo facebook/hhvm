@@ -30,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "98",
+        "line": "121",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "98",
-        "bodyend": "100"
+        "bodystart": "121",
+        "bodyend": "123"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid emplace_back(Args&amp;&amp;... args)",

@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "finalize",
+  "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::finalize",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a3e8b4fa60f6720d86da20dd8b05c1c5a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+      "argsstring_html": "()",
+      "name_html": "finalize",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "49",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "49",
+        "bodyend": "49"
+      },
+      "definition": {
+        "simple_html": "void finalize()",
+        "simple_raw": "void finalize()",
+        "detailed_html": "inline void finalize()",
+        "detailed_raw": "inline void finalize()",
+        "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+      "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+      "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::finalize"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+  "minprot": "public",
+  "displayname_html": "finalize",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/finalize"
+}

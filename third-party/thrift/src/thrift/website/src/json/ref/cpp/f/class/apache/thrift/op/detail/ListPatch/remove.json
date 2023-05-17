@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "143",
+        "line": "166",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "143",
-        "bodyend": "150"
+        "bodystart": "166",
+        "bodyend": "173"
       },
       "definition": {
         "simple_html": "template &lt;typename C = std::unordered_set&lt;typename T::value_type&gt;&gt;\nvoid remove(C&amp;&amp; entries)",

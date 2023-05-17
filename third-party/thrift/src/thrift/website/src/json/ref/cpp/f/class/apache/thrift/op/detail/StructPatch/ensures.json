@@ -4,44 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::ensures",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a0ef66784167c85e01df46f8213aa76d0",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::ensures",
-      "argsstring_html": "()",
-      "name_html": "ensures",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "373",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "373",
-        "bodyend": "375"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensures()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) ensures()",
-        "detailed_html": "template &lt;typename Id&gt; private inline decltype(auto) ensures()",
-        "detailed_raw": "template <typename Id> private inline decltype(auto) ensures()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::ensures",
-        "original_argsstring_html": "()"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/ensures",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/ensures",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
-      "compoundname_html": "apache::thrift::op::detail::StructPatch::ensures"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1af91b6b06b099c4ccdb10cf5a5ec7e234",
       "prot": "public",
       "static": "no",
@@ -60,11 +22,11 @@
       "name_html": "ensures",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "124",
+        "line": "138",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "124",
-        "bodyend": "126"
+        "bodystart": "138",
+        "bodyend": "140"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nconstexpr bool ensures() const",

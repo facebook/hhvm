@@ -13,6 +13,11 @@
       "text_html": "folly/Traits.h"
     },
     {
+      "refid": "Clear_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Clear.h"
+    },
+    {
       "refid": "Get_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/Get.h"
@@ -41,6 +46,11 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::BaseEnsurePatch"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "prot": "private",
+      "text_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier"
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",

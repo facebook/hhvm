@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "assign",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::assign",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1ae53c0f5f3755a2acfc2889f340c86cf9",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::assign",
+      "argsstring_html": "(const T &amp;t)",
+      "name_html": "assign",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "t"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "107",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "107",
+        "bodyend": "107"
+      },
+      "definition": {
+        "simple_html": "void assign(const T&amp; t)",
+        "simple_raw": "void assign(const T& t)",
+        "detailed_html": "inline void assign(const T&amp; t)",
+        "detailed_raw": "inline void assign(const T& t)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::assign",
+        "original_argsstring_html": "(const T &amp;t)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::assign"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
+  "minprot": "public",
+  "displayname_html": "assign",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign"
+}

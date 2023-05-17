@@ -53,6 +53,60 @@
   },
   "filepath": "file/thrift/lib/cpp2/op/Patch.h",
   "href": "/ref/cpp/thrift/lib/cpp2/op/Patch.h",
+  "free_vars": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a37c7594ba5c743897964b68b1d37784c",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        },
+        {
+          "type_html": "typename",
+          "defval_html": "void"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr bool",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr bool apache::thrift::op::is_patch_v",
+      "argsstring_html": "",
+      "name_html": "is_patch_v",
+      "initializer_html": "= false",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "line": "88",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "bodystart": "88",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a58ef1eb3572dc9686f0790c5afbe7b66",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr bool",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr bool apache::thrift::op::is_assign_only_patch_v&lt; detail::AssignPatch&lt; T &gt; &gt;",
+      "argsstring_html": "",
+      "name_html": "is_assign_only_patch_v",
+      "initializer_html": "= false",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "line": "96",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "bodystart": "96",
+        "bodyend": "-1"
+      }
+    }
+  ],
   "free_functions": [
     {
       "refid": "namespaceapache_1_1thrift_1_1op_1a04018433197eac61800d5d528dcfe195",
@@ -84,11 +138,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "88",
+        "line": "102",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "88",
-        "bodyend": "96"
+        "bodystart": "102",
+        "bodyend": "108"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
@@ -167,11 +221,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "line": "88",
+                "line": "102",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "bodystart": "88",
-                "bodyend": "96"
+                "bodystart": "102",
+                "bodyend": "108"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",

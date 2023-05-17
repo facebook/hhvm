@@ -10,6 +10,10 @@
     },
     {
       "local": "no",
+      "text_html": "folly/Range.h"
+    },
+    {
+      "local": "no",
       "text_html": "folly/Utility.h"
     },
     {

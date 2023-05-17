@@ -1,0 +1,102 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a65f758d7de5adeb837deeccca3c9a221",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
+      "argsstring_html": "()",
+      "name_html": "patchIfSet",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "183",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "183",
+        "bodyend": "185"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
+        "simple_raw": "template <typename Id>\ndecltype(auto) patchIfSet()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) patchIfSet()",
+        "detailed_raw": "template <typename Id>\ninline decltype(auto) patchIfSet()",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Returns the proper patch object for the given field. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchIfSet"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a423b0632827fd52056d9ed303b3c3d0a",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        },
+        {
+          "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a>"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
+      "argsstring_html": "(const FieldPatch &amp;p)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "304",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "304",
+        "bodyend": "306"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",
+        "simple_raw": "template <typename Id, typename FieldPatch>\nvoid patchIfSet(const FieldPatch& p)",
+        "detailed_html": "template &lt;typename Id, typename FieldPatch&gt;\nprivate inline void patchIfSet(const FieldPatch&amp; p)",
+        "detailed_raw": "template <typename Id, typename FieldPatch>\nprivate inline void patchIfSet(const FieldPatch& p)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
+        "original_argsstring_html": "(const FieldPatch &amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+  "minprot": "public",
+  "displayname_html": "patchIfSet",
+  "brief_html": "<p>Returns the proper patch object for the given field. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet"
+}

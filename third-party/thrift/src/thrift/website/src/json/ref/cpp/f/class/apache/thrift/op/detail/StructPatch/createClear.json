@@ -17,11 +17,11 @@
       "name_html": "createClear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "220",
+        "line": "211",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "220",
-        "bodyend": "224"
+        "bodystart": "211",
+        "bodyend": "215"
       },
       "definition": {
         "simple_html": "static FOLLY_NODISCARD Derived createClear()",

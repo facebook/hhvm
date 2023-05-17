@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "finalize",
+  "compoundname_html": "apache::thrift::op::Xxh64Hasher::finalize",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1a714c28f669ac71b5a0e28f8e0803e3a0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::Xxh64Hasher::finalize",
+      "argsstring_html": "()",
+      "name_html": "finalize",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "line": "62",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "bodystart": "62",
+        "bodyend": "62"
+      },
+      "definition": {
+        "simple_html": "void finalize()",
+        "simple_raw": "void finalize()",
+        "detailed_html": "inline void finalize()",
+        "detailed_raw": "inline void finalize()",
+        "original_definition_html": "void apache::thrift::op::Xxh64Hasher::finalize",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/finalize",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Xxh64Hasher/finalize",
+      "parentid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
+      "compoundname_html": "apache::thrift::op::Xxh64Hasher::finalize"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/Xxh64Hasher/finalize",
+  "minprot": "public",
+  "displayname_html": "finalize",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/finalize",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/finalize"
+}

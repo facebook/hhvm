@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator&lt;",
+  "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a5876dfc7c0ac2452b1d355888292587d",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+      "argsstring_html": "(const StdHasherNoIOBuf other) const",
+      "name_html": "operator&lt;",
+      "param": [
+        {
+          "type_html": "const <code>StdHasherNoIOBuf</code>",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "51",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "51",
+        "bodyend": "53"
+      },
+      "definition": {
+        "simple_html": "bool operator&lt;(const StdHasherNoIOBuf other) const",
+        "simple_raw": "bool operator<(const StdHasherNoIOBuf other) const",
+        "detailed_html": "inline bool operator&lt;(const StdHasherNoIOBuf other) const",
+        "detailed_raw": "inline bool operator<(const StdHasherNoIOBuf other) const",
+        "original_definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+        "original_argsstring_html": "(const StdHasherNoIOBuf other) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+      "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+      "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::operator&lt;"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+  "minprot": "public",
+  "displayname_html": "operator&lt;",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt"
+}

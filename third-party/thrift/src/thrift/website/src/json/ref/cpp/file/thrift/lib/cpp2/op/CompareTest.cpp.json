@@ -18,10 +18,6 @@
       "text_html": "folly/portability/GTest.h"
     },
     {
-      "local": "no",
-      "text_html": "thrift/conformance/if/gen-cpp2/object_types.h"
-    },
-    {
       "refid": "detail_2Compare_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Compare.h"
@@ -29,6 +25,10 @@
     {
       "local": "no",
       "text_html": "thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h"
     }
   ],
   "innernamespace": [

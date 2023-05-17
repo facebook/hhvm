@@ -14,17 +14,13 @@
       "text_html": "folly/portability/GTest.h"
     },
     {
-      "local": "no",
-      "text_html": "thrift/conformance/cpp2/Object.h"
-    },
-    {
-      "local": "no",
-      "text_html": "thrift/conformance/if/gen-cpp2/object_types_custom_protocol.h"
-    },
-    {
       "refid": "Testing_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/Testing.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Object.h"
     }
   ],
   "innernamespace": [

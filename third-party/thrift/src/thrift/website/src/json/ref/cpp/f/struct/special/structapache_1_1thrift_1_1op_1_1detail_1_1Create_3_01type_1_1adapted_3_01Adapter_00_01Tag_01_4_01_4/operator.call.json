@@ -23,11 +23,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "202",
+        "line": "207",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "202",
-        "bodyend": "207"
+        "bodystart": "207",
+        "bodyend": "212"
       },
       "definition": {
         "simple_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\nconstexpr T operator()() const",

@@ -35,10 +35,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "290",
+        "line": "300",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "290",
+        "bodystart": "300",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269"
@@ -46,15 +46,21 @@
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1abff678b28db76e2fdc850c2214449c08",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1aa672c940fb7f8743623d696af40c18f7",
       "prot": "public",
       "static": "no",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr bool",
-      "definition_html": "constexpr bool apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+      "tparams": [
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_is_empty_adapter&lt; AdapterT, type::native_type&lt; <code>Tag</code> &gt; &gt;",
+      "definition_html": "constexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const",
       "name_html": "operator()",
       "param": [
@@ -65,18 +71,61 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "291",
+        "line": "304",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "291",
-        "bodyend": "293"
+        "bodystart": "304",
+        "bodyend": "306"
       },
       "definition": {
-        "simple_html": "constexpr bool operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
-        "simple_raw": "constexpr bool operator()(const type::native_type<Tag>& value) const",
-        "detailed_html": "inline constexpr bool operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
-        "detailed_raw": "inline constexpr bool operator()(const type::native_type<Tag>& value) const",
-        "original_definition_html": "constexpr bool apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+        "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\noperator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+        "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>\noperator()(const type::native_type<Tag>& value) const",
+        "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+        "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+        "original_definition_html": "constexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+        "original_argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1adbb5115cbad0b4328cba74ef2e70009e",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_not_is_empty_adapter&lt; AdapterT, type::native_type&lt; <code>Tag</code> &gt; &gt;",
+      "definition_html": "constexpr adapt_detail:: if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+      "argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const type::native_type&lt; <code>Tag</code> &gt; &amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "311",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "311",
+        "bodyend": "313"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+        "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+        "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+        "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+        "original_definition_html": "constexpr adapt_detail:: if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
         "original_argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call",
@@ -85,11 +134,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "289",
+    "line": "299",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "289",
-    "bodyend": "294"
+    "bodystart": "299",
+    "bodyend": "314"
   },
   "namespacednames_html": [
     "apache",
@@ -116,15 +165,21 @@
           "compoundname_html": "apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1abff678b28db76e2fdc850c2214449c08",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1aa672c940fb7f8743623d696af40c18f7",
               "prot": "public",
               "static": "no",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
-              "type_html": "constexpr bool",
-              "definition_html": "constexpr bool apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "tparams": [
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::if_is_empty_adapter&lt; AdapterT, type::native_type&lt; <code>Tag</code> &gt; &gt;",
+              "definition_html": "constexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const",
               "name_html": "operator()",
               "param": [
@@ -135,18 +190,63 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "291",
+                "line": "304",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "291",
-                "bodyend": "293"
+                "bodystart": "304",
+                "bodyend": "306"
               },
               "definition": {
-                "simple_html": "constexpr bool operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
-                "simple_raw": "constexpr bool operator()(const type::native_type<Tag>& value) const",
-                "detailed_html": "inline constexpr bool operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
-                "detailed_raw": "inline constexpr bool operator()(const type::native_type<Tag>& value) const",
-                "original_definition_html": "constexpr bool apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\noperator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>\noperator()(const type::native_type<Tag>& value) const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+                "original_definition_html": "constexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269",
+              "compoundname_html": "apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269_1adbb5115cbad0b4328cba74ef2e70009e",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::if_not_is_empty_adapter&lt; AdapterT, type::native_type&lt; <code>Tag</code> &gt; &gt;",
+              "definition_html": "constexpr adapt_detail:: if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const type::native_type&lt; <code>Tag</code> &gt; &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "311",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "311",
+                "bodyend": "313"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>\n    operator()(const type::native_type<Tag>& value) const",
+                "original_definition_html": "constexpr adapt_detail:: if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt; &gt; apache::thrift::op::detail::IsEmpty&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
                 "original_argsstring_html": "(const type::native_type&lt; Tag &gt; &amp;value) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_3_01adapted__field__tag_3_01Adapter_00_01UTag_af4bd28c6cb5d1963019f0431992e269/operator.call",

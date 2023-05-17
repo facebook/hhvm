@@ -31,11 +31,11 @@
       "name_html": "bad_patch_access",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "35",
+        "line": "36",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "35",
-        "bodyend": "36"
+        "bodystart": "36",
+        "bodyend": "37"
       },
       "definition": {
         "simple_html": "bad_patch_access()",
@@ -51,11 +51,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-    "line": "33",
+    "line": "34",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-    "bodystart": "33",
-    "bodyend": "37"
+    "bodystart": "34",
+    "bodyend": "38"
   },
   "namespacednames_html": [
     "apache",
@@ -94,11 +94,11 @@
               "name_html": "bad_patch_access",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-                "line": "35",
+                "line": "36",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-                "bodystart": "35",
-                "bodyend": "36"
+                "bodystart": "36",
+                "bodyend": "37"
               },
               "definition": {
                 "simple_html": "bad_patch_access()",

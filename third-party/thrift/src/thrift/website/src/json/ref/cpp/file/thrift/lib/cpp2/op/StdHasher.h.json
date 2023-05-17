@@ -27,7 +27,17 @@
   ],
   "innerclass": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1StdHasher",
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+      "prot": "public",
+      "text_html": "apache::thrift::op::StdHasherNoIOBuf"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1StdHasherDeprecated",
+      "prot": "public",
+      "text_html": "apache::thrift::op::StdHasherDeprecated"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1StdHasher",
       "prot": "public",
       "text_html": "apache::thrift::op::StdHasher"
     }

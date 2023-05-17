@@ -1,0 +1,48 @@
+{
+  "kind": "overloadset",
+  "name_html": "Xxh64Hasher",
+  "compoundname_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1a053a0c90b644e748e11de70a80c48dbf",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
+      "argsstring_html": "()",
+      "name_html": "Xxh64Hasher",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "line": "35",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "bodystart": "35",
+        "bodyend": "37"
+      },
+      "definition": {
+        "simple_html": "Xxh64Hasher()",
+        "simple_raw": "Xxh64Hasher()",
+        "detailed_html": "inline Xxh64Hasher()",
+        "detailed_raw": "inline Xxh64Hasher()",
+        "original_definition_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
+      "parentid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
+  "minprot": "public",
+  "displayname_html": "(constructor)",
+  "brief_html": "Constructs the Xxh64Hasher.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher"
+}

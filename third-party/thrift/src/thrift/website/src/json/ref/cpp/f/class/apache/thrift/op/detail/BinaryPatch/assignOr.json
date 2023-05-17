@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "172",
+        "line": "184",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "172",
-        "bodyend": "174"
+        "bodystart": "184",
+        "bodyend": "186"
       },
       "definition": {
         "simple_html": "FOLLY_NODISCARD value_type&amp; assignOr(value_type&amp; value)",

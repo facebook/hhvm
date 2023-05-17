@@ -11,11 +11,11 @@
   },
   "location": {
     "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-    "line": "57",
+    "line": "58",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-    "bodystart": "57",
-    "bodyend": "60"
+    "bodystart": "58",
+    "bodyend": "61"
   },
   "namespacednames_html": [
     "apache",
@@ -38,10 +38,10 @@
       "name_html": "read",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "58",
+        "line": "59",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "bodystart": "58",
+        "bodystart": "59",
         "bodyend": "-1"
       }
     },
@@ -56,10 +56,10 @@
       "name_html": "write",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "59",
+        "line": "60",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "bodystart": "59",
+        "bodystart": "60",
         "bodyend": "-1"
       }
     }

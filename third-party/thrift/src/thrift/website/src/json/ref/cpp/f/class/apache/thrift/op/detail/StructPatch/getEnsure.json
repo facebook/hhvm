@@ -4,53 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::getEnsure",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1afa39057a200f5612a4aa8b6dfbd84322",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        },
-        {
-          "type_html": "typename U"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "static decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::getEnsure",
-      "argsstring_html": "(U &amp;&amp;data)",
-      "name_html": "getEnsure",
-      "param": [
-        {
-          "type_html": "U &amp;&amp;",
-          "declname_html": "data"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "378",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "378",
-        "bodyend": "380"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",
-        "simple_raw": "template <typename Id, typename U>\nstatic decltype(auto) getEnsure(U&& data)",
-        "detailed_html": "template &lt;typename Id, typename U&gt;\nprivate inline static decltype(auto) getEnsure(U&amp;&amp; data)",
-        "detailed_raw": "template <typename Id, typename U>\nprivate inline static decltype(auto) getEnsure(U&& data)",
-        "original_definition_html": "static decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::getEnsure",
-        "original_argsstring_html": "(U &amp;&amp;data)"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/getEnsure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/getEnsure",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
-      "compoundname_html": "apache::thrift::op::detail::StructPatch::getEnsure"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a4f90b5c2eae9a97be24452d3943c4f0c",
       "prot": "protected",
       "static": "yes",
@@ -78,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "186",
+        "line": "242",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "186",
-        "bodyend": "188"
+        "bodystart": "242",
+        "bodyend": "244"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",

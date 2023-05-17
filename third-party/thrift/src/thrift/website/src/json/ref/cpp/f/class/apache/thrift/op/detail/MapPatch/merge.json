@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::MapPatch::merge",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a246442dd2ec062bc9167f76f001329c1",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a3f2783dc70f1d025e7ef04eedabae128",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,7 +17,7 @@
         }
       ],
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::merge",
+      "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::merge",
       "argsstring_html": "(U &amp;&amp;next)",
       "name_html": "merge",
       "param": [
@@ -27,27 +27,27 @@
         }
       ],
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "433",
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "100",
         "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "433",
-        "bodyend": "461"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "100",
+        "bodyend": "107"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid merge(U&amp;&amp; next)",
         "simple_raw": "template <typename U>\nvoid merge(U&& next)",
         "detailed_html": "template &lt;typename U&gt;\ninline void merge(U&amp;&amp; next)",
         "detailed_raw": "template <typename U>\ninline void merge(U&& next)",
-        "original_definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::merge",
+        "original_definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::merge",
         "original_argsstring_html": "(U &amp;&amp;next)"
       },
       "description": {
         "detailed_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>"
       },
-      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/merge",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/merge",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+      "filepath": "fns/class/apache/thrift/op/detail/BasePatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BasePatch/merge",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch",
       "compoundname_html": "apache::thrift::op::detail::MapPatch::merge"
     }
   ],

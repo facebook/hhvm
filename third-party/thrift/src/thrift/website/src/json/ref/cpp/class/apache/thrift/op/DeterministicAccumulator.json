@@ -197,7 +197,7 @@
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "252",
-        "bodyend": "271"
+        "bodyend": "272"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid combine(const T&amp; val)",
@@ -438,12 +438,12 @@
       }
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1a04496de02e317e03d4d71116b37470b4",
+      "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1a20733bcd9bfa17b8942ba9b601fbe402",
       "prot": "private",
       "static": "no",
       "mutable": "no",
-      "type_html": "std::stack&lt; Context &gt;",
-      "definition_html": "std::stack&lt;Context&gt; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context_",
+      "type_html": "std::stack&lt; Context, std::vector&lt; Context &gt; &gt;",
+      "definition_html": "std::stack&lt;Context, std::vector&lt;Context&gt; &gt; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context_",
       "argsstring_html": "",
       "name_html": "context_",
       "location": {
@@ -808,7 +808,7 @@
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "bodystart": "252",
-                "bodyend": "271"
+                "bodyend": "272"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nvoid combine(const T&amp; val)",

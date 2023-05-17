@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "84",
+        "line": "107",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "84",
-        "bodyend": "88"
+        "bodystart": "107",
+        "bodyend": "111"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nstatic ListPatch createPrepend(C&amp;&amp; values)",

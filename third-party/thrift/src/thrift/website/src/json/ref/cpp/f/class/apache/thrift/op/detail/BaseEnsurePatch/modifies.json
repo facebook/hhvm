@@ -22,11 +22,11 @@
       "name_html": "modifies",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "130",
+        "line": "144",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "130",
-        "bodyend": "134"
+        "bodystart": "144",
+        "bodyend": "148"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nbool modifies() const",
@@ -68,11 +68,11 @@
       "name_html": "modifies",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "137",
+        "line": "151",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "137",
-        "bodyend": "145"
+        "bodystart": "151",
+        "bodyend": "159"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename... Ids&gt;\nstd::enable_if_t&lt;sizeof...(Ids) != 0, bool&gt; modifies() const",

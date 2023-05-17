@@ -1,0 +1,63 @@
+{
+  "refid": "Xxh64Hasher_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Xxh64Hasher.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "cstdint"
+    },
+    {
+      "local": "no",
+      "text_html": "type_traits"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Hash.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Optional.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Range.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/io/IOBuf.h"
+    },
+    {
+      "local": "no",
+      "text_html": "xxhash.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
+      "prot": "public",
+      "text_html": "apache::thrift::op::Xxh64Hasher"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/Xxh64Hasher.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/Xxh64Hasher.h",
+  "free_overloadgroups": []
+}

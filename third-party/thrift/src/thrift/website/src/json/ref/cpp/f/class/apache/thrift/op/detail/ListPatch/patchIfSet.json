@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::ListPatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1ab00788d88b8041725aefc4c52e4056a7",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
+      "argsstring_html": "(const VPMap &amp;patches)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "const VPMap &amp;",
+          "declname_html": "patches"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "235",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "235",
+        "bodyend": "239"
+      },
+      "definition": {
+        "simple_html": "void patchIfSet(const VPMap&amp; patches)",
+        "simple_raw": "void patchIfSet(const VPMap& patches)",
+        "detailed_html": "private inline void patchIfSet(const VPMap&amp; patches)",
+        "detailed_raw": "private inline void patchIfSet(const VPMap& patches)",
+        "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
+        "original_argsstring_html": "(const VPMap &amp;patches)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
+      "compoundname_html": "apache::thrift::op::detail::ListPatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/ListPatch/patchIfSet",
+  "minprot": "private",
+  "displayname_html": "patchIfSet",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchIfSet"
+}

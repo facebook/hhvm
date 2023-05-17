@@ -17,7 +17,7 @@
       "name_html": "~BasePatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "107",
+        "line": "119",
         "column": "1"
       },
       "definition": {

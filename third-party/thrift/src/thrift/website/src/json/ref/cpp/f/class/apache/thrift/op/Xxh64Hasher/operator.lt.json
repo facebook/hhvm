@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator&lt;",
+  "compoundname_html": "apache::thrift::op::Xxh64Hasher::operator&lt;",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1a527d3459b430cb65ba46dbc6e3f69be3",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::Xxh64Hasher::operator&lt;",
+      "argsstring_html": "(const Xxh64Hasher &amp;other) const",
+      "name_html": "operator&lt;",
+      "param": [
+        {
+          "type_html": "const <code>Xxh64Hasher</code> &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "line": "64",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "bodystart": "64",
+        "bodyend": "70"
+      },
+      "definition": {
+        "simple_html": "bool operator&lt;(const Xxh64Hasher&amp; other) const",
+        "simple_raw": "bool operator<(const Xxh64Hasher& other) const",
+        "detailed_html": "inline bool operator&lt;(const Xxh64Hasher&amp; other) const",
+        "detailed_raw": "inline bool operator<(const Xxh64Hasher& other) const",
+        "original_definition_html": "bool apache::thrift::op::Xxh64Hasher::operator&lt;",
+        "original_argsstring_html": "(const Xxh64Hasher &amp;other) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/operator.lt",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Xxh64Hasher/operator.lt",
+      "parentid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
+      "compoundname_html": "apache::thrift::op::Xxh64Hasher::operator&lt;"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/Xxh64Hasher/operator.lt",
+  "minprot": "public",
+  "displayname_html": "operator&lt;",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/operator.lt",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/operator.lt"
+}

@@ -1,0 +1,662 @@
+{
+  "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+  "kind": "class",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf",
+  "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1StdHasher",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::StdHasher"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1StdHasherDeprecated",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::StdHasherDeprecated"
+    }
+  ],
+  "includes": {
+    "refid": "StdHasher_8h",
+    "local": "no",
+    "text_html": "StdHasher.h"
+  },
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a9c6b3bf67ea1e0ed398fc01480ff8323",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "size_t",
+      "definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+      "argsstring_html": "() const",
+      "name_html": "getResult",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "32",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "32",
+        "bodyend": "32"
+      },
+      "definition": {
+        "simple_html": "size_t getResult() const",
+        "simple_raw": "size_t getResult() const",
+        "detailed_html": "inline size_t getResult() const",
+        "detailed_raw": "inline size_t getResult() const",
+        "original_definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a10b1bae50604b44ab89cbb7f49c8ab62",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;::<code>value</code> &gt;",
+      "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+      "argsstring_html": "(const T &amp;val)",
+      "name_html": "combine",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "35",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "35",
+        "bodyend": "38"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(\n    const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(\n    const T& val)",
+        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+        "original_argsstring_html": "(const T &amp;val)"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a7b64ea83e33a231c32943d591725cea3",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "constexpr std::enable_if_t&lt; std::is_enum&lt; T &gt;::<code>value</code> &gt;",
+      "definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+      "argsstring_html": "(const T &amp;val)",
+      "name_html": "combine",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "40",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "40",
+        "bodyend": "42"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+        "original_argsstring_html": "(const T &amp;val)"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a0dc76fa8da0ff791461e4d4e8e81927a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+      "argsstring_html": "(folly::ByteRange value)",
+      "name_html": "combine",
+      "param": [
+        {
+          "type_html": "folly::ByteRange",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "43",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "43",
+        "bodyend": "46"
+      },
+      "definition": {
+        "simple_html": "void combine(folly::ByteRange value)",
+        "simple_raw": "void combine(folly::ByteRange value)",
+        "detailed_html": "inline void combine(folly::ByteRange value)",
+        "detailed_raw": "inline void combine(folly::ByteRange value)",
+        "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+        "original_argsstring_html": "(folly::ByteRange value)"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a2a4bd5cfce204e3a6658795709258e13",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+      "argsstring_html": "(const StdHasherNoIOBuf &amp;other)",
+      "name_html": "combine",
+      "param": [
+        {
+          "type_html": "const <code>StdHasherNoIOBuf</code> &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "47",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "47",
+        "bodyend": "47"
+      },
+      "definition": {
+        "simple_html": "void combine(const StdHasherNoIOBuf&amp; other)",
+        "simple_raw": "void combine(const StdHasherNoIOBuf& other)",
+        "detailed_html": "inline void combine(const StdHasherNoIOBuf&amp; other)",
+        "detailed_raw": "inline void combine(const StdHasherNoIOBuf& other)",
+        "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+        "original_argsstring_html": "(const StdHasherNoIOBuf &amp;other)"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a3e8b4fa60f6720d86da20dd8b05c1c5a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+      "argsstring_html": "()",
+      "name_html": "finalize",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "49",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "49",
+        "bodyend": "49"
+      },
+      "definition": {
+        "simple_html": "void finalize()",
+        "simple_raw": "void finalize()",
+        "detailed_html": "inline void finalize()",
+        "detailed_raw": "inline void finalize()",
+        "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a5876dfc7c0ac2452b1d355888292587d",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+      "argsstring_html": "(const StdHasherNoIOBuf other) const",
+      "name_html": "operator&lt;",
+      "param": [
+        {
+          "type_html": "const <code>StdHasherNoIOBuf</code>",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "51",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "51",
+        "bodyend": "53"
+      },
+      "definition": {
+        "simple_html": "bool operator&lt;(const StdHasherNoIOBuf other) const",
+        "simple_raw": "bool operator<(const StdHasherNoIOBuf other) const",
+        "detailed_html": "inline bool operator&lt;(const StdHasherNoIOBuf other) const",
+        "detailed_raw": "inline bool operator<(const StdHasherNoIOBuf other) const",
+        "original_definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+        "original_argsstring_html": "(const StdHasherNoIOBuf other) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+    "line": "30",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+    "bodystart": "30",
+    "bodyend": "57"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "StdHasherNoIOBuf"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1af39291ff5e8fe1c61f190cbb8cf71d11",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "size_t",
+      "definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::result_",
+      "argsstring_html": "",
+      "name_html": "result_",
+      "initializer_html": "= 0",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "line": "56",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+        "bodystart": "56",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "class StdHasherNoIOBuf;",
+  "declaration_html": "class StdHasherNoIOBuf;",
+  "filepath": "class/apache/thrift/op/StdHasherNoIOBuf",
+  "href": "/ref/cpp/class/apache/thrift/op/StdHasherNoIOBuf",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "getResult",
+          "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::getResult",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a9c6b3bf67ea1e0ed398fc01480ff8323",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "size_t",
+              "definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+              "argsstring_html": "() const",
+              "name_html": "getResult",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "32",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "32",
+                "bodyend": "32"
+              },
+              "definition": {
+                "simple_html": "size_t getResult() const",
+                "simple_raw": "size_t getResult() const",
+                "detailed_html": "inline size_t getResult() const",
+                "detailed_raw": "inline size_t getResult() const",
+                "original_definition_html": "size_t apache::thrift::op::StdHasherNoIOBuf::getResult",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::getResult"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+          "minprot": "public",
+          "displayname_html": "getResult",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/getResult",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/getResult"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "combine",
+          "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::combine",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a10b1bae50604b44ab89cbb7f49c8ab62",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;::<code>value</code> &gt;",
+              "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+              "argsstring_html": "(const T &amp;val)",
+              "name_html": "combine",
+              "param": [
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "35",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "35",
+                "bodyend": "38"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(const T&amp; val)",
+                "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(const T& val)",
+                "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(\n    const T&amp; val)",
+                "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(\n    const T& val)",
+                "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+                "original_argsstring_html": "(const T &amp;val)"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::combine"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a7b64ea83e33a231c32943d591725cea3",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr std::enable_if_t&lt; std::is_enum&lt; T &gt;::<code>value</code> &gt;",
+              "definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+              "argsstring_html": "(const T &amp;val)",
+              "name_html": "combine",
+              "param": [
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "40",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "40",
+                "bodyend": "42"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+                "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+                "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+                "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+                "original_definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasherNoIOBuf::combine",
+                "original_argsstring_html": "(const T &amp;val)"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::combine"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a0dc76fa8da0ff791461e4d4e8e81927a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+              "argsstring_html": "(folly::ByteRange value)",
+              "name_html": "combine",
+              "param": [
+                {
+                  "type_html": "folly::ByteRange",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "43",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "43",
+                "bodyend": "46"
+              },
+              "definition": {
+                "simple_html": "void combine(folly::ByteRange value)",
+                "simple_raw": "void combine(folly::ByteRange value)",
+                "detailed_html": "inline void combine(folly::ByteRange value)",
+                "detailed_raw": "inline void combine(folly::ByteRange value)",
+                "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+                "original_argsstring_html": "(folly::ByteRange value)"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::combine"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a2a4bd5cfce204e3a6658795709258e13",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+              "argsstring_html": "(const StdHasherNoIOBuf &amp;other)",
+              "name_html": "combine",
+              "param": [
+                {
+                  "type_html": "const <code>StdHasherNoIOBuf</code> &amp;",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "47",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "47",
+                "bodyend": "47"
+              },
+              "definition": {
+                "simple_html": "void combine(const StdHasherNoIOBuf&amp; other)",
+                "simple_raw": "void combine(const StdHasherNoIOBuf& other)",
+                "detailed_html": "inline void combine(const StdHasherNoIOBuf&amp; other)",
+                "detailed_raw": "inline void combine(const StdHasherNoIOBuf& other)",
+                "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::combine",
+                "original_argsstring_html": "(const StdHasherNoIOBuf &amp;other)"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::combine"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+          "minprot": "public",
+          "displayname_html": "combine",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/combine",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/combine"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "finalize",
+          "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::finalize",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a3e8b4fa60f6720d86da20dd8b05c1c5a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+              "argsstring_html": "()",
+              "name_html": "finalize",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "49",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "49",
+                "bodyend": "49"
+              },
+              "definition": {
+                "simple_html": "void finalize()",
+                "simple_raw": "void finalize()",
+                "detailed_html": "inline void finalize()",
+                "detailed_raw": "inline void finalize()",
+                "original_definition_html": "void apache::thrift::op::StdHasherNoIOBuf::finalize",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::finalize"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+          "minprot": "public",
+          "displayname_html": "finalize",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/finalize",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/finalize"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "operator&lt;",
+          "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf_1a5876dfc7c0ac2452b1d355888292587d",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+              "argsstring_html": "(const StdHasherNoIOBuf other) const",
+              "name_html": "operator&lt;",
+              "param": [
+                {
+                  "type_html": "const <code>StdHasherNoIOBuf</code>",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "line": "51",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
+                "bodystart": "51",
+                "bodyend": "53"
+              },
+              "definition": {
+                "simple_html": "bool operator&lt;(const StdHasherNoIOBuf other) const",
+                "simple_raw": "bool operator<(const StdHasherNoIOBuf other) const",
+                "detailed_html": "inline bool operator&lt;(const StdHasherNoIOBuf other) const",
+                "detailed_raw": "inline bool operator<(const StdHasherNoIOBuf other) const",
+                "original_definition_html": "bool apache::thrift::op::StdHasherNoIOBuf::operator&lt;",
+                "original_argsstring_html": "(const StdHasherNoIOBuf other) const"
+              },
+              "filepath": "fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+              "parentid": "classapache_1_1thrift_1_1op_1_1StdHasherNoIOBuf",
+              "compoundname_html": "apache::thrift::op::StdHasherNoIOBuf::operator&lt;"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+          "minprot": "public",
+          "displayname_html": "operator&lt;",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasherNoIOBuf/operator.lt"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

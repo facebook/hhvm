@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "getResult",
+  "compoundname_html": "apache::thrift::op::Xxh64Hasher::getResult",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1ad55a8f9c2a9eec38d5fcce24ebc3c62c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "XXH64_hash_t",
+      "definition_html": "XXH64_hash_t apache::thrift::op::Xxh64Hasher::getResult",
+      "argsstring_html": "() const",
+      "name_html": "getResult",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "line": "38",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
+        "bodystart": "38",
+        "bodyend": "42"
+      },
+      "definition": {
+        "simple_html": "XXH64_hash_t getResult() const",
+        "simple_raw": "XXH64_hash_t getResult() const",
+        "detailed_html": "inline XXH64_hash_t getResult() const",
+        "detailed_raw": "inline XXH64_hash_t getResult() const",
+        "original_definition_html": "XXH64_hash_t apache::thrift::op::Xxh64Hasher::getResult",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/getResult",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/Xxh64Hasher/getResult",
+      "parentid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
+      "compoundname_html": "apache::thrift::op::Xxh64Hasher::getResult"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/Xxh64Hasher/getResult",
+  "minprot": "public",
+  "displayname_html": "getResult",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/getResult",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/getResult"
+}

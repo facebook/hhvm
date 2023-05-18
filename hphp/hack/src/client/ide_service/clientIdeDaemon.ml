@@ -518,7 +518,7 @@ let prepare_naming_table
       in
       match result with
       | Ok (project_metadata, _telemetry) ->
-        State_loader_lwt.load_naming_table_from_disk
+        State_loader_lwt.load_arbitrary_naming_table_from_disk
           ~saved_state_type
           ~project_metadata
           ~root:param.root

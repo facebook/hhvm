@@ -26,33 +26,14 @@ let catch_ifc_internal_errors pos f =
       ~on_timeout:(fun _ ->
         Hh_logger.log
           "Timed out running IFC analysis on %s"
-          (Relative_path.suffix (Pos.filename pos));
-        Typing_error_utils.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Ifc_internal_error
-                 { pos; msg = "Timed out running IFC analysis" }))
+          (Relative_path.suffix (Pos.filename pos)))
   with
   (* Solver exceptions*)
-  | IFCError error ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Ifc_internal_error
-             { pos; msg = Ifc_pretty.ifc_error_to_string error })
+  | IFCError _
   (* Failwith exceptions *)
-  | Failure s ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Ifc_internal_error
-             { pos; msg = "IFC internal assertion failure: " ^ s })
-  | e ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Ifc_internal_error
-             { pos; msg = "Unexpected IFC exception: " ^ Exn.to_string e })
+  | Failure _
+  | _ ->
+    ()
 
 let decl_env : decl_env = { de_class = SMap.empty }
 

@@ -492,23 +492,9 @@ let join_policies ?(prefix = "join") ~pos renv env pl =
     let env = Env.acc env (L.(pl <* [pv]) ~pos) in
     (env, pv)
 
-let is_special_var =
-  (* skip co-effect magic variables and fake members *)
-  (* the $this local used in the Hack typechecker is
-     not used in Hack IFC, instead the type of $this is
-     in renv.re_this *)
-  let re = Str.regexp "^\\$\\(#\\|.*->\\|this\\)" in
-  (fun s -> Str.string_match re s 0)
-
-let get_local_type ~pos env lid =
+let get_local_type ~pos:_ env lid =
   match Env.get_local_type env lid with
-  | None ->
-    let name = Local_id.get_name lid in
-    (if not (is_special_var name) then
-      let what = "local " ^ name ^ " missing from env" in
-      Typing_error_utils.add_typing_error
-        Typing_error.(ifc @@ Primary.Ifc.Unknown_information_flow { pos; what }));
-    None
+  | None -> None
   | pty_opt -> pty_opt
 
 (* Uses a Hack-inferred type to update the flow type of a local
@@ -547,7 +533,7 @@ let lift_params renv =
 let set_local_types env =
   List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
-let class_ pos msg ty =
+let class_ _pos msg ty =
   let rec find_class = function
     | Tclass class_ -> Some class_
     | Tdynamic pol ->
@@ -555,9 +541,6 @@ let class_ pos msg ty =
          (invariant) policy, we do not know if the property we are looking for
          is policied, therefore we guess that it has the lump policy and emit an
          error in case we are wrong *)
-      Typing_error_utils.add_typing_error
-        Typing_error.(
-          ifc @@ Primary.Ifc.Unknown_information_flow { pos; what = "dynamic" });
       Some { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
     | Tinter tys -> List.find_map ~f:find_class tys
     | _ -> None
@@ -753,13 +736,10 @@ let array_like ~cow ~shape ~klass ~tuple ~dynamic ty =
   in
   search ty
 
-let array_like_with_default ~cow ~shape ~klass ~tuple ~dynamic ~pos renv ty =
+let array_like_with_default ~cow ~shape ~klass ~tuple ~dynamic ~pos:_ renv ty =
   match array_like ~cow ~shape ~klass ~tuple ~dynamic ty with
   | Some ty -> ty
   | None ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc @@ Primary.Ifc.Unknown_information_flow { pos; what = "Hack array" });
     (* The default is completely arbitrary but it should be the least
        precisely handled array structure given the search options. *)
     if dynamic then
@@ -833,11 +813,7 @@ let assign_helper
     let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
-  | _ ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc @@ Primary.Ifc.Unknown_information_flow { pos; what = "lvalue" });
-    env
+  | _ -> env
 
 (* Hack array accesses and mutations may throw when the indexed
    element is not in the array. may_throw_out_of_bounds_exn is
@@ -961,13 +937,7 @@ let rec assign
           let tshape = Tshape { sh_kind; sh_fields } in
           let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
           (env, false)
-        | None ->
-          Typing_error_utils.add_typing_error
-            Typing_error.(
-              ifc
-              @@ Primary.Ifc.Unknown_information_flow
-                   { pos; what = "shape key" });
-          (env, true)
+        | None -> (env, true)
       end
       | Ttuple _ ->
         let ix =
@@ -1049,13 +1019,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     let element_pty =
       match find_element_ty ety with
       | Some element_ty -> Lift.ty ~lump:class_.c_lump renv element_ty
-      | None ->
-        Typing_error_utils.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "mutable collection literal" });
-        Tprim (Env.new_policy_var renv "fake_element")
+      | None -> Tprim (Env.new_policy_var renv "fake_element")
     in
     let env = Env.acc env (add_dependencies ~pos [class_.c_self] element_pty) in
     (* Each element is a subtype of the collection's value. *)
@@ -1098,11 +1062,6 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         ( Lift.ty ~lump:class_.c_lump renv key_ty,
           Lift.ty ~lump:class_.c_lump renv value_ty )
       | None ->
-        Typing_error_utils.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "mutable collection literal" });
         ( Tprim (Env.new_policy_var renv "fake_key"),
           Tprim (Env.new_policy_var renv "fake_value") )
     in
@@ -1255,13 +1214,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     | Ast_defs.Uplus
     | Ast_defs.Uminus ->
       expr env e
-    | Ast_defs.Usilence ->
-      Typing_error_utils.add_typing_error
-        Typing_error.(
-          ifc
-          @@ Primary.Ifc.Unknown_information_flow
-               { pos; what = "silence (@) operator" });
-      expr env e
+    | Ast_defs.Usilence -> expr env e
   end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, _, A.Id (_, property)), _, _) ->
@@ -1315,11 +1268,6 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
           | A.CIexpr e -> fst @@ expr env e
           | A.CIstatic ->
             (* TODO(T72024862): Handle late static binding *)
-            Typing_error_utils.add_typing_error
-              Typing_error.(
-                ifc
-                @@ Primary.Ifc.Unknown_information_flow
-                     { pos; what = "late static binding" });
             env
           | _ -> env
         in
@@ -1366,11 +1314,6 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         Cglobal (call_id, ety)
       | A.FP_class_const _ ->
         (* TODO(T72024862): Handle late static binding *)
-        Typing_error_utils.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "late static binding" });
         Clocal fty
     in
     (* Act as though we are defining a lambda that wraps a call to the function
@@ -1437,13 +1380,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         begin
           match sft with
           | Some { sft_ty; _ } -> (env, sft_ty)
-          | None ->
-            Typing_error_utils.add_typing_error
-              Typing_error.(
-                ifc
-                @@ Primary.Ifc.Unknown_information_flow
-                     { pos; what = "nonexistent shape field" });
-            (env, Lift.ty renv ety)
+          | None -> (env, Lift.ty renv ety)
         end
       | Ttuple ptys ->
         let indexed_pty = nth_tuple_pty ptys ix_exp in
@@ -1474,11 +1411,6 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
       | A.CIexpr e -> fst @@ expr env e
       | A.CIstatic ->
         (* TODO(T72024862): Handle late static binding *)
-        Typing_error_utils.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "late static binding" });
         env
       | _ -> env
     in
@@ -1610,16 +1542,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
   | A.Collection _ ->
     failwith "AST should not contain these nodes"
   (* --- expressions below are not yet supported *)
-  | _ ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Unknown_information_flow
-             {
-               pos;
-               what = sprintf "expression (%s)" (Aast_names_utils.expr_name e);
-             });
-    (env, Lift.ty renv ety)
+  | _ -> (env, Lift.ty renv ety)
 
 and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
   let expr_ = expr
@@ -2022,16 +1945,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     failwith
       "Unexpected nodes in AST. These nodes should have been removed in naming."
   (* --- These nodes are not yet supported *)
-  | _ ->
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Unknown_information_flow
-             {
-               pos;
-               what = sprintf "statement (%s)" (Aast_names_utils.stmt_name s);
-             });
-    Env.close_stmt env K.Next
+  | _ -> Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =
   let init = Env.close_stmt env K.Next in
@@ -2246,74 +2160,7 @@ let walk_tast opts decl_env ctx =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-let check_valid_flow opts _ (result, implicit, simple) =
-  let pds_of_poss = List.map ~f:Pos_or_decl.of_raw_pos in
-  let simple_illegal_flows =
-    Logic.entailment_violations opts.opt_security_lattice simple
-  in
-  let to_err node =
-    ( PosSet.elements (pos_set_of_policy node) |> pds_of_poss,
-      Format.asprintf "%a" Pp.policy node )
-  in
-  let illegal_information_flow (poss, source, sink) =
-    (* Separate error positions that are not in the result and filter out
-         unknown positions *)
-    let (primary_poss, other_poss) =
-      PosSet.filter (fun p -> not @@ Pos.equal Pos.none p) poss
-      |> PosSet.elements
-      |> List.partition_tf ~f:(Pos.overlaps result.res_span)
-    in
-    (* Make sure the primary error position is the latest position in the
-         callable being analysed *)
-    let (primary_pos, other_poss) =
-      match List.sort ~compare:Pos.compare primary_poss |> List.rev with
-      | [] -> (result.res_span, other_poss |> pds_of_poss)
-      | primary :: primary_poss ->
-        (primary, List.unordered_append primary_poss other_poss |> pds_of_poss)
-    in
-
-    let ((source_poss, source), (sink_poss, sink)) =
-      (to_err source, to_err sink)
-    in
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Illegal_information_flow
-             {
-               pos = primary_pos;
-               secondaries = other_poss;
-               source_poss;
-               source;
-               sink_poss;
-               sink;
-             })
-  in
-
-  let context_implicit_policy_leakage (pos, source, sink) =
-    (* The latest program point contributing to the violation is the
-         primary error *)
-    let (pos, secondaries) =
-      let poss =
-        PosSet.elements pos |> List.sort ~compare:Pos.compare |> List.rev
-      in
-      match poss with
-      | [] -> (result.res_span, [])
-      | primary :: secondaries -> (primary, pds_of_poss secondaries)
-    in
-    let ((source_poss, source), (sink_poss, sink)) =
-      (to_err source, to_err sink)
-    in
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        ifc
-        @@ Primary.Ifc.Context_implicit_policy_leakage
-             { pos; secondaries; source_poss; source; sink_poss; sink })
-  in
-
-  if should_print ~user_mode:opts.opt_mode ~phase:Mcheck then begin
-    List.iter ~f:illegal_information_flow simple_illegal_flows;
-    List.iter ~f:context_implicit_policy_leakage implicit
-  end
+let check_valid_flow _opts _ (_result, _implicit, _simple) = ()
 
 let simplify result =
   let pred = const true in

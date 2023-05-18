@@ -272,6 +272,8 @@ struct ClsConstInfo {
 
 // private types
 struct ClassInfo;
+struct FuncInfo2;
+struct FuncFamily2;
 struct UnresolvedClassMaker;
 
 //////////////////////////////////////////////////////////////////////
@@ -642,21 +644,30 @@ struct Func {
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
-    explicit FuncName(SString n) : name{n} {}
-    bool operator==(FuncName o) const { return name == o.name; }
     SString name;
   };
   struct MethodName {
-    bool operator==(MethodName o) const { return name == o.name; }
     SString name;
   };
+  struct Fun {
+    const FuncInfo* finfo;
+  };
+  struct Fun2 {
+    const FuncInfo2* finfo;
+  };
   struct Method {
-    const php::Func* func;
+    const FuncInfo* finfo;
+  };
+  struct Method2{
+    const FuncInfo2* finfo;
   };
   // Like Method, but the method is not guaranteed to actually exist
   // (this only matters for things like exactFunc()).
   struct MethodOrMissing {
-    const php::Func* func;
+    const FuncInfo* finfo;
+  };
+  struct MethodOrMissing2 {
+    const FuncInfo2* finfo;
   };
   // Method/Func is known to not exist
   struct Missing {
@@ -667,6 +678,10 @@ private:
     FuncFamily* family;
     bool regularOnly;
   };
+  struct MethodFamily2 {
+    const FuncFamily2* family;
+    bool regularOnly;
+  };
   // Simultaneously a group of func families. Any data must be
   // intersected across all of the func families in the list. Used for
   // method resolution on a DCls where isIsect() is true.
@@ -674,14 +689,23 @@ private:
     CompactVector<FuncFamily*> families;
     bool regularOnly{false};
   };
+  struct Isect2 {
+    CompactVector<const FuncFamily2*> families;
+    bool regularOnly{false};
+  };
   using Rep = boost::variant< FuncName
                             , MethodName
-                            , FuncInfo*
+                            , Fun
+                            , Fun2
                             , Method
+                            , Method2
                             , MethodFamily
+                            , MethodFamily2
                             , MethodOrMissing
+                            , MethodOrMissing2
                             , Missing
                             , Isect
+                            , Isect2
                             >;
 
 private:
@@ -1426,7 +1450,7 @@ private:
   bool visit_every_dcls_cls(const DCls&, const F&) const;
 
   template <typename P, typename G>
-  static res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&);
+  res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

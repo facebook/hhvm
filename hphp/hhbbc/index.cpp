@@ -487,6 +487,13 @@ struct FuncInfo2 {
   SString name;
 
   /*
+   * The php::Func representing this function. This field is not
+   * serialized. If you wish to make use of it, it must be fixed up
+   * manually after deserialization.
+   */
+  const php::Func* func = nullptr;
+
+  /*
    * The best-known return type of the function, if we have any
    * information. May be TBottom if the function is known to never
    * return (e.g. always throws).
@@ -670,6 +677,8 @@ size_t FuncFamily::StaticInfo::hash() const {
   return hash;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 struct PFuncVecHasher {
@@ -729,6 +738,10 @@ struct FFStaticInfoPtrEquals {
   }
 };
 
+//////////////////////////////////////////////////////////////////////
+
+}
+
 /*
  * Sometimes function resolution can't determine which exact function
  * something will call, but can restrict it to a family of functions.
@@ -761,6 +774,10 @@ struct FuncFamily2 {
   using Id = SHA1;
 
   Id m_id;
+  // All methods in a func family should have the same name. However,
+  // multiple func families may have the same name (so this is not an
+  // unique identifier).
+  SString m_name;
   // Methods used by a regular classes
   std::vector<MethRef> m_regular;
   // Methods used exclusively by non-regular classes, but as a private
@@ -845,8 +862,17 @@ struct FuncFamily2 {
   Optional<StaticInfo> m_allStatic;
   Optional<StaticInfo> m_regularStatic;
 
+  const StaticInfo& infoFor(bool regular) const {
+    if (regular) {
+      assertx(m_regularStatic.has_value());
+      return *m_regularStatic;
+    }
+    return *m_allStatic;
+  }
+
   template <typename SerDe> void serde(SerDe& sd) {
     sd(m_id)
+      (m_name)
       (m_regular)
       (m_nonRegularPrivate)
       (m_nonRegular)
@@ -855,6 +881,8 @@ struct FuncFamily2 {
       ;
   }
 };
+
+namespace {
 
 // Func families are (usually) very small, but we have a lot of
 // them. To reduce remote worker overhead, we bundle func families
@@ -3134,16 +3162,24 @@ SString Func::name() const {
     val,
     [&] (FuncName s)   { return s.name; },
     [&] (MethodName s) { return s.name; },
-    [&] (FuncInfo* fi) { return fi->func->name; },
-    [&] (Method m)     { return m.func->name; },
+    [&] (Fun f)        { return f.finfo->func->name; },
+    [&] (Fun2 f)       { return f.finfo->name; },
+    [&] (Method m)     { return m.finfo->func->name; },
+    [&] (Method2 m)    { return m.finfo->name; },
     [&] (MethodFamily fam) {
       return fam.family->possibleFuncs().front().ptr()->name;
     },
-    [&] (MethodOrMissing m) { return m.func->name; },
+    [&] (MethodFamily2 fam) { return fam.family->m_name; },
+    [&] (MethodOrMissing m) { return m.finfo->func->name; },
+    [&] (MethodOrMissing2 m) { return m.finfo->name; },
     [&] (Missing m) { return m.name; },
     [&] (const Isect& i) {
       assertx(i.families.size() > 1);
       return i.families[0]->possibleFuncs().front().ptr()->name;
+    },
+    [&] (const Isect2& i) {
+      assertx(i.families.size() > 1);
+      return i.families[0]->m_name;
     }
   );
 }
@@ -3154,12 +3190,17 @@ const php::Func* Func::exactFunc() const {
     val,
     [&](FuncName)                    { return Ret{}; },
     [&](MethodName)                  { return Ret{}; },
-    [&](FuncInfo* fi)                { return fi->func; },
-    [&](Method m)                    { return m.func; },
+    [&](Fun f)                       { return f.finfo->func; },
+    [&](Fun2 f)                      { return f.finfo->func; },
+    [&](Method m)                    { return m.finfo->func; },
+    [&](Method2 m)                   { return m.finfo->func; },
     [&](MethodFamily)                { return Ret{}; },
+    [&](MethodFamily2)               { return Ret{}; },
     [&](MethodOrMissing)             { return Ret{}; },
+    [&](MethodOrMissing2)            { return Ret{}; },
     [&](Missing)                     { return Ret{}; },
-    [&](const Isect&)                { return Ret{}; }
+    [&](const Isect&)                { return Ret{}; },
+    [&](const Isect2&)               { return Ret{}; }
   );
 }
 
@@ -3168,12 +3209,17 @@ TriBool Func::exists() const {
     val,
     [&](FuncName)                    { return TriBool::Maybe; },
     [&](MethodName)                  { return TriBool::Maybe; },
-    [&](FuncInfo*)                   { return TriBool::Yes; },
+    [&](Fun)                         { return TriBool::Yes; },
+    [&](Fun2)                        { return TriBool::Yes; },
     [&](Method)                      { return TriBool::Yes; },
+    [&](Method2)                     { return TriBool::Yes; },
     [&](MethodFamily)                { return TriBool::Maybe; },
+    [&](MethodFamily2)               { return TriBool::Maybe; },
     [&](MethodOrMissing)             { return TriBool::Maybe; },
+    [&](MethodOrMissing2)            { return TriBool::Maybe; },
     [&](Missing)                     { return TriBool::No; },
-    [&](const Isect&)                { return TriBool::Maybe; }
+    [&](const Isect&)                { return TriBool::Maybe; },
+    [&](const Isect2&)               { return TriBool::Maybe; }
   );
 }
 
@@ -3182,14 +3228,21 @@ bool Func::isFoldable() const {
     val,
     [&](FuncName)   { return false; },
     [&](MethodName) { return false; },
-    [&](FuncInfo* fi) {
-      return fi->func->attrs & AttrIsFoldable;
+    [&](Fun f) {
+      return f.finfo->func->attrs & AttrIsFoldable;
     },
-    [&](Method m) { return m.func->attrs & AttrIsFoldable; },
+    [&](Fun2 f) {
+      return f.finfo->func->attrs & AttrIsFoldable;
+    },
+    [&](Method m)  { return m.finfo->func->attrs & AttrIsFoldable; },
+    [&](Method2 m) { return m.finfo->func->attrs & AttrIsFoldable; },
     [&](MethodFamily)    { return false; },
+    [&](MethodFamily2)   { return false; },
     [&](MethodOrMissing) { return false; },
+    [&](MethodOrMissing2){ return false; },
     [&](Missing)         { return false; },
-    [&](const Isect&)    { return false; }
+    [&](const Isect&)    { return false; },
+    [&](const Isect2&)   { return false; }
   );
 }
 
@@ -3198,16 +3251,28 @@ bool Func::couldHaveReifiedGenerics() const {
     val,
     [&](FuncName s) { return true; },
     [&](MethodName) { return true; },
-    [&](FuncInfo* fi) { return fi->func->isReified; },
-    [&](Method m) { return m.func->isReified; },
+    [&](Fun f) { return f.finfo->func->isReified; },
+    [&](Fun2 f) { return f.finfo->func->isReified; },
+    [&](Method m) { return m.finfo->func->isReified; },
+    [&](Method2 m) { return m.finfo->func->isReified; },
     [&](MethodFamily fa) {
       return fa.family->infoFor(fa.regularOnly).m_static->m_maybeReified;
     },
-    [&](MethodOrMissing m) { return m.func->isReified; },
+    [&](MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_maybeReified;
+    },
+    [&](MethodOrMissing m) { return m.finfo->func->isReified; },
+    [&](MethodOrMissing2 m) { return m.finfo->func->isReified; },
     [&](Missing) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
         if (!ff->infoFor(i.regularOnly).m_static->m_maybeReified) return false;
+      }
+      return true;
+    },
+    [&](const Isect2& i) {
+      for (auto const ff : i.families) {
+        if (!ff->infoFor(i.regularOnly).m_maybeReified) return false;
       }
       return true;
     }
@@ -3231,19 +3296,36 @@ bool Func::mightCareAboutDynCalls() const {
     [&](MethodName) {
       return mightCareAboutClsMeth || mightCareAboutInstMeth;
     },
-    [&](FuncInfo* fi) {
-      return dyn_call_error_level(fi->func) > 0;
+    [&](Fun f) {
+      return dyn_call_error_level(f.finfo->func) > 0;
     },
-    [&](Method m) { return dyn_call_error_level(m.func) > 0; },
+    [&](Fun2 f) {
+      return dyn_call_error_level(f.finfo->func) > 0;
+    },
+    [&](Method m)  { return dyn_call_error_level(m.finfo->func) > 0; },
+    [&](Method2 m) { return dyn_call_error_level(m.finfo->func) > 0; },
     [&](MethodFamily fa) {
       return
         fa.family->infoFor(fa.regularOnly).m_static->m_maybeCaresAboutDynCalls;
     },
-    [&](MethodOrMissing m) { return dyn_call_error_level(m.func) > 0; },
+    [&](MethodFamily2 fa) {
+      return
+        fa.family->infoFor(fa.regularOnly).m_maybeCaresAboutDynCalls;
+    },
+    [&](MethodOrMissing m)  { return dyn_call_error_level(m.finfo->func) > 0; },
+    [&](MethodOrMissing2 m) { return dyn_call_error_level(m.finfo->func) > 0; },
     [&](Missing m) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
         if (!ff->infoFor(i.regularOnly).m_static->m_maybeCaresAboutDynCalls) {
+          return false;
+        }
+      }
+      return true;
+    },
+    [&](const Isect2& i) {
+      for (auto const ff : i.families) {
+        if (!ff->infoFor(i.regularOnly).m_maybeCaresAboutDynCalls) {
           return false;
         }
       }
@@ -3257,16 +3339,28 @@ bool Func::mightBeBuiltin() const {
     val,
     [&](FuncName s) { return true; },
     [&](MethodName) { return true; },
-    [&](FuncInfo* fi) { return fi->func->attrs & AttrBuiltin; },
-    [&](Method m) { return m.func->attrs & AttrBuiltin; },
+    [&](Fun f) { return f.finfo->func->attrs & AttrBuiltin; },
+    [&](Fun2 f) { return f.finfo->func->attrs & AttrBuiltin; },
+    [&](Method m) { return m.finfo->func->attrs & AttrBuiltin; },
+    [&](Method2 m) { return m.finfo->func->attrs & AttrBuiltin; },
     [&](MethodFamily fa) {
       return fa.family->infoFor(fa.regularOnly).m_static->m_maybeBuiltin;
     },
-    [&](MethodOrMissing m) { return m.func->attrs & AttrBuiltin; },
+    [&](MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_maybeBuiltin;
+    },
+    [&](MethodOrMissing m) { return m.finfo->func->attrs & AttrBuiltin; },
+    [&](MethodOrMissing2 m) { return m.finfo->func->attrs & AttrBuiltin; },
     [&](Missing m) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
         if (!ff->infoFor(i.regularOnly).m_static->m_maybeBuiltin) return false;
+      }
+      return true;
+    },
+    [&](const Isect2& i) {
+      for (auto const ff : i.families) {
+        if (!ff->infoFor(i.regularOnly).m_maybeBuiltin) return false;
       }
       return true;
     }
@@ -3278,13 +3372,19 @@ uint32_t Func::minNonVariadicParams() const {
     val,
     [&] (FuncName) { return 0; },
     [&] (MethodName) { return 0; },
-    [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
-    [&] (Method m) { return numNVArgs(*m.func); },
+    [&] (Fun f) { return numNVArgs(*f.finfo->func); },
+    [&] (Fun2 f) { return numNVArgs(*f.finfo->func); },
+    [&] (Method m) { return numNVArgs(*m.finfo->func); },
+    [&] (Method2 m) { return numNVArgs(*m.finfo->func); },
     [&] (MethodFamily fa) {
       return
         fa.family->infoFor(fa.regularOnly).m_static->m_minNonVariadicParams;
     },
-    [&] (MethodOrMissing m) { return numNVArgs(*m.func); },
+    [&] (MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_minNonVariadicParams;
+    },
+    [&] (MethodOrMissing m) { return numNVArgs(*m.finfo->func); },
+    [&] (MethodOrMissing2 m) { return numNVArgs(*m.finfo->func); },
     [&] (Missing) { return 0; },
     [&] (const Isect& i) {
       uint32_t nv = 0;
@@ -3292,6 +3392,16 @@ uint32_t Func::minNonVariadicParams() const {
         nv = std::max(
           nv,
           ff->infoFor(i.regularOnly).m_static->m_minNonVariadicParams
+        );
+      }
+      return nv;
+    },
+    [&] (const Isect2& i) {
+      uint32_t nv = 0;
+      for (auto const ff : i.families) {
+        nv = std::max(
+          nv,
+          ff->infoFor(i.regularOnly).m_minNonVariadicParams
         );
       }
       return nv;
@@ -3304,13 +3414,19 @@ uint32_t Func::maxNonVariadicParams() const {
     val,
     [&] (FuncName) { return std::numeric_limits<uint32_t>::max(); },
     [&] (MethodName) { return std::numeric_limits<uint32_t>::max(); },
-    [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
-    [&] (Method m) { return numNVArgs(*m.func); },
+    [&] (Fun f) { return numNVArgs(*f.finfo->func); },
+    [&] (Fun2 f) { return numNVArgs(*f.finfo->func); },
+    [&] (Method m) { return numNVArgs(*m.finfo->func); },
+    [&] (Method2 m) { return numNVArgs(*m.finfo->func); },
     [&] (MethodFamily fa) {
       return
         fa.family->infoFor(fa.regularOnly).m_static->m_maxNonVariadicParams;
     },
-    [&] (MethodOrMissing m) { return numNVArgs(*m.func); },
+    [&] (MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_maxNonVariadicParams;
+    },
+    [&] (MethodOrMissing m) { return numNVArgs(*m.finfo->func); },
+    [&] (MethodOrMissing2 m) { return numNVArgs(*m.finfo->func); },
     [&] (Missing) { return 0; },
     [&] (const Isect& i) {
       auto nv = std::numeric_limits<uint32_t>::max();
@@ -3318,6 +3434,16 @@ uint32_t Func::maxNonVariadicParams() const {
         nv = std::min(
           nv,
           ff->infoFor(i.regularOnly).m_static->m_maxNonVariadicParams
+        );
+      }
+      return nv;
+    },
+    [&] (const Isect2& i) {
+      auto nv = std::numeric_limits<uint32_t>::max();
+      for (auto const ff : i.families) {
+        nv = std::min(
+          nv,
+          ff->infoFor(i.regularOnly).m_maxNonVariadicParams
         );
       }
       return nv;
@@ -3330,18 +3456,35 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     val,
     [&] (FuncName) { return nullptr; },
     [&] (MethodName) { return nullptr; },
-    [&] (FuncInfo* fi) { return &fi->func->requiredCoeffects; },
-    [&] (Method m) { return &m.func->requiredCoeffects; },
+    [&] (Fun f) { return &f.finfo->func->requiredCoeffects; },
+    [&] (Fun2 f) { return &f.finfo->func->requiredCoeffects; },
+    [&] (Method m) { return &m.finfo->func->requiredCoeffects; },
+    [&] (Method2 m) { return &m.finfo->func->requiredCoeffects; },
     [&] (MethodFamily fa) {
       return fa.family->infoFor(fa.regularOnly)
         .m_static->m_requiredCoeffects.get_pointer();
     },
-    [&] (MethodOrMissing m) { return &m.func->requiredCoeffects; },
+    [&] (MethodFamily2 fa) {
+      return
+        fa.family->infoFor(fa.regularOnly).m_requiredCoeffects.get_pointer();
+    },
+    [&] (MethodOrMissing m) { return &m.finfo->func->requiredCoeffects; },
+    [&] (MethodOrMissing2 m) { return &m.finfo->func->requiredCoeffects; },
     [&] (Missing) { return nullptr; },
     [&] (const Isect& i) {
       const RuntimeCoeffects* coeffects = nullptr;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_requiredCoeffects) continue;
+        assertx(IMPLIES(coeffects, *coeffects == *info.m_requiredCoeffects));
+        if (!coeffects) coeffects = info.m_requiredCoeffects.get_pointer();
+      }
+      return coeffects;
+    },
+    [&] (const Isect2& i) {
+      const RuntimeCoeffects* coeffects = nullptr;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (!info.m_requiredCoeffects) continue;
         assertx(IMPLIES(coeffects, *coeffects == *info.m_requiredCoeffects));
         if (!coeffects) coeffects = info.m_requiredCoeffects.get_pointer();
@@ -3356,18 +3499,44 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
     val,
     [&] (FuncName) { return nullptr; },
     [&] (MethodName) { return nullptr; },
-    [&] (FuncInfo* fi) { return &fi->func->coeffectRules; },
-    [&] (Method m) { return &m.func->coeffectRules; },
+    [&] (Fun f) { return &f.finfo->func->coeffectRules; },
+    [&] (Fun2 f) { return &f.finfo->func->coeffectRules; },
+    [&] (Method m) { return &m.finfo->func->coeffectRules; },
+    [&] (Method2 m) { return &m.finfo->func->coeffectRules; },
     [&] (MethodFamily fa) {
       return fa.family->infoFor(fa.regularOnly)
         .m_static->m_coeffectRules.get_pointer();
     },
-    [&] (MethodOrMissing m) { return &m.func->coeffectRules; },
+    [&] (MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_coeffectRules.get_pointer();
+    },
+    [&] (MethodOrMissing m) { return &m.finfo->func->coeffectRules; },
+    [&] (MethodOrMissing2 m) { return &m.finfo->func->coeffectRules; },
     [&] (Missing) { return nullptr; },
     [&] (const Isect& i) {
       const CompactVector<CoeffectRule>* coeffects = nullptr;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_coeffectRules) continue;
+        assertx(
+          IMPLIES(
+            coeffects,
+            std::is_permutation(
+              begin(*coeffects),
+              end(*coeffects),
+              begin(*info.m_coeffectRules),
+              end(*info.m_coeffectRules)
+            )
+          )
+        );
+        if (!coeffects) coeffects = info.m_coeffectRules.get_pointer();
+      }
+      return coeffects;
+    },
+    [&] (const Isect2& i) {
+      const CompactVector<CoeffectRule>* coeffects = nullptr;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (!info.m_coeffectRules) continue;
         assertx(
           IMPLIES(
@@ -3393,12 +3562,17 @@ std::string show(const Func& f) {
     f.val,
     [&](Func::FuncName s)        {},
     [&](Func::MethodName)        {},
-    [&](FuncInfo*)               { ret += "*"; },
+    [&](Func::Fun)               { ret += "*"; },
+    [&](Func::Fun2)              { ret += "*"; },
     [&](Func::Method)            { ret += "*"; },
+    [&](Func::Method2)           { ret += "*"; },
     [&](Func::MethodFamily)      { ret += "+"; },
+    [&](Func::MethodFamily2)     { ret += "+"; },
     [&](Func::MethodOrMissing)   { ret += "-"; },
+    [&](Func::MethodOrMissing2)  { ret += "-"; },
     [&](Func::Missing)           { ret += "!"; },
-    [&](const Func::Isect&)      { ret += "&"; }
+    [&](const Func::Isect&)      { ret += "&"; },
+    [&](const Func::Isect2&)     { ret += "&"; }
   );
   return ret;
 }
@@ -9938,7 +10112,7 @@ protected:
       auto& info = infos.at(name);
       entries.emplace_back(
         name,
-        make_method_family_entry(index, std::move(info))
+        make_method_family_entry(index, name, std::move(info))
       );
     }
     return entries;
@@ -10441,6 +10615,7 @@ protected:
   // Create (or re-use an existing) FuncFamily for the given MethInfo.
   static FuncFamily2::Id make_func_family(
     LocalIndex& index,
+    SString name,
     Data::MethInfo info
   ) {
     // We should have more than one method because otherwise we
@@ -10527,6 +10702,7 @@ protected:
 
     auto ff = std::make_unique<FuncFamily2>();
     ff->m_id = id;
+    ff->m_name = name;
     ff->m_regular = std::move(regular);
     ff->m_nonRegularPrivate = std::move(nonRegularPrivate);
     ff->m_nonRegular = std::move(nonRegular);
@@ -10581,6 +10757,7 @@ protected:
   // Translate a MethInfo into the appropriate FuncFamilyEntry
   static FuncFamilyEntry make_method_family_entry(
     LocalIndex& index,
+    SString name,
     Data::MethInfo info
   ) {
     FuncFamilyEntry entry;
@@ -10595,7 +10772,7 @@ protected:
       // we need a func family.
       assertx(info.allStatic);
       assertx(info.regularStatic);
-      auto const ff = make_func_family(index, std::move(info));
+      auto const ff = make_func_family(index, name, std::move(info));
       entry.m_meths = FuncFamilyEntry::BothFF{ff};
     } else if (!info.regularMeths.empty() ||
                !info.nonRegularPrivateMeths.empty()) {
@@ -10619,7 +10796,7 @@ protected:
         // disjoint, overall there's more than one method so need a
         // func family.
         auto const nonRegularPrivate = info.regularMeths.empty();
-        auto const ff = make_func_family(index, std::move(info));
+        auto const ff = make_func_family(index, name, std::move(info));
         entry.m_meths = FuncFamilyEntry::FFAndSingle{ff, r, nonRegularPrivate};
       }
     } else if (info.nonRegularMeths.size() > 1) {
@@ -10628,7 +10805,7 @@ protected:
       // the non-regular variant, but the regular variant is empty.
       assertx(info.allStatic);
       assertx(!info.regularStatic);
-      auto const ff = make_func_family(index, std::move(info));
+      auto const ff = make_func_family(index, name, std::move(info));
       entry.m_meths = FuncFamilyEntry::FFAndNone{ff};
     } else if (!info.nonRegularMeths.empty()) {
       // There's exactly one nonRegularMeths method (and nothing for
@@ -10845,7 +11022,7 @@ protected:
         // and a child class could be regular. Even if the child class
         // doesn't override the method, it changes it from non-regular
         // to regular.
-        entry = make_method_family_entry(index, std::move(info));
+        entry = make_method_family_entry(index, name, std::move(info));
 
         if (mte.attrs & AttrNoOverride) {
           // However, even if the entry changes with AttrNoOverride,
@@ -10891,7 +11068,7 @@ protected:
       for (auto& [name, info] : data.methods) {
         if (cinfo->methods.count(name)) continue;
         assertx(!is_special_method_name(name));
-        auto entry = make_method_family_entry(index, std::move(info));
+        auto entry = make_method_family_entry(index, name, std::move(info));
         always_assert(
           cinfo->methodFamilies.emplace(name, std::move(entry)).second
         );
@@ -10990,7 +11167,7 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
   >;
 
   static Output
-  run(std::vector<std::vector<FuncFamilyEntry>> allEntries,
+  run(std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> allEntries,
       Variadic<FuncFamilyGroup> funcFamilies) {
     LocalIndex index;
 
@@ -11006,7 +11183,7 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
 
     OutputMeta meta;
 
-    for (auto const& entries : allEntries) {
+    for (auto const& [name, entries] : allEntries) {
       Data::MethInfo info;
       info.complete = false;
       info.regularComplete = false;
@@ -11053,7 +11230,7 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
       }
 
       meta.nameOnly.emplace_back(
-        make_method_family_entry(index, std::move(info))
+        make_method_family_entry(index, name, std::move(info))
       );
     }
 
@@ -11587,7 +11764,7 @@ void aggregate_name_only_entries(
 
     if (names.empty()) HPHP_CORO_RETURN(Updates{});
 
-    std::vector<std::vector<FuncFamilyEntry>> entries;
+    std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> entries;
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
 
     entries.reserve(names.size());
@@ -11595,8 +11772,8 @@ void aggregate_name_only_entries(
     // be provided to the job.
     for (auto const n : names) {
       auto& e = work.at(n);
-      entries.emplace_back(std::move(e));
-      for (auto const& entry : entries.back()) {
+      entries.emplace_back(n, std::move(e));
+      for (auto const& entry : entries.back().second) {
         match<void>(
           entry.m_meths,
           [&] (const FuncFamilyEntry::BothFF& e) {
@@ -13757,7 +13934,7 @@ template <typename P, typename G>
 res::Func Index::rfunc_from_dcls(const DCls& dcls,
                                  SString name,
                                  const P& process,
-                                 const G& general) {
+                                 const G& general) const {
   if (!dcls.isIsect()) {
     // If this isn't an intersection, there's only one cinfo to
     // process and we're done.
@@ -13800,11 +13977,11 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
       func.val,
       [&] (Func::MethodName) {},
       [&] (Func::Method m) {
-        assertx(IMPLIES(singleMethod, singleMethod == m.func));
+        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
         assertx(IMPLIES(singleMethod, isect.families.empty()));
         assertx(missing != TriBool::Yes);
         if (!singleMethod) {
-          singleMethod = m.func;
+          singleMethod = m.finfo->func;
           isect.families.clear();
         }
         missing = TriBool::No;
@@ -13825,7 +14002,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
         isect.regularOnly |= fam.regularOnly;
       },
       [&] (Func::MethodOrMissing m) {
-        assertx(IMPLIES(singleMethod, singleMethod == m.func));
+        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
         assertx(IMPLIES(singleMethod, isect.families.empty()));
         if (missing == TriBool::Yes) {
           assertx(!singleMethod);
@@ -13833,7 +14010,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
           return;
         }
         if (!singleMethod) {
-          singleMethod = m.func;
+          singleMethod = m.finfo->func;
           isect.families.clear();
         }
       },
@@ -13843,9 +14020,14 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
         isect.families.clear();
         missing = TriBool::Yes;
       },
-      [&] (Func::FuncName)     { always_assert(false); },
-      [&] (FuncInfo*)          { always_assert(false); },
-      [&] (const Func::Isect&) { always_assert(false); }
+      [&] (Func::FuncName)         { always_assert(false); },
+      [&] (Func::Fun)              { always_assert(false); },
+      [&] (Func::Fun2)             { always_assert(false); },
+      [&] (Func::Method2)          { always_assert(false); },
+      [&] (Func::MethodFamily2)    { always_assert(false); },
+      [&] (Func::MethodOrMissing2) { always_assert(false); },
+      [&] (const Func::Isect&)     { always_assert(false); },
+      [&] (const Func::Isect2&)    { always_assert(false); }
     );
   }
 
@@ -13858,9 +14040,11 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
     // MethodName or MethodOrMissing, so include that fact here by
     // using MethodOrMissing.
     if (missing == TriBool::Maybe) {
-      return Func { Func::MethodOrMissing { singleMethod } };
+      return Func {
+        Func::MethodOrMissing { func_info(*m_data, singleMethod) }
+      };
     }
-    return Func { Func::Method { singleMethod } };
+    return Func { Func::Method { func_info(*m_data, singleMethod) } };
   }
   // We only got unresolved classes. If missing is TriBool::Yes, the
   // function doesn't exist. Otherwise be pessimistic.
@@ -13932,7 +14116,7 @@ res::Func Index::resolve_method(Context ctx,
     if (auto const ff = entry.funcFamily()) {
       return Func { Func::MethodFamily { ff, !includeNonRegular } };
     } else if (auto const f = entry.func()) {
-      return Func { Func::MethodOrMissing { f } };
+      return Func { Func::MethodOrMissing { func_info(*m_data, f) } };
     } else {
       return Func { Func::Missing { name } };
     }
@@ -13981,7 +14165,7 @@ res::Func Index::resolve_method(Context ctx,
       if (auto const ff = entry.funcFamily()) {
         return Func { Func::MethodFamily { ff, true } };
       } else if (auto const func = entry.func()) {
-        return Func { Func::Method { func } };
+        return Func { Func::Method { func_info(*m_data, func) } };
       } else {
         always_assert(false);
       }
@@ -13994,11 +14178,11 @@ res::Func Index::resolve_method(Context ctx,
     // and they have special inheritance semantics.
     if (is_special_method_name(name)) {
       // If we know the class exactly, we can use ftarget.
-      if (isExact) return Func { Func::Method { ftarget } };
+      if (isExact) return Func { Func::Method { func_info(*m_data, ftarget) } };
       // The method isn't overwritten, but they don't inherit, so it
       // could be missing.
       if (meth.attrs & AttrNoOverride) {
-        return Func { Func::MethodOrMissing { ftarget } };
+        return Func { Func::MethodOrMissing { func_info(*m_data, ftarget) } };
       }
       // Otherwise be pessimistic.
       return Func { Func::MethodName { name } };
@@ -14015,7 +14199,7 @@ res::Func Index::resolve_method(Context ctx,
       // private method (defined on this class), then that's what
       // we'll call.
       if ((meth.attrs & AttrPrivate) && meth.topLevel()) {
-        return Func { Func::Method { ftarget } };
+        return Func { Func::Method { func_info(*m_data, ftarget) } };
       }
     } else if ((meth.attrs & AttrPrivate) || meth.hasPrivateAncestor()) {
       // Otherwise the context doesn't match the current class. If the
@@ -14042,7 +14226,9 @@ res::Func Index::resolve_method(Context ctx,
         // Otherwise do normal lookup.
         return nullptr;
       }();
-      if (ancestor) return Func { Func::Method { ancestor } };
+      if (ancestor) {
+        return Func { Func::Method { func_info(*m_data, ancestor) } };
+      }
     }
     // If none of the above cases trigger, we still might call a
     // private method (in a child class), but the func-family logic
@@ -14065,7 +14251,7 @@ res::Func Index::resolve_method(Context ctx,
         if (!cinfo->hasRegularSubclass) {
           return Func { Func::Missing { name } };
         }
-        return Func { Func::Method { ftarget } };
+        return Func { Func::Method { func_info(*m_data, ftarget) } };
       }
       // We can't use the base class (because it's non-regular), but
       // the method is overridden by a regular subclass.
@@ -14080,8 +14266,8 @@ res::Func Index::resolve_method(Context ctx,
           return Func { Func::MethodFamily { ff, true } };
         } else if (auto const f = aux.func()) {
           return aux.isComplete()
-            ? Func { Func::Method { f } }
-            : Func { Func::MethodOrMissing { f } };
+            ? Func { Func::Method { func_info(*m_data, f) } }
+            : Func { Func::MethodOrMissing { func_info(*m_data, f) } };
         } else {
           return Func { Func::Missing { name } };
         }
@@ -14095,7 +14281,7 @@ res::Func Index::resolve_method(Context ctx,
       // the method isn't overridden we know it must be just ftarget
       // (the override bits include it being missing in a subclass, so
       // we know it cannot be missing either).
-      return Func { Func::Method { ftarget } };
+      return Func { Func::Method { func_info(*m_data, ftarget) } };
     }
 
     // Look up the entry in the normal method family table and use
@@ -14109,8 +14295,8 @@ res::Func Index::resolve_method(Context ctx,
       return Func { Func::MethodFamily { ff, !includeNonRegular } };
     } else if (auto const f = fam.func()) {
       return (!includeNonRegular || fam.isComplete())
-        ? Func { Func::Method { f } }
-        : Func { Func::MethodOrMissing { f } };
+        ? Func { Func::Method { func_info(*m_data, f) } }
+        : Func { Func::MethodOrMissing { func_info(*m_data, f) } };
     } else {
       always_assert(false);
     }
@@ -14178,7 +14364,7 @@ res::Func Index::resolve_ctor(const Type& obj) const {
             (isExact || !cinfo->hasRegularSubclass)) {
           return Func { Func::Missing { s_construct.get() } };
         }
-        return Func { Func::Method { ftarget } };
+        return Func { Func::Method { func_info(*m_data, ftarget) } };
       }
 
       // If this isn't a regular class, we need to check the "aux"
@@ -14192,8 +14378,8 @@ res::Func Index::resolve_ctor(const Type& obj) const {
             return Func { Func::MethodFamily { ff, true } };
           } else if (auto const f = aux.func()) {
             return aux.isComplete()
-              ? Func { Func::Method { f } }
-              : Func { Func::MethodOrMissing { f } };
+              ? Func { Func::Method { func_info(*m_data, f) } }
+              : Func { Func::MethodOrMissing { func_info(*m_data, f) } };
           } else {
             // Ctor doesn't exist in any regular subclasses. This can
             // happen with interfaces. The ctor might get the default
@@ -14216,7 +14402,7 @@ res::Func Index::resolve_ctor(const Type& obj) const {
       } else if (auto const f = fam.func()) {
         // Since we're looking at the regular subset, we can assume
         // the set is complete, regardless of the flag on fam.
-        return Func { Func::Method { f } };
+        return Func { Func::Method { func_info(*m_data, f) } };
       } else {
         always_assert(false);
       }
@@ -14234,7 +14420,7 @@ res::Func Index::resolve_func(SString name) const {
   if (it == end(m_data->funcs)) return res::Func { res::Func::Missing {} };
   auto const func = it->second;
   assertx(func->attrs & AttrUnique);
-  return res::Func { func_info(*m_data, func) };
+  return res::Func { res::Func::Fun { func_info(*m_data, func) } };
 }
 
 bool Index::could_have_reified_type(Context ctx,
@@ -14261,23 +14447,45 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     rfunc.val,
     [&](res::Func::FuncName)   { return TriBool::Maybe; },
     [&](res::Func::MethodName) { return TriBool::Maybe; },
-    [&](FuncInfo* finfo) {
-      return yesOrNo(func_supports_AER(finfo->func));
+    [&](res::Func::Fun f) {
+      return yesOrNo(func_supports_AER(f.finfo->func));
+    },
+    [&](res::Func::Fun2 f) {
+      return yesOrNo(func_supports_AER(f.finfo->func));
     },
     [&](res::Func::Method m) {
-      return yesOrNo(func_supports_AER(m.func));
+      return yesOrNo(func_supports_AER(m.finfo->func));
+    },
+    [&](res::Func::Method2 m) {
+      return yesOrNo(func_supports_AER(m.finfo->func));
     },
     [&](res::Func::MethodFamily fam) {
       return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
     },
+    [&](res::Func::MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_supportsAER;
+    },
     [&](res::Func::MethodOrMissing m) {
-      return yesOrNo(func_supports_AER(m.func));
+      return yesOrNo(func_supports_AER(m.finfo->func));
+    },
+    [&](res::Func::MethodOrMissing2 m) {
+      return yesOrNo(func_supports_AER(m.finfo->func));
     },
     [&](res::Func::Missing) { return TriBool::No; },
     [&](const res::Func::Isect& i) {
       auto aer = TriBool::Maybe;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_supportsAER == TriBool::Maybe) continue;
+        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
+        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
+      }
+      return aer;
+    },
+    [&](const res::Func::Isect2& i) {
+      auto aer = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (info.m_supportsAER == TriBool::Maybe) continue;
         assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
         if (aer == TriBool::Maybe) aer = info.m_supportsAER;
@@ -14312,13 +14520,13 @@ bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
     rfunc.val,
     [&](res::Func::FuncName)   { return false; },
     [&](res::Func::MethodName) { return false; },
-    [&](FuncInfo* finfo)       {
-      add_dependency(*m_data, finfo->func, ctx, Dep::InlineDepthLimit);
-      return finfo->effectFree;
+    [&](res::Func::Fun f)      {
+      add_dependency(*m_data, f.finfo->func, ctx, Dep::InlineDepthLimit);
+      return f.finfo->effectFree;
     },
     [&] (res::Func::Method m) {
-      add_dependency(*m_data, m.func, ctx, Dep::InlineDepthLimit);
-      return func_info(*m_data, m.func)->effectFree;
+      add_dependency(*m_data, m.finfo->func, ctx, Dep::InlineDepthLimit);
+      return m.finfo->effectFree;
     },
     [&] (res::Func::MethodFamily fam) {
       return processFF(fam.family, fam.regularOnly);
@@ -14330,7 +14538,12 @@ bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
         if (processFF(ff, i.regularOnly)) return true;
       }
       return false;
-    }
+    },
+    [&] (res::Func::Fun2)             -> bool { always_assert(false); },
+    [&] (res::Func::Method2)          -> bool { always_assert(false); },
+    [&] (res::Func::MethodFamily2)    -> bool { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2) -> bool { always_assert(false); },
+    [&] (res::Func::Isect2&)          -> bool { always_assert(false); }
   );
 }
 
@@ -14806,15 +15019,15 @@ Type Index::lookup_return_type(Context ctx,
     rfunc.val,
     [&] (res::Func::FuncName)   { return TInitCell; },
     [&] (res::Func::MethodName) { return TInitCell; },
-    [&] (FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, ctx, dep);
-      return unctx(finfo->returnTy);
+    [&] (res::Func::Fun f) {
+      add_dependency(*m_data, f.finfo->func, ctx, dep);
+      return unctx(f.finfo->returnTy);
     },
-    [&] (res::Func::Method m)          { return meth(m.func); },
+    [&] (res::Func::Method m)          { return meth(m.finfo->func); },
     [&] (res::Func::MethodFamily fam)  {
       return funcFamily(fam.family, fam.regularOnly);
     },
-    [&] (res::Func::MethodOrMissing m) { return meth(m.func); },
+    [&] (res::Func::MethodOrMissing m) { return meth(m.finfo->func); },
     [&] (res::Func::Missing)           { return TBottom; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
@@ -14822,7 +15035,12 @@ Type Index::lookup_return_type(Context ctx,
         ty &= funcFamily(ff, i.regularOnly);
       }
       return ty;
-    }
+    },
+    [&] (res::Func::Fun2)             -> Type { always_assert(false); },
+    [&] (res::Func::Method2)          -> Type { always_assert(false); },
+    [&] (res::Func::MethodFamily2)    -> Type { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2) -> Type { always_assert(false); },
+    [&] (res::Func::Isect2&)          -> Type { always_assert(false); }
   );
 }
 
@@ -14878,19 +15096,19 @@ Type Index::lookup_return_type(Context caller,
     [&] (res::Func::MethodName) {
       return lookup_return_type(caller, methods, rfunc, dep);
     },
-    [&] (FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, caller, dep);
+    [&] (res::Func::Fun f) {
+      add_dependency(*m_data, f.finfo->func, caller, dep);
       return context_sensitive_return_type(
         *m_data,
-        { finfo->func, args, context },
-        finfo->returnTy
+        { f.finfo->func, args, context },
+        f.finfo->returnTy
       );
     },
-    [&] (res::Func::Method m)          { return meth(m.func); },
+    [&] (res::Func::Method m)          { return meth(m.finfo->func); },
     [&] (res::Func::MethodFamily fam)  {
       return funcFamily(fam.family, fam.regularOnly);
     },
-    [&] (res::Func::MethodOrMissing m) { return meth(m.func); },
+    [&] (res::Func::MethodOrMissing m) { return meth(m.finfo->func); },
     [&] (res::Func::Missing)           { return TBottom; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
@@ -14898,7 +15116,12 @@ Type Index::lookup_return_type(Context caller,
         ty &= funcFamily(ff, i.regularOnly);
       }
       return ty;
-    }
+    },
+    [&] (res::Func::Fun2)             -> Type { always_assert(false); },
+    [&] (res::Func::Method2)          -> Type { always_assert(false); },
+    [&] (res::Func::MethodFamily2)    -> Type { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2) -> Type { always_assert(false); },
+    [&] (res::Func::Isect2&)          -> Type { always_assert(false); }
   );
 }
 
@@ -14938,23 +15161,45 @@ Optional<uint32_t> Index::lookup_num_inout_params(
     [&] (res::Func::MethodName s) -> Optional<uint32_t> {
       return std::nullopt;
     },
-    [&] (FuncInfo* finfo) {
-      return func_num_inout(finfo->func);
+    [&] (res::Func::Fun f) {
+      return func_num_inout(f.finfo->func);
+    },
+    [&] (res::Func::Fun2 f) {
+      return func_num_inout(f.finfo->func);
     },
     [&] (res::Func::Method m) {
-      return func_num_inout(m.func);
+      return func_num_inout(m.finfo->func);
+    },
+    [&] (res::Func::Method2 m) {
+      return func_num_inout(m.finfo->func);
     },
     [&] (res::Func::MethodFamily fam) -> Optional<uint32_t> {
       return fam.family->infoFor(fam.regularOnly).m_static->m_numInOut;
     },
+    [&] (res::Func::MethodFamily2 fam) -> Optional<uint32_t> {
+      return fam.family->infoFor(fam.regularOnly).m_numInOut;
+    },
     [&] (res::Func::MethodOrMissing m) {
-      return func_num_inout(m.func);
+      return func_num_inout(m.finfo->func);
+    },
+    [&] (res::Func::MethodOrMissing2 m) {
+      return func_num_inout(m.finfo->func);
     },
     [&] (res::Func::Missing) { return 0; },
     [&] (const res::Func::Isect& i) {
       Optional<uint32_t> numInOut;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_numInOut) continue;
+        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
+        if (!numInOut) numInOut = info.m_numInOut;
+      }
+      return numInOut;
+    },
+    [&] (const res::Func::Isect2& i) {
+      Optional<uint32_t> numInOut;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (!info.m_numInOut) continue;
         assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
         if (!numInOut) numInOut = info.m_numInOut;
@@ -14974,6 +15219,13 @@ PrepKind Index::lookup_param_prep(Context,
     }
     return info.m_paramPreps[paramId];
   };
+  auto const fromFuncFamily2 = [&] (const FuncFamily2* ff, bool regularOnly) {
+    auto const& info = ff->infoFor(regularOnly);
+    if (paramId >= info.m_paramPreps.size()) {
+      return PrepKind{TriBool::No, TriBool::No};
+    }
+    return info.m_paramPreps[paramId];
+  };
 
   return match<PrepKind>(
     rfunc.val,
@@ -14983,17 +15235,29 @@ PrepKind Index::lookup_param_prep(Context,
     [&] (res::Func::MethodName s) {
       return PrepKind{TriBool::Maybe, TriBool::Maybe};
     },
-    [&] (FuncInfo* finfo) {
-      return func_param_prep(finfo->func, paramId);
+    [&] (res::Func::Fun f) {
+      return func_param_prep(f.finfo->func, paramId);
+    },
+    [&] (res::Func::Fun2 f) {
+      return func_param_prep(f.finfo->func, paramId);
     },
     [&] (res::Func::Method m) {
-      return func_param_prep(m.func, paramId);
+      return func_param_prep(m.finfo->func, paramId);
+    },
+    [&] (res::Func::Method2 m) {
+      return func_param_prep(m.finfo->func, paramId);
     },
     [&] (res::Func::MethodFamily fam) {
       return fromFuncFamily(fam.family, fam.regularOnly);
     },
+    [&] (res::Func::MethodFamily2 fam) {
+      return fromFuncFamily2(fam.family, fam.regularOnly);
+    },
     [&] (res::Func::MethodOrMissing m) {
-      return func_param_prep(m.func, paramId);
+      return func_param_prep(m.finfo->func, paramId);
+    },
+    [&] (res::Func::MethodOrMissing2 m) {
+      return func_param_prep(m.finfo->func, paramId);
     },
     [&] (res::Func::Missing) {
       return PrepKind{TriBool::No, TriBool::Yes};
@@ -15004,6 +15268,27 @@ PrepKind Index::lookup_param_prep(Context,
 
       for (auto const ff : i.families) {
         auto const prepKind = fromFuncFamily(ff, i.regularOnly);
+        if (prepKind.inOut != TriBool::Maybe) {
+          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
+          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
+        }
+
+        if (prepKind.readonly != TriBool::Maybe) {
+          assertx(
+            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
+          );
+          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
+        }
+      }
+
+      return PrepKind{inOut, readonly};
+    },
+    [&] (const res::Func::Isect2& i) {
+      auto inOut = TriBool::Maybe;
+      auto readonly = TriBool::Maybe;
+
+      for (auto const ff : i.families) {
+        auto const prepKind = fromFuncFamily2(ff, i.regularOnly);
         if (prepKind.inOut != TriBool::Maybe) {
           assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
           if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
@@ -15030,23 +15315,46 @@ TriBool Index::lookup_return_readonly(
     rfunc.val,
     [&] (res::Func::FuncName s) { return TriBool::Maybe; },
     [&] (res::Func::MethodName s) { return TriBool::Maybe; },
-    [&] (FuncInfo* finfo) {
-      return yesOrNo(finfo->func->isReadonlyReturn);
+    [&] (res::Func::Fun f) {
+      return yesOrNo(f.finfo->func->isReadonlyReturn);
+    },
+    [&] (res::Func::Fun2 f) {
+      return yesOrNo(f.finfo->func->isReadonlyReturn);
     },
     [&] (res::Func::Method m) {
-      return yesOrNo(m.func->isReadonlyReturn);
+      return yesOrNo(m.finfo->func->isReadonlyReturn);
+    },
+    [&] (res::Func::Method2 m) {
+      return yesOrNo(m.finfo->func->isReadonlyReturn);
     },
     [&] (res::Func::MethodFamily fam) {
       return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyReturn;
     },
+    [&] (res::Func::MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_isReadonlyReturn;
+    },
     [&] (res::Func::MethodOrMissing m) {
-      return yesOrNo(m.func->isReadonlyReturn);
+      return yesOrNo(m.finfo->func->isReadonlyReturn);
+    },
+    [&] (res::Func::MethodOrMissing2 m) {
+      return yesOrNo(m.finfo->func->isReadonlyReturn);
     },
     [&] (res::Func::Missing) { return TriBool::No; },
     [&] (const res::Func::Isect& i) {
       auto readOnly = TriBool::Maybe;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyReturn));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
+      }
+      return readOnly;
+    },
+    [&] (const res::Func::Isect2& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
         assertx(IMPLIES(readOnly != TriBool::Maybe,
                         readOnly == info.m_isReadonlyReturn));
@@ -15065,23 +15373,46 @@ TriBool Index::lookup_readonly_this(
     rfunc.val,
     [&] (res::Func::FuncName s) { return TriBool::Maybe; },
     [&] (res::Func::MethodName s) { return TriBool::Maybe; },
-    [&] (FuncInfo* finfo) {
-      return yesOrNo(finfo->func->isReadonlyThis);
+    [&] (res::Func::Fun f) {
+      return yesOrNo(f.finfo->func->isReadonlyThis);
+    },
+    [&] (res::Func::Fun2 f) {
+      return yesOrNo(f.finfo->func->isReadonlyThis);
     },
     [&] (res::Func::Method m) {
-      return yesOrNo(m.func->isReadonlyThis);
+      return yesOrNo(m.finfo->func->isReadonlyThis);
+    },
+    [&] (res::Func::Method2 m) {
+      return yesOrNo(m.finfo->func->isReadonlyThis);
     },
     [&] (res::Func::MethodFamily fam) {
       return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyThis;
     },
+    [&] (res::Func::MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_isReadonlyThis;
+    },
     [&] (res::Func::MethodOrMissing m) {
-      return yesOrNo(m.func->isReadonlyThis);
+      return yesOrNo(m.finfo->func->isReadonlyThis);
+    },
+    [&] (res::Func::MethodOrMissing2 m) {
+      return yesOrNo(m.finfo->func->isReadonlyThis);
     },
     [&] (res::Func::Missing) { return TriBool::No; },
     [&] (const res::Func::Isect& i) {
       auto readOnly = TriBool::Maybe;
       for (auto const ff : i.families) {
         auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyThis));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
+      }
+      return readOnly;
+    },
+    [&] (const res::Func::Isect2& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
         if (info.m_isReadonlyThis == TriBool::Maybe) continue;
         assertx(IMPLIES(readOnly != TriBool::Maybe,
                         readOnly == info.m_isReadonlyThis));

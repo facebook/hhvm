@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::ops::Range;
 use std::path::PathBuf;
 
 use ocamlrep::ptr::UnsafeOcamlPtr;
@@ -72,7 +73,8 @@ ocaml_ffi! {
                     .iter()
                     .map(|(name, package)| {
                         let convert = |x: &Spanned<String>| -> PosId {
-                            let pos = pos_from_span(x.span());
+                            let Range { start, end } = x.span();
+                            let pos = pos_from_span((start, end));
                             let id = x.to_owned().into_inner();
                             (pos, id)
                         };

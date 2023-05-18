@@ -5,6 +5,7 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use std::ops::Range;
 
 use toml::Spanned;
 
@@ -28,16 +29,18 @@ pub enum Error {
 
 impl Error {
     pub fn undefined_package(x: &Spanned<String>) -> Self {
+        let Range { start, end } = x.span();
         Self::UndefinedInclude {
             name: x.get_ref().into(),
-            span: x.span(),
+            span: (start, end),
         }
     }
 
     pub fn duplicate_use(x: &Spanned<String>) -> Self {
+        let Range { start, end } = x.span();
         Self::DuplicateUse {
             name: x.get_ref().into(),
-            span: x.span(),
+            span: (start, end),
         }
     }
 
@@ -46,9 +49,10 @@ impl Error {
         missing_pkgs: Vec<Spanned<String>>,
         soft: bool,
     ) -> Self {
+        let Range { start, end } = deployment.span();
         Self::IncompleteDeployment {
             name: deployment.get_ref().into(),
-            span: deployment.span(),
+            span: (start, end),
             missing_pkgs,
             soft,
         }

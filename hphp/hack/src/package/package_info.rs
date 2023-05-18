@@ -81,7 +81,10 @@ mod test {
         let foo = &info.packages()["foo"];
         assert_eq!(foo.uses.as_ref().unwrap()[0].get_ref(), "a.*");
         assert!(foo.includes.is_none());
-        assert_eq!(info.line_number(foo.uses.as_ref().unwrap()[0].span().0), 4);
+        assert_eq!(
+            info.line_number(foo.uses.as_ref().unwrap()[0].span().start),
+            4
+        );
 
         let bar = &info.packages()["bar"];
         assert_eq!(bar.uses.as_ref().unwrap()[0].get_ref(), "b.*");
@@ -92,8 +95,14 @@ mod test {
         assert_eq!(baz.uses.as_ref().unwrap()[1].get_ref(), "y.*");
         assert_eq!(baz.includes.as_ref().unwrap()[0].get_ref(), "foo");
         assert_eq!(baz.includes.as_ref().unwrap()[1].get_ref(), "bar");
-        assert_eq!(info.line_number(baz.uses.as_ref().unwrap()[0].span().0), 11);
-        assert_eq!(info.line_number(baz.uses.as_ref().unwrap()[1].span().0), 11);
+        assert_eq!(
+            info.line_number(baz.uses.as_ref().unwrap()[0].span().start),
+            11
+        );
+        assert_eq!(
+            info.line_number(baz.uses.as_ref().unwrap()[1].span().start),
+            11
+        );
 
         let my_prod = &info.deployments().unwrap()["my-prod"];
         assert_eq!(my_prod.packages.as_ref().unwrap()[0].get_ref(), "foo");
@@ -118,12 +127,12 @@ mod test {
         let foo_uses = &foo.uses.as_ref().unwrap();
         assert_eq!(foo_uses[0].get_ref(), "a.*");
         assert_eq!(foo_uses[1].get_ref(), "b.*");
-        assert_eq!(info.line_number(foo_uses[0].span().0), 7);
-        assert_eq!(info.line_number(foo_uses[1].span().0), 9);
+        assert_eq!(info.line_number(foo_uses[0].span().start), 7);
+        assert_eq!(info.line_number(foo_uses[1].span().start), 9);
 
         let foo_includes = &foo.includes.as_ref().unwrap();
         assert_eq!(foo_includes[0].get_ref(), "bar");
-        assert_eq!(info.line_number(foo_includes[0].span().0), 12);
+        assert_eq!(info.line_number(foo_includes[0].span().start), 12);
     }
 
     #[test]

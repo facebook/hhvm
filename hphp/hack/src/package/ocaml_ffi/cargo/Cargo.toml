@@ -17,4 +17,4 @@ ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/oca
 package = { version = "0.0.0", path = "../../cargo" }
 rc_pos = { version = "0.0.0", path = "../../../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
-toml = "=0.5.8"
+toml = "0.7.3"

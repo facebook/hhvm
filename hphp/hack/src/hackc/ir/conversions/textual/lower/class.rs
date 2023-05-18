@@ -46,6 +46,10 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
             method.attrs -= Attr::AttrStatic;
         }
+        if method.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
+            // We want closure bodies to be 'instance' but hackc marks it as 'static'.
+            method.attrs -= Attr::AttrStatic;
+        }
     }
 
     // HHVM is okay with implicit 86pinit and 86sinit but we need to make them

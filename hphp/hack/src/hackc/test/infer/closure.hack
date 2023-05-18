@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
-// TEST-CHECK-BAL: define Closure$closure1$static.__invoke
-// CHECK: define Closure$closure1$static.__invoke($this: *Closure$closure1$static) : *HackMixed {
+// TEST-CHECK-BAL: define Closure$closure1.__invoke
+// CHECK: define Closure$closure1.__invoke($this: *Closure$closure1) : *HackMixed {
 // CHECK: local $x: *void
 // CHECK: #b0:
 // CHECK:   n0 = &$this

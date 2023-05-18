@@ -234,9 +234,9 @@ class HQUpstreamSession : public HQSession {
 
   void cleanupUnboundPushStreams(std::vector<quic::StreamId>&) override;
 
-  void onNewPushStream(quic::StreamId /* pushStreamId */,
-                       hq::PushId /* pushId */,
-                       size_t /* toConsume */) override;
+  void dispatchPushStream(quic::StreamId /* pushStreamId */,
+                          hq::PushId /* pushId */,
+                          size_t /* toConsume */) override;
 
   // Incoming server push streams. Since the incoming push streams
   // can be created before transport stream

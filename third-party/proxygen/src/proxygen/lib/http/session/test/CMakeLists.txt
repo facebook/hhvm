@@ -49,7 +49,7 @@ if (BUILD_QUIC)
       HQSessionMocksTest.cpp
       HQSessionTestCommon.cpp
       HQStreamBaseTest.cpp
-      HQUnidirectionalCallbacksTest.cpp
+      HQStreamDispatcherTest.cpp
       HQUpstreamSessionTest.cpp
     DEPENDS
       codectestutils

@@ -1158,39 +1158,10 @@ void HQSession::timeoutExpired() noexcept {
   closeWhenIdle();
 }
 
-HQSession::HQControlStream* FOLLY_NULLABLE
-HQSession::tryCreateIngressControlStream(quic::StreamId id, uint64_t preface) {
-  auto res = parseStreamPreface(preface);
-  if (!res) {
-    LOG(ERROR) << "Got unidirectional stream with unknown preface "
-               << static_cast<uint64_t>(preface) << " streamID=" << id
-               << " sess=" << *this;
-    return nullptr;
-  }
-
-  auto ctrlStream = createIngressControlStream(id, *res);
-  if (!ctrlStream) {
-    return nullptr;
-  }
-
-  sock_->setControlStream(id);
-  return ctrlStream;
-}
-
-folly::Optional<UnidirectionalStreamType> HQSession::parseStreamPreface(
+folly::Optional<UnidirectionalStreamType> HQSession::parseUniStreamPreface(
     uint64_t preface) {
   hq::UnidirectionalTypeF parse = [](hq::UnidirectionalStreamType type)
-      -> folly::Optional<UnidirectionalStreamType> {
-    switch (type) {
-      case UnidirectionalStreamType::CONTROL:
-      case UnidirectionalStreamType::PUSH:
-      case UnidirectionalStreamType::QPACK_ENCODER:
-      case UnidirectionalStreamType::QPACK_DECODER:
-        return type;
-      default:
-        return folly::none;
-    }
-  };
+      -> folly::Optional<UnidirectionalStreamType> { return type; };
   return hq::withType(preface, parse);
 }
 
@@ -1222,13 +1193,11 @@ void HQSession::readControlStream(HQControlStream* ctrlStream) {
 }
 
 // Dispatcher method implementation
-void HQSession::assignReadCallback(quic::StreamId id,
-                                   hq::UnidirectionalStreamType type,
-                                   size_t toConsume,
-                                   quic::QuicSocket::ReadCallback* const cb) {
+void HQSession::dispatchControlStream(quic::StreamId id,
+                                      hq::UnidirectionalStreamType type,
+                                      size_t toConsume) {
   VLOG(4) << __func__ << " streamID=" << id << " type=" << type
-          << " toConsume=" << toConsume << " cb=" << std::hex << cb;
-  CHECK(cb) << "Bug in dispatcher - null callback passed";
+          << " toConsume=" << toConsume;
 
   auto consumeRes = sock_->consume(id, toConsume);
   CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
@@ -1239,17 +1208,16 @@ void HQSession::assignReadCallback(quic::StreamId id,
         *this, toConsume, static_cast<HTTPCodec::StreamID>(id));
   }
 
-  auto ctrlStream =
-      tryCreateIngressControlStream(id, static_cast<uint64_t>(type));
-
+  auto ctrlStream = createIngressControlStream(id, type);
   if (!ctrlStream) {
     rejectStream(id);
     return;
   }
+  sock_->setControlStream(id);
 
   // After reading the preface we can switch to the regular readCallback
   sock_->setPeekCallback(id, nullptr);
-  sock_->setReadCallback(id, cb);
+  sock_->setReadCallback(id, &controlStreamReadCallback_);
 
   // The transport will send notifications via the read callback
   // for the *future* events, but not for this one.
@@ -1259,41 +1227,31 @@ void HQSession::assignReadCallback(quic::StreamId id,
   controlStreamReadAvailable(id);
 }
 
-// Dispatcher method implementation
-void HQSession::assignPeekCallback(quic::StreamId id,
-                                   hq::UnidirectionalStreamType type,
-                                   size_t toConsume,
-                                   quic::QuicSocket::PeekCallback* const cb) {
-  VLOG(4) << __func__ << " streamID=" << id << " type=" << type
-          << " toConsume=" << toConsume << " cb=" << std::hex << cb;
-  CHECK(cb) << "Bug in dispatcher - null callback passed";
-
-  auto consumeRes = sock_->consume(id, toConsume);
-  CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
-
-  // Install the new peek callback
-  sock_->setPeekCallback(id, cb);
-}
-
 void HQSession::rejectStream(quic::StreamId id) {
   // Do not read data for unknown unidirectional stream types.
   // setReadCallback will send STOP_SENDING and rely on the peer sending a RESET
   // to clear the stream in the transport. It is safe to stop reading from this
   // stream. The peer is supposed to reset it on receipt of a STOP_SENDING
+  if (!sock_) {
+    return;
+  }
   sock_->setReadCallback(
       id, nullptr, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   sock_->setPeekCallback(id, nullptr);
+  if (sock_->isBidirectionalStream(id)) {
+    sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+  }
 }
 
 size_t HQSession::cleanupPendingStreams() {
   std::vector<quic::StreamId> streamsToCleanup;
 
-  // Collect the pending stream ids from the dispatcher
-  unidirectionalReadDispatcher_.invokeOnPendingStreamIDs(
-      [&](quic::StreamId pendingStreamId) {
-        streamsToCleanup.push_back(pendingStreamId);
-      });
+  // Cleanup pending streams in the dispatchers
+  unidirectionalReadDispatcher_.cleanup();
+  bidirectionalReadDispatcher_.cleanup();
 
+  // These streams have been dispatched as push streams but are missing their
+  // push promise
   cleanupUnboundPushStreams(streamsToCleanup);
 
   // Clean up the streams by detaching all callbacks
@@ -1326,9 +1284,8 @@ void HQSession::controlStreamReadAvailable(quic::StreamId id) {
   readControlStream(ctrlStream);
 }
 
-void HQSession::controlStreamReadError(
-    quic::StreamId id,
-    const HQUnidirStreamDispatcher::Callback::ReadError& error) {
+void HQSession::controlStreamReadError(quic::StreamId id,
+                                       const quic::QuicError& error) {
   VLOG(4) << __func__ << " sess=" << *this << ": readError streamID=" << id
           << " error: " << error;
 

@@ -75,7 +75,7 @@ if (BUILD_QUIC)
         http/session/HQDownstreamSession.cpp
         http/session/HQSession.cpp
         http/session/HQStreamBase.cpp
-        http/session/HQUnidirectionalCallbacks.cpp
+        http/session/HQStreamDispatcher.cpp
         http/session/HQUpstreamSession.cpp
         transport/H3DatagramAsyncSocket.cpp
         transport/PersistentQuicPskCache.cpp

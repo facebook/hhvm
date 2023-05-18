@@ -12,16 +12,11 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <proxygen/lib/http/HTTPException.h>
+#include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 
 namespace proxygen { namespace hq {
 
-enum class UnidirectionalStreamType : uint64_t {
-  CONTROL = 0x00,
-  PUSH = 0x01,
-  QPACK_ENCODER = 0x02,
-  QPACK_DECODER = 0x03,
-};
 using StreamTypeType = std::underlying_type<UnidirectionalStreamType>::type;
 std::ostream& operator<<(std::ostream& os, UnidirectionalStreamType type);
 
@@ -44,6 +39,9 @@ folly::Optional<Ret> withType(uint64_t typeval,
     case UnidirectionalStreamType::QPACK_DECODER:
       return functor(casted);
     default:
+      if (isGreaseId(typeval)) {
+        return functor(UnidirectionalStreamType::GREASE);
+      }
       return folly::none;
   }
 }

@@ -16,16 +16,82 @@ using namespace proxygen;
 using namespace quic;
 using namespace testing;
 
+class MockDispatcher : public HQUniStreamDispatcher::Callback {
+ public:
+  using ReadCallbackAssignF =
+      std::function<void(quic::StreamId, hq::UnidirectionalStreamType, size_t)>;
+  using PrefaceParseF =
+      std::function<folly::Optional<hq::UnidirectionalStreamType>(uint64_t)>;
+  using StreamRejectF = std::function<void(quic::StreamId)>;
+  using NewPushStreamF =
+      std::function<void(quic::StreamId, hq::PushId, size_t)>;
+
+  explicit MockDispatcher(folly::EventBase* evb) : evb_(evb) {
+  }
+
+  void expectOnNewPushStream(const NewPushStreamF& impl) {
+    auto& exp = EXPECT_CALL(
+        *this, dispatchPushStream(::testing::_, ::testing::_, ::testing::_));
+    if (impl) {
+      exp.WillOnce(::testing::Invoke(impl));
+    }
+  }
+
+  void expectAssignReadCallback(const ReadCallbackAssignF& impl) {
+    auto& exp = EXPECT_CALL(
+        *this, dispatchControlStream(::testing::_, ::testing::_, ::testing::_));
+    if (impl) {
+      exp.WillOnce(::testing::Invoke(impl));
+    }
+  }
+
+  void expectParsePreface(const PrefaceParseF& impl) {
+    auto& exp = EXPECT_CALL(*this, parseUniStreamPreface(::testing::_));
+    if (impl) {
+      exp.WillOnce(::testing::Invoke(impl));
+    }
+  }
+
+  void expectRejectStream(const StreamRejectF& impl) {
+    auto& exp = EXPECT_CALL(*this, rejectStream(::testing::_));
+    if (impl) {
+      exp.WillOnce(::testing::Invoke(impl));
+    }
+  }
+
+  folly::EventBase* getEventBase() const override {
+    return evb_;
+  }
+
+  std::chrono::milliseconds getDispatchTimeout() const override {
+    return std::chrono::seconds(1);
+  }
+
+  MOCK_METHOD(void, dispatchPushStream, (quic::StreamId, hq::PushId, size_t));
+  MOCK_METHOD(void,
+              dispatchUniWTStream,
+              (quic::StreamId, quic::StreamId, size_t));
+  MOCK_METHOD(void,
+              dispatchControlStream,
+              (quic::StreamId, hq::UnidirectionalStreamType, size_t));
+  MOCK_METHOD(folly::Optional<hq::UnidirectionalStreamType>,
+              parseUniStreamPreface,
+              (uint64_t));
+  MOCK_METHOD(void, rejectStream, (quic::StreamId));
+
+  folly::EventBase* evb_{nullptr};
+};
+
 class UnidirectionalReadDispatcherTest : public Test {
  public:
   using PeekIterator = std::deque<StreamBuffer>::const_iterator;
-  using PeekData = proxygen::MockDispatcher::PeekData;
-  using ReadError = proxygen::MockDispatcher::ReadError;
+  using PeekData = MockDispatcher::PeekData;
+  using ReadError = MockDispatcher::ReadError;
 
   void SetUp() override {
     incomingData_.clear();
-    dispatcherCallback_ = std::make_unique<MockDispatcher>();
-    dispatcher_ = std::make_unique<HQUnidirStreamDispatcher>(
+    dispatcherCallback_ = std::make_unique<MockDispatcher>(&evb_);
+    dispatcher_ = std::make_unique<HQUniStreamDispatcher>(
         *dispatcherCallback_, proxygen::TransportDirection::UPSTREAM);
   }
 
@@ -66,26 +132,11 @@ class UnidirectionalReadDispatcherTest : public Test {
   }
 
  protected:
+  folly::EventBase evb_;
   std::deque<StreamBuffer> incomingData_;
-  std::unique_ptr<HQUnidirStreamDispatcher> dispatcher_;
+  std::unique_ptr<HQUniStreamDispatcher> dispatcher_;
   std::unique_ptr<MockDispatcher> dispatcherCallback_;
 };
-
-TEST_F(UnidirectionalReadDispatcherTest, TestControlStreamCallback) {
-  quic::StreamId expectedId = 5;
-  ReadError readError =
-      quic::QuicError(quic::GenericApplicationErrorCode::NO_ERROR);
-  dispatcherCallback_->expectUnidirectionalReadAvailable(
-      [&](quic::StreamId id) { ASSERT_EQ(id, expectedId); });
-
-  dispatcherCallback_->expectUnidirectionalReadError(
-      [&](quic::StreamId id, const ReadError& /* tbd */) {
-        ASSERT_EQ(id, expectedId);
-      });
-
-  dispatcher_->controlStreamCallback()->readAvailable(expectedId);
-  dispatcher_->controlStreamCallback()->readError(expectedId, readError);
-}
 
 TEST_F(UnidirectionalReadDispatcherTest, TestDispatchControlPreface) {
 
@@ -100,11 +151,9 @@ TEST_F(UnidirectionalReadDispatcherTest, TestDispatchControlPreface) {
   dispatcherCallback_->expectAssignReadCallback(
       [&](quic::StreamId id,
           hq::UnidirectionalStreamType /* type */,
-          size_t consumed,
-          proxygen::MockDispatcher::ReadCallback* const cb) {
+          size_t consumed) {
         ASSERT_EQ(id, expectedId);
         ASSERT_EQ(consumed, atLeastBytes);
-        ASSERT_EQ(cb, dispatcher_->controlStreamCallback());
       });
 
   // Prior to sending data, give the dispatcher ownership

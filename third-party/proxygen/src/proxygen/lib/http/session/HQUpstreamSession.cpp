@@ -292,9 +292,9 @@ uint32_t HQUpstreamSession::numberOfIngressPushStreams() const {
   return ingressPushStreams_.size();
 }
 
-void HQUpstreamSession::onNewPushStream(quic::StreamId pushStreamId,
-                                        hq::PushId pushId,
-                                        size_t toConsume) {
+void HQUpstreamSession::dispatchPushStream(quic::StreamId pushStreamId,
+                                           hq::PushId pushId,
+                                           size_t toConsume) {
   VLOG(4) << __func__ << " streamID=" << pushStreamId << " pushId=" << pushId;
 
   // TODO: if/when we support client goaway, reject stream if

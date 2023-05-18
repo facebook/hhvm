@@ -25,7 +25,7 @@
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <proxygen/lib/http/session/HQByteEventTracker.h>
 #include <proxygen/lib/http/session/HQStreamBase.h>
-#include <proxygen/lib/http/session/HQUnidirectionalCallbacks.h>
+#include <proxygen/lib/http/session/HQStreamDispatcher.h>
 #include <proxygen/lib/http/session/HTTPSessionBase.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
@@ -82,7 +82,8 @@ class HQSession
     , public quic::QuicSocket::PingCallback
     , public HTTPSessionBase
     , public folly::EventBase::LoopCallback
-    , public HQUnidirStreamDispatcher::Callback {
+    , public HQUniStreamDispatcher::Callback
+    , public HQBidiStreamDispatcher::Callback {
   // Forward declarations
  public:
   class HQStreamTransportBase;
@@ -275,11 +276,6 @@ class HQSession
 
   CodecProtocol getCodecProtocol() const override {
     return CodecProtocol::HTTP_3;
-  }
-
-  // for testing only
-  HQUnidirStreamDispatcher* getDispatcher() {
-    return &unidirectionalReadDispatcher_;
   }
 
   const TimePoint& getTransportStart() const {
@@ -605,37 +601,27 @@ class HQSession
     return nullptr;
   }
 
-  /*
-   * for HQ we need a read callback for unidirectional streams to read the
-   * stream type from the the wire to decide whether a stream is
-   * a control stream, a header codec/decoder stream or a push stream
-   *
-   * This part is now implemented in HQUnidirStreamDispatcher
-   */
+  // Callback methods that are invoked by the stream dispatchers
+  void dispatchControlStream(quic::StreamId /* id */,
+                             hq::UnidirectionalStreamType /* type */,
+                             size_t /* toConsume */) override;
 
-  // Callback methods that are invoked by the dispatcher
-  void assignPeekCallback(
-      quic::StreamId /* id */,
-      hq::UnidirectionalStreamType /* type */,
-      size_t /* toConsume */,
-      quic::QuicSocket::PeekCallback* const /* cb */) override;
+  void dispatchRequestStream(quic::StreamId /* streamId */) override {
+  }
 
-  void assignReadCallback(
-      quic::StreamId /* id */,
-      hq::UnidirectionalStreamType /* type */,
-      size_t /* toConsume */,
-      quic::QuicSocket::ReadCallback* const /* cb */) override;
+  std::chrono::milliseconds getDispatchTimeout() const override {
+    return transactionsTimeout_;
+  }
 
   void rejectStream(quic::StreamId /* id */) override;
 
-  folly::Optional<hq::UnidirectionalStreamType> parseStreamPreface(
+  folly::Optional<hq::UnidirectionalStreamType> parseUniStreamPreface(
       uint64_t preface) override;
 
-  void controlStreamReadAvailable(quic::StreamId /* id */) override;
-
-  void controlStreamReadError(
-      quic::StreamId /* id */,
-      const HQUnidirStreamDispatcher::Callback::ReadError& /* err */) override;
+  folly::Optional<hq::BidirectionalStreamType> parseBidiStreamPreface(
+      uint64_t) override {
+    return hq::BidirectionalStreamType::REQUEST;
+  }
 
   /**
    * HQSession is an HTTPSessionBase that uses QUIC as the underlying transport
@@ -665,6 +651,8 @@ class HQSession
         dropping_(false),
         inLoopCallback_(false),
         unidirectionalReadDispatcher_(*this, direction),
+        bidirectionalReadDispatcher_(*this, direction),
+        controlStreamReadCallback_(*this),
         sessionObserverAccessor_(this),
         sessionObserverContainer_(&sessionObserverAccessor_) {
     codec_.add<HTTPChecks>();
@@ -749,8 +737,6 @@ class HQSession
   HQStreamTransport* createStreamTransport(quic::StreamId streamId);
 
   bool createEgressControlStreams();
-  HQControlStream* tryCreateIngressControlStream(quic::StreamId id,
-                                                 uint64_t preface);
 
   // Creates outgoing control stream.
   bool createEgressControlStream(hq::UnidirectionalStreamType streamType);
@@ -1044,6 +1030,22 @@ class HQSession
     std::unique_ptr<hq::HQUnidirectionalCodec> ingressCodec_;
     bool readEOF_{false};
   }; // HQControlStream
+
+  // Callback for the control stream - follows the read api
+  struct ControlStreamReadCallback : public quic::QuicSocket::ReadCallback {
+    explicit ControlStreamReadCallback(HQSession& session) : session_(session) {
+    }
+    ~ControlStreamReadCallback() override = default;
+    void readAvailable(quic::StreamId id) noexcept override {
+      session_.controlStreamReadAvailable(id);
+    }
+    void readError(quic::StreamId id, quic::QuicError error) noexcept override {
+      session_.controlStreamReadError(id, error);
+    }
+
+   protected:
+    HQSession& session_;
+  };
 
  public:
   class HQStreamTransportBase
@@ -1813,10 +1815,15 @@ class HQSession
   // Remove all callbacks from a stream during cleanup
   void clearStreamCallbacks(quic::StreamId /* id */);
 
+  void controlStreamReadAvailable(quic::StreamId id);
+  void controlStreamReadError(quic::StreamId id, const quic::QuicError& error);
+
   using ControlStreamsKey = std::pair<quic::StreamId, hq::StreamDirection>;
   std::unordered_map<hq::UnidirectionalStreamType, HQControlStream>
       controlStreams_;
-  HQUnidirStreamDispatcher unidirectionalReadDispatcher_;
+  HQUniStreamDispatcher unidirectionalReadDispatcher_;
+  HQBidiStreamDispatcher bidirectionalReadDispatcher_;
+  ControlStreamReadCallback controlStreamReadCallback_;
   QPACKCodec qpackCodec_;
 
   // Min Stream ID we haven't seen so far

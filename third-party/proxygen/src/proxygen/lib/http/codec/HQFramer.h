@@ -39,6 +39,18 @@ using PushId = uint64_t;
 using ParseResult = folly::Optional<HTTP3::ErrorCode>;
 using WriteResult = folly::Expected<size_t, quic::TransportErrorCode>;
 
+enum class UnidirectionalStreamType : uint64_t {
+  CONTROL = 0x00,
+  PUSH = 0x01,
+  QPACK_ENCODER = 0x02,
+  QPACK_DECODER = 0x03,
+  GREASE = 0x21,
+};
+
+enum class BidirectionalStreamType : uint64_t {
+  REQUEST = 0x00, // Can be any reserved frame type valid on a bidi stream
+};
+
 enum class FrameType : uint64_t {
   DATA = 0x00,
   HEADERS = 0x01,

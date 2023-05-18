@@ -11,125 +11,12 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/HQSession.h>
-#include <proxygen/lib/http/session/HQUnidirectionalCallbacks.h>
+#include <proxygen/lib/http/session/HQStreamDispatcher.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <quic/dsr/test/Mocks.h>
 
 namespace proxygen {
-
-class MockDispatcher : public HQUnidirStreamDispatcher::Callback {
- public:
-  using PeekCallback = quic::QuicSocket::PeekCallback;
-  using ReadCallback = quic::QuicSocket::ReadCallback;
-  using PeekCallbackAssignF = std::function<void(quic::StreamId,
-                                                 hq::UnidirectionalStreamType,
-                                                 size_t,
-                                                 PeekCallback* const)>;
-  using ReadCallbackAssignF = std::function<void(quic::StreamId,
-                                                 hq::UnidirectionalStreamType,
-                                                 size_t,
-                                                 ReadCallback* const)>;
-  using PrefaceParseF =
-      std::function<folly::Optional<hq::UnidirectionalStreamType>(uint64_t)>;
-  using StreamRejectF = std::function<void(quic::StreamId)>;
-  using StreamReadF = std::function<void(quic::StreamId)>;
-  using StreamInspectF = std::function<bool(quic::StreamId)>;
-  using ErrorStreamF = std::function<void(quic::StreamId, const ReadError&)>;
-  using StreamPeekF = std::function<void(quic::StreamId, const PeekData& x)>;
-  using UsePeekApiF = std::function<bool()>;
-  using NewPushStreamF =
-      std::function<void(quic::StreamId, hq::PushId, size_t)>;
-  using PRSeekF = std::function<void(quic::StreamId, uint64_t)>;
-
-  void expectOnNewPushStream(NewPushStreamF impl = nullptr) {
-    auto& exp = EXPECT_CALL(
-        *this, onNewPushStream(::testing::_, ::testing::_, ::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectAssignPeekCallback(PeekCallbackAssignF impl = nullptr) {
-    auto& exp = EXPECT_CALL(
-        *this,
-        assignPeekCallback(
-            ::testing::_, ::testing::_, ::testing::_, ::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectAssignReadCallback(ReadCallbackAssignF impl = nullptr) {
-    auto& exp = EXPECT_CALL(
-        *this,
-        assignReadCallback(
-            ::testing::_, ::testing::_, ::testing::_, ::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectParsePreface(PrefaceParseF impl = nullptr) {
-    auto& exp = EXPECT_CALL(*this, parseStreamPreface(::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectRejectStream(StreamRejectF impl = nullptr) {
-    auto& exp = EXPECT_CALL(*this, rejectStream(::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectUnidirectionalReadAvailable(StreamReadF impl = nullptr) {
-    auto& exp = EXPECT_CALL(*this, controlStreamReadAvailable(::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectUnidirectionalReadError(ErrorStreamF impl = nullptr) {
-    auto& exp =
-        EXPECT_CALL(*this, controlStreamReadError(::testing::_, ::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  void expectPartialDataAvailable(StreamPeekF impl = nullptr) {
-    auto& exp =
-        EXPECT_CALL(*this, onPartialDataAvailable(::testing::_, ::testing::_));
-    if (impl) {
-      exp.WillOnce(::testing::Invoke(impl));
-    }
-  }
-
-  MOCK_METHOD(void, onNewPushStream, (quic::StreamId, hq::PushId, size_t));
-  MOCK_METHOD(void,
-              assignReadCallback,
-              (quic::StreamId,
-               hq::UnidirectionalStreamType,
-               size_t,
-               quic::QuicSocket::ReadCallback* const));
-  MOCK_METHOD(void,
-              assignPeekCallback,
-              (quic::StreamId,
-               hq::UnidirectionalStreamType,
-               size_t,
-               quic::QuicSocket::PeekCallback* const));
-  MOCK_METHOD(folly::Optional<hq::UnidirectionalStreamType>,
-              parseStreamPreface,
-              (uint64_t));
-  MOCK_METHOD(void, rejectStream, (quic::StreamId));
-  MOCK_METHOD(void, controlStreamReadAvailable, (quic::StreamId));
-  MOCK_METHOD(void, controlStreamReadError, (quic::StreamId, const ReadError&));
-  MOCK_METHOD(void, onPartialDataAvailable, (quic::StreamId, const PeekData&));
-  MOCK_METHOD(void, processExpiredData, (quic::StreamId, uint64_t));
-  MOCK_METHOD(void, processRejectedData, (quic::StreamId, uint64_t));
-};
 
 class MockServerPushLifecycleCallback : public ServerPushLifecycleCallback {
  public:
@@ -471,9 +358,10 @@ class MockHQSession : public HQSession {
     return static_cast<uint32_t>(streams_.size());
   }
 
-  void onNewPushStream(quic::StreamId /* streamId */,
-                       hq::PushId /* pushId */,
-                       size_t /* to consume */) override{};
+  void dispatchPushStream(quic::StreamId /* streamId */,
+                          hq::PushId /* pushId */,
+                          size_t /* to consume */) override {
+  }
 
   const std::chrono::milliseconds transactionTimeout_;
   const proxygen::TransportDirection direction_;

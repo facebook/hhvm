@@ -551,16 +551,6 @@ t_struct& patch_generator::gen_suffix_struct(
   return generated;
 }
 
-t_struct& patch_generator::gen_prefix_struct(
-    const t_node& annot, const t_named& orig, const char* prefix) {
-  t_struct& generated = gen_struct(
-      annot, prefix + orig.name(), prefix_uri_name(orig.uri(), prefix));
-  if (const auto* cpp_name = orig.find_annotation_or_null("cpp.name")) {
-    generated.set_annotation("cpp.name", prefix + *cpp_name);
-  }
-  return generated;
-}
-
 t_struct& patch_generator::gen_patch(
     const t_const& annot,
     const t_structured& orig,

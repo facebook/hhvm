@@ -120,8 +120,6 @@ class patch_generator {
   t_struct& gen_struct(const t_node& annot, std::string name, std::string uri);
   t_struct& gen_suffix_struct(
       const t_node& annot, const t_named& orig, const char* suffix);
-  t_struct& gen_prefix_struct(
-      const t_node& annot, const t_named& orig, const char* prefix);
 
   t_struct& gen_patch(
       const t_const& annot,

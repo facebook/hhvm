@@ -16,6 +16,7 @@
 
 #include <folly/portability/GTest.h>
 
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocketMetadata.h>
 
 using namespace apache::thrift;
@@ -31,6 +32,11 @@ TEST(FdSocketMetadata, ReleaseFdsFromMetadataEmpty) {
   RequestRpcMetadata alsoNoMagicKey;
   alsoNoMagicKey.otherMetadata() = {};
   EXPECT_EQ(alsoNoMagicKey, noMagicKey);
+
+  RequestRpcMetadata emptyMagicKey;
+  emptyMagicKey.otherMetadata() = {{"__UNSAFE_FDS_FOR_REQUEST__", ""}};
+  EXPECT_TRUE(rocket::releaseFdsFromMetadata(emptyMagicKey).empty());
+  EXPECT_EQ(emptyMagicKey, noMagicKey);
 }
 
 TEST(FdSocketMetadata, ReleaseFdsFromMetadata) {

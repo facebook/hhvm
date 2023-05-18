@@ -35,11 +35,13 @@ folly::SocketFds releaseFdsFromMetadata(RequestRpcMetadata& metadata) {
   }
 
   folly::SocketFds::ToSend fds;
-  std::vector<folly::StringPiece> fdStrVec;
-  folly::split(",", it->second, fdStrVec);
-  for (const auto& fdStr : fdStrVec) {
-    fds.emplace_back(
-        std::make_shared<folly::File>(folly::to<int>(fdStr), /*ownsFd*/ false));
+  if (!it->second.empty()) {
+    std::vector<folly::StringPiece> fdStrVec;
+    folly::split(",", it->second, fdStrVec);
+    for (const auto& fdStr : fdStrVec) {
+      fds.emplace_back(std::make_shared<folly::File>(
+          folly::to<int>(fdStr), /*ownsFd*/ false));
+    }
   }
   otherMetadata.erase(it);
 

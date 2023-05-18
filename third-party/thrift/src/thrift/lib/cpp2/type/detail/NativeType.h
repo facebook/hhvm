@@ -26,6 +26,7 @@
 
 #include <folly/Traits.h>
 #include <thrift/lib/cpp/Field.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
@@ -160,6 +161,11 @@ struct NativeTypes<binary_t> : ConcreteType<std::string> {};
 // Traits for enums.
 template <typename E>
 struct NativeTypes<enum_t<E>> : ConcreteType<E> {};
+
+template <typename T>
+struct InferTag<T, std::enable_if_t<util::is_thrift_enum_v<T>>> {
+  using type = type::enum_t<T>;
+};
 
 // Traits for structs.
 template <typename T>

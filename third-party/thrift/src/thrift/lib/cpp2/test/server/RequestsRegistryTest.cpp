@@ -19,6 +19,8 @@
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 
 using namespace apache::thrift;
+using ArrivalSum = apache::thrift::RecentRequestCounter::ArrivalSum;
+using OverloadSum = apache::thrift::RecentRequestCounter::OverloadSum;
 
 namespace {
 static uint32_t getCurrentServerTickCallCount = 0;
@@ -143,5 +145,46 @@ TEST_F(RecentRequestCounterTest, testIncrementOverloadCount) {
     auto counts = counter.get();
     EXPECT_EQ(counts[0].overloadCount, 1);
     EXPECT_EQ(counts[1].overloadCount, 2);
+  }
+}
+
+TEST_F(RecentRequestCounterTest, testGetSumRequestCountsLastXTicks) {
+  auto counter = create();
+  // set up request counts be like
+  // index:  0, 1, 2, 3, 4, 5, ..., 511
+  // value: [1, 2, 3, 4, 5, 6, ..., 512] (arrival counts)
+  // value: [1, 1, 1, 1, 1, 1, ..., 1] (overload counts)
+  //                  ^
+  //                  (current bucket)
+
+  for (size_t i = 0; i < 515; ++i) {
+    for (size_t j = 0; j < (i % 512) + 1; ++j) {
+      counter.increment();
+    }
+    counter.incrementOverloadCount();
+    ++currentTick;
+  }
+  EXPECT_EQ(515, currentTick);
+
+  ArrivalSum arrivalSum;
+  OverloadSum overloadSum;
+  {
+    std::tie(arrivalSum, overloadSum) =
+        counter.getSumRequestCountsLastXTicks(3);
+    EXPECT_EQ(1 + 2 + 3, arrivalSum);
+    EXPECT_EQ(3, overloadSum);
+  }
+  {
+    std::tie(arrivalSum, overloadSum) =
+        counter.getSumRequestCountsLastXTicks(0);
+    EXPECT_EQ(0, arrivalSum);
+    EXPECT_EQ(0, overloadSum);
+  }
+
+  {
+    std::tie(arrivalSum, overloadSum) =
+        counter.getSumRequestCountsLastXTicks(4);
+    EXPECT_EQ(512 + 1 + 2 + 3, arrivalSum);
+    EXPECT_EQ(4, overloadSum);
   }
 }

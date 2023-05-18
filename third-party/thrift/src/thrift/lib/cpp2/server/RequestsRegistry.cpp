@@ -110,6 +110,22 @@ RecentRequestCounter::Values RecentRequestCounter::get() const {
   return ret;
 }
 
+std::tuple<RecentRequestCounter::ArrivalSum, RecentRequestCounter::OverloadSum>
+RecentRequestCounter::getSumRequestCountsLastXTicks(
+    uint64_t ticksLookback) const {
+  uint64_t currentBucket = getCurrentBucket();
+  uint64_t curIdx = currentBucket + kBuckets;
+  ticksLookback = std::min(ticksLookback, kBuckets);
+
+  uint64_t arrivalSum = 0;
+  uint64_t overloadSum = 0;
+  for (auto i = curIdx - ticksLookback; i < curIdx; ++i) {
+    arrivalSum += counts_[i % kBuckets].arrivalCount;
+    overloadSum += counts_[i % kBuckets].overloadCount;
+  }
+  return {arrivalSum, overloadSum};
+}
+
 void RecentRequestCounter::incrementOverloadCount() {
   auto currBucket = getCurrentBucket();
   counts_[currBucket].overloadCount += 1;

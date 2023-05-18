@@ -65,6 +65,31 @@ class RecentRequestCounter {
   void decrement();
   Values get() const;
 
+  /**
+   * Returns the request sum for the last x ticks.
+
+   * Here are two common approaches for calculating request counts:
+   *
+   * Inclusive Approach: Include the current tick in the
+   * calculation of the last x ticks, and thus consider the time range from
+   * the current tick to the previous x-1 ticks. This means you would
+   * include the current tick in the calculation.
+   *
+   * Exclusive Approach: Exclude the current tick and only
+   * consider the previous x ticks, and thus exclude the current tick
+   * from the calculation. In this case, you would only consider the ticks
+   * preceding the current tick.
+   *
+   * Here it uses EXCLUSIVE approach to calculate request counts for the last x
+   * ticks.
+   *
+   * @param ticksLookback number (x) of ticks to look back for request counts.
+   */
+  using ArrivalSum = uint64_t;
+  using OverloadSum = uint64_t;
+  std::tuple<ArrivalSum, OverloadSum> getSumRequestCountsLastXTicks(
+      uint64_t ticksLookback) const;
+
   void incrementOverloadCount();
 
  private:

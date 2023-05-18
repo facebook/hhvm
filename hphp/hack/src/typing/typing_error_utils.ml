@@ -5523,34 +5523,16 @@ end = struct
       lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")],
       [] )
 
-  let smember_not_found
-      pos
-      kind
-      member_name
-      closest_member_name
-      class_name
-      class_pos
-      hint
-      quickfixes =
+  let smember_not_found pos kind member_name class_name class_pos hint =
     let (code, claim, reasons) =
       Common.smember_not_found pos kind member_name class_name class_pos hint
-    in
-    let quickfixes =
-      match closest_member_name with
-      | None -> quickfixes
-      | Some type_name ->
-        Quickfix.make
-          ~title:("Change type to " ^ Markdown_lite.md_codify type_name)
-          ~new_text:type_name
-          (Pos_or_decl.unsafe_to_raw_pos pos)
-        :: quickfixes
     in
     let reasons =
       Lazy.(
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, quickfixes)
+    (code, reasons, [])
 
   let bad_method_override pos member_name =
     let reasons =
@@ -5828,27 +5810,10 @@ end = struct
         (non_object_member pos ctxt ty_name member_name kind decl_pos)
     | Rigid_tvar_escape { pos; name } ->
       Eval_result.single (rigid_tvar_escape pos name)
-    | Smember_not_found
-        {
-          pos;
-          kind;
-          member_name;
-          closest_member_name;
-          class_name;
-          class_pos;
-          hint;
-          quickfixes;
-        } ->
+    | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
+      ->
       Eval_result.single
-        (smember_not_found
-           pos
-           kind
-           member_name
-           closest_member_name
-           class_name
-           class_pos
-           hint
-           quickfixes)
+        (smember_not_found pos kind member_name class_name class_pos hint)
     | Bad_method_override { pos; member_name } ->
       Eval_result.single (bad_method_override pos member_name)
     | Bad_prop_override { pos; member_name } ->

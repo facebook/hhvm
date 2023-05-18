@@ -1,8 +1,7 @@
-Change type to `TFooBar`
 
 class MyClass {
   const type TFooBar = int;
-  public function foo(this::TFooBar $_) {
+  public function foo(this::TFooBaz $_) {
     throw new Exception();
   }
 }

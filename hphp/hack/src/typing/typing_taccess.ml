@@ -111,16 +111,6 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
   let { id = (id_pos, id_name) as id; _ } = ctx in
   match Env.get_typeconst env class_ id_name with
   | None ->
-    let typeconst_names =
-      List.map
-        ~f:(fun tc ->
-          let (tc_name, _) = tc in
-          tc_name)
-        (Cls.typeconsts class_)
-    in
-    let closest_member_name =
-      Env.most_similar id_name typeconst_names (fun tc_name -> tc_name)
-    in
     ( (env, None),
       Missing
         (Option.map
@@ -136,9 +126,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                         class_name;
                         class_pos = Cls.pos class_;
                         member_name = id_name;
-                        closest_member_name;
                         hint = None;
-                        quickfixes = [];
                       })) )
   | Some typeconst ->
     let name = tp_name class_name id in

@@ -19,6 +19,8 @@
 
 #include <folly/init/Init.h>
 
+#include <folly/experimental/io/IoUringBackend.h>
+
 #include <common/services/cpp/ServiceFramework.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyService.h>
 
@@ -38,10 +40,98 @@ DEFINE_int32(zc_rx_num_entries, -1024, "ZC RX num entries");
 DEFINE_int32(zc_rx_entry_size, 128 * 1024, "ZC RX entry size");
 
 DEFINE_bool(napi_id_assign, false, "Use NAPI ID based socket assignment");
+DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
+
+DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
+
+// io_uring related
+DEFINE_bool(use_iouring_event_eventfd, true, "");
+DEFINE_int32(io_capacity, 0, "");
+DEFINE_int32(io_submit_sqe, 0, "");
+DEFINE_int32(io_max_get, 0, "");
+DEFINE_bool(set_iouring_defer_taskrun, true, "");
+DEFINE_int32(io_max_submit, 0, "");
+DEFINE_int32(io_registers, 2048, "");
+DEFINE_int32(io_prov_buffs_size, 2048, "");
+DEFINE_int32(io_prov_buffs, 2000, "");
 
 using namespace thrift::zerocopy::cpp2;
 
 namespace {
+folly::IoUringBackend::Options getIoUringOptions() {
+  folly::IoUringBackend::Options options;
+  options.setRegisterRingFd(FLAGS_use_iouring_event_eventfd);
+
+  if (FLAGS_io_prov_buffs_size > 0 && FLAGS_io_prov_buffs > 0) {
+    options.setInitialProvidedBuffers(
+        FLAGS_io_prov_buffs_size, FLAGS_io_prov_buffs);
+  }
+
+  if (FLAGS_io_registers > 0) {
+    options.setUseRegisteredFds(static_cast<size_t>(FLAGS_io_registers));
+  }
+
+  if (FLAGS_io_capacity > 0) {
+    options.setCapacity(static_cast<size_t>(FLAGS_io_capacity));
+  }
+
+  if (FLAGS_io_submit_sqe > 0) {
+    options.setSqeSize(FLAGS_io_submit_sqe);
+  }
+
+  if (FLAGS_io_max_get > 0) {
+    options.setMaxGet(static_cast<size_t>(FLAGS_io_max_get));
+  }
+
+  if (FLAGS_io_max_submit > 0) {
+    options.setMaxSubmit(static_cast<size_t>(FLAGS_io_max_submit));
+  }
+
+  if (FLAGS_set_iouring_defer_taskrun) {
+    if (folly::IoUringBackend::kernelSupportsDeferTaskrun()) {
+      options.setDeferTaskRun(FLAGS_set_iouring_defer_taskrun);
+    } else {
+      LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
+    }
+  }
+  return options;
+}
+
+std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
+  try {
+    // TODO numa node affinitization
+    // static int sqSharedCore = 0;
+    // LOG(INFO) << "Sharing eb sq poll on core: " << sqSharedCore;
+    // options.setSQGroupName("fast_eb").setSQCpu(sqSharedCore);
+    return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
+  } catch (const std::exception& ex) {
+    LOG(FATAL) << "Failed to create io_uring backend: "
+               << folly::exceptionStr(ex);
+  }
+}
+
+std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
+    const std::string& name, size_t numThreads) {
+  auto threadFactory = std::make_shared<folly::NamedThreadFactory>(name);
+  if (FLAGS_io_uring) {
+    LOG(INFO) << "using io_uring EventBase backend";
+    folly::EventBaseBackendBase::FactoryFunc func(getEventBaseBackendFunc);
+    static folly::EventBaseManager ebm(
+        folly::EventBase::Options().setBackendFactory(std::move(func)));
+
+    auto* evb = folly::EventBaseManager::get()->getEventBase();
+    // use the same EventBase for the main thread
+    if (evb) {
+      ebm.setEventBase(evb, false);
+    }
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory, &ebm);
+  } else {
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory);
+  }
+}
+
 class ServerIOVecQueue : public fizz::AsyncFizzBase::IOVecQueueOps {
  public:
   ServerIOVecQueue(size_t readVecBlockSize, size_t readVecReadSize)
@@ -80,13 +170,16 @@ class ZeroCopyServiceImpl
       : ::facebook::fb303::FacebookBase2DeprecationMigration("Zerocopy") {}
   ~ZeroCopyServiceImpl() override = default;
 
-  void echo(IOBuf& ret, std::unique_ptr<IOBuf> data) override {
-    ret = data->cloneAsValue();
+  void async_eb_echo(
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf>>> callback,
+      std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf> data) override {
+    auto ret = data->clone();
     if (FLAGS_debug_logs) {
       LOG(INFO) << "[" << num_ << "]: data = " << data->countChainElements()
                 << ":" << data->computeChainDataLength()
-                << " ret = " << ret.countChainElements() << ":"
-                << ret.computeChainDataLength();
+                << " ret = " << ret->countChainElements() << ":"
+                << ret->computeChainDataLength();
 
       size_t i = 0;
 
@@ -99,6 +192,8 @@ class ZeroCopyServiceImpl
       } while (current != data.get());
     }
     num_++;
+
+    callback->result(std::move(data));
   }
   facebook::fb303::cpp2::fb_status getStatus() override {
     return facebook::fb303::cpp2::fb_status::ALIVE;
@@ -196,6 +291,9 @@ int main(int argc, char* argv[]) {
   }
   server->setInterface(handler);
   server->setPort(FLAGS_port);
+  server->setPreferIoUring(FLAGS_io_uring);
+  server->setIOThreadPool(
+      getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
 
   facebook::services::ServiceFramework instance("ZeroCopyServer");
 

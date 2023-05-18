@@ -220,13 +220,7 @@ let command_or_action_of_candidate ~path ~source_text candidate =
   Lsp.CodeAction.Action code_action
 
 let find ~(range : Lsp.range) ~path ~entry ctx =
-  let is_selection =
-    Lsp.(
-      range.start.line < range.end_.line
-      || range.start.line = range.end_.line
-         && range.start.character < range.end_.character)
-  in
-  if not is_selection then
+  if not (Lsp_helpers.lsp_range_is_selection range) then
     match entry.Provider_context.source_text with
     | Some source_text ->
       let line_to_offset line =

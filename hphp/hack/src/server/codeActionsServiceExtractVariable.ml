@@ -183,14 +183,8 @@ let command_or_action_of_candidate
   Lsp.CodeAction.Action code_action
 
 let find ~(range : Lsp.range) ~path ~entry ctx =
-  let is_selection =
-    Lsp.(
-      range.start.line < range.end_.line
-      || range.start.line = range.end_.line
-         && range.start.character < range.end_.character)
-  in
   match entry.Provider_context.source_text with
-  | Some source_text when is_selection ->
+  | Some source_text when Lsp_helpers.lsp_range_is_selection range ->
     let line_to_offset line =
       Full_fidelity_source_text.position_to_offset source_text (line, 0)
     in

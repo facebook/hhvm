@@ -74,6 +74,11 @@ let lsp_range_to_pos ~line_to_offset path (range : Lsp.range) : Pos.t =
   let end_ = lexing_of range.Lsp.end_ in
   Pos.make_from_lexing_pos path start end_
 
+let lsp_range_is_selection (range : Lsp.range) =
+  range.start.line < range.end_.line
+  || range.start.line = range.end_.line
+     && range.start.character < range.end_.character
+
 let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
     File_content.text_edit =
   {

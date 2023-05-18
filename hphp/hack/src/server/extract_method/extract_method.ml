@@ -8,13 +8,7 @@
 open Hh_prelude
 
 let find ~(range : Lsp.range) ~path ~entry ctx =
-  let is_selection =
-    Lsp.(
-      range.start.line < range.end_.line
-      || range.start.line = range.end_.line
-         && range.start.character < range.end_.character)
-  in
-  if is_selection then
+  if Lsp_helpers.lsp_range_is_selection range then
     match entry.Provider_context.source_text with
     | Some source_text ->
       let selection =

@@ -98,7 +98,10 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
 
     def test_rawptr_std_unique_ptr(self):
         self.run_until_breakpoint("lookupObjMethod")
-        s_func_vec = utils.Global("HPHP::Func::s_funcVec", self.target)
+        s_func_vec = self.target.FindFirstGlobalVariable("HPHP::Func::s_funcVec")
+        if not s_func_vec.IsValid():
+            # lowptr builds don't have a funcVec
+            return
         smart_ptr = utils.get(s_func_vec, "m_vals")
         self.assertEqual(utils.template_type(smart_ptr.type), "std::unique_ptr")
         raw_ptr = utils.rawptr(smart_ptr)

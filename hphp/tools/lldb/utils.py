@@ -244,6 +244,36 @@ def template_type(t: lldb.SBType) -> str:
     """
     return destruct(rawtype(t).name.split('<')[0])
 
+def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
+    """ Perform a cast of `v` to `t` with C compatible unsigned widening.
+
+    Use this in place of SBValue::Cast for cases where you are widening a
+    value (such as lowptr -> ptr conversion).  SBValue::Cast performs only a
+    reinterpretation of the bits so for a widening conversion it potentially
+    add garbage in the upper bits.
+
+    Arguments:
+        v: the value to cast
+
+    Return:
+        The value v casted to type `t` using C style semantics unsigned
+        widening.
+    """
+
+    assert not v.type.IsAggregateType(), "Cannot cast aggregate type"
+    assert v.GetByteSize() <= 8, "Value is too wide"
+
+    # In theory we should use `v.path` to access value v in an expression.  In
+    # practice this doesn't work because there are bugs in lldb.  Such as the
+    # one that was being fixed in https://reviews.llvm.org/D132734,
+    # which is reverted.  If this worked properly we could have this cast
+    # operation follow C style semantics according to the types in play (as
+    # opposed to forcing no sign extension).
+    ret = v.target.EvaluateExpression(f"({t.name}){v.unsigned}")
+
+    assert ret is not None and ret.IsValid(), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
+    return ret
+
 
 #------------------------------------------------------------------------------
 # Pointer helpers
@@ -297,7 +327,7 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
             # Currently only used by AtomicLowPtr alias
             assert storage_type == "HPHP::detail::AtomicStorage"
             ptr = get(ptr, "_M_i")
-        ptr = ptr.Cast(inner.GetPointerType())
+        ptr = unsigned_cast(ptr, inner.GetPointerType())
     elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
         addr = get(val, "m_data").unsigned & 0xffffffffffff
@@ -309,7 +339,7 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     elif name == "HPHP::TokenOrPtr":
         compact = get(val, "m_compact")  # HPHP::CompactTaggedPtr
         data = val.CreateValueFromExpression("(tmp)", str(compact.unsigned >> 2))
-        ptr = rawptr(data.Cast(compact.type.GetPointerType()))  # Stop the recursion by turning into pointer
+        ptr = rawptr(unsigned_cast(data, compact.type.GetPointerType()))  # Stop the recursion by turning into pointer
 
     if ptr is not None:
         return rawptr(ptr)
@@ -349,7 +379,7 @@ def _full_func_name(func: lldb.SBValue) -> str:
         if cls.unsigned == 0:
             cls = ""
         else:
-            cls = nameof(cls.Cast(Type("HPHP::Class", cls.target).GetPointerType())) + "::"
+            cls = nameof(unsigned_cast(cls, Type("HPHP::Class", cls.target).GetPointerType())) + "::"
     return cls + string_data_val(deref(get(func, 'm_name')))
 
 
@@ -544,8 +574,8 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     elif typ.unsigned == DT("ClsMeth"):
         # For non-lowptr, m_data is a pointer, so try and dereference first
         val = referenced_value(get(data, "pclsmeth", "m_data"))
-        cls = get(val, "m_cls").Cast(Type("HPHP::Class", target).GetPointerType())
-        func = get(val, "m_func").Cast(Type("HPHP::Func", target).GetPointerType())
+        cls = unsigned_cast(get(val, "m_cls"), Type("HPHP::Class", target).GetPointerType())
+        func = unsigned_cast(get(val, "m_func"), Type("HPHP::Func", target).GetPointerType())
         name = f"{nameof(cls)}::{nameof(func)}"
     elif typ.unsigned == DT("RFunc"):
         val = get(data, "prfunc")

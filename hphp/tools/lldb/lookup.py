@@ -21,7 +21,7 @@ def lookup_func(func_id: lldb.SBValue) -> lldb.SBValue:
     """
     target = func_id.target
     assert func_id.type == utils.Type("HPHP::FuncId", target), f"invalid func_id, type given is {func_id.type.name}"
-    func_vec = utils.Global("HPHP::Func::s_funcVec", target)
+    func_vec = target.FindFirstGlobalVariable("HPHP::Func::s_funcVec")
     if func_vec.IsValid():
         # Not LowPtr
         func_id_val = utils.get(func_id, "m_id").unsigned

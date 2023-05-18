@@ -30,7 +30,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "Resource": r'\(HPHP::TypedValue\) \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}',
             "RFunc": r'\(HPHP::TypedValue\) \{ RFunc, \(HPHP::RFuncData \*\) prfunc = 0x.* \("Exception::__construct"\) \}',
             "RClsMeth": r'\(HPHP::TypedValue\) \{ RClsMeth, \(HPHP::RClsMethData \*\) prclsmeth = 0x.* \("InvalidArgumentException::Exception::__construct"\) \}',
-            "ClsMeth": r'\(HPHP::TypedValue\) \{ ClsMeth, \(HPHP::ClsMethData\) \*m_data = \(m_cls = \d+, m_func = \d+\) \("InvalidArgumentException::Exception::__construct"\) \}',
+            "ClsMeth": r'\(HPHP::TypedValue\) \{ ClsMeth, \(HPHP::ClsMethData(::cls_meth_t)?\) \*?m_data = \(m_cls = \d+, m_func = \d+\) \("InvalidArgumentException::Exception::__construct"\) \}',
             "Boolean": r'\(HPHP::TypedValue\) \{ Boolean, True \}',
             "Int64": r'\(HPHP::TypedValue\) \{ Int64, 42 \}',
             "Double": r'\(HPHP::TypedValue\) \{ Double, 3.1415 \}',

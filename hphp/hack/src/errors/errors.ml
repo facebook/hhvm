@@ -996,8 +996,6 @@ let as_telemetry : t -> Telemetry.t =
 (* Error code printing. *)
 (*****************************************************************************)
 
-let internal_error pos msg = add 0 pos ("Internal error: " ^ msg)
-
 let unimplemented_feature pos msg = add 0 pos ("Feature not implemented: " ^ msg)
 
 let experimental_feature pos msg =
@@ -1006,6 +1004,85 @@ let experimental_feature pos msg =
 (*****************************************************************************)
 (* Typing errors *)
 (*****************************************************************************)
+let log_exception_occurred pos e =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
+  Hh_logger.error
+    "Exception while typechecking at position %s\n%s"
+    pos_str
+    (Exception.to_string e)
+
+let log_invariant_violation ~desc pos telemetry =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.invariant_violation_bug
+    desc
+    ~path:(Pos.filename pos)
+    ~pos:pos_str
+    ~telemetry;
+  Hh_logger.error
+    "Invariant violation at position %s\n%s"
+    pos_str
+    Telemetry.(telemetry |> string_ ~key:"desc" ~value:desc |> to_string)
+
+(* The contents of the following error message can trigger `hh rage` in
+ * sandcastle. If you change it, please make sure the existing trigger in
+ * `flib/intern/sandcastle/hack/SandcastleCheckHackOnDiffsStep.php` still
+ * catches this error message. *)
+let please_file_a_bug_message =
+  let hacklang_feedback_support_link =
+    "https://fb.workplace.com/groups/hackforhiphop/"
+  in
+  let hh_rage = Markdown_lite.md_codify "hh rage" in
+  Printf.sprintf
+    "Please run %s and post in %s."
+    hh_rage
+    hacklang_feedback_support_link
+
+let remediation_message =
+  Printf.sprintf
+    "Addressing other errors, restarting the typechecker with %s, or rebasing might resolve this error."
+    (Markdown_lite.md_codify "hh restart")
+
+let internal_compiler_error_msg =
+  Printf.sprintf
+    "Encountered an internal compiler error while typechecking this. %s %s"
+    remediation_message
+    please_file_a_bug_message
+
+let invariant_violation pos telemetry desc ~report_to_user =
+  log_invariant_violation ~desc pos telemetry;
+  if report_to_user then
+    add_error
+    @@ User_error.make
+         Error_codes.Typing.(to_enum InvariantViolated)
+         (pos, internal_compiler_error_msg)
+         []
+
+let exception_occurred pos exn =
+  log_exception_occurred pos exn;
+  add_error
+  @@ User_error.make
+       Error_codes.Typing.(to_enum ExceptionOccurred)
+       (pos, internal_compiler_error_msg)
+       []
+
+let internal_error pos msg =
+  add_error
+  @@ User_error.make
+       Error_codes.Typing.(to_enum InternalError)
+       (pos, "Internal error: " ^ msg)
+       []
+
+let typechecker_timeout pos fn_name seconds =
+  let claim =
+    ( pos,
+      Printf.sprintf
+        "Type checker timed out after %d seconds whilst checking function %s"
+        seconds
+        fn_name )
+  in
+  add_error
+  @@ User_error.make Error_codes.Typing.(to_enum TypecheckerTimeout) claim []
 
 (*****************************************************************************)
 (* Typing decl errors *)

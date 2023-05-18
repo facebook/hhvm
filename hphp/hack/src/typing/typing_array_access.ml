@@ -275,16 +275,11 @@ let pessimised_tup_assign p env arg_ty =
   let (env, pess_ty) = pessimise_type env ty in
   let env = Env.set_tyvar_variance env pess_ty in
   (* There can't be an error since the type variable is fresh *)
-  let (env, ty_err_opt) =
-    SubType.sub_type env arg_ty pess_ty
-    @@ Some
-         Typing_error.(
-           Reasons_callback.always
-           @@ primary
-           @@ Primary.Internal_error
-                { pos = p; msg = "Subtype of fresh type variable" })
-  in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  let cb = Typing_error.Reasons_callback.unify_error_at p in
+  let (env, ty_err_opt) = SubType.sub_type env arg_ty pess_ty (Some cb) in
+  (* Enforce the invariant - this call should never give us an error *)
+  if Option.is_some ty_err_opt then
+    Errors.internal_error p "Subtype of fresh type variable";
   let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
   Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
   (env, ty)

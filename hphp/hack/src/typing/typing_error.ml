@@ -361,25 +361,6 @@ module Primary = struct
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     (* Primary only *)
-    | Exception_occurred of {
-        pos: Pos.t;
-        exn: Exception.t;
-      }
-    | Invariant_violation of {
-        pos: Pos.t;
-        telemetry: Telemetry.t;
-        desc: string;
-        report_to_user: bool;
-      }
-    | Internal_error of {
-        pos: Pos.t;
-        msg: string;
-      }
-    | Typechecker_timeout of {
-        pos: Pos.t;
-        fn_name: string;
-        seconds: int;
-      }
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
         pos: Pos.t;

@@ -3209,10 +3209,7 @@ and expr
   with
   | Inf.InconsistentTypeVarState _ as exn ->
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
-    Typing_error_utils.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Exception_occurred { pos = p; exn = Exception.wrap exn });
+    Errors.exception_occurred p (Exception.wrap exn);
     expr_error env p e
 (*let (env, ty) = Env.fresh_type_error env p in
   make_result env p (invalid_expr_ env p) @@ ty*)
@@ -3658,13 +3655,7 @@ and expr_
       and telemetry =
         Telemetry.(create () |> string_ ~key:"class name" ~value:name)
       in
-      let err =
-        Typing_error.(
-          primary
-          @@ Primary.Invariant_violation
-               { pos = p; desc; telemetry; report_to_user = false })
-      in
-      Typing_error_utils.add_typing_error err;
+      Errors.invariant_violation p telemetry desc ~report_to_user:false;
       (* Continue typechecking without performing the check on a best effort
          basis. *)
       env

@@ -31,8 +31,7 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     Exception.reraise e
   | exn ->
     let e = Exception.wrap exn in
-    Typing_error_utils.add_typing_error
-      Typing_error.(primary @@ Primary.Exception_occurred { pos; exn = e });
+    Errors.exception_occurred pos e;
     None
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :

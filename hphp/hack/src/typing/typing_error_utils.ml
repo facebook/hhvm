@@ -33,11 +33,6 @@ module Common = struct
       hh_rage
       hacklang_feedback_support_link
 
-  let remediation_message =
-    Printf.sprintf
-      "Addressing other errors, restarting the typechecker with %s, or rebasing might resolve this error."
-      (Markdown_lite.md_codify "hh restart")
-
   let reasons_of_trail trail =
     List.map trail ~f:(fun pos -> (pos, "Typedef definition comes from here"))
 
@@ -1492,20 +1487,6 @@ module Eval_primary = struct
   let generic_unify pos msg =
     let claim = lazy (pos, msg) in
     (Error_code.GenericUnify, claim, lazy [], [])
-
-  let internal_error pos msg =
-    (Error_code.InternalError, lazy (pos, "Internal error: " ^ msg), lazy [], [])
-
-  let typechecker_timeout pos fn_name seconds =
-    let claim =
-      lazy
-        ( pos,
-          Printf.sprintf
-            "Type checker timed out after %d seconds whilst checking function %s"
-            seconds
-            fn_name )
-    in
-    (Error_code.TypecheckerTimeout, claim, lazy [], [])
 
   let unresolved_tyvar pos =
     let claim =
@@ -4301,25 +4282,7 @@ module Eval_primary = struct
       lazy [],
       [] )
 
-  let internal_compiler_error_msg =
-    Printf.sprintf
-      "Encountered an internal compiler error while typechecking this. %s %s"
-      Common.remediation_message
-      Common.please_file_a_bug_message
-
-  let invariant_violation pos =
-    ( Error_code.InvariantViolated,
-      lazy (pos, internal_compiler_error_msg),
-      lazy [],
-      [] )
-
-  let exception_occurred pos =
-    ( Error_code.ExceptionOccurred,
-      lazy (pos, internal_compiler_error_msg),
-      lazy [],
-      [] )
-
-  let to_error_ t =
+  let to_error t =
     let open Typing_error.Primary in
     match t with
     | Coeffect err -> Eval_coeffect.to_error err
@@ -4334,11 +4297,6 @@ module Eval_primary = struct
     | Unify_error { pos; msg_opt; reasons_opt } ->
       unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg
-    | Exception_occurred { pos; _ } -> exception_occurred pos
-    | Invariant_violation { pos; _ } -> invariant_violation pos
-    | Internal_error { pos; msg } -> internal_error pos msg
-    | Typechecker_timeout { pos; fn_name; seconds } ->
-      typechecker_timeout pos fn_name seconds
     | Unresolved_tyvar pos -> unresolved_tyvar pos
     | Using_error { pos; has_await } -> using_error pos has_await
     | Bad_enum_decl pos -> bad_enum_decl pos
@@ -4884,12 +4842,6 @@ module Eval_primary = struct
         ~actual_ty:(Lazy.force actual_ty)
     | Call_lvalue pos -> call_lvalue pos
     | Unsafe_cast_await pos -> unsafe_cast_await pos
-
-  let to_error t =
-    let open Typing_error.Primary in
-    match t with
-    | Invariant_violation { report_to_user = false; _ } -> None
-    | err -> Some (to_error_ err)
 end
 
 module rec Eval_error : sig
@@ -4903,7 +4855,7 @@ end = struct
   let eval t ~current_span =
     let open Typing_error.Error in
     let rec aux ~k = function
-      | Primary base -> k @@ Eval_result.of_option @@ Eval_primary.to_error base
+      | Primary base -> k @@ Eval_result.single @@ Eval_primary.to_error base
       | With_code (t, code) ->
         aux t ~k:(fun res ->
             k
@@ -4916,7 +4868,7 @@ end = struct
         aux err ~k:(fun t ->
             k
             @@ Eval_result.bind t ~f:(fun (code, claim, reasons, quickfixes) ->
-                   Eval_result.of_option
+                   Eval_result.single
                    @@ Eval_callback.apply cb ~code ~claim ~reasons ~quickfixes))
       | Apply_reasons (cb, snd_err) ->
         k
@@ -5837,7 +5789,7 @@ and Eval_callback : sig
     ?quickfixes:Pos.t Quickfix.t list ->
     Typing_error.Callback.t ->
     claim:Pos.t Message.t Lazy.t ->
-    error option
+    error
 end = struct
   type error_state = {
     code_opt: Error_code.t option;
@@ -5853,16 +5805,14 @@ end = struct
       eff ();
       eval t st
     | Always err ->
-      Option.map ~f:(fun (code, claim, reasons, quickfixes) ->
-          (code, Some claim, reasons, quickfixes))
-      @@ Eval_primary.to_error err
+      let (code, claim, reasons, quickfixes) = Eval_primary.to_error err in
+      (code, Some claim, reasons, quickfixes)
     | Of_primary err ->
-      Option.map ~f:(fun (code, _claim, _reasons, qfs) ->
-          ( Option.value ~default:code st.code_opt,
-            st.claim_opt,
-            st.reasons,
-            qfs @ st.quickfixes ))
-      @@ Eval_primary.to_error err
+      let (code, _claim, _reasons, qfs) = Eval_primary.to_error err in
+      ( Option.value ~default:code st.code_opt,
+        st.claim_opt,
+        st.reasons,
+        qfs @ st.quickfixes )
     | With_claim_as_reason (err, claim_from) ->
       let reasons =
         Option.value_map
@@ -5874,24 +5824,19 @@ end = struct
               return (Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: reasons)))
           st.claim_opt
       in
-      let claim_opt =
-        Option.map ~f:(fun (_, claim, _, _) -> claim)
-        @@ Eval_primary.to_error claim_from
-      in
-      eval err { st with claim_opt; reasons }
+      let (_, claim, _, _) = Eval_primary.to_error claim_from in
+      eval err { st with claim_opt = Some claim; reasons }
     | Retain_code t -> eval t { st with code_opt = None }
     | With_code (code, qfs) ->
-      Some
-        ( Option.value ~default:code st.code_opt,
-          st.claim_opt,
-          st.reasons,
-          qfs @ st.quickfixes )
+      ( Option.value ~default:code st.code_opt,
+        st.claim_opt,
+        st.reasons,
+        qfs @ st.quickfixes )
 
   let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
-    Option.map ~f:(fun (code, claim_opt, reasons, quickfixes) ->
-        (code, Option.value ~default:claim claim_opt, reasons, quickfixes))
-    @@ eval t st
+    let (code, claim_opt, reasons, quickfixes) = eval t st in
+    (code, Option.value ~default:claim claim_opt, reasons, quickfixes)
 end
 
 and Eval_reasons_callback : sig
@@ -5976,7 +5921,7 @@ end = struct
       | Always err -> Eval_error.eval err ~current_span
       | Of_error err -> Error_state.with_defaults st err ~current_span
       | Of_callback (k, claim) ->
-        Eval_result.of_option @@ eval_callback k st ~claim
+        Eval_result.single @@ eval_callback k st ~claim
       | Assert_in_current_decl (default, ctx) ->
         let Error_state.{ code_opt; reasons_opt; _ } = st in
         let crs =
@@ -6081,43 +6026,13 @@ end = struct
     @@ apply_help ?code ?claim ?reasons ?quickfixes t ~current_span
 end
 
-let log_exception_occurred pos e =
-  let pos_str = pos |> Pos.to_absolute |> Pos.string in
-  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
-  Hh_logger.error
-    "Exception while typechecking at position %s\n%s"
-    pos_str
-    (Exception.to_string e)
-
-let log_invariant_violation ~desc pos telemetry =
-  let pos_str = pos |> Pos.to_absolute |> Pos.string in
-  HackEventLogger.invariant_violation_bug
-    desc
-    ~path:(Pos.filename pos)
-    ~pos:pos_str
-    ~telemetry;
-  Hh_logger.error
-    "Invariant violation at position %s\n%s"
-    pos_str
-    Telemetry.(telemetry |> string_ ~key:"desc" ~value:desc |> to_string)
-
-let log_primary_typing_error prim_err =
-  let open Typing_error.Primary in
-  match prim_err with
-  | Exception_occurred { pos; exn } -> log_exception_occurred pos exn
-  | Invariant_violation { pos; telemetry; desc; _ } ->
-    log_invariant_violation ~desc pos telemetry
-  | _ -> ()
-
 let is_suppressed User_error.{ claim; code; _ } =
   Errors.fixme_present Message.(get_message_pos claim) code
 
 let add_typing_error err =
-  Typing_error.(
-    iter ~on_prim:log_primary_typing_error ~on_snd:(fun _ -> ()) err;
-    Eval_result.iter ~f:Errors.add_error
-    @@ Eval_result.suppress_intersection ~is_suppressed
-    @@ Eval_error.to_user_error err ~current_span:(Errors.get_current_span ()))
+  Eval_result.iter ~f:Errors.add_error
+  @@ Eval_result.suppress_intersection ~is_suppressed
+  @@ Eval_error.to_user_error err ~current_span:(Errors.get_current_span ())
 
 (* Until we return a list of errors from typing, we have to apply
    'client errors' to a callback for using in subtyping *)

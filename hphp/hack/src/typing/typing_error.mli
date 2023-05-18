@@ -361,30 +361,6 @@ module Primary : sig
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     (* == Primary only ====================================================== *)
-    | Exception_occurred of {
-        pos: Pos.t;
-        exn: Exception.t;
-      }
-    (* The intention is to introduce invariant violations with `report_to_user`
-       set to `false` initially. Then we observe and confirm that the invariant is
-       not repeatedly violated. Only then, we set it to `true` in a subsequent
-       release. This should prevent us from blocking users unexpectedly while
-       gradually introducing signal for unexpected compiler states. *)
-    | Invariant_violation of {
-        pos: Pos.t;
-        telemetry: Telemetry.t;
-        desc: string;
-        report_to_user: bool;
-      }
-    | Internal_error of {
-        pos: Pos.t;
-        msg: string;
-      }
-    | Typechecker_timeout of {
-        pos: Pos.t;
-        fn_name: string;
-        seconds: int;
-      }
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
         pos: Pos.t;

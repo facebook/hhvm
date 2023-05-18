@@ -138,15 +138,13 @@ let coerce_type_like_strip
         fresh_ty
         (Typing_make_type.dynamic (get_reason fresh_ty))
     in
-    let (env2, _impossible_error) =
-      Typing_utils.sub_type env2 fresh_ty ty_expect
-      @@ Some
-           Typing_error.(
-             Reasons_callback.always
-             @@ primary
-             @@ Primary.Internal_error
-                  { pos = p; msg = "Subtype of fresh type variable" })
+    let cb = Typing_error.Reasons_callback.unify_error_at p in
+    let (env2, impossible_error) =
+      Typing_utils.sub_type env2 fresh_ty ty_expect (Some cb)
     in
+    (* Enforce the invariant - this call should never give us an error *)
+    if Option.is_some impossible_error then
+      Errors.internal_error p "Subtype of fresh type variable";
     let (env2, ty_err_opt_like) =
       coerce_type
         p

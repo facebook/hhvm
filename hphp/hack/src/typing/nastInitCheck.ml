@@ -283,18 +283,12 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
                  class_name
                  member_origin
                  prop_name);
-          Typing_error_utils.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Internal_error
-                   {
-                     pos = Pos.none;
-                     msg =
-                       "Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
-                       ^ prop_name
-                       ^ " in class "
-                       ^ member_origin;
-                   });
+          Errors.internal_error
+            Pos.none
+            ("Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
+            ^ prop_name
+            ^ " in class "
+            ^ member_origin);
           Pos_or_decl.none
         | Some cv -> Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id)))
 

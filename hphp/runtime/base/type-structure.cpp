@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -60,6 +61,8 @@ struct TSEnv {
   bool invalidType{};
   // Vector of typestructures that need to be put in for reified generics
   const req::vector<Array>* tsList;
+  // Set of type aliases or case types currently being resolved
+  req::StringFastSet resolving;
 };
 
 struct TSCtx {
@@ -493,9 +496,18 @@ std::string resolveContextMsg(const TSCtx& ctx) {
  * whether the returned type-structure is already resolved or not.
 */
 std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
-                                bool usePreResolved = true) {
+                                bool usePreResolved) {
+
   if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
     return std::make_pair(Array::CreateDict(), false);
+  }
+
+  if (env.resolving.contains(aliasName)) {
+    // The alias is currently being resolved and we are hitting a recursion.
+    // give error
+    throw Exception(
+      "Alias %s is being used recursively",
+      aliasName.data());
   }
 
   auto persistentTA = true;
@@ -746,20 +758,25 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_unresolved: {
       assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].asCStrRef();
-      auto tsAndPreresolved = getAlias(env, clsName);
+      auto tsAndPreresolved = getAlias(env, clsName, true);
       auto ts = tsAndPreresolved.first;
       auto const preresolved = tsAndPreresolved.second;
 
-      auto resolve = [&] (ArrayData* generics = nullptr) {
-        // If it's already resolved, don't do so again.
-        if (preresolved) return ts;
-        TSCtx newCtx;
-        newCtx.name = clsName.get();
-        newCtx.generics = generics;
-        return resolveTS(env, newCtx, ts, generics);
-      };
-
       if (!ts.empty()) {
+        auto resolveAlias = [&] (ArrayData* generics) {
+          // If it's already resolved, don't do so again.
+          if (preresolved) return ts;
+          TSCtx newCtx;
+          newCtx.name = clsName.get();
+          newCtx.generics = generics;
+          auto const [_, inserted] = env.resolving.insert(clsName);
+          always_assert(inserted);
+          auto resolved = resolveTS(env, newCtx, ts, generics);
+          assertx(!resolved.isNull());
+          env.resolving.erase(clsName);
+          return resolved;
+        };
+
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;
           folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
@@ -774,9 +791,9 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
             newarr.set(String(typevars[i]), generic_types[i]);
           }
           auto generics = newarr.toArray();
-          ts = resolve(generics.get());
+          ts = resolveAlias(generics.get());
         } else {
-          ts = resolve();
+          ts = resolveAlias(nullptr);
         }
         copyTypeModifiers(arr, ts);
         newarr = ts;
@@ -971,6 +988,7 @@ Array TypeStructure::resolve(const String& aliasName,
                              bool& persistent,
                              const Array& generics) {
   TSEnv env;
+  env.resolving.insert(aliasName);
   TSCtx ctx;
   ctx.name = aliasName.get();
   ctx.generics = generics.get();

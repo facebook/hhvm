@@ -1,0 +1,37 @@
+dict(3) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  vec(2) {
+    dict(3) {
+      ["kind"]=>
+      int(1)
+      ["alias"]=>
+      string(2) "T1"
+      ["typevar_types"]=>
+      dict(1) {
+        ["T"]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+    dict(3) {
+      ["kind"]=>
+      int(4)
+      ["alias"]=>
+      string(2) "T1"
+      ["typevar_types"]=>
+      dict(1) {
+        ["T"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+      }
+    }
+  }
+  ["alias"]=>
+  string(2) "T2"
+}

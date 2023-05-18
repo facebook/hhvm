@@ -191,7 +191,7 @@ let parse_options () =
     },
     root,
     None,
-    SharedMem.default_config )
+    Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
 let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->

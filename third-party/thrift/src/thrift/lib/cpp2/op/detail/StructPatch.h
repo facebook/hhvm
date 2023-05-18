@@ -184,6 +184,37 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const MyClass&);
+  ///       void clear();
+  ///       template<class Id> void patchIfSet(const FieldPatch&);
+  ///       template<class Id> void ensure(const FieldPatch&);
+  ///     }
+  ///
+  /// For example, let's assume you have the following thrift struct:
+  ///
+  ///     struct MyClass {
+  ///       1: string foo;
+  ///       2: bool bar;
+  ///     }
+  ///
+  /// and then you created the following patch:
+  ///
+  ///     MyClassPatch patch;
+  ///     patch.patch<ident::bar>().invert();
+  ///     patch.patch<ident::bar>().invert();
+  ///     patch.patch<ident::foo>().append("_");
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.ensure<ident::foo>();
+  ///     v.ensure<ident::bar>();
+  ///     v.patchIfSet<ident::foo>(StringPatch::createAppend("_"));
+  ///     v.patchIfSet<ident::bar>(BoolPatch{});  // no-op since inverted twice
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {

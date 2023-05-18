@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "245",
+        "line": "301",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "245",
-        "bodyend": "249"
+        "bodystart": "301",
+        "bodyend": "305"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nstatic Derived createPrepend(U&amp;&amp; val)",

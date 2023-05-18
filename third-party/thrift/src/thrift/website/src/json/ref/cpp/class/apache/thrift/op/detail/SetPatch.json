@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "252",
+        "line": "276",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "252",
+        "bodystart": "276",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1SetPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "253",
+        "line": "277",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "253",
+        "bodystart": "277",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1SetPatch"
@@ -107,11 +107,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "262",
+        "line": "286",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "262",
-        "bodyend": "266"
+        "bodystart": "286",
+        "bodyend": "290"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nstatic SetPatch createAdd(C&amp;&amp; keys)",
@@ -153,11 +153,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "270",
+        "line": "294",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "270",
-        "bodyend": "274"
+        "bodystart": "294",
+        "bodyend": "298"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nstatic SetPatch createRemove(C&amp;&amp; keys)",
@@ -199,11 +199,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "278",
+        "line": "302",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "278",
-        "bodyend": "281"
+        "bodystart": "302",
+        "bodyend": "305"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; keys)",
@@ -246,11 +246,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "284",
+        "line": "308",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "284",
-        "bodyend": "293"
+        "bodystart": "308",
+        "bodyend": "317"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid emplace(Args&amp;&amp;... args)",
@@ -292,11 +292,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "296",
+        "line": "320",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "296",
-        "bodyend": "303"
+        "bodystart": "320",
+        "bodyend": "327"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid insert(U&amp;&amp; val)",
@@ -338,11 +338,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "307",
+        "line": "331",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "307",
-        "bodyend": "314"
+        "bodystart": "331",
+        "bodyend": "338"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid remove(C&amp;&amp; keys)",
@@ -384,11 +384,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "317",
+        "line": "341",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "317",
-        "bodyend": "320"
+        "bodystart": "341",
+        "bodyend": "344"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
@@ -429,11 +429,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "323",
+        "line": "368",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "323",
-        "bodyend": "338"
+        "bodystart": "368",
+        "bodyend": "383"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -442,6 +442,10 @@
         "detailed_raw": "template <class Visitor>\ninline void customVisit(Visitor&& v) const",
         "original_definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::customVisit",
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Set&amp;);\n  void clear();\n  void remove(const Set&amp;);\n  void add(const Set&amp;);\n}\n</pre></p><p>For example: <pre>SetPatch&lt;SetI32Patch&gt; patch;\npatch.remove({20, 30});\npatch.add({10, 20});\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({10, 20});\nv.remove({30});  </pre> </p>",
+        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/SetPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/SetPatch/customVisit"
@@ -466,11 +470,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "340",
+        "line": "385",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "340",
-        "bodyend": "350"
+        "bodystart": "385",
+        "bodyend": "395"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -486,11 +490,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "line": "251",
+    "line": "275",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "bodystart": "251",
-    "bodyend": "355"
+    "bodystart": "275",
+    "bodyend": "400"
   },
   "namespacednames_html": [
     "apache",
@@ -978,11 +982,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "262",
+                "line": "286",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "262",
-                "bodyend": "266"
+                "bodystart": "286",
+                "bodyend": "290"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nstatic SetPatch createAdd(C&amp;&amp; keys)",
@@ -1040,11 +1044,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "270",
+                "line": "294",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "270",
-                "bodyend": "274"
+                "bodystart": "294",
+                "bodyend": "298"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nstatic SetPatch createRemove(C&amp;&amp; keys)",
@@ -1102,11 +1106,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "278",
+                "line": "302",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "278",
-                "bodyend": "281"
+                "bodystart": "302",
+                "bodyend": "305"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; keys)",
@@ -1165,11 +1169,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "284",
+                "line": "308",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "284",
-                "bodyend": "293"
+                "bodystart": "308",
+                "bodyend": "317"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid emplace(Args&amp;&amp;... args)",
@@ -1227,11 +1231,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "296",
+                "line": "320",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "296",
-                "bodyend": "303"
+                "bodystart": "320",
+                "bodyend": "327"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid insert(U&amp;&amp; val)",
@@ -1289,11 +1293,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "307",
+                "line": "331",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "307",
-                "bodyend": "314"
+                "bodystart": "331",
+                "bodyend": "338"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid remove(C&amp;&amp; keys)",
@@ -1351,11 +1355,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "317",
+                "line": "341",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "317",
-                "bodyend": "320"
+                "bodystart": "341",
+                "bodyend": "344"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
@@ -1412,11 +1416,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "323",
+                "line": "368",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "323",
-                "bodyend": "338"
+                "bodystart": "368",
+                "bodyend": "383"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1425,6 +1429,10 @@
                 "detailed_raw": "template <class Visitor>\ninline void customVisit(Visitor&& v) const",
                 "original_definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::customVisit",
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+              },
+              "description": {
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Set&amp;);\n  void clear();\n  void remove(const Set&amp;);\n  void add(const Set&amp;);\n}\n</pre></p><p>For example: <pre>SetPatch&lt;SetI32Patch&gt; patch;\npatch.remove({20, 30});\npatch.add({10, 20});\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({10, 20});\nv.remove({30});  </pre> </p>",
+                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/SetPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/SetPatch/customVisit",
@@ -1435,7 +1443,7 @@
           "filepath": "f/class/apache/thrift/op/detail/SetPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "",
+          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit"
@@ -1465,11 +1473,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "340",
+                "line": "385",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "340",
-                "bodyend": "350"
+                "bodystart": "385",
+                "bodyend": "395"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",

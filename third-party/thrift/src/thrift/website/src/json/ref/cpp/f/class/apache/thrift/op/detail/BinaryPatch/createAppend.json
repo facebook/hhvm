@@ -30,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "253",
+        "line": "309",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "253",
-        "bodyend": "257"
+        "bodystart": "309",
+        "bodyend": "313"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nstatic Derived createAppend(Args&amp;&amp;... args)",

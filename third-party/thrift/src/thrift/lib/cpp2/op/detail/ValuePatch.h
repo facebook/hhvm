@@ -41,6 +41,24 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
+  /// @brief This API uses the Visitor pattern to describe how Patch is applied.
+  /// For each operation that will be performed by the patch, the corresponding
+  /// method (that matches the write API) will be invoked.
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const MyClass&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     MyClassPatch patch;
+  ///     patch = myClass;
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.assign(myClass);
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
     if (auto p = data_.assign()) {
@@ -86,6 +104,25 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
     val = !val;
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(bool);
+  ///       void clear();
+  ///       void invert();
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     auto patch = BoolPatch::createClear();
+  ///     patch = !patch;
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.clear();
+  ///     v.invert();
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {
@@ -162,6 +199,25 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
     assignOr(*data_.add()) -= std::forward<U>(val);
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(Number);
+  ///       void clear();
+  ///       void add(Number);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     auto patch = I32Patch::createClear();
+  ///     patch += 10;
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.clear();
+  ///     v.add(10);
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {
@@ -263,6 +319,26 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
     return derived();
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const String&);
+  ///       void clear();
+  ///       void prepend(const String&);
+  ///       void append(const String&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     auto patch = StringPatch::createPrepend("(");
+  ///     patch += ")";
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.prepend("(");
+  ///     v.append(")");
   template <class Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {

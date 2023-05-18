@@ -181,6 +181,30 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     return data_.patch()->operator[](ListPatchIndex(pos));
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const List&);
+  ///       void clear();
+  ///       void remove(const std::vector<Element>&);
+  ///       void prepend(const List&);
+  ///       void append(const List&);
+  ///       void patchIfSet(const std::unordered_map<ListPatchIndex,
+  ///                                                ElementPatch>&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     ListPatch<ListI32Patch> patch;
+  ///     patch.patchAt(10).add(20);
+  ///     patch.push_front(30);
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.patchIfSet({{10, I32Patch::createAdd(20)}});
+  ///     v.prepend({30});
   template <class Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {
@@ -319,6 +343,27 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     assignOr(*data_.remove()).insert(std::forward<U>(val));
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const Set&);
+  ///       void clear();
+  ///       void remove(const Set&);
+  ///       void add(const Set&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     SetPatch<SetI32Patch> patch;
+  ///     patch.remove({20, 30});
+  ///     patch.add({10, 20});
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.add({10, 20});
+  ///     v.remove({30});
   template <class Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {
@@ -454,6 +499,29 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     return (data_.add().value()[key], data_.patch()->operator[](key));
   }
 
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const Map&);
+  ///       void clear();
+  ///       void add(const Map&);
+  ///       void put(const Map&);
+  ///       void remove(const std::unordered_set<Key>&);
+  ///       void patchIfSet(const std::unordered_map<Key, ValuePatch>&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     MapPatch<MapI32StringPatch> patch;
+  ///     patch.add({{10, "10"}});
+  ///     patch.ensureAndPatchByKey(20).append("_");
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.add({{10, "10"}, {20, ""}});
+  ///     v.patchIfSet({{20, StringPatch::createAppend("_")}});
   template <class Visitor>
   void customVisit(Visitor&& v) const {
     if (false) {

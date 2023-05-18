@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "317",
+        "line": "341",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "317",
-        "bodyend": "320"
+        "bodystart": "341",
+        "bodyend": "344"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",

@@ -642,11 +642,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "185",
+        "line": "209",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "185",
-        "bodyend": "204"
+        "bodystart": "209",
+        "bodyend": "228"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -655,6 +655,10 @@
         "detailed_raw": "template <class Visitor>\ninline void customVisit(Visitor&& v) const",
         "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::customVisit",
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void remove(const std::vector&lt;Element&gt;&amp;);\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n  void patchIfSet(const std::unordered_map&lt;ListPatchIndex,\n                                           ElementPatch&gt;&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.patchAt(10).add(20);\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.patchIfSet({{10, I32Patch::createAdd(20)}});\nv.prepend({30});  </pre> </p>",
+        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/ListPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/customVisit"
@@ -679,11 +683,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "206",
+        "line": "230",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "206",
-        "bodyend": "227"
+        "bodystart": "230",
+        "bodyend": "251"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -716,11 +720,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "235",
+        "line": "259",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "235",
-        "bodyend": "239"
+        "bodystart": "259",
+        "bodyend": "263"
       },
       "definition": {
         "simple_html": "void patchIfSet(const VPMap&amp; patches)",
@@ -740,7 +744,7 @@
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
     "bodystart": "86",
-    "bodyend": "240"
+    "bodyend": "264"
   },
   "namespacednames_html": [
     "apache",
@@ -1905,11 +1909,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "185",
+                "line": "209",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "185",
-                "bodyend": "204"
+                "bodystart": "209",
+                "bodyend": "228"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1918,6 +1922,10 @@
                 "detailed_raw": "template <class Visitor>\ninline void customVisit(Visitor&& v) const",
                 "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::customVisit",
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+              },
+              "description": {
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void remove(const std::vector&lt;Element&gt;&amp;);\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n  void patchIfSet(const std::unordered_map&lt;ListPatchIndex,\n                                           ElementPatch&gt;&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.patchAt(10).add(20);\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.patchIfSet({{10, I32Patch::createAdd(20)}});\nv.prepend({30});  </pre> </p>",
+                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/ListPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/customVisit",
@@ -1928,7 +1936,7 @@
           "filepath": "f/class/apache/thrift/op/detail/ListPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "",
+          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit"
@@ -1958,11 +1966,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "206",
+                "line": "230",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "206",
-                "bodyend": "227"
+                "bodystart": "230",
+                "bodyend": "251"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2284,11 +2292,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "235",
+                "line": "259",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "235",
-                "bodyend": "239"
+                "bodystart": "259",
+                "bodyend": "263"
               },
               "definition": {
                 "simple_html": "void patchIfSet(const VPMap&amp; patches)",

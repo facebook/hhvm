@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "270",
+        "line": "294",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "270",
-        "bodyend": "274"
+        "bodystart": "294",
+        "bodyend": "298"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nstatic SetPatch createRemove(C&amp;&amp; keys)",

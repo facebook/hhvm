@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "102",
+        "line": "139",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "102",
-        "bodyend": "111"
+        "bodystart": "139",
+        "bodyend": "148"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "76",
+        "line": "94",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "bodystart": "219",

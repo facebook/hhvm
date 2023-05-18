@@ -22,11 +22,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "380",
+        "line": "411",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "230",
-        "bodyend": "238"
+        "bodystart": "261",
+        "bodyend": "269"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -60,11 +60,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "230",
+        "line": "261",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "230",
-        "bodyend": "238"
+        "bodystart": "261",
+        "bodyend": "269"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",

@@ -17,11 +17,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "391",
+        "line": "422",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "391",
-        "bodyend": "391"
+        "bodystart": "422",
+        "bodyend": "422"
       },
       "definition": {
         "simple_html": "T&amp; ensure()",
@@ -59,11 +59,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "393",
+        "line": "424",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "393",
-        "bodyend": "393"
+        "bodystart": "424",
+        "bodyend": "424"
       },
       "definition": {
         "simple_html": "P&amp; ensure(const T&amp; val)",
@@ -101,11 +101,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "395",
+        "line": "426",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "395",
-        "bodyend": "395"
+        "bodystart": "426",
+        "bodyend": "426"
       },
       "definition": {
         "simple_html": "P&amp; ensure(T&amp;&amp; val)",
@@ -142,7 +142,7 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "381",
+        "line": "412",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "bodystart": "163",
@@ -193,7 +193,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "381",
+        "line": "412",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "bodystart": "168",

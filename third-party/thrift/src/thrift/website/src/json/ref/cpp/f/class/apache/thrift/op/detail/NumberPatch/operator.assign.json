@@ -17,7 +17,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "136",
+        "line": "173",
         "column": "1"
       },
       "definition": {
@@ -47,7 +47,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "136",
+        "line": "173",
         "column": "1"
       },
       "definition": {

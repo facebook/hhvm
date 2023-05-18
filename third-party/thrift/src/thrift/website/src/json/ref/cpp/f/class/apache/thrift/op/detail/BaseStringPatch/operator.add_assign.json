@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "261",
+        "line": "317",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "261",
-        "bodyend": "264"
+        "bodystart": "317",
+        "bodyend": "320"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",

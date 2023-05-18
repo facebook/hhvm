@@ -81,7 +81,7 @@ If you don’t want to patch when the field doesn’t exist, you **should** use 
 Besides patching fields, you can also use `patch` to modify the whole struct. e.g.,
 
 ```
-patch. Clear();
+patch.clear();
 patch.apply(s);
 EXPECT_FALSE(s.field().has_value());
 ```
@@ -149,6 +149,31 @@ s.nested[42] = "hi";
 patch.apply(s);
 EXPECT_EQ(s.nested[42], "(hi)");
 ```
+
+### Read patch's content
+
+`Patch::customVisitor(Visitor)` can be used to inspect Patch. This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked.
+
+For example, let's assume you have the following thrift struct:
+
+    struct MyClass {
+      1: string foo;
+      2: bool bar;
+    }
+
+and then you created the following patch:
+
+    MyClassPatch patch;
+    patch.patch<ident::bar>().invert();
+    patch.patch<ident::bar>().invert();
+    patch.patch<ident::foo>().append("_");
+
+`patch.customVisit(v)` will invoke the following methods
+
+    v.ensure<ident::foo>();
+    v.ensure<ident::bar>();
+    v.patchIfSet<ident::foo>(StringPatch::createAppend("_"));
+    v.patchIfSet<ident::bar>(BoolPatch{});  // no-op since inverted twice
 
 ### Type alias for Patch type
 

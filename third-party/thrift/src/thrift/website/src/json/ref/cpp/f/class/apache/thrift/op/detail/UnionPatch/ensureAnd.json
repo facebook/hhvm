@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "409",
+        "line": "440",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "409",
-        "bodyend": "416"
+        "bodystart": "440",
+        "bodyend": "447"
       },
       "definition": {
         "simple_html": "template &lt;typename U = T&gt;\nPatch&amp; ensureAnd(U&amp;&amp; _default)",

@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "72",
+        "line": "90",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "72",
+        "bodystart": "90",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "73",
+        "line": "91",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "73",
+        "bodystart": "91",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch"
@@ -95,11 +95,11 @@
       "name_html": "createInvert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "81",
+        "line": "99",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "81",
-        "bodyend": "81"
+        "bodystart": "99",
+        "bodyend": "99"
       },
       "definition": {
         "simple_html": "static BoolPatch createInvert()",
@@ -129,11 +129,11 @@
       "name_html": "invert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "84",
+        "line": "102",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "84",
-        "bodyend": "87"
+        "bodystart": "102",
+        "bodyend": "105"
       },
       "definition": {
         "simple_html": "void invert()",
@@ -174,11 +174,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "90",
+        "line": "127",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "90",
-        "bodyend": "100"
+        "bodystart": "127",
+        "bodyend": "137"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -187,6 +187,10 @@
         "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
         "original_definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::customVisit",
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(bool);\n  void clear();\n  void invert();\n}\n</pre></p><p>For example: <pre>auto patch = BoolPatch::createClear();\npatch = !patch;\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.invert();  </pre> </p>",
+        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/customVisit"
@@ -211,11 +215,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "102",
+        "line": "139",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "102",
-        "bodyend": "111"
+        "bodystart": "139",
+        "bodyend": "148"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -253,7 +257,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "76",
+        "line": "94",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "bodystart": "219",
@@ -284,7 +288,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "78",
+        "line": "96",
         "column": "1"
       },
       "definition": {
@@ -312,7 +316,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "78",
+        "line": "96",
         "column": "1"
       },
       "definition": {
@@ -348,21 +352,21 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "117",
+        "line": "154",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "117",
-        "bodyend": "117"
+        "bodystart": "154",
+        "bodyend": "154"
       }
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "71",
+    "line": "89",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "71",
-    "bodyend": "118"
+    "bodystart": "89",
+    "bodyend": "155"
   },
   "namespacednames_html": [
     "apache",
@@ -793,11 +797,11 @@
               "name_html": "createInvert",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "81",
+                "line": "99",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "81",
-                "bodyend": "81"
+                "bodystart": "99",
+                "bodyend": "99"
               },
               "definition": {
                 "simple_html": "static BoolPatch createInvert()",
@@ -843,11 +847,11 @@
               "name_html": "invert",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "84",
+                "line": "102",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "84",
-                "bodyend": "87"
+                "bodystart": "102",
+                "bodyend": "105"
               },
               "definition": {
                 "simple_html": "void invert()",
@@ -904,11 +908,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "90",
+                "line": "127",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "90",
-                "bodyend": "100"
+                "bodystart": "127",
+                "bodyend": "137"
               },
               "definition": {
                 "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -917,6 +921,10 @@
                 "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
                 "original_definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::customVisit",
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+              },
+              "description": {
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(bool);\n  void clear();\n  void invert();\n}\n</pre></p><p>For example: <pre>auto patch = BoolPatch::createClear();\npatch = !patch;\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.invert();  </pre> </p>",
+                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
@@ -927,7 +935,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BoolPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "",
+          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit"
@@ -957,11 +965,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "102",
+                "line": "139",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "102",
-                "bodyend": "111"
+                "bodystart": "139",
+                "bodyend": "148"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1001,7 +1009,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "76",
+                "line": "94",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
                 "bodystart": "219",
@@ -1321,7 +1329,7 @@
               "name_html": "operator=",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "78",
+                "line": "96",
                 "column": "1"
               },
               "definition": {
@@ -1351,7 +1359,7 @@
               "name_html": "operator=",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "78",
+                "line": "96",
                 "column": "1"
               },
               "definition": {

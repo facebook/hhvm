@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "166",
+        "line": "222",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "166",
-        "bodyend": "176"
+        "bodystart": "222",
+        "bodyend": "232"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -41,6 +41,10 @@
         "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
         "original_definition_html": "void apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::customVisit",
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(Number);\n  void clear();\n  void add(Number);\n}\n</pre></p><p>For example: <pre>auto patch = I32Patch::createClear();\npatch += 10;\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.add(10);  </pre> </p>",
+        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/NumberPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/NumberPatch/customVisit",
@@ -51,7 +55,7 @@
   "filepath": "f/class/apache/thrift/op/detail/NumberPatch/customVisit",
   "minprot": "public",
   "displayname_html": "customVisit",
-  "brief_html": "",
+  "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit"

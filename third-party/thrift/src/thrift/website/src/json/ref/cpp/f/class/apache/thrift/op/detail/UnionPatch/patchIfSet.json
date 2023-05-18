@@ -72,11 +72,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "304",
+        "line": "335",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "304",
-        "bodyend": "306"
+        "bodystart": "335",
+        "bodyend": "337"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",

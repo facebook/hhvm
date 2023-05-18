@@ -1482,7 +1482,9 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
     ? tc::ustubs().interpHelperFuncEntryFromTC
     : tc::ustubs().interpHelperFromTC;
   if (sk.funcEntry()) {
+    v << saverips{};
     emitUninitDefaultArgs(v, sk);
+    v << restorerips{};
     sk.advance();
   } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
@@ -1497,7 +1499,9 @@ void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
     ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
     : tc::ustubs().interpHelperNoTranslateFromTC;
   if (sk.funcEntry()) {
+    v << saverips{};
     emitUninitDefaultArgs(v, sk);
+    v << restorerips{};
     sk.advance();
   } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();

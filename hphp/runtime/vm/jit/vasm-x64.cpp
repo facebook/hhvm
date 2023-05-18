@@ -122,6 +122,8 @@ struct Vgen {
     setCallFuncId(env, a.frontier());
   }
   void emit(const restoreripm& i);
+  void emit(const restorerips& /*i*/) {}
+  void emit(const saverips& /*i*/) {}
   void emit(const phpret& i);
   void emit(const contenter& i);
 

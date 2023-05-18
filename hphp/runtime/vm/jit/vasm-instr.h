@@ -130,6 +130,8 @@ struct Vunit;
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(restoreripm, Inone, U(s), Dn)\
+  O(restorerips, Inone, Un, Dn)\
+  O(saverips, Inone, Un, Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(target), U(args), Dn)\
   O(callphpfe, I(target), U(args), Dn)\
@@ -860,6 +862,15 @@ struct phplogue { Vreg fp; };
  * for the return address prior to a function return.
  */
 struct restoreripm { Vptr s; };
+
+/*
+ * Save and restore the return address to the native stack. These are no-ops on
+ * architectures where the return address is automatically saved on the stack by
+ * call instructions, such as Intel x86.
+ */
+struct restorerips {};
+
+struct saverips {};
 
 /*
  * Load fp[m_sfp] into rvmfp() and return to m_savedRip on `fp'.

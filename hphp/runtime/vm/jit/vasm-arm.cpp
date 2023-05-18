@@ -1709,6 +1709,22 @@ void lower(const VLS& e, restoreripm& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(const VLS& e, saverips& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Push LR twice to keep stack aligned.
+    v << pushp{rlr(), rlr()};
+  });
+}
+
+void lower(const VLS& e, restorerips& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Pop LR and the stack alignment padding.
+    v << popp{PhysReg(rAsm), rlr()};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Push both the LR and FP regardless of i.saveframe to align SP.

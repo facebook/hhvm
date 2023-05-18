@@ -1552,7 +1552,6 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
-        shape_lit_pos: Pos.t option;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -1837,7 +1836,6 @@ end = struct
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
-        shape_lit_pos: Pos.t option;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;

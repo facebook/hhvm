@@ -3035,7 +3035,6 @@ and simplify_subtype_shape
                        pos = Reason.to_pos r_super;
                        decl_pos = field_pos;
                        name = printable_name;
-                       shape_lit_pos = None;
                      })
       in
       with_error ty_err_opt res
@@ -3057,9 +3056,19 @@ and simplify_subtype_shape
       in
       with_error ty_err_opt res
     | (`Absent, `Required _) ->
-      let shape_lit_pos =
+      let quickfixes_opt =
         match r_sub with
-        | Reason.Rshape_literal p -> Some p
+        | Reason.Rshape_literal p ->
+          let fix_pos =
+            Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
+          in
+          Some
+            [
+              Quickfix.make
+                ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
+                ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
+                fix_pos;
+            ]
         | _ -> None
       in
 
@@ -3069,13 +3078,18 @@ and simplify_subtype_shape
           ~f:
             Typing_error.(
               fun on_error ->
+                let on_error =
+                  Option.value_map
+                    ~default:on_error
+                    ~f:(Reasons_callback.add_quickfixes on_error)
+                    quickfixes_opt
+                in
                 apply_reasons ~on_error
                 @@ Secondary.Missing_field
                      {
                        decl_pos = field_pos;
                        pos = Reason.to_pos r_sub;
                        name = printable_name;
-                       shape_lit_pos;
                      })
       in
       with_error ty_err_opt res

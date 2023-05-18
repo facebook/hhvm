@@ -5108,22 +5108,7 @@ end = struct
     in
     (Error_code.ConcreteConstInterfaceOverride, reasons, [])
 
-  let missing_field pos name decl_pos shape_lit_pos =
-    let quickfixes =
-      match shape_lit_pos with
-      | Some p ->
-        (* We want to add the new field just before the closing
-           parenthesis of the shape literal. *)
-        let fix_pos = Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p) in
-        [
-          Quickfix.make
-            ~title:("Add field " ^ Markdown_lite.md_codify name)
-            ~new_text:(Printf.sprintf ", '%s' => TODO" name)
-            fix_pos;
-        ]
-      | None -> []
-    in
-
+  let missing_field pos name decl_pos =
     let reasons =
       lazy
         [
@@ -5131,7 +5116,7 @@ end = struct
           (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
         ]
     in
-    (Error_code.MissingField, reasons, quickfixes)
+    (Error_code.MissingField, reasons, [])
 
   let shape_fields_unknown pos decl_pos =
     let reasons =
@@ -5753,8 +5738,8 @@ end = struct
            origin
            parent_origin
            is_abstract)
-    | Missing_field { pos; name; decl_pos; shape_lit_pos } ->
-      Eval_result.single (missing_field pos name decl_pos shape_lit_pos)
+    | Missing_field { pos; name; decl_pos } ->
+      Eval_result.single (missing_field pos name decl_pos)
     | Shape_fields_unknown { pos; decl_pos } ->
       Eval_result.single (shape_fields_unknown pos decl_pos)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->

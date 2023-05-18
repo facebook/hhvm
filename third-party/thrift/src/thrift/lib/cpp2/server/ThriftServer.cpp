@@ -572,6 +572,9 @@ void ThriftServer::setup() {
           socket->setAcceptRateAdjustSpeed(acceptRateAdjustSpeed_);
           socket->setZeroCopy(useZeroCopy);
           socket->setQueueTimeout(getSocketQueueTimeout());
+          if (callbackAssignFunc_) {
+            socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
+          }
 
           try {
             socket->setTosReflect(tosReflect_);

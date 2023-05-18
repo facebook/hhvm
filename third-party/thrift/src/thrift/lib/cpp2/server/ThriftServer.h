@@ -244,6 +244,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   folly::AsyncWriter::ZeroCopyEnableFunc zeroCopyEnableFunc_;
 
+  folly::AsyncServerSocket::CallbackAssignFunction callbackAssignFunc_;
+
   std::shared_ptr<folly::IOThreadPoolExecutor> acceptPool_;
   int nAcceptors_ = 1;
   uint16_t socketMaxReadsPerEvent_{16};
@@ -549,6 +551,16 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   const folly::AsyncWriter::ZeroCopyEnableFunc& getZeroCopyEnableFunc() const {
     return zeroCopyEnableFunc_;
+  }
+
+  void setCallbackAssignFunc(
+      folly::AsyncServerSocket::CallbackAssignFunction func) {
+    callbackAssignFunc_ = std::move(func);
+  }
+
+  const folly::AsyncServerSocket::CallbackAssignFunction&
+  getCallbackAssignFunc() const {
+    return callbackAssignFunc_;
   }
 
   void setAcceptExecutor(std::shared_ptr<folly::IOThreadPoolExecutor> pool) {

@@ -37,6 +37,8 @@ DEFINE_int32(read_vec_read_size, 32 * 1024, "readVecReadSize");
 DEFINE_int32(zc_rx_num_entries, -1024, "ZC RX num entries");
 DEFINE_int32(zc_rx_entry_size, 128 * 1024, "ZC RX entry size");
 
+DEFINE_bool(napi_id_assign, false, "Use NAPI ID based socket assignment");
+
 using namespace thrift::zerocopy::cpp2;
 
 namespace {
@@ -132,6 +134,29 @@ int main(int argc, char* argv[]) {
   auto handler = std::make_shared<ZeroCopyServiceImpl>();
 
   auto server = std::make_shared<apache::thrift::ThriftServer>();
+
+  if (FLAGS_napi_id_assign) {
+    LOG(INFO) << "Enabling NAPI ID based assignment";
+
+    folly::AsyncServerSocket::CallbackAssignFunction callbackAssignFunc =
+        [](folly::AsyncServerSocket*, folly::NetworkSocket sock) -> int {
+      int id = -1;
+      socklen_t len = sizeof(id);
+      auto ret =
+          ::getsockopt(sock.toFd(), SOL_SOCKET, SO_INCOMING_NAPI_ID, &id, &len);
+
+      LOG(INFO) << "NAPI ID for " << sock.toFd() << " = " << id
+                << " ret = " << ret;
+
+      if (ret < 0) {
+        return -1;
+      } else {
+        return id;
+      }
+    };
+    server->setCallbackAssignFunc(callbackAssignFunc);
+  }
+
   facebook::services::TLSConfig::applyDefaultsToThriftServer(*server);
 
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
